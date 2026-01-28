@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import SeriesHeader from "./SeriesHeader";
 import EpisodeList from "./EpisodeList";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
@@ -14,7 +15,12 @@ import {
   readAdultState,
   requestEnableAdult,
 } from "../../lib/adultGate";
+import { apiGet } from "../../lib/apiClient";
 import { track } from "../../lib/analytics";
+import { useWalletStore } from "../../store/useWalletStore";
+import { useEntitlementStore } from "../../store/useEntitlementStore";
+import { useRewardsStore } from "../../store/useRewardsStore";
+import { useFollowStore } from "../../store/useFollowStore";
 
 function getFirstEpisodeId(episodes) {
   if (!Array.isArray(episodes) || episodes.length === 0) {
@@ -53,17 +59,25 @@ function WalletCard({ wallet }) {
 }
 
 export default function SeriesPage({ seriesId }) {
+  const router = useRouter();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [gateStatus, setGateStatus] = useState("OK");
   const [activeModal, setActiveModal] = useState(null);
   const [adultState, setAdultState] = useState(readAdultState());
-  const [actionModal, setActionModal] = useState(null);
+  const [infoModal, setInfoModal] = useState(null);
+
+  const walletStore = useWalletStore();
+  const { loadWallet } = walletStore;
+  const { bySeriesId, loadEntitlement, unlockEpisode, claimTTF } =
+    useEntitlementStore();
+  const { report } = useRewardsStore();
+  const { followedSeriesIds, loadFollowed, follow, unfollow } = useFollowStore();
+
   const series = data?.series || {};
   const episodes = Array.isArray(data?.episodes) ? data.episodes : [];
-  const entitlement = data?.entitlement || {};
-  const wallet = data?.wallet || {};
+  const entitlement = bySeriesId[seriesId] || { seriesId, unlockedEpisodeIds: [] };
   const firstEpisodeId = useMemo(
     () => getFirstEpisodeId(episodes),
     [episodes]
@@ -74,34 +88,26 @@ export default function SeriesPage({ seriesId }) {
     setLoading(true);
     setError(null);
     const adultFlag = adultState.isAdultMode ? "1" : "0";
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "";
-    const url = `${baseUrl}/api/series/${seriesId}?adult=${adultFlag}`;
+    const response = await apiGet(`/api/series/${seriesId}?adult=${adultFlag}`);
 
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        if (response.status === 403) {
-          setError("ADULT_GATED");
-        } else {
-          setError("FETCH_ERROR");
-        }
-        setLoading(false);
-        return;
-      }
-
-      const payload = await response.json();
-      if (payload?.error === "ADULT_GATED") {
+    if (!response.ok) {
+      if (response.status === 403 || response.error === "ADULT_GATED") {
         setError("ADULT_GATED");
-        setLoading(false);
-        return;
+      } else {
+        setError("FETCH_ERROR");
       }
-
-      setData(payload);
       setLoading(false);
-    } catch (err) {
-      setError("FETCH_ERROR");
-      setLoading(false);
+      return;
     }
+
+    if (response.data?.error === "ADULT_GATED") {
+      setError("ADULT_GATED");
+      setLoading(false);
+      return;
+    }
+
+    setData(response.data);
+    setLoading(false);
   }, [adultState.isAdultMode, seriesId]);
 
   useEffect(() => {
@@ -119,8 +125,11 @@ export default function SeriesPage({ seriesId }) {
   useEffect(() => {
     if (data?.series?.id) {
       track("view_series", { seriesId: data.series.id });
+      loadWallet();
+      loadEntitlement(data.series.id);
+      loadFollowed();
     }
-  }, [data?.series?.id]);
+  }, [data?.series?.id, loadEntitlement, loadWallet, loadFollowed]);
 
   useEffect(() => {
     if (error === "ADULT_GATED" || series?.adult) {
@@ -160,35 +169,22 @@ export default function SeriesPage({ seriesId }) {
     fetchSeries();
   };
 
-  const openActionModal = (type, episodeId) => {
-    const episode = episodes.find((item) => item.id === episodeId);
-    const title =
-      type === "unlock" ? "Unlock (P0-1)" : "Claim Free (P0-1)";
-    const description =
-      type === "unlock"
-        ? `Unlock ${episode?.title} will be available in P0-2.`
-        : `Claim free for ${episode?.title} will be available in P0-2.`;
-    setActionModal({ title, description });
-  };
-
   const handleRead = (seriesIdValue, episodeId) => {
     track("click_episode_read", { seriesId: seriesIdValue, episodeId });
-    window.location.href = `/read/${seriesIdValue}/${episodeId}`;
+    router.push(`/read/${seriesIdValue}/${episodeId}`);
   };
 
-  const handleUnlock = (seriesIdValue, episodeId) => {
-    track("click_episode_unlock", { seriesId: seriesIdValue, episodeId });
-    openActionModal("unlock", episodeId);
+  const handleUnlock = (seriesIdValue, episodeId, idempotencyKey) => {
+    return unlockEpisode(seriesIdValue, episodeId, idempotencyKey);
   };
 
   const handleClaim = (seriesIdValue, episodeId) => {
-    track("click_episode_claim", { seriesId: seriesIdValue, episodeId });
-    openActionModal("claim", episodeId);
+    return claimTTF(seriesIdValue, episodeId);
   };
 
   const handleSubscribe = (seriesIdValue, episodeId) => {
     track("click_subscribe_from_ttf", { seriesId: seriesIdValue, episodeId });
-    window.location.href = "/subscribe";
+    router.push("/subscribe");
   };
 
   const handleContinue = lastReadEpisodeId
@@ -198,18 +194,32 @@ export default function SeriesPage({ seriesId }) {
     ? () => handleRead(seriesId, firstEpisodeId)
     : null;
 
-  const handleFollow = () => {
-    setActionModal({
-      title: "Follow (P0-1)",
-      description: "Follow will be available in P0-2.",
-    });
+  const isFollowing = followedSeriesIds.includes(seriesId);
+
+  const handleFollowToggle = async () => {
+    if (isFollowing) {
+      await unfollow(seriesId);
+      return;
+    }
+    await follow(seriesId);
+    report("FOLLOW_SERIES");
   };
 
   const handleAddToLibrary = () => {
-    setActionModal({
-      title: "Add to Library (P0-1)",
+    setInfoModal({
+      type: "INFO",
+      title: "Add to Library",
       description: "Add to Library will be available in P0-2.",
     });
+  };
+
+  const handleShare = () => {
+    setInfoModal({
+      type: "INFO",
+      title: "Share",
+      description: "Share will be available in P0-2.",
+    });
+    report("SHARE_SERIES");
   };
 
   if (loading) {
@@ -263,11 +273,13 @@ export default function SeriesPage({ seriesId }) {
       <div className="max-w-6xl mx-auto px-4">
         <SeriesHeader
           series={series}
-          wallet={wallet}
+          wallet={walletStore}
           onContinue={handleContinue}
           onStart={handleStart}
-          onFollow={handleFollow}
+          onFollowToggle={handleFollowToggle}
+          isFollowing={isFollowing}
           onAddToLibrary={handleAddToLibrary}
+          onShare={handleShare}
         />
 
         <div className="lg:grid lg:grid-cols-12 gap-4">
@@ -276,6 +288,7 @@ export default function SeriesPage({ seriesId }) {
               series={series}
               episodes={episodes}
               entitlement={entitlement}
+              wallet={walletStore}
               onRead={handleRead}
               onUnlock={handleUnlock}
               onClaim={handleClaim}
@@ -283,7 +296,7 @@ export default function SeriesPage({ seriesId }) {
             />
           </div>
           <div className="lg:col-span-4">
-            <WalletCard wallet={wallet} />
+            <WalletCard wallet={walletStore} />
           </div>
         </div>
       </div>
@@ -301,10 +314,11 @@ export default function SeriesPage({ seriesId }) {
         legalAge={adultState.legalAge}
       />
       <ActionModal
-        open={Boolean(actionModal)}
-        title={actionModal?.title}
-        description={actionModal?.description}
-        onClose={() => setActionModal(null)}
+        open={Boolean(infoModal)}
+        type={infoModal?.type}
+        title={infoModal?.title}
+        description={infoModal?.description}
+        onClose={() => setInfoModal(null)}
       />
     </main>
   );

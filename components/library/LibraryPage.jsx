@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import SiteHeader from "../layout/SiteHeader";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
 import { track } from "../../lib/analytics";
+import { useProgressStore } from "../../store/useProgressStore";
+import { useRewardsStore } from "../../store/useRewardsStore";
+import CheckInPanel from "./CheckInPanel";
+import MissionsPanel from "./MissionsPanel";
+import RewardToast from "./RewardToast";
 
 const continueItems = [
   { id: "l1", title: "Midnight Contract", subtitle: "Ep 12", coverTone: "warm" },
@@ -18,9 +23,65 @@ const libraryItems = [
 ];
 
 export default function LibraryPage() {
+  const { bySeriesId } = useProgressStore();
+  const {
+    rewards,
+    missions,
+    loadRewards,
+    checkIn,
+    makeUp,
+    loadMissions,
+    claimMission,
+  } = useRewardsStore();
+  const [toastMessage, setToastMessage] = useState("");
+  const [workingId, setWorkingId] = useState(null);
+  const [checkinWorking, setCheckinWorking] = useState(false);
+  const progressEntries = Object.entries(bySeriesId);
+  const dynamicContinue = progressEntries.map(([seriesId, progress]) => ({
+    id: `${seriesId}-${progress.lastEpisodeId}`,
+    title: seriesId,
+    subtitle: `Continue ${progress.lastEpisodeId}`,
+    coverTone: "warm",
+  }));
+
   useEffect(() => {
     track("view_library", {});
   }, []);
+
+  useEffect(() => {
+    loadRewards();
+    loadMissions();
+  }, [loadMissions, loadRewards]);
+
+  const handleCheckIn = async () => {
+    setCheckinWorking(true);
+    const response = await checkIn();
+    if (response.ok) {
+      setToastMessage(`+${response.data?.rewards?.todayReward || 0} bonus pts`);
+    }
+    setCheckinWorking(false);
+  };
+
+  const handleMakeUp = async () => {
+    setCheckinWorking(true);
+    const response = await makeUp();
+    if (response.ok) {
+      setToastMessage("Make-up successful");
+    }
+    setCheckinWorking(false);
+  };
+
+  const handleClaim = async (missionId) => {
+    setWorkingId(missionId);
+    const response = await claimMission(missionId);
+    if (response.ok) {
+      const reward = [...missions.daily, ...missions.weekly].find(
+        (mission) => mission.id === missionId
+      )?.reward;
+      setToastMessage(`+${reward || 0} bonus pts`);
+    }
+    setWorkingId(null);
+  };
 
   return (
     <div className="min-h-screen bg-neutral-950">
@@ -33,7 +94,23 @@ export default function LibraryPage() {
           </p>
         </section>
 
-        <Rail title="Continue Reading" items={continueItems} />
+        <CheckInPanel
+          rewards={rewards}
+          onCheckIn={handleCheckIn}
+          onMakeUp={handleMakeUp}
+          working={checkinWorking}
+        />
+
+        <MissionsPanel
+          missions={missions}
+          onClaim={handleClaim}
+          workingId={workingId}
+        />
+
+        <Rail
+          title="Continue Reading"
+          items={dynamicContinue.length > 0 ? dynamicContinue : continueItems}
+        />
 
         <section className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-6">
           <div className="flex items-center justify-between">
@@ -51,6 +128,7 @@ export default function LibraryPage() {
 
         <Skeleton className="h-32 w-full rounded-2xl" />
       </main>
+      <RewardToast message={toastMessage} onClose={() => setToastMessage("")} />
     </div>
   );
 }

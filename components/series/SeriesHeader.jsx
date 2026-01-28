@@ -9,8 +9,10 @@ export default function SeriesHeader({
   wallet,
   onContinue,
   onStart,
-  onFollow,
+  onFollowToggle,
+  isFollowing,
   onAddToLibrary,
+  onShare,
 }) {
   const genres = series.genres || [];
   const badges = series.badges || [];
@@ -50,14 +52,19 @@ export default function SeriesHeader({
               Start
             </button>
           ) : null}
-          {onFollow ? (
-            <button type="button" onClick={onFollow}>
-              Follow
+          {onFollowToggle ? (
+            <button type="button" onClick={onFollowToggle}>
+              {isFollowing ? "Following" : "Follow"}
             </button>
           ) : null}
           {onAddToLibrary ? (
             <button type="button" onClick={onAddToLibrary}>
               Add to Library
+            </button>
+          ) : null}
+          {onShare ? (
+            <button type="button" onClick={onShare}>
+              Share
             </button>
           ) : null}
           <div className="series-pricing">

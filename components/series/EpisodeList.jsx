@@ -17,6 +17,7 @@ export default function EpisodeList({
   series,
   episodes,
   entitlement,
+  wallet,
   onRead,
   onUnlock,
   onClaim,
@@ -24,13 +25,14 @@ export default function EpisodeList({
 }) {
   const [sortOrder, setSortOrder] = useState("newest");
   const unlockedEpisodeIds = entitlement?.unlockedEpisodeIds || [];
+  const walletTotal = (wallet?.paidPts || 0) + (wallet?.bonusPts || 0);
   const sortedEpisodes = useMemo(
     () => sortEpisodes(episodes, sortOrder),
     [episodes, sortOrder]
   );
 
   return (
-    <section className="series-episodes">
+    <section className="series-episodes" data-wallet-total={walletTotal}>
       <div className="episode-toolbar">
         <div className="episode-toolbar-title">
           <h2>Episodes</h2>

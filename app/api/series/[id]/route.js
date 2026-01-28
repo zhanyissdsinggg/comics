@@ -14,7 +14,7 @@ function parseLatestNumber(value) {
 
 function buildEpisodes(seriesId, latestNumber, pricePts) {
   const now = Date.now();
-  return Array.from({ length: latestNumber }, (_, index) => {
+  const episodes = Array.from({ length: latestNumber }, (_, index) => {
     const number = index + 1;
     const releasedAt = new Date(
       now - (latestNumber - number) * 7 * 24 * 60 * 60 * 1000
@@ -37,6 +37,7 @@ function buildEpisodes(seriesId, latestNumber, pricePts) {
       previewFreePages,
     };
   });
+  return episodes.sort((a, b) => a.number - b.number);
 }
 
 function buildEntitlement(seriesId, episodes) {

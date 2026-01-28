@@ -10,7 +10,9 @@ import useCountdown from "../../hooks/useCountdown";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useHomeStore } from "../../store/useHomeStore";
 import { useWalletStore } from "../../store/useWalletStore";
+import { useFollowStore } from "../../store/useFollowStore";
 import { track } from "../../lib/analytics";
+import { SERIES_CATALOG } from "../../lib/seriesCatalog";
 
 const heroItems = [
   {
@@ -53,6 +55,17 @@ const railData = {
   ],
 };
 
+function parseLatestNumber(value) {
+  if (!value) {
+    return 0;
+  }
+  const match = String(value).match(/(\d+)/);
+  if (!match) {
+    return 0;
+  }
+  return Number.parseInt(match[1], 10) || 0;
+}
+
 function WalletAside() {
   const { paidPts, bonusPts, plan } = useWalletStore();
   const readyAt = useMemo(() => Date.now() + 2 * 60 * 60 * 1000, []);
@@ -83,6 +96,7 @@ function WalletAside() {
 export default function HomePage() {
   const { isAdultMode } = useAdultGateStore();
   const { homeTab } = useHomeStore();
+  const { followedSeriesIds, loadFollowed } = useFollowStore();
   const [activeChip, setActiveChip] = useState("popular");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -95,6 +109,10 @@ export default function HomePage() {
   useEffect(() => {
     track("view_home", { tab: homeTab });
   }, [homeTab]);
+
+  useEffect(() => {
+    loadFollowed();
+  }, [loadFollowed]);
 
   const chips = useMemo(() => {
     const base = [
@@ -109,6 +127,24 @@ export default function HomePage() {
     }
     return base;
   }, [isAdultMode]);
+
+  const followingUpdates = useMemo(() => {
+    if (!followedSeriesIds || followedSeriesIds.length === 0) {
+      return [];
+    }
+    const candidates = SERIES_CATALOG.filter((series) =>
+      followedSeriesIds.includes(series.id)
+    ).filter((series) => (isAdultMode ? true : !series.adult));
+    return candidates
+      .map((series) => ({
+        id: series.id,
+        title: series.title,
+        subtitle: series.latest || "New episode",
+        coverTone: series.coverTone,
+        badge: series.badge,
+      }))
+      .sort((a, b) => parseLatestNumber(b.subtitle) - parseLatestNumber(a.subtitle));
+  }, [followedSeriesIds, isAdultMode]);
 
   const activeRails = useMemo(() => {
     const rails = [];
@@ -160,6 +196,25 @@ export default function HomePage() {
             </div>
             <div className="lg:grid lg:grid-cols-12 gap-6">
               <div className="space-y-10 lg:col-span-8">
+                <section className="space-y-3">
+                  {followingUpdates.length === 0 ? (
+                    <div className="rounded-2xl border border-neutral-900 bg-neutral-900/40 p-6 text-sm text-neutral-400">
+                      <p className="text-lg font-semibold text-white">Following Updates</p>
+                      <p className="mt-2 text-sm text-neutral-400">
+                        Follow a series to see updates here.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveChip("popular")}
+                        className="mt-4 w-full rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
+                      >
+                        Browse popular
+                      </button>
+                    </div>
+                  ) : (
+                    <Rail title="Following Updates" items={followingUpdates} />
+                  )}
+                </section>
                 {activeRails.map((rail) => (
                   <Rail key={rail.id} title={rail.title} items={rail.items} tone={rail.tone} />
                 ))}

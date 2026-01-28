@@ -15,4 +15,5 @@
 - Added App Router pages for `/`, `/adult`, and `/library` with global layout metadata.
 - Introduced shared auth/wallet/adult gate/home tab stores and a global SiteHeader.
 - Split home/adult/library UI into maintainable components with rails, hero, and skeletons.
+- Added rewards/mission check-in system and reader paywall flow with API-backed stores.
 - Adjusted episode CTA labels to match unlock/claim/subscribe expectations.

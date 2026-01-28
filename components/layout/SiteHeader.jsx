@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { Bell } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useHomeStore } from "../../store/useHomeStore";
+import { useNotificationsStore } from "../../store/useNotificationsStore";
 import TabButton from "../common/TabButton";
 import Chip from "../common/Chip";
 import LoginGateModal from "./LoginGateModal";
@@ -25,10 +27,17 @@ export default function SiteHeader({ onSearch }) {
     forceDisableAdultMode,
   } = useAdultGateStore();
   const { homeTab, setHomeTab } = useHomeStore();
+  const { unreadCount, loadNotifications, loaded } = useNotificationsStore();
   const [activeModal, setActiveModal] = useState(null);
   const pathname = usePathname();
   const isLibrary = pathname === "/library";
   const isAdultHub = pathname === "/adult";
+
+  useEffect(() => {
+    if (!loaded) {
+      loadNotifications();
+    }
+  }, [loaded, loadNotifications]);
 
   const handleTabClick = (tab) => {
     if (tab === "library") {
@@ -122,6 +131,19 @@ export default function SiteHeader({ onSearch }) {
                 <span>Bonus {bonusPts}</span>
                 <Chip>{plan}</Chip>
               </div>
+              <button
+                type="button"
+                onClick={() => router.push("/notifications")}
+                className="relative rounded-full border border-neutral-800 p-2 text-neutral-300 hover:text-white"
+                aria-label="Notifications"
+              >
+                <Bell size={16} />
+                {unreadCount > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                    {unreadCount}
+                  </span>
+                ) : null}
+              </button>
               <button
                 type="button"
                 onClick={handleAdultToggle}

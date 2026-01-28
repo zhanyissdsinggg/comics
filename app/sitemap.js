@@ -13,5 +13,9 @@ export default function sitemap() {
       url: `${baseUrl}/library`,
       lastModified: new Date(),
     },
+    {
+      url: `${baseUrl}/notifications`,
+      lastModified: new Date(),
+    },
   ];
 }
