@@ -363,7 +363,7 @@ function EpisodeRow({
             Ep {episode?.number} {episode?.title}
           </strong>
           {unlocked ? <Pill>Unlocked</Pill> : null}
-          {ttfStatus?.eligible && isReady ? <Pill>免费试读</Pill> : null}
+          {ttfStatus?.eligible && isReady ? <Pill>Free to Read</Pill> : null}
           {progress?.lastEpisodeId === episode?.id ? <Pill>Last read</Pill> : null}
         </div>
         <div className="episode-subtitle">

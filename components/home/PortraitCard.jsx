@@ -42,7 +42,7 @@ function PortraitCard({ item, tone, onClick }) {
           </div>
         ) : hasFreeEpisodes ? (
           <div className="absolute left-2 top-2">
-            <Pill>免费试读</Pill>
+            <Pill>Free to Read</Pill>
           </div>
         ) : null}
         {typeof item.progressPercent === "number" && item.progressPercent > 0 ? (

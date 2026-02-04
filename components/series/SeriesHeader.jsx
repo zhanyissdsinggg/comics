@@ -45,7 +45,7 @@ export default function SeriesHeader({
           <p>{series.description}</p>
           <div className="series-badges">
             {isAdult ? <Pill>18+</Pill> : null}
-            {hasFreeEpisodes ? <Pill>免费试读</Pill> : null}
+            {hasFreeEpisodes ? <Pill>Free to Read</Pill> : null}
             {badges.map((badge) => (
               <Pill key={badge}>{badge}</Pill>
             ))}

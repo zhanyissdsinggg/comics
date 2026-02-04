@@ -14,7 +14,7 @@ const BottomTabNav = memo(function BottomTabNav() {
   const tabs = [
     {
       id: "home",
-      label: "首页",
+      label: "Home",
       icon: (
         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -30,7 +30,7 @@ const BottomTabNav = memo(function BottomTabNav() {
     },
     {
       id: "library",
-      label: "书架",
+      label: "Library",
       icon: (
         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -46,7 +46,7 @@ const BottomTabNav = memo(function BottomTabNav() {
     },
     {
       id: "store",
-      label: "商店",
+      label: "Store",
       icon: (
         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -62,7 +62,7 @@ const BottomTabNav = memo(function BottomTabNav() {
     },
     {
       id: "account",
-      label: "我的",
+      label: "Account",
       icon: (
         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
