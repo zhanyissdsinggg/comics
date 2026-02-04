@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import AdminBrandingPage from "../../../components/admin/AdminBrandingPage";
 
 export default function BrandingPage() {
-  return <AdminBrandingPage />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminBrandingPage />
+    </Suspense>
+  );
 }

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import SiteHeader from "../../../components/layout/SiteHeader";
 import { apiPost } from "../../../lib/apiClient";
 
-export default function ResetPage() {
+function ResetPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [token, setToken] = useState("");
@@ -61,5 +61,13 @@ export default function ResetPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ResetPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPageContent />
+    </Suspense>
   );
 }
