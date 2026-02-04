@@ -56,16 +56,16 @@ export default function AdminBrandingPage() {
     const response = await apiPost("/api/admin/branding", payload);
     if (response.ok && response.data?.branding) {
       setBranding(response.data.branding);
-      setStatus("ÒÑ±£´æ");
+      setStatus("已保存");
     } else {
-      setStatus("±£´æÊ§°Ü");
+      setStatus("保存失败");
     }
   };
 
   return (
     <AdminShell
-      title="Í¼Æ¬¹ÜÀí"
-      subtitle="¸üÐÂÍøÕ¾ Logo¡¢ä¯ÀÀÆ÷Í¼±êÓëÊ×Ò³ Banner"
+      title="图片管理"
+      subtitle="更新网站 Logo、浏览器图标与首页 Banner"
       actions={
         isAuthorized ? (
           <button
@@ -73,25 +73,25 @@ export default function AdminBrandingPage() {
             onClick={handleSave}
             className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white"
           >
-            ±£´æÅäÖÃ
+            保存配置
           </button>
         ) : null
       }
     >
       {!isAuthorized ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-          403 ÎÞÈ¨ÏÞ£¬ÇëÔÚµØÖ·À¸¸½¼Ó ?key=ADMIN_KEY
+          403 无权限，请在地址栏附加 ?key=ADMIN_KEY
         </div>
       ) : loading ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-10 text-slate-400">
-          ¼ÓÔØÖÐ...
+          加载中...
         </div>
       ) : (
         <div className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="text-sm font-semibold text-slate-800">Õ¾µã Logo</h3>
-              <p className="mt-1 text-xs text-slate-400">ÓÃÓÚÒ³Í· Logo</p>
+              <h3 className="text-sm font-semibold text-slate-800">站点 Logo</h3>
+              <p className="mt-1 text-xs text-slate-400">用于页头 Logo</p>
               <input
                 value={draft.siteLogoUrl}
                 onChange={(event) => handleChange("siteLogoUrl", event.target.value)}
@@ -100,12 +100,12 @@ export default function AdminBrandingPage() {
               />
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="text-sm font-semibold text-slate-800">Ô¤ÀÀ</h3>
+              <h3 className="text-sm font-semibold text-slate-800">预览</h3>
               <div className="mt-4 flex h-20 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50">
                 {draft.siteLogoUrl ? (
                   <img src={draft.siteLogoUrl} alt="Site logo" className="h-10 w-auto" />
                 ) : (
-                  <span className="text-xs text-slate-400">ÔÝÎÞ Logo</span>
+                  <span className="text-xs text-slate-400">暂无 Logo</span>
                 )}
               </div>
             </div>
@@ -113,8 +113,8 @@ export default function AdminBrandingPage() {
 
           <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="text-sm font-semibold text-slate-800">ä¯ÀÀÆ÷Í¼±ê (favicon)</h3>
-              <p className="mt-1 text-xs text-slate-400">ÓÃÓÚä¯ÀÀÆ÷±êÇ©À¸</p>
+              <h3 className="text-sm font-semibold text-slate-800">浏览器图标 (favicon)</h3>
+              <p className="mt-1 text-xs text-slate-400">用于浏览器标签栏</p>
               <input
                 value={draft.faviconUrl}
                 onChange={(event) => handleChange("faviconUrl", event.target.value)}
@@ -123,12 +123,12 @@ export default function AdminBrandingPage() {
               />
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="text-sm font-semibold text-slate-800">Ô¤ÀÀ</h3>
+              <h3 className="text-sm font-semibold text-slate-800">预览</h3>
               <div className="mt-4 flex h-20 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50">
                 {draft.faviconUrl ? (
                   <img src={draft.faviconUrl} alt="Favicon" className="h-10 w-10" />
                 ) : (
-                  <span className="text-xs text-slate-400">ÔÝÎÞ favicon</span>
+                  <span className="text-xs text-slate-400">暂无 favicon</span>
                 )}
               </div>
             </div>
@@ -136,8 +136,8 @@ export default function AdminBrandingPage() {
 
           <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="text-sm font-semibold text-slate-800">Ê×Ò³ Banner Í¼</h3>
-              <p className="mt-1 text-xs text-slate-400">ÓÃÓÚÊ×Ò³ Hero ÂÖ²¥Ê×ÕÅ</p>
+              <h3 className="text-sm font-semibold text-slate-800">首页 Banner 图</h3>
+              <p className="mt-1 text-xs text-slate-400">用于首页 Hero 轮播首张</p>
               <input
                 value={draft.homeBannerUrl}
                 onChange={(event) => handleChange("homeBannerUrl", event.target.value)}
@@ -146,7 +146,7 @@ export default function AdminBrandingPage() {
               />
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="text-sm font-semibold text-slate-800">Ô¤ÀÀ</h3>
+              <h3 className="text-sm font-semibold text-slate-800">预览</h3>
               <div className="mt-4 overflow-hidden rounded-xl border border-dashed border-slate-200 bg-slate-50">
                 {draft.homeBannerUrl ? (
                   <img
@@ -156,7 +156,7 @@ export default function AdminBrandingPage() {
                   />
                 ) : (
                   <div className="flex h-24 items-center justify-center text-xs text-slate-400">
-                    ÔÝÎÞ Banner
+                    暂无 Banner
                   </div>
                 )}
               </div>
