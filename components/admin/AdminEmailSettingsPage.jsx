@@ -52,9 +52,9 @@ export default function AdminEmailSettingsPage() {
     const payload = { key, ...draft };
     const response = await apiPost("/api/admin/email", payload);
     if (response.ok) {
-      setStatus("ÒÑ±£´æ");
+      setStatus("已保存");
     } else {
-      setStatus(response.error || "±£´æÊ§°Ü");
+      setStatus(response.error || "保存失败");
     }
   };
 
@@ -64,9 +64,9 @@ export default function AdminEmailSettingsPage() {
     const response = await apiPost("/api/admin/email", payload);
     if (response.ok) {
       setDraft((prev) => ({ ...prev, [field]: "" }));
-      setStatus("ÒÑÇå¿ÕÃÜÔ¿");
+      setStatus("已清空密钥");
     } else {
-      setStatus(response.error || "Çå¿ÕÊ§°Ü");
+      setStatus(response.error || "清空失败");
     }
   };
 
@@ -77,16 +77,16 @@ export default function AdminEmailSettingsPage() {
       to: draft.testRecipient,
     });
     if (response.ok) {
-      setStatus("²âÊÔÓÊ¼þÒÑ·¢ËÍ");
+      setStatus("测试邮件已发送");
     } else {
-      setStatus(response.error || "²âÊÔ·¢ËÍÊ§°Ü");
+      setStatus(response.error || "测试发送失败");
     }
   };
 
   return (
     <AdminShell
-      title="ÓÊ¼þÉèÖÃ"
-      subtitle="ÅäÖÃÓÊ¼þ·þÎñÉÌÓë·¢¼þÐÅÏ¢"
+      title="邮件设置"
+      subtitle="配置邮件服务商与发件信息"
       actions={
         isAuthorized ? (
           <div className="flex items-center gap-2">
@@ -95,14 +95,14 @@ export default function AdminEmailSettingsPage() {
               onClick={handleTest}
               className="rounded-lg border border-slate-200 px-4 py-2 text-sm"
             >
-              ·¢ËÍ²âÊÔ
+              发送测试
             </button>
             <button
               type="button"
               onClick={handleSave}
               className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white"
             >
-              ±£´æÅäÖÃ
+              保存配置
             </button>
           </div>
         ) : null
@@ -110,11 +110,11 @@ export default function AdminEmailSettingsPage() {
     >
       {!isAuthorized ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-          403 ÎÞÈ¨ÏÞ£¬ÇëÔÚµØÖ·À¸¸½¼Ó ?key=ADMIN_KEY
+          403 无权限，请在地址栏附加 ?key=ADMIN_KEY
         </div>
       ) : loading ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-10 text-slate-400">
-          ¼ÓÔØÖÐ...
+          加载中...
         </div>
       ) : (
         <div className="space-y-6">
@@ -142,7 +142,7 @@ export default function AdminEmailSettingsPage() {
               />
             </div>
             <div>
-              <label className="text-xs uppercase text-slate-400">¹ÜÀíÔ±¸æ¾¯ÓÊÏä</label>
+              <label className="text-xs uppercase text-slate-400">管理员告警邮箱</label>
               <input
                 value={draft.adminNotifyEmail}
                 onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
@@ -176,7 +176,7 @@ export default function AdminEmailSettingsPage() {
                   onClick={() => handleClearKey("resendApiKey")}
                   className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
                 >
-                  Çå¿Õ
+                  清空
                 </button>
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function AdminEmailSettingsPage() {
                   onClick={() => handleClearKey("sendgridApiKey")}
                   className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
                 >
-                  Çå¿Õ
+                  清空
                 </button>
               </div>
             </div>
@@ -215,7 +215,7 @@ export default function AdminEmailSettingsPage() {
                   onClick={() => handleClearKey("smsWebhookUrl")}
                   className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
                 >
-                  Çå¿Õ
+                  清空
                 </button>
               </div>
             </div>

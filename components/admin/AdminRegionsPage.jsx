@@ -63,9 +63,9 @@ export default function AdminRegionsPage() {
     const payload = { key, countryCodes, lengthRules };
     const response = await apiPost("/api/admin/regions", payload);
     if (response.ok) {
-      setStatus("ÒÑ±£´æ");
+      setStatus("已保存");
     } else {
-      setStatus(response.error || "±£´æÊ§°Ü");
+      setStatus(response.error || "保存失败");
     }
   };
 
@@ -94,9 +94,9 @@ export default function AdminRegionsPage() {
       const nextLengthRules = parsed?.lengthRules || {};
       setCountryCodes(nextCountryCodes);
       setLengthRules(nextLengthRules);
-      setStatus("ÒÑµ¼Èë£¬Çë¼ÇµÃ±£´æ");
+      setStatus("已导入，请记得保存");
     } catch (err) {
-      setStatus("µ¼ÈëÊ§°Ü£¬JSON¸ñÊ½²»ÕýÈ·");
+      setStatus("导入失败，JSON格式不正确");
     } finally {
       event.target.value = "";
     }
@@ -104,13 +104,13 @@ export default function AdminRegionsPage() {
 
   return (
     <AdminShell
-      title="ÇøºÅÅäÖÃ"
-      subtitle="¹ÜÀí¶ÌÐÅÇøºÅÓëºÅÂë³¤¶È¹æÔò"
+      title="区号配置"
+      subtitle="管理短信区号与号码长度规则"
       actions={
         isAuthorized ? (
           <div className="flex items-center gap-2">
             <label className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-600">
-              µ¼ÈëJSON
+              导入JSON
               <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
             </label>
             <button
@@ -118,14 +118,14 @@ export default function AdminRegionsPage() {
               onClick={handleExport}
               className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
             >
-              µ¼³öJSON
+              导出JSON
             </button>
             <button
               type="button"
               onClick={handleSave}
               className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white"
             >
-              ±£´æÅäÖÃ
+              保存配置
             </button>
           </div>
         ) : null
@@ -133,27 +133,27 @@ export default function AdminRegionsPage() {
     >
       {!isAuthorized ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-          403 ÎÞÈ¨ÏÞ£¬ÇëÔÚµØÖ·À¸¸½¼Ó ?key=ADMIN_KEY
+          403 无权限，请在地址栏附加 ?key=ADMIN_KEY
         </div>
       ) : loading ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-10 text-slate-400">
-          ¼ÓÔØÖÐ...
+          加载中...
         </div>
       ) : (
         <div className="space-y-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-800">¹ú¼ÒÇøºÅ</h3>
+              <h3 className="text-sm font-semibold text-slate-800">国家区号</h3>
               <button
                 type="button"
                 onClick={addCode}
                 className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
               >
-                ÐÂÔö
+                新增
               </button>
             </div>
             {countryCodes.length === 0 ? (
-              <div className="text-xs text-slate-500">ÔÝÎÞÇøºÅ</div>
+              <div className="text-xs text-slate-500">暂无区号</div>
             ) : (
               <div className="space-y-2">
                 {countryCodes.map((item, index) => (
@@ -175,7 +175,7 @@ export default function AdminRegionsPage() {
                       onClick={() => removeCode(index)}
                       className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
                     >
-                      É¾³ý
+                      删除
                     </button>
                   </div>
                 ))}
@@ -184,8 +184,8 @@ export default function AdminRegionsPage() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-800">ºÅÂë³¤¶È¹æÔò</h3>
-            <p className="text-xs text-slate-400">¸ñÊ½£º10 »ò 9,10,11</p>
+            <h3 className="text-sm font-semibold text-slate-800">号码长度规则</h3>
+            <p className="text-xs text-slate-400">格式：10 或 9,10,11</p>
             <div className="space-y-2">
               {countryCodes.map((item) => (
                 <div key={item.code} className="flex items-center gap-2">
