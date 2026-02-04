@@ -7,6 +7,7 @@
     "dev:all": "powershell -ExecutionPolicy Bypass -File scripts/dev-all.ps1",
     "build": "next build",
     "start": "next start",
+    "init-db": "node scripts/init-db.js",
     "health-check": "node scripts/health-check.js",
     "check:all": "powershell -ExecutionPolicy Bypass -File scripts/ci-check.ps1",
     "lint": "next lint",
@@ -15,20 +16,22 @@
     "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "dotenv": "^17.2.3",
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.451.0",
     "next": "14.2.5",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "framer-motion": "^11.0.0",
-    "lucide-react": "^0.451.0",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^14.2.5",
     "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.14",
+    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.5",
-    "@next/bundle-analyzer": "^14.2.5",
-    "cross-env": "^7.0.3"
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.14"
   }
 }
