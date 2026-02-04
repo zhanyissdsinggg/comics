@@ -69,8 +69,8 @@ export default function AdminEmailJobsPage() {
 
   return (
     <AdminShell
-      title="邮件发送记录"
-      subtitle="查看失败重试情况"
+      title="脫脢录镁路垄脣脥录脟脗录"
+      subtitle="虏茅驴麓脢搂掳脺脰脴脢脭脟茅驴枚"
       actions={
         <div className="flex items-center gap-2">
           <button
@@ -80,7 +80,7 @@ export default function AdminEmailJobsPage() {
               view === "all" ? "border-slate-900 text-slate-900" : "border-slate-200 text-slate-500"
             }`}
           >
-            全部
+            脠芦虏驴
           </button>
           <button
             type="button"
@@ -89,42 +89,42 @@ export default function AdminEmailJobsPage() {
               view === "failed" ? "border-slate-900 text-slate-900" : "border-slate-200 text-slate-500"
             }`}
           >
-            仅失败
+            陆枚脢搂掳脺
           </button>
           <button
             type="button"
             onClick={handleExport}
             className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
           >
-            导出CSV
+            碌录鲁枚CSV
           </button>
         </div>
       }
     >
       {!isAuthorized ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-          403 无权限，请在地址栏附加 ?key=ADMIN_KEY
+          403 脦脼脠篓脧脼拢卢脟毛脭脷碌脴脰路脌赂赂陆录脫 ?key=ADMIN_KEY
         </div>
       ) : loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-slate-400">加载中...</div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-slate-400">录脫脭脴脰脨...</div>
       ) : jobs.length === 0 ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500">
-          暂无邮件记录
+          脭脻脦脼脫脢录镁录脟脗录
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-400">
               <tr>
-                <th className="px-4 py-3">状态</th>
-                <th className="px-4 py-3">收件人</th>
-                <th className="px-4 py-3">主题</th>
+                <th className="px-4 py-3">脳麓脤卢</th>
+                <th className="px-4 py-3">脢脮录镁脠脣</th>
+                <th className="px-4 py-3">脰梅脤芒</th>
                 <th className="px-4 py-3">Provider</th>
-                <th className="px-4 py-3">优先级</th>
-                <th className="px-4 py-3">重试</th>
-                <th className="px-4 py-3">最近尝试</th>
-                <th className="px-4 py-3">错误</th>
-                <th className="px-4 py-3">操作</th>
+                <th className="px-4 py-3">脫脜脧脠录露</th>
+                <th className="px-4 py-3">脰脴脢脭</th>
+                <th className="px-4 py-3">脳卯陆眉鲁垄脢脭</th>
+                <th className="px-4 py-3">麓铆脦贸</th>
+                <th className="px-4 py-3">虏脵脳梅</th>
               </tr>
             </thead>
             <tbody>
@@ -145,7 +145,7 @@ export default function AdminEmailJobsPage() {
                         onClick={() => handleRetry(job.id)}
                         className="rounded-full border border-slate-200 px-3 py-1"
                       >
-                        重试
+                        脰脴脢脭
                       </button>
                     ) : (
                       "-"
