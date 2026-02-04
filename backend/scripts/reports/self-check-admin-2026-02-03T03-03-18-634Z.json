@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-02-03T03:03:18.637Z",
+  "items": [
+    {
+      "ok": true,
+      "label": "[admin/stats]",
+      "status": 404,
+      "startedAt": 1770087798442,
+      "endedAt": 1770087798557
+    },
+    {
+      "ok": true,
+      "label": "[admin/rankings day]",
+      "status": 404,
+      "startedAt": 1770087798557,
+      "endedAt": 1770087798564
+    },
+    {
+      "ok": true,
+      "label": "[admin/rankings week]",
+      "status": 404,
+      "startedAt": 1770087798564,
+      "endedAt": 1770087798567
+    },
+    {
+      "ok": true,
+      "label": "[admin/users]",
+      "status": 404,
+      "startedAt": 1770087798567,
+      "endedAt": 1770087798572
+    },
+    {
+      "ok": true,
+      "label": "[admin/orders]",
+      "status": 404,
+      "startedAt": 1770087798572,
+      "endedAt": 1770087798576
+    },
+    {
+      "ok": true,
+      "label": "[admin/promotions]",
+      "status": 404,
+      "startedAt": 1770087798576,
+      "endedAt": 1770087798580
+    },
+    {
+      "ok": true,
+      "label": "[admin/promotions defaults]",
+      "status": 404,
+      "startedAt": 1770087798580,
+      "endedAt": 1770087798583
+    },
+    {
+      "ok": true,
+      "label": "[admin/tracking]",
+      "status": 404,
+      "startedAt": 1770087798583,
+      "endedAt": 1770087798588
+    },
+    {
+      "ok": true,
+      "label": "[admin/tracking update]",
+      "status": 404,
+      "startedAt": 1770087798588,
+      "endedAt": 1770087798597
+    },
+    {
+      "ok": true,
+      "label": "[admin/tracking rollback]",
+      "status": 404,
+      "startedAt": 1770087798597,
+      "endedAt": 1770087798604
+    },
+    {
+      "ok": true,
+      "label": "[admin/billing topups]",
+      "status": 404,
+      "startedAt": 1770087798604,
+      "endedAt": 1770087798607
+    },
+    {
+      "ok": true,
+      "label": "[admin/billing plans]",
+      "status": 404,
+      "startedAt": 1770087798607,
+      "endedAt": 1770087798613
+    },
+    {
+      "ok": true,
+      "label": "[admin/promotions create]",
+      "status": 404,
+      "startedAt": 1770087798613,
+      "endedAt": 1770087798619
+    },
+    {
+      "ok": true,
+      "label": "[admin/promotions delete]",
+      "status": 404,
+      "startedAt": 1770087798619,
+      "endedAt": 1770087798622
+    },
+    {
+      "ok": true,
+      "label": "[admin/series]",
+      "status": 404,
+      "startedAt": 1770087798622,
+      "endedAt": 1770087798626
+    },
+    {
+      "ok": true,
+      "label": "[admin/notifications]",
+      "status": 404,
+      "startedAt": 1770087798626,
+      "endedAt": 1770087798630
+    },
+    {
+      "ok": true,
+      "label": "[admin/comments]",
+      "status": 404,
+      "startedAt": 1770087798630,
+      "endedAt": 1770087798634
+    }
+  ]
+}

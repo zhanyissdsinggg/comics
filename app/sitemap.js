@@ -14,6 +14,22 @@ export default function sitemap() {
       lastModified: new Date(),
     },
     {
+      url: `${baseUrl}/store`,
+      lastModified: new Date(),
+    },
+    {
+      url: `${baseUrl}/search`,
+      lastModified: new Date(),
+    },
+    {
+      url: `${baseUrl}/rankings`,
+      lastModified: new Date(),
+    },
+    {
+      url: `${baseUrl}/subscribe`,
+      lastModified: new Date(),
+    },
+    {
       url: `${baseUrl}/notifications`,
       lastModified: new Date(),
     },

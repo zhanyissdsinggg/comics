@@ -1,0 +1,55 @@
+{
+  "generatedAt": "2026-02-02T09:00:07.516Z",
+  "items": [
+    {
+      "ok": false,
+      "label": "[health]",
+      "status": 0,
+      "startedAt": 1770022806329,
+      "endedAt": 1770022807334,
+      "error": "fetch failed"
+    },
+    {
+      "ok": true,
+      "label": "[auth/register]",
+      "status": 201,
+      "startedAt": 1770022807334,
+      "endedAt": 1770022807460
+    },
+    {
+      "ok": true,
+      "label": "[auth/me]",
+      "status": 200,
+      "startedAt": 1770022807460,
+      "endedAt": 1770022807469
+    },
+    {
+      "ok": true,
+      "label": "[wallet]",
+      "status": 200,
+      "startedAt": 1770022807469,
+      "endedAt": 1770022807481
+    },
+    {
+      "ok": true,
+      "label": "[promotions]",
+      "status": 200,
+      "startedAt": 1770022807481,
+      "endedAt": 1770022807492
+    },
+    {
+      "ok": true,
+      "label": "[series]",
+      "status": 200,
+      "startedAt": 1770022807492,
+      "endedAt": 1770022807501
+    },
+    {
+      "ok": true,
+      "label": "[series detail]",
+      "status": 403,
+      "startedAt": 1770022807501,
+      "endedAt": 1770022807514
+    }
+  ]
+}

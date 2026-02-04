@@ -1,10 +1,8 @@
-import { NextResponse } from "next/server";
-import { getMissionsState, getUserIdFromCookies } from "../../../lib/rewardsStore";
+import { handler } from "../../../lib/apiProxy";
 
-export async function GET(request) {
-  const userId = getUserIdFromCookies(request);
-  const missions = getMissionsState(userId);
-  return NextResponse.json({ missions });
-}
-
-export const dynamic = "force-dynamic";
+export const GET = handler;
+export const POST = handler;
+export const PUT = handler;
+export const PATCH = handler;
+export const DELETE = handler;
+export const OPTIONS = handler;

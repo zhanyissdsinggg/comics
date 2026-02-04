@@ -1,18 +1,8 @@
-import { NextResponse } from "next/server";
-import { getUserIdFromCookies, markNotificationsRead } from "../../../../lib/serverStore";
+import { handler } from "../../../../lib/apiProxy";
 
-export async function POST(request) {
-  const userId = getUserIdFromCookies(request);
-  let payload = {};
-  try {
-    payload = await request.json();
-  } catch (err) {
-    payload = {};
-  }
-
-  const notificationIds = Array.isArray(payload.notificationIds)
-    ? payload.notificationIds
-    : [];
-  const notifications = markNotificationsRead(userId, notificationIds);
-  return NextResponse.json({ notifications });
-}
+export const GET = handler;
+export const POST = handler;
+export const PUT = handler;
+export const PATCH = handler;
+export const DELETE = handler;
+export const OPTIONS = handler;

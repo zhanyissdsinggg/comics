@@ -1,5 +1,6 @@
 import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
+import { PerformanceMonitor } from "../lib/performance";
 
 export const metadata = {
   title: {
@@ -18,7 +19,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AppProviders>{children}</AppProviders>
+        <PerformanceMonitor>
+          <AppProviders>{children}</AppProviders>
+        </PerformanceMonitor>
       </body>
     </html>
   );

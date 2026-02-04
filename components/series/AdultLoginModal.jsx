@@ -1,24 +1,20 @@
 "use client";
 
-export default function AdultLoginModal({ open, onClose, onConfirm }) {
-  if (!open) {
-    return null;
-  }
+import LoginGateModal from "../layout/LoginGateModal";
+import {
+  LOGIN_GATE_DESCRIPTION,
+  LOGIN_GATE_TITLE,
+} from "../../lib/adultGateCopy";
 
+export default function AdultLoginModal({ open, onClose, onSubmit, errorMessage }) {
   return (
-    <div className="modal-backdrop">
-      <div className="modal-card" role="dialog" aria-modal="true">
-        <h3>Login required</h3>
-        <p>Sign in to access adult content.</p>
-        <div className="modal-actions">
-          <button type="button" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="button" onClick={onConfirm}>
-            Sign in
-          </button>
-        </div>
-      </div>
-    </div>
+    <LoginGateModal
+      open={open}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      title={LOGIN_GATE_TITLE}
+      description={LOGIN_GATE_DESCRIPTION}
+      errorMessage={errorMessage}
+    />
   );
 }

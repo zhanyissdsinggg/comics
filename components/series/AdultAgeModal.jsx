@@ -1,5 +1,7 @@
 "use client";
 
+import { AGE_GATE_TITLE } from "../../lib/adultGateCopy";
+
 export default function AdultAgeModal({
   open,
   onClose,
@@ -14,7 +16,7 @@ export default function AdultAgeModal({
   return (
     <div className="modal-backdrop">
       <div className="modal-card" role="dialog" aria-modal="true">
-        <h3>Confirm your age</h3>
+        <h3>{AGE_GATE_TITLE}</h3>
         <p>
           You must be at least {legalAge} years old ({ageRuleKey} policy).
         </p>

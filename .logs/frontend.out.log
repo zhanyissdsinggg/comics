@@ -1,0 +1,146 @@
+
+> tappytoon@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.5
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.1s
+ ○ Compiling /admin ...
+ ✓ Compiled /admin in 1118ms (586 modules)
+ GET /admin?key=admin 200 in 1297ms
+ GET /admin?key=admin 200 in 45ms
+ GET /admin?key=admin 200 in 55ms
+ GET /admin?key=admin 200 in 63ms
+ ✓ Compiled /admin/promotions in 322ms (593 modules)
+ GET /admin/promotions?key=admin 200 in 101ms
+ GET /admin/promotions?key=admin 200 in 59ms
+ ✓ Compiled in 1243ms (607 modules)
+ ✓ Compiled in 535ms (607 modules)
+ ✓ Compiled in 616ms (607 modules)
+ ✓ Compiled in 296ms (307 modules)
+ ✓ Compiled in 339ms (307 modules)
+ GET /admin?key=admin 200 in 111ms
+ ✓ Compiled in 964ms (613 modules)
+ ✓ Compiled in 407ms (613 modules)
+ ✓ Compiled in 759ms (613 modules)
+ ✓ Compiled in 351ms (310 modules)
+ ✓ Compiled in 709ms (613 modules)
+ ✓ Compiled in 299ms (310 modules)
+ ✓ Compiled in 212ms (310 modules)
+ ✓ Compiled in 210ms (310 modules)
+ ✓ Compiled in 275ms (599 modules)
+ ✓ Compiled in 223ms (310 modules)
+ ✓ Compiled in 172ms (310 modules)
+ ✓ Compiled in 186ms (310 modules)
+ ✓ Compiled in 151ms (310 modules)
+ ✓ Compiled in 464ms (613 modules)
+ ✓ Compiled in 271ms (310 modules)
+ ✓ Compiled in 172ms (310 modules)
+ ✓ Compiled in 202ms (310 modules)
+ ✓ Compiled in 219ms (599 modules)
+ GET /admin?key=admin 200 in 112ms
+ GET /admin?key=admin 200 in 49ms
+ ✓ Compiled in 689ms (615 modules)
+ ✓ Compiled in 296ms (615 modules)
+ ✓ Compiled in 219ms (311 modules)
+ ✓ Compiled in 218ms (311 modules)
+ ✓ Compiled in 173ms (311 modules)
+ ✓ Compiled in 205ms (601 modules)
+ ✓ Compiled in 260ms (311 modules)
+ GET /admin?key=admin 200 in 149ms
+ GET /admin?key=admin 200 in 63ms
+ ✓ Compiled in 458ms (615 modules)
+ ✓ Compiled in 184ms (311 modules)
+ ✓ Compiled in 172ms (311 modules)
+ ✓ Compiled in 456ms (615 modules)
+ ✓ Compiled in 176ms (311 modules)
+ ✓ Compiled in 262ms (601 modules)
+ ✓ Compiled in 338ms (615 modules)
+ ✓ Compiled in 555ms (601 modules)
+ GET /admin?key=admin 200 in 84ms
+ GET /admin?key=admin 200 in 73ms
+ ✓ Compiled in 536ms (615 modules)
+ GET /admin?key=admin 200 in 94ms
+ GET /admin?key=admin 200 in 45ms
+ GET /admin?key=admin 200 in 80ms
+ GET /admin?key=admin 200 in 40ms
+ ✓ Compiled in 410ms (615 modules)
+ GET /admin?key=admin 200 in 137ms
+ ✓ Compiled in 486ms (615 modules)
+ GET /admin?key=admin 200 in 106ms
+ ○ Compiling / ...
+ ✓ Compiled / in 913ms (695 modules)
+ GET / 200 in 1070ms
+ GET / 200 in 46ms
+ GET /admin?key=admin 200 in 152ms
+ GET /admin?key=admin 200 in 50ms
+ ○ Compiling /admin/series ...
+ ✓ Compiled /admin/series in 1183ms (661 modules)
+ ✓ Compiled in 339ms (352 modules)
+ ✓ Compiled in 581ms (352 modules)
+ ✓ Compiled in 352ms (352 modules)
+ ✓ Compiled in 395ms (352 modules)
+ ✓ Compiled in 317ms (352 modules)
+ ✓ Compiled in 707ms (656 modules)
+ ✓ Compiled in 641ms (352 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 822ms (345 modules)
+ GET / 200 in 1250ms
+ GET / 200 in 870ms
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 1375ms (74 modules)
+ ○ Compiling /adult-gate ...
+ ✓ Compiled /adult-gate in 2.1s (704 modules)
+ GET /adult-gate?returnTo=%2Fadult&reason=NEED_LOGIN 200 in 2555ms
+ GET /?returnTo=%2Flibrary&reason=NEED_LOGIN 200 in 110ms
+ ○ Compiling /series/[id] ...
+ ✓ Compiled /series/[id] in 1206ms (744 modules)
+ GET /series/c1 200 in 2996ms
+ GET /?returnTo=%2Fread%2Fc1%2Fc1e1&reason=NEED_LOGIN 200 in 72ms
+ GET /?returnTo=%2Fstore&reason=NEED_LOGIN 200 in 87ms
+ GET /?returnTo=%2Fnotifications&reason=NEED_LOGIN 200 in 44ms
+ GET /admin?key=admin 200 in 85ms
+ ✓ Compiled /admin/series in 454ms (377 modules)
+ GET /admin/series?key=admin 200 in 609ms
+ ○ Compiling /admin/settings ...
+ ✓ Compiled /admin/settings in 581ms (754 modules)
+ GET /admin/settings?key=admin 200 in 724ms
+ GET / 200 in 76ms
+ GET /adult-gate?returnTo=%2Fadult&reason=NEED_LOGIN 200 in 87ms
+ GET /?returnTo=%2Flibrary&reason=NEED_LOGIN 200 in 76ms
+ GET /series/c1 200 in 323ms
+ GET /?returnTo=%2Fread%2Fc1%2Fc1e1&reason=NEED_LOGIN 200 in 56ms
+ GET /?returnTo=%2Fstore&reason=NEED_LOGIN 200 in 82ms
+ GET /?returnTo=%2Fnotifications&reason=NEED_LOGIN 200 in 76ms
+ GET /admin?key=admin 200 in 64ms
+ GET /admin/series?key=admin 200 in 68ms
+ GET /admin/settings?key=admin 200 in 76ms
+ GET / 200 in 48ms
+ GET /adult-gate?returnTo=%2Fadult&reason=NEED_LOGIN 200 in 54ms
+ GET /?returnTo=%2Flibrary&reason=NEED_LOGIN 200 in 96ms
+ GET /series/c1 200 in 320ms
+ GET /?returnTo=%2Fread%2Fc1%2Fc1e1&reason=NEED_LOGIN 200 in 67ms
+ GET /?returnTo=%2Fstore&reason=NEED_LOGIN 200 in 60ms
+ GET /?returnTo=%2Fnotifications&reason=NEED_LOGIN 200 in 75ms
+ GET /admin?key=admin 200 in 65ms
+ GET /admin/series?key=admin 200 in 57ms
+ GET /admin/settings?key=admin 200 in 76ms
+ GET / 200 in 78ms
+ GET /adult-gate?returnTo=%2Fadult&reason=NEED_LOGIN 200 in 67ms
+ GET /?returnTo=%2Flibrary&reason=NEED_LOGIN 200 in 67ms
+ GET / 200 in 55ms
+ GET / 200 in 41ms
+ GET /series/c1 200 in 316ms
+ GET /admin?key=admin 200 in 59ms
+ GET /admin/series?key=admin 200 in 58ms
+ GET /admin/settings?key=admin 200 in 72ms
+ ○ Compiling /admin/orders ...
+ ✓ Compiled /admin/comments in 5.5s (705 modules)
+ ✓ Compiled in 229ms (74 modules)
+ ✓ Compiled in 399ms (381 modules)
+ ○ Compiling /read/[seriesId]/[episodeId] ...
+ ✓ Compiled /read/[seriesId]/[episodeId] in 1166ms (733 modules)
+ GET /read/c1/c1e1 200 in 2685ms

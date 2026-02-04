@@ -1,0 +1,480 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  isBlocked Boolean  @default(false)
+  emailVerified Boolean @default(false)
+  emailVerifiedAt DateTime?
+  createdAt DateTime @default(now())
+  sessions  Session[]
+  wallet    Wallet?
+  orders    Order[]
+  follows   Follow[]
+  comments  Comment[]
+  commentLikes CommentLike[]
+  commentReplies CommentReply[]
+  ratings   Rating[]
+  progress  Progress[]
+  entitlements Entitlement[]
+  notifications Notification[]
+  subscription Subscription?
+  subscriptionUsage SubscriptionUsage[]
+  subscriptionVoucherUsage SubscriptionVoucherUsage[]
+  rewardState RewardState?
+  missionState MissionState?
+  bookmarks Bookmark[]
+  history ReadingHistory[]
+  userCoupons UserCoupon[]
+  dailyActives DailyActive[]
+  preference UserPreference?
+  supportTickets SupportTicket[]
+  authTokens AuthToken[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model AuthToken {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  @@index([userId, type])
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  paidPts   Int      @default(0)
+  bonusPts  Int      @default(0)
+  plan      String   @default("free")
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Series {
+  id             String   @id
+  title          String
+  type           String
+  adult          Boolean  @default(false)
+  genres         String[] @default([])
+  coverTone      String   @default("")
+  coverUrl       String   @default("")
+  badge          String   @default("")
+  badges         String[] @default([])
+  status         String   @default("Ongoing")
+  rating         Float    @default(0)
+  ratingCount    Int      @default(0)
+  description    String   @default("")
+  episodePrice   Int      @default(0)
+  ttfEnabled     Boolean  @default(false)
+  ttfIntervalHours Int    @default(24)
+  latestEpisodeId String  @default("")
+  episodes       Episode[]
+  entitlements   Entitlement[]
+  follows        Follow[]
+  comments       Comment[]
+  ratings        Rating[]
+}
+
+model Episode {
+  id               String   @id
+  seriesId         String
+  number           Int
+  title            String
+  releasedAt       DateTime @default(now())
+  pricePts         Int      @default(0)
+  ttfEligible      Boolean  @default(false)
+  ttfReadyAt       DateTime?
+  previewFreePages Int      @default(0)
+  pages            Json?
+  paragraphs       Json?
+  text             String?
+  series           Series   @relation(fields: [seriesId], references: [id])
+  entitlements     Entitlement[]
+}
+
+model Entitlement {
+  id         String   @id @default(cuid())
+  userId     String
+  seriesId   String
+  episodeId  String
+  unlockedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  series     Series   @relation(fields: [seriesId], references: [id])
+  episode    Episode  @relation(fields: [episodeId], references: [id])
+  @@unique([userId, episodeId])
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  userId    String
+  packageId String
+  amount    Float
+  currency  String
+  status    String
+  createdAt DateTime @default(now())
+  paidAt    DateTime?
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model PaymentIntent {
+  id        String   @id @default(cuid())
+  userId    String
+  orderId   String
+  provider  String
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model PaymentRetry {
+  id            String   @id @default(cuid())
+  userId        String
+  orderId       String
+  paymentId     String?
+  status        String   @default("PENDING")
+  attempts      Int      @default(0)
+  nextAttemptAt DateTime
+  lastError     String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@unique([orderId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  targetType String
+  targetId  String
+  payload   Json?
+  requestId String?
+  createdAt DateTime @default(now())
+}
+
+model IdempotencyKey {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  status    Int      @default(200)
+  body      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId, key])
+}
+
+model RateLimitCounter {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  count     Int      @default(0)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+  @@unique([userId, action])
+}
+
+model UserPreference {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  payload   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model SupportTicket {
+  id        String   @id @default(cuid())
+  userId    String
+  subject   String
+  message   String
+  status    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model TopupPackage {
+  id        String   @id
+  paidPts   Int
+  bonusPts  Int
+  price     Float
+  currency  String   @default("USD")
+  active    Boolean  @default(true)
+  label     String   @default("")
+  tags      String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SubscriptionPlan {
+  id               String   @id
+  discountPct      Int
+  dailyFreeUnlocks Int
+  ttfMultiplier    Float
+  voucherPts       Int
+  price            Float    @default(0)
+  currency         String   @default("USD")
+  active           Boolean  @default(true)
+  label            String   @default("")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id
+  userId    String
+  type      String
+  title     String
+  message   String
+  seriesId  String?
+  episodeId String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Follow {
+  id       String  @id @default(cuid())
+  userId   String
+  seriesId String
+  user     User    @relation(fields: [userId], references: [id])
+  series   Series  @relation(fields: [seriesId], references: [id])
+  @@unique([userId, seriesId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  seriesId  String
+  userId    String
+  text      String
+  hidden    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  series    Series   @relation(fields: [seriesId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  likes     CommentLike[]
+  replies   CommentReply[]
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  seriesId  String
+  userId    String
+  rating    Int
+  createdAt DateTime @default(now())
+  series    Series   @relation(fields: [seriesId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  @@unique([userId, seriesId])
+}
+
+model CommentReply {
+  id        String   @id @default(cuid())
+  commentId String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  @@unique([commentId, userId])
+}
+
+model Progress {
+  id            String   @id @default(cuid())
+  userId        String
+  seriesId      String
+  lastEpisodeId String
+  percent       Float
+  updatedAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id])
+  @@unique([userId, seriesId])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  planId    String
+  active    Boolean  @default(false)
+  startedAt DateTime @default(now())
+  renewAt   DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model SubscriptionUsage {
+  id      String @id @default(cuid())
+  userId  String
+  dateKey String
+  used    Int    @default(0)
+  user    User   @relation(fields: [userId], references: [id])
+  @@unique([userId, dateKey])
+}
+
+model SubscriptionVoucherUsage {
+  id      String @id @default(cuid())
+  userId  String
+  dateKey String
+  used    Boolean @default(false)
+  user    User    @relation(fields: [userId], references: [id])
+  @@unique([userId, dateKey])
+}
+
+model Coupon {
+  id            String   @id
+  code          String   @unique
+  type          String
+  value         Int
+  remainingUses Int
+  label         String
+  userCoupons   UserCoupon[]
+}
+
+model Promotion {
+  id              String   @id
+  title           String
+  description     String
+  type            String
+  segment         String
+  active          Boolean  @default(false)
+  startAt         DateTime?
+  endAt           DateTime?
+  bonusMultiplier Float    @default(0)
+  returningAfterDays Int   @default(7)
+  autoGrant       Boolean  @default(false)
+  ctaType         String   @default("STORE")
+  ctaTarget       String   @default("")
+  ctaLabel        String   @default("")
+}
+
+model PromotionFallback {
+  id      String @id @default(cuid())
+  key     String @unique
+  payload Json
+}
+
+model RewardState {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  lastCheckInDate String
+  streakCount     Int      @default(0)
+  makeUpUsedToday Boolean  @default(false)
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model MissionState {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  payload   Json
+  updatedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  seriesId  String
+  episodeId String
+  percent   Float    @default(0)
+  pageIndex Int      @default(0)
+  label     String   @default("Bookmark")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  @@index([userId, seriesId])
+}
+
+model ReadingHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  seriesId  String
+  episodeId String
+  title     String   @default("")
+  percent   Float    @default(0)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  @@index([userId, seriesId])
+}
+
+model SearchLog {
+  id        String   @id @default(cuid())
+  dateKey   String
+  keyword   String
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  @@unique([dateKey, keyword])
+}
+
+model UserCoupon {
+  id        String   @id @default(cuid())
+  userId    String
+  couponId  String
+  claimedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  coupon    Coupon   @relation(fields: [couponId], references: [id])
+  @@unique([userId, couponId])
+}
+
+model DailyStat {
+  dateKey       String @id
+  views         Int    @default(0)
+  registrations Int    @default(0)
+  paidOrders    Int    @default(0)
+}
+
+model DailyActive {
+  id      String @id @default(cuid())
+  dateKey String
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  @@unique([dateKey, userId])
+}
+
+model SeriesViewStat {
+  id      String @id @default(cuid())
+  dateKey String
+  seriesId String
+  views   Int    @default(0)
+  @@unique([dateKey, seriesId])
+}
+
+model TrackingConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  payload   Json
+  updatedAt DateTime @updatedAt
+}
+
+model EmailConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  payload   Json
+  updatedAt DateTime @updatedAt
+}
+
+model RegionConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  payload   Json
+  updatedAt DateTime @updatedAt
+}

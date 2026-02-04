@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SiteHeader from "../layout/SiteHeader";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
@@ -10,6 +10,10 @@ import AdultGateBlockingPanel from "../series/AdultGateBlockingPanel";
 import LoginGateModal from "../layout/LoginGateModal";
 import AgeGateModal from "../layout/AgeGateModal";
 import { track } from "../../lib/analytics";
+import {
+  LOGIN_GATE_DESCRIPTION,
+  LOGIN_GATE_TITLE,
+} from "../../lib/adultGateCopy";
 
 const adultItems = [
   { id: "a1", title: "After Dark", subtitle: "Thriller", coverTone: "noir", badge: "18+" },
@@ -29,6 +33,8 @@ export default function AdultHubPage() {
   } = useAdultGateStore();
   const { isSignedIn, signIn } = useAuthStore();
   const [activeModal, setActiveModal] = useState(null);
+  const [authError, setAuthError] = useState("");
+  const gateReportedRef = useRef(false);
   const panelStatus =
     requireLoginForAdult && !isSignedIn
       ? "NEED_LOGIN"
@@ -54,15 +60,24 @@ export default function AdultHubPage() {
     setActiveModal(null);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async ({ email, password, mode }) => {
     track("adult_gate_login", { source: "adult-hub" });
-    signIn();
+    const response = await signIn(email, password, mode);
+    if (response?.status === 202) {
+      setAuthError("");
+      return response;
+    }
+    if (!response.ok) {
+      setAuthError("Invalid email or password.");
+      return;
+    }
     const status = requestAdultToggle(true);
     if (status === "NEED_AGE_CONFIRM") {
       setActiveModal("age");
       return;
     }
     setActiveModal(null);
+    return response;
   };
 
   const handleAgeConfirm = (ruleKey) => {
@@ -75,6 +90,18 @@ export default function AdultHubPage() {
   useEffect(() => {
     track("view_adult", {});
   }, []);
+
+  useEffect(() => {
+    if (isAdultMode) {
+      gateReportedRef.current = false;
+      return;
+    }
+    if (gateReportedRef.current) {
+      return;
+    }
+    track("adult_gate_blocked", { source: "adult-hub", reason: panelStatus });
+    gateReportedRef.current = true;
+  }, [isAdultMode, panelStatus]);
 
   return (
     <div className="min-h-screen bg-neutral-950">
@@ -101,8 +128,14 @@ export default function AdultHubPage() {
 
       <LoginGateModal
         open={activeModal === "login"}
-        onClose={() => setActiveModal(null)}
-        onConfirm={handleLogin}
+        onClose={() => {
+          setActiveModal(null);
+          setAuthError("");
+        }}
+        onSubmit={handleLogin}
+        title={LOGIN_GATE_TITLE}
+        description={LOGIN_GATE_DESCRIPTION}
+        errorMessage={authError}
       />
       <AgeGateModal
         open={activeModal === "age"}

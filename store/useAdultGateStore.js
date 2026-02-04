@@ -33,7 +33,11 @@ export function AdultGateProvider({ children }) {
 
   useEffect(() => {
     const confirmed = readStorageValue(CONFIRMED_KEY, "0") === "1";
-    const rule = readStorageValue(RULE_KEY, "global");
+    const region =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("mn_region")
+        : null;
+    const rule = readStorageValue(RULE_KEY, region || "global");
     const mode = readStorageValue(MODE_KEY, "0") === "1";
     setAdultConfirmed(confirmed);
     setAgeRuleKey(rule);

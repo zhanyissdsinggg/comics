@@ -1,0 +1,96 @@
+
+> tappytoon@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.5
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.8s
+ ○ Compiling / ...
+ ✓ Compiled / in 1852ms (663 modules)
+ GET / 200 in 2467ms
+ GET / 200 in 72ms
+ ✓ Compiled /middleware in 327ms (74 modules)
+ ○ Compiling /series/[id] ...
+ ✓ Compiled /series/[id] in 1192ms (703 modules)
+ GET /series/c1 200 in 2284ms
+ ✓ Compiled /read/[seriesId]/[episodeId] in 499ms (718 modules)
+ GET /read/c1/c1e1 200 in 1494ms
+ ○ Compiling /store ...
+ ✓ Compiled /store in 566ms (729 modules)
+ GET /store 200 in 752ms
+ GET /?returnTo=%2Flibrary&reason=NEED_LOGIN 200 in 94ms
+ GET /?returnTo=%2Fnotifications&reason=NEED_LOGIN 200 in 84ms
+ ✓ Compiled /subscribe in 409ms (736 modules)
+ GET /subscribe 200 in 542ms
+ ✓ Compiled /search in 349ms (743 modules)
+ GET /search?q=Midnight 200 in 477ms
+ ✓ Compiled /adult-gate in 341ms (750 modules)
+ GET /adult-gate?returnTo=%2Fadult&reason=NEED_LOGIN 200 in 477ms
+ GET / 200 in 243ms
+ GET /series/c1 200 in 598ms
+ GET /read/c1/c1e1 200 in 526ms
+ GET /store?returnTo=/series/c1 200 in 256ms
+ GET /?returnTo=%2Flibrary&reason=NEED_LOGIN 200 in 88ms
+ GET /?returnTo=%2Fnotifications&reason=NEED_LOGIN 200 in 90ms
+ GET /subscribe 200 in 128ms
+ ✓ Compiled in 2.8s (363 modules)
+ ✓ Compiled in 273ms (363 modules)
+ ✓ Compiled in 389ms (363 modules)
+ ✓ Compiled in 263ms (363 modules)
+ ✓ Compiled in 795ms (363 modules)
+ ✓ Compiled in 598ms (363 modules)
+ ✓ Compiled in 1037ms (363 modules)
+ ✓ Compiled in 756ms (363 modules)
+ ✓ Compiled in 540ms (363 modules)
+ ✓ Compiled in 726ms (363 modules)
+ ✓ Compiled in 636ms (363 modules)
+ ✓ Compiled in 655ms (363 modules)
+ ✓ Compiled in 647ms (363 modules)
+ ✓ Compiled in 768ms (363 modules)
+ ✓ Compiled in 674ms (363 modules)
+ ✓ Compiled in 508ms (363 modules)
+ ✓ Compiled in 904ms (363 modules)
+ ✓ Compiled in 725ms (363 modules)
+ ✓ Compiled in 407ms (363 modules)
+ ✓ Compiled in 715ms (363 modules)
+ ✓ Compiled in 421ms (363 modules)
+ ✓ Compiled in 774ms (363 modules)
+ ✓ Compiled in 667ms (363 modules)
+ ✓ Compiled in 610ms (363 modules)
+ ✓ Compiled in 1043ms (363 modules)
+ ✓ Compiled in 734ms (363 modules)
+ ✓ Compiled in 634ms (363 modules)
+ ✓ Compiled in 605ms (363 modules)
+ ✓ Compiled in 702ms (363 modules)
+ ✓ Compiled in 601ms (363 modules)
+ ✓ Compiled in 688ms (363 modules)
+ ✓ Compiled in 470ms (363 modules)
+ ✓ Compiled in 546ms (363 modules)
+ ✓ Compiled in 489ms (363 modules)
+ ✓ Compiled in 727ms (363 modules)
+ ✓ Compiled in 492ms (363 modules)
+ ✓ Compiled in 531ms (363 modules)
+ ✓ Compiled in 734ms (437 modules)
+ ✓ Compiled in 572ms (363 modules)
+ ✓ Compiled in 517ms (363 modules)
+ ✓ Compiled in 892ms (363 modules)
+ ✓ Compiled in 701ms (363 modules)
+ ✓ Compiled in 441ms (363 modules)
+ ✓ Compiled in 453ms (363 modules)
+ ✓ Compiled in 720ms (363 modules)
+ ✓ Compiled in 583ms (363 modules)
+ ✓ Compiled in 849ms (363 modules)
+ ✓ Compiled in 825ms (363 modules)
+ ✓ Compiled in 857ms (363 modules)
+ ✓ Compiled in 486ms (363 modules)
+ ✓ Compiled in 951ms (363 modules)
+ ✓ Compiled in 416ms (363 modules)
+ ✓ Compiled in 678ms (363 modules)
+ ✓ Compiled in 795ms (363 modules)
+ ✓ Compiled in 852ms (363 modules)
+ ✓ Compiled in 761ms (363 modules)
+ ✓ Compiled in 603ms (363 modules)
+ ✓ Compiled in 776ms (363 modules)

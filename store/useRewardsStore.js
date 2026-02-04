@@ -12,6 +12,25 @@ import { useWalletStore } from "./useWalletStore";
 import { track } from "../lib/analytics";
 
 const RewardsContext = createContext(null);
+const MAKEUP_COST = 5;
+
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function normalizeRewards(state, rewardPts) {
+  if (!state) {
+    return null;
+  }
+  const todayKey = getTodayKey();
+  const lastCheckInDate = state.lastCheckInDate || "";
+  return {
+    ...state,
+    todayReward: rewardPts ?? state.rewardPts ?? 0,
+    canCheckIn: lastCheckInDate !== todayKey,
+    makeUpCost: MAKEUP_COST,
+  };
+}
 
 export function RewardsProvider({ children }) {
   const [rewards, setRewards] = useState(null);
@@ -21,7 +40,7 @@ export function RewardsProvider({ children }) {
   const loadRewards = useCallback(async () => {
     const response = await apiGet("/api/rewards");
     if (response.ok) {
-      setRewards(response.data?.rewards || null);
+      setRewards(normalizeRewards(response.data, response.data?.rewardPts));
     }
     return response;
   }, []);
@@ -31,12 +50,12 @@ export function RewardsProvider({ children }) {
     const response = await apiPost("/api/rewards/checkin");
     if (response.ok) {
       track("checkin_success", {});
-      setRewards(response.data?.rewards || null);
+      setRewards(normalizeRewards(response.data?.state, response.data?.rewardPts));
       if (response.data?.wallet) {
         setWallet(response.data.wallet);
       }
     } else {
-      track("checkin_fail", { status: response.status });
+      track("checkin_fail", { status: response.status, errorCode: response.error });
     }
     return response;
   }, [setWallet]);
@@ -46,10 +65,12 @@ export function RewardsProvider({ children }) {
     const response = await apiPost("/api/rewards/makeup");
     if (response.ok) {
       track("makeup_success", {});
-      setRewards(response.data?.rewards || null);
+      setRewards(normalizeRewards(response.data?.state, response.data?.rewardPts));
       if (response.data?.wallet) {
         setWallet(response.data.wallet);
       }
+    } else {
+      track("makeup_fail", { status: response.status, errorCode: response.error });
     }
     return response;
   }, [setWallet]);
@@ -57,7 +78,10 @@ export function RewardsProvider({ children }) {
   const loadMissions = useCallback(async () => {
     const response = await apiGet("/api/missions");
     if (response.ok) {
-      setMissions(response.data?.missions || { daily: [], weekly: [] });
+      setMissions({
+        daily: response.data?.daily || [],
+        weekly: response.data?.weekly || [],
+      });
     }
     return response;
   }, []);
@@ -68,10 +92,15 @@ export function RewardsProvider({ children }) {
       const response = await apiPost("/api/missions/claim", { missionId });
       if (response.ok) {
         track("mission_claim_success", { missionId });
-        setMissions(response.data?.missions || { daily: [], weekly: [] });
+        setMissions({
+          daily: response.data?.daily || [],
+          weekly: response.data?.weekly || [],
+        });
         if (response.data?.wallet) {
           setWallet(response.data.wallet);
         }
+      } else {
+        track("mission_claim_fail", { missionId, status: response.status, errorCode: response.error });
       }
       return response;
     },
@@ -82,7 +111,10 @@ export function RewardsProvider({ children }) {
     track("mission_progress_event", { eventType });
     const response = await apiPost("/api/missions/report", { eventType });
     if (response.ok) {
-      setMissions(response.data?.missions || { daily: [], weekly: [] });
+      setMissions({
+        daily: response.data?.daily || [],
+        weekly: response.data?.weekly || [],
+      });
     }
     return response;
   }, []);

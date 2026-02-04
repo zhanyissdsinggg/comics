@@ -6,8 +6,10 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { apiGet, apiPost } from "../lib/apiClient";
 
 const ProgressContext = createContext(null);
 
@@ -32,6 +34,9 @@ function readProgress(seriesId) {
 
 export function ProgressProvider({ children }) {
   const [bySeriesId, setBySeriesId] = useState({});
+  const [loaded, setLoaded] = useState(false);
+  const pendingRef = useRef({});
+  const timerRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -51,6 +56,25 @@ export function ProgressProvider({ children }) {
     setBySeriesId(next);
   }, []);
 
+  useEffect(() => {
+    apiGet("/api/progress").then((response) => {
+      if (response.ok && response.data?.progress) {
+        setBySeriesId(response.data.progress);
+        if (typeof window !== "undefined") {
+          Object.entries(response.data.progress).forEach(([seriesId, value]) => {
+            window.localStorage.setItem(getProgressKey(seriesId), JSON.stringify(value));
+          });
+        }
+      }
+      setLoaded(true);
+    });
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
   const setProgress = useCallback((seriesId, episodeId, percent) => {
     const payload = {
       lastEpisodeId: episodeId,
@@ -61,6 +85,31 @@ export function ProgressProvider({ children }) {
       window.localStorage.setItem(getProgressKey(seriesId), JSON.stringify(payload));
     }
     setBySeriesId((prev) => ({ ...prev, [seriesId]: payload }));
+    pendingRef.current[seriesId] = payload;
+    if (timerRef.current) {
+      return;
+    }
+    timerRef.current = setTimeout(() => {
+      const batch = pendingRef.current;
+      pendingRef.current = {};
+      Object.entries(batch).forEach(([id, entry]) => {
+        apiPost("/api/progress/update", {
+          seriesId: id,
+          lastEpisodeId: entry.lastEpisodeId,
+          percent: entry.percent,
+        });
+      });
+      timerRef.current = null;
+    }, 2000);
+  }, []);
+
+  const loadProgress = useCallback(async () => {
+    const response = await apiGet("/api/progress");
+    if (response.ok && response.data?.progress) {
+      setBySeriesId(response.data.progress);
+    }
+    setLoaded(true);
+    return response;
   }, []);
 
   const getProgress = useCallback(
@@ -69,8 +118,8 @@ export function ProgressProvider({ children }) {
   );
 
   const value = useMemo(
-    () => ({ bySeriesId, setProgress, getProgress }),
-    [bySeriesId, getProgress, setProgress]
+    () => ({ bySeriesId, setProgress, getProgress, loadProgress, loaded }),
+    [bySeriesId, getProgress, setProgress, loadProgress, loaded]
   );
 
   return (

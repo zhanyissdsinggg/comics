@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ModalBase from "../common/ModalBase";
+import { AGE_GATE_TITLE } from "../../lib/adultGateCopy";
 import { AGE_RULES } from "../../lib/ageRules";
 
 export default function AgeGateModal({ open, onClose, onConfirm, ageRuleKey, legalAge }) {
@@ -15,7 +16,7 @@ export default function AgeGateModal({ open, onClose, onConfirm, ageRuleKey, leg
   }, [ageRuleKey, open]);
 
   return (
-    <ModalBase open={open} title="Confirm your age" onClose={onClose}>
+    <ModalBase open={open} title={AGE_GATE_TITLE} onClose={onClose}>
       <p>You must be at least {currentAge} years old.</p>
       <div className="space-y-2">
         {Object.entries(AGE_RULES).map(([key, rule]) => (

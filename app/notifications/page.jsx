@@ -1,27 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import NotificationList from "../../components/notifications/NotificationList";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
+import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { track } from "../../lib/analytics";
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const { notifications, loadNotifications, markRead } = useNotificationsStore();
+  const { isAdultMode } = useAdultGateStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [workingId, setWorkingId] = useState(null);
 
   useEffect(() => {
     track("view_notifications", {});
-    loadNotifications()
+    loadNotifications(isAdultMode ? "1" : "0")
       .then((response) => {
         if (!response.ok) {
           setError("LOAD_ERROR");
         }
       })
       .finally(() => setLoading(false));
-  }, [loadNotifications]);
+  }, [loadNotifications, isAdultMode]);
 
   const handleMarkRead = async (notificationId) => {
     setWorkingId(notificationId);
@@ -50,6 +54,40 @@ export default function NotificationsPage() {
             <NotificationList
               notifications={notifications}
               onMarkRead={handleMarkRead}
+              onNavigate={(item) => {
+                if (item.seriesId && item.episodeId) {
+                  router.push(`/read/${item.seriesId}/${item.episodeId}`);
+                  return;
+                }
+                if (item.seriesId) {
+                  router.push(`/series/${item.seriesId}`);
+                  return;
+                }
+                if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
+                  const ctaType = item.ctaType || "STORE";
+                  const target = item.ctaTarget || "";
+                  if (ctaType === "SUBSCRIBE") {
+                    router.push("/subscribe");
+                    return;
+                  }
+                  if (ctaType === "SERIES" && target) {
+                    router.push(`/series/${target}`);
+                    return;
+                  }
+                  if (ctaType === "READ" && target) {
+                    const [seriesId, episodeId] = target.split("/");
+                    if (seriesId && episodeId) {
+                      router.push(`/read/${seriesId}/${episodeId}`);
+                      return;
+                    }
+                  }
+                  if (ctaType === "URL" && target) {
+                    window.location.href = target;
+                    return;
+                  }
+                  router.push("/store?returnTo=/notifications&focus=auto");
+                }
+              }}
               workingId={workingId}
             />
           )}

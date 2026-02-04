@@ -1,0 +1,42 @@
+{
+  "name": "tappytoon-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push",
+    "db:init": "npm run prisma:generate && npm run prisma:push && node scripts/seed.js && node scripts/seed-email-config.js && node scripts/seed-region-config.js",
+    "db:backup": "node scripts/backup-db.js",
+    "db:restore": "node scripts/restore-db.js",
+    "self-check": "node scripts/self-check.js",
+    "self-check-admin": "node scripts/self-check-admin.js",
+    "compensate": "node scripts/compensate.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.3.8",
+    "@nestjs/core": "^10.3.8",
+    "@nestjs/platform-express": "^10.3.8",
+    "@nestjs/swagger": "^7.3.2",
+    "@prisma/client": "^5.19.1",
+    "adm-zip": "^0.5.10",
+    "cookie-parser": "^1.4.6",
+    "ioredis": "^5.4.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "swagger-ui-express": "^5.0.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.4.2",
+    "@nestjs/schematics": "^10.1.1",
+    "@nestjs/testing": "^10.3.8",
+    "@types/cookie-parser": "^1.4.6",
+    "@types/node": "^20.12.12",
+    "prisma": "^5.19.1",
+    "typescript": "^5.4.5"
+  }
+}

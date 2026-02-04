@@ -26,7 +26,7 @@ export default function CheckInPanel({
           </div>
           <h2 className="mt-3 text-xl font-semibold">Daily Check-in</h2>
           <p className="mt-2 text-sm text-neutral-400">
-            Today's reward: +{rewards.todayReward} bonus pts
+            Today&apos;s reward: +{rewards.todayReward} bonus POINTS
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -44,7 +44,7 @@ export default function CheckInPanel({
             disabled={rewards.makeUpUsedToday || working}
             className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200 disabled:opacity-50"
           >
-            Make up (-{rewards.makeUpCost} pts)
+            Make up (-{rewards.makeUpCost} POINTS)
           </button>
         </div>
       </div>

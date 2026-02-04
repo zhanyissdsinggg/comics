@@ -1,0 +1,45 @@
+import { Request, Response } from "express";
+import { PrismaService } from "../../common/prisma/prisma.service";
+export declare class AdminOrdersController {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    list(req: Request, res: Response): Promise<{
+        error: string;
+    } | {
+        orders: any[];
+    }>;
+    refund(body: any, req: Request, res: Response): Promise<{
+        error: string;
+    } | {
+        ok: boolean;
+        order: {
+            orderId: string;
+            id: string;
+            createdAt: Date;
+            userId: string;
+            status: string;
+            currency: string;
+            packageId: string;
+            amount: number;
+            paidAt: Date | null;
+        };
+        wallet: {
+            id: string;
+            userId: string;
+            paidPts: number;
+            bonusPts: number;
+            plan: string;
+        };
+    }>;
+    adjust(body: any, req: Request, res: Response): Promise<{
+        error: string;
+    } | {
+        wallet: {
+            id: string;
+            userId: string;
+            paidPts: number;
+            bonusPts: number;
+            plan: string;
+        };
+    }>;
+}

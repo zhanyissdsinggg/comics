@@ -8,47 +8,91 @@ import {
   useMemo,
   useState,
 } from "react";
+import { apiGet, apiPost } from "../lib/apiClient";
 import { setCookie } from "../lib/cookies";
+import { applyPreferencesToStorage } from "../lib/preferencesClient";
 
 const AuthContext = createContext(null);
-const STORAGE_KEY = "mn_signed_in";
 
 export function AuthProvider({ children }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [user, setUser] = useState(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
-    setIsSignedIn(window.localStorage.getItem(STORAGE_KEY) === "1");
-    setHydrated(true);
+    apiGet("/api/auth/me", { suppressAuthModal: true })
+      .then((response) => {
+        if (response.ok) {
+          setIsSignedIn(true);
+          setUser(response.data?.user || null);
+          apiGet("/api/preferences").then((prefResponse) => {
+            if (prefResponse.ok && prefResponse.data?.preferences) {
+              applyPreferencesToStorage(prefResponse.data.preferences);
+            }
+          });
+        } else {
+          setIsSignedIn(false);
+          setUser(null);
+        }
+      })
+      .finally(() => setHydrated(true));
   }, []);
 
-  const signIn = useCallback(() => {
-    setIsSignedIn(true);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_KEY, "1");
+  const refresh = useCallback(async () => {
+    const response = await apiGet("/api/auth/me", { suppressAuthModal: true });
+    if (response.ok) {
+      setIsSignedIn(true);
+      setUser(response.data?.user || null);
+    } else {
+      setIsSignedIn(false);
+      setUser(null);
     }
+    return response;
   }, []);
 
-  const signOut = useCallback(() => {
+  const login = useCallback(async (email, password) => {
+    const response = await apiPost("/api/auth/login", { email, password });
+    if (response.ok) {
+      setIsSignedIn(true);
+      setUser(response.data?.user || null);
+      setCookie("mn_is_signed_in", "1");
+    }
+    return response;
+  }, []);
+
+  const register = useCallback(async (email, password) => {
+    const response = await apiPost("/api/auth/register", { email, password });
+    if (response.ok) {
+      setIsSignedIn(true);
+      setUser(response.data?.user || null);
+      setCookie("mn_is_signed_in", "1");
+    }
+    return response;
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await apiPost("/api/auth/logout");
     setIsSignedIn(false);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_KEY, "0");
-    }
+    setUser(null);
+    setCookie("mn_is_signed_in", "0");
   }, []);
 
-  useEffect(() => {
-    if (!hydrated) {
-      return;
-    }
-    setCookie("mn_is_signed_in", isSignedIn ? "1" : "0");
-  }, [hydrated, isSignedIn]);
+  const signIn = useCallback(
+    async (email, password, mode = "login") => {
+      if (mode === "register") {
+        return register(email, password);
+      }
+      return login(email, password);
+    },
+    [login, register]
+  );
 
   const value = useMemo(
-    () => ({ isSignedIn, signIn, signOut }),
-    [isSignedIn, signIn, signOut]
+    () => ({ isSignedIn, user, signIn, signOut, login, register, refresh }),
+    [isSignedIn, user, signIn, signOut, login, register, refresh]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,3 +1,7 @@
+/**
+ * 老王注释：封面组件，支持渐进式加载和blur-up效果
+ */
+import { useState } from "react";
 import Image from "next/image";
 
 const toneMap = {
@@ -9,27 +13,55 @@ const toneMap = {
   default: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)",
 };
 
-export default function Cover({ tone = "default", coverUrl, className = "" }) {
+export default function Cover({ tone = "default", coverUrl, className = "", style = {} }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const background = toneMap[tone] || toneMap.default;
 
+  // 老王注释：如果有coverUrl，显示图片
   if (coverUrl) {
     return (
-      <div className={`relative ${className}`.trim()} aria-hidden="true">
-        <Image
-          src={coverUrl}
-          alt=""
-          fill
-          sizes="(max-width: 768px) 160px, 240px"
-          className="object-cover"
-        />
+      <div className={`relative ${className}`.trim()} style={style} aria-hidden="true">
+        {/* 老王注释：加载时的模糊背景 */}
+        {isLoading && (
+          <div
+            className="absolute inset-0 animate-pulse bg-neutral-800"
+            style={{ background }}
+          />
+        )}
+
+        {/* 老王注释：图片加载失败时的fallback */}
+        {hasError ? (
+          <div
+            className="absolute inset-0"
+            style={{ background }}
+          />
+        ) : (
+          <Image
+            src={coverUrl}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 160px, 240px"
+            className={`object-cover transition-opacity duration-500 ${
+              isLoading ? "opacity-0" : "opacity-100"
+            }`}
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setHasError(true);
+            }}
+            priority={false}
+          />
+        )}
       </div>
     );
   }
 
+  // 老王注释：没有coverUrl时，显示渐变背景
   return (
     <div
       className={`cover ${className}`.trim()}
-      style={{ background }}
+      style={{ background, ...style }}
       aria-hidden="true"
     />
   );

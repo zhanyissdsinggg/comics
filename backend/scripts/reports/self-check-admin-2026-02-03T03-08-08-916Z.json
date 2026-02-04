@@ -1,0 +1,152 @@
+{
+  "generatedAt": "2026-02-03T03:08:08.918Z",
+  "items": [
+    {
+      "ok": true,
+      "label": "[admin/stats]",
+      "status": 200,
+      "startedAt": 1770088088615,
+      "endedAt": 1770088088716
+    },
+    {
+      "ok": true,
+      "label": "[admin/rankings day]",
+      "status": 200,
+      "startedAt": 1770088088716,
+      "endedAt": 1770088088732
+    },
+    {
+      "ok": true,
+      "label": "[admin/rankings week]",
+      "status": 200,
+      "startedAt": 1770088088732,
+      "endedAt": 1770088088743
+    },
+    {
+      "ok": true,
+      "label": "[admin/users]",
+      "status": 200,
+      "startedAt": 1770088088743,
+      "endedAt": 1770088088756
+    },
+    {
+      "ok": true,
+      "label": "[admin/orders]",
+      "status": 200,
+      "startedAt": 1770088088756,
+      "endedAt": 1770088088770
+    },
+    {
+      "ok": true,
+      "label": "[admin/promotions]",
+      "status": 200,
+      "startedAt": 1770088088770,
+      "endedAt": 1770088088780
+    },
+    {
+      "ok": true,
+      "label": "[admin/promotions defaults]",
+      "status": 200,
+      "startedAt": 1770088088780,
+      "endedAt": 1770088088791
+    },
+    {
+      "ok": true,
+      "label": "[admin/tracking]",
+      "status": 200,
+      "startedAt": 1770088088792,
+      "endedAt": 1770088088801
+    },
+    {
+      "ok": true,
+      "label": "[admin/tracking update]",
+      "status": 201,
+      "startedAt": 1770088088801,
+      "endedAt": 1770088088815
+    },
+    {
+      "ok": true,
+      "label": "[admin/tracking rollback]",
+      "status": 201,
+      "startedAt": 1770088088815,
+      "endedAt": 1770088088822
+    },
+    {
+      "ok": true,
+      "label": "[admin/billing topups]",
+      "status": 200,
+      "startedAt": 1770088088822,
+      "endedAt": 1770088088833
+    },
+    {
+      "ok": true,
+      "label": "[admin/billing topups update]",
+      "status": 200,
+      "startedAt": 1770088088833,
+      "endedAt": 1770088088840
+    },
+    {
+      "ok": true,
+      "label": "[admin/billing topups rollback]",
+      "status": 200,
+      "startedAt": 1770088088841,
+      "endedAt": 1770088088846
+    },
+    {
+      "ok": true,
+      "label": "[admin/billing plans]",
+      "status": 200,
+      "startedAt": 1770088088846,
+      "endedAt": 1770088088853
+    },
+    {
+      "ok": true,
+      "label": "[admin/billing plans update]",
+      "status": 200,
+      "startedAt": 1770088088853,
+      "endedAt": 1770088088860
+    },
+    {
+      "ok": true,
+      "label": "[admin/billing plans rollback]",
+      "status": 200,
+      "startedAt": 1770088088860,
+      "endedAt": 1770088088867
+    },
+    {
+      "ok": true,
+      "label": "[admin/promotions create]",
+      "status": 500,
+      "startedAt": 1770088088868,
+      "endedAt": 1770088088883
+    },
+    {
+      "ok": true,
+      "label": "[admin/promotions delete]",
+      "status": 404,
+      "startedAt": 1770088088883,
+      "endedAt": 1770088088891
+    },
+    {
+      "ok": true,
+      "label": "[admin/series]",
+      "status": 200,
+      "startedAt": 1770088088891,
+      "endedAt": 1770088088899
+    },
+    {
+      "ok": true,
+      "label": "[admin/notifications]",
+      "status": 200,
+      "startedAt": 1770088088899,
+      "endedAt": 1770088088907
+    },
+    {
+      "ok": true,
+      "label": "[admin/comments]",
+      "status": 200,
+      "startedAt": 1770088088907,
+      "endedAt": 1770088088915
+    }
+  ]
+}

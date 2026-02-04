@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
@@ -15,8 +16,22 @@ const EntitlementContext = createContext(null);
 
 export function EntitlementProvider({ children }) {
   const [bySeriesId, setBySeriesId] = useState({});
+  const inflightRef = useRef(new Map());
   const { setWallet } = useWalletStore();
   const { report } = useRewardsStore();
+
+  const withInflight = useCallback(async (key, handler) => {
+    if (inflightRef.current.has(key)) {
+      return inflightRef.current.get(key);
+    }
+    const requestPromise = handler();
+    inflightRef.current.set(key, requestPromise);
+    try {
+      return await requestPromise;
+    } finally {
+      inflightRef.current.delete(key);
+    }
+  }, []);
 
   const loadEntitlement = useCallback(async (seriesId) => {
     const response = await apiGet(`/api/entitlements?seriesId=${seriesId}`);
@@ -31,55 +46,82 @@ export function EntitlementProvider({ children }) {
   }, []);
 
   const unlockEpisode = useCallback(
-    async (seriesId, episodeId, idempotencyKey) => {
-      const response = await apiPost("/api/entitlements", {
-        seriesId,
-        episodeId,
-        method: "WALLET",
-        idempotencyKey,
-      });
-      if (!response.ok) {
+    async (seriesId, episodeId, idempotencyKey) =>
+      withInflight(`unlock:${seriesId}:${episodeId}`, async () => {
+        const response = await apiPost("/api/entitlements", {
+          seriesId,
+          episodeId,
+          method: "WALLET",
+          idempotencyKey,
+        });
+        if (!response.ok) {
+          return response;
+        }
+        const entitlement = response.data?.entitlement;
+        if (entitlement?.seriesId) {
+          setBySeriesId((prev) => ({ ...prev, [entitlement.seriesId]: entitlement }));
+        }
+        if (response.data?.wallet) {
+          setWallet(response.data.wallet);
+        }
+        report("UNLOCK_EPISODE");
         return response;
-      }
-      const entitlement = response.data?.entitlement;
-      if (entitlement?.seriesId) {
-        setBySeriesId((prev) => ({ ...prev, [entitlement.seriesId]: entitlement }));
-      }
-      if (response.data?.wallet) {
-        setWallet(response.data.wallet);
-      }
-      report("UNLOCK_EPISODE");
-      return response;
-    },
-    [report, setWallet]
+      }),
+    [report, setWallet, withInflight]
+  );
+
+  const unlockPack = useCallback(
+    async (seriesId, episodeIds, offerId) =>
+      withInflight(`pack:${seriesId}:${offerId}`, async () => {
+        const response = await apiPost("/api/entitlements", {
+          seriesId,
+          episodeIds,
+          offerId,
+          method: "PACK",
+        });
+        if (!response.ok) {
+          return response;
+        }
+        const entitlement = response.data?.entitlement;
+        if (entitlement?.seriesId) {
+          setBySeriesId((prev) => ({ ...prev, [entitlement.seriesId]: entitlement }));
+        }
+        if (response.data?.wallet) {
+          setWallet(response.data.wallet);
+        }
+        report("UNLOCK_EPISODE");
+        return response;
+      }),
+    [report, setWallet, withInflight]
   );
 
   const claimTTF = useCallback(
-    async (seriesId, episodeId) => {
-      const response = await apiPost("/api/entitlements", {
-        seriesId,
-        episodeId,
-        method: "TTF",
-      });
-      if (!response.ok) {
+    async (seriesId, episodeId) =>
+      withInflight(`ttf:${seriesId}:${episodeId}`, async () => {
+        const response = await apiPost("/api/entitlements", {
+          seriesId,
+          episodeId,
+          method: "TTF",
+        });
+        if (!response.ok) {
+          return response;
+        }
+        const entitlement = response.data?.entitlement;
+        if (entitlement?.seriesId) {
+          setBySeriesId((prev) => ({ ...prev, [entitlement.seriesId]: entitlement }));
+        }
+        if (response.data?.wallet) {
+          setWallet(response.data.wallet);
+        }
+        report("UNLOCK_EPISODE");
         return response;
-      }
-      const entitlement = response.data?.entitlement;
-      if (entitlement?.seriesId) {
-        setBySeriesId((prev) => ({ ...prev, [entitlement.seriesId]: entitlement }));
-      }
-      if (response.data?.wallet) {
-        setWallet(response.data.wallet);
-      }
-      report("UNLOCK_EPISODE");
-      return response;
-    },
-    [report, setWallet]
+      }),
+    [report, setWallet, withInflight]
   );
 
   const value = useMemo(
-    () => ({ bySeriesId, loadEntitlement, unlockEpisode, claimTTF }),
-    [bySeriesId, loadEntitlement, unlockEpisode, claimTTF]
+    () => ({ bySeriesId, loadEntitlement, unlockEpisode, unlockPack, claimTTF }),
+    [bySeriesId, loadEntitlement, unlockEpisode, unlockPack, claimTTF]
   );
 
   return (
