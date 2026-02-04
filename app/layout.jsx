@@ -1,6 +1,7 @@
 import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
 import { PerformanceMonitor } from "../lib/performance";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata = {
   title: {
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
         <PerformanceMonitor>
           <AppProviders>{children}</AppProviders>
         </PerformanceMonitor>
+        <SpeedInsights />
       </body>
     </html>
   );
