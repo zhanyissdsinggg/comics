@@ -28,6 +28,7 @@ import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { formatUSNumber } from "../../lib/localization";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAuthStore } from "../../store/useAuthStore";
+import { getRecommendations } from "../../lib/recommendation/engine";
 
 const baseHeroItems = [
   {
@@ -239,6 +240,33 @@ export default function HomePage() {
     return (base || []).slice(0, 8);
   }, [reco.trendingRail, seriesList]);
 
+  // 老王注释：计算个性化推荐
+  const recommendedRail = useMemo(() => {
+    if (!isSignedIn || seriesList.length === 0) {
+      return [];
+    }
+
+    const historySeriesIds = historyItems.map((item) => item.seriesId);
+    const progressSeriesIds = Object.keys(progressMap);
+
+    const recommendations = getRecommendations({
+      allSeries: seriesList,
+      historySeriesIds,
+      followedSeriesIds,
+      progressSeriesIds,
+      limit: 10,
+      strategy: "content", // 使用基于内容的推荐
+    });
+
+    return recommendations.map((series) => ({
+      id: series.id,
+      title: series.title,
+      subtitle: series.badge || series.status,
+      coverTone: series.coverTone,
+      isAdult: Boolean(series.adult),
+    }));
+  }, [seriesList, historyItems, followedSeriesIds, progressMap, isSignedIn]);
+
   const activeRails = useMemo(() => {
     const rails = [];
     if (isNewUser && starterItems.length > 0) {
@@ -246,6 +274,14 @@ export default function HomePage() {
         id: "starter",
         title: "Start Here",
         items: starterItems,
+      });
+    }
+    // 老王注释：为你推荐板块（仅登录用户）
+    if (isSignedIn && recommendedRail.length > 0) {
+      rails.push({
+        id: "recommended",
+        title: "为你推荐",
+        items: recommendedRail,
       });
     }
     if (reco.continueRail.length > 0) {
@@ -277,7 +313,7 @@ export default function HomePage() {
       rails.push({ id: "adult", title: "Adult Picks", items: reco.adultRail, tone: "noir" });
     }
     return rails;
-  }, [reco, isAdultMode, historyRail, isNewUser, starterItems]);
+  }, [reco, isAdultMode, historyRail, isNewUser, starterItems, isSignedIn, recommendedRail]);
 
   const chipRail = useMemo(() => {
     const map = {
