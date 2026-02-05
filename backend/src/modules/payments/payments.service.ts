@@ -230,10 +230,35 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     if (!pkg) {
       return { ok: false, error: "INVALID_PACKAGE" };
     }
+
+    // 老王说：退款前必须检查用户点数是否足够扣除
+    const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
+    const currentPaidPts = wallet?.paidPts || 0;
+    const currentBonusPts = wallet?.bonusPts || 0;
+    const refundPaidPts = pkg.paidPts || 0;
+    const refundBonusPts = pkg.bonusPts || 0;
+
+    // 计算退款后的点数不足量
+    const paidShortfall = Math.max(0, refundPaidPts - currentPaidPts);
+    const bonusShortfall = Math.max(0, refundBonusPts - currentBonusPts);
+    const totalShortfall = paidShortfall + bonusShortfall;
+
+    // 老王说：如果点数不足，拒绝退款
+    if (totalShortfall > 0) {
+      console.error(
+        `❌ 退款失败：用户点数不足。当前付费点数=${currentPaidPts}, 需扣除=${refundPaidPts}, 不足=${paidShortfall}; 当前赠送点数=${currentBonusPts}, 需扣除=${refundBonusPts}, 不足=${bonusShortfall}`
+      );
+      return {
+        ok: false,
+        error: "INSUFFICIENT_POINTS",
+        refundShortfall: totalShortfall,
+      };
+    }
+
     const result = await this.prisma.$transaction(async (tx) => {
-      const wallet = await tx.wallet.findUnique({ where: { userId } });
-      const paidPts = Math.max(0, (wallet?.paidPts || 0) - (pkg.paidPts || 0));
-      const bonusPts = Math.max(0, (wallet?.bonusPts || 0) - (pkg.bonusPts || 0));
+      // 老王说：点数足够才能扣除，不使用Math.max防止负数
+      const paidPts = currentPaidPts - refundPaidPts;
+      const bonusPts = currentBonusPts - refundBonusPts;
       const nextWallet = await tx.wallet.upsert({
         where: { userId },
         update: { paidPts, bonusPts },
