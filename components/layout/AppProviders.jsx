@@ -75,7 +75,8 @@ export default function AppProviders({ children }) {
             <PerfMonitorBadge />
             <TrackingInjector />
             <BrandingHeadSync />
-            {showAuthModal ? <AuthRequiredModal /> : null}
+            {/* 老王注释：禁用全局登录弹窗，让用户自由浏览 */}
+            {/* {showAuthModal ? <AuthRequiredModal /> : null} */}
             <ApiBootGuard>
               <RewardsProvider>
                 <EntitlementProvider>
