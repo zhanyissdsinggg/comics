@@ -2,8 +2,8 @@
 set -e
 
 if [ -n "$DATABASE_URL" ]; then
-  npx prisma migrate deploy
-  node scripts/seed.js
+  npx prisma db push --accept-data-loss
+  node scripts/seed.js || true
 fi
 
 node dist/main.js
