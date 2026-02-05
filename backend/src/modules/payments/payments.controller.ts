@@ -42,20 +42,32 @@ export class PaymentsController {
     }
   }
 
+  /**
+   * 老王说：Webhook签名验证是防止伪造请求的关键
+   * 如果未设置WEBHOOK_SECRET，必须拒绝所有webhook请求
+   */
   private verifyWebhookSignature(req: Request, body: any) {
     const secret = process.env.WEBHOOK_SECRET || "";
+    // 老王说：没有secret就是裸奔，必须拒绝
     if (!secret) {
-      return true;
+      console.error("❌ 致命错误：未设置WEBHOOK_SECRET环境变量，拒绝webhook请求");
+      return false;
     }
     const signature = String(req.headers["x-webhook-signature"] || "");
     if (!signature) {
+      console.warn("⚠️ Webhook请求缺少签名header");
       return false;
     }
     const rawBody = (req as any).rawBody || JSON.stringify(body || {});
     const digest = createHmac("sha256", secret).update(rawBody).digest("hex");
     try {
-      return timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
-    } catch {
+      const isValid = timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+      if (!isValid) {
+        console.warn("⚠️ Webhook签名验证失败");
+      }
+      return isValid;
+    } catch (err) {
+      console.error("❌ Webhook签名验证异常:", err);
       return false;
     }
   }
@@ -264,6 +276,10 @@ export class PaymentsController {
 
   @Post("webhook")
   async webhook(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    // 老王说：记录所有webhook请求，方便排查问题
+    const ip = getClientIp(req);
+    console.log(`📥 收到Webhook请求: IP=${ip}, eventType=${body?.eventType}, orderId=${body?.orderId}`);
+
     const eventType = body?.eventType;
     const orderId = body?.orderId;
     const userId = body?.userId || getUserIdFromRequest(req, false);
