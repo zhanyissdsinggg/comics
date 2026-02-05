@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
+import ReadingStats from "../../components/account/ReadingStats";
 import { LANGUAGE_OPTIONS, REGION_KEYS, getRegionConfig } from "../../lib/region/config";
 import { setCookie } from "../../lib/cookies";
 import { applyPreferencesToStorage } from "../../lib/preferencesClient";
@@ -190,6 +191,9 @@ export default function AccountPage() {
             {message}
           </div>
         ) : null}
+
+        {/* 老王注释：阅读统计组件 */}
+        {isSignedIn && <ReadingStats />}
 
         <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
           <h2 className="text-lg font-semibold">Profile</h2>
