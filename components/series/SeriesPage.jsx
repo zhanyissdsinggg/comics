@@ -8,6 +8,7 @@ import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
 import AdultLoginModal from "./AdultLoginModal";
 import AdultAgeModal from "./AdultAgeModal";
 import ActionModal from "./ActionModal";
+import TipModal from "./TipModal";
 import CommentsSection from "./CommentsSection";
 import SiteHeader from "../layout/SiteHeader";
 import Skeleton from "../common/Skeleton";
@@ -86,6 +87,7 @@ export default function SeriesPage({ seriesId }) {
   const [adultState, setAdultState] = useState(readAdultState());
   const [infoModal, setInfoModal] = useState(null);
   const [authError, setAuthError] = useState("");
+  const [showTipModal, setShowTipModal] = useState(false);
   const gateReportedRef = useRef(false);
 
   const walletStore = useWalletStore();
@@ -330,6 +332,12 @@ export default function SeriesPage({ seriesId }) {
     });
   };
 
+  // 老王注释：打开打赏弹窗
+  const handleTip = () => {
+    track("click_tip", { seriesId });
+    setShowTipModal(true);
+  };
+
   const handleRatingUpdate = (nextRating, nextCount) => {
     setData((prev) => {
       if (!prev?.series) {
@@ -435,6 +443,7 @@ export default function SeriesPage({ seriesId }) {
           onAddToLibrary={handleAddToLibrary}
           onSubscribe={handleSubscribeSeries}
           onStore={handleStore}
+          onTip={handleTip}
         />
 
         <div className="lg:grid lg:grid-cols-12 gap-4">
@@ -487,6 +496,14 @@ export default function SeriesPage({ seriesId }) {
         title={infoModal?.title}
         description={infoModal?.description}
         onClose={() => setInfoModal(null)}
+      />
+      {/* 老王注释：打赏弹窗 */}
+      <TipModal
+        open={showTipModal}
+        seriesId={seriesId}
+        seriesTitle={series.title}
+        authorName={series.author}
+        onClose={() => setShowTipModal(false)}
       />
     </main>
   );

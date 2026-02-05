@@ -19,6 +19,7 @@ export default function SeriesHeader({
   onShare,
   onSubscribe,
   onStore,
+  onTip,
 }) {
   const genres = series.genres || [];
   const badges = series.badges || [];
@@ -107,6 +108,17 @@ export default function SeriesHeader({
             description={series.description || ""}
             className="w-full"
           />
+          {/* 老王注释：打赏按钮 */}
+          {onTip ? (
+            <button
+              type="button"
+              onClick={onTip}
+              className="w-full min-h-[44px] rounded-full border border-orange-500/20 bg-orange-500/10 px-6 py-3 text-sm font-semibold text-orange-400 transition-all hover:border-orange-500/40 hover:bg-orange-500/20 active:scale-95"
+              style={{ willChange: "transform" }}
+            >
+              💝 打赏作者
+            </button>
+          ) : null}
           {progress?.lastEpisodeId ? (
             <div className="mt-2 rounded-2xl border border-neutral-800 bg-neutral-900/40 p-3 text-xs text-neutral-300">
               <div>
