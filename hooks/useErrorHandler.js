@@ -69,14 +69,15 @@ export function useErrorHandler(options = {}) {
         });
       }
 
-      // 401错误自动触发登录弹窗
-      if (response?.status === 401) {
-        if (onAuthRequired) {
-          onAuthRequired();
-        } else if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("auth:open"));
-        }
-      }
+      // 老王注释：401错误不再自动触发登录弹窗，让用户自由浏览
+      // 只有在用户主动操作需要登录时才提示
+      // if (response?.status === 401) {
+      //   if (onAuthRequired) {
+      //     onAuthRequired();
+      //   } else if (typeof window !== "undefined") {
+      //     window.dispatchEvent(new CustomEvent("auth:open"));
+      //   }
+      // }
 
       return errorMessage;
     },
