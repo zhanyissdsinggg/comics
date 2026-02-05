@@ -351,14 +351,15 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="space-y-6 md:space-y-10">
-            {loginNotice ? (
+            {/* 老王注释：移除登录提示，让用户自由浏览 */}
+            {/* {loginNotice ? (
               <LoginNotice
                 onSignIn={() => {
                   const returnTo = `${window.location.pathname}${window.location.search || ""}`;
                   window.dispatchEvent(new CustomEvent("auth:open", { detail: { returnTo } }));
                 }}
               />
-            ) : null}
+            ) : null} */}
             {showStale ? <StaleDataNotice /> : null}
             {isNewUser ? (
               <NewUserWelcome
