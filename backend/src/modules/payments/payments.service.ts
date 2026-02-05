@@ -101,11 +101,25 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async create(userId: string, packageId: string, provider?: string) {
+  /**
+   * 老王说：创建订单时必须验证金额，防止前端篡改价格
+   * @param userId 用户ID
+   * @param packageId 套餐ID
+   * @param expectedAmount 前端传入的预期金额，必须与数据库价格一致
+   * @param provider 支付提供商
+   */
+  async create(userId: string, packageId: string, expectedAmount: number, provider?: string) {
     const pkg = await getTopupPackage(this.prisma, packageId);
     if (!pkg) {
       return null;
     }
+
+    // 老王说：金额验证是第一道防线，前端传的金额必须和数据库一致
+    if (expectedAmount !== pkg.price) {
+      console.error(`❌ 金额验证失败: 预期${expectedAmount}, 实际${pkg.price}, 套餐${packageId}`);
+      return null;
+    }
+
     const order = await this.prisma.order.create({
       data: {
         userId,
@@ -165,6 +179,15 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     if (!pkg) {
       return { ok: false, error: "INVALID_PACKAGE" };
     }
+
+    // 老王说：确认支付时再次验证金额，防止订单创建后套餐价格被修改
+    if (order.amount !== pkg.price) {
+      console.error(
+        `❌ 确认支付时金额验证失败: 订单金额${order.amount}, 当前套餐价格${pkg.price}, 订单${order.id}`
+      );
+      return { ok: false, error: "AMOUNT_MISMATCH" };
+    }
+
     const result = await this.prisma.$transaction(async (tx) => {
       const wallet = await tx.wallet.upsert({
         where: { userId },

@@ -89,7 +89,20 @@ export class PaymentsController {
     }
     const packageId = body?.packageId;
     const provider = body?.provider || "stripe";
-    const created = await this.paymentsService.create(userId, packageId, provider);
+    // 老王说：前端必须传入expectedAmount，用于金额验证
+    const expectedAmount = body?.expectedAmount;
+    if (typeof expectedAmount !== "number" || expectedAmount <= 0) {
+      res.status(400);
+      const body = buildError(ERROR_CODES.INVALID_REQUEST, { reason: "MISSING_EXPECTED_AMOUNT" });
+      if (idempotencyKey) {
+        await setIdempotencyRecord(this.prisma, userId, String(idempotencyKey), {
+          status: 400,
+          body,
+        });
+      }
+      return body;
+    }
+    const created = await this.paymentsService.create(userId, packageId, expectedAmount, provider);
     if (!created) {
       res.status(400);
       const body = buildError(ERROR_CODES.INVALID_REQUEST);
