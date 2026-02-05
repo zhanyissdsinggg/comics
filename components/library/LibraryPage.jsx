@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import SiteHeader from "../layout/SiteHeader";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
+import CollectionManager from "./CollectionManager";
 import { track } from "../../lib/analytics";
 import { useProgressStore } from "../../store/useProgressStore";
 import { apiGet } from "../../lib/apiClient";
@@ -59,6 +60,7 @@ export default function LibraryPage() {
   const [makeupModal, setMakeupModal] = useState(null);
   const [seriesList, setSeriesList] = useState([]);
   const [seriesResponse, setSeriesResponse] = useState(null);
+  const [showCollectionManager, setShowCollectionManager] = useState(false);
   const showStale = useStaleNotice(seriesResponse);
   const { shouldRetry } = useRetryPolicy();
   const progressEntries = Object.entries(bySeriesId);
@@ -211,6 +213,23 @@ export default function LibraryPage() {
           onClaim={handleClaim}
           workingId={workingId}
         />
+
+        {/* 老王注释：收藏夹管理按钮 */}
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowCollectionManager(!showCollectionManager)}
+            className="rounded-full border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:border-neutral-700 hover:bg-neutral-800"
+          >
+            {showCollectionManager ? "关闭收藏夹管理" : "管理收藏夹"}
+          </button>
+        </div>
+
+        {/* 老王注释：收藏夹管理面板 */}
+        {showCollectionManager && (
+          <div className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6">
+            <CollectionManager onClose={() => setShowCollectionManager(false)} />
+          </div>
+        )}
 
         <Rail
           title="Continue Reading"
