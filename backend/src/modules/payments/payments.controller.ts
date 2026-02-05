@@ -387,8 +387,33 @@ export class PaymentsController {
       }
       const pkg = await getTopupPackage(this.prisma, order.packageId);
       const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
-      const paidPts = Math.max(0, (wallet?.paidPts || 0) - (pkg?.paidPts || 0));
-      const bonusPts = Math.max(0, (wallet?.bonusPts || 0) - (pkg?.bonusPts || 0));
+
+      // 老王说：拒付处理必须检查点数是否足够扣除，和退款逻辑一样
+      const currentPaidPts = wallet?.paidPts || 0;
+      const currentBonusPts = wallet?.bonusPts || 0;
+      const chargebackPaidPts = pkg?.paidPts || 0;
+      const chargebackBonusPts = pkg?.bonusPts || 0;
+
+      // 计算拒付后的点数不足量
+      const paidShortfall = Math.max(0, chargebackPaidPts - currentPaidPts);
+      const bonusShortfall = Math.max(0, chargebackBonusPts - currentBonusPts);
+      const totalShortfall = paidShortfall + bonusShortfall;
+
+      // 老王说：如果点数不足，拒绝拒付处理
+      if (totalShortfall > 0) {
+        console.error(
+          `❌ 拒付处理失败：用户点数不足。当前付费点数=${currentPaidPts}, 需扣除=${chargebackPaidPts}, 不足=${paidShortfall}; 当前赠送点数=${currentBonusPts}, 需扣除=${chargebackBonusPts}, 不足=${bonusShortfall}`
+        );
+        res.status(400);
+        return buildError(ERROR_CODES.INSUFFICIENT_POINTS, {
+          chargebackShortfall: totalShortfall,
+        });
+      }
+
+      // 老王说：点数足够才能扣除，不使用Math.max防止负数
+      const paidPts = currentPaidPts - chargebackPaidPts;
+      const bonusPts = currentBonusPts - chargebackBonusPts;
+
       const next = await this.prisma.$transaction(async (tx) => {
         const nextWallet = await tx.wallet.upsert({
           where: { userId },
@@ -401,7 +426,12 @@ export class PaymentsController {
         });
         return { nextWallet, nextOrder };
       });
-      const responseBody = { ok: true, order: next.nextOrder, wallet: next.nextWallet };
+      const responseBody = {
+        ok: true,
+        order: next.nextOrder,
+        wallet: next.nextWallet,
+        chargebackShortfall: 0,
+      };
       await this.logAudit(
         "payment_webhook_chargeback",
         { userId, targetType: "order", targetId: orderId },
