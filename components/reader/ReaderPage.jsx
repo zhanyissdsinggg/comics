@@ -1005,6 +1005,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
         decision={offerDecision}
         pricing={nextPricing}
         packPricing={packPricing}
+        seriesTitle={seriesData?.series?.title}
+        episodeTitle={episodeData?.episode?.title}
         onNext={() => router.push(`/read/${seriesId}/${nextEpisode?.id}`)}
         onUnlock={handleUnlockNext}
         onSubscribe={() => {

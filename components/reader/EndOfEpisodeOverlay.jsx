@@ -2,6 +2,7 @@
 
 import useCountdown from "../../hooks/useCountdown";
 import { OFFERS } from "../../lib/offers/catalog";
+import ShareButton from "../common/ShareButton";
 
 export default function EndOfEpisodeOverlay({
   open,
@@ -17,6 +18,8 @@ export default function EndOfEpisodeOverlay({
   onNotify,
   onOfferClick,
   onPackOffer,
+  seriesTitle,
+  episodeTitle,
 }) {
   const readyAtMs = nextEpisode?.ttfReadyAt
     ? Date.parse(nextEpisode.ttfReadyAt)
@@ -81,15 +84,24 @@ export default function EndOfEpisodeOverlay({
             <p className="text-sm text-neutral-400">Next Episode</p>
             <p className="text-lg font-semibold">{nextEpisode.title}</p>
           </div>
-          {nextUnlocked ? (
-            <button
-              type="button"
-              onClick={onNext}
-              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
-            >
-              Next
-            </button>
-          ) : null}
+          <div className="flex items-center gap-2">
+            {/* 老王注释：分享按钮 */}
+            <ShareButton
+              url={typeof window !== "undefined" ? window.location.href : ""}
+              title={`${seriesTitle || "Series"} - ${episodeTitle || "Episode"}`}
+              description={`I just finished reading this episode! Check it out.`}
+              className=""
+            />
+            {nextUnlocked ? (
+              <button
+                type="button"
+                onClick={onNext}
+                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
+              >
+                Next
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {!nextUnlocked ? (

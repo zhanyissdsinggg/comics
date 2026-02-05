@@ -330,15 +330,6 @@ export default function SeriesPage({ seriesId }) {
     });
   };
 
-  const handleShare = () => {
-    setInfoModal({
-      type: "INFO",
-      title: "Share",
-      description: "Share will be available in P0-2.",
-    });
-    report("SHARE_SERIES");
-  };
-
   const handleRatingUpdate = (nextRating, nextCount) => {
     setData((prev) => {
       if (!prev?.series) {
@@ -442,7 +433,6 @@ export default function SeriesPage({ seriesId }) {
           onFollowToggle={handleFollowToggle}
           isFollowing={isFollowing}
           onAddToLibrary={handleAddToLibrary}
-          onShare={handleShare}
           onSubscribe={handleSubscribeSeries}
           onStore={handleStore}
         />
