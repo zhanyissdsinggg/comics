@@ -82,6 +82,11 @@ export default function AdminPage() {
 
   const handleCreate = async () => {
     if (!form.id) {
+      alert("请填写作品 ID！");
+      return;
+    }
+    if (!form.title) {
+      alert("请填写作品标题！");
       return;
     }
     const response = await apiPost("/api/admin/series", {
@@ -99,6 +104,9 @@ export default function AdminPage() {
     if (response.ok) {
       setForm({ id: "", title: "", type: "comic", adult: false });
       loadSeries();
+      alert("作品创建成功！");
+    } else {
+      alert(`创建失败：${response.error || "未知错误"}`);
     }
   };
 
