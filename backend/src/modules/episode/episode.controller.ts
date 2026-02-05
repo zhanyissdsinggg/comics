@@ -35,12 +35,39 @@ export class EpisodeController {
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
       }
     }
+
+    // 老王注释：检查用户是否已解锁该章节（付费验证）
+    const userId = getUserIdFromRequest(req, false);
+    let hasAccess = false;
+
+    if (userId) {
+      // 检查用户是否已解锁该章节
+      const entitlement = await this.prisma.entitlement.findUnique({
+        where: {
+          userId_episodeId: {
+            userId,
+            episodeId,
+          },
+        },
+      });
+      hasAccess = !!entitlement;
+    }
+
+    // 获取章节数据
     const payload = await this.episodeService.getEpisode(seriesId, episodeId);
     if (!payload) {
       res.status(404);
       return buildError(ERROR_CODES.NOT_FOUND);
     }
-    const userId = getUserIdFromRequest(req, false);
+
+    // 老王注释：如果用户没有解锁，只返回预览内容（前3页）
+    if (!hasAccess && payload.episode?.pages) {
+      const previewCount = 3; // 预览页数
+      payload.episode.pages = payload.episode.pages.slice(0, previewCount);
+      payload.episode.isPreview = true;
+      payload.episode.previewCount = previewCount;
+    }
+
     await this.statsService.recordSeriesView(userId, seriesId);
     if (series?.type === "comic") {
       await this.statsService.recordComicView(userId);
