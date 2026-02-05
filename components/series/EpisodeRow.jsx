@@ -357,6 +357,21 @@ function EpisodeRow({
 
   return (
     <li className="series-episode">
+      {/* 老王注释：章节缩略图 */}
+      <div className="episode-thumbnail">
+        {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
+          <img
+            src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
+            alt={`Episode ${episode?.number} thumbnail`}
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-neutral-600">
+            <span className="text-2xl font-bold">Ep {episode?.number}</span>
+          </div>
+        )}
+      </div>
       <div className="episode-info">
         <div className="episode-title">
           <strong>

@@ -189,3 +189,49 @@ main {
 .blink {
   animation: blink 1s ease-in-out infinite;
 }
+
+/* 老王注释：章节列表样式 */
+.series-episode {
+  @apply flex gap-4 rounded-2xl border border-neutral-800 bg-neutral-900/40 p-4 transition-all hover:border-neutral-700 hover:bg-neutral-900/60;
+}
+
+/* 老王注释：章节缩略图容器 */
+.episode-thumbnail {
+  @apply h-24 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-neutral-800;
+}
+
+/* 老王注释：章节信息区域 */
+.episode-info {
+  @apply flex flex-1 flex-col gap-2;
+}
+
+/* 老王注释：章节标题 */
+.episode-title {
+  @apply flex flex-wrap items-center gap-2 text-base font-semibold text-white;
+}
+
+/* 老王注释：章节副标题 */
+.episode-subtitle {
+  @apply flex flex-wrap gap-3 text-xs text-neutral-400;
+}
+
+/* 老王注释：章节操作按钮区域 */
+.episode-cta {
+  @apply flex flex-col items-end justify-center gap-2;
+}
+
+/* 老王注释：响应式布局 - 移动端 */
+@media (max-width: 640px) {
+  .series-episode {
+    @apply flex-col;
+  }
+
+  .episode-thumbnail {
+    @apply h-32 w-full;
+  }
+
+  .episode-cta {
+    @apply flex-row items-center justify-between;
+  }
+}
+
