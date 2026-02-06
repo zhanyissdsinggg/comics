@@ -79,8 +79,8 @@ const BottomTabNav = memo(function BottomTabNav() {
   ];
 
   return (
-    {/* 老王注释：玻璃态底部导航 - 半透明背景 + 强模糊 + 微妙边框 + 阴影 */}
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-neutral-950/80 backdrop-blur-xl shadow-glass md:hidden">
+      {/* 老王注释：玻璃态底部导航 - 半透明背景 + 强模糊 + 微妙边框 + 阴影 */}
       <div className="flex items-center justify-around">
         {tabs.map((tab) => (
           <button
