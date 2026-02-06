@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import { Bell, Home, Library, User, Receipt } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -132,10 +133,13 @@ export default function SiteHeader({ onSearch }) {
               className="flex items-center gap-2 text-lg font-bold tracking-wide text-white"
             >
               {branding?.siteLogoUrl ? (
-                <img
+                <Image
                   src={branding.siteLogoUrl}
                   alt="Site logo"
+                  width={120}
+                  height={28}
                   className="h-7 w-auto"
+                  priority
                 />
               ) : (
                 "MN"

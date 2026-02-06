@@ -21,12 +21,22 @@ const nextConfig = {
         protocol: "http",
         hostname: "localhost",
       },
+      {
+        protocol: "https",
+        hostname: "**.railway.app", // 老王注释：支持Railway部署的后端图片
+      },
+      {
+        protocol: "https",
+        hostname: "**.vercel.app", // 老王注释：支持Vercel部署的图片
+      },
     ],
     // 支持现代图片格式
     formats: ['image/avif', 'image/webp'],
     // 优化设备尺寸
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // 老王注释：允许未优化的图片（用于外部CDN）
+    unoptimized: false,
   },
 
   // 编译优化

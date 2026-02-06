@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Pill from "../common/Pill";
 import ActionModal from "./ActionModal";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -357,13 +358,15 @@ function EpisodeRow({
 
   return (
     <li className="series-episode">
-      {/* 老王注释：章节缩略图 */}
-      <div className="episode-thumbnail">
+      {/* 老王注释：章节缩略图 - 使用Next.js Image优化加载 */}
+      <div className="episode-thumbnail relative">
         {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
-          <img
+          <Image
             src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
             alt={`Episode ${episode?.number} thumbnail`}
-            className="h-full w-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100px, 120px"
             loading="lazy"
           />
         ) : (
