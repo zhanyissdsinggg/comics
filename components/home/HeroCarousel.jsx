@@ -96,7 +96,7 @@ export default function HeroCarousel({ items }) {
         clearTimeout(autoPlayTimeoutRef.current);
       }
     };
-  }, [index, isPaused, safeItems.length, AUTO_PLAY_INTERVAL]);
+  }, [index, isPaused, safeItems.length]); // 老王注释：移除AUTO_PLAY_INTERVAL，它是常量不需要在依赖数组中
 
   // 老王注释：early return必须在所有Hooks之后
   if (safeItems.length === 0) {
