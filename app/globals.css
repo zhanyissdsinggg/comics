@@ -13,12 +13,20 @@ body {
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 老王注释：移动端优化 - 禁用双击缩放，提升触摸体验 */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* 老王注释：移动端底部Tab导航预留空间，避免内容被遮挡 */
 @media (max-width: 767px) {
   body {
     padding-bottom: 60px;
+  }
+
+  /* 老王注释：移动端字体稍大，提升可读性 */
+  html {
+    font-size: 16px;
   }
 }
 
@@ -68,17 +76,32 @@ textarea {
   scrollbar-width: none;
 }
 
+/* 老王注释：骨架屏基础样式 - 深色背景 + 圆角 */
 .skeleton {
   @apply relative overflow-hidden rounded bg-neutral-800/60;
 }
 
+/* 老王注释：shimmer闪烁动画 - 使用品牌色渐变 + 更宽的光带 */
 .skeleton::after {
   content: "";
-  @apply absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-neutral-700/60 to-transparent;
-  animation: shimmer 1.6s infinite;
+  @apply absolute inset-0 -translate-x-full;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(16, 185, 129, 0.1) 25%,
+    rgba(6, 182, 212, 0.15) 50%,
+    rgba(16, 185, 129, 0.1) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
 }
 
+/* 老王注释：shimmer动画关键帧 - 从左到右扫过 */
 @keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
   100% {
     transform: translateX(100%);
   }

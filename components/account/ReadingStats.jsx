@@ -59,15 +59,15 @@ const ReadingStats = React.memo(() => {
   }, [historyItems, progressData, followedSeriesIds]);
 
   return (
-    <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
-      <h2 className="text-lg font-semibold">阅读统计</h2>
+    <section className="rounded-3xl border border-white/10 bg-neutral-900/50 p-6 space-y-4 backdrop-blur-sm">
+      <h2 className="text-lg font-semibold bg-gradient-to-r from-white via-brand-primary to-brand-secondary bg-clip-text text-transparent">阅读统计</h2>
 
-      {/* 老王注释：统计卡片网格 */}
+      {/* 老王注释：统计卡片网格 - 添加悬停动画 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* 老王注释：总阅读时长 */}
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+        {/* 老王注释：总阅读时长 - 品牌色 + 悬停动画 */}
+        <div className="group rounded-2xl border border-neutral-800 bg-neutral-950 p-4 transition-all duration-300 hover:border-brand-primary/50 hover:shadow-glow-sm hover:-translate-y-1">
           <div className="text-xs uppercase text-neutral-500">总阅读时长</div>
-          <div className="mt-2 text-2xl font-bold text-emerald-400">
+          <div className="mt-2 text-2xl font-bold text-brand-primary">
             {stats.readingHours}
             <span className="text-sm text-neutral-400">小时</span>
             {stats.readingMinutes > 0 && (
@@ -83,10 +83,10 @@ const ReadingStats = React.memo(() => {
           </div>
         </div>
 
-        {/* 老王注释：阅读章节数 */}
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+        {/* 老王注释：阅读章节数 - 品牌色 + 悬停动画 */}
+        <div className="group rounded-2xl border border-neutral-800 bg-neutral-950 p-4 transition-all duration-300 hover:border-brand-secondary/50 hover:shadow-glow-sm hover:-translate-y-1">
           <div className="text-xs uppercase text-neutral-500">阅读章节数</div>
-          <div className="mt-2 text-2xl font-bold text-blue-400">
+          <div className="mt-2 text-2xl font-bold text-brand-secondary">
             {stats.totalEpisodesRead}
             <span className="text-sm text-neutral-400">章</span>
           </div>
@@ -95,8 +95,8 @@ const ReadingStats = React.memo(() => {
           </div>
         </div>
 
-        {/* 老王注释：正在阅读 */}
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+        {/* 老王注释：正在阅读 - 品牌色 + 悬停动画 */}
+        <div className="group rounded-2xl border border-neutral-800 bg-neutral-950 p-4 transition-all duration-300 hover:border-brand-accent/50 hover:shadow-glow-sm hover:-translate-y-1">
           <div className="text-xs uppercase text-neutral-500">正在阅读</div>
           <div className="mt-2 text-2xl font-bold text-purple-400">
             {stats.seriesInProgress}

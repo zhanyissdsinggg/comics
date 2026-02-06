@@ -113,15 +113,16 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
 
   return (
     <div ref={containerRef} className="relative w-full">
-      {/* 老王注释：搜索输入框 */}
+      {/* 老王注释：搜索输入框 - 聚焦时放大并发光 + 移动端优化 */}
       <div
-        className={`relative flex items-center gap-2 rounded-full border bg-neutral-900 px-4 py-2 transition-all md:py-2.5 ${
+        className={`relative flex items-center gap-2 rounded-full border bg-neutral-900 px-4 py-3 transition-all duration-300 md:py-2.5 touch-manipulation ${
           isFocused
-            ? "border-emerald-500/40 ring-2 ring-emerald-500/20"
-            : "border-neutral-800"
+            ? "scale-105 border-brand-primary/50 shadow-glow-md ring-2 ring-brand-primary/20"
+            : "border-neutral-800 hover:border-neutral-700"
         }`}
+        style={{ WebkitTapHighlightColor: "transparent" }}
       >
-        <Search size={16} className="text-neutral-500" />
+        <Search size={18} className={`transition-colors duration-300 md:w-4 md:h-4 ${isFocused ? "text-brand-primary" : "text-neutral-500"}`} />
         <input
           ref={inputRef}
           type="search"
@@ -138,16 +139,16 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
               handleSearch(value);
             }
           }}
-          className="flex-1 bg-transparent text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none"
+          className="flex-1 bg-transparent text-base md:text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none"
         />
         {value && (
           <button
             type="button"
             onClick={handleClear}
-            className="rounded-full p-1 text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-neutral-300"
+            className="group rounded-full p-1 text-neutral-500 transition-all duration-300 hover:bg-neutral-800 hover:text-brand-primary hover:scale-110 active:scale-95"
             aria-label="Clear search"
           >
-            <X size={14} />
+            <X size={14} className="transition-transform duration-300 group-hover:rotate-90" />
           </button>
         )}
         <kbd className="hidden rounded border border-neutral-800 bg-neutral-900/50 px-1.5 py-0.5 text-[10px] text-neutral-500 md:block">
@@ -155,9 +156,9 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
         </kbd>
       </div>
 
-      {/* 老王注释：搜索建议/历史 */}
+      {/* 老王注释：搜索建议/历史 - 玻璃态卡片 + 滑入动画 */}
       {showSuggestions && searchHistory.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 shadow-xl">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 animate-slide-up overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/95 shadow-glass backdrop-blur-xl">
           <div className="p-2">
             <div className="mb-2 flex items-center gap-2 px-3 py-1">
               <TrendingUp size={14} className="text-neutral-500" />
@@ -168,9 +169,9 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
                 key={index}
                 type="button"
                 onClick={() => handleHistoryClick(query)}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-neutral-300 transition-colors hover:bg-neutral-800"
+                className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-neutral-300 transition-all duration-300 hover:bg-neutral-800/50 hover:text-brand-primary hover:translate-x-1"
               >
-                <Search size={14} className="text-neutral-500" />
+                <Search size={14} className="text-neutral-500 transition-colors duration-300 group-hover:text-brand-primary" />
                 <span>{query}</span>
               </button>
             ))}

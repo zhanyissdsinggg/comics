@@ -24,11 +24,11 @@ export default function ReaderTopBar({
   progress,
 }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-neutral-900 bg-neutral-950/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl shadow-glass">
       {typeof progress === "number" ? (
         <div className="h-1 w-full bg-neutral-900">
           <div
-            className="h-full bg-emerald-400/70"
+            className="h-full bg-brand-gradient shadow-glow-sm transition-all duration-300"
             style={{ width: `${Math.round(progress * 100)}%` }}
           />
         </div>
@@ -37,7 +37,7 @@ export default function ReaderTopBar({
         <button
           type="button"
           onClick={onBack}
-          className="rounded-full border border-neutral-800 px-2 py-1 text-xs text-neutral-200 md:px-3"
+          className="rounded-full border border-neutral-800 px-2 py-1 text-xs text-neutral-200 transition-all duration-300 hover:border-brand-primary/50 hover:bg-neutral-800 hover:text-brand-primary hover:shadow-glow-sm active:scale-95 md:px-3"
         >
           Back
         </button>

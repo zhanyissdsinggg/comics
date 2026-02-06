@@ -122,7 +122,8 @@ export default function SiteHeader({ onSearch }) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-neutral-900 bg-neutral-950/90 backdrop-blur">
+      {/* 老王注释：玻璃态Header - 半透明背景 + 强模糊 + 微妙边框 + 阴影 */}
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl shadow-glass">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 md:py-4">
           <div className="flex items-center justify-between gap-4">
             <button
@@ -178,8 +179,9 @@ export default function SiteHeader({ onSearch }) {
                 onClick={() => {
                   router.push("/notifications");
                 }}
-                className="relative rounded-full border border-neutral-800 bg-neutral-900/50 p-2 text-neutral-300 transition-all hover:border-emerald-500/40 hover:bg-neutral-800 hover:text-white"
+                className="relative min-h-[44px] min-w-[44px] rounded-full border border-neutral-800 bg-neutral-900/50 p-2 text-neutral-300 transition-all duration-300 hover:border-brand-primary/40 hover:bg-neutral-800 hover:text-white touch-manipulation active:scale-95"
                 aria-label="Notifications"
+                style={{ WebkitTapHighlightColor: "transparent" }}
               >
                 <Bell size={16} />
                 {unreadCount > 0 ? (
@@ -196,11 +198,12 @@ export default function SiteHeader({ onSearch }) {
               <button
                 type="button"
                 onClick={handleAdultToggle}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                className={`min-h-[44px] rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-300 touch-manipulation active:scale-95 ${
                   isAdultMode
                     ? "border-red-500 text-red-300"
                     : "border-neutral-700 text-neutral-300"
                 }`}
+                style={{ WebkitTapHighlightColor: "transparent" }}
               >
                 18+ {isAdultMode ? "ON" : "OFF"}
               </button>

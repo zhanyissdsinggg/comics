@@ -15,8 +15,8 @@ function PortraitCard({ item, tone, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="group scroll-snap-item min-w-[120px] rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2 text-left shadow-lg transition-all duration-300 hover:scale-105 hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/20 active:scale-95 sm:min-w-[140px] sm:p-3"
-      style={{ willChange: "transform" }}
+      className="group scroll-snap-item min-w-[120px] rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2 text-left shadow-lg transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:border-brand-primary/50 hover:shadow-glow-md active:scale-95 sm:min-w-[140px] sm:p-3 touch-manipulation"
+      style={{ willChange: "transform", WebkitTapHighlightColor: "transparent" }}
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
         <Cover
@@ -25,8 +25,8 @@ function PortraitCard({ item, tone, onClick }) {
           className="h-full w-full transition-transform duration-500 group-hover:scale-110"
           style={{ willChange: "transform" }}
         />
-        {/* 老王注释：hover时的渐变遮罩 */}
-        <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        {/* 老王注释：hover时的品牌色渐变遮罩 + 发光效果 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-primary/20 via-brand-secondary/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
         {/* 老王注释：评分显示 */}
         {hasRating && (
@@ -49,7 +49,7 @@ function PortraitCard({ item, tone, onClick }) {
           <div className="absolute bottom-0 left-0 right-0 bg-neutral-950/70 px-2 py-1">
             <div className="h-1 w-full rounded-full bg-neutral-800">
               <div
-                className="h-full rounded-full bg-emerald-400/80"
+                className="h-full rounded-full bg-brand-gradient"
                 style={{ width: `${Math.round(item.progressPercent * 100)}%` }}
               />
             </div>
@@ -60,7 +60,7 @@ function PortraitCard({ item, tone, onClick }) {
         ) : null}
       </div>
       <div className="mt-2 space-y-1 sm:mt-3">
-        <p className="text-sm font-semibold transition-colors group-hover:text-emerald-400">{item.title}</p>
+        <p className="text-sm font-semibold transition-colors duration-300 group-hover:text-brand-primary">{item.title}</p>
         <p className="text-xs text-neutral-400">{item.subtitle}</p>
       </div>
     </button>

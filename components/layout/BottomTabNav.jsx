@@ -79,17 +79,18 @@ const BottomTabNav = memo(function BottomTabNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral-800 bg-neutral-950/95 backdrop-blur-lg md:hidden">
+    {/* 老王注释：玻璃态底部导航 - 半透明背景 + 强模糊 + 微妙边框 + 阴影 */}
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-neutral-950/80 backdrop-blur-xl shadow-glass md:hidden">
       <div className="flex items-center justify-around">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => router.push(tab.path)}
-            className={`flex min-h-[60px] flex-1 flex-col items-center justify-center gap-1 transition-all active:scale-95 ${
+            className={`flex min-h-[60px] flex-1 flex-col items-center justify-center gap-1 transition-all duration-300 active:scale-95 ${
               tab.isActive
-                ? "text-emerald-400"
-                : "text-neutral-400 hover:text-neutral-300 active:text-emerald-400"
+                ? "text-brand-primary"
+                : "text-neutral-400 hover:text-neutral-300 active:text-brand-primary"
             }`}
             style={{ willChange: "transform" }}
           >
@@ -97,8 +98,9 @@ const BottomTabNav = memo(function BottomTabNav() {
               {tab.icon}
             </div>
             <span className="text-[10px] font-semibold">{tab.label}</span>
+            {/* 老王注释：选中态指示器 - 使用品牌色渐变 */}
             {tab.isActive && (
-              <div className="absolute bottom-0 h-0.5 w-12 rounded-full bg-emerald-400" />
+              <div className="absolute bottom-0 h-0.5 w-12 rounded-full bg-brand-gradient" />
             )}
           </button>
         ))}
