@@ -106,9 +106,13 @@ let PaymentsService = class PaymentsService {
             });
         }
     }
-    async create(userId, packageId, provider) {
+    async create(userId, packageId, expectedAmount, provider) {
         const pkg = await (0, topup_1.getTopupPackage)(this.prisma, packageId);
         if (!pkg) {
+            return null;
+        }
+        if (expectedAmount !== pkg.price) {
+            console.error(`❌ 金额验证失败: 预期${expectedAmount}, 实际${pkg.price}, 套餐${packageId}`);
             return null;
         }
         const order = await this.prisma.order.create({
@@ -169,6 +173,10 @@ let PaymentsService = class PaymentsService {
         if (!pkg) {
             return { ok: false, error: "INVALID_PACKAGE" };
         }
+        if (order.amount !== pkg.price) {
+            console.error(`❌ 确认支付时金额验证失败: 订单金额${order.amount}, 当前套餐价格${pkg.price}, 订单${order.id}`);
+            return { ok: false, error: "AMOUNT_MISMATCH" };
+        }
         const result = await this.prisma.$transaction(async (tx) => {
             const wallet = await tx.wallet.upsert({
                 where: { userId },
@@ -210,10 +218,25 @@ let PaymentsService = class PaymentsService {
         if (!pkg) {
             return { ok: false, error: "INVALID_PACKAGE" };
         }
+        const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
+        const currentPaidPts = (wallet === null || wallet === void 0 ? void 0 : wallet.paidPts) || 0;
+        const currentBonusPts = (wallet === null || wallet === void 0 ? void 0 : wallet.bonusPts) || 0;
+        const refundPaidPts = pkg.paidPts || 0;
+        const refundBonusPts = pkg.bonusPts || 0;
+        const paidShortfall = Math.max(0, refundPaidPts - currentPaidPts);
+        const bonusShortfall = Math.max(0, refundBonusPts - currentBonusPts);
+        const totalShortfall = paidShortfall + bonusShortfall;
+        if (totalShortfall > 0) {
+            console.error(`❌ 退款失败：用户点数不足。当前付费点数=${currentPaidPts}, 需扣除=${refundPaidPts}, 不足=${paidShortfall}; 当前赠送点数=${currentBonusPts}, 需扣除=${refundBonusPts}, 不足=${bonusShortfall}`);
+            return {
+                ok: false,
+                error: "INSUFFICIENT_POINTS",
+                refundShortfall: totalShortfall,
+            };
+        }
         const result = await this.prisma.$transaction(async (tx) => {
-            const wallet = await tx.wallet.findUnique({ where: { userId } });
-            const paidPts = Math.max(0, ((wallet === null || wallet === void 0 ? void 0 : wallet.paidPts) || 0) - (pkg.paidPts || 0));
-            const bonusPts = Math.max(0, ((wallet === null || wallet === void 0 ? void 0 : wallet.bonusPts) || 0) - (pkg.bonusPts || 0));
+            const paidPts = currentPaidPts - refundPaidPts;
+            const bonusPts = currentBonusPts - refundBonusPts;
             const nextWallet = await tx.wallet.upsert({
                 where: { userId },
                 update: { paidPts, bonusPts },

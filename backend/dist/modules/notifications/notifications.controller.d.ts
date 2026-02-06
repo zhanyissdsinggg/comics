@@ -9,11 +9,11 @@ export declare class NotificationsController {
     } | {
         notifications: {
             id: string;
-            userId: string;
             createdAt: Date;
-            type: string;
-            title: string;
+            userId: string;
             message: string;
+            title: string;
+            type: string;
             seriesId: string | null;
             episodeId: string | null;
             read: boolean;
@@ -24,11 +24,11 @@ export declare class NotificationsController {
     } | {
         notifications: Promise<{
             id: string;
-            userId: string;
             createdAt: Date;
-            type: string;
-            title: string;
+            userId: string;
             message: string;
+            title: string;
+            type: string;
             seriesId: string | null;
             episodeId: string | null;
             read: boolean;

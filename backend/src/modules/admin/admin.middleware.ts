@@ -1,14 +1,48 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
 import { Request, Response, NextFunction } from "express";
 import { isAdminAuthorized } from "../../common/utils/admin";
+import { JwtService } from "@nestjs/jwt";
 
+/**
+ * 老王说：管理员认证中间件，支持两种认证方式：
+ * 1. 旧的密钥认证（兼容性，逐步废弃）
+ * 2. 新的JWT认证（推荐）
+ */
 @Injectable()
 export class AdminKeyMiddleware implements NestMiddleware {
+  constructor(private jwtService: JwtService) {}
+
   use(req: Request, res: Response, next: NextFunction) {
+    // 老王说：先尝试JWT认证
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+      const token = authHeader.slice(7);
+      try {
+        const payload = this.jwtService.verify(token, {
+          secret: process.env.JWT_SECRET || "tappytoon-jwt-secret-change-me"
+        });
+
+        if (payload.sub && payload.role === "admin") {
+          // 老王说：JWT验证通过，将用户信息附加到请求对象
+          (req as any).user = {
+            userId: payload.sub,
+            username: payload.username,
+            role: payload.role
+          };
+          next();
+          return;
+        }
+      } catch (error) {
+        // 老王说：JWT验证失败，继续尝试密钥认证
+      }
+    }
+
+    // 老王说：JWT认证失败，尝试旧的密钥认证（兼容性）
     if (isAdminAuthorized(req, req.body)) {
       next();
       return;
     }
+
     res.status(403).json({ error: "FORBIDDEN" });
   }
 }

@@ -9,11 +9,11 @@ export declare class RankingsController {
     } | {
         rankings: {
             id: string;
-            type: string;
             status: string;
-            title: string;
             rating: number;
             adult: boolean;
+            title: string;
+            type: string;
             genres: string[];
             coverTone: string;
             coverUrl: string;

@@ -14,14 +14,14 @@ export declare class AdminBillingController {
         package: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
+            currency: string;
             paidPts: number;
             bonusPts: number;
-            tags: string[];
-            price: number;
-            currency: string;
             active: boolean;
+            tags: string[];
+            updatedAt: Date;
             label: string;
+            price: number;
         };
     }>;
     updateTopup(id: string, body: any, req: Request, res: Response): Promise<{
@@ -30,14 +30,14 @@ export declare class AdminBillingController {
         package: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
+            currency: string;
             paidPts: number;
             bonusPts: number;
-            tags: string[];
-            price: number;
-            currency: string;
             active: boolean;
+            tags: string[];
+            updatedAt: Date;
             label: string;
+            price: number;
         };
     }>;
     listPlans(req: Request, res: Response): Promise<{
@@ -51,15 +51,15 @@ export declare class AdminBillingController {
         plan: {
             id: string;
             createdAt: Date;
+            currency: string;
+            active: boolean;
             updatedAt: Date;
+            label: string;
+            price: number;
             discountPct: number;
             dailyFreeUnlocks: number;
             ttfMultiplier: number;
             voucherPts: number;
-            price: number;
-            currency: string;
-            active: boolean;
-            label: string;
         };
     }>;
     updatePlan(id: string, body: any, req: Request, res: Response): Promise<{
@@ -68,15 +68,15 @@ export declare class AdminBillingController {
         plan: {
             id: string;
             createdAt: Date;
+            currency: string;
+            active: boolean;
             updatedAt: Date;
+            label: string;
+            price: number;
             discountPct: number;
             dailyFreeUnlocks: number;
             ttfMultiplier: number;
             voucherPts: number;
-            price: number;
-            currency: string;
-            active: boolean;
-            label: string;
         };
     }>;
 }

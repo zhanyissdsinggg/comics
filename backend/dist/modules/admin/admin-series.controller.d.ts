@@ -10,11 +10,11 @@ export declare class AdminSeriesController {
     } | {
         series: {
             id: string;
-            type: string;
             status: string;
-            title: string;
             rating: number;
             adult: boolean;
+            title: string;
+            type: string;
             genres: string[];
             coverTone: string;
             coverUrl: string;
@@ -33,11 +33,11 @@ export declare class AdminSeriesController {
     } | {
         series: {
             id: string;
-            type: string;
             status: string;
-            title: string;
             rating: number;
             adult: boolean;
+            title: string;
+            type: string;
             genres: string[];
             coverTone: string;
             coverUrl: string;
@@ -56,11 +56,11 @@ export declare class AdminSeriesController {
     } | {
         series: {
             id: string;
-            type: string;
             status: string;
-            title: string;
             rating: number;
             adult: boolean;
+            title: string;
+            type: string;
             genres: string[];
             coverTone: string;
             coverUrl: string;
@@ -79,11 +79,11 @@ export declare class AdminSeriesController {
     } | {
         series: {
             id: string;
-            type: string;
             status: string;
-            title: string;
             rating: number;
             adult: boolean;
+            title: string;
+            type: string;
             genres: string[];
             coverTone: string;
             coverUrl: string;
@@ -108,8 +108,8 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            seriesId: string;
             title: string;
+            seriesId: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -126,8 +126,8 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            seriesId: string;
             title: string;
+            seriesId: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -144,8 +144,8 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            seriesId: string;
             title: string;
+            seriesId: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -162,8 +162,8 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            seriesId: string;
             title: string;
+            seriesId: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -181,8 +181,8 @@ export declare class AdminSeriesController {
         episode: {
             number: number;
             id: string;
-            seriesId: string;
             title: string;
+            seriesId: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -199,8 +199,8 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            seriesId: string;
             title: string;
+            seriesId: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;

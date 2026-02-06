@@ -6,10 +6,10 @@ export declare class OrdersService {
         id: string;
         createdAt: Date;
         userId: string;
-        status: string;
-        currency: string;
         packageId: string;
         amount: number;
+        currency: string;
+        status: string;
         paidAt: Date | null;
     }[]>;
     reconcile(userId: string): Promise<{
@@ -18,10 +18,10 @@ export declare class OrdersService {
             id: string;
             createdAt: Date;
             userId: string;
-            status: string;
-            currency: string;
             packageId: string;
             amount: number;
+            currency: string;
+            status: string;
             paidAt: Date | null;
         }[];
     }>;

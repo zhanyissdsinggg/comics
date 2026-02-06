@@ -50,18 +50,25 @@ let PaymentsController = class PaymentsController {
     verifyWebhookSignature(req, body) {
         const secret = process.env.WEBHOOK_SECRET || "";
         if (!secret) {
-            return true;
+            console.error("❌ 致命错误：未设置WEBHOOK_SECRET环境变量，拒绝webhook请求");
+            return false;
         }
         const signature = String(req.headers["x-webhook-signature"] || "");
         if (!signature) {
+            console.warn("⚠️ Webhook请求缺少签名header");
             return false;
         }
         const rawBody = req.rawBody || JSON.stringify(body || {});
         const digest = (0, crypto_1.createHmac)("sha256", secret).update(rawBody).digest("hex");
         try {
-            return (0, crypto_1.timingSafeEqual)(Buffer.from(signature), Buffer.from(digest));
+            const isValid = (0, crypto_1.timingSafeEqual)(Buffer.from(signature), Buffer.from(digest));
+            if (!isValid) {
+                console.warn("⚠️ Webhook签名验证失败");
+            }
+            return isValid;
         }
-        catch {
+        catch (err) {
+            console.error("❌ Webhook签名验证异常:", err);
             return false;
         }
     }
@@ -94,7 +101,19 @@ let PaymentsController = class PaymentsController {
         }
         const packageId = body === null || body === void 0 ? void 0 : body.packageId;
         const provider = (body === null || body === void 0 ? void 0 : body.provider) || "stripe";
-        const created = await this.paymentsService.create(userId, packageId, provider);
+        const expectedAmount = body === null || body === void 0 ? void 0 : body.expectedAmount;
+        if (typeof expectedAmount !== "number" || expectedAmount <= 0) {
+            res.status(400);
+            const body = (0, errors_1.buildError)(errors_1.ERROR_CODES.INVALID_REQUEST, { reason: "MISSING_EXPECTED_AMOUNT" });
+            if (idempotencyKey) {
+                await (0, limits_1.setIdempotencyRecord)(this.prisma, userId, String(idempotencyKey), {
+                    status: 400,
+                    body,
+                });
+            }
+            return body;
+        }
+        const created = await this.paymentsService.create(userId, packageId, expectedAmount, provider);
         if (!created) {
             res.status(400);
             const body = (0, errors_1.buildError)(errors_1.ERROR_CODES.INVALID_REQUEST);
@@ -231,6 +250,8 @@ let PaymentsController = class PaymentsController {
         return responseBody;
     }
     async webhook(body, req, res) {
+        const ip = (0, ip_1.getClientIp)(req);
+        console.log(`📥 收到Webhook请求: IP=${ip}, eventType=${body === null || body === void 0 ? void 0 : body.eventType}, orderId=${body === null || body === void 0 ? void 0 : body.orderId}`);
         const eventType = body === null || body === void 0 ? void 0 : body.eventType;
         const orderId = body === null || body === void 0 ? void 0 : body.orderId;
         const userId = (body === null || body === void 0 ? void 0 : body.userId) || (0, auth_1.getUserIdFromRequest)(req, false);
@@ -239,7 +260,6 @@ let PaymentsController = class PaymentsController {
             res.status(400);
             return (0, errors_1.buildError)(errors_1.ERROR_CODES.INVALID_REQUEST);
         }
-        const ip = (0, ip_1.getClientIp)(req);
         const rate = await (0, limits_1.checkRateLimitByIp)(this.prisma, ip, "webhook", 120, 60);
         if (!rate.ok) {
             res.status(429);
@@ -326,8 +346,22 @@ let PaymentsController = class PaymentsController {
             }
             const pkg = await (0, topup_1.getTopupPackage)(this.prisma, order.packageId);
             const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
-            const paidPts = Math.max(0, ((wallet === null || wallet === void 0 ? void 0 : wallet.paidPts) || 0) - ((pkg === null || pkg === void 0 ? void 0 : pkg.paidPts) || 0));
-            const bonusPts = Math.max(0, ((wallet === null || wallet === void 0 ? void 0 : wallet.bonusPts) || 0) - ((pkg === null || pkg === void 0 ? void 0 : pkg.bonusPts) || 0));
+            const currentPaidPts = (wallet === null || wallet === void 0 ? void 0 : wallet.paidPts) || 0;
+            const currentBonusPts = (wallet === null || wallet === void 0 ? void 0 : wallet.bonusPts) || 0;
+            const chargebackPaidPts = (pkg === null || pkg === void 0 ? void 0 : pkg.paidPts) || 0;
+            const chargebackBonusPts = (pkg === null || pkg === void 0 ? void 0 : pkg.bonusPts) || 0;
+            const paidShortfall = Math.max(0, chargebackPaidPts - currentPaidPts);
+            const bonusShortfall = Math.max(0, chargebackBonusPts - currentBonusPts);
+            const totalShortfall = paidShortfall + bonusShortfall;
+            if (totalShortfall > 0) {
+                console.error(`❌ 拒付处理失败：用户点数不足。当前付费点数=${currentPaidPts}, 需扣除=${chargebackPaidPts}, 不足=${paidShortfall}; 当前赠送点数=${currentBonusPts}, 需扣除=${chargebackBonusPts}, 不足=${bonusShortfall}`);
+                res.status(400);
+                return (0, errors_1.buildError)(errors_1.ERROR_CODES.INSUFFICIENT_POINTS, {
+                    chargebackShortfall: totalShortfall,
+                });
+            }
+            const paidPts = currentPaidPts - chargebackPaidPts;
+            const bonusPts = currentBonusPts - chargebackBonusPts;
             const next = await this.prisma.$transaction(async (tx) => {
                 const nextWallet = await tx.wallet.upsert({
                     where: { userId },
@@ -340,7 +374,12 @@ let PaymentsController = class PaymentsController {
                 });
                 return { nextWallet, nextOrder };
             });
-            const responseBody = { ok: true, order: next.nextOrder, wallet: next.nextWallet };
+            const responseBody = {
+                ok: true,
+                order: next.nextOrder,
+                wallet: next.nextWallet,
+                chargebackShortfall: 0,
+            };
             await this.logAudit("payment_webhook_chargeback", { userId, targetType: "order", targetId: orderId }, req);
             if (eventId) {
                 await (0, limits_1.setIdempotencyRecord)(this.prisma, userId, String(eventId), {

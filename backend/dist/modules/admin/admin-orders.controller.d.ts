@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { AdminLogService } from "../../common/services/admin-log.service";
 export declare class AdminOrdersController {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly adminLogService;
+    constructor(prisma: PrismaService, adminLogService: AdminLogService);
     list(req: Request, res: Response): Promise<{
         error: string;
     } | {
@@ -17,10 +19,10 @@ export declare class AdminOrdersController {
             id: string;
             createdAt: Date;
             userId: string;
-            status: string;
-            currency: string;
             packageId: string;
             amount: number;
+            currency: string;
+            status: string;
             paidAt: Date | null;
         };
         wallet: {

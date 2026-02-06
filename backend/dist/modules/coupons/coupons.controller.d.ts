@@ -9,8 +9,8 @@ export declare class CouponsController {
         coupons: {
             claimedAt: Date;
             id: string;
-            code: string;
             type: string;
+            code: string;
             value: number;
             remainingUses: number;
             label: string;
@@ -22,8 +22,8 @@ export declare class CouponsController {
         coupons: {
             claimedAt: Date;
             id: string;
-            code: string;
             type: string;
+            code: string;
             value: number;
             remainingUses: number;
             label: string;

@@ -61,11 +61,11 @@ export class EpisodeController {
     }
 
     // 老王注释：如果用户没有解锁，只返回预览内容（前3页）
-    if (!hasAccess && payload.episode?.pages) {
+    if (!hasAccess && payload.episode?.pages && Array.isArray(payload.episode.pages)) {
       const previewCount = 3; // 预览页数
       payload.episode.pages = payload.episode.pages.slice(0, previewCount);
-      payload.episode.isPreview = true;
-      payload.episode.previewCount = previewCount;
+      (payload.episode as any).isPreview = true;
+      (payload.episode as any).previewCount = previewCount;
     }
 
     await this.statsService.recordSeriesView(userId, seriesId);

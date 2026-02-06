@@ -288,7 +288,6 @@ export class PaymentsController {
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST);
     }
-    const ip = getClientIp(req);
     const rate = await checkRateLimitByIp(this.prisma, ip, "webhook", 120, 60);
     if (!rate.ok) {
       res.status(429);

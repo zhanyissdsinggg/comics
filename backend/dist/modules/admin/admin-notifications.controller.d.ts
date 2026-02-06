@@ -10,12 +10,12 @@ export declare class AdminNotificationsController {
             id: string;
             createdAt: Date;
             userId: string;
-            type: string;
-            read: boolean;
             message: string;
-            seriesId: string | null;
             title: string;
+            type: string;
+            seriesId: string | null;
             episodeId: string | null;
+            read: boolean;
         }[];
     }>;
     create(body: any, req: Request, res: Response): Promise<{
@@ -29,12 +29,12 @@ export declare class AdminNotificationsController {
             id: string;
             createdAt: Date;
             userId: string;
-            type: string;
-            read: boolean;
             message: string;
-            seriesId: string | null;
             title: string;
+            type: string;
+            seriesId: string | null;
             episodeId: string | null;
+            read: boolean;
         };
         ok?: undefined;
         count?: undefined;

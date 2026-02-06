@@ -6,8 +6,8 @@ export declare class CouponsService {
     list(userId: string): Promise<{
         claimedAt: Date;
         id: string;
-        code: string;
         type: string;
+        code: string;
         value: number;
         remainingUses: number;
         label: string;
@@ -21,8 +21,8 @@ export declare class CouponsService {
         coupons: {
             claimedAt: Date;
             id: string;
-            code: string;
             type: string;
+            code: string;
             value: number;
             remainingUses: number;
             label: string;

@@ -28,10 +28,10 @@ export declare class WalletService {
             id: string;
             createdAt: Date;
             userId: string;
-            status: string;
-            currency: string;
             packageId: string;
             amount: number;
+            currency: string;
+            status: string;
             paidAt: Date | null;
         };
         status?: undefined;

@@ -17,6 +17,8 @@ import { BookmarkProvider } from "../../store/useBookmarkStore";
 import { BrandingProvider, useBrandingStore } from "../../store/useBrandingStore";
 import { RegionProvider } from "../../store/useRegionStore";
 import { HistoryProvider } from "../../store/useHistoryStore";
+import { ToastProvider } from "../common/ToastContext";
+import ToastContainer from "../common/ToastContainer";
 import BackendHealthBanner from "../common/BackendHealthBanner";
 import { ApiBootGuard } from "../common/ApiBootGuard";
 import GlobalErrorToast from "../common/GlobalErrorToast";
@@ -63,18 +65,20 @@ export default function AppProviders({ children }) {
   const pathname = usePathname();
   const showAuthModal = !pathname?.startsWith("/admin");
   return (
-    <AuthProvider>
-      <WalletProvider>
-        <AdultGateProvider>
-          <BrandingProvider>
-            <RegionProvider>
-            <BackendHealthBanner />
-            <OfflineNotice />
-            <GlobalErrorToast />
-            <BackendMetaBadge />
-            <PerfMonitorBadge />
-            <TrackingInjector />
-            <BrandingHeadSync />
+    <ToastProvider>
+      <AuthProvider>
+        <WalletProvider>
+          <AdultGateProvider>
+            <BrandingProvider>
+              <RegionProvider>
+              <BackendHealthBanner />
+              <OfflineNotice />
+              <GlobalErrorToast />
+              <BackendMetaBadge />
+              <PerfMonitorBadge />
+              <TrackingInjector />
+              <BrandingHeadSync />
+              <ToastContainer />
             {/* 老王注释：禁用全局登录弹窗，让用户自由浏览 */}
             {/* {showAuthModal ? <AuthRequiredModal /> : null} */}
             <ApiBootGuard>
@@ -110,5 +114,6 @@ export default function AppProviders({ children }) {
         </AdultGateProvider>
       </WalletProvider>
     </AuthProvider>
+    </ToastProvider>
   );
 }

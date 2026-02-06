@@ -478,3 +478,21 @@ model RegionConfig {
   payload   Json
   updatedAt DateTime @updatedAt
 }
+
+// 老王说：管理员操作日志，记录所有管理员操作用于审计
+model AdminLog {
+  id         String   @id @default(cuid())
+  action     String   // 操作类型：refund、adjust、delete、create、update等
+  resource   String   // 资源类型：order、user、series、episode等
+  resourceId String   // 资源ID
+  adminId    String   // 管理员ID（目前是"admin"，未来可扩展）
+  details    Json?    // 操作详情（包含操作前后的数据）
+  ip         String?  // IP地址
+  userAgent  String?  // User Agent
+  createdAt  DateTime @default(now())
+
+  @@index([action])
+  @@index([resource])
+  @@index([adminId])
+  @@index([createdAt])
+}

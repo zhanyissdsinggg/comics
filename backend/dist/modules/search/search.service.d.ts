@@ -7,16 +7,16 @@ export declare class SearchService {
     private buildSuggestions;
     search(query: string, adult: boolean): Promise<{
         id: string;
+        status: string;
+        rating: number;
+        adult: boolean;
         title: string;
         type: string;
-        adult: boolean;
         genres: string[];
         coverTone: string;
         coverUrl: string;
         badge: string;
         badges: string[];
-        status: string;
-        rating: number;
         ratingCount: number;
         description: string;
         episodePrice: number;

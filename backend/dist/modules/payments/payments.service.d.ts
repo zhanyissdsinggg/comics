@@ -9,15 +9,15 @@ export declare class PaymentsService implements OnModuleInit, OnModuleDestroy {
     private buildNextRetryTime;
     enqueueRetry(userId: string, orderId: string, paymentId?: string, reason?: string): Promise<void>;
     processRetries(): Promise<void>;
-    create(userId: string, packageId: string, provider?: string): Promise<{
+    create(userId: string, packageId: string, expectedAmount: number, provider?: string): Promise<{
         order: {
             id: string;
             createdAt: Date;
             userId: string;
-            status: string;
-            currency: string;
             packageId: string;
             amount: number;
+            currency: string;
+            status: string;
             paidAt: Date | null;
         };
         payment: {
@@ -39,10 +39,10 @@ export declare class PaymentsService implements OnModuleInit, OnModuleDestroy {
             id: string;
             createdAt: Date;
             userId: string;
-            status: string;
-            currency: string;
             packageId: string;
             amount: number;
+            currency: string;
+            status: string;
             paidAt: Date | null;
         };
         wallet: {
@@ -57,19 +57,25 @@ export declare class PaymentsService implements OnModuleInit, OnModuleDestroy {
     refund(userId: string, orderId: string): Promise<{
         ok: boolean;
         error: string;
+        refundShortfall?: undefined;
         order?: undefined;
         wallet?: undefined;
-        refundShortfall?: undefined;
+    } | {
+        ok: boolean;
+        error: string;
+        refundShortfall: number;
+        order?: undefined;
+        wallet?: undefined;
     } | {
         ok: boolean;
         order: {
             id: string;
             createdAt: Date;
             userId: string;
-            status: string;
-            currency: string;
             packageId: string;
             amount: number;
+            currency: string;
+            status: string;
             paidAt: Date | null;
         };
         wallet: {

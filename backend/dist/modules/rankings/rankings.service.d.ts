@@ -4,11 +4,11 @@ export declare class RankingsService {
     constructor(prisma: PrismaService);
     list(type: string, adult: boolean): Promise<{
         id: string;
-        type: string;
         status: string;
-        title: string;
         rating: number;
         adult: boolean;
+        title: string;
+        type: string;
         genres: string[];
         coverTone: string;
         coverUrl: string;

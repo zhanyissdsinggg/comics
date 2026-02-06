@@ -16,12 +16,12 @@ export declare class AdminUsersController {
             };
         } & {
             id: string;
+            createdAt: Date;
             email: string;
             password: string;
             isBlocked: boolean;
             emailVerified: boolean;
             emailVerifiedAt: Date | null;
-            createdAt: Date;
         })[];
     }>;
     tickets(req: Request, res: Response): Promise<{
@@ -41,12 +41,12 @@ export declare class AdminUsersController {
     } | {
         user: {
             id: string;
+            createdAt: Date;
             email: string;
             password: string;
             isBlocked: boolean;
             emailVerified: boolean;
             emailVerifiedAt: Date | null;
-            createdAt: Date;
         };
     }>;
 }

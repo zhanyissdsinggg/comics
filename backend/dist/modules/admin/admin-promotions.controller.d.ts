@@ -9,10 +9,10 @@ export declare class AdminPromotionsController {
         promotions: {
             id: string;
             title: string;
-            description: string;
             type: string;
-            segment: string;
+            description: string;
             active: boolean;
+            segment: string;
             startAt: Date | null;
             endAt: Date | null;
             bonusMultiplier: number;
@@ -39,10 +39,10 @@ export declare class AdminPromotionsController {
         promotion: {
             id: string;
             title: string;
-            description: string;
             type: string;
-            segment: string;
+            description: string;
             active: boolean;
+            segment: string;
             startAt: Date | null;
             endAt: Date | null;
             bonusMultiplier: number;
@@ -59,10 +59,10 @@ export declare class AdminPromotionsController {
         promotion: {
             id: string;
             title: string;
-            description: string;
             type: string;
-            segment: string;
+            description: string;
             active: boolean;
+            segment: string;
             startAt: Date | null;
             endAt: Date | null;
             bonusMultiplier: number;

@@ -6,10 +6,10 @@ export declare class PromotionsController {
         promotions: {
             id: string;
             title: string;
-            description: string;
             type: string;
-            segment: string;
+            description: string;
             active: boolean;
+            segment: string;
             startAt: Date | null;
             endAt: Date | null;
             bonusMultiplier: number;

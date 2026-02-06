@@ -27,6 +27,7 @@ let EpisodeController = class EpisodeController {
         this.statsService = statsService;
     }
     async getEpisode(seriesId, episodeId, req, res) {
+        var _a;
         const series = await this.prisma.series.findUnique({ where: { id: seriesId } });
         if (!series) {
             res.status(404);
@@ -39,12 +40,30 @@ let EpisodeController = class EpisodeController {
                 return (0, errors_1.buildError)(errors_1.ERROR_CODES.ADULT_GATED, { reason: gate.reason });
             }
         }
+        const userId = (0, auth_1.getUserIdFromRequest)(req, false);
+        let hasAccess = false;
+        if (userId) {
+            const entitlement = await this.prisma.entitlement.findUnique({
+                where: {
+                    userId_episodeId: {
+                        userId,
+                        episodeId,
+                    },
+                },
+            });
+            hasAccess = !!entitlement;
+        }
         const payload = await this.episodeService.getEpisode(seriesId, episodeId);
         if (!payload) {
             res.status(404);
             return (0, errors_1.buildError)(errors_1.ERROR_CODES.NOT_FOUND);
         }
-        const userId = (0, auth_1.getUserIdFromRequest)(req, false);
+        if (!hasAccess && ((_a = payload.episode) === null || _a === void 0 ? void 0 : _a.pages) && Array.isArray(payload.episode.pages)) {
+            const previewCount = 3;
+            payload.episode.pages = payload.episode.pages.slice(0, previewCount);
+            payload.episode.isPreview = true;
+            payload.episode.previewCount = previewCount;
+        }
         await this.statsService.recordSeriesView(userId, seriesId);
         if ((series === null || series === void 0 ? void 0 : series.type) === "comic") {
             await this.statsService.recordComicView(userId);
