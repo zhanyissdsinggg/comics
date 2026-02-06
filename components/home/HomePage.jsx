@@ -78,15 +78,15 @@ const WalletAside = memo(function WalletAside() {
         </div>
         <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-neutral-400 uppercase tracking-wide">Paid Points</span>
+            <span className="text-sm font-medium text-neutral-300 uppercase tracking-wide">Paid Points</span>
             <span className="text-2xl font-bold text-white">{formatUSNumber(paidPts)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-neutral-400 uppercase tracking-wide">Bonus Points</span>
+            <span className="text-sm font-medium text-neutral-300 uppercase tracking-wide">Bonus Points</span>
             <span className="text-2xl font-bold text-emerald-400">{formatUSNumber(bonusPts)}</span>
           </div>
           <div className="flex items-center justify-between pt-5 border-t border-neutral-800">
-            <span className="text-sm font-medium text-neutral-400 uppercase tracking-wide">Plan</span>
+            <span className="text-sm font-medium text-neutral-300 uppercase tracking-wide">Plan</span>
             <span className="text-base font-bold text-white uppercase tracking-wider">{plan}</span>
           </div>
         </div>
@@ -102,8 +102,8 @@ const WalletAside = memo(function WalletAside() {
           </div>
           <h3 className="text-xl font-bold text-white">Free Unlock</h3>
         </div>
-        <p className="text-sm font-medium text-neutral-400 uppercase tracking-wide mb-3">Next unlock in</p>
-        <p className="text-4xl font-bold text-white mb-8 tracking-tight">{formatted || "--:--:--"}</p>
+        <p className="text-sm font-medium text-neutral-300 uppercase tracking-wide mb-3">Next unlock in</p>
+        <p className="text-4xl md:text-5xl font-bold text-white mb-8 tracking-tight">{formatted || "--:--:--"}</p>
         <button
           type="button"
           onClick={() => router.push("/subscribe")}
@@ -453,12 +453,12 @@ export default function HomePage() {
                 >
                   {chip.label}
                 </button>
-              ))}<
-              <div className="rounded-2xl bg-neutral-900 border border-neutral-800 px-5 py-3 text-sm font-bold text-neutral-400 uppercase tracking-wide">
+              ))}
+              <div className="rounded-2xl bg-neutral-900 border border-neutral-800 px-6 py-3 text-base font-bold text-neutral-300 uppercase tracking-wide">
                 {homeTab === "novels" ? "📚 Novels" : "📖 Comics"}
               </div>
               {query ? (
-                <div className="rounded-2xl bg-amber-500/20 border border-amber-500/30 px-5 py-3 text-sm font-bold text-amber-400 uppercase tracking-wide">
+                <div className="rounded-2xl bg-amber-500/20 border border-amber-500/30 px-6 py-3 text-base font-bold text-amber-300 uppercase tracking-wide">
                   🔍 {query}
                 </div>
               ) : null}
@@ -474,8 +474,8 @@ export default function HomePage() {
                         </svg>
                       </div>
                       <h3 className="text-2xl font-bold text-white mb-3">No Following Yet</h3>
-                      <p className="text-base text-neutral-400 mb-8 max-w-md mx-auto leading-relaxed">
-                        Follow your favorite series to get notified about new episodes and updates.
+                      <p className="text-base text-neutral-300 mb-8 max-w-md mx-auto leading-relaxed">
+                        Start following series to see updates here.
                       </p>
                       <button
                         type="button"
@@ -519,8 +519,8 @@ export default function HomePage() {
                       </svg>
                     </div>
                     <h3 className="text-2xl font-bold text-white mb-3">No Results Found</h3>
-                    <p className="text-base text-neutral-400 mb-8 max-w-md mx-auto leading-relaxed">
-                      We couldn't find any series matching your search. Try different keywords or browse our popular picks.
+                    <p className="text-base text-neutral-300 mb-8 max-w-md mx-auto leading-relaxed">
+                      Try different keywords or browse our popular picks.
                     </p>
                     <div className="flex flex-wrap gap-4 justify-center">
                       <button
@@ -528,7 +528,7 @@ export default function HomePage() {
                         onClick={() => setQuery("")}
                         className="rounded-2xl bg-neutral-800 border border-neutral-700 px-6 py-3 text-base font-bold text-neutral-200 hover:bg-neutral-700 transition-colors uppercase tracking-wide"
                       >
-                        Clear Search
+                        Clear
                       </button>
                       <button
                         type="button"
