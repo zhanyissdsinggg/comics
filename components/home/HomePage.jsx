@@ -65,56 +65,52 @@ const WalletAside = memo(function WalletAside() {
   const { formatted } = useCountdown(readyAt);
 
   return (
-    <aside className="space-y-4">
-      {/* 老王说：美化钱包卡片 - 使用glassmorphism和渐变边框 */}
-      <div className="relative rounded-2xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 p-[1px] backdrop-blur-xl">
-        <div className="rounded-2xl bg-neutral-900/80 p-5 backdrop-blur-xl">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-sm font-semibold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Wallet</h3>
+    <aside className="space-y-6">
+      {/* 老王说：欧美风格钱包卡片 - 扁平、大胆、简洁 */}
+      <div className="rounded-3xl bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-neutral-400">Paid Points</span>
-              <span className="text-sm font-bold text-emerald-400">{formatUSNumber(paidPts)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-neutral-400">Bonus Points</span>
-              <span className="text-sm font-bold text-cyan-400">{formatUSNumber(bonusPts)}</span>
-            </div>
-            <div className="flex items-center justify-between pt-2 border-t border-neutral-800">
-              <span className="text-xs text-neutral-400">Plan</span>
-              <span className="text-xs font-semibold text-white uppercase">{plan}</span>
-            </div>
+          <h3 className="text-xl font-bold text-white">Wallet</h3>
+        </div>
+        <div className="space-y-5">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-neutral-400 uppercase tracking-wide">Paid Points</span>
+            <span className="text-2xl font-bold text-white">{formatUSNumber(paidPts)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-neutral-400 uppercase tracking-wide">Bonus Points</span>
+            <span className="text-2xl font-bold text-emerald-400">{formatUSNumber(bonusPts)}</span>
+          </div>
+          <div className="flex items-center justify-between pt-5 border-t border-neutral-800">
+            <span className="text-sm font-medium text-neutral-400 uppercase tracking-wide">Plan</span>
+            <span className="text-base font-bold text-white uppercase tracking-wider">{plan}</span>
           </div>
         </div>
       </div>
 
-      {/* 老王说：美化倒计时卡片 */}
-      <div className="relative rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-[1px]">
-        <div className="rounded-2xl bg-neutral-900/80 p-5 backdrop-blur-xl">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-sm font-semibold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">TTF Countdown</h3>
+      {/* 老王说：欧美风格倒计时卡片 */}
+      <div className="rounded-3xl bg-neutral-900 border border-neutral-800 p-8 hover:border-neutral-700 transition-colors">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-          <p className="text-xs text-neutral-400 mb-2">Next free unlock in</p>
-          <p className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent mb-4">{formatted || "--:--:--"}</p>
-          <button
-            type="button"
-            onClick={() => router.push("/subscribe")}
-            className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-3 text-sm font-semibold text-white hover:from-emerald-600 hover:to-cyan-600 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
-          >
-            Subscribe for perks
-          </button>
+          <h3 className="text-xl font-bold text-white">Free Unlock</h3>
         </div>
+        <p className="text-sm font-medium text-neutral-400 uppercase tracking-wide mb-3">Next unlock in</p>
+        <p className="text-4xl font-bold text-white mb-8 tracking-tight">{formatted || "--:--:--"}</p>
+        <button
+          type="button"
+          onClick={() => router.push("/subscribe")}
+          className="w-full rounded-2xl bg-emerald-500 px-6 py-4 text-base font-bold text-white hover:bg-emerald-600 transition-colors uppercase tracking-wide"
+        >
+          Get Premium
+        </button>
       </div>
     </aside>
   );
@@ -401,16 +397,11 @@ export default function HomePage() {
   }, [activeRails]);
 
   return (
-    <div className="min-h-screen bg-neutral-950 relative overflow-hidden">
-      {/* 老王说：添加背景装饰渐变 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-cyan-500/5 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10">
-        <OnboardingTour />
-        <SiteHeader onSearch={setQuery} />
-        <main className="mx-auto max-w-6xl px-3 pb-12 pt-6 md:px-4 md:pt-8">
+    <div className="min-h-screen bg-neutral-950">
+      {/* 老王说：欧美风格 - 简洁的背景，不要过多装饰 */}
+      <OnboardingTour />
+      <SiteHeader onSearch={setQuery} />
+      <main className="mx-auto max-w-7xl px-4 pb-16 pt-8 md:px-6 md:pt-12">
         {loading ? (
           <div className="space-y-4 md:space-y-6">
             <Skeleton className="h-56 w-full rounded-3xl" />
@@ -447,54 +438,52 @@ export default function HomePage() {
               onKeywordClick={(keyword) => router.push(`/search?q=${encodeURIComponent(keyword)}`)}
             />
             <HeroCarousel items={heroItems} />
-            {/* 老王说：美化分类chips - 使用渐变和更好的hover效果 */}
-            <div className="flex flex-wrap items-center gap-2">
+            {/* 老王说：欧美风格分类chips - 扁平、大胆、简洁 */}
+            <div className="flex flex-wrap items-center gap-3">
               {chips.map((chip) => (
                 <button
                   key={chip.id}
                   type="button"
                   onClick={() => setActiveChip(chip.id)}
-                  className={`relative rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-95 ${
+                  className={`rounded-2xl px-6 py-3 text-base font-bold transition-colors uppercase tracking-wide ${
                     activeChip === chip.id
-                      ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/30"
-                      : "bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800/80 border border-neutral-800 hover:border-neutral-700 backdrop-blur-sm"
+                      ? "bg-emerald-500 text-white"
+                      : "bg-neutral-900 text-neutral-300 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700"
                   }`}
                 >
                   {chip.label}
                 </button>
-              ))}
-              <div className="rounded-xl bg-neutral-900/50 border border-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-400 backdrop-blur-sm">
+              ))}<
+              <div className="rounded-2xl bg-neutral-900 border border-neutral-800 px-5 py-3 text-sm font-bold text-neutral-400 uppercase tracking-wide">
                 {homeTab === "novels" ? "📚 Novels" : "📖 Comics"}
               </div>
               {query ? (
-                <div className="rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 px-4 py-2.5 text-sm font-medium text-amber-400 backdrop-blur-sm">
-                  🔍 Search: {query}
+                <div className="rounded-2xl bg-amber-500/20 border border-amber-500/30 px-5 py-3 text-sm font-bold text-amber-400 uppercase tracking-wide">
+                  🔍 {query}
                 </div>
               ) : null}
             </div>
-            <div className="lg:grid lg:grid-cols-12 gap-4 md:gap-6">
-              <div className="space-y-6 md:space-y-10 lg:col-span-8">
-                <section className="space-y-3">
+            <div className="lg:grid lg:grid-cols-12 gap-6 md:gap-8">
+              <div className="space-y-8 md:space-y-12 lg:col-span-8">
+                <section className="space-y-6">
                   {followingUpdates.length === 0 ? (
-                    <div className="relative rounded-2xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 p-[1px]">
-                      <div className="rounded-2xl bg-neutral-900/80 p-8 backdrop-blur-xl text-center">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
-                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                          </svg>
-                        </div>
-                        <p className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-2">Following Updates</p>
-                        <p className="text-sm text-neutral-400 mb-6">
-                          Follow a series to see updates here.
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => setActiveChip("popular")}
-                          className="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-sm font-semibold text-white hover:from-emerald-600 hover:to-cyan-600 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
-                        >
-                          Browse popular
-                        </button>
+                    <div className="rounded-3xl bg-neutral-900 border border-neutral-800 p-12 text-center hover:border-neutral-700 transition-colors">
+                      <div className="w-16 h-16 rounded-2xl bg-emerald-500 flex items-center justify-center mx-auto mb-6">
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
                       </div>
+                      <h3 className="text-2xl font-bold text-white mb-3">No Following Yet</h3>
+                      <p className="text-base text-neutral-400 mb-8 max-w-md mx-auto leading-relaxed">
+                        Follow your favorite series to get notified about new episodes and updates.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveChip("popular")}
+                        className="rounded-2xl bg-emerald-500 px-8 py-4 text-base font-bold text-white hover:bg-emerald-600 transition-colors uppercase tracking-wide"
+                      >
+                        Browse Popular
+                      </button>
                     </div>
                   ) : (
                     <Rail
@@ -523,33 +512,31 @@ export default function HomePage() {
                   />
                 ) : null}
                 {searchEmpty ? (
-                  <div className="relative rounded-2xl bg-gradient-to-br from-red-500/10 to-pink-500/10 p-[1px]">
-                    <div className="rounded-2xl bg-neutral-900/80 p-8 backdrop-blur-xl text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      </div>
-                      <p className="text-lg font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent mb-2">No results</p>
-                      <p className="text-sm text-neutral-400 mb-6">
-                        Try a different keyword or browse popular picks.
-                      </p>
-                      <div className="flex flex-wrap gap-3 justify-center">
-                        <button
-                          type="button"
-                          onClick={() => setQuery("")}
-                          className="rounded-xl bg-neutral-800 border border-neutral-700 px-5 py-2.5 text-sm font-semibold text-neutral-200 hover:bg-neutral-700 transition-all active:scale-95"
-                        >
-                          Clear search
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setActiveChip("popular")}
-                          className="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white hover:from-emerald-600 hover:to-cyan-600 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
-                        >
-                          Browse popular
-                        </button>
-                      </div>
+                  <div className="rounded-3xl bg-neutral-900 border border-neutral-800 p-12 text-center hover:border-neutral-700 transition-colors">
+                    <div className="w-16 h-16 rounded-2xl bg-red-500 flex items-center justify-center mx-auto mb-6">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-3">No Results Found</h3>
+                    <p className="text-base text-neutral-400 mb-8 max-w-md mx-auto leading-relaxed">
+                      We couldn't find any series matching your search. Try different keywords or browse our popular picks.
+                    </p>
+                    <div className="flex flex-wrap gap-4 justify-center">
+                      <button
+                        type="button"
+                        onClick={() => setQuery("")}
+                        className="rounded-2xl bg-neutral-800 border border-neutral-700 px-6 py-3 text-base font-bold text-neutral-200 hover:bg-neutral-700 transition-colors uppercase tracking-wide"
+                      >
+                        Clear Search
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveChip("popular")}
+                        className="rounded-2xl bg-emerald-500 px-6 py-3 text-base font-bold text-white hover:bg-emerald-600 transition-colors uppercase tracking-wide"
+                      >
+                        Browse Popular
+                      </button>
                     </div>
                   </div>
                 ) : null}
@@ -589,7 +576,6 @@ export default function HomePage() {
           </div>
         )}
       </main>
-      </div>
     </div>
   );
 }
