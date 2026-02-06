@@ -16,6 +16,9 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  // 老王注释：添加补点模态框状态
+  const [adjustModal, setAdjustModal] = useState({ open: false, order: null });
+  const [adjustForm, setAdjustForm] = useState({ paidDelta: "", bonusDelta: "" });
   const [loading, setLoading] = useState(true);
 
   const loadOrders = useCallback(async () => {
@@ -48,7 +51,8 @@ export default function AdminOrdersPage() {
       const toTs = dateTo ? Date.parse(dateTo) : null;
       const matchesFrom = fromTs ? createdAt >= fromTs : true;
       const matchesTo = toTs ? createdAt <= toTs + 24 * 60 * 60 * 1000 : true;
-      return matchesStatus && matchesQuery;
+      // 老王注释：修复日期筛选bug - 添加日期匹配条件
+      return matchesStatus && matchesQuery && matchesFrom && matchesTo;
     });
   }, [orders, query, statusFilter, dateFrom, dateTo]);
 
@@ -94,15 +98,43 @@ export default function AdminOrdersPage() {
     loadOrders();
   };
 
+  // 老王注释：改进补点UI - 使用模态框替代window.prompt
   const handleAdjust = async (order) => {
-    const paidDelta = Number(window.prompt("补点（paid）", "0") || 0);
-    const bonusDelta = Number(window.prompt("补点（bonus）", "0") || 0);
-    await apiPost("/api/admin/orders/adjust", {
+    setAdjustModal({ open: true, order });
+    setAdjustForm({ paidDelta: "", bonusDelta: "" });
+  };
+
+  const confirmAdjust = async () => {
+    if (!adjustModal.order) return;
+
+    const paidDelta = Number(adjustForm.paidDelta || 0);
+    const bonusDelta = Number(adjustForm.bonusDelta || 0);
+
+    // 前端验证
+    if (paidDelta < 0 || bonusDelta < 0) {
+      alert("❌ 补点数量不能为负数");
+      return;
+    }
+
+    if (paidDelta > 10000 || bonusDelta > 10000) {
+      alert("❌ 单次补点不能超过10000");
+      return;
+    }
+
+    const response = await apiPost("/api/admin/orders/adjust", {
       key,
-      userId: order.userId,
+      userId: adjustModal.order.userId,
       paidDelta,
       bonusDelta,
     });
+
+    if (response.ok) {
+      alert("✅ 补点成功");
+      setAdjustModal({ open: false, order: null });
+      loadOrders();
+    } else {
+      alert(`❌ 补点失败：${response.error || "未知错误"}`);
+    }
   };
 
   if (!isAuthorized) {
@@ -221,6 +253,69 @@ export default function AdminOrdersPage() {
           </table>
         </div>
       </div>
+
+      {/* 老王注释：补点模态框 - 替代window.prompt，提供更好的用户体验 */}
+      {adjustModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-slate-900">补点</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              用户ID: {adjustModal.order?.userId}
+            </p>
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  付费点数 (Paid Points)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10000"
+                  value={adjustForm.paidDelta}
+                  onChange={(e) =>
+                    setAdjustForm((prev) => ({ ...prev, paidDelta: e.target.value }))
+                  }
+                  placeholder="输入补点数量"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  赠送点数 (Bonus Points)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10000"
+                  value={adjustForm.bonusDelta}
+                  onChange={(e) =>
+                    setAdjustForm((prev) => ({ ...prev, bonusDelta: e.target.value }))
+                  }
+                  placeholder="输入补点数量"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                />
+              </div>
+              <p className="text-xs text-slate-500">
+                ⚠️ 单次补点上限：10000点
+              </p>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={confirmAdjust}
+                className="flex-1 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                确认补点
+              </button>
+              <button
+                onClick={() => setAdjustModal({ open: false, order: null })}
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminShell>
   );
 }

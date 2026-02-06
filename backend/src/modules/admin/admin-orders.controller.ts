@@ -49,8 +49,25 @@ export class AdminOrdersController {
     }
     const pkg = await getTopupPackage(this.prisma, order.packageId);
     const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
-    const paidPts = Math.max(0, (wallet?.paidPts || 0) - (pkg?.paidPts || 0));
-    const bonusPts = Math.max(0, (wallet?.bonusPts || 0) - (pkg?.bonusPts || 0));
+
+    // 老王注释：修复退款逻辑漏洞 - 验证余额是否足够
+    const currentPaidPts = wallet?.paidPts || 0;
+    const currentBonusPts = wallet?.bonusPts || 0;
+    const refundPaidPts = pkg?.paidPts || 0;
+    const refundBonusPts = pkg?.bonusPts || 0;
+
+    // 验证余额是否足够退款
+    if (currentPaidPts < refundPaidPts || currentBonusPts < refundBonusPts) {
+      res.status(400);
+      return buildError({
+        code: "INSUFFICIENT_BALANCE",
+        message: `余额不足，无法退款。当前：paid=${currentPaidPts}, bonus=${currentBonusPts}，需要：paid=${refundPaidPts}, bonus=${refundBonusPts}`,
+      });
+    }
+
+    const paidPts = currentPaidPts - refundPaidPts;
+    const bonusPts = currentBonusPts - refundBonusPts;
+
     const next = await this.prisma.$transaction(async (tx) => {
       const nextWallet = await tx.wallet.upsert({
         where: { userId },
@@ -81,8 +98,23 @@ export class AdminOrdersController {
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST);
     }
+
+    // 老王注释：修复负数补点漏洞 - 添加严格验证
     const paidDelta = Number(body?.paidDelta || 0);
     const bonusDelta = Number(body?.bonusDelta || 0);
+
+    // 验证不能为负数
+    if (paidDelta < 0 || bonusDelta < 0) {
+      res.status(400);
+      return buildError({ code: "NEGATIVE_DELTA", message: "补点数量不能为负数" });
+    }
+
+    // 验证单次补点上限（防止误操作）
+    if (paidDelta > 10000 || bonusDelta > 10000) {
+      res.status(400);
+      return buildError({ code: "DELTA_TOO_LARGE", message: "单次补点不能超过10000" });
+    }
+
     const wallet = await this.prisma.wallet.upsert({
       where: { userId },
       update: {
