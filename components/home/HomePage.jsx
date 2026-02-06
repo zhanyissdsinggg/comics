@@ -66,25 +66,55 @@ const WalletAside = memo(function WalletAside() {
 
   return (
     <aside className="space-y-4">
-      <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4">
-        <h3 className="text-sm font-semibold">Wallet</h3>
-        <div className="mt-3 space-y-2 text-xs text-neutral-400">
-          <div>Paid: {formatUSNumber(paidPts)} POINTS</div>
-          <div>Bonus: {formatUSNumber(bonusPts)} POINTS</div>
-          <div>Plan: {plan}</div>
+      {/* 老王说：美化钱包卡片 - 使用glassmorphism和渐变边框 */}
+      <div className="relative rounded-2xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 p-[1px] backdrop-blur-xl">
+        <div className="rounded-2xl bg-neutral-900/80 p-5 backdrop-blur-xl">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-semibold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Wallet</h3>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-neutral-400">Paid Points</span>
+              <span className="text-sm font-bold text-emerald-400">{formatUSNumber(paidPts)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-neutral-400">Bonus Points</span>
+              <span className="text-sm font-bold text-cyan-400">{formatUSNumber(bonusPts)}</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-neutral-800">
+              <span className="text-xs text-neutral-400">Plan</span>
+              <span className="text-xs font-semibold text-white uppercase">{plan}</span>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4">
-        <h3 className="text-sm font-semibold">TTF Countdown</h3>
-        <p className="mt-3 text-xs text-neutral-400">Next free unlock in</p>
-        <p className="mt-2 text-lg font-semibold">{formatted || "--:--:--"}</p>
-        <button
-          type="button"
-          onClick={() => router.push("/subscribe")}
-          className="mt-4 w-full rounded-full border border-neutral-700 px-4 py-2 text-xs"
-        >
-          Subscribe for perks
-        </button>
+
+      {/* 老王说：美化倒计时卡片 */}
+      <div className="relative rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-[1px]">
+        <div className="rounded-2xl bg-neutral-900/80 p-5 backdrop-blur-xl">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-semibold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">TTF Countdown</h3>
+          </div>
+          <p className="text-xs text-neutral-400 mb-2">Next free unlock in</p>
+          <p className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent mb-4">{formatted || "--:--:--"}</p>
+          <button
+            type="button"
+            onClick={() => router.push("/subscribe")}
+            className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-3 text-sm font-semibold text-white hover:from-emerald-600 hover:to-cyan-600 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
+          >
+            Subscribe for perks
+          </button>
+        </div>
       </div>
     </aside>
   );
@@ -371,10 +401,16 @@ export default function HomePage() {
   }, [activeRails]);
 
   return (
-    <div className="min-h-screen bg-neutral-950">
-      <OnboardingTour />
-      <SiteHeader onSearch={setQuery} />
-      <main className="mx-auto max-w-6xl px-3 pb-12 pt-6 md:px-4 md:pt-8">
+    <div className="min-h-screen bg-neutral-950 relative overflow-hidden">
+      {/* 老王说：添加背景装饰渐变 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-cyan-500/5 pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10">
+        <OnboardingTour />
+        <SiteHeader onSearch={setQuery} />
+        <main className="mx-auto max-w-6xl px-3 pb-12 pt-6 md:px-4 md:pt-8">
         {loading ? (
           <div className="space-y-4 md:space-y-6">
             <Skeleton className="h-56 w-full rounded-3xl" />
@@ -411,40 +447,54 @@ export default function HomePage() {
               onKeywordClick={(keyword) => router.push(`/search?q=${encodeURIComponent(keyword)}`)}
             />
             <HeroCarousel items={heroItems} />
+            {/* 老王说：美化分类chips - 使用渐变和更好的hover效果 */}
             <div className="flex flex-wrap items-center gap-2">
               {chips.map((chip) => (
                 <button
                   key={chip.id}
                   type="button"
                   onClick={() => setActiveChip(chip.id)}
-                  className={`rounded-full px-4 py-2 text-xs font-semibold transition-all active:scale-95 ${
+                  className={`relative rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-95 ${
                     activeChip === chip.id
-                      ? "bg-white text-neutral-900 shadow-lg"
-                      : "border border-neutral-800 text-neutral-300 hover:border-neutral-700 active:bg-neutral-800"
+                      ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/30"
+                      : "bg-neutral-900/50 text-neutral-300 hover:bg-neutral-800/80 border border-neutral-800 hover:border-neutral-700 backdrop-blur-sm"
                   }`}
                 >
                   {chip.label}
                 </button>
               ))}
-              <Chip>{homeTab === "novels" ? "Novels" : "Comics"}</Chip>
-              {query ? <Chip>Search: {query}</Chip> : null}
+              <div className="rounded-xl bg-neutral-900/50 border border-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-400 backdrop-blur-sm">
+                {homeTab === "novels" ? "📚 Novels" : "📖 Comics"}
+              </div>
+              {query ? (
+                <div className="rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 px-4 py-2.5 text-sm font-medium text-amber-400 backdrop-blur-sm">
+                  🔍 Search: {query}
+                </div>
+              ) : null}
             </div>
             <div className="lg:grid lg:grid-cols-12 gap-4 md:gap-6">
               <div className="space-y-6 md:space-y-10 lg:col-span-8">
                 <section className="space-y-3">
                   {followingUpdates.length === 0 ? (
-                    <div className="rounded-2xl border border-neutral-900 bg-neutral-900/40 p-6 text-sm text-neutral-400">
-                      <p className="text-lg font-semibold text-white">Following Updates</p>
-                      <p className="mt-2 text-sm text-neutral-400">
-                        Follow a series to see updates here.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setActiveChip("popular")}
-                        className="mt-4 w-full rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
-                      >
-                        Browse popular
-                      </button>
+                    <div className="relative rounded-2xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 p-[1px]">
+                      <div className="rounded-2xl bg-neutral-900/80 p-8 backdrop-blur-xl text-center">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                          </svg>
+                        </div>
+                        <p className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-2">Following Updates</p>
+                        <p className="text-sm text-neutral-400 mb-6">
+                          Follow a series to see updates here.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setActiveChip("popular")}
+                          className="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-3 text-sm font-semibold text-white hover:from-emerald-600 hover:to-cyan-600 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
+                        >
+                          Browse popular
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <Rail
@@ -473,26 +523,33 @@ export default function HomePage() {
                   />
                 ) : null}
                 {searchEmpty ? (
-                  <div className="rounded-2xl border border-neutral-900 bg-neutral-900/40 p-6 text-sm text-neutral-400">
-                    <p className="text-lg font-semibold text-white">No results</p>
-                    <p className="mt-2 text-sm text-neutral-400">
-                      Try a different keyword or browse popular picks.
-                    </p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setQuery("")}
-                        className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
-                      >
-                        Clear search
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setActiveChip("popular")}
-                        className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-neutral-900"
-                      >
-                        Browse popular
-                      </button>
+                  <div className="relative rounded-2xl bg-gradient-to-br from-red-500/10 to-pink-500/10 p-[1px]">
+                    <div className="rounded-2xl bg-neutral-900/80 p-8 backdrop-blur-xl text-center">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-lg font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent mb-2">No results</p>
+                      <p className="text-sm text-neutral-400 mb-6">
+                        Try a different keyword or browse popular picks.
+                      </p>
+                      <div className="flex flex-wrap gap-3 justify-center">
+                        <button
+                          type="button"
+                          onClick={() => setQuery("")}
+                          className="rounded-xl bg-neutral-800 border border-neutral-700 px-5 py-2.5 text-sm font-semibold text-neutral-200 hover:bg-neutral-700 transition-all active:scale-95"
+                        >
+                          Clear search
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveChip("popular")}
+                          className="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white hover:from-emerald-600 hover:to-cyan-600 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
+                        >
+                          Browse popular
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : null}
@@ -532,6 +589,7 @@ export default function HomePage() {
           </div>
         )}
       </main>
+      </div>
     </div>
   );
 }
