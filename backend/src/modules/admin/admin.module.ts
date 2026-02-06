@@ -2,6 +2,7 @@ import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { EmailModule } from "../email/email.module";
 import { AdminLogService } from "../../common/services/admin-log.service";
+import { AdminAuthController } from "./admin-auth.controller";
 import { AdminSeriesController } from "./admin-series.controller";
 import { AdminPromotionsController } from "./admin-promotions.controller";
 import { AdminOrdersController } from "./admin-orders.controller";
@@ -32,6 +33,7 @@ import { AdminKeyMiddleware } from "./admin.middleware";
     })
   ],
   controllers: [
+    AdminAuthController,
     AdminSeriesController,
     AdminPromotionsController,
     AdminOrdersController,
