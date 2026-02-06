@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminAuthProvider } from "@/components/admin/AuthContext";
+import { AdminAuthProvider } from "../../components/admin/AuthContext";
 
 /**
  * 老王说：管理员页面布局
