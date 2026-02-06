@@ -28,14 +28,7 @@ export default function HeroCarousel({ items }) {
   const progressIntervalRef = useRef(null);
   const autoPlayTimeoutRef = useRef(null);
 
-  if (safeItems.length === 0) {
-    return (
-      <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 text-sm text-neutral-400">
-        No featured items.
-      </section>
-    );
-  }
-
+  // 老王注释：函数定义必须在early return之前，遵守React Hooks规则
   const handlePrev = () => {
     setIndex((prev) => (prev - 1 + safeItems.length) % safeItems.length);
     setProgress(0); // 重置进度
@@ -75,7 +68,7 @@ export default function HeroCarousel({ items }) {
     setIsPaused(false); // 恢复自动播放
   };
 
-  // 老王注释：自动播放逻辑
+  // 老王注释：自动播放逻辑 - 必须在early return之前调用
   useEffect(() => {
     if (safeItems.length <= 1 || isPaused) {
       return;
@@ -91,7 +84,8 @@ export default function HeroCarousel({ items }) {
 
     // 自动切换到下一张
     autoPlayTimeoutRef.current = setTimeout(() => {
-      handleNext();
+      setIndex((prev) => (prev + 1) % safeItems.length);
+      setProgress(0);
     }, AUTO_PLAY_INTERVAL);
 
     return () => {
@@ -102,7 +96,16 @@ export default function HeroCarousel({ items }) {
         clearTimeout(autoPlayTimeoutRef.current);
       }
     };
-  }, [index, isPaused, safeItems.length]);
+  }, [index, isPaused, safeItems.length, AUTO_PLAY_INTERVAL]);
+
+  // 老王注释：early return必须在所有Hooks之后
+  if (safeItems.length === 0) {
+    return (
+      <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 text-sm text-neutral-400">
+        No featured items.
+      </section>
+    );
+  }
 
   return (
     <section
