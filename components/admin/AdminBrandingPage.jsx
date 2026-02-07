@@ -8,8 +8,6 @@ import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { useBrandingStore } from "../../store/useBrandingStore";
 
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
-
 const defaultDraft = {
   siteLogoUrl: "",
   faviconUrl: "",
@@ -74,7 +72,7 @@ export default function AdminBrandingPage() {
       title="图片管理"
       subtitle="更新网站 Logo、浏览器图标与首页 Banner"
       actions={
-        isAuthorized ? (
+        isAuthenticated ? (
           <button
             type="button"
             onClick={handleSave}
@@ -85,7 +83,7 @@ export default function AdminBrandingPage() {
         ) : null
       }
     >
-      {!isAuthorized ? (
+      {!isAuthenticated ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
           403 无权限，请在地址栏附加 ?key=ADMIN_KEY
         </div>

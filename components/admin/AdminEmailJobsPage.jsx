@@ -45,7 +45,7 @@ export default function AdminEmailJobsPage() {
       setJobs(response.data?.jobs || []);
     }
     setLoading(false);
-  }, [key, view]);
+  }, [view]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -106,7 +106,7 @@ export default function AdminEmailJobsPage() {
         </div>
       }
     >
-      {!isAuthorized ? (
+      {!isAuthenticated ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
           403 无权限，请在地址栏附加 ?key=ADMIN_KEY
         </div>

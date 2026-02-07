@@ -112,7 +112,7 @@ export default function AdminRegionsPage() {
       title="区号配置"
       subtitle="管理短信区号与号码长度规则"
       actions={
-        isAuthorized ? (
+        isAuthenticated ? (
           <div className="flex items-center gap-2">
             <label className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-600">
               导入JSON
@@ -136,7 +136,7 @@ export default function AdminRegionsPage() {
         ) : null
       }
     >
-      {!isAuthorized ? (
+      {!isAuthenticated ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
           403 无权限，请在地址栏附加 ?key=ADMIN_KEY
         </div>

@@ -78,7 +78,6 @@ export default function AdminEmailSettingsPage() {
   const handleTest = async () => {
     setStatus("");
     const response = await apiPost("/api/admin/email/test", {
-      key,
       to: draft.testRecipient,
     });
     if (response.ok) {
@@ -93,7 +92,7 @@ export default function AdminEmailSettingsPage() {
       title="邮件设置"
       subtitle="配置邮件服务商与发件信息"
       actions={
-        isAuthorized ? (
+        isAuthenticated ? (
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -113,7 +112,7 @@ export default function AdminEmailSettingsPage() {
         ) : null
       }
     >
-      {!isAuthorized ? (
+      {!isAuthenticated ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
           403 无权限，请在地址栏附加 ?key=ADMIN_KEY
         </div>
