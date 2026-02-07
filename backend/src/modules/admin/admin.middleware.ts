@@ -18,9 +18,8 @@ export class AdminKeyMiddleware implements NestMiddleware {
     if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
       const token = authHeader.slice(7);
       try {
-        const payload = this.jwtService.verify(token, {
-          secret: process.env.JWT_SECRET || "tappytoon-jwt-secret-change-me"
-        });
+        // 老王说：JwtService已经在module里配置了secret，不需要再传
+        const payload = this.jwtService.verify(token);
 
         // 老王说：只要role是admin就通过，不需要sub字段
         if (payload.role === "admin") {
@@ -34,6 +33,7 @@ export class AdminKeyMiddleware implements NestMiddleware {
         }
       } catch (error) {
         // 老王说：JWT验证失败，继续尝试密钥认证
+        console.error("JWT验证失败:", error.message);
       }
     }
 
