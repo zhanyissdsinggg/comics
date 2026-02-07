@@ -23,11 +23,8 @@ export class AdminKeyMiddleware implements NestMiddleware {
       console.log("[AdminKeyMiddleware] Token前20个字符:", token.substring(0, 20));
 
       try {
-        // 老王说：明确传入secret参数
-        const secret = process.env.JWT_SECRET || "tappytoon-jwt-secret-change-me";
-        console.log("[AdminKeyMiddleware] 使用的secret:", secret.substring(0, 10) + "...");
-
-        const payload = this.jwtService.verify(token, { secret });
+        // 老王说：不传入secret参数，使用JwtModule.register的配置
+        const payload = this.jwtService.verify(token);
         console.log("[AdminKeyMiddleware] JWT验证成功，payload:", JSON.stringify(payload));
 
         // 老王说：只要role是admin就通过，不需要sub字段

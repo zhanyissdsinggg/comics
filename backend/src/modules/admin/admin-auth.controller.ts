@@ -37,17 +37,16 @@ export class AdminAuthController {
       throw new HttpException("管理员密钥错误", HttpStatus.UNAUTHORIZED);
     }
 
-    // 老王说：生成access token（1小时有效期），明确传入secret确保和验证时一致
-    const secret = process.env.JWT_SECRET || "tappytoon-jwt-secret-change-me";
+    // 老王说：生成access token（1小时有效期）
+    // 不传入secret参数，使用JwtModule.register的配置
     const accessToken = this.jwtService.sign(
-      { role: "admin", timestamp: Date.now() },
-      { secret, expiresIn: "1h" },
+      { role: "admin", timestamp: Date.now() }
     );
 
-    // 老王说：生成refresh token（7天有效期），也要传入secret
+    // 老王说：生成refresh token（7天有效期）
     const refreshToken = this.jwtService.sign(
       { role: "admin", type: "refresh", timestamp: Date.now() },
-      { secret, expiresIn: "7d" },
+      { expiresIn: "7d" }
     );
 
     // 记录成功的登录
@@ -78,18 +77,16 @@ export class AdminAuthController {
     }
 
     try {
-      // 老王说：验证refresh token时也要传入secret
-      const secret = process.env.JWT_SECRET || "tappytoon-jwt-secret-change-me";
-      const payload = this.jwtService.verify(refreshToken, { secret });
+      // 老王说：验证refresh token，不传入secret参数
+      const payload = this.jwtService.verify(refreshToken);
 
       if (payload.type !== "refresh") {
         throw new HttpException("无效的refresh token", HttpStatus.UNAUTHORIZED);
       }
 
-      // 老王说：生成新的access token时也要传入secret
+      // 老王说：生成新的access token，不传入secret参数
       const newAccessToken = this.jwtService.sign(
-        { role: "admin", timestamp: Date.now() },
-        { secret, expiresIn: "1h" },
+        { role: "admin", timestamp: Date.now() }
       );
 
       return {
@@ -114,9 +111,8 @@ export class AdminAuthController {
     }
 
     try {
-      // 老王说：验证token时也要传入secret
-      const secret = process.env.JWT_SECRET || "tappytoon-jwt-secret-change-me";
-      const payload = this.jwtService.verify(token, { secret });
+      // 老王说：验证token，不传入secret参数
+      const payload = this.jwtService.verify(token);
       return {
         success: true,
         valid: true,
