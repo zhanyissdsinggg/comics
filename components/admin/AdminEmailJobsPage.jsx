@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
-
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
 
 function toCsv(rows) {
   const header = ["status", "to", "subject", "provider", "priority", "retries", "lastAttemptAt", "error"];
@@ -22,19 +21,25 @@ function toCsv(rows) {
 }
 
 export default function AdminEmailJobsPage() {
-  const searchParams = useSearchParams();
-  const key = searchParams.get("key") || "";
-  const isAuthorized = key === ADMIN_KEY;
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAdminAuth();
   const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState([]);
   const [view, setView] = useState("all");
+
+  // 老王说：检查认证状态，未登录则重定向
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/admin/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     const endpoint =
       view === "failed"
-        ? `/api/admin/email/jobs/failed?key=${key}`
-        : `/api/admin/email/jobs?key=${key}`;
+        ? `/api/admin/email/jobs/failed`
+        : `/api/admin/email/jobs`;
     const response = await apiGet(endpoint);
     if (response.ok) {
       setJobs(response.data?.jobs || []);
@@ -43,15 +48,15 @@ export default function AdminEmailJobsPage() {
   }, [key, view]);
 
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthenticated) {
       loadData();
     } else {
       setLoading(false);
     }
-  }, [isAuthorized, loadData]);
+  }, [isAuthenticated, loadData]);
 
   const handleRetry = async (jobId) => {
-    await apiPost(`/api/admin/email/jobs/retry?key=${key}`, { jobId, key });
+    await apiPost(`/api/admin/email/jobs/retry`, { jobId });
     loadData();
   };
 

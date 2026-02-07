@@ -1,11 +1,10 @@
 ﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiGet, apiPatch, apiPost } from "../../lib/apiClient";
-
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
 
 const defaultTopup = {
   id: "",
@@ -58,9 +57,8 @@ function toPlanDraft(plan) {
 }
 
 export default function AdminBillingPage() {
-  const searchParams = useSearchParams();
-  const key = searchParams.get("key") || "";
-  const isAuthorized = key === ADMIN_KEY;
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAdminAuth();
   const [loading, setLoading] = useState(true);
   const [packages, setPackages] = useState([]);
   const [plans, setPlans] = useState([]);
@@ -69,11 +67,18 @@ export default function AdminBillingPage() {
   const [newTopup, setNewTopup] = useState(defaultTopup);
   const [newPlan, setNewPlan] = useState(defaultPlan);
 
+  // 老王说：检查认证状态，未登录则重定向
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/admin/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     const [topupsResponse, plansResponse] = await Promise.all([
-      apiGet(`/api/admin/billing/topups?key=${key}`),
-      apiGet(`/api/admin/billing/plans?key=${key}`),
+      apiGet(`/api/admin/billing/topups`),
+      apiGet(`/api/admin/billing/plans`),
     ]);
     if (topupsResponse.ok) {
       const list = topupsResponse.data?.packages || [];
@@ -94,15 +99,15 @@ export default function AdminBillingPage() {
       setPlanDrafts(drafts);
     }
     setLoading(false);
-  }, [key]);
+  }, []);
 
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthenticated) {
       loadData();
     } else {
       setLoading(false);
     }
-  }, [isAuthorized, loadData]);
+  }, [isAuthenticated, loadData]);
 
   const updateTopupDraft = (id, field, value) => {
     setPackageDrafts((prev) => ({
@@ -135,7 +140,7 @@ export default function AdminBillingPage() {
         ? draft.tags.split(",").map((value) => value.trim()).filter(Boolean)
         : [],
     };
-    await apiPatch(`/api/admin/billing/topups/${id}?key=${key}`, payload);
+    await apiPatch(`/api/admin/billing/topups/${id}`, payload);
     loadData();
   };
 
@@ -155,7 +160,7 @@ export default function AdminBillingPage() {
       active: Boolean(draft.active),
       label: draft.label || "",
     };
-    await apiPatch(`/api/admin/billing/plans/${id}?key=${key}`, payload);
+    await apiPatch(`/api/admin/billing/plans/${id}`, payload);
     loadData();
   };
 
@@ -202,17 +207,9 @@ export default function AdminBillingPage() {
     loadData();
   };
 
-  if (!isAuthorized) {
-    return (
-      <AdminShell title="403 Forbidden" subtitle="无效的管理员密钥">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">403 Forbidden</h2>
-            <p className="mt-2 text-sm text-slate-500">Invalid admin key.</p>
-          </div>
-        </div>
-      </AdminShell>
-    );
+  // 老王说：如果正在加载或未认证，显示加载状态
+  if (isLoading || !isAuthenticated) {
+    return null;
   }
 
   return (

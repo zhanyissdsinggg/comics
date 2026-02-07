@@ -1,16 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
-
 export default function AdminNotificationsPage() {
-  const searchParams = useSearchParams();
-  const key = searchParams.get("key") || "";
-  const isAuthorized = key === ADMIN_KEY;
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAdminAuth();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
@@ -21,22 +19,29 @@ export default function AdminNotificationsPage() {
     type: "PROMO",
   });
 
+  // 老王说：检查认证状态，未登录则重定向
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/admin/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   const loadNotifications = useCallback(async () => {
     setLoading(true);
-    const response = await apiGet(`/api/admin/notifications?key=${key}`);
+    const response = await apiGet(`/api/admin/notifications`);
     if (response.ok) {
       setNotifications(response.data?.notifications || []);
     }
     setLoading(false);
-  }, [key]);
+  }, []);
 
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthenticated) {
       loadNotifications();
     } else {
       setLoading(false);
     }
-  }, [isAuthorized, loadNotifications]);
+  }, [isAuthenticated, loadNotifications]);
 
   const handleSend = async () => {
     if (!form.title) {
@@ -50,17 +55,9 @@ export default function AdminNotificationsPage() {
     loadNotifications();
   };
 
-  if (!isAuthorized) {
-    return (
-      <AdminShell title="403 Forbidden" subtitle="无效的管理员密钥">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">403 Forbidden</h2>
-            <p className="mt-2 text-sm text-slate-500">Invalid admin key.</p>
-          </div>
-        </div>
-      </AdminShell>
-    );
+  // 老王说：如果正在加载或未认证，显示加载状态
+  if (isLoading || !isAuthenticated) {
+    return null;
   }
 
   return (

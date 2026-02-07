@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
-
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
 
 const defaultDraft = {
   provider: "console",
@@ -19,29 +18,35 @@ const defaultDraft = {
 };
 
 export default function AdminEmailSettingsPage() {
-  const searchParams = useSearchParams();
-  const key = searchParams.get("key") || "";
-  const isAuthorized = key === ADMIN_KEY;
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAdminAuth();
   const [draft, setDraft] = useState(defaultDraft);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
 
+  // 老王说：检查认证状态，未登录则重定向
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/admin/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   const loadData = useCallback(async () => {
     setLoading(true);
-    const response = await apiGet(`/api/admin/email?key=${key}`);
+    const response = await apiGet(`/api/admin/email`);
     if (response.ok && response.data?.config) {
       setDraft({ ...defaultDraft, ...response.data.config });
     }
     setLoading(false);
-  }, [key]);
+  }, []);
 
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthenticated) {
       loadData();
     } else {
       setLoading(false);
     }
-  }, [isAuthorized, loadData]);
+  }, [isAuthenticated, loadData]);
 
   const handleChange = (field, value) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -49,7 +54,7 @@ export default function AdminEmailSettingsPage() {
 
   const handleSave = async () => {
     setStatus("");
-    const payload = { key, ...draft };
+    const payload = { ...draft };
     const response = await apiPost("/api/admin/email", payload);
     if (response.ok) {
       setStatus("已保存");
@@ -60,7 +65,7 @@ export default function AdminEmailSettingsPage() {
 
   const handleClearKey = async (field) => {
     setStatus("");
-    const payload = { key, ...draft, [field]: "" };
+    const payload = { ...draft, [field]: "" };
     const response = await apiPost("/api/admin/email", payload);
     if (response.ok) {
       setDraft((prev) => ({ ...prev, [field]: "" }));

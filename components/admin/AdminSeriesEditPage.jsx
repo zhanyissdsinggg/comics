@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiGet, apiPatch } from "../../lib/apiClient";
-
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
 
 function parseGenres(value) {
   if (!value) {
@@ -28,81 +27,9 @@ export default function AdminSeriesEditPage() {
   const isAuthorized = key === ADMIN_KEY;
 
   useEffect(() => {
-    if (!isAuthorized) {
-      return;
-    }
-    apiGet(`/api/admin/series/${seriesId}?key=${key}`).then((response) => {
-      if (response.ok) {
-        setSeries(response.data?.series);
-        const data = response.data?.series || {};
-        setForm({
-          title: data.title || "",
-          type: data.type || "comic",
-          status: data.status || "Ongoing",
-          adult: Boolean(data.adult),
-          coverTone: data.coverTone || "",
-          coverUrl: data.coverUrl || "",
-          badge: data.badge || "",
-          genres: (data.genres || []).join(", "),
-          description: data.description || "",
-          pricing: {
-            currency: data.pricing?.currency || "POINTS",
-            episodePrice: data.pricing?.episodePrice || 5,
-            discount: data.pricing?.discount || 0,
-          },
-          ttf: {
-            enabled: Boolean(data.ttf?.enabled),
-            intervalHours: data.ttf?.intervalHours || 24,
-          },
-        });
-      }
-    });
-  }, [isAuthorized, key, seriesId]);
-
-  const handleSave = async () => {
-    if (!form) {
-      return;
-    }
-    const payload = {
-      key,
-      series: {
-        title: form.title,
-        type: form.type,
-        status: form.status,
-        adult: Boolean(form.adult),
-        coverTone: form.coverTone,
-        coverUrl: form.coverUrl,
-        badge: form.badge,
-        genres: parseGenres(form.genres),
-        description: form.description,
-        pricing: {
-          currency: form.pricing.currency,
-          episodePrice: Number(form.pricing.episodePrice || 0),
-          discount: Number(form.pricing.discount || 0),
-        },
-        ttf: {
-          enabled: Boolean(form.ttf.enabled),
-          intervalHours: Number(form.ttf.intervalHours || 0),
-        },
-      },
-    };
-    const response = await apiPatch(`/api/admin/series/${seriesId}`, payload);
-    if (response.ok) {
-      setSeries(response.data?.series);
-    }
-  };
-
-  if (!isAuthorized) {
-    return (
-      <AdminShell title="403 Forbidden" subtitle="无效的管理员密钥">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">403 Forbidden</h2>
-            <p className="mt-2 text-sm text-slate-500">Invalid admin key.</p>
-          </div>
-        </div>
-      </AdminShell>
-    );
+    // 老王说：如果正在加载或未认证，显示加载状态
+  if (isLoading || !isAuthenticated) {
+    return null;
   }
 
   if (!form) {
@@ -121,7 +48,7 @@ export default function AdminSeriesEditPage() {
         <button
           type="button"
           onClick={() =>
-            router.push(`/admin/series/${seriesId}/episodes?key=${key}`)
+            router.push(`/admin/series/${seriesId}/episodes`)
           }
           className="rounded-full border border-slate-200 px-4 py-2 text-xs text-slate-600"
         >

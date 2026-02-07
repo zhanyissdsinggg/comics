@@ -1,0 +1,98 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e105]: tappytoon-backend v0.1.0
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e7]: MN
+        - text: 管理系统
+      - navigation [ref=e8]:
+        - link "首页" [ref=e9] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e10]
+          - text: 首页
+        - link "作品管理" [ref=e13] [cursor=pointer]:
+          - /url: /admin/series
+          - img [ref=e14]
+          - text: 作品管理
+        - link "活动配置" [ref=e16] [cursor=pointer]:
+          - /url: /admin/promotions
+          - img [ref=e17]
+          - text: 活动配置
+        - link "订单管理" [ref=e20] [cursor=pointer]:
+          - /url: /admin/orders
+          - img [ref=e21]
+          - text: 订单管理
+        - link "套餐定价" [ref=e24] [cursor=pointer]:
+          - /url: /admin/billing
+          - img [ref=e25]
+          - text: 套餐定价
+        - link "图片管理" [ref=e27] [cursor=pointer]:
+          - /url: /admin/branding
+          - img [ref=e28]
+          - text: 图片管理
+        - link "邮件设置" [ref=e32] [cursor=pointer]:
+          - /url: /admin/email-settings
+          - img [ref=e33]
+          - text: 邮件设置
+        - link "邮件记录" [ref=e36] [cursor=pointer]:
+          - /url: /admin/email-jobs
+          - img [ref=e37]
+          - text: 邮件记录
+        - link "支持工单" [ref=e41] [cursor=pointer]:
+          - /url: /admin/support
+          - img [ref=e42]
+          - text: 支持工单
+        - link "用户管理" [ref=e49] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e50]
+          - text: 用户管理
+        - link "追踪设置" [ref=e55] [cursor=pointer]:
+          - /url: /admin/tracking
+          - img [ref=e56]
+          - text: 追踪设置
+        - link "通知中心" [ref=e63] [cursor=pointer]:
+          - /url: /admin/notifications
+          - img [ref=e64]
+          - text: 通知中心
+        - link "评论管理" [ref=e67] [cursor=pointer]:
+          - /url: /admin/comments
+          - img [ref=e68]
+          - text: 评论管理
+        - link "系统设置" [ref=e70] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e71]
+          - text: 系统设置
+        - generic [ref=e74]: 系统设置
+        - link "区号配置" [ref=e75] [cursor=pointer]:
+          - /url: /admin/regions
+          - img [ref=e76]
+          - text: 区号配置
+    - generic [ref=e79]:
+      - banner [ref=e80]:
+        - generic [ref=e81]:
+          - generic [ref=e82]:
+            - paragraph [ref=e83]: 首页 / 活动配置
+            - heading "403 Forbidden" [level=1] [ref=e84]
+            - paragraph [ref=e85]: 无效的管理员密钥
+          - generic [ref=e86]:
+            - generic [ref=e87]:
+              - generic [ref=e88]: ⌘K
+              - generic [ref=e89]: 搜索
+            - searchbox "搜索作品/章节" [ref=e90]
+      - main [ref=e91]:
+        - generic [ref=e93]:
+          - heading "403 Forbidden" [level=2] [ref=e94]
+          - paragraph [ref=e95]: Invalid admin key.
+  - contentinfo [ref=e96]:
+    - generic [ref=e97]:
+      - generic [ref=e98]:
+        - link "Diagnostics" [ref=e99] [cursor=pointer]:
+          - /url: /diagnostics
+        - link "Events" [ref=e100] [cursor=pointer]:
+          - /url: /events
+        - link "Help" [ref=e101] [cursor=pointer]:
+          - /url: /faq
+        - link "Support" [ref=e102] [cursor=pointer]:
+          - /url: /support
+      - generic [ref=e103]: MN
+  - alert [ref=e104]

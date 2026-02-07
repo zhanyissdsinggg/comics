@@ -1,38 +1,43 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
-
 export default function AdminRegionsPage() {
-  const searchParams = useSearchParams();
-  const key = searchParams.get("key") || "";
-  const isAuthorized = key === ADMIN_KEY;
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAdminAuth();
   const [loading, setLoading] = useState(true);
   const [countryCodes, setCountryCodes] = useState([]);
   const [lengthRules, setLengthRules] = useState({});
   const [status, setStatus] = useState("");
 
+  // 老王说：检查认证状态，未登录则重定向
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/admin/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   const loadData = useCallback(async () => {
     setLoading(true);
-    const response = await apiGet(`/api/admin/regions?key=${key}`);
+    const response = await apiGet(`/api/admin/regions`);
     if (response.ok && response.data?.config) {
       setCountryCodes(response.data.config.countryCodes || []);
       setLengthRules(response.data.config.lengthRules || {});
     }
     setLoading(false);
-  }, [key]);
+  }, []);
 
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthenticated) {
       loadData();
     } else {
       setLoading(false);
     }
-  }, [isAuthorized, loadData]);
+  }, [isAuthenticated, loadData]);
 
   const updateCode = (index, field, value) => {
     setCountryCodes((prev) =>
@@ -60,7 +65,7 @@ export default function AdminRegionsPage() {
 
   const handleSave = async () => {
     setStatus("");
-    const payload = { key, countryCodes, lengthRules };
+    const payload = { countryCodes, lengthRules };
     const response = await apiPost("/api/admin/regions", payload);
     if (response.ok) {
       setStatus("已保存");

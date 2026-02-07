@@ -2,7 +2,8 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { useBrandingStore } from "../../store/useBrandingStore";
@@ -16,17 +17,23 @@ const defaultDraft = {
 };
 
 export default function AdminBrandingPage() {
-  const searchParams = useSearchParams();
-  const key = searchParams.get("key") || "";
-  const isAuthorized = key === ADMIN_KEY;
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAdminAuth();
   const { setBranding } = useBrandingStore();
   const [draft, setDraft] = useState(defaultDraft);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
 
+  // 老王说：检查认证状态，未登录则重定向
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/admin/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   const loadData = useCallback(async () => {
     setLoading(true);
-    const response = await apiGet(`/api/admin/branding?key=${key}`);
+    const response = await apiGet(`/api/admin/branding`);
     if (response.ok && response.data?.branding) {
       const payload = response.data.branding || {};
       setDraft({
@@ -36,15 +43,15 @@ export default function AdminBrandingPage() {
       });
     }
     setLoading(false);
-  }, [key]);
+  }, []);
 
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthenticated) {
       loadData();
     } else {
       setLoading(false);
     }
-  }, [isAuthorized, loadData]);
+  }, [isAuthenticated, loadData]);
 
   const handleChange = (field, value) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -52,7 +59,7 @@ export default function AdminBrandingPage() {
 
   const handleSave = async () => {
     setStatus("");
-    const payload = { key, ...draft };
+    const payload = { ...draft };
     const response = await apiPost("/api/admin/branding", payload);
     if (response.ok && response.data?.branding) {
       setBranding(response.data.branding);

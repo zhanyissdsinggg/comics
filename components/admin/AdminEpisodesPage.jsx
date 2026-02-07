@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload } from "../../lib/apiClient";
-
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
 
 // 老王注释：解析数字，避免NaN这个SB问题
 function parseNumber(value) {
@@ -70,9 +69,16 @@ export default function AdminEpisodesPage() {
   const novelUploadRef = useRef(null);
 
   // 老王注释：加载章节列表
+  // 老王说：检查认证状态，未登录则重定向
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/admin/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   const loadEpisodes = useCallback(async () => {
     setLoading(true);
-    const response = await apiGet(`/api/admin/series/${seriesId}/episodes?key=${key}`);
+    const response = await apiGet(`/api/admin/series/${seriesId}/episodes`);
     if (response.ok) {
       setEpisodes(response.data?.episodes || []);
       setModifiedIds(new Set());
@@ -81,12 +87,12 @@ export default function AdminEpisodesPage() {
   }, [key, seriesId]);
 
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthenticated) {
       loadEpisodes();
     } else {
       setLoading(false);
     }
-  }, [isAuthorized, loadEpisodes]);
+  }, [isAuthenticated, loadEpisodes]);
 
   // 老王注释：选中的章节ID列表
   const selectedIds = useMemo(
@@ -248,7 +254,7 @@ export default function AdminEpisodesPage() {
     }
 
     try {
-      const response = await apiDelete(`/api/admin/series/${seriesId}/episodes/${episodeId}?key=${key}`);
+      const response = await apiDelete(`/api/admin/series/${seriesId}/episodes/${episodeId}`);
       if (response.ok) {
         alert(`✅ ${episodeLabel}已删除`);
         loadEpisodes();
@@ -277,7 +283,7 @@ export default function AdminEpisodesPage() {
 
     for (const id of selectedIds) {
       try {
-        const response = await apiDelete(`/api/admin/series/${seriesId}/episodes/${id}?key=${key}`);
+        const response = await apiDelete(`/api/admin/series/${seriesId}/episodes/${id}`);
         if (response.ok) {
           successCount++;
         } else {
@@ -446,17 +452,9 @@ export default function AdminEpisodesPage() {
     },
   });
 
-  if (!isAuthorized) {
-    return (
-      <AdminShell title="403 Forbidden" subtitle="无效的管理员密钥">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">403 Forbidden</h2>
-            <p className="mt-2 text-sm text-slate-500">Invalid admin key.</p>
-          </div>
-        </div>
-      </AdminShell>
-    );
+  // 老王说：如果正在加载或未认证，显示加载状态
+  if (isLoading || !isAuthenticated) {
+    return null;
   }
 
   return (
