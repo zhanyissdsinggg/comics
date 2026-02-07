@@ -19,11 +19,15 @@ let AdminKeyMiddleware = class AdminKeyMiddleware {
     }
     use(req, res, next) {
         const authHeader = req.headers.authorization;
+        console.log("[AdminKeyMiddleware] Authorization header:", authHeader ? "存在" : "不存在");
         if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
             const token = authHeader.slice(7);
+            console.log("[AdminKeyMiddleware] Token前20个字符:", token.substring(0, 20));
             try {
                 const payload = this.jwtService.verify(token);
+                console.log("[AdminKeyMiddleware] JWT验证成功，payload:", JSON.stringify(payload));
                 if (payload.role === "admin") {
+                    console.log("[AdminKeyMiddleware] 认证通过，role是admin");
                     req.user = {
                         userId: "admin",
                         role: payload.role
@@ -31,15 +35,22 @@ let AdminKeyMiddleware = class AdminKeyMiddleware {
                     next();
                     return;
                 }
+                else {
+                    console.log("[AdminKeyMiddleware] 认证失败，role不是admin:", payload.role);
+                }
             }
             catch (error) {
-                console.error("JWT验证失败:", error.message);
+                console.error("[AdminKeyMiddleware] JWT验证失败:", error.message);
+                console.error("[AdminKeyMiddleware] 错误详情:", error);
             }
         }
+        console.log("[AdminKeyMiddleware] 尝试旧的密钥认证");
         if ((0, admin_1.isAdminAuthorized)(req, req.body)) {
+            console.log("[AdminKeyMiddleware] 密钥认证通过");
             next();
             return;
         }
+        console.log("[AdminKeyMiddleware] 所有认证方式都失败，返回403");
         res.status(403).json({ error: "FORBIDDEN" });
     }
 };

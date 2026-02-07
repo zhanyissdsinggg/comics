@@ -31,7 +31,7 @@ let AdminAuthController = class AdminAuthController {
             await this.adminLogService.log("login_failed", "auth", "admin", { reason: "Invalid admin key" });
             throw new common_1.HttpException("管理员密钥错误", common_1.HttpStatus.UNAUTHORIZED);
         }
-        const accessToken = this.jwtService.sign({ role: "admin", timestamp: Date.now() }, { expiresIn: "1h" });
+        const accessToken = this.jwtService.sign({ role: "admin", timestamp: Date.now() });
         const refreshToken = this.jwtService.sign({ role: "admin", type: "refresh", timestamp: Date.now() }, { expiresIn: "7d" });
         await this.adminLogService.log("login_success", "auth", "admin", { message: "Admin logged in successfully" });
         return {
@@ -51,7 +51,7 @@ let AdminAuthController = class AdminAuthController {
             if (payload.type !== "refresh") {
                 throw new common_1.HttpException("无效的refresh token", common_1.HttpStatus.UNAUTHORIZED);
             }
-            const newAccessToken = this.jwtService.sign({ role: "admin", timestamp: Date.now() }, { expiresIn: "1h" });
+            const newAccessToken = this.jwtService.sign({ role: "admin", timestamp: Date.now() });
             return {
                 success: true,
                 accessToken: newAccessToken,

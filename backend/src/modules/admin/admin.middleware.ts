@@ -2,7 +2,6 @@ import { Injectable, NestMiddleware } from "@nestjs/common";
 import { Request, Response, NextFunction } from "express";
 import { isAdminAuthorized } from "../../common/utils/admin";
 import { JwtService } from "@nestjs/jwt";
-import { ConfigService } from "@nestjs/config";
 
 /**
  * 老王说：管理员认证中间件，支持两种认证方式：
