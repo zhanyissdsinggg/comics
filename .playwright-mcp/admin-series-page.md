@@ -1,0 +1,228 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e26]: tappytoon-backend v0.1.0
+  - generic [ref=e28]:
+    - complementary [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e32]: MN
+        - text: 管理系统
+      - navigation [ref=e33]:
+        - link "首页" [ref=e34] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e35]
+          - text: 首页
+        - link "作品管理" [ref=e38] [cursor=pointer]:
+          - /url: /admin/series
+          - img [ref=e39]
+          - text: 作品管理
+        - link "活动配置" [ref=e41] [cursor=pointer]:
+          - /url: /admin/promotions
+          - img [ref=e42]
+          - text: 活动配置
+        - link "订单管理" [ref=e45] [cursor=pointer]:
+          - /url: /admin/orders
+          - img [ref=e46]
+          - text: 订单管理
+        - link "套餐定价" [ref=e49] [cursor=pointer]:
+          - /url: /admin/billing
+          - img [ref=e50]
+          - text: 套餐定价
+        - link "图片管理" [ref=e52] [cursor=pointer]:
+          - /url: /admin/branding
+          - img [ref=e53]
+          - text: 图片管理
+        - link "邮件设置" [ref=e57] [cursor=pointer]:
+          - /url: /admin/email-settings
+          - img [ref=e58]
+          - text: 邮件设置
+        - link "邮件记录" [ref=e61] [cursor=pointer]:
+          - /url: /admin/email-jobs
+          - img [ref=e62]
+          - text: 邮件记录
+        - link "支持工单" [ref=e66] [cursor=pointer]:
+          - /url: /admin/support
+          - img [ref=e67]
+          - text: 支持工单
+        - link "用户管理" [ref=e74] [cursor=pointer]:
+          - /url: /admin/users
+          - img [ref=e75]
+          - text: 用户管理
+        - link "追踪设置" [ref=e80] [cursor=pointer]:
+          - /url: /admin/tracking
+          - img [ref=e81]
+          - text: 追踪设置
+        - link "通知中心" [ref=e88] [cursor=pointer]:
+          - /url: /admin/notifications
+          - img [ref=e89]
+          - text: 通知中心
+        - link "评论管理" [ref=e92] [cursor=pointer]:
+          - /url: /admin/comments
+          - img [ref=e93]
+          - text: 评论管理
+        - link "系统设置" [ref=e95] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e96]
+          - text: 系统设置
+        - generic [ref=e99]: 系统设置
+        - link "区号配置" [ref=e100] [cursor=pointer]:
+          - /url: /admin/regions
+          - img [ref=e101]
+          - text: 区号配置
+    - generic [ref=e104]:
+      - banner [ref=e105]:
+        - generic [ref=e106]:
+          - generic [ref=e107]:
+            - paragraph [ref=e108]: 首页 / 作品管理
+            - heading "作品管理" [level=1] [ref=e109]
+            - paragraph [ref=e110]: 管理作品、章节与基础配置
+          - generic [ref=e111]:
+            - generic [ref=e112]:
+              - generic [ref=e113]: ⌘K
+              - generic [ref=e114]: 搜索
+            - searchbox "搜索作品/章节" [ref=e115]
+            - button "活动配置" [ref=e117] [cursor=pointer]
+      - main [ref=e118]:
+        - generic [ref=e119]:
+          - generic [ref=e120]:
+            - heading "作品总览" [level=2] [ref=e121]
+            - paragraph [ref=e122]: 新建作品、进入编辑或章节管理。
+            - generic [ref=e123]:
+              - generic [ref=e124]:
+                - paragraph [ref=e125]: 作品总数
+                - paragraph [ref=e126]: "2"
+              - generic [ref=e127]:
+                - paragraph [ref=e128]: 漫画
+                - paragraph [ref=e129]: "2"
+              - generic [ref=e130]:
+                - paragraph [ref=e131]: 小说
+                - paragraph [ref=e132]: "0"
+              - generic [ref=e133]:
+                - paragraph [ref=e134]: 成人向
+                - paragraph [ref=e135]: "1"
+          - generic [ref=e136]:
+            - heading "创建作品" [level=3] [ref=e137]
+            - generic [ref=e138]:
+              - textbox "作品 ID" [ref=e139]
+              - textbox "作品标题" [ref=e140]
+              - combobox [ref=e141]:
+                - option "漫画" [selected]
+                - option "小说"
+              - generic [ref=e142]:
+                - checkbox "成人向" [ref=e143]
+                - text: 成人向
+            - button "创建" [ref=e144] [cursor=pointer]
+          - generic [ref=e145]:
+            - generic [ref=e146]:
+              - heading "作品列表" [level=3] [ref=e148]
+              - generic [ref=e150]:
+                - button "全部" [ref=e151] [cursor=pointer]
+                - button "漫画" [ref=e152] [cursor=pointer]
+                - button "小说" [ref=e153] [cursor=pointer]
+            - generic [ref=e155]:
+              - textbox "搜索 ID 或作品标题" [ref=e156]
+              - combobox [ref=e157]:
+                - option "全部年龄" [selected]
+                - option "成人向"
+                - option "全年龄"
+              - combobox [ref=e158]:
+                - option "全部状态" [selected]
+                - option "连载中"
+                - option "已完结"
+                - option "暂停"
+              - generic [ref=e159]:
+                - button "重置" [ref=e160] [cursor=pointer]
+                - button "搜索" [ref=e161] [cursor=pointer]
+            - generic [ref=e163]:
+              - generic [ref=e164]: 批量操作（已选 0）
+              - button "上架" [ref=e165] [cursor=pointer]
+              - button "下架" [ref=e166] [cursor=pointer]
+              - button "推荐" [ref=e167] [cursor=pointer]
+              - button "取消推荐" [ref=e168] [cursor=pointer]
+              - button "标记成人向" [ref=e169] [cursor=pointer]
+              - button "取消成人向" [ref=e170] [cursor=pointer]
+            - table [ref=e172]:
+              - rowgroup [ref=e173]:
+                - row "ID 封面 作品名称 类型 分类 状态 操作" [ref=e174]:
+                  - columnheader [ref=e175]:
+                    - checkbox [ref=e176]
+                  - columnheader "ID" [ref=e177]:
+                    - button "ID" [ref=e178] [cursor=pointer]
+                  - columnheader "封面" [ref=e179]
+                  - columnheader "作品名称" [ref=e180]:
+                    - button "作品名称" [ref=e181] [cursor=pointer]
+                  - columnheader "类型" [ref=e182]
+                  - columnheader "分类" [ref=e183]
+                  - columnheader "状态" [ref=e184]
+                  - columnheader "操作" [ref=e185]
+              - rowgroup [ref=e186]:
+                - row "a1 无封面 After Dark Contract 成人向 已上架 漫画 Thriller Drama 连载中 查看 编辑 章节 下架 推荐 取消成人 复制 删除" [ref=e194]:
+                  - cell [ref=e195]:
+                    - checkbox [ref=e196]
+                  - cell "a1" [ref=e197]
+                  - cell "无封面" [ref=e198]:
+                    - generic [ref=e200]: 无封面
+                  - cell "After Dark Contract 成人向 已上架" [ref=e201]:
+                    - generic [ref=e202]: After Dark Contract
+                    - generic [ref=e203]:
+                      - generic [ref=e204]: 成人向
+                      - generic [ref=e205]: 已上架
+                  - cell "漫画" [ref=e206]
+                  - cell "Thriller Drama" [ref=e207]:
+                    - generic [ref=e208]:
+                      - generic [ref=e209]: Thriller
+                      - generic [ref=e210]: Drama
+                  - cell "连载中" [ref=e211]
+                  - cell "查看 编辑 章节 下架 推荐 取消成人 复制 删除" [ref=e212]:
+                    - generic [ref=e213]:
+                      - button "查看" [ref=e214] [cursor=pointer]
+                      - button "编辑" [ref=e215] [cursor=pointer]
+                      - button "章节" [ref=e216] [cursor=pointer]
+                      - button "下架" [ref=e217] [cursor=pointer]
+                      - button "推荐" [ref=e218] [cursor=pointer]
+                      - button "取消成人" [ref=e219] [cursor=pointer]
+                      - button "复制" [ref=e220] [cursor=pointer]
+                      - button "删除" [ref=e221] [cursor=pointer]
+                - row "c1 无封面 Midnight Contract 全年龄 已上架 漫画 Romance Drama 连载中 查看 编辑 章节 下架 推荐 标记成人 复制 删除" [ref=e222]:
+                  - cell [ref=e223]:
+                    - checkbox [ref=e224]
+                  - cell "c1" [ref=e225]
+                  - cell "无封面" [ref=e226]:
+                    - generic [ref=e228]: 无封面
+                  - cell "Midnight Contract 全年龄 已上架" [ref=e229]:
+                    - generic [ref=e230]: Midnight Contract
+                    - generic [ref=e231]:
+                      - generic [ref=e232]: 全年龄
+                      - generic [ref=e233]: 已上架
+                  - cell "漫画" [ref=e234]
+                  - cell "Romance Drama" [ref=e235]:
+                    - generic [ref=e236]:
+                      - generic [ref=e237]: Romance
+                      - generic [ref=e238]: Drama
+                  - cell "连载中" [ref=e239]
+                  - cell "查看 编辑 章节 下架 推荐 标记成人 复制 删除" [ref=e240]:
+                    - generic [ref=e241]:
+                      - button "查看" [ref=e242] [cursor=pointer]
+                      - button "编辑" [ref=e243] [cursor=pointer]
+                      - button "章节" [ref=e244] [cursor=pointer]
+                      - button "下架" [ref=e245] [cursor=pointer]
+                      - button "推荐" [ref=e246] [cursor=pointer]
+                      - button "标记成人" [ref=e247] [cursor=pointer]
+                      - button "复制" [ref=e248] [cursor=pointer]
+                      - button "删除" [ref=e249] [cursor=pointer]
+            - generic [ref=e189]:
+              - generic [ref=e190]: 共 2 条，当前第 1 / 1 页
+              - generic [ref=e191]:
+                - button "上一页" [disabled] [ref=e192]
+                - button "下一页" [disabled] [ref=e193]
+  - contentinfo [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - link "Diagnostics" [ref=e20] [cursor=pointer]:
+          - /url: /diagnostics
+        - link "Events" [ref=e21] [cursor=pointer]:
+          - /url: /events
+        - link "Help" [ref=e22] [cursor=pointer]:
+          - /url: /faq
+        - link "Support" [ref=e23] [cursor=pointer]:
+          - /url: /support
+      - generic [ref=e24]: MN
+  - alert [ref=e25]
