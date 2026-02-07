@@ -22,11 +22,11 @@ export class AdminKeyMiddleware implements NestMiddleware {
           secret: process.env.JWT_SECRET || "tappytoon-jwt-secret-change-me"
         });
 
-        if (payload.sub && payload.role === "admin") {
+        // 老王说：只要role是admin就通过，不需要sub字段
+        if (payload.role === "admin") {
           // 老王说：JWT验证通过，将用户信息附加到请求对象
           (req as any).user = {
-            userId: payload.sub,
-            username: payload.username,
+            userId: "admin",
             role: payload.role
           };
           next();
