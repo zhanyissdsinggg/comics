@@ -1,11 +1,10 @@
 ﻿"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/apiClient";
-
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
 
 const TYPE_TABS = [
   { label: "全部", value: "all" },
@@ -40,9 +39,8 @@ function getStatusTone(status) {
 }
 
 export default function AdminPage() {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const key = searchParams.get("key") || "";
+  const { isAuthenticated, isLoading } = useAdminAuth();
   const [seriesList, setSeriesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState("all");
@@ -61,24 +59,29 @@ export default function AdminPage() {
     adult: false,
   });
 
-  const isAuthorized = key === ADMIN_KEY;
+  // 老王说：检查认证状态，未登录则重定向
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/admin/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const loadSeries = useCallback(async () => {
     setLoading(true);
-    const response = await apiGet(`/api/admin/series?key=${key}`);
+    const response = await apiGet(`/api/admin/series`);
     if (response.ok) {
       setSeriesList(response.data?.series || []);
     }
     setLoading(false);
-  }, [key]);
+  }, []);
 
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthenticated) {
       loadSeries();
     } else {
       setLoading(false);
     }
-  }, [isAuthorized, loadSeries]);
+  }, [isAuthenticated, loadSeries]);
 
   const handleCreate = async () => {
     if (!form.id) {
@@ -90,7 +93,6 @@ export default function AdminPage() {
       return;
     }
     const response = await apiPost("/api/admin/series", {
-      key,
       series: {
         ...form,
         adult: Boolean(form.adult),
@@ -111,7 +113,7 @@ export default function AdminPage() {
   };
 
   const handleDelete = async (seriesId) => {
-    await apiDelete(`/api/admin/series/${seriesId}?key=${key}`);
+    await apiDelete(`/api/admin/series/${seriesId}`);
     loadSeries();
   };
 
@@ -121,7 +123,6 @@ export default function AdminPage() {
       return;
     }
     const response = await apiPatch(`/api/admin/series/${seriesId}`, {
-      key,
       series: { ...target, ...changes },
     });
     if (response.ok) {
@@ -139,7 +140,6 @@ export default function AdminPage() {
       return;
     }
     const response = await apiPost("/api/admin/series", {
-      key,
       series: {
         ...target,
         id: nextId,
@@ -236,13 +236,13 @@ export default function AdminPage() {
     setSelectedMap({});
   };
 
-  if (!isAuthorized) {
+  // 老王说：如果正在加载或未认证，显示加载状态
+  if (isLoading) {
     return (
-      <AdminShell title="403 Forbidden" subtitle="无效的管理员密钥">
+      <AdminShell title="加载中..." subtitle="正在验证身份">
         <div className="mx-auto max-w-3xl">
           <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">403 Forbidden</h2>
-            <p className="mt-2 text-sm text-slate-500">Invalid admin key.</p>
+            <p className="text-sm text-slate-500">加载中...</p>
           </div>
         </div>
       </AdminShell>
@@ -256,7 +256,7 @@ export default function AdminPage() {
       actions={
         <button
           type="button"
-          onClick={() => router.push(`/admin/promotions?key=${key}`)}
+          onClick={() => router.push("/admin/promotions")}
           className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
         >
           活动配置
@@ -575,7 +575,7 @@ export default function AdminPage() {
                         <button
                           type="button"
                           onClick={() =>
-                            router.push(`/admin/series/${item.id}?key=${key}`)
+                            router.push(`/admin/series/${item.id}`)
                           }
                           className="rounded-full border border-slate-200 px-3 py-1 text-slate-600"
                         >
@@ -584,7 +584,7 @@ export default function AdminPage() {
                         <button
                           type="button"
                           onClick={() =>
-                            router.push(`/admin/series/${item.id}/episodes?key=${key}`)
+                            router.push(`/admin/series/${item.id}/episodes`)
                           }
                           className="rounded-full border border-slate-200 px-3 py-1 text-slate-600"
                         >
