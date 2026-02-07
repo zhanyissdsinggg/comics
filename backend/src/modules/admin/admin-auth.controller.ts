@@ -1,6 +1,6 @@
 import { Controller, Post, Body, HttpException, HttpStatus } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { AdminLogService } from "./admin-log.service";
+import { AdminLogService } from "../../common/services/admin-log.service";
 
 /**
  * 老王说：管理员认证控制器 - 处理JWT登录和token刷新
