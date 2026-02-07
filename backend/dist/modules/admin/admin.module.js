@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const email_module_1 = require("../email/email.module");
 const admin_log_service_1 = require("../../common/services/admin-log.service");
+const admin_auth_controller_1 = require("./admin-auth.controller");
 const admin_series_controller_1 = require("./admin-series.controller");
 const admin_promotions_controller_1 = require("./admin-promotions.controller");
 const admin_orders_controller_1 = require("./admin-orders.controller");
@@ -46,6 +47,7 @@ exports.AdminModule = AdminModule = __decorate([
             })
         ],
         controllers: [
+            admin_auth_controller_1.AdminAuthController,
             admin_series_controller_1.AdminSeriesController,
             admin_promotions_controller_1.AdminPromotionsController,
             admin_orders_controller_1.AdminOrdersController,
