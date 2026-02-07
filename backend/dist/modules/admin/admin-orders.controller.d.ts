@@ -18,19 +18,19 @@ export declare class AdminOrdersController {
             orderId: string;
             id: string;
             createdAt: Date;
+            currency: string;
             userId: string;
+            status: string;
             packageId: string;
             amount: number;
-            currency: string;
-            status: string;
             paidAt: Date | null;
         };
         wallet: {
             id: string;
-            userId: string;
             paidPts: number;
             bonusPts: number;
             plan: string;
+            userId: string;
         };
     }>;
     adjust(body: any, req: Request, res: Response): Promise<{
@@ -38,10 +38,10 @@ export declare class AdminOrdersController {
     } | {
         wallet: {
             id: string;
-            userId: string;
             paidPts: number;
             bonusPts: number;
             plan: string;
+            userId: string;
         };
     }>;
 }

@@ -11,9 +11,9 @@ export declare class AdminNotificationsController {
             createdAt: Date;
             userId: string;
             message: string;
-            title: string;
-            type: string;
             seriesId: string | null;
+            type: string;
+            title: string;
             episodeId: string | null;
             read: boolean;
         }[];
@@ -30,9 +30,9 @@ export declare class AdminNotificationsController {
             createdAt: Date;
             userId: string;
             message: string;
-            title: string;
-            type: string;
             seriesId: string | null;
+            type: string;
+            title: string;
             episodeId: string | null;
             read: boolean;
         };

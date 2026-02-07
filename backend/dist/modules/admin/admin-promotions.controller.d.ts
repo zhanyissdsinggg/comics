@@ -8,10 +8,10 @@ export declare class AdminPromotionsController {
     } | {
         promotions: {
             id: string;
-            title: string;
-            type: string;
-            description: string;
             active: boolean;
+            type: string;
+            title: string;
+            description: string;
             segment: string;
             startAt: Date | null;
             endAt: Date | null;
@@ -38,10 +38,10 @@ export declare class AdminPromotionsController {
     } | {
         promotion: {
             id: string;
-            title: string;
-            type: string;
-            description: string;
             active: boolean;
+            type: string;
+            title: string;
+            description: string;
             segment: string;
             startAt: Date | null;
             endAt: Date | null;
@@ -58,10 +58,10 @@ export declare class AdminPromotionsController {
     } | {
         promotion: {
             id: string;
-            title: string;
-            type: string;
-            description: string;
             active: boolean;
+            type: string;
+            title: string;
+            description: string;
             segment: string;
             startAt: Date | null;
             endAt: Date | null;

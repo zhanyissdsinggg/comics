@@ -26,6 +26,10 @@ if (!validateAdminKey(ADMIN_KEY)) {
 console.log("✅ 管理员密钥验证通过");
 function isAdminAuthorized(req, body) {
     var _a;
+    const user = req.user;
+    if (user && user.role === "admin") {
+        return true;
+    }
     const keyFromQuery = (_a = req.query) === null || _a === void 0 ? void 0 : _a.key;
     const keyFromBody = body === null || body === void 0 ? void 0 : body.key;
     const headerKey = req.headers["x-admin-key"];

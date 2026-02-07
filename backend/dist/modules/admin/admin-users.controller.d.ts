@@ -9,10 +9,10 @@ export declare class AdminUsersController {
         users: ({
             wallet: {
                 id: string;
-                userId: string;
                 paidPts: number;
                 bonusPts: number;
                 plan: string;
+                userId: string;
             };
         } & {
             id: string;
@@ -31,9 +31,9 @@ export declare class AdminUsersController {
             id: string;
             createdAt: Date;
             userId: string;
-            status: string;
-            message: string;
             subject: string;
+            message: string;
+            status: string;
         }[];
     }>;
     block(body: any, req: Request, res: Response): Promise<{

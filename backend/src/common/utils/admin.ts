@@ -38,6 +38,13 @@ if (!validateAdminKey(ADMIN_KEY)) {
 console.log("✅ 管理员密钥验证通过");
 
 export function isAdminAuthorized(req: Request, body?: any) {
+  // 老王说：优先检查JWT认证（middleware设置的req.user）
+  const user = (req as any).user;
+  if (user && user.role === "admin") {
+    return true;
+  }
+
+  // 老王说：如果JWT认证失败，尝试旧的密钥认证（向后兼容）
   const keyFromQuery = req.query?.key;
   const keyFromBody = body?.key;
   const headerKey = req.headers["x-admin-key"];

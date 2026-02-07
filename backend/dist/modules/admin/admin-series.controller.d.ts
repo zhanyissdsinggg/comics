@@ -12,16 +12,16 @@ export declare class AdminSeriesController {
             id: string;
             status: string;
             rating: number;
-            adult: boolean;
-            title: string;
             type: string;
+            title: string;
+            description: string;
+            adult: boolean;
             genres: string[];
             coverTone: string;
             coverUrl: string;
             badge: string;
             badges: string[];
             ratingCount: number;
-            description: string;
             episodePrice: number;
             ttfEnabled: boolean;
             ttfIntervalHours: number;
@@ -35,16 +35,16 @@ export declare class AdminSeriesController {
             id: string;
             status: string;
             rating: number;
-            adult: boolean;
-            title: string;
             type: string;
+            title: string;
+            description: string;
+            adult: boolean;
             genres: string[];
             coverTone: string;
             coverUrl: string;
             badge: string;
             badges: string[];
             ratingCount: number;
-            description: string;
             episodePrice: number;
             ttfEnabled: boolean;
             ttfIntervalHours: number;
@@ -58,16 +58,16 @@ export declare class AdminSeriesController {
             id: string;
             status: string;
             rating: number;
-            adult: boolean;
-            title: string;
             type: string;
+            title: string;
+            description: string;
+            adult: boolean;
             genres: string[];
             coverTone: string;
             coverUrl: string;
             badge: string;
             badges: string[];
             ratingCount: number;
-            description: string;
             episodePrice: number;
             ttfEnabled: boolean;
             ttfIntervalHours: number;
@@ -81,16 +81,16 @@ export declare class AdminSeriesController {
             id: string;
             status: string;
             rating: number;
-            adult: boolean;
-            title: string;
             type: string;
+            title: string;
+            description: string;
+            adult: boolean;
             genres: string[];
             coverTone: string;
             coverUrl: string;
             badge: string;
             badges: string[];
             ratingCount: number;
-            description: string;
             episodePrice: number;
             ttfEnabled: boolean;
             ttfIntervalHours: number;
@@ -108,8 +108,9 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            title: string;
             seriesId: string;
+            text: string | null;
+            title: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -117,7 +118,6 @@ export declare class AdminSeriesController {
             previewFreePages: number;
             pages: import("@prisma/client/runtime/library").JsonValue | null;
             paragraphs: import("@prisma/client/runtime/library").JsonValue | null;
-            text: string | null;
         }[];
     }>;
     createEpisode(body: any, req: Request, res: Response): Promise<{
@@ -126,8 +126,9 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            title: string;
             seriesId: string;
+            text: string | null;
+            title: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -135,7 +136,6 @@ export declare class AdminSeriesController {
             previewFreePages: number;
             pages: import("@prisma/client/runtime/library").JsonValue | null;
             paragraphs: import("@prisma/client/runtime/library").JsonValue | null;
-            text: string | null;
         }[];
     }>;
     bulkUpdateEpisodes(body: any, req: Request, res: Response): Promise<{
@@ -144,8 +144,9 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            title: string;
             seriesId: string;
+            text: string | null;
+            title: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -153,7 +154,6 @@ export declare class AdminSeriesController {
             previewFreePages: number;
             pages: import("@prisma/client/runtime/library").JsonValue | null;
             paragraphs: import("@prisma/client/runtime/library").JsonValue | null;
-            text: string | null;
         }[];
     }>;
     uploadEpisodes(files: any[], body: any, req: Request, res: Response): Promise<{
@@ -162,8 +162,9 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            title: string;
             seriesId: string;
+            text: string | null;
+            title: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -171,7 +172,6 @@ export declare class AdminSeriesController {
             previewFreePages: number;
             pages: import("@prisma/client/runtime/library").JsonValue | null;
             paragraphs: import("@prisma/client/runtime/library").JsonValue | null;
-            text: string | null;
         }[];
         created: number;
     }>;
@@ -181,8 +181,9 @@ export declare class AdminSeriesController {
         episode: {
             number: number;
             id: string;
-            title: string;
             seriesId: string;
+            text: string | null;
+            title: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -190,7 +191,6 @@ export declare class AdminSeriesController {
             previewFreePages: number;
             pages: import("@prisma/client/runtime/library").JsonValue | null;
             paragraphs: import("@prisma/client/runtime/library").JsonValue | null;
-            text: string | null;
         };
     }>;
     removeEpisode(req: Request, res: Response): Promise<{
@@ -199,8 +199,9 @@ export declare class AdminSeriesController {
         episodes: {
             number: number;
             id: string;
-            title: string;
             seriesId: string;
+            text: string | null;
+            title: string;
             releasedAt: Date;
             pricePts: number;
             ttfEligible: boolean;
@@ -208,7 +209,6 @@ export declare class AdminSeriesController {
             previewFreePages: number;
             pages: import("@prisma/client/runtime/library").JsonValue | null;
             paragraphs: import("@prisma/client/runtime/library").JsonValue | null;
-            text: string | null;
         }[];
     }>;
 }

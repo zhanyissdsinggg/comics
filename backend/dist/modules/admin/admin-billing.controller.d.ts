@@ -14,14 +14,14 @@ export declare class AdminBillingController {
         package: {
             id: string;
             createdAt: Date;
-            currency: string;
+            updatedAt: Date;
             paidPts: number;
             bonusPts: number;
-            active: boolean;
-            tags: string[];
-            updatedAt: Date;
-            label: string;
             price: number;
+            currency: string;
+            active: boolean;
+            label: string;
+            tags: string[];
         };
     }>;
     updateTopup(id: string, body: any, req: Request, res: Response): Promise<{
@@ -30,14 +30,14 @@ export declare class AdminBillingController {
         package: {
             id: string;
             createdAt: Date;
-            currency: string;
+            updatedAt: Date;
             paidPts: number;
             bonusPts: number;
-            active: boolean;
-            tags: string[];
-            updatedAt: Date;
-            label: string;
             price: number;
+            currency: string;
+            active: boolean;
+            label: string;
+            tags: string[];
         };
     }>;
     listPlans(req: Request, res: Response): Promise<{
@@ -51,11 +51,11 @@ export declare class AdminBillingController {
         plan: {
             id: string;
             createdAt: Date;
+            updatedAt: Date;
+            price: number;
             currency: string;
             active: boolean;
-            updatedAt: Date;
             label: string;
-            price: number;
             discountPct: number;
             dailyFreeUnlocks: number;
             ttfMultiplier: number;
@@ -68,11 +68,11 @@ export declare class AdminBillingController {
         plan: {
             id: string;
             createdAt: Date;
+            updatedAt: Date;
+            price: number;
             currency: string;
             active: boolean;
-            updatedAt: Date;
             label: string;
-            price: number;
             discountPct: number;
             dailyFreeUnlocks: number;
             ttfMultiplier: number;
