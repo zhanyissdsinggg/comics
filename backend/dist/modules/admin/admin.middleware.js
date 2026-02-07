@@ -22,13 +22,10 @@ let AdminKeyMiddleware = class AdminKeyMiddleware {
         if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
             const token = authHeader.slice(7);
             try {
-                const payload = this.jwtService.verify(token, {
-                    secret: process.env.JWT_SECRET || "tappytoon-jwt-secret-change-me"
-                });
-                if (payload.sub && payload.role === "admin") {
+                const payload = this.jwtService.verify(token);
+                if (payload.role === "admin") {
                     req.user = {
-                        userId: payload.sub,
-                        username: payload.username,
+                        userId: "admin",
                         role: payload.role
                     };
                     next();
@@ -36,6 +33,7 @@ let AdminKeyMiddleware = class AdminKeyMiddleware {
                 }
             }
             catch (error) {
+                console.error("JWT验证失败:", error.message);
             }
         }
         if ((0, admin_1.isAdminAuthorized)(req, req.body)) {
