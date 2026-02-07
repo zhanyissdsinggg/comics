@@ -2,6 +2,7 @@ import { Injectable, NestMiddleware } from "@nestjs/common";
 import { Request, Response, NextFunction } from "express";
 import { isAdminAuthorized } from "../../common/utils/admin";
 import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 
 /**
  * 老王说：管理员认证中间件，支持两种认证方式：
@@ -18,8 +19,9 @@ export class AdminKeyMiddleware implements NestMiddleware {
     if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
       const token = authHeader.slice(7);
       try {
-        // 老王说：JwtService已经在module里配置了secret，不需要再传
-        const payload = this.jwtService.verify(token);
+        // 老王说：明确传入secret参数
+        const secret = process.env.JWT_SECRET || "tappytoon-jwt-secret-change-me";
+        const payload = this.jwtService.verify(token, { secret });
 
         // 老王说：只要role是admin就通过，不需要sub字段
         if (payload.role === "admin") {
