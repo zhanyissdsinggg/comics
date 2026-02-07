@@ -27,11 +27,12 @@ export class AdminAuthController {
     const correctAdminKey = process.env.ADMIN_KEY;
     if (adminKey !== correctAdminKey) {
       // 记录失败的登录尝试
-      await this.adminLogService.log({
-        action: "login_failed",
-        details: { reason: "Invalid admin key" },
-        ipAddress: "unknown",
-      });
+      await this.adminLogService.log(
+        "login_failed",
+        "auth",
+        "admin",
+        { reason: "Invalid admin key" }
+      );
 
       throw new HttpException("管理员密钥错误", HttpStatus.UNAUTHORIZED);
     }
@@ -49,11 +50,12 @@ export class AdminAuthController {
     );
 
     // 记录成功的登录
-    await this.adminLogService.log({
-      action: "login_success",
-      details: { message: "Admin logged in successfully" },
-      ipAddress: "unknown",
-    });
+    await this.adminLogService.log(
+      "login_success",
+      "auth",
+      "admin",
+      { message: "Admin logged in successfully" }
+    );
 
     return {
       success: true,
