@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
 import AdminShell from "./AdminShell";
 import { apiGet, apiPatch } from "../../lib/apiClient";
@@ -19,17 +19,92 @@ function parseGenres(value) {
 export default function AdminSeriesEditPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const key = searchParams.get("key") || "";
+  const { isAuthenticated, isLoading } = useAdminAuth();
   const seriesId = params.id;
   const [series, setSeries] = useState(null);
   const [form, setForm] = useState(null);
-  const isAuthorized = key === ADMIN_KEY;
 
   useEffect(() => {
-    // 老王说：如果正在加载或未认证，显示加载状态
+    if (!isAuthenticated) {
+      router.push("/admin/login");
+      return;
+    }
+  }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+    apiGet(`/api/admin/series/${seriesId}`).then((response) => {
+      if (response.ok) {
+        setSeries(response.data?.series);
+        const data = response.data?.series || {};
+        setForm({
+          title: data.title || "",
+          type: data.type || "comic",
+          status: data.status || "Ongoing",
+          adult: Boolean(data.adult),
+          coverTone: data.coverTone || "",
+          coverUrl: data.coverUrl || "",
+          badge: data.badge || "",
+          genres: (data.genres || []).join(", "),
+          description: data.description || "",
+          pricing: {
+            currency: data.pricing?.currency || "POINTS",
+            episodePrice: data.pricing?.episodePrice || 5,
+            discount: data.pricing?.discount || 0,
+          },
+          ttf: {
+            enabled: Boolean(data.ttf?.enabled),
+            intervalHours: data.ttf?.intervalHours || 24,
+          },
+        });
+      }
+    });
+  }, [isAuthenticated, seriesId]);
+
+  const handleSave = async () => {
+    if (!form) {
+      return;
+    }
+    const payload = {
+      series: {
+        title: form.title,
+        type: form.type,
+        status: form.status,
+        adult: Boolean(form.adult),
+        coverTone: form.coverTone,
+        coverUrl: form.coverUrl,
+        badge: form.badge,
+        genres: parseGenres(form.genres),
+        description: form.description,
+        pricing: {
+          currency: form.pricing.currency,
+          episodePrice: Number(form.pricing.episodePrice || 0),
+          discount: Number(form.pricing.discount || 0),
+        },
+        ttf: {
+          enabled: Boolean(form.ttf.enabled),
+          intervalHours: Number(form.ttf.intervalHours || 0),
+        },
+      },
+    };
+    const response = await apiPatch(`/api/admin/series/${seriesId}`, payload);
+    if (response.ok) {
+      setSeries(response.data?.series);
+    }
+  };
+
   if (isLoading || !isAuthenticated) {
-    return null;
+    return (
+      <AdminShell title="加载中" subtitle="">
+        <div className="mx-auto max-w-3xl">
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <div className="text-sm text-slate-500">加载中...</div>
+          </div>
+        </div>
+      </AdminShell>
+    );
   }
 
   if (!form) {
@@ -206,4 +281,3 @@ export default function AdminSeriesEditPage() {
     </AdminShell>
   );
 }
-
