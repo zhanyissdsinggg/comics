@@ -37,7 +37,7 @@ export function AdminAuthProvider({ children }) {
     // 每50分钟刷新一次（token有效期1小时）
     const refreshInterval = setInterval(async () => {
       try {
-        const response = await fetch("/api/backend/auth/refresh", {
+        const response = await fetch("https://comics-production-07fa.up.railway.app/api/admin/auth/refresh", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ refreshToken }),
@@ -66,7 +66,7 @@ export function AdminAuthProvider({ children }) {
    */
   const login = async (adminKey) => {
     try {
-      const response = await fetch("/api/backend/auth/login", {
+      const response = await fetch("https://comics-production-07fa.up.railway.app/api/admin/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ adminKey }),
