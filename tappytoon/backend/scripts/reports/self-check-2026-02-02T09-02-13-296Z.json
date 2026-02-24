@@ -1,0 +1,243 @@
+{
+  "generatedAt": "2026-02-02T09:02:13.298Z",
+  "items": [
+    {
+      "ok": true,
+      "label": "[health]",
+      "status": 200,
+      "startedAt": 1770022932481,
+      "endedAt": 1770022932553
+    },
+    {
+      "ok": true,
+      "label": "[auth/register]",
+      "status": 201,
+      "startedAt": 1770022932553,
+      "endedAt": 1770022932636
+    },
+    {
+      "ok": true,
+      "label": "[auth/me]",
+      "status": 200,
+      "startedAt": 1770022932636,
+      "endedAt": 1770022932648
+    },
+    {
+      "ok": true,
+      "label": "[wallet]",
+      "status": 200,
+      "startedAt": 1770022932648,
+      "endedAt": 1770022932660
+    },
+    {
+      "ok": true,
+      "label": "[promotions]",
+      "status": 200,
+      "startedAt": 1770022932660,
+      "endedAt": 1770022932674
+    },
+    {
+      "ok": true,
+      "label": "[series]",
+      "status": 200,
+      "startedAt": 1770022932674,
+      "endedAt": 1770022932683
+    },
+    {
+      "ok": true,
+      "label": "[series detail]",
+      "status": 200,
+      "startedAt": 1770022932683,
+      "endedAt": 1770022932695
+    },
+    {
+      "ok": true,
+      "label": "[entitlements]",
+      "status": 200,
+      "startedAt": 1770022932695,
+      "endedAt": 1770022932703
+    },
+    {
+      "ok": true,
+      "label": "[wallet/topup]",
+      "status": 201,
+      "startedAt": 1770022932703,
+      "endedAt": 1770022932808
+    },
+    {
+      "ok": true,
+      "label": "[entitlements unlock]",
+      "status": 201,
+      "startedAt": 1770022932808,
+      "endedAt": 1770022932828
+    },
+    {
+      "ok": true,
+      "label": "[missions/report]",
+      "status": 201,
+      "startedAt": 1770022932828,
+      "endedAt": 1770022932838
+    },
+    {
+      "ok": true,
+      "label": "[missions]",
+      "status": 200,
+      "startedAt": 1770022932838,
+      "endedAt": 1770022932841
+    },
+    {
+      "ok": true,
+      "label": "[rewards]",
+      "status": 200,
+      "startedAt": 1770022932841,
+      "endedAt": 1770022932848
+    },
+    {
+      "ok": true,
+      "label": "[follow]",
+      "status": 201,
+      "startedAt": 1770022932848,
+      "endedAt": 1770022932855
+    },
+    {
+      "ok": true,
+      "label": "[comments]",
+      "status": 201,
+      "startedAt": 1770022932855,
+      "endedAt": 1770022932863
+    },
+    {
+      "ok": true,
+      "label": "[ratings]",
+      "status": 201,
+      "startedAt": 1770022932863,
+      "endedAt": 1770022932872
+    },
+    {
+      "ok": true,
+      "label": "[progress update]",
+      "status": 201,
+      "startedAt": 1770022932872,
+      "endedAt": 1770022932881
+    },
+    {
+      "ok": true,
+      "label": "[bookmarks add]",
+      "status": 201,
+      "startedAt": 1770022932881,
+      "endedAt": 1770022932892
+    },
+    {
+      "ok": true,
+      "label": "[history add]",
+      "status": 201,
+      "startedAt": 1770022932892,
+      "endedAt": 1770022932901
+    },
+    {
+      "ok": true,
+      "label": "[episode]",
+      "status": 200,
+      "startedAt": 1770022932901,
+      "endedAt": 1770022932920
+    },
+    {
+      "ok": true,
+      "label": "[search/log]",
+      "status": 201,
+      "startedAt": 1770022932920,
+      "endedAt": 1770022932930
+    },
+    {
+      "ok": true,
+      "label": "[search]",
+      "status": 200,
+      "startedAt": 1770022932930,
+      "endedAt": 1770022932941
+    },
+    {
+      "ok": true,
+      "label": "[search/suggest]",
+      "status": 200,
+      "startedAt": 1770022932941,
+      "endedAt": 1770022932949
+    },
+    {
+      "ok": true,
+      "label": "[search/hot]",
+      "status": 200,
+      "startedAt": 1770022932950,
+      "endedAt": 1770022932965
+    },
+    {
+      "ok": true,
+      "label": "[coupons/list]",
+      "status": 200,
+      "startedAt": 1770022932965,
+      "endedAt": 1770022932982
+    },
+    {
+      "ok": true,
+      "label": "[coupons/claim]",
+      "status": 400,
+      "startedAt": 1770022932982,
+      "endedAt": 1770022932997
+    },
+    {
+      "ok": true,
+      "label": "[orders]",
+      "status": 200,
+      "startedAt": 1770022932997,
+      "endedAt": 1770022933008
+    },
+    {
+      "ok": true,
+      "label": "[rankings]",
+      "status": 200,
+      "startedAt": 1770022933008,
+      "endedAt": 1770022933017
+    },
+    {
+      "ok": true,
+      "label": "[notifications]",
+      "status": 200,
+      "startedAt": 1770022933017,
+      "endedAt": 1770022933245
+    },
+    {
+      "ok": true,
+      "label": "[subscription]",
+      "status": 201,
+      "startedAt": 1770022933245,
+      "endedAt": 1770022933261
+    },
+    {
+      "ok": true,
+      "label": "[subscription/cancel]",
+      "status": 200,
+      "startedAt": 1770022933261,
+      "endedAt": 1770022933267
+    },
+    {
+      "ok": true,
+      "label": "[entitlements pack]",
+      "status": 201,
+      "startedAt": 1770022933267,
+      "endedAt": 1770022933286
+    },
+    {
+      "ok": true,
+      "label": "[orders/reconcile]",
+      "status": 201,
+      "startedAt": 1770022933286,
+      "endedAt": 1770022933291
+    },
+    {
+      "ok": true,
+      "label": "[logout]",
+      "status": 201,
+      "startedAt": 1770022933291,
+      "endedAt": 1770022933296
+    }
+  ]
+}

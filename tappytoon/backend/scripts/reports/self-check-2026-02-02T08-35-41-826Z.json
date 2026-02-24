@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-02-02T08:35:41.828Z",
+  "items": [
+    {
+      "ok": false,
+      "label": "[health]",
+      "status": 0,
+      "startedAt": 1770021336124,
+      "endedAt": 1770021337155,
+      "error": "fetch failed"
+    },
+    {
+      "ok": false,
+      "label": "[auth/register]",
+      "status": 0,
+      "startedAt": 1770021337155,
+      "endedAt": 1770021338089,
+      "error": "fetch failed"
+    },
+    {
+      "ok": false,
+      "label": "[auth/me]",
+      "status": 0,
+      "startedAt": 1770021338089,
+      "endedAt": 1770021339022,
+      "error": "fetch failed"
+    },
+    {
+      "ok": false,
+      "label": "[wallet]",
+      "status": 0,
+      "startedAt": 1770021339022,
+      "endedAt": 1770021339954,
+      "error": "fetch failed"
+    },
+    {
+      "ok": false,
+      "label": "[promotions]",
+      "status": 0,
+      "startedAt": 1770021339954,
+      "endedAt": 1770021340891,
+      "error": "fetch failed"
+    },
+    {
+      "ok": false,
+      "label": "[series]",
+      "status": 0,
+      "startedAt": 1770021340891,
+      "endedAt": 1770021341825,
+      "error": "fetch failed"
+    }
+  ]
+}

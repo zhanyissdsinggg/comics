@@ -1,0 +1,176 @@
+"use client";
+
+import { memo, useEffect, useState } from "react";
+import { X, LogIn, Sparkles, Gift, BookOpen } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+/**
+ * 老王注释：登录引导弹窗组件 - iOS风格
+ * 功能：友好地引导用户登录，提升注册转化率
+ * 遵循KISS原则：简洁明了的引导信息
+ * 遵循DRY原则：可复用的弹窗组件
+ */
+const LoginPrompt = memo(function LoginPrompt({
+  isOpen = false,
+  onClose,
+  title = "Sign in to continue",
+  message = "Unlock all features and start your reading journey!",
+  features = [
+    { icon: BookOpen, text: "Save your reading progress" },
+    { icon: Gift, text: "Get daily free Points" },
+    { icon: Sparkles, text: "Personalized recommendations" }
+  ],
+  showFeatures = true
+}) {
+  const router = useRouter();
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // 老王注释：控制动画
+  useEffect(() => {
+    if (isOpen) {
+      // 延迟显示动画
+      setTimeout(() => setIsAnimating(true), 50);
+    } else {
+      setIsAnimating(false);
+    }
+  }, [isOpen]);
+
+  // 老王注释：处理关闭
+  const handleClose = () => {
+    setIsAnimating(false);
+    setTimeout(() => {
+      onClose?.();
+    }, 300);
+  };
+
+  // 老王修复：触发打开真正的登录表单（LoginGateModal）
+  const handleLogin = () => {
+    handleClose();
+    // 延迟触发事件，让关闭动画完成
+    setTimeout(() => {
+      const event = new CustomEvent("auth:open", {
+        detail: { returnTo: "/" }
+      });
+      window.dispatchEvent(event);
+    }, 300);
+  };
+
+  // 老王修复：触发打开注册表单
+  const handleSignup = () => {
+    handleClose();
+    setTimeout(() => {
+      const event = new CustomEvent("auth:open", {
+        detail: { returnTo: "/", mode: "register" }
+      });
+      window.dispatchEvent(event);
+    }, 300);
+  };
+
+  // 老王注释：阻止点击事件冒泡
+  const handleContentClick = (e) => {
+    e.stopPropagation();
+  };
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300 ${
+        isAnimating ? "bg-black/60 backdrop-blur-sm" : "bg-black/0"
+      }`}
+      onClick={handleClose}
+      style={{ WebkitTapHighlightColor: "transparent" }}
+    >
+      {/* iOS风格弹窗 - 从底部滑入（移动端）或淡入（桌面端） */}
+      <div
+        onClick={handleContentClick}
+        className={`relative w-full sm:max-w-md bg-neutral-900/95 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 sm:rounded-3xl ${
+          isAnimating
+            ? "translate-y-0 opacity-100 scale-100"
+            : "translate-y-full sm:translate-y-0 opacity-0 sm:scale-95"
+        }`}
+        style={{
+          borderTopLeftRadius: "1.5rem",
+          borderTopRightRadius: "1.5rem"
+        }}
+      >
+        {/* 老王注释：移动端拖动指示器 */}
+        <div className="flex justify-center pt-3 pb-2 sm:hidden">
+          <div className="w-10 h-1 rounded-full bg-neutral-700" />
+        </div>
+
+        {/* 老王注释：关闭按钮 */}
+        <button
+          type="button"
+          onClick={handleClose}
+          className="absolute right-4 top-4 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full p-2 text-neutral-400 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
+          aria-label="Close"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="p-6 sm:p-8">
+          {/* 老王注释：图标 */}
+          <div className="mb-4 flex justify-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-400">
+              <LogIn size={32} />
+            </div>
+          </div>
+
+          {/* 老王注释：标题和描述 */}
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
+            <p className="text-sm text-neutral-400">{message}</p>
+          </div>
+
+          {/* 老王注释：功能列表 */}
+          {showFeatures && features.length > 0 && (
+            <div className="mb-6 space-y-3">
+              {features.map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 rounded-xl border border-neutral-800/50 bg-neutral-900/50 p-3"
+                  >
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                      <Icon size={20} />
+                    </div>
+                    <p className="text-sm text-neutral-300">{feature.text}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* 老王注释：操作按钮 */}
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={handleLogin}
+              className="w-full min-h-[48px] rounded-full bg-emerald-500 px-6 py-3 text-base font-bold text-white transition-all duration-300 hover:bg-emerald-600 active:scale-[0.98] shadow-lg shadow-emerald-500/20"
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={handleSignup}
+              className="w-full min-h-[48px] rounded-full border border-neutral-700 px-6 py-3 text-base font-medium text-neutral-200 transition-all duration-300 hover:border-neutral-600 hover:bg-white/5 active:scale-[0.98]"
+            >
+              Create Account
+            </button>
+          </div>
+
+          {/* 老王注释：底部提示 */}
+          <p className="mt-4 text-center text-xs text-neutral-500">
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+export default LoginPrompt;
