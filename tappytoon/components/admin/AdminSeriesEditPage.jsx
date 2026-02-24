@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPatch, apiUpload } from "../../lib/apiClient";
 import { Save, FileText, Image as ImageIcon } from "lucide-react";
 
@@ -187,42 +186,22 @@ export default function AdminSeriesEditPage() {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <AdminShell title="加载中" subtitle="">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-8 text-center">
-            <div className="text-sm text-neutral-400">加载中...</div>
-          </div>
+      <div className="mx-auto max-w-3xl">
+        <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-8 text-center">
+          <div className="text-sm text-neutral-400">加载中...</div>
         </div>
-      </AdminShell>
+      </div>
     );
   }
 
   if (!form) {
     return (
-      <AdminShell title="加载中" subtitle={seriesId}>
-        <div className="text-sm text-neutral-400">加载中...</div>
-      </AdminShell>
+      <div className="text-sm text-neutral-400">加载中...</div>
     );
   }
 
   return (
-    <AdminShell
-      title="编辑作品"
-      subtitle={series?.title || seriesId}
-      actions={
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => router.push(`/admin/series/${seriesId}/episodes`)}
-            className="flex items-center gap-2 px-4 py-2 rounded-[12px] bg-neutral-800/50 text-neutral-300 text-sm font-medium hover:bg-neutral-800 transition-all duration-300 border border-emerald-500/20"
-          >
-            <FileText size={16} />
-            编辑章节
-          </button>
-        </div>
-      }
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* 老王重新设计：基本信息区域 - emerald绿色主题 */}
         <section className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-6 shadow-lg space-y-4">
           <h3 className="text-base font-semibold text-emerald-400 mb-4">基本信息</h3>
@@ -502,6 +481,6 @@ export default function AdminSeriesEditPage() {
           </button>
         </div>
       </div>
-    </AdminShell>
+    </div>
   );
 }

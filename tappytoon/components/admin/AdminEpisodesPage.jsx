@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload } from "../../lib/apiClient";
 import { ConfirmModal } from "../common/Modal";
 
@@ -590,8 +589,7 @@ export default function AdminEpisodesPage() {
   }
 
   return (
-    <AdminShell title="章节管理" subtitle={seriesId}>
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* 老王注释：顶部工具栏 - 搜索、筛选、批量操作 */}
         <div className="rounded-[12px] border border-emerald-500/20 bg-neutral-900/50 p-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -1052,6 +1050,6 @@ export default function AdminEpisodesPage() {
           )}
         </div>
       </div>
-    </AdminShell>
+    </div>
   );
 }
