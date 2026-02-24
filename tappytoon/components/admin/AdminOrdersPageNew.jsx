@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import Pagination from "../common/Pagination";
 import { usePagination } from "../../hooks/usePagination";
@@ -381,8 +380,7 @@ export default function AdminOrdersPageNew() {
   }
 
   return (
-    <AdminShell title="订单管理" subtitle="订单查询 / 导出 / 退款 / 补点">
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* 状态通知 */}
         {statusMessage.text && (
           <div
@@ -653,6 +651,6 @@ export default function AdminOrdersPageNew() {
           </div>
         </div>
       )}
-    </AdminShell>
+    </div>
   );
 }

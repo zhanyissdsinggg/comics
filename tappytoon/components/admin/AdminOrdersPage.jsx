@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 
 export default function AdminOrdersPage() {
@@ -149,8 +148,7 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <AdminShell title="订单管理" subtitle="订单查询 / 导出 / 退款">
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
             <input
@@ -314,6 +312,6 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
-    </AdminShell>
+    </div>
   );
 }

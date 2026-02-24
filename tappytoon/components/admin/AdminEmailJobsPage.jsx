@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 
 function toCsv(rows) {
@@ -74,7 +73,7 @@ export default function AdminEmailJobsPage() {
   };
 
   return (
-    <AdminShell
+    <div
       title="邮件发送记录"
       subtitle="查看失败重试情况"
       actions={
@@ -163,6 +162,6 @@ export default function AdminEmailJobsPage() {
           </table>
         </div>
       )}
-    </AdminShell>
+    </div>
   );
 }

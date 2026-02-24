@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import AdminShell from "./AdminShell";
 import { apiGet } from "../../lib/apiClient";
 
 const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "admin";
@@ -123,20 +122,19 @@ export default function AdminDashboard() {
 
   if (!isAuthorized) {
     return (
-      <AdminShell title="403 Forbidden" subtitle="无效的管理员密钥">
+      <div>
         <div className="mx-auto max-w-3xl">
           <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
             <h2 className="text-xl font-semibold text-slate-900">403 Forbidden</h2>
             <p className="mt-2 text-sm text-slate-500">Invalid admin key.</p>
           </div>
         </div>
-      </AdminShell>
+      </div>
     );
   }
 
   return (
-    <AdminShell title="数据概览" subtitle="关键指标按天汇总">
-      <div className="space-y-8">
+    <div className="space-y-8">
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -424,6 +422,6 @@ export default function AdminDashboard() {
           </div>
         </section>
       </div>
-    </AdminShell>
+    </div>
   );
 }

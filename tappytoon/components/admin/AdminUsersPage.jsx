@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPatch } from "../../lib/apiClient";
 
 export default function AdminUsersPage() {
@@ -63,8 +62,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <AdminShell title="用户管理" subtitle="账号与钱包信息">
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <input
             value={query}
@@ -118,6 +116,6 @@ export default function AdminUsersPage() {
           </table>
         </div>
       </div>
-    </AdminShell>
+    </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/apiClient";
 
 const TYPE_TABS = [
@@ -251,7 +250,7 @@ export default function AdminPage() {
   }
 
   return (
-    <AdminShell
+    <div
       title="作品管理"
       subtitle="管理作品、章节与基础配置"
       actions={
@@ -666,6 +665,6 @@ export default function AdminPage() {
           </div>
         </section>
       </div>
-    </AdminShell>
+    </div>
   );
 }

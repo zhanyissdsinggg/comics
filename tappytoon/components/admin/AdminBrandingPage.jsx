@@ -4,7 +4,6 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPost, apiUpload } from "../../lib/apiClient";
 import { useBrandingStore } from "../../store/useBrandingStore";
 import { Image as ImageIcon } from "lucide-react";
@@ -119,21 +118,7 @@ export default function AdminBrandingPage() {
   };
 
   return (
-    <AdminShell
-      title="图片管理"
-      subtitle="更新网站 Logo、浏览器图标与首页 Banner"
-      actions={
-        isAuthenticated ? (
-          <button
-            type="button"
-            onClick={handleSave}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white"
-          >
-            保存配置
-          </button>
-        ) : null
-      }
-    >
+    <div>
       {!isAuthenticated ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
           403 无权限，请在地址栏附加 ?key=ADMIN_KEY
@@ -312,6 +297,6 @@ export default function AdminBrandingPage() {
           {status ? <div className="text-sm text-emerald-600">{status}</div> : null}
         </div>
       )}
-    </AdminShell>
+    </div>
   );
 }

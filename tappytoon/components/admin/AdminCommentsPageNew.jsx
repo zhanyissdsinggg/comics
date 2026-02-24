@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPatch } from "../../lib/apiClient";
 import Pagination from "../common/Pagination";
 import { SkeletonList } from "../common/Skeleton";
@@ -506,8 +505,7 @@ export default function AdminCommentsPageNew() {
   }
 
   return (
-    <AdminShell title="评论管理" subtitle="评论审核 / 屏蔽管理 / 评分重算">
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* 状态通知 */}
         {statusMessage.text && (
           <div
@@ -726,6 +724,6 @@ export default function AdminCommentsPageNew() {
           </>
         )}
       </div>
-    </AdminShell>
+    </div>
   );
 }

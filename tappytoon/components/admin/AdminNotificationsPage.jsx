@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 
 export default function AdminNotificationsPage() {
@@ -62,8 +61,7 @@ export default function AdminNotificationsPage() {
   }
 
   return (
-    <AdminShell title="通知中心" subtitle="运营通知 / 测试推送">
-      <div className="space-y-6">
+    <div className="space-y-6">
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <h3 className="text-base font-semibold">发送通知</h3>
           <div className="grid gap-3 md:grid-cols-3">
@@ -138,6 +136,6 @@ export default function AdminNotificationsPage() {
           </div>
         </section>
       </div>
-    </AdminShell>
+    </div>
   );
 }

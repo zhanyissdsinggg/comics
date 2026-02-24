@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPatch } from "../../lib/apiClient";
 
 export default function AdminCommentsPage() {
@@ -68,8 +67,7 @@ export default function AdminCommentsPage() {
   }
 
   return (
-    <AdminShell title="评论管理" subtitle="屏蔽评论 / 重算评分">
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-2">
             <input
@@ -141,6 +139,6 @@ export default function AdminCommentsPage() {
           </div>
         </div>
       </div>
-    </AdminShell>
+    </div>
   );
 }

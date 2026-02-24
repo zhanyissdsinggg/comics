@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiDelete, apiGet, apiPost, apiPatch } from "../../lib/apiClient";
 import { ConfirmModal } from "../common/Modal";
 import {
@@ -523,25 +522,12 @@ export default function AdminSeriesPageNew() {
             />
           ))}
         </div>
-      </AdminShell>
+      </div>
     );
   }
 
   return (
-    <AdminShell
-      title="作品管理"
-      subtitle="管理漫画和小说作品"
-      actions={
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-[12px] bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-all duration-300 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50"
-        >
-          <Plus size={16} />
-          添加作品
-        </button>
-      }
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* 老王重新设计：筛选、搜索和视图切换栏 */}
         <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4">
           <div className="flex flex-col lg:flex-row gap-4">

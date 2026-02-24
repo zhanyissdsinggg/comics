@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/apiClient";
 import {
   Search,
@@ -666,6 +665,6 @@ export default function AdminPromotionsPageNew() {
           </div>
         )}
       </div>
-    </AdminShell>
+    </div>
   );
 }

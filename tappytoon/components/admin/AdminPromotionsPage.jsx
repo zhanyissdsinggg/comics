@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/apiClient";
 
 const defaultForm = {
@@ -178,8 +177,7 @@ export default function AdminPromotionsPage() {
   }
 
   return (
-    <AdminShell title="活动配置" subtitle="更简洁的活动管理面板">
-      <div className="space-y-8">
+    <div className="space-y-8">
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-base font-semibold">
@@ -571,6 +569,6 @@ export default function AdminPromotionsPage() {
           </div>
         </section>
       </div>
-    </AdminShell>
+    </div>
   );
 }

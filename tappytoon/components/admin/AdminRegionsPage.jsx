@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 
 export default function AdminRegionsPage() {
@@ -108,7 +107,7 @@ export default function AdminRegionsPage() {
   };
 
   return (
-    <AdminShell
+    <div
       title="区号配置"
       subtitle="管理短信区号与号码长度规则"
       actions={
@@ -209,6 +208,6 @@ export default function AdminRegionsPage() {
           {status ? <div className="text-xs text-emerald-600">{status}</div> : null}
         </div>
       )}
-    </AdminShell>
+    </div>
   );
 }

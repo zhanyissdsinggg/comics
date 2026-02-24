@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPatch, apiPost } from "../../lib/apiClient";
 import {
   DollarSign,
@@ -230,8 +229,7 @@ export default function AdminBillingPage() {
   }
 
   return (
-    <AdminShell title="套餐定价" subtitle="点数套餐与订阅权益定价">
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* 状态通知 */}
         {statusMessage.text && (
           <div
@@ -819,7 +817,7 @@ export default function AdminBillingPage() {
           </div>
         </section>
       </div>
-    </AdminShell>
+    </div>
   );
 }
 

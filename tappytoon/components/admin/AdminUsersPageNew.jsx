@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPatch } from "../../lib/apiClient";
 import Pagination from "../common/Pagination";
 import { SkeletonList } from "../common/Skeleton";
@@ -453,8 +452,7 @@ export default function AdminUsersPageNew() {
   }
 
   return (
-    <AdminShell title="用户管理" subtitle="账号管理 / 钱包信息 / 封禁管理">
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* 状态通知 */}
         {statusMessage.text && (
           <div
@@ -680,6 +678,6 @@ export default function AdminUsersPageNew() {
           </>
         )}
       </div>
-    </AdminShell>
+    </div>
   );
 }

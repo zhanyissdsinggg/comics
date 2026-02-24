@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import AdminShell from "./AdminShell";
 import { apiGet, apiPost } from "../../lib/apiClient";
 
 const defaultDraft = {
@@ -88,7 +87,7 @@ export default function AdminEmailSettingsPage() {
   };
 
   return (
-    <AdminShell
+    <div
       title="邮件设置"
       subtitle="配置邮件服务商与发件信息"
       actions={
@@ -239,6 +238,6 @@ export default function AdminEmailSettingsPage() {
           </div>
         </div>
       )}
-    </AdminShell>
+    </div>
   );
 }
