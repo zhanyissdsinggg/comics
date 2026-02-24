@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import { AdminLayout } from "../../../components/admin/AdminLayout";
 import Skeleton from "../../../components/common/Skeleton";
 import AdminShell from "../../../components/admin/AdminShell";
 import { apiGet } from "../../../lib/apiClient";
@@ -58,18 +59,20 @@ function SupportList() {
 
 export default function Page() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-neutral-950">
-          <div className="mx-auto max-w-6xl px-4 py-10 space-y-4">
-            <Skeleton className="h-10 w-56 rounded-2xl" />
-            <Skeleton className="h-32 w-full rounded-3xl" />
-            <Skeleton className="h-64 w-full rounded-3xl" />
+    <AdminLayout title="支持工单">
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-neutral-950">
+            <div className="mx-auto max-w-6xl px-4 py-10 space-y-4">
+              <Skeleton className="h-10 w-56 rounded-2xl" />
+              <Skeleton className="h-32 w-full rounded-3xl" />
+              <Skeleton className="h-64 w-full rounded-3xl" />
+            </div>
           </div>
-        </div>
-      }
-    >
-      <SupportList />
-    </Suspense>
+        }
+      >
+        <SupportList />
+      </Suspense>
+    </AdminLayout>
   );
 }

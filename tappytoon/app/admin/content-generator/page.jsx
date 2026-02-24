@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AdminLayout } from "../../../components/admin/AdminLayout";
 
 export default function ContentGeneratorPage() {
   const router = useRouter();
@@ -37,15 +38,9 @@ export default function ContentGeneratorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 p-8">
+    <AdminLayout title="内容生成器">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8">
-          <button
-            onClick={() => router.push("/admin")}
-            className="mb-4 text-neutral-400 hover:text-white"
-          >
-            ← 返回管理后台
-          </button>
           <h1 className="text-3xl font-bold text-white mb-2">内容生成器</h1>
           <p className="text-neutral-400">
             一键生成测试数据：20个漫画系列 + 20个小说系列
@@ -106,6 +101,6 @@ export default function ContentGeneratorPage() {
           )}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
