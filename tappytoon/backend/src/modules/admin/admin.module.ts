@@ -34,6 +34,9 @@ import {
   AdminEmailController,
   AdminEmailJobsController,
 } from "./admin-other-optimized.controller";
+import { AdminSeriesController } from "./controllers/admin-series.controller";
+import { AdminEpisodesController } from "./controllers/admin-episodes.controller";
+import { AdminEpisodesUploadController } from "./controllers/admin-episodes-upload.controller";
 
 /**
  * 老王说：管理员模块，现在支持JWT认证、全局异常处理和操作日志审计了
@@ -73,6 +76,10 @@ import {
     AdminUploadController,
     AdminEmailController,
     AdminEmailJobsController,
+    // 老王说：拆分后的Series和Episodes Controller
+    AdminSeriesController,
+    AdminEpisodesController,
+    AdminEpisodesUploadController,
   ],
   providers: [
     AdminLogService,
