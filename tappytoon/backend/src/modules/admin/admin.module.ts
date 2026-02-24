@@ -3,34 +3,48 @@ import { JwtModule } from "@nestjs/jwt";
 import { EmailModule } from "../email/email.module";
 import { AdminLogService } from "../../common/services/admin-log.service";
 import { AdminAuthController } from "./admin-auth.controller";
-import { AdminSeriesController } from "./admin-series.controller";
-import { AdminPromotionsController } from "./admin-promotions.controller";
-import { AdminOrdersController } from "./admin-orders.controller";
-import { AdminNotificationsController } from "./admin-notifications.controller";
-import { AdminCommentsController } from "./admin-comments.controller";
 import { AdminUsersController } from "./admin-users.controller";
-import { AdminStatsController } from "./admin-stats.controller";
-import { AdminRankingsController } from "./admin-rankings.controller";
-import { AdminTrackingController } from "./admin-tracking.controller";
-import { AdminBillingController } from "./admin-billing.controller";
-import { AdminMetricsController } from "./admin-metrics.controller";
-import { AdminBrandingController } from "./admin-branding.controller";
-import { AdminEmailController } from "./admin-email.controller";
-import { AdminEmailJobsController } from "./admin-email-jobs.controller";
-import { AdminRegionsController } from "./admin-regions.controller";
-import { AdminLogsController } from "./admin-logs.controller";
-import { AdminUploadController } from "./admin-upload.controller";
+import { AdminOrdersController } from "./admin-orders.controller";
 import { AdminKeyMiddleware } from "./admin.middleware";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
 import { AllExceptionsFilter } from "./filters/all-exceptions.filter";
 import { AdminAuditInterceptor } from "./interceptors/admin-audit.interceptor";
+import { CrudService } from "./services/crud.service";
+import { ConfigService } from "./services/config.service";
+import { FileProcessingService } from "./services/file-processing.service";
+import { StreamingService } from "./services/streaming.service";
+import { PrismaService } from "../../common/prisma/prisma.service";
+
+// 老王说：导入优化版本的controller
+import {
+  AdminPromotionsController,
+  AdminBillingController,
+  AdminNotificationsController,
+  AdminCommentsController,
+} from "./admin-common-optimized.controller";
+import {
+  AdminStatsController,
+  AdminMetricsController,
+  AdminRankingsController,
+  AdminTrackingController,
+  AdminRegionsController,
+  AdminBrandingController,
+  AdminLogsController,
+  AdminUploadController,
+  AdminEmailController,
+  AdminEmailJobsController,
+} from "./admin-other-optimized.controller";
 
 /**
  * 老王说：管理员模块，现在支持JWT认证、全局异常处理和操作日志审计了
- * 这个SB模块集成了三个核心的基础设施：
- * 1. AdminAuthGuard - 统一认证守卫，替代了之前的中间件
- * 2. AllExceptionsFilter - 全局异常过滤器，统一错误处理
- * 3. AdminAuditInterceptor - 审计日志拦截器，自动记录操作
+ * 这个SB模块集成了所有优化的基础设施和服务：
+ * 1. AdminAuthGuard - 统一认证守卫
+ * 2. AllExceptionsFilter - 全局异常过滤器
+ * 3. AdminAuditInterceptor - 审计日志拦截器
+ * 4. CrudService - 通用CRUD操作
+ * 5. ConfigService - 统一配置管理
+ * 6. FileProcessingService - 文件处理
+ * 7. StreamingService - 流式处理大数据
  */
 @Module({
   imports: [
@@ -42,26 +56,31 @@ import { AdminAuditInterceptor } from "./interceptors/admin-audit.interceptor";
   ],
   controllers: [
     AdminAuthController,
-    AdminSeriesController,
-    AdminPromotionsController,
+    AdminUsersController,
     AdminOrdersController,
+    // 老王说：使用优化版本的controller
+    AdminPromotionsController,
+    AdminBillingController,
     AdminNotificationsController,
     AdminCommentsController,
-    AdminUsersController,
     AdminStatsController,
+    AdminMetricsController,
     AdminRankingsController,
     AdminTrackingController,
-    AdminBillingController,
-    AdminMetricsController,
-    AdminBrandingController,
-    AdminEmailController,
-    AdminEmailJobsController,
     AdminRegionsController,
+    AdminBrandingController,
     AdminLogsController,
     AdminUploadController,
+    AdminEmailController,
+    AdminEmailJobsController,
   ],
   providers: [
     AdminLogService,
+    PrismaService,
+    CrudService,
+    ConfigService,
+    FileProcessingService,
+    StreamingService,
     // 老王说：注册全局异常过滤器
     {
       provide: APP_FILTER,
@@ -78,7 +97,7 @@ import { AdminAuditInterceptor } from "./interceptors/admin-audit.interceptor";
       useClass: AdminAuditInterceptor,
     },
   ],
-  exports: [AdminLogService],
+  exports: [AdminLogService, CrudService, ConfigService, FileProcessingService, StreamingService],
 })
 export class AdminModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
@@ -86,23 +105,21 @@ export class AdminModule implements NestModule {
     consumer
       .apply(AdminKeyMiddleware)
       .forRoutes(
-        AdminSeriesController,
-        AdminPromotionsController,
+        AdminUsersController,
         AdminOrdersController,
+        AdminPromotionsController,
+        AdminBillingController,
         AdminNotificationsController,
         AdminCommentsController,
-        AdminUsersController,
         AdminStatsController,
         AdminRankingsController,
         AdminTrackingController,
-        AdminBillingController,
-        AdminMetricsController,
-        AdminBrandingController,
-        AdminEmailController,
-        AdminEmailJobsController,
         AdminRegionsController,
+        AdminBrandingController,
         AdminLogsController,
-        AdminUploadController
+        AdminUploadController,
+        AdminEmailController,
+        AdminEmailJobsController
       );
   }
 }
