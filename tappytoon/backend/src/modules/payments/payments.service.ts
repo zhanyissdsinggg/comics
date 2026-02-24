@@ -50,26 +50,41 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
+  /**
+   * 优化后的processRetries方法 - 消除循环中的数据库操作
+   * 之前：for循环中逐个查询paymentIntent和更新paymentRetry（N+1问题）
+   * 现在：批量查询所有paymentIntent，然后并行处理重试逻辑
+   */
   async processRetries() {
     const now = new Date();
     const due = await this.prisma.paymentRetry.findMany({
       where: { status: "PENDING", nextAttemptAt: { lte: now } },
       take: 10,
     });
+
     if (due.length === 0) {
       return;
     }
-    for (const job of due) {
-      let paymentId = job.paymentId;
+
+    // 第一步：批量查询所有订单对应的最新支付意图（一次查询）
+    const paymentIntents = await this.prisma.paymentIntent.findMany({
+      where: { orderId: { in: due.map((j) => j.orderId) } },
+      orderBy: { createdAt: "desc" },
+      distinct: ["orderId"],
+    });
+
+    // 第二步：构建paymentId映射表
+    const paymentIdMap = new Map(
+      paymentIntents.map((p) => [p.orderId, p.id])
+    );
+
+    // 第三步：并行处理所有重试任务
+    const updatePromises = due.map(async (job) => {
+      let paymentId = job.paymentId || paymentIdMap.get(job.orderId);
+
       if (!paymentId) {
-        const payment = await this.prisma.paymentIntent.findFirst({
-          where: { orderId: job.orderId },
-          orderBy: { createdAt: "desc" },
-        });
-        paymentId = payment?.id;
-      }
-      if (!paymentId) {
-        await this.prisma.paymentRetry.update({
+        // 支付意图不存在，标记为失败
+        return this.prisma.paymentRetry.update({
           where: { orderId: job.orderId },
           data: {
             attempts: { increment: 1 },
@@ -77,19 +92,23 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
             nextAttemptAt: this.buildNextRetryTime(job.attempts + 1),
           },
         });
-        continue;
       }
+
+      // 确认支付
       const result = await this.confirm(job.userId, paymentId);
+
       if (result.ok) {
-        await this.prisma.paymentRetry.update({
+        return this.prisma.paymentRetry.update({
           where: { orderId: job.orderId },
           data: { status: "SUCCEEDED", lastError: "" },
         });
-        continue;
       }
+
+      // 重试失败，更新重试状态
       const attempts = job.attempts + 1;
       const status = attempts >= 3 ? "FAILED" : "PENDING";
-      await this.prisma.paymentRetry.update({
+
+      return this.prisma.paymentRetry.update({
         where: { orderId: job.orderId },
         data: {
           attempts,
@@ -98,7 +117,10 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
           nextAttemptAt: this.buildNextRetryTime(attempts),
         },
       });
-    }
+    });
+
+    // 第四步：等待所有更新完成
+    await Promise.all(updatePromises);
   }
 
   /**
