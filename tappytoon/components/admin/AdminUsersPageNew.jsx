@@ -679,4 +679,5 @@ export default function AdminUsersPageNew() {
         )}
       </div>
     </div>
+  );
 }
