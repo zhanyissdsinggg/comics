@@ -569,6 +569,5 @@ export default function AdminPromotionsPage() {
           </div>
         </section>
       </div>
-    </>
   );
 }

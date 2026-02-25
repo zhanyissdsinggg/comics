@@ -136,6 +136,5 @@ export default function AdminNotificationsPage() {
           </div>
         </section>
       </div>
-    </>
   );
 }

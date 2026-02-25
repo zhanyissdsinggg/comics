@@ -139,6 +139,5 @@ export default function AdminCommentsPage() {
           </div>
         </div>
       </div>
-    </>
   );
 }

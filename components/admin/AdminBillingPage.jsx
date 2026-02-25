@@ -816,6 +816,5 @@ export default function AdminBillingPage() {
           </div>
         </section>
       </div>
-    </>
   );
 }
