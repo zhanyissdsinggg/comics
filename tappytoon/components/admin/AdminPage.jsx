@@ -250,19 +250,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div
-      title="作品管理"
-      subtitle="管理作品、章节与基础配置"
-      actions={
-        <button
-          type="button"
-          onClick={() => router.push("/admin/promotions")}
-          className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
-        >
-          活动配置
-        </button>
-      }
-    >
+    <div>
       <div className="space-y-8">
         <div>
           <h2 className="text-xl font-semibold">作品总览</h2>
