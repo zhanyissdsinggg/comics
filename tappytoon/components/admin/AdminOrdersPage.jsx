@@ -250,7 +250,6 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* 老王注释：补点模态框 - 替代window.prompt，提供更好的用户体验 */}
       {adjustModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">

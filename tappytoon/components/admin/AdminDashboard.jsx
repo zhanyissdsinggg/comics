@@ -423,5 +423,4 @@ export default function AdminDashboard() {
         </section>
       </div>
     </div>
-  );
 }

@@ -590,7 +590,6 @@ export default function AdminOrdersPageNew() {
       </div>
 
       {/* 补点模态框 */}
-      {adjustModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="w-full max-w-md rounded-[20px] border border-emerald-500/10 bg-neutral-900/95 backdrop-blur-xl p-6 shadow-xl">
             <h3 className="text-lg font-semibold text-neutral-100">补点</h3>

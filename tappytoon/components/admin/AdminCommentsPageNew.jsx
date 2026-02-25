@@ -725,5 +725,4 @@ export default function AdminCommentsPageNew() {
         )}
       </div>
     </div>
-  );
 }
