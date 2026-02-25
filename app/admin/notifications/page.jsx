@@ -1,118 +1,261 @@
-﻿"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import { AdminLayout } from "../../../components/admin/AdminLayout";
-import { DataTable } from "../../../components/admin/DataTable";
-import { BulkActions } from "../../../components/admin/BulkActions";
-import { AdvancedFilter } from "../../../components/admin/AdvancedFilter";
-import { useAdminApi } from "../../../lib/hooks/useAdminApi";
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { LoadingState } from '@/components/admin/common/LoadingState';
+import { Modal } from '@/components/admin/common/Modal';
+import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 
-function parseList(payload, keys = []) {
-  for (const key of keys) {
-    if (Array.isArray(payload?.[key])) {
-      return payload[key];
-    }
-  }
-  if (Array.isArray(payload?.data)) {
-    return payload.data;
-  }
-  return [];
-}
-
-export default function NotificationsPage() {
-  const { request, error } = useAdminApi();
-  const [notifications, setNotifications] = useState([]);
+export default function AdminNotificationsPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [selectedIds, setSelectedIds] = useState([]);
-  const [pageLoading, setPageLoading] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
-  const fetchNotifications = useCallback(
-    async (filters = {}) => {
-      setPageLoading(true);
-      try {
-        const params = new URLSearchParams();
-        params.append("page", String(filters.page || 1));
-        params.append("limit", String(filters.limit || 10));
-        if (filters.search) params.append("search", filters.search);
+  // 获取通知列表
+  const { data: notificationsData, isLoading, refetch } = useQuery({
+    queryKey: ['admin', 'notifications', { searchTerm, sortBy, sortOrder }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      params.append('sortBy', sortBy);
+      params.append('sortOrder', sortOrder);
 
-        const data = await request(`/api/admin/notifications?${params.toString()}`);
-        const list = parseList(data, ["notifications"]).map((item) => ({
-          ...item,
-          id: item.id || item.notificationId,
-        }));
-        setNotifications(list);
-      } catch (err) {
-        console.error("获取通知列表失败:", err);
-      } finally {
-        setPageLoading(false);
-      }
+      const response = await fetch(`/api/admin/notifications?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
+        },
+      });
+      return response.json();
     },
-    [request]
-  );
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+  const notifications = notificationsData?.notifications || [];
 
-  const handleDelete = async (ids) => {
-    if (!confirm(`确定要删除这 ${ids.length} 条通知吗？`)) return;
+  // 过滤和排序
+  const filteredNotifications = useMemo(() => {
+    let result = notifications ? [...notifications] : [];
 
-    setPageLoading(true);
-    try {
-      for (const id of ids) {
-        await request(`/api/admin/notifications/${id}`, { method: "DELETE" });
+    // 搜索过滤
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(
+        (notif) =>
+          notif.id.toString().includes(term) ||
+          (notif.title && notif.title.toLowerCase().includes(term)) ||
+          (notif.content && notif.content.toLowerCase().includes(term))
+      );
+    }
+
+    // 排序
+    result.sort((a, b) => {
+      let aVal, bVal;
+      if (sortBy === 'createdAt') {
+        aVal = new Date(a.createdAt || 0).getTime();
+        bVal = new Date(b.createdAt || 0).getTime();
+      } else if (sortBy === 'title') {
+        aVal = a.title || '';
+        bVal = b.title || '';
       }
+
+      if (sortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+
+    return result;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifications, searchTerm, sortBy, sortOrder]);
+
+  // 处理批量删除
+  const handleBulkDelete = async () => {
+    try {
+      for (const id of selectedIds) {
+        await fetch(`/api/admin/notifications/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        });
+      }
+
       setSelectedIds([]);
-      await fetchNotifications();
-      alert("删除成功");
-    } catch (err) {
-      console.error("删除失败:", err);
-      alert("删除失败");
-    } finally {
-      setPageLoading(false);
+      setIsDeleteConfirmOpen(false);
+      refetch();
+    } catch (error) {
+      console.error('批量删除失败:', error);
     }
   };
 
-  const columns = [
-    { key: "id", label: "ID", sortable: true },
-    { key: "title", label: "标题", sortable: true },
-    {
-      key: "content",
-      label: "内容",
-      render: (v) => {
-        const text = v || "";
-        return text.length > 50 ? `${text.slice(0, 50)}...` : text;
-      },
-    },
-    {
-      key: "createdAt",
-      label: "创建时间",
-      render: (v) => (v ? new Date(v).toLocaleDateString("zh-CN") : "-"),
-    },
-  ];
+  const getContentPreview = (content) => {
+    const text = content || '';
+    return text.length > 50 ? `${text.slice(0, 50)}...` : text;
+  };
 
   return (
-    <AdminLayout title="通知管理" subtitle="通知列表筛选与批量删除。">
-      <div className="space-y-6">
-        <AdvancedFilter filters={[]} onFilter={fetchNotifications} loading={pageLoading} />
+    <div className="min-h-screen bg-neutral-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* 页面标题 */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-neutral-100">通知管理</h1>
+          <p className="text-neutral-400 mt-2">管理所有系统通知和消息</p>
+        </div>
 
-        <BulkActions
-          selectedIds={selectedIds}
-          onDelete={handleDelete}
-          loading={pageLoading}
-        />
+        {/* 工具栏 */}
+        <div className="mb-6 flex gap-4 flex-wrap items-center">
+          <input
+            type="text"
+            placeholder="搜索通知..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-100 placeholder-neutral-500"
+          />
 
-        <DataTable
-          columns={columns}
-          data={notifications}
-          loading={pageLoading}
-          error={error}
-          selectable
-          onSelectionChange={setSelectedIds}
-          sortable
-          paginated
-          pageSize={10}
-        />
+          <button
+            onClick={() => setIsFilterModalOpen(true)}
+            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700"
+          >
+            🔍 高级筛选
+          </button>
+
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+          >
+            {sortOrder === 'asc' ? '↑ 升序' : '↓ 降序'}
+          </button>
+        </div>
+
+        {/* 批量操作栏 */}
+        {selectedIds.length > 0 && (
+          <div className="mb-6 p-4 rounded-lg bg-blue-900/20 border border-blue-700 flex items-center justify-between">
+            <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsDeleteConfirmOpen(true)}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm"
+              >
+                删除
+              </button>
+              <button
+                onClick={() => setSelectedIds([])}
+                className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 通知列表 */}
+        {isLoading ? (
+          <LoadingState.Spinner size="md" />
+        ) : filteredNotifications.length > 0 ? (
+          <div className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-neutral-700 bg-neutral-900">
+                    <th className="px-4 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.length === filteredNotifications.length && filteredNotifications.length > 0}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds(filteredNotifications.map((n) => n.id));
+                          } else {
+                            setSelectedIds([]);
+                          }
+                        }}
+                        className="rounded"
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-left text-neutral-400">ID</th>
+                    <th className="px-4 py-3 text-left text-neutral-400">标题</th>
+                    <th className="px-4 py-3 text-left text-neutral-400">内容</th>
+                    <th className="px-4 py-3 text-left text-neutral-400">创建时间</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredNotifications.map((notif) => (
+                    <tr key={notif.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(notif.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds([...selectedIds, notif.id]);
+                            } else {
+                              setSelectedIds(selectedIds.filter((id) => id !== notif.id));
+                            }
+                          }}
+                          className="rounded"
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-neutral-300 font-medium">{notif.id}</td>
+                      <td className="px-4 py-3 text-neutral-300">{notif.title}</td>
+                      <td className="px-4 py-3 text-neutral-400 max-w-xs truncate">
+                        {getContentPreview(notif.content)}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-400">
+                        {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString('zh-CN') : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <LoadingState.EmptyState message="暂无通知" />
+        )}
       </div>
-    </AdminLayout>
+
+      {/* 高级筛选模态框 */}
+      <Modal
+        isOpen={isFilterModalOpen}
+        title="高级筛选"
+        onClose={() => setIsFilterModalOpen(false)}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm text-neutral-400">排序字段</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+            >
+              <option value="createdAt">创建时间</option>
+              <option value="title">标题</option>
+            </select>
+          </div>
+
+          <button
+            onClick={() => setIsFilterModalOpen(false)}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            应用筛选
+          </button>
+        </div>
+      </Modal>
+
+      {/* 删除确认对话框 */}
+      <ConfirmDialog
+        isOpen={isDeleteConfirmOpen}
+        title="确认删除"
+        message={`确定要删除这 ${selectedIds.length} 条通知吗？此操作不可撤销。`}
+        confirmText="删除"
+        cancelText="取消"
+        isDangerous={true}
+        onConfirm={handleBulkDelete}
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+      />
+    </div>
   );
 }
