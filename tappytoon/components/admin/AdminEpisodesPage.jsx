@@ -1050,6 +1050,5 @@ export default function AdminEpisodesPage() {
           )}
         </div>
       </div>
-    </div>
   );
 }

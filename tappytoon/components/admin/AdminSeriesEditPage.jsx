@@ -481,6 +481,5 @@ export default function AdminSeriesEditPage() {
           </button>
         </div>
       </div>
-    </div>
   );
 }
