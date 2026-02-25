@@ -1,78 +1,64 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Users,
+  ArrowDown,
+  ArrowUp,
+  Award,
+  Bell,
   BookOpen,
-  Receipt,
-  TrendingUp,
+  Clock,
   DollarSign,
   Eye,
-  MessageSquare,
-  Bell,
-  ArrowUp,
-  ArrowDown,
-  Megaphone,
   FileText,
   Layers,
-  Award,
-  Clock,
+  Megaphone,
+  MessageSquare,
+  Receipt,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 
-/**
- * 老王重新设计：Dashboard数据看板
- * 特点：
- * - 关键指标卡片
- * - 快捷操作
- * - 最近活动
- * - emerald绿色主题
- */
-
-// 老王注释：模拟数据（实际应该从API获取）
-const MOCK_STATS = {
+const DEFAULT_STATS = {
   users: { total: 12543, change: 12.5, trend: "up" },
   series: { total: 856, change: 3.2, trend: "up" },
   orders: { total: 3421, change: -2.1, trend: "down" },
   revenue: { total: 45678, change: 18.3, trend: "up" },
   views: { total: 234567, change: 8.7, trend: "up" },
   comments: { total: 1234, change: 5.4, trend: "up" },
-  // 老王添加：作品类型分布
   seriesByType: {
     comic: { total: 520, change: 5.2, trend: "up" },
     novel: { total: 336, change: 1.8, trend: "up" },
   },
-  // 老王添加：章节统计
   episodes: { total: 12456, change: 15.3, trend: "up" },
 };
 
-// 老王添加：热门作品排行数据
-const MOCK_TOP_SERIES = {
+const DEFAULT_TOP_SERIES = {
   byViews: [
-    { id: 1, title: "Midnight Contract", type: "comic", views: 45678, cover: "/placeholder-cover.svg" },
-    { id: 2, title: "Crimson Promise", type: "novel", views: 38921, cover: "/placeholder-cover.svg" },
-    { id: 3, title: "Shadow Realm", type: "comic", views: 32145, cover: "/placeholder-cover.svg" },
-    { id: 4, title: "Eternal Bond", type: "novel", views: 28934, cover: "/placeholder-cover.svg" },
-    { id: 5, title: "Dark Fantasy", type: "comic", views: 25678, cover: "/placeholder-cover.svg" },
+    { id: 1, title: "Midnight Contract", type: "comic", views: 45678, revenue: 0 },
+    { id: 2, title: "Crimson Promise", type: "novel", views: 38921, revenue: 0 },
+    { id: 3, title: "Shadow Realm", type: "comic", views: 32145, revenue: 0 },
+    { id: 4, title: "Eternal Bond", type: "novel", views: 28934, revenue: 0 },
+    { id: 5, title: "Dark Fantasy", type: "comic", views: 25678, revenue: 0 },
   ],
   byRevenue: [
-    { id: 1, title: "Midnight Contract", type: "comic", revenue: 8934, cover: "/placeholder-cover.svg" },
-    { id: 2, title: "Shadow Realm", type: "comic", revenue: 7821, cover: "/placeholder-cover.svg" },
-    { id: 3, title: "Crimson Promise", type: "novel", revenue: 6543, cover: "/placeholder-cover.svg" },
-    { id: 4, title: "Eternal Bond", type: "novel", revenue: 5432, cover: "/placeholder-cover.svg" },
-    { id: 5, title: "Dark Fantasy", type: "comic", revenue: 4321, cover: "/placeholder-cover.svg" },
+    { id: 1, title: "Midnight Contract", type: "comic", views: 0, revenue: 8934 },
+    { id: 2, title: "Shadow Realm", type: "comic", views: 0, revenue: 7821 },
+    { id: 3, title: "Crimson Promise", type: "novel", views: 0, revenue: 6543 },
+    { id: 4, title: "Eternal Bond", type: "novel", views: 0, revenue: 5432 },
+    { id: 5, title: "Dark Fantasy", type: "comic", views: 0, revenue: 4321 },
   ],
 };
 
-// 老王添加：最近更新的作品
-const MOCK_RECENT_UPDATES = [
-  { id: 1, title: "Midnight Contract", type: "comic", updatedAt: "2024-01-15T10:30:00Z", episodeCount: 45, cover: "/placeholder-cover.svg" },
-  { id: 2, title: "Crimson Promise", type: "novel", updatedAt: "2024-01-15T09:15:00Z", episodeCount: 32, cover: "/placeholder-cover.svg" },
-  { id: 3, title: "Shadow Realm", type: "comic", updatedAt: "2024-01-14T18:45:00Z", episodeCount: 28, cover: "/placeholder-cover.svg" },
-  { id: 4, title: "Eternal Bond", type: "novel", updatedAt: "2024-01-14T16:20:00Z", episodeCount: 41, cover: "/placeholder-cover.svg" },
-  { id: 5, title: "Dark Fantasy", type: "comic", updatedAt: "2024-01-14T14:10:00Z", episodeCount: 36, cover: "/placeholder-cover.svg" },
+const DEFAULT_RECENT_UPDATES = [
+  { id: 1, title: "Midnight Contract", type: "comic", updatedAt: "2024-01-15T10:30:00Z", episodeCount: 45 },
+  { id: 2, title: "Crimson Promise", type: "novel", updatedAt: "2024-01-15T09:15:00Z", episodeCount: 32 },
+  { id: 3, title: "Shadow Realm", type: "comic", updatedAt: "2024-01-14T18:45:00Z", episodeCount: 28 },
+  { id: 4, title: "Eternal Bond", type: "novel", updatedAt: "2024-01-14T16:20:00Z", episodeCount: 41 },
+  { id: 5, title: "Dark Fantasy", type: "comic", updatedAt: "2024-01-14T14:10:00Z", episodeCount: 36 },
 ];
 
-const RECENT_ACTIVITIES = [
+const DEFAULT_ACTIVITIES = [
   { id: 1, type: "order", user: "用户A", action: "购买了《Midnight Contract》", time: "5分钟前" },
   { id: 2, type: "comment", user: "用户B", action: "评论了《Crimson Promise》", time: "10分钟前" },
   { id: 3, type: "user", user: "用户C", action: "注册了新账号", time: "15分钟前" },
@@ -80,28 +66,229 @@ const RECENT_ACTIVITIES = [
   { id: 5, type: "series", user: "管理员", action: "发布了新作品", time: "30分钟前" },
 ];
 
+function toArray(value, fallback) {
+  return Array.isArray(value) ? value : fallback;
+}
+
+function toNumber(value, fallback = 0) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+  return fallback;
+}
+
+function resolveTrend(change, trend) {
+  if (trend === "up" || trend === "down") {
+    return trend;
+  }
+  return change < 0 ? "down" : "up";
+}
+
+function normalizeMetric(metric, fallback, flatTotal, flatChange) {
+  const source = metric && typeof metric === "object" ? metric : {};
+  const total = toNumber(source.total, toNumber(flatTotal, fallback.total));
+  const change = toNumber(
+    source.change,
+    toNumber(source.delta, toNumber(source.growth, toNumber(flatChange, fallback.change))),
+  );
+  const trend = resolveTrend(change, source.trend);
+
+  return { total, change, trend };
+}
+
+function normalizeSeriesEntry(entry, index, metric, fallback) {
+  const source = entry && typeof entry === "object" ? entry : {};
+  const base = fallback[index] || fallback[0];
+
+  return {
+    id: source.id || source.seriesId || source._id || `${metric}-${index + 1}`,
+    title: source.title || source.name || source.seriesTitle || base.title,
+    type: source.type || source.seriesType || base.type || "comic",
+    views: toNumber(source.views, toNumber(source.viewCount, base.views || 0)),
+    revenue: toNumber(source.revenue, toNumber(source.amount, base.revenue || 0)),
+  };
+}
+
+function normalizeTopSeries(payload) {
+  const source = payload && typeof payload === "object" ? payload : {};
+
+  const viewSource =
+    source.topByViews ||
+    source.seriesByViews ||
+    source.hotSeriesByViews ||
+    source.byViews ||
+    source.topSeriesByViews ||
+    source.rankByViews;
+
+  const revenueSource =
+    source.topByRevenue ||
+    source.seriesByRevenue ||
+    source.hotSeriesByRevenue ||
+    source.byRevenue ||
+    source.topSeriesByRevenue ||
+    source.rankByRevenue;
+
+  return {
+    byViews: toArray(viewSource, DEFAULT_TOP_SERIES.byViews).map((entry, index) =>
+      normalizeSeriesEntry(entry, index, "views", DEFAULT_TOP_SERIES.byViews),
+    ),
+    byRevenue: toArray(revenueSource, DEFAULT_TOP_SERIES.byRevenue).map((entry, index) =>
+      normalizeSeriesEntry(entry, index, "revenue", DEFAULT_TOP_SERIES.byRevenue),
+    ),
+  };
+}
+
+function normalizeRecentUpdates(list) {
+  return toArray(list, DEFAULT_RECENT_UPDATES).map((entry, index) => {
+    const source = entry && typeof entry === "object" ? entry : {};
+    const fallback = DEFAULT_RECENT_UPDATES[index] || DEFAULT_RECENT_UPDATES[0];
+
+    return {
+      id: source.id || source.seriesId || source._id || `update-${index + 1}`,
+      title: source.title || source.name || source.seriesTitle || fallback.title,
+      type: source.type || source.seriesType || fallback.type,
+      updatedAt: source.updatedAt || source.updated_at || source.lastUpdatedAt || fallback.updatedAt,
+      episodeCount: toNumber(source.episodeCount, toNumber(source.totalEpisodes, fallback.episodeCount)),
+    };
+  });
+}
+
+function getRelativeTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "刚刚";
+  }
+
+  const diffMs = Date.now() - date.getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMs / 3600000);
+  const days = Math.floor(diffMs / 86400000);
+
+  if (minutes < 1) return "刚刚";
+  if (minutes < 60) return `${minutes}分钟前`;
+  if (hours < 24) return `${hours}小时前`;
+  return `${days}天前`;
+}
+
+function normalizeActivities(list) {
+  return toArray(list, DEFAULT_ACTIVITIES).map((entry, index) => {
+    const source = entry && typeof entry === "object" ? entry : {};
+    const fallback = DEFAULT_ACTIVITIES[index] || DEFAULT_ACTIVITIES[0];
+
+    return {
+      id: source.id || source.activityId || source._id || `activity-${index + 1}`,
+      type: source.type || source.category || fallback.type,
+      user: source.user || source.username || source.operator || fallback.user,
+      action: source.action || source.description || source.message || fallback.action,
+      time: source.time || (source.createdAt ? getRelativeTime(source.createdAt) : fallback.time),
+    };
+  });
+}
+
+function normalizeDashboardPayload(payload) {
+  const root = payload?.data ?? payload ?? {};
+  const statsSource = root.stats ?? root;
+
+  const normalizedStats = {
+    users: normalizeMetric(
+      statsSource.users,
+      DEFAULT_STATS.users,
+      root.totalUsers ?? root.usersTotal ?? root.userCount,
+      root.usersChange ?? root.userGrowth,
+    ),
+    series: normalizeMetric(
+      statsSource.series,
+      DEFAULT_STATS.series,
+      root.totalSeries ?? root.seriesTotal ?? root.worksCount,
+      root.seriesChange ?? root.seriesGrowth,
+    ),
+    orders: normalizeMetric(
+      statsSource.orders,
+      DEFAULT_STATS.orders,
+      root.totalOrders ?? root.ordersTotal ?? root.orderCount,
+      root.ordersChange ?? root.orderGrowth,
+    ),
+    revenue: normalizeMetric(
+      statsSource.revenue,
+      DEFAULT_STATS.revenue,
+      root.totalRevenue ?? root.revenueTotal ?? root.revenue,
+      root.revenueChange ?? root.revenueGrowth,
+    ),
+    views: normalizeMetric(
+      statsSource.views,
+      DEFAULT_STATS.views,
+      root.totalViews ?? root.viewsTotal ?? root.viewCount,
+      root.viewsChange ?? root.viewsGrowth,
+    ),
+    comments: normalizeMetric(
+      statsSource.comments,
+      DEFAULT_STATS.comments,
+      root.totalComments ?? root.commentsTotal ?? root.commentCount,
+      root.commentsChange ?? root.commentsGrowth,
+    ),
+    seriesByType: {
+      comic: normalizeMetric(
+        statsSource.seriesByType?.comic,
+        DEFAULT_STATS.seriesByType.comic,
+        root.comicSeriesCount ?? root.totalComicSeries,
+        root.comicSeriesChange,
+      ),
+      novel: normalizeMetric(
+        statsSource.seriesByType?.novel,
+        DEFAULT_STATS.seriesByType.novel,
+        root.novelSeriesCount ?? root.totalNovelSeries,
+        root.novelSeriesChange,
+      ),
+    },
+    episodes: normalizeMetric(
+      statsSource.episodes,
+      DEFAULT_STATS.episodes,
+      root.totalEpisodes ?? root.episodesTotal,
+      root.episodesChange,
+    ),
+  };
+
+  const topSource = root.topSeries || root.rankings || root;
+  const normalizedTopSeries = normalizeTopSeries(topSource);
+
+  const updatesSource = root.recentUpdates || root.latestSeries || root.updatedSeries;
+  const activitiesSource = root.recentActivities || root.activities || root.timeline;
+
+  return {
+    stats: normalizedStats,
+    topSeries: normalizedTopSeries,
+    recentUpdates: normalizeRecentUpdates(updatesSource),
+    activities: normalizeActivities(activitiesSource),
+  };
+}
+
 function StatCard({ icon: Icon, label, value, change, trend, color }) {
-  const isPositive = trend === "up";
+  const safeValue = toNumber(value, 0);
+  const safeChange = toNumber(change, 0);
+  const isPositive = trend !== "down";
   const TrendIcon = isPositive ? ArrowUp : ArrowDown;
 
   return (
-    <div className="group relative overflow-hidden rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-6 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 hover:scale-[1.02]">
-      {/* 老王添加：背景渐变效果 */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+    <div className="group relative overflow-hidden rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10">
+      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-5 transition-opacity duration-300 group-hover:opacity-10`} />
 
       <div className="relative">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div className={`flex h-12 w-12 items-center justify-center rounded-[14px] bg-gradient-to-br ${color} shadow-lg`}>
             <Icon size={24} className="text-white" />
           </div>
           <div className={`flex items-center gap-1 text-sm font-medium ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
             <TrendIcon size={16} />
-            <span>{Math.abs(change)}%</span>
+            <span>{Math.abs(safeChange)}%</span>
           </div>
         </div>
         <div>
-          <p className="text-sm text-neutral-400 mb-1">{label}</p>
-          <p className="text-3xl font-bold text-neutral-100">{value.toLocaleString()}</p>
+          <p className="mb-1 text-sm text-neutral-400">{label}</p>
+          <p className="text-3xl font-bold text-neutral-100">{safeValue.toLocaleString("zh-CN")}</p>
         </div>
       </div>
     </div>
@@ -112,12 +299,12 @@ function QuickAction({ icon: Icon, label, href, color }) {
   return (
     <a
       href={href}
-      className={`group flex flex-col items-center gap-3 rounded-[16px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-6 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 hover:scale-105 active:scale-95`}
+      className="group flex flex-col items-center gap-3 rounded-[16px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-95"
     >
       <div className={`flex h-14 w-14 items-center justify-center rounded-[14px] bg-gradient-to-br ${color} shadow-lg transition-transform duration-300 group-hover:scale-110`}>
         <Icon size={28} className="text-white" />
       </div>
-      <span className="text-sm font-medium text-neutral-200 group-hover:text-emerald-300 transition-colors duration-300">
+      <span className="text-sm font-medium text-neutral-200 transition-colors duration-300 group-hover:text-emerald-300">
         {label}
       </span>
     </a>
@@ -125,243 +312,215 @@ function QuickAction({ icon: Icon, label, href, color }) {
 }
 
 function ActivityItem({ activity }) {
-  const getIcon = () => {
-    switch (activity.type) {
-      case "order":
-        return <Receipt size={16} className="text-emerald-400" />;
-      case "comment":
-        return <MessageSquare size={16} className="text-blue-400" />;
-      case "user":
-        return <Users size={16} className="text-purple-400" />;
-      case "series":
-        return <BookOpen size={16} className="text-orange-400" />;
-      default:
-        return <Bell size={16} className="text-neutral-400" />;
-    }
+  const iconByType = {
+    order: <Receipt size={16} className="text-emerald-400" />,
+    comment: <MessageSquare size={16} className="text-blue-400" />,
+    user: <Users size={16} className="text-purple-400" />,
+    series: <BookOpen size={16} className="text-orange-400" />,
   };
 
   return (
     <div className="group flex items-start gap-3 rounded-[14px] p-3 transition-all duration-300 hover:bg-emerald-500/5">
-      <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-neutral-800/50 group-hover:bg-emerald-500/10 transition-colors duration-300">
-        {getIcon()}
+      <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-neutral-800/50 transition-colors duration-300 group-hover:bg-emerald-500/10">
+        {iconByType[activity.type] || <Bell size={16} className="text-neutral-400" />}
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-sm text-neutral-200">
           <span className="font-medium text-emerald-300">{activity.user}</span>
           {" "}
           <span className="text-neutral-400">{activity.action}</span>
         </p>
-        <p className="text-xs text-neutral-500 mt-0.5">{activity.time}</p>
+        <p className="mt-0.5 text-xs text-neutral-500">{activity.time}</p>
       </div>
     </div>
   );
 }
 
-// 老王添加：热门作品排行项组件
 function TopSeriesItem({ series, rank, metric }) {
-  const getRankColor = () => {
-    if (rank === 1) return "from-yellow-500 to-yellow-600";
-    if (rank === 2) return "from-gray-400 to-gray-500";
-    if (rank === 3) return "from-orange-600 to-orange-700";
-    return "from-neutral-700 to-neutral-800";
-  };
-
-  const getTypeLabel = () => {
-    return series.type === "comic" ? "漫画" : "小说";
-  };
-
-  const getTypeColor = () => {
-    return series.type === "comic" ? "text-blue-400" : "text-purple-400";
-  };
+  const rankColor =
+    rank === 1
+      ? "from-yellow-500 to-yellow-600"
+      : rank === 2
+        ? "from-gray-400 to-gray-500"
+        : rank === 3
+          ? "from-orange-600 to-orange-700"
+          : "from-neutral-700 to-neutral-800";
 
   return (
     <div className="group flex items-center gap-3 rounded-[14px] p-3 transition-all duration-300 hover:bg-emerald-500/5">
-      {/* 老王添加：排名徽章 */}
-      <div className={`flex h-8 w-8 items-center justify-center rounded-[10px] bg-gradient-to-br ${getRankColor()} shadow-lg flex-shrink-0`}>
+      <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br ${rankColor} shadow-lg`}>
         <span className="text-sm font-bold text-white">{rank}</span>
       </div>
 
-      {/* 老王添加：作品信息 */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <p className="text-sm font-medium text-neutral-200 truncate">{series.title}</p>
-          <span className={`text-xs px-2 py-0.5 rounded-[6px] bg-neutral-800/50 ${getTypeColor()} flex-shrink-0`}>
-            {getTypeLabel()}
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex items-center gap-2">
+          <p className="truncate text-sm font-medium text-neutral-200">{series.title}</p>
+          <span className={`flex-shrink-0 rounded-[6px] bg-neutral-800/50 px-2 py-0.5 text-xs ${series.type === "comic" ? "text-blue-400" : "text-purple-400"}`}>
+            {series.type === "comic" ? "漫画" : "小说"}
           </span>
         </div>
         <p className="text-xs text-neutral-400">
-          {metric === "views" ? `${series.views.toLocaleString()} 次浏览` : `¥${series.revenue.toLocaleString()} 收入`}
+          {metric === "views"
+            ? `${toNumber(series.views).toLocaleString("zh-CN")} 次浏览`
+            : `¥${toNumber(series.revenue).toLocaleString("zh-CN")} 收入`}
         </p>
       </div>
     </div>
   );
 }
 
-// 老王添加：最近更新作品项组件
 function RecentUpdateItem({ series }) {
-  const getTypeLabel = () => {
-    return series.type === "comic" ? "漫画" : "小说";
-  };
-
-  const getTypeColor = () => {
-    return series.type === "comic" ? "text-blue-400" : "text-purple-400";
-  };
-
-  const getTimeAgo = () => {
-    const now = new Date();
-    const updated = new Date(series.updatedAt);
-    const diffMs = now - updated;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) return `${diffMins}分钟前`;
-    if (diffHours < 24) return `${diffHours}小时前`;
-    return `${diffDays}天前`;
-  };
-
   return (
     <div className="group flex items-center gap-3 rounded-[14px] p-3 transition-all duration-300 hover:bg-emerald-500/5">
-      {/* 老王添加：时钟图标 */}
-      <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors duration-300 flex-shrink-0">
+      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[10px] bg-emerald-500/10 transition-colors duration-300 group-hover:bg-emerald-500/20">
         <Clock size={16} className="text-emerald-400" />
       </div>
 
-      {/* 老王添加：作品信息 */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <p className="text-sm font-medium text-neutral-200 truncate">{series.title}</p>
-          <span className={`text-xs px-2 py-0.5 rounded-[6px] bg-neutral-800/50 ${getTypeColor()} flex-shrink-0`}>
-            {getTypeLabel()}
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex items-center gap-2">
+          <p className="truncate text-sm font-medium text-neutral-200">{series.title}</p>
+          <span className={`flex-shrink-0 rounded-[6px] bg-neutral-800/50 px-2 py-0.5 text-xs ${series.type === "comic" ? "text-blue-400" : "text-purple-400"}`}>
+            {series.type === "comic" ? "漫画" : "小说"}
           </span>
         </div>
         <p className="text-xs text-neutral-400">
-          {series.episodeCount} 章节 · {getTimeAgo()}
+          {toNumber(series.episodeCount)} 章节 · {getRelativeTime(series.updatedAt)}
         </p>
       </div>
+    </div>
+  );
+}
+
+function EmptyBlock({ text }) {
+  return (
+    <div className="rounded-[14px] border border-dashed border-neutral-700 p-4 text-center text-sm text-neutral-500">
+      {text}
     </div>
   );
 }
 
 export default function AdminDashboardNew() {
-  const [stats, setStats] = useState(MOCK_STATS);
-  const [activities, setActivities] = useState(RECENT_ACTIVITIES);
+  const [stats, setStats] = useState(DEFAULT_STATS);
+  const [topSeries, setTopSeries] = useState(DEFAULT_TOP_SERIES);
+  const [recentUpdates, setRecentUpdates] = useState(DEFAULT_RECENT_UPDATES);
+  const [activities, setActivities] = useState(DEFAULT_ACTIVITIES);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 老王添加：热门作品和最近更新状态
-  const [topSeries, setTopSeries] = useState(MOCK_TOP_SERIES);
-  const [recentUpdates, setRecentUpdates] = useState(MOCK_RECENT_UPDATES);
-
-  // 老王添加：日期范围状态
-  const [dateRange, setDateRange] = useState("all"); // all, 7days, 30days, custom
+  const [dateRange, setDateRange] = useState("all");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
 
-  // 老王修复：从API获取真实数据
+  const queryString = useMemo(() => {
+    if (dateRange === "7days") {
+      const to = new Date().toISOString().slice(0, 10);
+      const from = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      return `?from=${from}&to=${to}`;
+    }
+
+    if (dateRange === "30days") {
+      const to = new Date().toISOString().slice(0, 10);
+      const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      return `?from=${from}&to=${to}`;
+    }
+
+    if (dateRange === "custom" && customFrom && customTo) {
+      return `?from=${customFrom}&to=${customTo}`;
+    }
+
+    return "";
+  }, [dateRange, customFrom, customTo]);
+
   useEffect(() => {
+    let aborted = false;
+
     async function fetchDashboardData() {
       try {
         setIsLoading(true);
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
+
+        const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
+        const endpoint = `${baseUrl}/api/admin/stats/dashboard${queryString}`;
         const token = localStorage.getItem("admin_token");
 
-        // 老王添加：根据dateRange构建查询参数
-        let queryParams = "";
-        if (dateRange === "7days") {
-          const to = new Date().toISOString().slice(0, 10);
-          const from = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-          queryParams = `?from=${from}&to=${to}`;
-        } else if (dateRange === "30days") {
-          const to = new Date().toISOString().slice(0, 10);
-          const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-          queryParams = `?from=${from}&to=${to}`;
-        } else if (dateRange === "custom" && customFrom && customTo) {
-          queryParams = `?from=${customFrom}&to=${customTo}`;
+        const headers = {
+          "Content-Type": "application/json",
+        };
+
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
         }
 
-        const response = await fetch(`${baseUrl}/api/admin/stats/dashboard${queryParams}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(endpoint, { headers });
 
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
-        } else {
-          console.error("获取dashboard数据失败:", response.status);
+        if (!response.ok) {
+          throw new Error(`request failed: ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const normalized = normalizeDashboardPayload(payload);
+
+        if (!aborted) {
+          setStats(normalized.stats);
+          setTopSeries(normalized.topSeries);
+          setRecentUpdates(normalized.recentUpdates);
+          setActivities(normalized.activities);
         }
       } catch (error) {
-        console.error("获取dashboard数据出错:", error);
+        console.error("获取 dashboard 数据失败:", error);
+
+        if (!aborted) {
+          setStats(DEFAULT_STATS);
+          setTopSeries(DEFAULT_TOP_SERIES);
+          setRecentUpdates(DEFAULT_RECENT_UPDATES);
+          setActivities(DEFAULT_ACTIVITIES);
+        }
       } finally {
-        setIsLoading(false);
+        if (!aborted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchDashboardData();
-  }, [dateRange, customFrom, customTo]); // 老王注释：日期变化时重新获取数据
+
+    return () => {
+      aborted = true;
+    };
+  }, [queryString]);
 
   return (
     <div className="space-y-6">
-      {/* 老王添加：欢迎标题和日期筛选 */}
-      <div className="rounded-[20px] border border-emerald-500/10 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 backdrop-blur-xl p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="rounded-[20px] border border-emerald-500/10 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-6 backdrop-blur-xl">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-neutral-100 mb-2">
-              欢迎回来，管理员 👋
+            <h2 className="mb-2 flex items-center gap-2 text-2xl font-bold text-neutral-100">
+              <TrendingUp size={24} className="text-emerald-400" />
+              后台数据看板
             </h2>
-            <p className="text-sm text-neutral-400">
-              这是您的数据概览，实时监控平台运营状况
-            </p>
+            <p className="text-sm text-neutral-400">实时监控内容运营、订单和用户增长表现</p>
           </div>
 
-          {/* 老王添加：日期筛选器 */}
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setDateRange("all")}
-              className={`px-4 py-2 rounded-[12px] text-sm font-medium transition-all duration-300 ${
-                dateRange === "all"
-                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                  : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800 hover:text-emerald-300"
-              }`}
-            >
-              全部
-            </button>
-            <button
-              onClick={() => setDateRange("7days")}
-              className={`px-4 py-2 rounded-[12px] text-sm font-medium transition-all duration-300 ${
-                dateRange === "7days"
-                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                  : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800 hover:text-emerald-300"
-              }`}
-            >
-              最近7天
-            </button>
-            <button
-              onClick={() => setDateRange("30days")}
-              className={`px-4 py-2 rounded-[12px] text-sm font-medium transition-all duration-300 ${
-                dateRange === "30days"
-                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                  : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800 hover:text-emerald-300"
-              }`}
-            >
-              最近30天
-            </button>
-            <button
-              onClick={() => setDateRange("custom")}
-              className={`px-4 py-2 rounded-[12px] text-sm font-medium transition-all duration-300 ${
-                dateRange === "custom"
-                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                  : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800 hover:text-emerald-300"
-              }`}
-            >
-              自定义
-            </button>
+            {[
+              { value: "all", label: "全部" },
+              { value: "7days", label: "最近7天" },
+              { value: "30days", label: "最近30天" },
+              { value: "custom", label: "自定义" },
+            ].map((option) => (
+              <button
+                key={option.value}
+                onClick={() => setDateRange(option.value)}
+                className={`rounded-[12px] px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                  dateRange === option.value
+                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                    : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800 hover:text-emerald-300"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* 老王添加：自定义日期范围输入 */}
         {dateRange === "custom" && (
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
@@ -369,8 +528,8 @@ export default function AdminDashboardNew() {
               <input
                 type="date"
                 value={customFrom}
-                onChange={(e) => setCustomFrom(e.target.value)}
-                className="px-3 py-2 rounded-[10px] bg-neutral-800/50 border border-emerald-500/20 text-neutral-200 text-sm focus:outline-none focus:border-emerald-500/50 transition-colors duration-300"
+                onChange={(event) => setCustomFrom(event.target.value)}
+                className="rounded-[10px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-200 transition-colors duration-300 focus:border-emerald-500/50 focus:outline-none"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -378,32 +537,30 @@ export default function AdminDashboardNew() {
               <input
                 type="date"
                 value={customTo}
-                onChange={(e) => setCustomTo(e.target.value)}
-                className="px-3 py-2 rounded-[10px] bg-neutral-800/50 border border-emerald-500/20 text-neutral-200 text-sm focus:outline-none focus:border-emerald-500/50 transition-colors duration-300"
+                onChange={(event) => setCustomTo(event.target.value)}
+                className="rounded-[10px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-200 transition-colors duration-300 focus:border-emerald-500/50 focus:outline-none"
               />
             </div>
           </div>
         )}
       </div>
 
-      {/* 老王添加：Loading状态 */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((item) => (
             <div
-              key={i}
-              className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-6 h-32 animate-pulse"
+              key={item}
+              className="h-32 animate-pulse rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl"
             >
-              <div className="h-12 w-12 bg-neutral-800 rounded-[14px] mb-4" />
-              <div className="h-4 w-20 bg-neutral-800 rounded mb-2" />
-              <div className="h-8 w-32 bg-neutral-800 rounded" />
+              <div className="mb-4 h-12 w-12 rounded-[14px] bg-neutral-800" />
+              <div className="mb-2 h-4 w-20 rounded bg-neutral-800" />
+              <div className="h-8 w-32 rounded bg-neutral-800" />
             </div>
           ))}
         </div>
       ) : (
         <>
-          {/* 老王重新设计：关键指标卡片 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <StatCard
               icon={Users}
               label="总用户数"
@@ -454,124 +611,105 @@ export default function AdminDashboardNew() {
             />
           </div>
 
-          {/* 老王添加：作品类型分布和章节统计 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <StatCard
               icon={FileText}
               label="漫画作品"
-              value={stats.seriesByType?.comic?.total || 0}
-              change={stats.seriesByType?.comic?.change || 0}
-              trend={stats.seriesByType?.comic?.trend || "up"}
+              value={stats.seriesByType.comic.total}
+              change={stats.seriesByType.comic.change}
+              trend={stats.seriesByType.comic.trend}
               color="from-blue-500 to-blue-600"
             />
             <StatCard
               icon={BookOpen}
               label="小说作品"
-              value={stats.seriesByType?.novel?.total || 0}
-              change={stats.seriesByType?.novel?.change || 0}
-              trend={stats.seriesByType?.novel?.trend || "up"}
+              value={stats.seriesByType.novel.total}
+              change={stats.seriesByType.novel.change}
+              trend={stats.seriesByType.novel.trend}
               color="from-purple-500 to-purple-600"
             />
             <StatCard
               icon={Layers}
               label="总章节数"
-              value={stats.episodes?.total || 0}
-              change={stats.episodes?.change || 0}
-              trend={stats.episodes?.trend || "up"}
+              value={stats.episodes.total}
+              change={stats.episodes.change}
+              trend={stats.episodes.trend}
               color="from-emerald-500 to-emerald-600"
             />
           </div>
 
-          {/* 老王添加：快捷操作 */}
           <div>
-            <h3 className="text-lg font-bold text-neutral-100 mb-4">快捷操作</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <QuickAction
-                icon={BookOpen}
-                label="添加作品"
-                href="/admin/series"
-                color="from-blue-500 to-blue-600"
-              />
-              <QuickAction
-                icon={Megaphone}
-                label="创建活动"
-                href="/admin/promotions"
-                color="from-orange-500 to-orange-600"
-              />
-              <QuickAction
-                icon={Users}
-                label="用户管理"
-                href="/admin/users"
-                color="from-purple-500 to-purple-600"
-              />
-              <QuickAction
-                icon={Receipt}
-                label="订单管理"
-                href="/admin/orders"
-                color="from-emerald-500 to-emerald-600"
-              />
+            <h3 className="mb-4 text-lg font-bold text-neutral-100">快捷操作</h3>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <QuickAction icon={BookOpen} label="添加作品" href="/admin/series" color="from-blue-500 to-blue-600" />
+              <QuickAction icon={Megaphone} label="创建活动" href="/admin/promotions" color="from-orange-500 to-orange-600" />
+              <QuickAction icon={Users} label="用户管理" href="/admin/users" color="from-purple-500 to-purple-600" />
+              <QuickAction icon={Receipt} label="订单管理" href="/admin/orders" color="from-emerald-500 to-emerald-600" />
             </div>
           </div>
 
-          {/* 老王添加：热门作品排行和最近更新 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 老王添加：按浏览量排行 */}
-            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-6">
-              <div className="flex items-center gap-2 mb-4">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl">
+              <div className="mb-4 flex items-center gap-2">
                 <Award size={20} className="text-emerald-400" />
                 <h3 className="text-lg font-bold text-neutral-100">热门作品（浏览量）</h3>
               </div>
               <div className="space-y-2">
-                {topSeries.byViews.map((series, index) => (
-                  <TopSeriesItem key={series.id} series={series} rank={index + 1} metric="views" />
-                ))}
+                {topSeries.byViews.length > 0 ? (
+                  topSeries.byViews.map((series, index) => (
+                    <TopSeriesItem key={series.id} series={series} rank={index + 1} metric="views" />
+                  ))
+                ) : (
+                  <EmptyBlock text="暂无热门作品数据" />
+                )}
               </div>
             </div>
 
-            {/* 老王添加：按收入排行 */}
-            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-6">
-              <div className="flex items-center gap-2 mb-4">
+            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl">
+              <div className="mb-4 flex items-center gap-2">
                 <DollarSign size={20} className="text-emerald-400" />
                 <h3 className="text-lg font-bold text-neutral-100">热门作品（收入）</h3>
               </div>
               <div className="space-y-2">
-                {topSeries.byRevenue.map((series, index) => (
-                  <TopSeriesItem key={series.id} series={series} rank={index + 1} metric="revenue" />
-                ))}
+                {topSeries.byRevenue.length > 0 ? (
+                  topSeries.byRevenue.map((series, index) => (
+                    <TopSeriesItem key={series.id} series={series} rank={index + 1} metric="revenue" />
+                  ))
+                ) : (
+                  <EmptyBlock text="暂无热门收入数据" />
+                )}
               </div>
             </div>
           </div>
 
-          {/* 老王添加：最近更新和最近活动 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 老王添加：最近更新的作品 */}
-            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-6">
-              <div className="flex items-center gap-2 mb-4">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl">
+              <div className="mb-4 flex items-center gap-2">
                 <Clock size={20} className="text-emerald-400" />
                 <h3 className="text-lg font-bold text-neutral-100">最近更新</h3>
               </div>
               <div className="space-y-2">
-                {recentUpdates.map((series) => (
-                  <RecentUpdateItem key={series.id} series={series} />
-                ))}
+                {recentUpdates.length > 0 ? (
+                  recentUpdates.map((series) => <RecentUpdateItem key={series.id} series={series} />)
+                ) : (
+                  <EmptyBlock text="暂无更新数据" />
+                )}
               </div>
             </div>
 
-            {/* 老王添加：最近活动 */}
-            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl">
+              <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-bold text-neutral-100">最近活动</h3>
-                <a
-                  href="/admin/tracking"
-                  className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors duration-300"
-                >
+                <a href="/admin/tracking" className="text-sm text-emerald-400 transition-colors duration-300 hover:text-emerald-300">
                   查看全部 →
                 </a>
               </div>
               <div className="space-y-2">
-                {activities.map((activity) => (
-                  <ActivityItem key={activity.id} activity={activity} />
-                ))}
+                {activities.length > 0 ? (
+                  activities.map((activity) => <ActivityItem key={activity.id} activity={activity} />)
+                ) : (
+                  <EmptyBlock text="暂无活动记录" />
+                )}
               </div>
             </div>
           </div>

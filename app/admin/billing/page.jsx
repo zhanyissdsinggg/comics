@@ -1,40 +1,57 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { DataTable } from "../../../components/admin/DataTable";
 import { BulkActions } from "../../../components/admin/BulkActions";
 import { AdvancedFilter } from "../../../components/admin/AdvancedFilter";
 import { useAdminApi } from "../../../lib/hooks/useAdminApi";
 
-/**
- * 老王注释：优化后的Billing管理页面 - 使用新的组件和Hook
- */
+function parseList(payload, keys = []) {
+  for (const key of keys) {
+    if (Array.isArray(payload?.[key])) {
+      return payload[key];
+    }
+  }
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+  return [];
+}
+
 export default function BillingPage() {
-  const { request, loading, error } = useAdminApi();
+  const { request, error } = useAdminApi();
   const [packages, setPackages] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchPackages = async (filters = {}) => {
+  const fetchPackages = useCallback(
+    async (filters = {}) => {
       setPageLoading(true);
       try {
         const params = new URLSearchParams();
-        params.append("page", filters.page || 1);
-        params.append("limit", filters.limit || 10);
+        params.append("page", String(filters.page || 1));
+        params.append("limit", String(filters.limit || 10));
         if (filters.search) params.append("search", filters.search);
 
         const data = await request(`/api/admin/billing?${params.toString()}`);
-        setPackages(data.data || []);
+        const list = parseList(data, ["packages", "plans"]).map((item) => ({
+          ...item,
+          id: item.id || item.packageId || item.planId,
+        }));
+        setPackages(list);
       } catch (err) {
         console.error("获取充值包列表失败:", err);
       } finally {
         setPageLoading(false);
       }
-    };
+    },
+    [request]
+  );
+
+  useEffect(() => {
     fetchPackages();
-  }, [request]);
+  }, [fetchPackages]);
 
   const handleDelete = async (ids) => {
     if (!confirm(`确定要删除这 ${ids.length} 个充值包吗？`)) return;
@@ -44,8 +61,8 @@ export default function BillingPage() {
       for (const id of ids) {
         await request(`/api/admin/billing/${id}`, { method: "DELETE" });
       }
-      setPackages(packages.filter((p) => !ids.includes(p.id)));
       setSelectedIds([]);
+      await fetchPackages();
       alert("删除成功");
     } catch (err) {
       console.error("删除失败:", err);
@@ -58,18 +75,18 @@ export default function BillingPage() {
   const columns = [
     { key: "id", label: "ID", sortable: true },
     { key: "name", label: "名称", sortable: true },
-    { key: "price", label: "价格", render: (v) => `¥${(v / 100).toFixed(2)}` },
+    {
+      key: "price",
+      label: "价格",
+      render: (v) => `${Number(v || 0).toFixed(2)}`,
+    },
     { key: "points", label: "积分", sortable: true },
   ];
 
   return (
-    <AdminLayout title="账单管理">
+    <AdminLayout title="账单管理" subtitle="充值包与定价项管理。">
       <div className="space-y-6">
-        <AdvancedFilter
-          filters={[]}
-          onFilter={(filters) => fetchPackages(filters)}
-          loading={pageLoading}
-        />
+        <AdvancedFilter filters={[]} onFilter={fetchPackages} loading={pageLoading} />
 
         <BulkActions
           selectedIds={selectedIds}
@@ -82,10 +99,10 @@ export default function BillingPage() {
           data={packages}
           loading={pageLoading}
           error={error}
-          selectable={true}
+          selectable
           onSelectionChange={setSelectedIds}
-          sortable={true}
-          paginated={true}
+          sortable
+          paginated
           pageSize={10}
         />
       </div>

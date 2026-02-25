@@ -46,3 +46,4 @@ Thumbs.db
 
 # 嵌入的git仓库（submodule应该用git submodule管理）
 tappytoon/.git/
+.ace-tool/

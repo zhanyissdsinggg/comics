@@ -1,40 +1,57 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { DataTable } from "../../../components/admin/DataTable";
 import { BulkActions } from "../../../components/admin/BulkActions";
 import { AdvancedFilter } from "../../../components/admin/AdvancedFilter";
 import { useAdminApi } from "../../../lib/hooks/useAdminApi";
 
-/**
- * 老王注释：优化后的Notifications管理页面 - 使用新的组件和Hook
- */
+function parseList(payload, keys = []) {
+  for (const key of keys) {
+    if (Array.isArray(payload?.[key])) {
+      return payload[key];
+    }
+  }
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+  return [];
+}
+
 export default function NotificationsPage() {
-  const { request, loading, error } = useAdminApi();
+  const { request, error } = useAdminApi();
   const [notifications, setNotifications] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchNotifications = async (filters = {}) => {
+  const fetchNotifications = useCallback(
+    async (filters = {}) => {
       setPageLoading(true);
       try {
         const params = new URLSearchParams();
-        params.append("page", filters.page || 1);
-        params.append("limit", filters.limit || 10);
+        params.append("page", String(filters.page || 1));
+        params.append("limit", String(filters.limit || 10));
         if (filters.search) params.append("search", filters.search);
 
         const data = await request(`/api/admin/notifications?${params.toString()}`);
-        setNotifications(data.data || []);
+        const list = parseList(data, ["notifications"]).map((item) => ({
+          ...item,
+          id: item.id || item.notificationId,
+        }));
+        setNotifications(list);
       } catch (err) {
         console.error("获取通知列表失败:", err);
       } finally {
         setPageLoading(false);
       }
-    };
+    },
+    [request]
+  );
+
+  useEffect(() => {
     fetchNotifications();
-  }, [request]);
+  }, [fetchNotifications]);
 
   const handleDelete = async (ids) => {
     if (!confirm(`确定要删除这 ${ids.length} 条通知吗？`)) return;
@@ -44,8 +61,8 @@ export default function NotificationsPage() {
       for (const id of ids) {
         await request(`/api/admin/notifications/${id}`, { method: "DELETE" });
       }
-      setNotifications(notifications.filter((n) => !ids.includes(n.id)));
       setSelectedIds([]);
+      await fetchNotifications();
       alert("删除成功");
     } catch (err) {
       console.error("删除失败:", err);
@@ -58,18 +75,25 @@ export default function NotificationsPage() {
   const columns = [
     { key: "id", label: "ID", sortable: true },
     { key: "title", label: "标题", sortable: true },
-    { key: "content", label: "内容", render: (v) => v.substring(0, 50) + "..." },
-    { key: "createdAt", label: "创建时间", render: (v) => new Date(v).toLocaleDateString("zh-CN") },
+    {
+      key: "content",
+      label: "内容",
+      render: (v) => {
+        const text = v || "";
+        return text.length > 50 ? `${text.slice(0, 50)}...` : text;
+      },
+    },
+    {
+      key: "createdAt",
+      label: "创建时间",
+      render: (v) => (v ? new Date(v).toLocaleDateString("zh-CN") : "-"),
+    },
   ];
 
   return (
-    <AdminLayout title="通知管理">
+    <AdminLayout title="通知管理" subtitle="通知列表筛选与批量删除。">
       <div className="space-y-6">
-        <AdvancedFilter
-          filters={[]}
-          onFilter={(filters) => fetchNotifications(filters)}
-          loading={pageLoading}
-        />
+        <AdvancedFilter filters={[]} onFilter={fetchNotifications} loading={pageLoading} />
 
         <BulkActions
           selectedIds={selectedIds}
@@ -82,10 +106,10 @@ export default function NotificationsPage() {
           data={notifications}
           loading={pageLoading}
           error={error}
-          selectable={true}
+          selectable
           onSelectionChange={setSelectedIds}
-          sortable={true}
-          paginated={true}
+          sortable
+          paginated
           pageSize={10}
         />
       </div>

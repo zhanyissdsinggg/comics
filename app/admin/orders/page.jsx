@@ -1,45 +1,60 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { DataTable } from "../../../components/admin/DataTable";
 import { BulkActions } from "../../../components/admin/BulkActions";
 import { AdvancedFilter } from "../../../components/admin/AdvancedFilter";
 import { useAdminApi } from "../../../lib/hooks/useAdminApi";
 
-/**
- * 老王注释：优化后的Orders管理页面 - 使用新的组件和Hook
- * 这个SB页面简洁多了，因为把复杂逻辑都提取到组件和Hook里了
- */
+function parseList(payload, keys = []) {
+  for (const key of keys) {
+    if (Array.isArray(payload?.[key])) {
+      return payload[key];
+    }
+  }
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+  return [];
+}
+
 export default function OrdersPage() {
-  const { request, loading, error } = useAdminApi();
+  const { request, error } = useAdminApi();
   const [orders, setOrders] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  // 老王说：初始化加载
-  useEffect(() => {
-    const fetchOrders = async (filters = {}) => {
+  const fetchOrders = useCallback(
+    async (filters = {}) => {
       setPageLoading(true);
       try {
         const params = new URLSearchParams();
-        params.append("page", filters.page || 1);
-        params.append("limit", filters.limit || 10);
+        params.append("page", String(filters.page || 1));
+        params.append("limit", String(filters.limit || 10));
         if (filters.search) params.append("search", filters.search);
         if (filters.status) params.append("status", filters.status);
 
         const data = await request(`/api/admin/orders?${params.toString()}`);
-        setOrders(data.data || []);
+        const list = parseList(data, ["orders"]).map((item) => ({
+          ...item,
+          id: item.id || item.orderId,
+          orderId: item.orderId || item.id,
+        }));
+        setOrders(list);
       } catch (err) {
         console.error("获取订单列表失败:", err);
       } finally {
         setPageLoading(false);
       }
-    };
-    fetchOrders();
-  }, [request]);
+    },
+    [request]
+  );
 
-  // 老王说：处理退款
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
   const handleRefund = async (ids) => {
     if (!confirm(`确定要退款这 ${ids.length} 个订单吗？`)) {
       return;
@@ -48,11 +63,16 @@ export default function OrdersPage() {
     setPageLoading(true);
     try {
       for (const id of ids) {
-        await request(`/api/admin/orders/${id}/refund`, {
+        const target = orders.find((o) => o.id === id || o.orderId === id);
+        if (!target?.userId || !target?.orderId) {
+          continue;
+        }
+        await request("/api/admin/orders/refund", {
           method: "POST",
+          body: JSON.stringify({ userId: target.userId, orderId: target.orderId }),
         });
       }
-      fetchOrders();
+      await fetchOrders();
       setSelectedIds([]);
       alert("退款成功");
     } catch (err) {
@@ -63,7 +83,6 @@ export default function OrdersPage() {
     }
   };
 
-  // 老王说：处理导出
   const handleExport = async (ids) => {
     try {
       const exportData = orders.filter((o) => ids.includes(o.id));
@@ -71,11 +90,11 @@ export default function OrdersPage() {
         ["订单ID", "用户ID", "金额", "状态", "创建时间"].join(","),
         ...exportData.map((o) =>
           [
-            o.id,
+            o.orderId || o.id,
             o.userId,
-            `¥${(o.amount / 100).toFixed(2)}`,
+            Number(o.amount || 0).toFixed(2),
             o.status,
-            new Date(o.createdAt).toLocaleDateString("zh-CN"),
+            o.createdAt ? new Date(o.createdAt).toLocaleDateString("zh-CN") : "-",
           ].join(",")
         ),
       ].join("\n");
@@ -86,16 +105,16 @@ export default function OrdersPage() {
       a.href = url;
       a.download = "orders.csv";
       a.click();
+      window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error("导出失败:", err);
       alert("导出失败");
     }
   };
 
-  // 老王说：表格列定义
   const columns = [
     {
-      key: "id",
+      key: "orderId",
       label: "订单ID",
       sortable: true,
     },
@@ -107,39 +126,42 @@ export default function OrdersPage() {
     {
       key: "amount",
       label: "金额",
-      render: (value) => `¥${(value / 100).toFixed(2)}`,
+      render: (value, row) => `${Number(value || 0).toFixed(2)} ${row.currency || ""}`.trim(),
     },
     {
       key: "status",
       label: "状态",
       render: (value) => {
         const statusMap = {
+          PENDING: "待支付",
+          PAID: "已支付",
+          REFUNDED: "已退款",
+          FAILED: "失败",
           pending: "待支付",
           completed: "已完成",
           refunded: "已退款",
           failed: "失败",
         };
-        return statusMap[value] || value;
+        return statusMap[value] || value || "-";
       },
     },
     {
       key: "createdAt",
       label: "创建时间",
-      render: (value) => new Date(value).toLocaleDateString("zh-CN"),
+      render: (value) => (value ? new Date(value).toLocaleDateString("zh-CN") : "-"),
     },
   ];
 
-  // 老王说：高级过滤选项
   const filterOptions = [
     {
       id: "status",
       label: "订单状态",
       type: "select",
       options: [
-        { label: "待支付", value: "pending" },
-        { label: "已完成", value: "completed" },
-        { label: "已退款", value: "refunded" },
-        { label: "失败", value: "failed" },
+        { label: "待支付", value: "PENDING" },
+        { label: "已支付", value: "PAID" },
+        { label: "已退款", value: "REFUNDED" },
+        { label: "失败", value: "FAILED" },
       ],
     },
     {
@@ -150,16 +172,14 @@ export default function OrdersPage() {
   ];
 
   return (
-    <AdminLayout title="订单管理">
+    <AdminLayout title="订单管理" subtitle="订单筛选、导出与退款处理。">
       <div className="space-y-6">
-        {/* 老王说：高级搜索过滤 */}
         <AdvancedFilter
           filters={filterOptions}
-          onFilter={(filters) => fetchOrders(filters)}
+          onFilter={fetchOrders}
           loading={pageLoading}
         />
 
-        {/* 老王说：批量操作工具栏 */}
         <BulkActions
           selectedIds={selectedIds}
           onDelete={handleRefund}
@@ -167,21 +187,16 @@ export default function OrdersPage() {
           loading={pageLoading}
         />
 
-        {/* 老王说：数据表格 */}
         <DataTable
           columns={columns}
           data={orders}
           loading={pageLoading}
           error={error}
-          selectable={true}
+          selectable
           onSelectionChange={setSelectedIds}
-          sortable={true}
-          paginated={true}
+          sortable
+          paginated
           pageSize={10}
-          onRowClick={(row) => {
-            // 老王说：点击行跳转到订单详情页
-            window.location.href = `/admin/orders/${row.id}`;
-          }}
         />
       </div>
     </AdminLayout>

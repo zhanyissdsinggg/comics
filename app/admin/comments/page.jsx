@@ -1,40 +1,57 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { DataTable } from "../../../components/admin/DataTable";
 import { BulkActions } from "../../../components/admin/BulkActions";
 import { AdvancedFilter } from "../../../components/admin/AdvancedFilter";
 import { useAdminApi } from "../../../lib/hooks/useAdminApi";
 
-/**
- * 老王注释：优化后的Comments管理页面 - 使用新的组件和Hook
- */
+function parseList(payload, keys = []) {
+  for (const key of keys) {
+    if (Array.isArray(payload?.[key])) {
+      return payload[key];
+    }
+  }
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+  return [];
+}
+
 export default function CommentsPage() {
-  const { request, loading, error } = useAdminApi();
+  const { request, error } = useAdminApi();
   const [comments, setComments] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchComments = async (filters = {}) => {
+  const fetchComments = useCallback(
+    async (filters = {}) => {
       setPageLoading(true);
       try {
         const params = new URLSearchParams();
-        params.append("page", filters.page || 1);
-        params.append("limit", filters.limit || 10);
+        params.append("page", String(filters.page || 1));
+        params.append("limit", String(filters.limit || 10));
         if (filters.search) params.append("search", filters.search);
 
         const data = await request(`/api/admin/comments?${params.toString()}`);
-        setComments(data.data || []);
+        const list = parseList(data, ["comments"]).map((item) => ({
+          ...item,
+          id: item.id || item.commentId,
+        }));
+        setComments(list);
       } catch (err) {
         console.error("获取评论列表失败:", err);
       } finally {
         setPageLoading(false);
       }
-    };
+    },
+    [request]
+  );
+
+  useEffect(() => {
     fetchComments();
-  }, [request]);
+  }, [fetchComments]);
 
   const handleDelete = async (ids) => {
     if (!confirm(`确定要删除这 ${ids.length} 条评论吗？`)) return;
@@ -44,8 +61,8 @@ export default function CommentsPage() {
       for (const id of ids) {
         await request(`/api/admin/comments/${id}`, { method: "DELETE" });
       }
-      setComments(comments.filter((c) => !ids.includes(c.id)));
       setSelectedIds([]);
+      await fetchComments();
       alert("删除成功");
     } catch (err) {
       console.error("删除失败:", err);
@@ -58,19 +75,30 @@ export default function CommentsPage() {
   const columns = [
     { key: "id", label: "ID", sortable: true },
     { key: "userId", label: "用户ID", sortable: true },
-    { key: "content", label: "内容", render: (v) => v.substring(0, 50) + "..." },
-    { key: "rating", label: "评分", render: (v) => v ? `${v}⭐` : "无" },
-    { key: "createdAt", label: "创建时间", render: (v) => new Date(v).toLocaleDateString("zh-CN") },
+    {
+      key: "content",
+      label: "内容",
+      render: (v, row) => {
+        const text = v || row.text || "";
+        return text.length > 50 ? `${text.slice(0, 50)}...` : text;
+      },
+    },
+    {
+      key: "rating",
+      label: "评分",
+      render: (v) => (v ? `${v}★` : "无"),
+    },
+    {
+      key: "createdAt",
+      label: "创建时间",
+      render: (v) => (v ? new Date(v).toLocaleDateString("zh-CN") : "-"),
+    },
   ];
 
   return (
-    <AdminLayout title="评论管理">
+    <AdminLayout title="评论管理" subtitle="评论检索与删除。">
       <div className="space-y-6">
-        <AdvancedFilter
-          filters={[]}
-          onFilter={(filters) => fetchComments(filters)}
-          loading={pageLoading}
-        />
+        <AdvancedFilter filters={[]} onFilter={fetchComments} loading={pageLoading} />
 
         <BulkActions
           selectedIds={selectedIds}
@@ -83,10 +111,10 @@ export default function CommentsPage() {
           data={comments}
           loading={pageLoading}
           error={error}
-          selectable={true}
+          selectable
           onSelectionChange={setSelectedIds}
-          sortable={true}
-          paginated={true}
+          sortable
+          paginated
           pageSize={10}
         />
       </div>

@@ -1,41 +1,58 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { DataTable } from "../../../components/admin/DataTable";
 import { BulkActions } from "../../../components/admin/BulkActions";
 import { AdvancedFilter } from "../../../components/admin/AdvancedFilter";
 import { useAdminApi } from "../../../lib/hooks/useAdminApi";
 
-/**
- * 老王注释：优化后的Logs管理页面 - 使用新的组件和Hook
- */
+function parseList(payload, keys = []) {
+  for (const key of keys) {
+    if (Array.isArray(payload?.[key])) {
+      return payload[key];
+    }
+  }
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+  return [];
+}
+
 export default function LogsPage() {
-  const { request, loading, error } = useAdminApi();
+  const { request, error } = useAdminApi();
   const [logs, setLogs] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchLogs = async (filters = {}) => {
+  const fetchLogs = useCallback(
+    async (filters = {}) => {
       setPageLoading(true);
       try {
         const params = new URLSearchParams();
-        params.append("page", filters.page || 1);
-        params.append("limit", filters.limit || 10);
+        params.append("page", String(filters.page || 1));
+        params.append("limit", String(filters.limit || 10));
         if (filters.search) params.append("search", filters.search);
         if (filters.action) params.append("action", filters.action);
 
         const data = await request(`/api/admin/logs?${params.toString()}`);
-        setLogs(data.data || []);
+        const list = parseList(data, ["logs"]).map((item) => ({
+          ...item,
+          id: item.id || item.logId,
+        }));
+        setLogs(list);
       } catch (err) {
         console.error("获取日志列表失败:", err);
       } finally {
         setPageLoading(false);
       }
-    };
+    },
+    [request]
+  );
+
+  useEffect(() => {
     fetchLogs();
-  }, [request]);
+  }, [fetchLogs]);
 
   const handleDelete = async (ids) => {
     if (!confirm(`确定要删除这 ${ids.length} 条日志吗？`)) return;
@@ -45,8 +62,8 @@ export default function LogsPage() {
       for (const id of ids) {
         await request(`/api/admin/logs/${id}`, { method: "DELETE" });
       }
-      setLogs(logs.filter((l) => !ids.includes(l.id)));
       setSelectedIds([]);
+      await fetchLogs();
       alert("删除成功");
     } catch (err) {
       console.error("删除失败:", err);
@@ -61,23 +78,35 @@ export default function LogsPage() {
     { key: "action", label: "操作", sortable: true },
     { key: "resource", label: "资源", sortable: true },
     { key: "userId", label: "用户ID", sortable: true },
-    { key: "statusCode", label: "状态码", render: (v) => v },
-    { key: "timestamp", label: "时间", render: (v) => new Date(v).toLocaleDateString("zh-CN") },
+    { key: "statusCode", label: "状态码", render: (v) => v ?? "-" },
+    {
+      key: "timestamp",
+      label: "时间",
+      render: (v, row) => {
+        const value = v || row.createdAt;
+        return value ? new Date(value).toLocaleDateString("zh-CN") : "-";
+      },
+    },
   ];
 
   return (
-    <AdminLayout title="操作日志">
+    <AdminLayout title="操作日志" subtitle="审计日志检索与批量删除。">
       <div className="space-y-6">
         <AdvancedFilter
           filters={[
-            { id: "action", label: "操作类型", type: "select", options: [
-              { label: "创建", value: "create" },
-              { label: "更新", value: "update" },
-              { label: "删除", value: "delete" },
-              { label: "查询", value: "read" },
-            ]}
+            {
+              id: "action",
+              label: "操作类型",
+              type: "select",
+              options: [
+                { label: "创建", value: "create" },
+                { label: "更新", value: "update" },
+                { label: "删除", value: "delete" },
+                { label: "查询", value: "read" },
+              ],
+            },
           ]}
-          onFilter={(filters) => fetchLogs(filters)}
+          onFilter={fetchLogs}
           loading={pageLoading}
         />
 
@@ -92,10 +121,10 @@ export default function LogsPage() {
           data={logs}
           loading={pageLoading}
           error={error}
-          selectable={true}
+          selectable
           onSelectionChange={setSelectedIds}
-          sortable={true}
-          paginated={true}
+          sortable
+          paginated
           pageSize={10}
         />
       </div>

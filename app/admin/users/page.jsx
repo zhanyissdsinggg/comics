@@ -1,44 +1,59 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { DataTable } from "../../../components/admin/DataTable";
 import { BulkActions } from "../../../components/admin/BulkActions";
 import { AdvancedFilter } from "../../../components/admin/AdvancedFilter";
 import { useAdminApi } from "../../../lib/hooks/useAdminApi";
 
-/**
- * 老王注释：优化后的Users管理页面 - 使用新的组件和Hook
- * 这个SB页面简洁多了，因为把复杂逻辑都提取到组件和Hook里了
- */
+function parseList(payload, keys = []) {
+  for (const key of keys) {
+    if (Array.isArray(payload?.[key])) {
+      return payload[key];
+    }
+  }
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+  return [];
+}
+
 export default function UsersPage() {
-  const { request, loading, error } = useAdminApi();
+  const { request, error } = useAdminApi();
   const [users, setUsers] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  // 老王说：初始化加载
-  useEffect(() => {
-    const fetchUsers = async (filters = {}) => {
+  const fetchUsers = useCallback(
+    async (filters = {}) => {
       setPageLoading(true);
       try {
         const params = new URLSearchParams();
-        params.append("page", filters.page || 1);
-        params.append("limit", filters.limit || 10);
+        params.append("page", String(filters.page || 1));
+        params.append("limit", String(filters.limit || 10));
         if (filters.search) params.append("search", filters.search);
+        if (filters.status) params.append("status", filters.status);
 
         const data = await request(`/api/admin/users?${params.toString()}`);
-        setUsers(data.data || []);
+        const list = parseList(data, ["users"]).map((item) => ({
+          ...item,
+          id: item.id || item.userId,
+        }));
+        setUsers(list);
       } catch (err) {
         console.error("获取用户列表失败:", err);
       } finally {
         setPageLoading(false);
       }
-    };
-    fetchUsers();
-  }, [request]);
+    },
+    [request]
+  );
 
-  // 老王说：处理封禁用户
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
   const handleBlock = async (ids) => {
     if (!confirm(`确定要封禁这 ${ids.length} 个用户吗？`)) {
       return;
@@ -47,12 +62,12 @@ export default function UsersPage() {
     setPageLoading(true);
     try {
       for (const id of ids) {
-        await request(`/api/admin/users/${id}/block`, {
+        await request("/api/admin/users/block", {
           method: "PATCH",
-          body: JSON.stringify({ blocked: true }),
+          body: JSON.stringify({ userId: id, blocked: true }),
         });
       }
-      fetchUsers();
+      await fetchUsers();
       setSelectedIds([]);
       alert("封禁成功");
     } catch (err) {
@@ -63,28 +78,26 @@ export default function UsersPage() {
     }
   };
 
-  // 老王说：处理解禁用户
   const handleUnblock = async (ids) => {
     setPageLoading(true);
     try {
       for (const id of ids) {
-        await request(`/api/admin/users/${id}/block`, {
+        await request("/api/admin/users/block", {
           method: "PATCH",
-          body: JSON.stringify({ blocked: false }),
+          body: JSON.stringify({ userId: id, blocked: false }),
         });
       }
-      fetchUsers();
+      await fetchUsers();
       setSelectedIds([]);
-      alert("解禁成功");
+      alert("解封成功");
     } catch (err) {
-      console.error("解禁失败:", err);
-      alert("解禁失败");
+      console.error("解封失败:", err);
+      alert("解封失败");
     } finally {
       setPageLoading(false);
     }
   };
 
-  // 老王说：表格列定义
   const columns = [
     {
       key: "id",
@@ -97,28 +110,26 @@ export default function UsersPage() {
       sortable: true,
     },
     {
-      key: "username",
-      label: "用户名",
-      sortable: true,
-    },
-    {
       key: "createdAt",
       label: "注册时间",
-      render: (value) => new Date(value).toLocaleDateString("zh-CN"),
+      render: (value) => (value ? new Date(value).toLocaleDateString("zh-CN") : "-"),
     },
     {
-      key: "blocked",
+      key: "isBlocked",
       label: "状态",
       render: (value) => (value ? "已封禁" : "正常"),
     },
     {
       key: "wallet",
-      label: "钱包余额",
-      render: (value) => `¥${(value / 100).toFixed(2)}`,
+      label: "钱包",
+      render: (value) => {
+        const paid = value?.paidPts || 0;
+        const bonus = value?.bonusPts || 0;
+        return `付费 ${paid} / 赠送 ${bonus}`;
+      },
     },
   ];
 
-  // 老王说：高级过滤选项
   const filterOptions = [
     {
       id: "status",
@@ -137,16 +148,14 @@ export default function UsersPage() {
   ];
 
   return (
-    <AdminLayout title="用户管理">
+    <AdminLayout title="用户管理" subtitle="用户检索、封禁与批量操作。">
       <div className="space-y-6">
-        {/* 老王说：高级搜索过滤 */}
         <AdvancedFilter
           filters={filterOptions}
-          onFilter={(filters) => fetchUsers(filters)}
+          onFilter={fetchUsers}
           loading={pageLoading}
         />
 
-        {/* 老王说：批量操作工具栏 */}
         <BulkActions
           selectedIds={selectedIds}
           onUpdate={handleUnblock}
@@ -162,21 +171,16 @@ export default function UsersPage() {
           ]}
         />
 
-        {/* 老王说：数据表格 */}
         <DataTable
           columns={columns}
           data={users}
           loading={pageLoading}
           error={error}
-          selectable={true}
+          selectable
           onSelectionChange={setSelectedIds}
-          sortable={true}
-          paginated={true}
+          sortable
+          paginated
           pageSize={10}
-          onRowClick={(row) => {
-            // 老王说：点击行跳转到用户详情页
-            window.location.href = `/admin/users/${row.id}`;
-          }}
         />
       </div>
     </AdminLayout>

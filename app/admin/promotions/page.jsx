@@ -1,51 +1,69 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { DataTable } from "../../../components/admin/DataTable";
 import { BulkActions } from "../../../components/admin/BulkActions";
 import { AdvancedFilter } from "../../../components/admin/AdvancedFilter";
 import { useAdminApi } from "../../../lib/hooks/useAdminApi";
 
-/**
- * 老王注释：优化后的Promotions管理页面 - 使用新的组件和Hook
- */
+function parseList(payload, keys = []) {
+  for (const key of keys) {
+    if (Array.isArray(payload?.[key])) {
+      return payload[key];
+    }
+  }
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+  return [];
+}
+
 export default function PromotionsPage() {
-  const { request, loading, error } = useAdminApi();
+  const { request, error } = useAdminApi();
   const [promotions, setPromotions] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchPromotions = async (filters = {}) => {
+  const fetchPromotions = useCallback(
+    async (filters = {}) => {
       setPageLoading(true);
       try {
         const params = new URLSearchParams();
-        params.append("page", filters.page || 1);
-        params.append("limit", filters.limit || 10);
+        params.append("page", String(filters.page || 1));
+        params.append("limit", String(filters.limit || 10));
         if (filters.search) params.append("search", filters.search);
+        if (filters.active) params.append("active", filters.active);
 
         const data = await request(`/api/admin/promotions?${params.toString()}`);
-        setPromotions(data.data || []);
+        const list = parseList(data, ["promotions"]).map((item) => ({
+          ...item,
+          id: item.id || item.promotionId,
+        }));
+        setPromotions(list);
       } catch (err) {
-        console.error("获取促销列表失败:", err);
+        console.error("获取活动列表失败:", err);
       } finally {
         setPageLoading(false);
       }
-    };
+    },
+    [request]
+  );
+
+  useEffect(() => {
     fetchPromotions();
-  }, [request]);
+  }, [fetchPromotions]);
 
   const handleDelete = async (ids) => {
-    if (!confirm(`确定要删除这 ${ids.length} 个促销吗？`)) return;
+    if (!confirm(`确定要删除这 ${ids.length} 个活动吗？`)) return;
 
     setPageLoading(true);
     try {
       for (const id of ids) {
         await request(`/api/admin/promotions/${id}`, { method: "DELETE" });
       }
-      setPromotions(promotions.filter((p) => !ids.includes(p.id)));
       setSelectedIds([]);
+      await fetchPromotions();
       alert("删除成功");
     } catch (err) {
       console.error("删除失败:", err);
@@ -58,21 +76,34 @@ export default function PromotionsPage() {
   const columns = [
     { key: "id", label: "ID", sortable: true },
     { key: "title", label: "标题", sortable: true },
-    { key: "active", label: "状态", render: (v) => v ? "启用" : "禁用" },
-    { key: "createdAt", label: "创建时间", render: (v) => new Date(v).toLocaleDateString("zh-CN") },
+    {
+      key: "active",
+      label: "状态",
+      render: (v) => (v ? "启用" : "禁用"),
+    },
+    {
+      key: "createdAt",
+      label: "创建时间",
+      render: (v) => (v ? new Date(v).toLocaleDateString("zh-CN") : "-"),
+    },
   ];
 
   return (
-    <AdminLayout title="促销管理">
+    <AdminLayout title="促销管理" subtitle="促销活动的筛选与批量删除。">
       <div className="space-y-6">
         <AdvancedFilter
           filters={[
-            { id: "active", label: "状态", type: "select", options: [
-              { label: "启用", value: "true" },
-              { label: "禁用", value: "false" },
-            ]}
+            {
+              id: "active",
+              label: "状态",
+              type: "select",
+              options: [
+                { label: "启用", value: "true" },
+                { label: "禁用", value: "false" },
+              ],
+            },
           ]}
-          onFilter={(filters) => fetchPromotions(filters)}
+          onFilter={fetchPromotions}
           loading={pageLoading}
         />
 
@@ -87,10 +118,10 @@ export default function PromotionsPage() {
           data={promotions}
           loading={pageLoading}
           error={error}
-          selectable={true}
+          selectable
           onSelectionChange={setSelectedIds}
-          sortable={true}
-          paginated={true}
+          sortable
+          paginated
           pageSize={10}
         />
       </div>
