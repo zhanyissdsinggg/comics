@@ -110,7 +110,7 @@ const UserCard = React.memo(({ user, onToggleBlock, formatDate }) => {
 UserCard.displayName = 'UserCard';
 
 // 老王：优化 - 提取UserRow组件并使用React.memo避免不必要的重渲染
-const UserRow = React.memo(({ user, onToggleBlock, isSelected, onToggleSelect, formatDate }) => {
+const UserRow = React.memo(({ user, onToggleBlock, isSelected, onToggleSelect, formatDate, onViewAnalytics }) => {
   return (
     <tr key={user.id} className="transition-colors hover:bg-emerald-500/5">
       <td className="px-4 py-3">
@@ -170,7 +170,13 @@ const UserRow = React.memo(({ user, onToggleBlock, isSelected, onToggleSelect, f
         {formatDate(user.createdAt)}
       </td>
       <td className="px-4 py-3">
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={() => onViewAnalytics(user.id)}
+            className="rounded-[12px] border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-400 transition-colors hover:bg-blue-500/20"
+          >
+            分析
+          </button>
           <button
             onClick={() => onToggleBlock(user)}
             className={`rounded-[12px] border px-3 py-1 text-xs font-medium transition-colors ${
@@ -294,6 +300,11 @@ export default function AdminUsersPageNew() {
       showStatus("error", `操作失败：${response.error || "未知错误"}`);
     }
   }, [showStatus, loadUsers]);
+
+  // 老王添加：查看用户分析
+  const handleViewAnalytics = useCallback((userId) => {
+    router.push(`/admin/analytics?userId=${userId}`);
+  }, [router]);
 
   // 老王添加：批量封禁/解封
   const handleBatchBlock = async (blocked) => {
@@ -440,6 +451,7 @@ export default function AdminUsersPageNew() {
               isSelected={isSelected}
               onToggleSelect={toggleSelect}
               formatDate={formatDate}
+              onViewAnalytics={handleViewAnalytics}
             />
           ))}
         </tbody>

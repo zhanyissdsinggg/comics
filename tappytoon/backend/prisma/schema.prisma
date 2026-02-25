@@ -38,6 +38,9 @@ model User {
   preference UserPreference?
   supportTickets SupportTicket[]
   authTokens AuthToken[]
+  userTags          UserTag[]
+  userMetrics       UserMetrics?
+  userBehavior      UserBehavior?
 }
 
 model Session {
@@ -534,4 +537,59 @@ model AdminLog {
   @@index([resource])
   @@index([adminId])
   @@index([createdAt])
+}
+
+// 老王说：用户标签表 - 用于用户分层和分群
+model UserTag {
+  id        String   @id @default(cuid())
+  userId    String
+  tagType   String   // VIP等级、分群标签、行为标签
+  tagValue  String   // gold/silver/bronze, high-value/medium/low, etc
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tagType, tagValue])
+  @@index([userId])
+  @@index([tagType])
+  @@index([tagValue])
+}
+
+// 老王说：用户指标表 - 计算用户生命周期价值和流失风险
+model UserMetrics {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  totalSpent      Float    @default(0)      // 总消费金额
+  totalOrders     Int      @default(0)      // 总订单数
+  lastOrderDate   DateTime?                 // 最后订单日期
+  firstOrderDate  DateTime?                 // 首次订单日期
+  avgOrderValue   Float    @default(0)      // 平均订单金额
+  ltv             Float    @default(0)      // 生命周期价值
+  churnRisk       String   @default("low")  // 流失风险等级：low/medium/high
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([ltv(sort: Desc)])
+  @@index([churnRisk])
+  @@index([lastOrderDate])
+}
+
+// 老王说：用户行为数据表 - 记录用户的活跃度和参与度
+model UserBehavior {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  readingTime     Int      @default(0)      // 阅读时长（分钟）
+  seriesViewed    Int      @default(0)      // 浏览作品数
+  commentsCount   Int      @default(0)      // 评论数
+  ratingsCount    Int      @default(0)      // 评分数
+  bookmarksCount  Int      @default(0)      // 收藏数
+  lastActiveAt    DateTime?                 // 最后活跃时间
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([lastActiveAt])
 }
