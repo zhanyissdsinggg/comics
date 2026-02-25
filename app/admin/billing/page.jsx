@@ -16,26 +16,25 @@ export default function BillingPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  const fetchPackages = async (filters = {}) => {
-    setPageLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.append("page", filters.page || 1);
-      params.append("limit", filters.limit || 10);
-      if (filters.search) params.append("search", filters.search);
-
-      const data = await request(`/api/admin/billing?${params.toString()}`);
-      setPackages(data.data || []);
-    } catch (err) {
-      console.error("获取充值包列表失败:", err);
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchPackages = async (filters = {}) => {
+      setPageLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.append("page", filters.page || 1);
+        params.append("limit", filters.limit || 10);
+        if (filters.search) params.append("search", filters.search);
+
+        const data = await request(`/api/admin/billing?${params.toString()}`);
+        setPackages(data.data || []);
+      } catch (err) {
+        console.error("获取充值包列表失败:", err);
+      } finally {
+        setPageLoading(false);
+      }
+    };
     fetchPackages();
-  }, []);
+  }, [request]);
 
   const handleDelete = async (ids) => {
     if (!confirm(`确定要删除这 ${ids.length} 个充值包吗？`)) return;

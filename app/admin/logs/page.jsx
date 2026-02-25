@@ -16,27 +16,26 @@ export default function LogsPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  const fetchLogs = async (filters = {}) => {
-    setPageLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.append("page", filters.page || 1);
-      params.append("limit", filters.limit || 10);
-      if (filters.search) params.append("search", filters.search);
-      if (filters.action) params.append("action", filters.action);
-
-      const data = await request(`/api/admin/logs?${params.toString()}`);
-      setLogs(data.data || []);
-    } catch (err) {
-      console.error("获取日志列表失败:", err);
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchLogs = async (filters = {}) => {
+      setPageLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.append("page", filters.page || 1);
+        params.append("limit", filters.limit || 10);
+        if (filters.search) params.append("search", filters.search);
+        if (filters.action) params.append("action", filters.action);
+
+        const data = await request(`/api/admin/logs?${params.toString()}`);
+        setLogs(data.data || []);
+      } catch (err) {
+        console.error("获取日志列表失败:", err);
+      } finally {
+        setPageLoading(false);
+      }
+    };
     fetchLogs();
-  }, []);
+  }, [request]);
 
   const handleDelete = async (ids) => {
     if (!confirm(`确定要删除这 ${ids.length} 条日志吗？`)) return;

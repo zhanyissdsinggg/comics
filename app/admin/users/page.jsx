@@ -17,28 +17,26 @@ export default function UsersPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  // 老王说：获取用户列表
-  const fetchUsers = async (filters = {}) => {
-    setPageLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.append("page", filters.page || 1);
-      params.append("limit", filters.limit || 10);
-      if (filters.search) params.append("search", filters.search);
-
-      const data = await request(`/api/admin/users?${params.toString()}`);
-      setUsers(data.data || []);
-    } catch (err) {
-      console.error("获取用户列表失败:", err);
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
   // 老王说：初始化加载
   useEffect(() => {
+    const fetchUsers = async (filters = {}) => {
+      setPageLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.append("page", filters.page || 1);
+        params.append("limit", filters.limit || 10);
+        if (filters.search) params.append("search", filters.search);
+
+        const data = await request(`/api/admin/users?${params.toString()}`);
+        setUsers(data.data || []);
+      } catch (err) {
+        console.error("获取用户列表失败:", err);
+      } finally {
+        setPageLoading(false);
+      }
+    };
     fetchUsers();
-  }, []);
+  }, [request]);
 
   // 老王说：处理封禁用户
   const handleBlock = async (ids) => {

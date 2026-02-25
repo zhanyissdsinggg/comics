@@ -17,29 +17,27 @@ export default function OrdersPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  // 老王说：获取订单列表
-  const fetchOrders = async (filters = {}) => {
-    setPageLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.append("page", filters.page || 1);
-      params.append("limit", filters.limit || 10);
-      if (filters.search) params.append("search", filters.search);
-      if (filters.status) params.append("status", filters.status);
-
-      const data = await request(`/api/admin/orders?${params.toString()}`);
-      setOrders(data.data || []);
-    } catch (err) {
-      console.error("获取订单列表失败:", err);
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
   // 老王说：初始化加载
   useEffect(() => {
+    const fetchOrders = async (filters = {}) => {
+      setPageLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.append("page", filters.page || 1);
+        params.append("limit", filters.limit || 10);
+        if (filters.search) params.append("search", filters.search);
+        if (filters.status) params.append("status", filters.status);
+
+        const data = await request(`/api/admin/orders?${params.toString()}`);
+        setOrders(data.data || []);
+      } catch (err) {
+        console.error("获取订单列表失败:", err);
+      } finally {
+        setPageLoading(false);
+      }
+    };
     fetchOrders();
-  }, []);
+  }, [request]);
 
   // 老王说：处理退款
   const handleRefund = async (ids) => {

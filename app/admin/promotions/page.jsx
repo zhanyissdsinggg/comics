@@ -16,26 +16,25 @@ export default function PromotionsPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  const fetchPromotions = async (filters = {}) => {
-    setPageLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.append("page", filters.page || 1);
-      params.append("limit", filters.limit || 10);
-      if (filters.search) params.append("search", filters.search);
-
-      const data = await request(`/api/admin/promotions?${params.toString()}`);
-      setPromotions(data.data || []);
-    } catch (err) {
-      console.error("获取促销列表失败:", err);
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchPromotions = async (filters = {}) => {
+      setPageLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.append("page", filters.page || 1);
+        params.append("limit", filters.limit || 10);
+        if (filters.search) params.append("search", filters.search);
+
+        const data = await request(`/api/admin/promotions?${params.toString()}`);
+        setPromotions(data.data || []);
+      } catch (err) {
+        console.error("获取促销列表失败:", err);
+      } finally {
+        setPageLoading(false);
+      }
+    };
     fetchPromotions();
-  }, []);
+  }, [request]);
 
   const handleDelete = async (ids) => {
     if (!confirm(`确定要删除这 ${ids.length} 个促销吗？`)) return;

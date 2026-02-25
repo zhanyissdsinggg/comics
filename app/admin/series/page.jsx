@@ -18,29 +18,27 @@ export default function SeriesPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  // 老王说：获取作品列表
-  const fetchSeries = async (filters = {}) => {
-    setPageLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.append("page", filters.page || 1);
-      params.append("limit", filters.limit || 10);
-      if (filters.search) params.append("search", filters.search);
-      if (filters.sortBy) params.append("sortBy", filters.sortBy);
-
-      const data = await request(`/api/admin/series?${params.toString()}`);
-      setSeries(data.data || []);
-    } catch (err) {
-      console.error("获取作品列表失败:", err);
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
   // 老王说：初始化加载
   useEffect(() => {
+    const fetchSeries = async (filters = {}) => {
+      setPageLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.append("page", filters.page || 1);
+        params.append("limit", filters.limit || 10);
+        if (filters.search) params.append("search", filters.search);
+        if (filters.sortBy) params.append("sortBy", filters.sortBy);
+
+        const data = await request(`/api/admin/series?${params.toString()}`);
+        setSeries(data.data || []);
+      } catch (err) {
+        console.error("获取作品列表失败:", err);
+      } finally {
+        setPageLoading(false);
+      }
+    };
     fetchSeries();
-  }, []);
+  }, [request]);
 
   // 老王说：处理删除
   const handleDelete = async (ids) => {

@@ -16,26 +16,25 @@ export default function NotificationsPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [pageLoading, setPageLoading] = useState(false);
 
-  const fetchNotifications = async (filters = {}) => {
-    setPageLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.append("page", filters.page || 1);
-      params.append("limit", filters.limit || 10);
-      if (filters.search) params.append("search", filters.search);
-
-      const data = await request(`/api/admin/notifications?${params.toString()}`);
-      setNotifications(data.data || []);
-    } catch (err) {
-      console.error("获取通知列表失败:", err);
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchNotifications = async (filters = {}) => {
+      setPageLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.append("page", filters.page || 1);
+        params.append("limit", filters.limit || 10);
+        if (filters.search) params.append("search", filters.search);
+
+        const data = await request(`/api/admin/notifications?${params.toString()}`);
+        setNotifications(data.data || []);
+      } catch (err) {
+        console.error("获取通知列表失败:", err);
+      } finally {
+        setPageLoading(false);
+      }
+    };
     fetchNotifications();
-  }, []);
+  }, [request]);
 
   const handleDelete = async (ids) => {
     if (!confirm(`确定要删除这 ${ids.length} 条通知吗？`)) return;
