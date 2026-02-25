@@ -650,3 +650,61 @@ model PromotionAnalytics {
   @@index([promotionId])
   @@index([dateKey])
 }
+
+// 老王说：推荐位表 - 管理推荐位配置和内容
+model RecommendationSlot {
+  id              String   @id @default(cuid())
+  name            String   // 推荐位名称（首页推荐、热门推荐等）
+  slotType        String   // 推荐位类型（banner、carousel、list等）
+  position        Int      // 位置顺序
+  active          Boolean  @default(true)
+  maxItems        Int      @default(10)    // 最多显示数量
+  refreshInterval Int      @default(3600)  // 刷新间隔（秒）
+  algorithm       String   @default("trending") // 推荐算法（trending、personalized、random等）
+  targetAudience  String   @default("all") // 目标用户（all、vip、new等）
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([active])
+  @@index([position])
+}
+
+// 老王说：排行榜配置表 - 管理排行榜规则和配置
+model RankingConfig {
+  id              String   @id @default(cuid())
+  name            String   // 排行榜名称（热门榜、新作榜、评分榜等）
+  rankingType     String   // 排行榜类型（views、rating、follows、trending等）
+  timeRange       String   // 时间范围（day、week、month、all）
+  seriesType      String   @default("all") // 作品类型（all、comic、novel）
+  adult           Boolean  @default(false) // 是否包含成人内容
+  active          Boolean  @default(true)
+  position        Int      // 位置顺序
+  maxItems        Int      @default(20)    // 最多显示数量
+  refreshInterval Int      @default(3600)  // 刷新间隔（秒）
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([active])
+  @@index([rankingType])
+  @@index([timeRange])
+}
+
+// 老王说：推荐效果分析表 - 追踪推荐位的效果数据
+model RecommendationAnalytics {
+  id              String   @id @default(cuid())
+  slotId          String   // 推荐位ID
+  seriesId        String   // 作品ID
+  dateKey         String   // YYYY-MM-DD格式
+  impressions     Int      @default(0)     // 展示次数
+  clicks          Int      @default(0)     // 点击次数
+  ctr             Float    @default(0)     // 点击率（百分比）
+  conversions     Int      @default(0)     // 转化次数（购买/收藏等）
+  conversionRate  Float    @default(0)     // 转化率（百分比）
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([slotId, seriesId, dateKey])
+  @@index([slotId])
+  @@index([seriesId])
+  @@index([dateKey])
+}
