@@ -63,58 +63,58 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索用户ID或邮箱"
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-          />
-        </div>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="搜索用户ID或邮箱"
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+      />
+    </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs text-slate-500">
-              <tr>
-                <th className="px-4 py-3">用户ID</th>
-                <th className="px-4 py-3">邮箱</th>
-                <th className="px-4 py-3">钱包</th>
-                <th className="px-4 py-3">状态</th>
-                <th className="px-4 py-3 text-right">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map((user) => (
-                <tr key={user.id}>
-                  <td className="px-4 py-3 text-slate-700">{user.id}</td>
-                  <td className="px-4 py-3 text-slate-500">{user.email}</td>
-                  <td className="px-4 py-3 text-slate-500">
-                    Paid {user.wallet?.paidPts || 0} · Bonus {user.wallet?.bonusPts || 0}
-                  </td>
-                  <td className="px-4 py-3 text-slate-500">
-                    {user.isBlocked ? "已封禁" : "正常"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={() => toggleBlock(user)}
-                      className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
-                    >
-                      {user.isBlocked ? "解封" : "封禁"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {!loading && filtered.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-8 text-center text-sm text-slate-400" colSpan={5}>
-                    暂无用户
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <table className="w-full text-left text-sm">
+        <thead className="bg-slate-50 text-xs text-slate-500">
+          <tr>
+            <th className="px-4 py-3">用户ID</th>
+            <th className="px-4 py-3">邮箱</th>
+            <th className="px-4 py-3">钱包</th>
+            <th className="px-4 py-3">状态</th>
+            <th className="px-4 py-3 text-right">操作</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {filtered.map((user) => (
+            <tr key={user.id}>
+              <td className="px-4 py-3 text-slate-700">{user.id}</td>
+              <td className="px-4 py-3 text-slate-500">{user.email}</td>
+              <td className="px-4 py-3 text-slate-500">
+                Paid {user.wallet?.paidPts || 0} · Bonus {user.wallet?.bonusPts || 0}
+              </td>
+              <td className="px-4 py-3 text-slate-500">
+                {user.isBlocked ? "已封禁" : "正常"}
+              </td>
+              <td className="px-4 py-3 text-right">
+                <button
+                  type="button"
+                  onClick={() => toggleBlock(user)}
+                  className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
+                >
+                  {user.isBlocked ? "解封" : "封禁"}
+                </button>
+              </td>
+            </tr>
+          ))}
+          {!loading && filtered.length === 0 ? (
+            <tr>
+              <td className="px-4 py-8 text-center text-sm text-slate-400" colSpan={5}>
+                暂无用户
+              </td>
+            </tr>
+          ) : null}
+        </tbody>
+      </table>
+    </div>
       </div>
     </div>
   );

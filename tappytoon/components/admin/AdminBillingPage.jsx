@@ -230,7 +230,7 @@ export default function AdminBillingPage() {
 
   return (
     <div className="space-y-6">
-        {/* 状态通知 */}
+      {/* 状态通知 */}
         {statusMessage.text && (
           <div
             className={`rounded-[12px] border px-4 py-3 ${

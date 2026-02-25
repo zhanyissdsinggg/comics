@@ -34,56 +34,56 @@ const OrderCard = React.memo(({ order, onAdjust, onRefund, getStatusBadge, forma
     >
       {/* 订单头部 */}
       <div className="mb-3 flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-emerald-600" />
-            <span className="text-sm font-semibold text-neutral-100">
-              {order.orderId}
-            </span>
-          </div>
-          <div className="mt-1 flex items-center gap-1.5 text-xs text-neutral-400">
-            <User className="h-3 w-3" />
-            <span>{order.userId}</span>
-          </div>
-        </div>
-        {getStatusBadge(order.status)}
+    <div className="flex-1">
+      <div className="flex items-center gap-2">
+        <CreditCard className="h-4 w-4 text-emerald-600" />
+        <span className="text-sm font-semibold text-neutral-100">
+          {order.orderId}
+        </span>
+      </div>
+      <div className="mt-1 flex items-center gap-1.5 text-xs text-neutral-400">
+        <User className="h-3 w-3" />
+        <span>{order.userId}</span>
+      </div>
+    </div>
+    {getStatusBadge(order.status)}
       </div>
 
       {/* 金额信息 */}
       <div className="mb-3 rounded-[12px] bg-emerald-500/10 p-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-emerald-400">订单金额</span>
-          <div className="flex items-center gap-1">
-            <DollarSign className="h-4 w-4 text-emerald-600" />
-            <span className="text-lg font-bold text-emerald-300">
-              {order.amount}
-            </span>
-            <span className="text-xs text-emerald-400">{order.currency}</span>
-          </div>
-        </div>
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-emerald-400">订单金额</span>
+      <div className="flex items-center gap-1">
+        <DollarSign className="h-4 w-4 text-emerald-600" />
+        <span className="text-lg font-bold text-emerald-300">
+          {order.amount}
+        </span>
+        <span className="text-xs text-emerald-400">{order.currency}</span>
+      </div>
+    </div>
       </div>
 
       {/* 时间信息 */}
       <div className="mb-3 flex items-center gap-1.5 text-xs text-neutral-400">
-        <Calendar className="h-3 w-3" />
-        <span>{formatDate(order.createdAt || order.paidAt)}</span>
+    <Calendar className="h-3 w-3" />
+    <span>{formatDate(order.createdAt || order.paidAt)}</span>
       </div>
 
       {/* 操作按钮 */}
       <div className="flex gap-2">
-        <button
-          onClick={() => onAdjust(order)}
-          className="flex-1 rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
-        >
-          补点
-        </button>
-        <button
-          onClick={() => onRefund(order)}
-          disabled={order.status !== "PAID"}
-          className="flex-1 rounded-[12px] border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          退款
-        </button>
+    <button
+      onClick={() => onAdjust(order)}
+      className="flex-1 rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
+    >
+      补点
+    </button>
+    <button
+      onClick={() => onRefund(order)}
+      disabled={order.status !== "PAID"}
+      className="flex-1 rounded-[12px] border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      退款
+    </button>
       </div>
     </div>
   );
@@ -95,44 +95,44 @@ const OrderRow = React.memo(({ order, onAdjust, onRefund, getStatusBadge, format
   return (
     <tr key={order.orderId} className="transition-colors hover:bg-emerald-500/5">
       <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
-          <CreditCard className="h-4 w-4 text-emerald-600" />
-          <span className="font-medium text-neutral-100">{order.orderId}</span>
-        </div>
+    <div className="flex items-center gap-2">
+      <CreditCard className="h-4 w-4 text-emerald-600" />
+      <span className="font-medium text-neutral-100">{order.orderId}</span>
+    </div>
       </td>
       <td className="px-4 py-3">
-        <div className="flex items-center gap-1.5 text-neutral-300">
-          <User className="h-3 w-3" />
-          <span>{order.userId}</span>
-        </div>
+    <div className="flex items-center gap-1.5 text-neutral-300">
+      <User className="h-3 w-3" />
+      <span>{order.userId}</span>
+    </div>
       </td>
       <td className="px-4 py-3">
-        <div className="flex items-center gap-1">
-          <DollarSign className="h-4 w-4 text-emerald-600" />
-          <span className="font-semibold text-emerald-300">{order.amount}</span>
-          <span className="text-xs text-neutral-400">{order.currency}</span>
-        </div>
+    <div className="flex items-center gap-1">
+      <DollarSign className="h-4 w-4 text-emerald-600" />
+      <span className="font-semibold text-emerald-300">{order.amount}</span>
+      <span className="text-xs text-neutral-400">{order.currency}</span>
+    </div>
       </td>
       <td className="px-4 py-3">{getStatusBadge(order.status)}</td>
       <td className="px-4 py-3 text-neutral-300">
-        {formatDate(order.createdAt || order.paidAt)}
+    {formatDate(order.createdAt || order.paidAt)}
       </td>
       <td className="px-4 py-3">
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={() => onAdjust(order)}
-            className="rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
-          >
-            补点
-          </button>
-          <button
-            onClick={() => onRefund(order)}
-            disabled={order.status !== "PAID"}
-            className="rounded-[12px] border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            退款
-          </button>
-        </div>
+    <div className="flex justify-end gap-2">
+      <button
+        onClick={() => onAdjust(order)}
+        className="rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
+      >
+        补点
+      </button>
+      <button
+        onClick={() => onRefund(order)}
+        disabled={order.status !== "PAID"}
+        className="rounded-[12px] border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        退款
+      </button>
+    </div>
       </td>
     </tr>
   );
@@ -183,10 +183,10 @@ export default function AdminOrdersPageNew() {
     const normalizedQuery = query.trim().toLowerCase();
     return orders.filter((order) => {
       const matchesStatus =
-        statusFilter === "all" ? true : order.status === statusFilter;
+    statusFilter === "all" ? true : order.status === statusFilter;
       const matchesQuery = normalizedQuery
-        ? `${order.orderId} ${order.userId}`.toLowerCase().includes(normalizedQuery)
-        : true;
+    ? `${order.orderId} ${order.userId}`.toLowerCase().includes(normalizedQuery)
+    : true;
       const createdAt = Date.parse(order.createdAt || order.paidAt || "");
       const fromTs = dateFrom ? Date.parse(dateFrom) : null;
       const toTs = dateTo ? Date.parse(dateTo) : null;
@@ -209,12 +209,12 @@ export default function AdminOrdersPageNew() {
     if (format === "csv") {
       // 老王：使用工具函数导出CSV
       const headers = [
-        { key: 'orderId', label: 'orderId' },
-        { key: 'userId', label: 'userId' },
-        { key: 'amount', label: 'amount' },
-        { key: 'currency', label: 'currency' },
-        { key: 'status', label: 'status' },
-        { key: 'createdAt', label: 'createdAt' },
+    { key: 'orderId', label: 'orderId' },
+    { key: 'userId', label: 'userId' },
+    { key: 'amount', label: 'amount' },
+    { key: 'currency', label: 'currency' },
+    { key: 'status', label: 'status' },
+    { key: 'createdAt', label: 'createdAt' },
       ];
       exportToCSV(filteredOrders, headers, 'orders');
       return;
@@ -276,15 +276,15 @@ export default function AdminOrdersPageNew() {
   const getStatusIcon = (status) => {
     switch (status) {
       case "PAID":
-        return <CheckCircle className="h-4 w-4 text-emerald-500" />;
+    return <CheckCircle className="h-4 w-4 text-emerald-500" />;
       case "PENDING":
-        return <Clock className="h-4 w-4 text-amber-500" />;
+    return <Clock className="h-4 w-4 text-amber-500" />;
       case "FAILED":
-        return <XCircle className="h-4 w-4 text-red-500" />;
+    return <XCircle className="h-4 w-4 text-red-500" />;
       case "REFUNDED":
-        return <RotateCcw className="h-4 w-4 text-slate-500" />;
+    return <RotateCcw className="h-4 w-4 text-slate-500" />;
       default:
-        return null;
+    return null;
     }
   };
 
@@ -303,12 +303,12 @@ export default function AdminOrdersPageNew() {
     };
     return (
       <span
-        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-          styles[status] || "bg-slate-50 text-slate-700 border-slate-200"
-        }`}
+    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+      styles[status] || "bg-slate-50 text-slate-700 border-slate-200"
+    }`}
       >
-        {getStatusIcon(status)}
-        {labels[status] || status}
+    {getStatusIcon(status)}
+    {labels[status] || status}
       </span>
     );
   };
@@ -334,7 +334,34 @@ export default function AdminOrdersPageNew() {
   const renderCardView = () => (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {paginatedOrders.map((order) => (
-        <OrderCard
+    <OrderCard
+      key={order.orderId}
+      order={order}
+      onAdjust={handleAdjust}
+      onRefund={handleRefund}
+      getStatusBadge={getStatusBadge}
+      formatDate={formatDate}
+    />
+      ))}
+    </div>
+  );
+
+  const renderListView = () => (
+    <div className="overflow-hidden rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl shadow-sm">
+      <table className="w-full text-left text-sm">
+    <thead className="bg-emerald-500/10 text-xs font-semibold text-emerald-400">
+      <tr>
+        <th className="px-4 py-3">订单号</th>
+        <th className="px-4 py-3">用户ID</th>
+        <th className="px-4 py-3">金额</th>
+        <th className="px-4 py-3">状态</th>
+        <th className="px-4 py-3">创建时间</th>
+        <th className="px-4 py-3 text-right">操作</th>
+      </tr>
+    </thead>
+    <tbody className="divide-y divide-emerald-500/10">
+      {paginatedOrders.map((order) => (
+        <OrderRow
           key={order.orderId}
           order={order}
           onAdjust={handleAdjust}
@@ -343,34 +370,7 @@ export default function AdminOrdersPageNew() {
           formatDate={formatDate}
         />
       ))}
-    </div>
-  );
-
-  const renderListView = () => (
-    <div className="overflow-hidden rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl shadow-sm">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-emerald-500/10 text-xs font-semibold text-emerald-400">
-          <tr>
-            <th className="px-4 py-3">订单号</th>
-            <th className="px-4 py-3">用户ID</th>
-            <th className="px-4 py-3">金额</th>
-            <th className="px-4 py-3">状态</th>
-            <th className="px-4 py-3">创建时间</th>
-            <th className="px-4 py-3 text-right">操作</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-emerald-500/10">
-          {paginatedOrders.map((order) => (
-            <OrderRow
-              key={order.orderId}
-              order={order}
-              onAdjust={handleAdjust}
-              onRefund={handleRefund}
-              getStatusBadge={getStatusBadge}
-              formatDate={formatDate}
-            />
-          ))}
-        </tbody>
+    </tbody>
       </table>
     </div>
   );
@@ -381,274 +381,274 @@ export default function AdminOrdersPageNew() {
 
   return (
     <div className="space-y-6">
-        {/* 状态通知 */}
-        {statusMessage.text && (
-          <div
-            className={`rounded-[12px] border px-4 py-3 ${
-              statusMessage.type === "success"
-                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                : "border-red-500/20 bg-red-500/10 text-red-400"
-            }`}
-          >
-            {statusMessage.text}
+    {/* 状态通知 */}
+    {statusMessage.text && (
+      <div
+        className={`rounded-[12px] border px-4 py-3 ${
+          statusMessage.type === "success"
+            ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+            : "border-red-500/20 bg-red-500/10 text-red-400"
+        }`}
+      >
+        {statusMessage.text}
+      </div>
+    )}
+
+    {/* 筛选和操作栏 */}
+    <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
+      <div className="space-y-4">
+        {/* 第一行：搜索和状态筛选 */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="搜索订单号或用户ID"
+              className="w-full rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 pl-10 pr-4 py-2 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
           </div>
-        )}
 
-        {/* 筛选和操作栏 */}
-        <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
-          <div className="space-y-4">
-            {/* 第一行：搜索和状态筛选 */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="搜索订单号或用户ID"
-                  className="w-full rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 pl-10 pr-4 py-2 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-neutral-400" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                >
-                  <option value="all">全部状态</option>
-                  <option value="PAID">已支付</option>
-                  <option value="PENDING">待支付</option>
-                  <option value="FAILED">失败</option>
-                  <option value="REFUNDED">已退款</option>
-                </select>
-              </div>
-            </div>
-
-            {/* 第二行：日期筛选和操作按钮 */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-neutral-400" />
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                />
-                <span className="text-sm text-neutral-400">至</span>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                />
-              </div>
-
-              <div className="ml-auto flex items-center gap-2">
-                {/* 视图切换 */}
-                <div className="flex rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 p-1">
-                  <button
-                    onClick={() => setViewMode("list")}
-                    className={`rounded-[8px] px-3 py-1.5 text-xs font-medium transition-colors ${
-                      viewMode === "list"
-                        ? "bg-emerald-500 text-white"
-                        : "text-neutral-400 hover:bg-neutral-700/50"
-                    }`}
-                  >
-                    <List className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode("card")}
-                    className={`rounded-[8px] px-3 py-1.5 text-xs font-medium transition-colors ${
-                      viewMode === "card"
-                        ? "bg-emerald-500 text-white"
-                        : "text-neutral-400 hover:bg-neutral-700/50"
-                    }`}
-                  >
-                    <Grid className="h-4 w-4" />
-                  </button>
-                </div>
-
-                {/* 刷新按钮 */}
-                <button
-                  onClick={loadOrders}
-                  disabled={loading}
-                  className="rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700/50 disabled:opacity-50"
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-                </button>
-
-                {/* 导出按钮 */}
-                <button
-                  onClick={() => exportOrders("json")}
-                  className="flex items-center gap-2 rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
-                >
-                  <Download className="h-4 w-4" />
-                  JSON
-                </button>
-                <button
-                  onClick={() => exportOrders("csv")}
-                  className="flex items-center gap-2 rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
-                >
-                  <Download className="h-4 w-4" />
-                  CSV
-                </button>
-              </div>
-            </div>
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-neutral-400" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            >
+              <option value="all">全部状态</option>
+              <option value="PAID">已支付</option>
+              <option value="PENDING">待支付</option>
+              <option value="FAILED">失败</option>
+              <option value="REFUNDED">已退款</option>
+            </select>
           </div>
         </div>
 
-        {/* 统计信息 */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-neutral-400">总订单数</p>
-                <p className="mt-1 text-2xl font-bold text-neutral-100">
-                  {filteredOrders.length}
-                </p>
-              </div>
-              <div className="rounded-[12px] bg-emerald-500/10 p-3">
-                <CreditCard className="h-6 w-6 text-emerald-600" />
-              </div>
-            </div>
+        {/* 第二行：日期筛选和操作按钮 */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-neutral-400" />
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+            <span className="text-sm text-neutral-400">至</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
           </div>
 
-          <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-neutral-400">已支付</p>
-                <p className="mt-1 text-2xl font-bold text-emerald-600">
-                  {filteredOrders.filter((o) => o.status === "PAID").length}
-                </p>
-              </div>
-              <div className="rounded-[12px] bg-emerald-500/10 p-3">
-                <CheckCircle className="h-6 w-6 text-emerald-600" />
-              </div>
+          <div className="ml-auto flex items-center gap-2">
+            {/* 视图切换 */}
+            <div className="flex rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 p-1">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`rounded-[8px] px-3 py-1.5 text-xs font-medium transition-colors ${
+                  viewMode === "list"
+                    ? "bg-emerald-500 text-white"
+                    : "text-neutral-400 hover:bg-neutral-700/50"
+                }`}
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("card")}
+                className={`rounded-[8px] px-3 py-1.5 text-xs font-medium transition-colors ${
+                  viewMode === "card"
+                    ? "bg-emerald-500 text-white"
+                    : "text-neutral-400 hover:bg-neutral-700/50"
+                }`}
+              >
+                <Grid className="h-4 w-4" />
+              </button>
             </div>
-          </div>
 
-          <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-neutral-400">待支付</p>
-                <p className="mt-1 text-2xl font-bold text-amber-600">
-                  {filteredOrders.filter((o) => o.status === "PENDING").length}
-                </p>
-              </div>
-              <div className="rounded-[12px] bg-amber-500/10 p-3">
-                <Clock className="h-6 w-6 text-amber-600" />
-              </div>
-            </div>
-          </div>
+            {/* 刷新按钮 */}
+            <button
+              onClick={loadOrders}
+              disabled={loading}
+              className="rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700/50 disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
 
-          <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-neutral-400">总金额</p>
-                <p className="mt-1 text-2xl font-bold text-neutral-100">
-                  {filteredOrders
-                    .filter((o) => o.status === "PAID")
-                    .reduce((sum, o) => sum + (o.amount || 0), 0)
-                    .toFixed(2)}
-                </p>
-              </div>
-              <div className="rounded-[12px] bg-emerald-500/10 p-3">
-                <DollarSign className="h-6 w-6 text-emerald-600" />
-              </div>
-            </div>
+            {/* 导出按钮 */}
+            <button
+              onClick={() => exportOrders("json")}
+              className="flex items-center gap-2 rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
+            >
+              <Download className="h-4 w-4" />
+              JSON
+            </button>
+            <button
+              onClick={() => exportOrders("csv")}
+              className="flex items-center gap-2 rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
+            >
+              <Download className="h-4 w-4" />
+              CSV
+            </button>
           </div>
         </div>
+      </div>
+    </div>
 
-        {/* 订单列表 */}
-        {loading ? (
-          <div className="flex items-center justify-center rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12">
-            <RefreshCw className="h-8 w-8 animate-spin text-emerald-500" />
+    {/* 统计信息 */}
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-neutral-400">总订单数</p>
+            <p className="mt-1 text-2xl font-bold text-neutral-100">
+              {filteredOrders.length}
+            </p>
           </div>
-        ) : filteredOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12">
-            <CreditCard className="h-12 w-12 text-neutral-600" />
-            <p className="mt-4 text-sm text-neutral-400">暂无订单数据</p>
+          <div className="rounded-[12px] bg-emerald-500/10 p-3">
+            <CreditCard className="h-6 w-6 text-emerald-600" />
           </div>
-        ) : (
-          <>
-            {viewMode === "card" ? renderCardView() : renderListView()}
+        </div>
+      </div>
 
-            {/* 老王添加：分页组件 */}
-            {totalPages > 1 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={filteredOrders.length}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                className="mt-6"
-              />
-            )}
-          </>
+      <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-neutral-400">已支付</p>
+            <p className="mt-1 text-2xl font-bold text-emerald-600">
+              {filteredOrders.filter((o) => o.status === "PAID").length}
+            </p>
+          </div>
+          <div className="rounded-[12px] bg-emerald-500/10 p-3">
+            <CheckCircle className="h-6 w-6 text-emerald-600" />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-neutral-400">待支付</p>
+            <p className="mt-1 text-2xl font-bold text-amber-600">
+              {filteredOrders.filter((o) => o.status === "PENDING").length}
+            </p>
+          </div>
+          <div className="rounded-[12px] bg-amber-500/10 p-3">
+            <Clock className="h-6 w-6 text-amber-600" />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-neutral-400">总金额</p>
+            <p className="mt-1 text-2xl font-bold text-neutral-100">
+              {filteredOrders
+                .filter((o) => o.status === "PAID")
+                .reduce((sum, o) => sum + (o.amount || 0), 0)
+                .toFixed(2)}
+            </p>
+          </div>
+          <div className="rounded-[12px] bg-emerald-500/10 p-3">
+            <DollarSign className="h-6 w-6 text-emerald-600" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* 订单列表 */}
+    {loading ? (
+      <div className="flex items-center justify-center rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12">
+        <RefreshCw className="h-8 w-8 animate-spin text-emerald-500" />
+      </div>
+    ) : filteredOrders.length === 0 ? (
+      <div className="flex flex-col items-center justify-center rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12">
+        <CreditCard className="h-12 w-12 text-neutral-600" />
+        <p className="mt-4 text-sm text-neutral-400">暂无订单数据</p>
+      </div>
+    ) : (
+      <>
+        {viewMode === "card" ? renderCardView() : renderListView()}
+
+        {/* 老王添加：分页组件 */}
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredOrders.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            className="mt-6"
+          />
         )}
+      </>
+    )}
       </div>
 
       {/* 补点模态框 */}
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="w-full max-w-md rounded-[20px] border border-emerald-500/10 bg-neutral-900/95 backdrop-blur-xl p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-neutral-100">补点</h3>
-            <p className="mt-1 text-sm text-neutral-400">
-              用户ID: {adjustModal.order?.userId}
-            </p>
-            <div className="mt-4 space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-neutral-300">
-                  付费点数 (Paid Points)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="10000"
-                  value={adjustForm.paidDelta}
-                  onChange={(e) =>
-                    setAdjustForm((prev) => ({ ...prev, paidDelta: e.target.value }))
-                  }
-                  placeholder="输入补点数量"
-                  className="mt-1 w-full rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-300">
-                  赠送点数 (Bonus Points)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="10000"
-                  value={adjustForm.bonusDelta}
-                  onChange={(e) =>
-                    setAdjustForm((prev) => ({ ...prev, bonusDelta: e.target.value }))
-                  }
-                  placeholder="输入补点数量"
-                  className="mt-1 w-full rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                />
-              </div>
-              <p className="text-xs text-neutral-400">
-                ⚠️ 单次补点上限：10000点
-              </p>
-            </div>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={confirmAdjust}
-                className="flex-1 rounded-[12px] bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
-              >
-                确认补点
-              </button>
-              <button
-                onClick={() => setAdjustModal({ open: false, order: null })}
-                className="flex-1 rounded-[12px] border border-emerald-500/20 px-4 py-2 text-sm font-semibold text-neutral-300 transition-colors hover:bg-neutral-800/50"
-              >
-                取消
-              </button>
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-md rounded-[20px] border border-emerald-500/10 bg-neutral-900/95 backdrop-blur-xl p-6 shadow-xl">
+        <h3 className="text-lg font-semibold text-neutral-100">补点</h3>
+        <p className="mt-1 text-sm text-neutral-400">
+          用户ID: {adjustModal.order?.userId}
+        </p>
+        <div className="mt-4 space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-neutral-300">
+              付费点数 (Paid Points)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="10000"
+              value={adjustForm.paidDelta}
+              onChange={(e) =>
+                setAdjustForm((prev) => ({ ...prev, paidDelta: e.target.value }))
+              }
+              placeholder="输入补点数量"
+              className="mt-1 w-full rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-neutral-300">
+              赠送点数 (Bonus Points)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="10000"
+              value={adjustForm.bonusDelta}
+              onChange={(e) =>
+                setAdjustForm((prev) => ({ ...prev, bonusDelta: e.target.value }))
+              }
+              placeholder="输入补点数量"
+              className="mt-1 w-full rounded-[12px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+          <p className="text-xs text-neutral-400">
+            ⚠️ 单次补点上限：10000点
+          </p>
         </div>
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={confirmAdjust}
+            className="flex-1 rounded-[12px] bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
+          >
+            确认补点
+          </button>
+          <button
+            onClick={() => setAdjustModal({ open: false, order: null })}
+            className="flex-1 rounded-[12px] border border-emerald-500/20 px-4 py-2 text-sm font-semibold text-neutral-300 transition-colors hover:bg-neutral-800/50"
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
       )}
     </div>
   );

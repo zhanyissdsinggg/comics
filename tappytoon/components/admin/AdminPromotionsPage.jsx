@@ -97,7 +97,7 @@ export default function AdminPromotionsPage() {
     }
     if (editingId) {
       await apiPatch(`/api/admin/promotions/${editingId}`, {
-        promotion: form,
+    promotion: form,
       });
     } else {
       await apiPost("/api/admin/promotions", { promotion: form });
@@ -150,7 +150,7 @@ export default function AdminPromotionsPage() {
     }
     for (const promo of list) {
       if (promo?.id) {
-        await apiPost("/api/admin/promotions", { promotion: promo });
+    await apiPost("/api/admin/promotions", { promotion: promo });
       }
     }
     loadPromotions();
@@ -178,396 +178,396 @@ export default function AdminPromotionsPage() {
 
   return (
     <div className="space-y-8">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-base font-semibold">
-              {editingId ? "编辑活动" : "创建活动"}
-            </h3>
+    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-base font-semibold">
+          {editingId ? "编辑活动" : "创建活动"}
+        </h3>
+        <button
+          type="button"
+          onClick={() => setShowAdvanced((prev) => !prev)}
+          className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
+        >
+          {showAdvanced ? "收起高级" : "高级设置"}
+        </button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <input
+          value={form.id}
+          onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))}
+          placeholder="活动 ID"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+          disabled={Boolean(editingId)}
+        />
+        <input
+          value={form.title}
+          onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+          placeholder="活动标题"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+        />
+        <input
+          value={form.description}
+          onChange={(event) =>
+            setForm((prev) => ({ ...prev, description: event.target.value }))
+          }
+          placeholder="活动描述"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+        />
+        <select
+          value={form.type}
+          onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value }))}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+        >
+          <option value="FIRST_PURCHASE">首充</option>
+          <option value="HOLIDAY">节日</option>
+          <option value="RETURNING">回流</option>
+          <option value="SUB_VOUCHER">订阅券</option>
+        </select>
+        <select
+          value={form.segment}
+          onChange={(event) => setForm((prev) => ({ ...prev, segment: event.target.value }))}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+        >
+          <option value="all">全部用户</option>
+          <option value="first_purchase">首充用户</option>
+          <option value="returning">回流用户</option>
+          <option value="subscriber">订阅用户</option>
+        </select>
+        <input
+          value={form.startAt}
+          onChange={(event) => setForm((prev) => ({ ...prev, startAt: event.target.value }))}
+          placeholder="开始时间 (ISO)"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+        />
+        <input
+          value={form.endAt}
+          onChange={(event) => setForm((prev) => ({ ...prev, endAt: event.target.value }))}
+          placeholder="结束时间 (ISO)"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+        />
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={form.active}
+            onChange={(event) =>
+              setForm((prev) => ({ ...prev, active: event.target.checked }))
+            }
+          />
+          启用
+        </label>
+      </div>
+
+      {showAdvanced ? (
+        <>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <h4 className="text-sm font-semibold">高级参数</h4>
+            <div className="grid gap-3 md:grid-cols-3">
+              <input
+                value={form.bonusMultiplier}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, bonusMultiplier: event.target.value }))
+                }
+                placeholder="奖励倍数"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+              <input
+                value={form.returningAfterDays}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, returningAfterDays: event.target.value }))
+                }
+                placeholder="回流天数"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+              <input
+                value={form.priority}
+                onChange={(event) => setForm((prev) => ({ ...prev, priority: event.target.value }))}
+                placeholder="优先级（数字越大越靠前）"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+              <label className="flex items-center gap-2 text-sm text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={form.autoGrant}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, autoGrant: event.target.checked }))
+                  }
+                />
+                自动发放券
+              </label>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <h4 className="text-sm font-semibold">优惠券（可选）</h4>
+            <div className="grid gap-3 md:grid-cols-3">
+              <input
+                value={form.coupon?.code || ""}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    coupon: { ...prev.coupon, code: event.target.value.toUpperCase() },
+                  }))
+                }
+                placeholder="券码"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+              <select
+                value={form.coupon?.type || "DISCOUNT_PCT"}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    coupon: { ...prev.coupon, type: event.target.value },
+                  }))
+                }
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                disabled={!isCouponEnabled}
+              >
+                <option value="DISCOUNT_PCT">折扣百分比</option>
+                <option value="DISCOUNT_PTS">点数减免</option>
+                <option value="FREE_EPISODE">免费章节</option>
+              </select>
+              <input
+                value={form.coupon?.value ?? 0}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    coupon: { ...prev.coupon, value: event.target.value },
+                  }))
+                }
+                placeholder="优惠值"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                disabled={!isCouponEnabled}
+              />
+              <input
+                value={form.coupon?.remainingUses ?? 1}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    coupon: { ...prev.coupon, remainingUses: event.target.value },
+                  }))
+                }
+                placeholder="可用次数"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                disabled={!isCouponEnabled}
+              />
+              <input
+                value={form.coupon?.label || ""}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    coupon: { ...prev.coupon, label: event.target.value },
+                  }))
+                }
+                placeholder="标签"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                disabled={!isCouponEnabled}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <h4 className="text-sm font-semibold">通知 CTA</h4>
+            <div className="grid gap-3 md:grid-cols-3">
+              <select
+                value={form.ctaType}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, ctaType: event.target.value }))
+                }
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              >
+                <option value="STORE">去商店</option>
+                <option value="SUBSCRIBE">订阅</option>
+                <option value="SERIES">作品页</option>
+                <option value="READ">阅读</option>
+                <option value="URL">外链</option>
+              </select>
+              <input
+                value={form.ctaTarget}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, ctaTarget: event.target.value }))
+                }
+                placeholder="目标 (seriesId 或 seriesId/episodeId 或 URL)"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+              <input
+                value={form.ctaLabel}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, ctaLabel: event.target.value }))
+                }
+                placeholder="按钮文案"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <h4 className="text-sm font-semibold">默认 CTA</h4>
+            <div className="grid gap-3 md:grid-cols-3">
+              <select
+                value={defaults.ctaType}
+                onChange={(event) =>
+                  setDefaults((prev) => ({ ...prev, ctaType: event.target.value }))
+                }
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              >
+                <option value="STORE">去商店</option>
+                <option value="SUBSCRIBE">订阅</option>
+                <option value="SERIES">作品页</option>
+                <option value="READ">阅读</option>
+                <option value="URL">外链</option>
+              </select>
+              <input
+                value={defaults.ctaTarget}
+                onChange={(event) =>
+                  setDefaults((prev) => ({ ...prev, ctaTarget: event.target.value }))
+                }
+                placeholder="目标"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+              <input
+                value={defaults.ctaLabel}
+                onChange={(event) =>
+                  setDefaults((prev) => ({ ...prev, ctaLabel: event.target.value }))
+                }
+                placeholder="按钮文案"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              />
+            </div>
             <button
               type="button"
-              onClick={() => setShowAdvanced((prev) => !prev)}
-              className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
+              onClick={async () => {
+                await apiPatch(`/api/admin/promotions/defaults`, {
+                  defaults,
+                });
+                loadPromotions();
+              }}
+              className="rounded-full border border-slate-200 px-4 py-2 text-xs text-slate-600"
             >
-              {showAdvanced ? "收起高级" : "高级设置"}
+              保存默认 CTA
             </button>
           </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <input
-              value={form.id}
-              onChange={(event) => setForm((prev) => ({ ...prev, id: event.target.value }))}
-              placeholder="活动 ID"
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-              disabled={Boolean(editingId)}
-            />
-            <input
-              value={form.title}
-              onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="活动标题"
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-            />
-            <input
-              value={form.description}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, description: event.target.value }))
-              }
-              placeholder="活动描述"
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-            />
-            <select
-              value={form.type}
-              onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value }))}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-            >
-              <option value="FIRST_PURCHASE">首充</option>
-              <option value="HOLIDAY">节日</option>
-              <option value="RETURNING">回流</option>
-              <option value="SUB_VOUCHER">订阅券</option>
-            </select>
-            <select
-              value={form.segment}
-              onChange={(event) => setForm((prev) => ({ ...prev, segment: event.target.value }))}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-            >
-              <option value="all">全部用户</option>
-              <option value="first_purchase">首充用户</option>
-              <option value="returning">回流用户</option>
-              <option value="subscriber">订阅用户</option>
-            </select>
-            <input
-              value={form.startAt}
-              onChange={(event) => setForm((prev) => ({ ...prev, startAt: event.target.value }))}
-              placeholder="开始时间 (ISO)"
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-            />
-            <input
-              value={form.endAt}
-              onChange={(event) => setForm((prev) => ({ ...prev, endAt: event.target.value }))}
-              placeholder="结束时间 (ISO)"
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-            />
-            <label className="flex items-center gap-2 text-sm text-slate-600">
-              <input
-                type="checkbox"
-                checked={form.active}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, active: event.target.checked }))
-                }
-              />
-              启用
-            </label>
-          </div>
-
-          {showAdvanced ? (
-            <>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-                <h4 className="text-sm font-semibold">高级参数</h4>
-                <div className="grid gap-3 md:grid-cols-3">
-                  <input
-                    value={form.bonusMultiplier}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, bonusMultiplier: event.target.value }))
-                    }
-                    placeholder="奖励倍数"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  />
-                  <input
-                    value={form.returningAfterDays}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, returningAfterDays: event.target.value }))
-                    }
-                    placeholder="回流天数"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  />
-                  <input
-                    value={form.priority}
-                    onChange={(event) => setForm((prev) => ({ ...prev, priority: event.target.value }))}
-                    placeholder="优先级（数字越大越靠前）"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  />
-                  <label className="flex items-center gap-2 text-sm text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={form.autoGrant}
-                      onChange={(event) =>
-                        setForm((prev) => ({ ...prev, autoGrant: event.target.checked }))
-                      }
-                    />
-                    自动发放券
-                  </label>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-                <h4 className="text-sm font-semibold">优惠券（可选）</h4>
-                <div className="grid gap-3 md:grid-cols-3">
-                  <input
-                    value={form.coupon?.code || ""}
-                    onChange={(event) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        coupon: { ...prev.coupon, code: event.target.value.toUpperCase() },
-                      }))
-                    }
-                    placeholder="券码"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  />
-                  <select
-                    value={form.coupon?.type || "DISCOUNT_PCT"}
-                    onChange={(event) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        coupon: { ...prev.coupon, type: event.target.value },
-                      }))
-                    }
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                    disabled={!isCouponEnabled}
-                  >
-                    <option value="DISCOUNT_PCT">折扣百分比</option>
-                    <option value="DISCOUNT_PTS">点数减免</option>
-                    <option value="FREE_EPISODE">免费章节</option>
-                  </select>
-                  <input
-                    value={form.coupon?.value ?? 0}
-                    onChange={(event) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        coupon: { ...prev.coupon, value: event.target.value },
-                      }))
-                    }
-                    placeholder="优惠值"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                    disabled={!isCouponEnabled}
-                  />
-                  <input
-                    value={form.coupon?.remainingUses ?? 1}
-                    onChange={(event) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        coupon: { ...prev.coupon, remainingUses: event.target.value },
-                      }))
-                    }
-                    placeholder="可用次数"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                    disabled={!isCouponEnabled}
-                  />
-                  <input
-                    value={form.coupon?.label || ""}
-                    onChange={(event) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        coupon: { ...prev.coupon, label: event.target.value },
-                      }))
-                    }
-                    placeholder="标签"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                    disabled={!isCouponEnabled}
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-                <h4 className="text-sm font-semibold">通知 CTA</h4>
-                <div className="grid gap-3 md:grid-cols-3">
-                  <select
-                    value={form.ctaType}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, ctaType: event.target.value }))
-                    }
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  >
-                    <option value="STORE">去商店</option>
-                    <option value="SUBSCRIBE">订阅</option>
-                    <option value="SERIES">作品页</option>
-                    <option value="READ">阅读</option>
-                    <option value="URL">外链</option>
-                  </select>
-                  <input
-                    value={form.ctaTarget}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, ctaTarget: event.target.value }))
-                    }
-                    placeholder="目标 (seriesId 或 seriesId/episodeId 或 URL)"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  />
-                  <input
-                    value={form.ctaLabel}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, ctaLabel: event.target.value }))
-                    }
-                    placeholder="按钮文案"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-                <h4 className="text-sm font-semibold">默认 CTA</h4>
-                <div className="grid gap-3 md:grid-cols-3">
-                  <select
-                    value={defaults.ctaType}
-                    onChange={(event) =>
-                      setDefaults((prev) => ({ ...prev, ctaType: event.target.value }))
-                    }
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  >
-                    <option value="STORE">去商店</option>
-                    <option value="SUBSCRIBE">订阅</option>
-                    <option value="SERIES">作品页</option>
-                    <option value="READ">阅读</option>
-                    <option value="URL">外链</option>
-                  </select>
-                  <input
-                    value={defaults.ctaTarget}
-                    onChange={(event) =>
-                      setDefaults((prev) => ({ ...prev, ctaTarget: event.target.value }))
-                    }
-                    placeholder="目标"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  />
-                  <input
-                    value={defaults.ctaLabel}
-                    onChange={(event) =>
-                      setDefaults((prev) => ({ ...prev, ctaLabel: event.target.value }))
-                    }
-                    placeholder="按钮文案"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await apiPatch(`/api/admin/promotions/defaults`, {
-                      defaults,
-                    });
-                    loadPromotions();
-                  }}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-xs text-slate-600"
-                >
-                  保存默认 CTA
-                </button>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={exportPromos}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600"
-                >
-                  导出 JSON
-                </button>
-                <button
-                  type="button"
-                  onClick={() => uploadRef.current?.click()}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600"
-                >
-                  导入 JSON
-                </button>
-                <input
-                  ref={uploadRef}
-                  type="file"
-                  accept="application/json"
-                  className="hidden"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    importPromos(file);
-                    event.target.value = "";
-                  }}
-                />
-              </div>
-            </>
-          ) : null}
 
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={handleSubmit}
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+              onClick={exportPromos}
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600"
             >
-              {editingId ? "保存" : "创建"}
+              导出 JSON
             </button>
-            {editingId ? (
+            <button
+              type="button"
+              onClick={() => uploadRef.current?.click()}
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600"
+            >
+              导入 JSON
+            </button>
+            <input
+              ref={uploadRef}
+              type="file"
+              accept="application/json"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                importPromos(file);
+                event.target.value = "";
+              }}
+            />
+          </div>
+        </>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+        >
+          {editingId ? "保存" : "创建"}
+        </button>
+        {editingId ? (
+          <button
+            type="button"
+            onClick={() => {
+              setForm(defaultForm);
+              setEditingId("");
+            }}
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600"
+          >
+            取消
+          </button>
+        ) : null}
+      </div>
+    </section>
+
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-semibold">活动列表</h3>
+        {loading ? <span className="text-xs text-slate-400">加载中...</span> : null}
+      </div>
+      <div className="space-y-3">
+        {promotions.map((promo) => (
+          <div
+            key={promo.id}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+          >
+            <div>
+              <p className="text-sm font-semibold text-slate-900">{promo.title}</p>
+              <p className="text-xs text-slate-500">
+                {TYPE_LABELS[promo.type] || promo.type} · {SEGMENT_LABELS[promo.segment] || promo.segment}
+              </p>
+              {promo.startAt || promo.endAt ? (
+                <p className="text-[10px] text-slate-500">
+                  {promo.startAt || "-"} ~ {promo.endAt || "-"}
+                </p>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  setForm(defaultForm);
-                  setEditingId("");
-                }}
-                className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600"
+                onClick={() => toggleActive(promo)}
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
               >
-                取消
+                {promo.active ? "暂停" : "发布"}
               </button>
-            ) : null}
-          </div>
-        </section>
-
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold">活动列表</h3>
-            {loading ? <span className="text-xs text-slate-400">加载中...</span> : null}
-          </div>
-          <div className="space-y-3">
-            {promotions.map((promo) => (
-              <div
-                key={promo.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+              <button
+                type="button"
+                onClick={() => handleEdit(promo)}
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
               >
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{promo.title}</p>
-                  <p className="text-xs text-slate-500">
-                    {TYPE_LABELS[promo.type] || promo.type} · {SEGMENT_LABELS[promo.segment] || promo.segment}
-                  </p>
-                  {promo.startAt || promo.endAt ? (
-                    <p className="text-[10px] text-slate-500">
-                      {promo.startAt || "-"} ~ {promo.endAt || "-"}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
+                编辑
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(promo.id)}
+                className="rounded-full border border-red-200 px-3 py-1 text-xs text-red-600"
+              >
+                删除
+              </button>
+              {showAdvanced ? (
+                <>
                   <button
                     type="button"
-                    onClick={() => toggleActive(promo)}
+                    onClick={() => movePriority(promo, 1)}
                     className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
                   >
-                    {promo.active ? "暂停" : "发布"}
+                    上移
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleEdit(promo)}
+                    onClick={() => movePriority(promo, -1)}
                     className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
                   >
-                    编辑
+                    下移
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(promo.id)}
-                    className="rounded-full border border-red-200 px-3 py-1 text-xs text-red-600"
-                  >
-                    删除
-                  </button>
-                  {showAdvanced ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => movePriority(promo, 1)}
-                        className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
-                      >
-                        上移
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => movePriority(promo, -1)}
-                        className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600"
-                      >
-                        下移
-                      </button>
-                    </>
-                  ) : null}
-                </div>
-              </div>
-            ))}
+                </>
+              ) : null}
+            </div>
           </div>
-        </section>
+        ))}
+      </div>
+    </section>
       </div>
     </div>
   );
