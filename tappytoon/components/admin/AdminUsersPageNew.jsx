@@ -39,7 +39,7 @@ const UserCard = React.memo(({ user, onToggleBlock, formatDate }) => {
     >
       {/* 用户头部 */}
       <div className="mb-3 flex items-start justify-between">
-        <div className="flex-1">
+      <div className="flex-1">
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-emerald-600" />
             <span className="text-sm font-semibold text-neutral-100">
@@ -50,23 +50,23 @@ const UserCard = React.memo(({ user, onToggleBlock, formatDate }) => {
             <Mail className="h-3 w-3" />
             <span className="truncate">{user.email}</span>
           </div>
-        </div>
-        {user.isBlocked ? (
+      </div>
+      {user.isBlocked ? (
           <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
             <ShieldOff className="h-3 w-3" />
             已封禁
           </span>
-        ) : (
+      ) : (
           <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
             <Shield className="h-3 w-3" />
             正常
           </span>
-        )}
+      )}
       </div>
 
       {/* 钱包信息 */}
       <div className="mb-3 space-y-2">
-        <div className="flex items-center justify-between rounded-[12px] bg-emerald-500/10 p-2">
+      <div className="flex items-center justify-between rounded-[12px] bg-emerald-500/10 p-2">
           <span className="text-xs text-emerald-400">付费点数</span>
           <div className="flex items-center gap-1">
             <Coins className="h-3 w-3 text-emerald-600" />
@@ -74,8 +74,8 @@ const UserCard = React.memo(({ user, onToggleBlock, formatDate }) => {
               {user.wallet?.paidPts || 0}
             </span>
           </div>
-        </div>
-        <div className="flex items-center justify-between rounded-[12px] bg-amber-500/10 p-2">
+      </div>
+      <div className="flex items-center justify-between rounded-[12px] bg-amber-500/10 p-2">
           <span className="text-xs text-amber-400">赠送点数</span>
           <div className="flex items-center gap-1">
             <Coins className="h-3 w-3 text-amber-600" />
@@ -83,26 +83,26 @@ const UserCard = React.memo(({ user, onToggleBlock, formatDate }) => {
               {user.wallet?.bonusPts || 0}
             </span>
           </div>
-        </div>
+      </div>
       </div>
 
       {/* 注册时间 */}
       {user.createdAt && (
-        <div className="mb-3 text-xs text-neutral-400">
+      <div className="mb-3 text-xs text-neutral-400">
           注册于 {formatDate(user.createdAt)}
-        </div>
+      </div>
       )}
 
       {/* 操作按钮 */}
       <button
-        onClick={() => onToggleBlock(user)}
-        className={`w-full rounded-[12px] border px-3 py-1.5 text-xs font-medium transition-colors ${
+      onClick={() => onToggleBlock(user)}
+      className={`w-full rounded-[12px] border px-3 py-1.5 text-xs font-medium transition-colors ${
           user.isBlocked
             ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
             : "border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
-        }`}
+      }`}
       >
-        {user.isBlocked ? "解封用户" : "封禁用户"}
+      {user.isBlocked ? "解封用户" : "封禁用户"}
       </button>
     </div>
   );
@@ -395,12 +395,12 @@ export default function AdminUsersPageNew() {
   const renderCardView = () => (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {paginatedUsers.map((user) => (
-        <UserCard
+      <UserCard
           key={user.id}
           user={user}
           onToggleBlock={toggleBlock}
           formatDate={formatDate}
-        />
+      />
       ))}
     </div>
   );
@@ -453,8 +453,8 @@ export default function AdminUsersPageNew() {
 
   return (
     <div className="space-y-6">
-        {/* 状态通知 */}
-        {statusMessage.text && (
+      {/* 状态通知 */}
+      {statusMessage.text && (
           <div
             className={`rounded-[12px] border px-4 py-3 ${
               statusMessage.type === "success"
@@ -464,10 +464,10 @@ export default function AdminUsersPageNew() {
           >
             {statusMessage.text}
           </div>
-        )}
+      )}
 
-        {/* 筛选和操作栏 */}
-        <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
+      {/* 筛选和操作栏 */}
+      <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
             {/* 搜索框 */}
             <div className="relative flex-1 min-w-[200px]">
@@ -577,10 +577,10 @@ export default function AdminUsersPageNew() {
               </button>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* 统计信息 */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {/* 统计信息 */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -650,17 +650,17 @@ export default function AdminUsersPageNew() {
               </div>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* 用户列表 */}
-        {loading ? (
+      {/* 用户列表 */}
+      {loading ? (
           <SkeletonList count={5} type="card" />
-        ) : filteredUsers.length === 0 ? (
+      ) : filteredUsers.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12">
             <Users className="h-12 w-12 text-neutral-600" />
             <p className="mt-4 text-sm text-neutral-400">暂无用户数据</p>
           </div>
-        ) : (
+      ) : (
           <>
             {viewMode === "card" ? renderCardView() : renderListView()}
 
@@ -676,7 +676,7 @@ export default function AdminUsersPageNew() {
               />
             )}
           </>
-        )}
+      )}
       </div>
     </div>
   );

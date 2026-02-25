@@ -41,7 +41,7 @@ const CommentCard = React.memo(({ comment, onToggleHidden, onRecalcRating, forma
     >
       {/* 评论头部 */}
       <div className="mb-3 flex items-start justify-between">
-        <div className="flex-1">
+      <div className="flex-1">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-emerald-600" />
             <span className="text-sm font-semibold text-neutral-100">
@@ -62,42 +62,42 @@ const CommentCard = React.memo(({ comment, onToggleHidden, onRecalcRating, forma
             <Clock className="h-3 w-3" />
             <span>{formatDate(comment.createdAt)}</span>
           </div>
-        </div>
-        {comment.hidden ? (
+      </div>
+      {comment.hidden ? (
           <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
             <EyeOff className="h-3 w-3" />
             已屏蔽
           </span>
-        ) : (
+      ) : (
           <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
             <Eye className="h-3 w-3" />
             正常
           </span>
-        )}
+      )}
       </div>
 
       {/* 评论内容 */}
       <div className="mb-3 rounded-[12px] bg-slate-50 p-3">
-        <p className="text-sm text-slate-700">{comment.text}</p>
+      <p className="text-sm text-slate-700">{comment.text}</p>
       </div>
 
       {/* 操作按钮 */}
       <div className="flex gap-2">
-        <button
+      <button
           onClick={() => onRecalcRating(comment.seriesId)}
           className="flex-1 flex items-center justify-center gap-1.5 rounded-[12px] border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
-        >
+      >
           <Calculator className="h-3 w-3" />
           重算评分
-        </button>
-        <button
+      </button>
+      <button
           onClick={() => onToggleHidden(comment)}
           className={`flex-1 flex items-center justify-center gap-1.5 rounded-[12px] border px-3 py-1.5 text-xs font-medium transition-colors ${
             comment.hidden
               ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
               : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
           }`}
-        >
+      >
           {comment.hidden ? (
             <>
               <Eye className="h-3 w-3" />
@@ -109,7 +109,7 @@ const CommentCard = React.memo(({ comment, onToggleHidden, onRecalcRating, forma
               屏蔽
             </>
           )}
-        </button>
+      </button>
       </div>
     </div>
   );
@@ -446,13 +446,13 @@ export default function AdminCommentsPageNew() {
   const renderCardView = () => (
     <div className="space-y-4">
       {paginatedComments.map((comment) => (
-        <CommentCard
+      <CommentCard
           key={comment.id}
           comment={comment}
           onToggleHidden={toggleHidden}
           onRecalcRating={recalcRating}
           formatDate={formatDate}
-        />
+      />
       ))}
     </div>
   );
@@ -506,8 +506,8 @@ export default function AdminCommentsPageNew() {
 
   return (
     <div className="space-y-6">
-        {/* 状态通知 */}
-        {statusMessage.text && (
+      {/* 状态通知 */}
+      {statusMessage.text && (
           <div
             className={`rounded-[12px] border px-4 py-3 ${
               statusMessage.type === "success"
@@ -517,10 +517,10 @@ export default function AdminCommentsPageNew() {
           >
             {statusMessage.text}
           </div>
-        )}
+      )}
 
-        {/* 筛选和操作栏 */}
-        <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
+      {/* 筛选和操作栏 */}
+      <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
             {/* 搜索框 */}
             <div className="relative flex-1 min-w-[200px]">
@@ -637,10 +637,10 @@ export default function AdminCommentsPageNew() {
               </button>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* 统计信息 */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 统计信息 */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -696,17 +696,17 @@ export default function AdminCommentsPageNew() {
               </div>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* 评论列表 */}
-        {loading ? (
+      {/* 评论列表 */}
+      {loading ? (
           <SkeletonList count={5} type="card" />
-        ) : filteredComments.length === 0 ? (
+      ) : filteredComments.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12">
             <MessageCircle className="h-12 w-12 text-slate-300" />
             <p className="mt-4 text-sm text-neutral-400">暂无评论数据</p>
           </div>
-        ) : (
+      ) : (
           <>
             {viewMode === "card" ? renderCardView() : renderListView()}
 
@@ -722,7 +722,7 @@ export default function AdminCommentsPageNew() {
               />
             )}
           </>
-        )}
+      )}
       </div>
     </div>
   );

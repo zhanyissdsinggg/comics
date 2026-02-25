@@ -63,16 +63,16 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="搜索用户ID或邮箱"
             className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
           />
-        </div>
+      </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs text-slate-500">
               <tr>
@@ -114,7 +114,7 @@ export default function AdminUsersPage() {
               ) : null}
             </tbody>
           </table>
-        </div>
+      </div>
       </div>
     </div>
   );

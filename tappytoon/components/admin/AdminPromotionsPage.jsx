@@ -178,7 +178,7 @@ export default function AdminPromotionsPage() {
 
   return (
     <div className="space-y-8">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-base font-semibold">
               {editingId ? "编辑活动" : "创建活动"}
@@ -499,9 +499,9 @@ export default function AdminPromotionsPage() {
               </button>
             ) : null}
           </div>
-        </section>
+      </section>
 
-        <section className="space-y-3">
+      <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold">活动列表</h3>
             {loading ? <span className="text-xs text-slate-400">加载中...</span> : null}
@@ -567,7 +567,7 @@ export default function AdminPromotionsPage() {
               </div>
             ))}
           </div>
-        </section>
+      </section>
       </div>
     </div>
   );

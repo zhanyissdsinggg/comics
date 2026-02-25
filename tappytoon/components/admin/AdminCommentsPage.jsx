@@ -68,7 +68,7 @@ export default function AdminCommentsPage() {
 
   return (
     <div className="space-y-6">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-2">
             <input
               value={query}
@@ -84,9 +84,9 @@ export default function AdminCommentsPage() {
               清除
             </button>
           </div>
-        </div>
+      </div>
 
-        <div className="space-y-3">
+      <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold">评论列表</h3>
             {loading ? <span className="text-xs text-slate-400">加载中...</span> : null}
@@ -137,7 +137,7 @@ export default function AdminCommentsPage() {
               </div>
             ) : null}
           </div>
-        </div>
+      </div>
       </div>
     </div>
   );

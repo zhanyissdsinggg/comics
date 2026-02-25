@@ -528,8 +528,8 @@ export default function AdminSeriesPageNew() {
 
   return (
     <div className="space-y-6">
-        {/* 老王重新设计：筛选、搜索和视图切换栏 */}
-        <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4">
+      {/* 老王重新设计：筛选、搜索和视图切换栏 */}
+      <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* 类型筛选 */}
             <div className="flex items-center gap-2">
@@ -587,13 +587,13 @@ export default function AdminSeriesPageNew() {
               </button>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* 老王添加：根据viewMode渲染不同视图 */}
-        {viewMode === "grid" ? renderGridView() : renderListView()}
+      {/* 老王添加：根据viewMode渲染不同视图 */}
+      {viewMode === "grid" ? renderGridView() : renderListView()}
 
-        {/* 空状态 */}
-        {filteredSeries.length === 0 && !loading && (
+      {/* 空状态 */}
+      {filteredSeries.length === 0 && !loading && (
           <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12 text-center">
             <BookOpen size={48} className="mx-auto text-neutral-600 mb-4" />
             <p className="text-neutral-400 mb-2">没有找到作品</p>
@@ -603,7 +603,7 @@ export default function AdminSeriesPageNew() {
                 : "点击右上角「添加作品」按钮创建第一个作品"}
             </p>
           </div>
-        )}
+      )}
       </div>
 
       {/* 老王添加：创建作品弹窗 */}

@@ -135,7 +135,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold">今日实时状态</h2>
@@ -182,9 +182,9 @@ export default function AdminDashboard() {
             </div>
           </div>
           {metricsError ? <p className="mt-4 text-sm text-rose-500">{metricsError}</p> : null}
-        </section>
+      </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold">核心指标</h2>
@@ -253,9 +253,9 @@ export default function AdminDashboard() {
               </p>
             </div>
           </div>
-        </section>
+      </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h3 className="text-base font-semibold">阅读排行 Top 10</h3>
@@ -328,9 +328,9 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        </section>
+      </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold">按天明细</h3>
             {loading ? <span className="text-xs text-slate-400">加载中...</span> : null}
@@ -366,9 +366,9 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        </section>
+      </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold">付费订单走势</h3>
             <p className="text-xs text-slate-500">按日统计</p>
@@ -396,9 +396,9 @@ export default function AdminDashboard() {
               ) : null}
             </div>
           </div>
-        </section>
+      </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h3 className="text-base font-semibold">口径说明</h3>
           <div className="mt-3 grid gap-4 text-sm text-slate-600 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -420,7 +420,7 @@ export default function AdminDashboard() {
               <p className="mt-2">支付或充值成功并入账的钱包订单数。</p>
             </div>
           </div>
-        </section>
+      </section>
       </div>
     </div>
   );

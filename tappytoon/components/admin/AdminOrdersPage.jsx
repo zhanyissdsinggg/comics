@@ -149,7 +149,7 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="space-y-6">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
             <input
               value={query}
@@ -195,9 +195,9 @@ export default function AdminOrdersPage() {
               导出 CSV
             </button>
           </div>
-        </div>
+      </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs text-slate-500">
               <tr>
@@ -247,7 +247,7 @@ export default function AdminOrdersPage() {
               ) : null}
             </tbody>
           </table>
-        </div>
+      </div>
       </div>
 
       {adjustModal.open && (

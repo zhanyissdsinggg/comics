@@ -230,8 +230,8 @@ export default function AdminBillingPage() {
 
   return (
     <div className="space-y-6">
-        {/* 状态通知 */}
-        {statusMessage.text && (
+      {/* 状态通知 */}
+      {statusMessage.text && (
           <div
             className={`rounded-[12px] border px-4 py-3 ${
               statusMessage.type === "success"
@@ -241,10 +241,10 @@ export default function AdminBillingPage() {
           >
             {statusMessage.text}
           </div>
-        )}
+      )}
 
-        {/* 点数套餐区域 */}
-        <section className="space-y-4">
+      {/* 点数套餐区域 */}
+      <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-neutral-100 flex items-center gap-2">
               <Coins className="h-5 w-5 text-emerald-600" />
@@ -507,10 +507,10 @@ export default function AdminBillingPage() {
               </button>
             </div>
           </div>
-        </section>
+      </section>
 
-        {/* 订阅套餐区域 */}
-        <section className="space-y-4">
+      {/* 订阅套餐区域 */}
+      <section className="space-y-4">
           <h3 className="text-lg font-semibold text-neutral-100 flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-emerald-600" />
             订阅套餐
@@ -815,7 +815,7 @@ export default function AdminBillingPage() {
               </button>
             </div>
           </div>
-        </section>
+      </section>
       </div>
     </div>
   );

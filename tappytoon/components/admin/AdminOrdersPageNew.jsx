@@ -34,7 +34,7 @@ const OrderCard = React.memo(({ order, onAdjust, onRefund, getStatusBadge, forma
     >
       {/* 订单头部 */}
       <div className="mb-3 flex items-start justify-between">
-        <div className="flex-1">
+      <div className="flex-1">
           <div className="flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-emerald-600" />
             <span className="text-sm font-semibold text-neutral-100">
@@ -45,13 +45,13 @@ const OrderCard = React.memo(({ order, onAdjust, onRefund, getStatusBadge, forma
             <User className="h-3 w-3" />
             <span>{order.userId}</span>
           </div>
-        </div>
-        {getStatusBadge(order.status)}
+      </div>
+      {getStatusBadge(order.status)}
       </div>
 
       {/* 金额信息 */}
       <div className="mb-3 rounded-[12px] bg-emerald-500/10 p-3">
-        <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
           <span className="text-xs text-emerald-400">订单金额</span>
           <div className="flex items-center gap-1">
             <DollarSign className="h-4 w-4 text-emerald-600" />
@@ -60,30 +60,30 @@ const OrderCard = React.memo(({ order, onAdjust, onRefund, getStatusBadge, forma
             </span>
             <span className="text-xs text-emerald-400">{order.currency}</span>
           </div>
-        </div>
+      </div>
       </div>
 
       {/* 时间信息 */}
       <div className="mb-3 flex items-center gap-1.5 text-xs text-neutral-400">
-        <Calendar className="h-3 w-3" />
-        <span>{formatDate(order.createdAt || order.paidAt)}</span>
+      <Calendar className="h-3 w-3" />
+      <span>{formatDate(order.createdAt || order.paidAt)}</span>
       </div>
 
       {/* 操作按钮 */}
       <div className="flex gap-2">
-        <button
+      <button
           onClick={() => onAdjust(order)}
           className="flex-1 rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
-        >
+      >
           补点
-        </button>
-        <button
+      </button>
+      <button
           onClick={() => onRefund(order)}
           disabled={order.status !== "PAID"}
           className="flex-1 rounded-[12px] border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+      >
           退款
-        </button>
+      </button>
       </div>
     </div>
   );
@@ -334,14 +334,14 @@ export default function AdminOrdersPageNew() {
   const renderCardView = () => (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {paginatedOrders.map((order) => (
-        <OrderCard
+      <OrderCard
           key={order.orderId}
           order={order}
           onAdjust={handleAdjust}
           onRefund={handleRefund}
           getStatusBadge={getStatusBadge}
           formatDate={formatDate}
-        />
+      />
       ))}
     </div>
   );
@@ -381,8 +381,8 @@ export default function AdminOrdersPageNew() {
 
   return (
     <div className="space-y-6">
-        {/* 状态通知 */}
-        {statusMessage.text && (
+      {/* 状态通知 */}
+      {statusMessage.text && (
           <div
             className={`rounded-[12px] border px-4 py-3 ${
               statusMessage.type === "success"
@@ -392,10 +392,10 @@ export default function AdminOrdersPageNew() {
           >
             {statusMessage.text}
           </div>
-        )}
+      )}
 
-        {/* 筛选和操作栏 */}
-        <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
+      {/* 筛选和操作栏 */}
+      <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
           <div className="space-y-4">
             {/* 第一行：搜索和状态筛选 */}
             <div className="flex flex-wrap items-center gap-3">
@@ -496,10 +496,10 @@ export default function AdminOrdersPageNew() {
               </div>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* 统计信息 */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 统计信息 */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -558,19 +558,19 @@ export default function AdminOrdersPageNew() {
               </div>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* 订单列表 */}
-        {loading ? (
+      {/* 订单列表 */}
+      {loading ? (
           <div className="flex items-center justify-center rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12">
             <RefreshCw className="h-8 w-8 animate-spin text-emerald-500" />
           </div>
-        ) : filteredOrders.length === 0 ? (
+      ) : filteredOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12">
             <CreditCard className="h-12 w-12 text-neutral-600" />
             <p className="mt-4 text-sm text-neutral-400">暂无订单数据</p>
           </div>
-        ) : (
+      ) : (
           <>
             {viewMode === "card" ? renderCardView() : renderListView()}
 
@@ -586,7 +586,7 @@ export default function AdminOrdersPageNew() {
               />
             )}
           </>
-        )}
+      )}
       </div>
 
       {/* 补点模态框 */}

@@ -62,7 +62,7 @@ export default function AdminNotificationsPage() {
 
   return (
     <div className="space-y-6">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <h3 className="text-base font-semibold">发送通知</h3>
           <div className="grid gap-3 md:grid-cols-3">
             <input
@@ -108,9 +108,9 @@ export default function AdminNotificationsPage() {
           >
             发送通知
           </button>
-        </section>
+      </section>
 
-        <section className="space-y-3">
+      <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold">通知列表</h3>
             {loading ? <span className="text-xs text-slate-400">加载中...</span> : null}
@@ -134,7 +134,7 @@ export default function AdminNotificationsPage() {
               </div>
             ) : null}
           </div>
-        </section>
+      </section>
       </div>
     </div>
   );
