@@ -239,13 +239,13 @@ export default function AdminPage() {
   // 老王说：如果正在加载或未认证，显示加载状态
   if (isLoading) {
     return (
-      <AdminShell title="加载中..." subtitle="正在验证身份">
+      <div>
         <div className="mx-auto max-w-3xl">
           <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
             <p className="text-sm text-slate-500">加载中...</p>
           </div>
         </div>
-      </AdminShell>
+      </div>
     );
   }
 

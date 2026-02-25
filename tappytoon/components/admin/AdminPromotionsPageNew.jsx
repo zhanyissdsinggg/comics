@@ -231,7 +231,7 @@ export default function AdminPromotionsPageNew() {
   }
 
   return (
-    <AdminShell title="活动配置" subtitle="活动管理 / 创建编辑 / 状态控制">
+    <div>
       <div className="space-y-6">
         {/* 状态通知 */}
         {statusMessage.text && (
