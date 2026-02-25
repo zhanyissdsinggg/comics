@@ -708,3 +708,87 @@ model RecommendationAnalytics {
   @@index([seriesId])
   @@index([dateKey])
 }
+
+// 老王说：营销活动表 - 管理营销活动的完整生命周期
+model MarketingCampaign {
+  id              String   @id @default(cuid())
+  name            String   // 活动名称
+  description     String?  // 活动描述
+  type            String   // 活动类型：email、push、banner、discount等
+  status          String   @default("draft") // 状态：draft、scheduled、active、paused、ended
+  targetSegment   String   // 目标受众：all、vip、new、at-risk、high-value等
+  budget          Float    @default(0)       // 活动预算
+  spent           Float    @default(0)       // 已花费
+  startAt         DateTime?                  // 开始时间
+  endAt           DateTime?                  // 结束时间
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 关系
+  analytics       MarketingAnalytics[]
+  targetUsers     MarketingCampaignTarget[]
+
+  @@index([status])
+  @@index([targetSegment])
+  @@index([startAt])
+  @@index([endAt])
+}
+
+// 老王说：营销活动目标用户表 - 记录活动针对的用户
+model MarketingCampaignTarget {
+  id              String   @id @default(cuid())
+  campaignId      String
+  userId          String
+  sentAt          DateTime?                  // 发送时间
+  openedAt        DateTime?                  // 打开时间
+  clickedAt       DateTime?                  // 点击时间
+  convertedAt     DateTime?                  // 转化时间
+  createdAt       DateTime @default(now())
+
+  campaign        MarketingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, userId])
+  @@index([campaignId])
+  @@index([userId])
+  @@index([sentAt])
+}
+
+// 老王说：营销活动效果分析表 - 追踪营销活动的效果数据
+model MarketingAnalytics {
+  id              String   @id @default(cuid())
+  campaignId      String
+  dateKey         String   // YYYY-MM-DD格式
+  sent            Int      @default(0)      // 发送数
+  opened          Int      @default(0)      // 打开数
+  clicked         Int      @default(0)      // 点击数
+  converted       Int      @default(0)      // 转化数
+  revenue         Float    @default(0)      // 产生的收入
+  openRate        Float    @default(0)      // 打开率（百分比）
+  clickRate       Float    @default(0)      // 点击率（百分比）
+  conversionRate  Float    @default(0)      // 转化率（百分比）
+  cac             Float    @default(0)      // 用户获取成本
+  roi             Float    @default(0)      // ROI（百分比）
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  campaign        MarketingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, dateKey])
+  @@index([campaignId])
+  @@index([dateKey])
+}
+
+// 老王说：营销活动预算表 - 管理营销活动的预算分配
+model MarketingBudget {
+  id              String   @id @default(cuid())
+  campaignId      String   @unique
+  totalBudget     Float    // 总预算
+  emailBudget     Float    @default(0)      // 邮件预算
+  pushBudget      Float    @default(0)      // 推送预算
+  bannerBudget    Float    @default(0)      // 横幅预算
+  discountBudget  Float    @default(0)      // 折扣预算
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([campaignId])
+}

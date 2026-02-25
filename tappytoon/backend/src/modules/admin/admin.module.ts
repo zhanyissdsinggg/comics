@@ -11,6 +11,8 @@ import { AdminRevenueController } from "./controllers/admin-revenue.controller";
 import { AdminRevenueService } from "./services/admin-revenue.service";
 import { AdminRecommendationController } from "./controllers/admin-recommendation.controller";
 import { AdminRecommendationService } from "./services/admin-recommendation.service";
+import { AdminMarketingController } from "./controllers/admin-marketing.controller";
+import { AdminMarketingService } from "./services/admin-marketing.service";
 import { AdminKeyMiddleware } from "./admin.middleware";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
 import { AllExceptionsFilter } from "./filters/all-exceptions.filter";
@@ -70,6 +72,7 @@ import { AdminEpisodesUploadController } from "./controllers/admin-episodes-uplo
     AdminAnalyticsController,
     AdminRevenueController,
     AdminRecommendationController,
+    AdminMarketingController,
     // 老王说：使用优化版本的controller
     AdminPromotionsController,
     AdminBillingController,
@@ -100,6 +103,7 @@ import { AdminEpisodesUploadController } from "./controllers/admin-episodes-uplo
     AdminAnalyticsService,
     AdminRevenueService,
     AdminRecommendationService,
+    AdminMarketingService,
     // 老王说：注册全局异常过滤器
     {
       provide: APP_FILTER,
@@ -129,6 +133,7 @@ export class AdminModule implements NestModule {
         AdminAnalyticsController,
         AdminRevenueController,
         AdminRecommendationController,
+        AdminMarketingController,
         AdminPromotionsController,
         AdminBillingController,
         AdminNotificationsController,
