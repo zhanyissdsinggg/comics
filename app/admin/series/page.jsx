@@ -1,229 +1,493 @@
-﻿"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import { AdminLayout } from "../../../components/admin/AdminLayout";
-import { DataTable } from "../../../components/admin/DataTable";
-import { BulkActions } from "../../../components/admin/BulkActions";
-import { AdvancedFilter } from "../../../components/admin/AdvancedFilter";
-import { useAdminApi } from "../../../lib/hooks/useAdminApi";
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { LoadingState } from '@/components/admin/common/LoadingState';
+import { Modal } from '@/components/admin/common/Modal';
+import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 
-function parseList(payload, keys = []) {
-  for (const key of keys) {
-    if (Array.isArray(payload?.[key])) {
-      return payload[key];
-    }
-  }
-  if (Array.isArray(payload?.data)) {
-    return payload.data;
-  }
-  return [];
-}
-
-export default function SeriesPage() {
-  const { request, error } = useAdminApi();
-  const [series, setSeries] = useState([]);
+export default function AdminSeriesPage() {
+  const [viewMode, setViewMode] = useState('list'); // list, grid
+  const [filters, setFilters] = useState({
+    search: '',
+    type: '',
+    status: '',
+    adult: false,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  });
   const [selectedIds, setSelectedIds] = useState([]);
-  const [pageLoading, setPageLoading] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState(false);
+  const [bulkActionType, setBulkActionType] = useState('');
+  const [bulkActionData, setBulkActionData] = useState({});
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
-  const fetchSeries = useCallback(
-    async (filters = {}) => {
-      setPageLoading(true);
-      try {
-        const params = new URLSearchParams();
-        params.append("page", String(filters.page || 1));
-        params.append("limit", String(filters.limit || 10));
-        if (filters.search) params.append("search", filters.search);
-        if (filters.sortBy) params.append("sortBy", filters.sortBy);
-        if (filters.type) params.append("type", filters.type);
-        if (filters.status) params.append("status", filters.status);
+  // 获取作品列表
+  const { data: seriesData, isLoading, refetch } = useQuery({
+    queryKey: ['admin', 'series', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (filters.search) params.append('search', filters.search);
+      if (filters.type) params.append('type', filters.type);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.adult) params.append('adult', 'true');
+      params.append('sortBy', filters.sortBy);
+      params.append('sortOrder', filters.sortOrder);
 
-        const data = await request(`/api/admin/series?${params.toString()}`);
-        const list = parseList(data, ["series"]).map((item) => ({
-          ...item,
-          id: item.id || item.seriesId,
-        }));
-        setSeries(list);
-      } catch (err) {
-        console.error("获取作品列表失败:", err);
-      } finally {
-        setPageLoading(false);
-      }
+      const response = await fetch(`/api/admin/series?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
+        },
+      });
+      return response.json();
     },
-    [request]
-  );
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchSeries();
-  }, [fetchSeries]);
+  const series = seriesData?.series || [];
 
-  const handleDelete = async (ids) => {
-    if (!confirm(`确定要删除这 ${ids.length} 部作品吗？`)) {
-      return;
-    }
-
-    setPageLoading(true);
+  // 处理批量删除
+  const handleBulkDelete = async () => {
     try {
-      for (const id of ids) {
-        await request(`/api/admin/series/${id}`, { method: "DELETE" });
-      }
-      setSelectedIds([]);
-      await fetchSeries();
-      alert("删除成功");
-    } catch (err) {
-      console.error("删除失败:", err);
-      alert("删除失败");
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
-  const handleBulkUpdate = async (ids) => {
-    const status = prompt("请输入新的状态 (Ongoing/Completed/Hiatus):");
-    if (!status) return;
-
-    setPageLoading(true);
-    try {
-      for (const id of ids) {
-        await request(`/api/admin/series/${id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ series: { status } }),
+      for (const id of selectedIds) {
+        await fetch(`/api/admin/series/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          },
         });
       }
       setSelectedIds([]);
-      await fetchSeries();
-      alert("更新成功");
-    } catch (err) {
-      console.error("更新失败:", err);
-      alert("更新失败");
-    } finally {
-      setPageLoading(false);
+      setIsDeleteConfirmOpen(false);
+      refetch();
+    } catch (error) {
+      console.error('批量删除失败:', error);
     }
   };
 
-  const handleExport = async (ids) => {
+  // 处理批量更新状态
+  const handleBulkUpdateStatus = async () => {
     try {
-      const exportData = series.filter((s) => ids.includes(s.id));
-      const csv = [
-        ["ID", "标题", "类型", "状态", "评分"].join(","),
-        ...exportData.map((s) =>
-          [
-            s.id,
-            s.title,
-            s.type,
-            s.status,
-            Number(s.rating || 0).toFixed(1),
-          ].join(",")
-        ),
-      ].join("\n");
-
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "series.csv";
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("导出失败:", err);
-      alert("导出失败");
+      for (const id of selectedIds) {
+        await fetch(`/api/admin/series/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: bulkActionData.status }),
+        });
+      }
+      setSelectedIds([]);
+      setIsBulkActionModalOpen(false);
+      setBulkActionData({});
+      refetch();
+    } catch (error) {
+      console.error('批量更新失败:', error);
     }
   };
 
-  const columns = [
-    {
-      key: "id",
-      label: "ID",
-      sortable: true,
-    },
-    {
-      key: "title",
-      label: "标题",
-      sortable: true,
-    },
-    {
-      key: "type",
-      label: "类型",
-      render: (value) => (value === "comic" ? "漫画" : "小说"),
-    },
-    {
-      key: "status",
-      label: "状态",
-      render: (value) => {
-        const statusMap = {
-          Ongoing: "连载中",
-          Completed: "已完结",
-          Hiatus: "暂停",
-        };
-        return statusMap[value] || value || "-";
-      },
-    },
-    {
-      key: "rating",
-      label: "评分",
-      render: (value) => Number(value || 0).toFixed(1),
-    },
-  ];
+  // 处理批量导出
+  const handleBulkExport = () => {
+    const exportData = series.filter((s) => selectedIds.includes(s.id));
+    const csv = [
+      ['ID', '标题', '类型', '状态', '评分', '描述'].join(','),
+      ...exportData.map((s) =>
+        [
+          s.id,
+          `"${s.title}"`,
+          s.type === 'comic' ? '漫画' : '小说',
+          s.status,
+          Number(s.rating || 0).toFixed(1),
+          `"${s.description || ''}"`,
+        ].join(',')
+      ),
+    ].join('\n');
 
-  const filterOptions = [
-    {
-      id: "type",
-      label: "类型",
-      type: "select",
-      options: [
-        { label: "漫画", value: "comic" },
-        { label: "小说", value: "novel" },
-      ],
-    },
-    {
-      id: "status",
-      label: "状态",
-      type: "select",
-      options: [
-        { label: "连载中", value: "Ongoing" },
-        { label: "已完结", value: "Completed" },
-        { label: "暂停", value: "Hiatus" },
-      ],
-    },
-    {
-      id: "adult",
-      label: "内容分级",
-      type: "checkbox",
-      options: [{ label: "仅显示成人内容", value: "true" }],
-    },
-  ];
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `series-${new Date().toISOString().split('T')[0]}.csv`);
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // 渲染列表视图
+  const renderListView = () => (
+    <div className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-neutral-700 bg-neutral-900">
+              <th className="px-4 py-3 text-left">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === series.length && series.length > 0}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedIds(series.map((s) => s.id));
+                    } else {
+                      setSelectedIds([]);
+                    }
+                  }}
+                  className="rounded"
+                />
+              </th>
+              <th className="px-4 py-3 text-left text-neutral-400 cursor-pointer hover:text-neutral-300">
+                标题
+              </th>
+              <th className="px-4 py-3 text-left text-neutral-400">类型</th>
+              <th className="px-4 py-3 text-left text-neutral-400">状态</th>
+              <th className="px-4 py-3 text-left text-neutral-400">评分</th>
+              <th className="px-4 py-3 text-left text-neutral-400">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {series.map((item) => (
+              <tr key={item.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
+                <td className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(item.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds([...selectedIds, item.id]);
+                      } else {
+                        setSelectedIds(selectedIds.filter((id) => id !== item.id));
+                      }
+                    }}
+                    className="rounded"
+                  />
+                </td>
+                <td className="px-4 py-3 text-neutral-300 font-medium">{item.title}</td>
+                <td className="px-4 py-3 text-neutral-400">
+                  <span className="px-2 py-1 rounded text-xs bg-neutral-700">
+                    {item.type === 'comic' ? '漫画' : '小说'}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium ${
+                      item.status === 'Ongoing'
+                        ? 'bg-green-900/30 text-green-400'
+                        : item.status === 'Completed'
+                        ? 'bg-blue-900/30 text-blue-400'
+                        : 'bg-yellow-900/30 text-yellow-400'
+                    }`}
+                  >
+                    {item.status === 'Ongoing' ? '连载中' : item.status === 'Completed' ? '已完结' : '暂停'}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-neutral-300">{Number(item.rating || 0).toFixed(1)}</td>
+                <td className="px-4 py-3">
+                  <a
+                    href={`/admin/series/${item.id}`}
+                    className="text-blue-400 hover:text-blue-300 text-sm mr-3"
+                  >
+                    编辑
+                  </a>
+                  <a
+                    href={`/admin/series/${item.id}/episodes`}
+                    className="text-purple-400 hover:text-purple-300 text-sm"
+                  >
+                    剧集
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // 渲染网格视图
+  const renderGridView = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {series.map((item) => (
+        <div
+          key={item.id}
+          className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden hover:border-neutral-600 transition-colors"
+        >
+          <div className="aspect-video bg-neutral-900 flex items-center justify-center overflow-hidden">
+            {item.coverUrl ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item.coverUrl} alt={item.title} className="w-full h-full object-cover" />
+              </>
+            ) : (
+              <div className="text-neutral-500">无封面</div>
+            )}
+          </div>
+          <div className="p-4">
+            <div className="flex items-start justify-between mb-2">
+              <h3 className="text-sm font-semibold text-neutral-100 flex-1 line-clamp-2">{item.title}</h3>
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(item.id)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedIds([...selectedIds, item.id]);
+                  } else {
+                    setSelectedIds(selectedIds.filter((id) => id !== item.id));
+                  }
+                }}
+                className="rounded ml-2"
+              />
+            </div>
+            <div className="flex gap-2 mb-3">
+              <span className="px-2 py-1 rounded text-xs bg-neutral-700 text-neutral-300">
+                {item.type === 'comic' ? '漫画' : '小说'}
+              </span>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  item.status === 'Ongoing'
+                    ? 'bg-green-900/30 text-green-400'
+                    : item.status === 'Completed'
+                    ? 'bg-blue-900/30 text-blue-400'
+                    : 'bg-yellow-900/30 text-yellow-400'
+                }`}
+              >
+                {item.status === 'Ongoing' ? '连载中' : item.status === 'Completed' ? '已完结' : '暂停'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-neutral-400">评分: {Number(item.rating || 0).toFixed(1)}</span>
+              <span className="text-xs text-neutral-500">{item.ratingCount} 人评分</span>
+            </div>
+            <div className="flex gap-2">
+              <a
+                href={`/admin/series/${item.id}`}
+                className="flex-1 px-3 py-2 rounded text-xs bg-blue-600 text-white hover:bg-blue-700 text-center"
+              >
+                编辑
+              </a>
+              <a
+                href={`/admin/series/${item.id}/episodes`}
+                className="flex-1 px-3 py-2 rounded text-xs bg-purple-600 text-white hover:bg-purple-700 text-center"
+              >
+                剧集
+              </a>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
-    <AdminLayout title="作品管理" subtitle="作品筛选、状态变更与批量操作。">
-      <div className="space-y-6">
-        <AdvancedFilter
-          filters={filterOptions}
-          onFilter={fetchSeries}
-          loading={pageLoading}
-        />
+    <div className="min-h-screen bg-neutral-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* 页面标题 */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-neutral-100">作品管理</h1>
+          <p className="text-neutral-400 mt-2">管理所有作品、剧集和内容</p>
+        </div>
 
-        <BulkActions
-          selectedIds={selectedIds}
-          onDelete={handleDelete}
-          onUpdate={handleBulkUpdate}
-          onExport={handleExport}
-          loading={pageLoading}
-        />
+        {/* 工具栏 */}
+        <div className="mb-6 flex gap-4 flex-wrap items-center">
+          <input
+            type="text"
+            placeholder="搜索作品..."
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            className="px-4 py-2 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-100 placeholder-neutral-500"
+          />
 
-        <DataTable
-          columns={columns}
-          data={series}
-          loading={pageLoading}
-          error={error}
-          selectable
-          onSelectionChange={setSelectedIds}
-          sortable
-          paginated
-          pageSize={10}
-          onRowClick={(row) => {
-            window.location.href = `/admin/series/${row.id}`;
-          }}
-        />
+          <button
+            onClick={() => setIsFilterModalOpen(true)}
+            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700"
+          >
+            🔍 高级筛选
+          </button>
+
+          <div className="flex gap-2 ml-auto">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-4 py-2 rounded-lg ${
+                viewMode === 'list'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+              }`}
+            >
+              列表
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-4 py-2 rounded-lg ${
+                viewMode === 'grid'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+              }`}
+            >
+              网格
+            </button>
+          </div>
+        </div>
+
+        {/* 批量操作栏 */}
+        {selectedIds.length > 0 && (
+          <div className="mb-6 p-4 rounded-lg bg-blue-900/20 border border-blue-700 flex items-center justify-between">
+            <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setBulkActionType('status');
+                  setIsBulkActionModalOpen(true);
+                }}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"
+              >
+                更改状态
+              </button>
+              <button
+                onClick={handleBulkExport}
+                className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm"
+              >
+                导出
+              </button>
+              <button
+                onClick={() => setIsDeleteConfirmOpen(true)}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm"
+              >
+                删除
+              </button>
+              <button
+                onClick={() => setSelectedIds([])}
+                className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 内容区域 */}
+        {isLoading ? (
+          <LoadingState.Spinner size="md" />
+        ) : series.length > 0 ? (
+          viewMode === 'list' ? (
+            renderListView()
+          ) : (
+            renderGridView()
+          )
+        ) : (
+          <LoadingState.EmptyState message="暂无作品" />
+        )}
       </div>
-    </AdminLayout>
+
+      {/* 高级筛选模态框 */}
+      <Modal
+        isOpen={isFilterModalOpen}
+        title="高级筛选"
+        onClose={() => setIsFilterModalOpen(false)}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm text-neutral-400">类型</label>
+            <select
+              value={filters.type}
+              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+            >
+              <option value="">全部</option>
+              <option value="comic">漫画</option>
+              <option value="novel">小说</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm text-neutral-400">状态</label>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+            >
+              <option value="">全部</option>
+              <option value="Ongoing">连载中</option>
+              <option value="Completed">已完结</option>
+              <option value="Hiatus">暂停</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm text-neutral-400">排序</label>
+            <select
+              value={filters.sortBy}
+              onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+            >
+              <option value="createdAt">创建时间</option>
+              <option value="rating">评分</option>
+              <option value="title">标题</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="adult-filter"
+              checked={filters.adult}
+              onChange={(e) => setFilters({ ...filters, adult: e.target.checked })}
+              className="rounded"
+            />
+            <label htmlFor="adult-filter" className="text-sm text-neutral-400">
+              仅显示成人内容
+            </label>
+          </div>
+
+          <button
+            onClick={() => setIsFilterModalOpen(false)}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            应用筛选
+          </button>
+        </div>
+      </Modal>
+
+      {/* 批量操作模态框 */}
+      <Modal
+        isOpen={isBulkActionModalOpen}
+        title="批量更改状态"
+        onClose={() => setIsBulkActionModalOpen(false)}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm text-neutral-400">新状态</label>
+            <select
+              value={bulkActionData.status || ''}
+              onChange={(e) => setBulkActionData({ ...bulkActionData, status: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+            >
+              <option value="">选择状态</option>
+              <option value="Ongoing">连载中</option>
+              <option value="Completed">已完结</option>
+              <option value="Hiatus">暂停</option>
+            </select>
+          </div>
+
+          <button
+            onClick={handleBulkUpdateStatus}
+            disabled={!bulkActionData.status}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            确认更新
+          </button>
+        </div>
+      </Modal>
+
+      {/* 删除确认对话框 */}
+      <ConfirmDialog
+        isOpen={isDeleteConfirmOpen}
+        title="确认删除"
+        message={`确定要删除这 ${selectedIds.length} 部作品吗？此操作不可撤销。`}
+        confirmText="删除"
+        cancelText="取消"
+        isDangerous={true}
+        onConfirm={handleBulkDelete}
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+      />
+    </div>
   );
 }
