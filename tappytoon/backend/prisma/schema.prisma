@@ -593,3 +593,60 @@ model UserBehavior {
   @@index([userId])
   @@index([lastActiveAt])
 }
+
+// 老王说：收入指标表 - 按日期统计收入数据
+model RevenueMetrics {
+  id              String   @id @default(cuid())
+  dateKey         String   // YYYY-MM-DD格式
+  totalRevenue    Float    @default(0)      // 总收入
+  totalOrders     Int      @default(0)      // 订单数
+  avgOrderValue   Float    @default(0)      // 平均订单金额
+  paidOrders      Int      @default(0)      // 已支付订单数
+  failedOrders    Int      @default(0)      // 失败订单数
+  refundedAmount  Float    @default(0)      // 退款金额
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([dateKey])
+  @@index([dateKey])
+}
+
+// 老王说：渠道分析表 - 按支付渠道和套餐类型统计
+model ChannelAnalytics {
+  id              String   @id @default(cuid())
+  dateKey         String   // YYYY-MM-DD格式
+  channel         String   // 支付渠道：stripe, paypal, wechat等
+  packageId       String   // 套餐ID
+  orders          Int      @default(0)      // 订单数
+  revenue         Float    @default(0)      // 收入
+  conversionRate  Float    @default(0)      // 转化率（百分比）
+  avgOrderValue   Float    @default(0)      // 平均订单金额
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([dateKey, channel, packageId])
+  @@index([dateKey])
+  @@index([channel])
+  @@index([packageId])
+}
+
+// 老王说：促销效果分析表 - 记录促销活动的效果数据
+model PromotionAnalytics {
+  id              String   @id @default(cuid())
+  promotionId     String   // 促销活动ID
+  dateKey         String   // YYYY-MM-DD格式
+  impressions     Int      @default(0)      // 展示次数
+  clicks          Int      @default(0)      // 点击次数
+  orders          Int      @default(0)      // 订单数
+  revenue         Float    @default(0)      // 收入
+  conversionRate  Float    @default(0)      // 转化率（百分比）
+  ctr             Float    @default(0)      // 点击率（百分比）
+  cac             Float    @default(0)      // 用户获取成本
+  roi             Float    @default(0)      // ROI（百分比）
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([promotionId, dateKey])
+  @@index([promotionId])
+  @@index([dateKey])
+}
