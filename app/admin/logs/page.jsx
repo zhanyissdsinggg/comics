@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
@@ -36,6 +36,28 @@ export default function AdminLogsPage() {
   });
 
   const logs = logsData?.logs || [];
+
+  // 批量删除 mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids) => {
+      const promises = ids.map((id) =>
+        fetch(`/api/admin/logs/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        })
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      setSelectedIds([]);
+      setIsDeleteConfirmOpen(false);
+      refetch();
+    },
+  });
+
+  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
 
   // 过滤和排序
   const filteredLogs = useMemo(() => {

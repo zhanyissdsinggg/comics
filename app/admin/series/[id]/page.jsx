@@ -33,6 +33,70 @@ export default function AdminSeriesDetailPage() {
 
   const series = seriesData?.series;
 
+  // 保存作品信息 mutation
+  const saveMutation = useMutation({
+    mutationFn: async (data) => {
+      const response = await fetch(`/api/admin/series/${seriesId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: data.title,
+          type: data.type,
+          status: data.status,
+          adult: data.adult,
+          description: data.description,
+          genres: data.genres.split(',').map((g) => g.trim()).filter(Boolean),
+          coverUrl: data.coverUrl,
+          coverTone: data.coverTone,
+          badge: data.badge,
+          episodePrice: parseInt(data.episodePrice) || 0,
+          ttfEnabled: data.ttfEnabled,
+          ttfIntervalHours: parseInt(data.ttfIntervalHours) || 24,
+        }),
+      });
+      if (!response.ok) throw new Error('保存失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      setSuccessMessage('保存成功！');
+      setIsEditing(false);
+      refetch();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    },
+    onError: () => {
+      setErrorMessage('保存失败，请重试');
+    },
+  });
+
+  // 上传封面 mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file) => {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+
+      const response = await fetch('/api/admin/upload/image', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: formDataUpload,
+      });
+      if (!response.ok) throw new Error('上传失败');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setFormData({ ...formData, coverUrl: data.url });
+      setSuccessMessage('封面上传成功！');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    },
+    onError: () => {
+      setErrorMessage('上传失败，请重试');
+    },
+  });
+
   // 初始化表单数据
   React.useEffect(() => {
     if (series && !isEditing) {
@@ -53,54 +117,14 @@ export default function AdminSeriesDetailPage() {
     }
   }, [series, isEditing]);
 
-  // 处理保存
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!formData.title?.trim()) {
       setErrorMessage('请输入作品标题');
       return;
     }
-
-    setIsSaving(true);
-    try {
-      const response = await fetch(`/api/admin/series/${seriesId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: formData.title,
-          type: formData.type,
-          status: formData.status,
-          adult: formData.adult,
-          description: formData.description,
-          genres: formData.genres.split(',').map((g) => g.trim()).filter(Boolean),
-          coverUrl: formData.coverUrl,
-          coverTone: formData.coverTone,
-          badge: formData.badge,
-          episodePrice: parseInt(formData.episodePrice) || 0,
-          ttfEnabled: formData.ttfEnabled,
-          ttfIntervalHours: parseInt(formData.ttfIntervalHours) || 24,
-        }),
-      });
-
-      if (response.ok) {
-        setSuccessMessage('保存成功！');
-        setIsEditing(false);
-        refetch();
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        setErrorMessage('保存失败，请重试');
-      }
-    } catch (error) {
-      console.error('保存失败:', error);
-      setErrorMessage('保存失败，请重试');
-    } finally {
-      setIsSaving(false);
-    }
+    saveMutation.mutate(formData);
   };
 
-  // 处理封面上传
   const handleCoverUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -115,30 +139,7 @@ export default function AdminSeriesDetailPage() {
       return;
     }
 
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-
-    try {
-      const response = await fetch('/api/admin/upload/image', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-        body: formDataUpload,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setFormData({ ...formData, coverUrl: data.url });
-        setSuccessMessage('封面上传成功！');
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        setErrorMessage('上传失败，请重试');
-      }
-    } catch (error) {
-      console.error('上传失败:', error);
-      setErrorMessage('上传失败，请重试');
-    }
+    uploadMutation.mutate(file);
   };
 
   if (isLoading) {
@@ -199,10 +200,10 @@ export default function AdminSeriesDetailPage() {
             <>
               <button
                 onClick={handleSave}
-                disabled={isSaving}
+                disabled={saveMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
               >
-                {isSaving ? '保存中...' : '保存'}
+                {saveMutation.isPending ? '保存中...' : '保存'}
               </button>
               <button
                 onClick={() => setIsEditing(false)}
