@@ -1,12 +1,12 @@
+'use client';
+
 /**
  * React Query配置和Provider
  * 这个SB文件管理所有的数据缓存和同步
  */
 
-'use client';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactNode, useMemo } from 'react';
+import { useMemo } from 'react';
 
 /**
  * 创建QueryClient实例
