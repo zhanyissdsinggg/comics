@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
@@ -47,46 +47,51 @@ export default function AdminSeriesPage() {
 
   const series = seriesData?.series || [];
 
-  // 处理批量删除
-  const handleBulkDelete = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/series/${id}`, {
+  // 批量删除 mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids) => {
+      const promises = ids.map((id) =>
+        fetch(`/api/admin/series/${id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
           },
-        });
-      }
+        })
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
       setSelectedIds([]);
       setIsDeleteConfirmOpen(false);
       refetch();
-    } catch (error) {
-      console.error('批量删除失败:', error);
-    }
-  };
+    },
+  });
 
-  // 处理批量更新状态
-  const handleBulkUpdateStatus = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/series/${id}`, {
+  // 批量更新状态 mutation
+  const bulkUpdateStatusMutation = useMutation({
+    mutationFn: async (ids) => {
+      const promises = ids.map((id) =>
+        fetch(`/api/admin/series/${id}`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ status: bulkActionData.status }),
-        });
-      }
+        })
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
       setSelectedIds([]);
       setIsBulkActionModalOpen(false);
       setBulkActionData({});
       refetch();
-    } catch (error) {
-      console.error('批量更新失败:', error);
-    }
-  };
+    },
+  });
+
+  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
+  const handleBulkUpdateStatus = () => bulkUpdateStatusMutation.mutate(selectedIds);
 
   // 处理批量导出
   const handleBulkExport = () => {

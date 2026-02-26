@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
@@ -81,45 +81,48 @@ export default function AdminMarketingPage() {
   const segments = segmentData?.segments || [];
   const types = typeData?.types || [];
 
-  // 创建营销活动
-  const handleCreateCampaign = async () => {
-    try {
+  // 创建营销活动 mutation
+  const createCampaignMutation = useMutation({
+    mutationFn: async (data) => {
       const response = await fetch('/api/admin/marketing/campaigns', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
-      if (response.ok) {
-        setIsModalOpen(false);
-        setFormData({});
-        refetchCampaigns();
-      }
-    } catch (error) {
-      console.error('创建营销活动失败:', error);
-    }
-  };
+      if (!response.ok) throw new Error('创建营销活动失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsModalOpen(false);
+      setFormData({});
+      refetchCampaigns();
+    },
+  });
 
-  // 删除营销活动
-  const handleDeleteCampaign = async () => {
-    try {
-      const response = await fetch(`/api/admin/marketing/campaigns/${selectedCampaign.id}`, {
+  // 删除营销活动 mutation
+  const deleteCampaignMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(`/api/admin/marketing/campaigns/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
       });
-      if (response.ok) {
-        setIsDeleteConfirmOpen(false);
-        setSelectedCampaign(null);
-        refetchCampaigns();
-      }
-    } catch (error) {
-      console.error('删除营销活动失败:', error);
-    }
-  };
+      if (!response.ok) throw new Error('删除营销活动失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsDeleteConfirmOpen(false);
+      setSelectedCampaign(null);
+      refetchCampaigns();
+    },
+  });
+
+  const handleCreateCampaign = () => createCampaignMutation.mutate(formData);
+  const handleDeleteCampaign = () => deleteCampaignMutation.mutate(selectedCampaign.id);
 
   // 渲染统计卡片
   const renderStatCard = (title, value, color = 'blue', unit = '') => (

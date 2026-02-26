@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
@@ -38,6 +38,94 @@ export default function AdminUsersPage() {
   });
 
   const users = usersData?.users || [];
+
+  // 批量封禁 mutation
+  const bulkBlockMutation = useMutation({
+    mutationFn: async (ids) => {
+      const promises = ids.map((id) =>
+        fetch(`/api/admin/users/${id}/block`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ blocked: true }),
+        })
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      setSelectedIds([]);
+      setIsBulkActionModalOpen(false);
+      refetch();
+    },
+  });
+
+  // 批量解封 mutation
+  const bulkUnblockMutation = useMutation({
+    mutationFn: async (ids) => {
+      const promises = ids.map((id) =>
+        fetch(`/api/admin/users/${id}/block`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ blocked: false }),
+        })
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      setSelectedIds([]);
+      setIsBulkActionModalOpen(false);
+      refetch();
+    },
+  });
+
+  // 批量删除 mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids) => {
+      const promises = ids.map((id) =>
+        fetch(`/api/admin/users/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        })
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      setSelectedIds([]);
+      setIsDeleteConfirmOpen(false);
+      refetch();
+    },
+  });
+
+  // 单个用户封禁/解封 mutation
+  const userBlockMutation = useMutation({
+    mutationFn: async ({ userId, blocked }) => {
+      const response = await fetch(`/api/admin/users/${userId}/block`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ blocked }),
+      });
+      if (!response.ok) throw new Error('更新用户状态失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  const handleBulkBlock = () => bulkBlockMutation.mutate(selectedIds);
+  const handleBulkUnblock = () => bulkUnblockMutation.mutate(selectedIds);
+  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
+  const handleUserBlock = (userId, blocked) => userBlockMutation.mutate({ userId, blocked });
 
   // 过滤和排序
   const filteredUsers = useMemo(() => {

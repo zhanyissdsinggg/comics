@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
@@ -59,85 +59,90 @@ export default function AdminRecommendationsPage() {
   const rankings = rankingsData?.configs || [];
   const analytics = analyticsData?.analytics || [];
 
-  // 创建推荐位
-  const handleCreateSlot = async () => {
-    try {
+  // 创建推荐位 mutation
+  const createSlotMutation = useMutation({
+    mutationFn: async (data) => {
       const response = await fetch('/api/admin/recommendations/slots', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
-      if (response.ok) {
-        setIsModalOpen(false);
-        setFormData({});
-        refetchSlots();
-      }
-    } catch (error) {
-      console.error('创建推荐位失败:', error);
-    }
-  };
+      if (!response.ok) throw new Error('创建推荐位失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsModalOpen(false);
+      setFormData({});
+      refetchSlots();
+    },
+  });
 
-  // 删除推荐位
-  const handleDeleteSlot = async () => {
-    try {
-      const response = await fetch(`/api/admin/recommendations/slots/${selectedItem.id}`, {
+  // 删除推荐位 mutation
+  const deleteSlotMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(`/api/admin/recommendations/slots/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
       });
-      if (response.ok) {
-        setIsDeleteConfirmOpen(false);
-        setSelectedItem(null);
-        refetchSlots();
-      }
-    } catch (error) {
-      console.error('删除推荐位失败:', error);
-    }
-  };
+      if (!response.ok) throw new Error('删除推荐位失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsDeleteConfirmOpen(false);
+      setSelectedItem(null);
+      refetchSlots();
+    },
+  });
 
-  // 创建排行榜配置
-  const handleCreateRanking = async () => {
-    try {
+  // 创建排行榜配置 mutation
+  const createRankingMutation = useMutation({
+    mutationFn: async (data) => {
       const response = await fetch('/api/admin/recommendations/rankings', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
-      if (response.ok) {
-        setIsModalOpen(false);
-        setFormData({});
-        refetchRankings();
-      }
-    } catch (error) {
-      console.error('创建排行榜配置失败:', error);
-    }
-  };
+      if (!response.ok) throw new Error('创建排行榜配置失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsModalOpen(false);
+      setFormData({});
+      refetchRankings();
+    },
+  });
 
-  // 删除排行榜配置
-  const handleDeleteRanking = async () => {
-    try {
-      const response = await fetch(`/api/admin/recommendations/rankings/${selectedItem.id}`, {
+  // 删除排行榜配置 mutation
+  const deleteRankingMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await fetch(`/api/admin/recommendations/rankings/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
       });
-      if (response.ok) {
-        setIsDeleteConfirmOpen(false);
-        setSelectedItem(null);
-        refetchRankings();
-      }
-    } catch (error) {
-      console.error('删除排行榜配置失败:', error);
-    }
-  };
+      if (!response.ok) throw new Error('删除排行榜配置失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsDeleteConfirmOpen(false);
+      setSelectedItem(null);
+      refetchRankings();
+    },
+  });
+
+  const handleCreateSlot = () => createSlotMutation.mutate(formData);
+  const handleDeleteSlot = () => deleteSlotMutation.mutate(selectedItem.id);
+  const handleCreateRanking = () => createRankingMutation.mutate(formData);
+  const handleDeleteRanking = () => deleteRankingMutation.mutate(selectedItem.id);
 
   return (
     <div className="min-h-screen bg-neutral-900 p-6">

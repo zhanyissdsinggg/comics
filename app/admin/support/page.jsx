@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
@@ -40,64 +40,72 @@ export default function AdminSupportPage() {
 
   const tickets = ticketsData?.tickets || [];
 
-  // 处理回复工单
-  const handleReplyTicket = async () => {
-    if (!replyContent.trim()) return;
-
-    try {
-      await fetch(`/api/admin/support/${selectedTicketId}/reply`, {
+  // 回复工单 mutation
+  const replyTicketMutation = useMutation({
+    mutationFn: async (data) => {
+      const response = await fetch(`/api/admin/support/${data.ticketId}/reply`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: replyContent }),
+        body: JSON.stringify({ message: data.message }),
       });
-
+      if (!response.ok) throw new Error('回复工单失败');
+      return response.json();
+    },
+    onSuccess: () => {
       setReplyContent('');
       setIsReplyModalOpen(false);
       refetch();
-    } catch (error) {
-      console.error('回复工单失败:', error);
-    }
-  };
+    },
+  });
 
-  // 处理批量删除
-  const handleBulkDelete = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/support/${id}`, {
+  // 批量删除 mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids) => {
+      const promises = ids.map((id) =>
+        fetch(`/api/admin/support/${id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
           },
-        });
-      }
-
+        })
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
       setSelectedIds([]);
       setIsDeleteConfirmOpen(false);
       refetch();
-    } catch (error) {
-      console.error('批量删除失败:', error);
-    }
-  };
+    },
+  });
 
-  // 处理关闭工单
-  const handleCloseTicket = async (ticketId) => {
-    try {
-      await fetch(`/api/admin/support/${ticketId}/close`, {
+  // 关闭工单 mutation
+  const closeTicketMutation = useMutation({
+    mutationFn: async (ticketId) => {
+      const response = await fetch(`/api/admin/support/${ticketId}/close`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json',
         },
       });
-
+      if (!response.ok) throw new Error('关闭工单失败');
+      return response.json();
+    },
+    onSuccess: () => {
       refetch();
-    } catch (error) {
-      console.error('关闭工单失败:', error);
-    }
+    },
+  });
+
+  const handleReplyTicket = () => {
+    if (!replyContent.trim()) return;
+    replyTicketMutation.mutate({ ticketId: selectedTicketId, message: replyContent });
   };
+
+  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
+  const handleCloseTicket = (ticketId) => closeTicketMutation.mutate(ticketId);
 
   const getStatusColor = (status) => {
     switch (status) {

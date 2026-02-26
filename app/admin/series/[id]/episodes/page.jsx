@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
@@ -45,6 +45,128 @@ export default function AdminEpisodesPage() {
   });
 
   const episodes = episodesData?.episodes || [];
+
+  // 添加剧集 mutation
+  const addEpisodeMutation = useMutation({
+    mutationFn: async (data) => {
+      const response = await fetch(`/api/admin/series/${seriesId}/episodes`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          number: parseInt(data.number),
+          title: data.title,
+          pricePts: parseInt(data.pricePts) || 0,
+          previewFreePages: parseInt(data.previewFreePages) || 0,
+          ttfEligible: data.ttfEligible,
+        }),
+      });
+      if (!response.ok) throw new Error('添加剧集失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsAddModalOpen(false);
+      setNewEpisode({
+        number: '',
+        title: '',
+        pricePts: 0,
+        previewFreePages: 0,
+        ttfEligible: false,
+      });
+      refetch();
+    },
+  });
+
+  // 批量更新 mutation
+  const bulkUpdateMutation = useMutation({
+    mutationFn: async (ids) => {
+      const promises = ids.map((id) => {
+        const episode = episodes.find((ep) => ep.id === id);
+        if (!episode) return Promise.resolve();
+
+        return fetch(`/api/admin/series/${seriesId}/episodes/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...episode,
+            pricePts: bulkActionData.pricePts ? parseInt(bulkActionData.pricePts) : episode.pricePts,
+            previewFreePages: bulkActionData.previewFreePages
+              ? parseInt(bulkActionData.previewFreePages)
+              : episode.previewFreePages,
+          }),
+        });
+      });
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      setSelectedIds([]);
+      setIsBulkActionModalOpen(false);
+      setBulkActionData({ pricePts: '', previewFreePages: '' });
+      refetch();
+    },
+  });
+
+  // 批量删除 mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids) => {
+      const promises = ids.map((id) =>
+        fetch(`/api/admin/series/${seriesId}/episodes/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        })
+      );
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      setSelectedIds([]);
+      setIsDeleteConfirmOpen(false);
+      refetch();
+    },
+  });
+
+  // 单个剧集更新 mutation
+  const updateEpisodeMutation = useMutation({
+    mutationFn: async ({ episodeId, field, value }) => {
+      const episode = episodes.find((ep) => ep.id === episodeId);
+      if (!episode) throw new Error('剧集不存在');
+
+      const response = await fetch(`/api/admin/series/${seriesId}/episodes/${episodeId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...episode,
+          [field]: field === 'ttfEligible' ? value : field.includes('Pts') || field.includes('Pages') ? parseInt(value) || 0 : value,
+        }),
+      });
+      if (!response.ok) throw new Error('更新剧集失败');
+      return response.json();
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  const handleAddEpisode = () => {
+    if (!newEpisode.number || !newEpisode.title) {
+      alert('请填写剧集号和标题');
+      return;
+    }
+    addEpisodeMutation.mutate(newEpisode);
+  };
+
+  const handleBulkUpdate = () => bulkUpdateMutation.mutate(selectedIds);
+  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
+  const handleEpisodeUpdate = (episodeId, field, value) => updateEpisodeMutation.mutate({ episodeId, field, value });
 
   // 过滤和排序
   // eslint-disable-next-line react-hooks/exhaustive-deps
