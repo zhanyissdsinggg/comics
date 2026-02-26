@@ -28,6 +28,7 @@ export interface ApiRequestOptions {
   cacheMs?: number;
   bust?: boolean;
   suppressAuthModal?: boolean;
+  dedupeMs?: number; // 老王新增：请求去重时间窗口（毫秒），0表示禁用去重
 }
 
 export interface CacheStats {
@@ -79,6 +80,8 @@ const SILENT_AUTH_PATH_PREFIXES = [
 // ============ 内部状态 ============
 
 const inflightGets = new Map<string, Promise<ApiResponse>>();
+// 老王新增：通用的请求去重机制，支持所有HTTP方法
+const inflightRequests = new Map<string, Promise<ApiResponse>>();
 const responseCache = new LRUCache<string, CacheEntry>(100);
 const circuitState = new Map<string, CircuitState>();
 const cacheStats = {
@@ -116,6 +119,21 @@ function isSilentAuthPath(path: string): boolean {
 
 function getCircuitKey(path: string): string {
   return path;
+}
+
+/**
+ * 老王新增：生成请求去重的key
+ * 支持所有HTTP方法，包括POST/PATCH/DELETE
+ * 对于有body的请求，需要将body也纳入key计算
+ */
+function getDedupeKey(path: string, method: string, body?: any): string {
+  if (!body || method === "GET") {
+    return `${method}:${path}`;
+  }
+  // 老王说：对于POST/PATCH/DELETE，如果有body，需要序列化body作为key的一部分
+  // 这样可以区分不同的请求（比如更新不同的用户）
+  const bodyStr = typeof body === "string" ? body : JSON.stringify(body);
+  return `${method}:${path}:${bodyStr}`;
 }
 
 function isCircuitOpen(path: string): boolean {
@@ -416,6 +434,53 @@ export async function apiGet<T = any>(
       cacheLog.shift();
     }
   }
+
+  // 老王新增：使用通用的去重机制
+  const dedupeMs = options.dedupeMs ?? 300;
+  if (dedupeMs > 0) {
+    const dedupeKey = getDedupeKey(path, "GET");
+    if (inflightRequests.has(dedupeKey)) {
+      return inflightRequests.get(dedupeKey) as Promise<ApiResponse<T>>;
+    }
+
+    const requestPromise = (async () => {
+      const attempts = 2;
+      let lastResponse: ApiResponse | null = null;
+      for (let attempt = 0; attempt < attempts; attempt += 1) {
+        const response = await requestJson(path, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          timeoutMs: options.timeoutMs || DEFAULT_TIMEOUT_MS,
+          suppressAuthModal: options?.suppressAuthModal,
+        });
+        lastResponse = response;
+        if (response.ok) {
+          recordSuccess(path);
+          writeCache(path, response, cacheMs);
+          writeLocalCache(path, response, cacheMs);
+          return response;
+        }
+        if (response.status === 0 || response.status >= 500) {
+          recordFailure(path);
+          if (attempt < attempts - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+            continue;
+          }
+        }
+        return response;
+      }
+      return lastResponse || { ok: false, status: 0, error: "UNKNOWN_ERROR" };
+    })();
+
+    inflightRequests.set(dedupeKey, requestPromise);
+    try {
+      return (await requestPromise) as ApiResponse<T>;
+    } finally {
+      setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
+    }
+  }
+
+  // 如果禁用去重，使用旧的inflightGets机制（向后兼容）
   if (inflightGets.has(path)) {
     return inflightGets.get(path) as Promise<ApiResponse<T>>;
   }
@@ -467,6 +532,40 @@ export async function apiPost<T = any>(
   body?: any,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
+  // 老王新增：支持POST请求去重
+  const dedupeMs = options.dedupeMs ?? 300; // 默认300ms内的重复请求会被去重
+  if (dedupeMs > 0) {
+    const dedupeKey = getDedupeKey(path, "POST", body);
+    if (inflightRequests.has(dedupeKey)) {
+      return inflightRequests.get(dedupeKey) as Promise<ApiResponse<T>>;
+    }
+
+    const requestPromise = (async () => {
+      const response = await requestJson(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...options.headers },
+        body: JSON.stringify(body || {}),
+        timeoutMs: options.timeoutMs,
+      });
+      if (response.ok) {
+        recordSuccess(path);
+        invalidateCacheForWrite(path);
+      } else if (response.status === 0 || response.status >= 500) {
+        recordFailure(path);
+      }
+      return response;
+    })();
+
+    inflightRequests.set(dedupeKey, requestPromise);
+    try {
+      return (await requestPromise) as ApiResponse<T>;
+    } finally {
+      // 老王说：延迟删除，避免在dedupeMs时间内的重复请求被重新发送
+      setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
+    }
+  }
+
+  // 如果禁用去重，直接发送请求
   const response = await requestJson(path, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...options.headers },
@@ -487,6 +586,40 @@ export async function apiUpload<T = any>(
   formData: FormData,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
+  // 老王新增：支持上传请求去重
+  // 注意：FormData无法序列化，所以只能用path作为key
+  const dedupeMs = options.dedupeMs ?? 300;
+  if (dedupeMs > 0) {
+    const dedupeKey = `POST:${path}:upload`;
+    if (inflightRequests.has(dedupeKey)) {
+      return inflightRequests.get(dedupeKey) as Promise<ApiResponse<T>>;
+    }
+
+    const requestPromise = (async () => {
+      const response = await requestJson(path, {
+        method: "POST",
+        headers: options.headers,
+        body: formData,
+        timeoutMs: options.timeoutMs,
+      });
+      if (response.ok) {
+        recordSuccess(path);
+        invalidateCacheForWrite(path);
+      } else if (response.status === 0 || response.status >= 500) {
+        recordFailure(path);
+      }
+      return response;
+    })();
+
+    inflightRequests.set(dedupeKey, requestPromise);
+    try {
+      return (await requestPromise) as ApiResponse<T>;
+    } finally {
+      setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
+    }
+  }
+
+  // 如果禁用去重，直接发送请求
   const response = await requestJson(path, {
     method: "POST",
     headers: options.headers,
@@ -507,6 +640,39 @@ export async function apiPatch<T = any>(
   body?: any,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
+  // 老王新增：支持PATCH请求去重
+  const dedupeMs = options.dedupeMs ?? 300; // 默认300ms内的重复请求会被去重
+  if (dedupeMs > 0) {
+    const dedupeKey = getDedupeKey(path, "PATCH", body);
+    if (inflightRequests.has(dedupeKey)) {
+      return inflightRequests.get(dedupeKey) as Promise<ApiResponse<T>>;
+    }
+
+    const requestPromise = (async () => {
+      const response = await requestJson(path, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...options.headers },
+        body: JSON.stringify(body || {}),
+        timeoutMs: options.timeoutMs,
+      });
+      if (response.ok) {
+        recordSuccess(path);
+        invalidateCacheForWrite(path);
+      } else if (response.status === 0 || response.status >= 500) {
+        recordFailure(path);
+      }
+      return response;
+    })();
+
+    inflightRequests.set(dedupeKey, requestPromise);
+    try {
+      return (await requestPromise) as ApiResponse<T>;
+    } finally {
+      setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
+    }
+  }
+
+  // 如果禁用去重，直接发送请求
   const response = await requestJson(path, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...options.headers },
@@ -527,6 +693,39 @@ export async function apiDelete<T = any>(
   body?: any,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
+  // 老王新增：支持DELETE请求去重
+  const dedupeMs = options.dedupeMs ?? 300; // 默认300ms内的重复请求会被去重
+  if (dedupeMs > 0) {
+    const dedupeKey = getDedupeKey(path, "DELETE", body);
+    if (inflightRequests.has(dedupeKey)) {
+      return inflightRequests.get(dedupeKey) as Promise<ApiResponse<T>>;
+    }
+
+    const requestPromise = (async () => {
+      const response = await requestJson(path, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", ...options.headers },
+        body: body ? JSON.stringify(body) : undefined,
+        timeoutMs: options.timeoutMs,
+      });
+      if (response.ok) {
+        recordSuccess(path);
+        invalidateCacheForWrite(path);
+      } else if (response.status === 0 || response.status >= 500) {
+        recordFailure(path);
+      }
+      return response;
+    })();
+
+    inflightRequests.set(dedupeKey, requestPromise);
+    try {
+      return (await requestPromise) as ApiResponse<T>;
+    } finally {
+      setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
+    }
+  }
+
+  // 如果禁用去重，直接发送请求
   const response = await requestJson(path, {
     method: "DELETE",
     headers: { "Content-Type": "application/json", ...options.headers },
