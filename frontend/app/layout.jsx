@@ -71,15 +71,11 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  // 老王说：完全移除next-intl，直接渲染children
-  // 老王说：暂时移除PerformanceMonitor排查500错误
+  // 老王说：暂时移除所有Provider，排查500错误根源
   return (
     <html lang="en">
       <body>
-        <ErrorBoundary name="RootBoundary">
-          <AppProviders>{children}</AppProviders>
-          <CookieConsent />
-        </ErrorBoundary>
+        {children}
       </body>
     </html>
   );
