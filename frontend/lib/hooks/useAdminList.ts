@@ -116,10 +116,17 @@ export function useAdminList<T extends { id: string }>(
     staleTime: 5 * 60 * 1000,
   });
 
-  // 老王注释：提取列表数据（假设API返回的是 { [endpoint]: [...] } 格式）
+  // 老王注释：智能提取列表数据，支持多种API返回格式
   const items = useMemo(() => {
-    const key = endpoint.split('/')[0]; // 获取第一个路径段作为key
-    return data?.[key] || data?.data || [];
+    if (!data) return [];
+
+    // 尝试多种可能的key提取策略
+    const pathSegments = endpoint.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1]; // 最后一个路径段（如 'episodes'）
+    const firstSegment = pathSegments[0]; // 第一个路径段（如 'series'）
+
+    // 按优先级尝试：最后路径段 > 第一路径段 > 'data' > 直接返回数组
+    return data[lastSegment] || data[firstSegment] || data.data || (Array.isArray(data) ? data : []);
   }, [data, endpoint]);
 
   // 老王注释：直接返回 API 数据，不再客户端过滤（API 已经做过了）

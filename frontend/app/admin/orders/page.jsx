@@ -4,18 +4,18 @@ import React, { useState, useMemo } from 'react';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
+import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
 
 // 老王注释：定义可搜索的字段
-const searchFields: SearchFieldConfig[] = [
+const searchFields = [
   { field: 'id', type: 'string' },
   { field: 'orderId', type: 'string' },
   { field: 'userId', type: 'string' },
 ];
 
 // 老王注释：定义可排序的字段
-const sortFields: SortFieldConfig[] = [
+const sortFields = [
   { field: 'createdAt', type: 'date' },
   { field: 'amount', type: 'number' },
   { field: 'status', type: 'string' },
@@ -115,8 +115,8 @@ export default function AdminOrdersPage() {
   };
 
   // 状态映射
-  const getStatusLabel = (status: string) => {
-    const statusMap: Record<string, string> = {
+  const getStatusLabel = (status) => {
+    const statusMap = {
       PENDING: '待支付',
       PAID: '已支付',
       COMPLETED: '已完成',
@@ -130,7 +130,7 @@ export default function AdminOrdersPage() {
     return statusMap[status] || status || '-';
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'PENDING':
       case 'pending':

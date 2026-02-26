@@ -236,7 +236,7 @@ export default function AdminRevenuePageNew() {
                       </tr>
                     </thead>
                     <tbody>
-                      {trend.map((item: any) => (
+                      {trend.map((item) => (
                         <tr key={item.date} className="border-b border-neutral-700 hover:bg-neutral-700/50">
                           <td className="px-4 py-3 text-neutral-300">{item.date}</td>
                           <td className="px-4 py-3 text-emerald-400">${item.revenue.toFixed(2)}</td>
@@ -272,7 +272,7 @@ export default function AdminRevenuePageNew() {
                       </tr>
                     </thead>
                     <tbody>
-                      {channels.map((item: any) => (
+                      {channels.map((item) => (
                         <tr key={item.channel} className="border-b border-neutral-700 hover:bg-neutral-700/50">
                           <td className="px-4 py-3 text-neutral-300">{item.channel}</td>
                           <td className="px-4 py-3 text-neutral-300">{item.orders}</td>
@@ -310,7 +310,7 @@ export default function AdminRevenuePageNew() {
                       </tr>
                     </thead>
                     <tbody>
-                      {promotions.map((item: any) => (
+                      {promotions.map((item) => (
                         <tr key={item.promotionId} className="border-b border-neutral-700 hover:bg-neutral-700/50">
                           <td className="px-4 py-3 text-neutral-300">{item.title}</td>
                           <td className="px-4 py-3 text-neutral-300">{item.orders}</td>

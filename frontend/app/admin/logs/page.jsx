@@ -103,26 +103,6 @@ export default function AdminLogsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logs, searchTerm, actionFilter, sortBy, sortOrder]);
 
-  // 处理批量删除
-  const handleBulkDelete = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/logs/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        });
-      }
-
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    } catch (error) {
-      console.error('批量删除失败:', error);
-    }
-  };
-
   const getActionLabel = (action) => {
     const actionMap = {
       create: '创建',

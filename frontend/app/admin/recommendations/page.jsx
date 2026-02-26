@@ -203,7 +203,7 @@ export default function AdminRecommendationsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {slots.map((slot: any) => (
+                      {slots.map((slot) => (
                         <tr key={slot.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
                           <td className="px-4 py-3 text-neutral-300">{slot.name}</td>
                           <td className="px-4 py-3 text-neutral-300">{slot.slotType}</td>
@@ -272,7 +272,7 @@ export default function AdminRecommendationsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {rankings.map((ranking: any) => (
+                      {rankings.map((ranking) => (
                         <tr key={ranking.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
                           <td className="px-4 py-3 text-neutral-300">{ranking.name}</td>
                           <td className="px-4 py-3 text-neutral-300">{ranking.rankingType}</td>
@@ -333,7 +333,7 @@ export default function AdminRecommendationsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {analytics.map((item: any) => (
+                      {analytics.map((item) => (
                         <tr key={`${item.slotId}-${item.seriesId}`} className="border-b border-neutral-700 hover:bg-neutral-700/50">
                           <td className="px-4 py-3 text-neutral-300">{item.slotId.slice(0, 8)}</td>
                           <td className="px-4 py-3 text-neutral-300">{item.seriesId.slice(0, 8)}</td>

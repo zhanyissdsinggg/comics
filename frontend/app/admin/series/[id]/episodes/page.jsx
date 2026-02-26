@@ -1,23 +1,37 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { BulkUploadModal } from '@/components/admin/episodes/BulkUploadModal';
+import { useAdminList } from '@/lib/hooks/useAdminList';
+import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
+import { adminFetch } from '@/lib/adminApiClient';
+
+// 定义可搜索的字段
+const searchFields = [
+  { field: 'number', type: 'number' },
+  { field: 'title', type: 'string' },
+];
+
+// 定义可排序的字段
+const sortFields = [
+  { field: 'number', type: 'number' },
+  { field: 'title', type: 'string' },
+  { field: 'pricePts', type: 'number' },
+];
 
 export default function AdminEpisodesPage() {
   const params = useParams();
   const seriesId = params.id;
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('number');
-  const [sortOrder, setSortOrder] = useState('asc');
-  const [selectedIds, setSelectedIds] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [newEpisode, setNewEpisode] = useState({
     number: '',
     title: '',
@@ -30,31 +44,29 @@ export default function AdminEpisodesPage() {
     previewFreePages: '',
   });
 
-  // 获取剧集列表
-  const { data: episodesData, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'series', seriesId, 'episodes'],
-    queryFn: async () => {
-      const response = await fetch(`/api/admin/series/${seriesId}/episodes`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const episodes = episodesData?.episodes || [];
+  // 用 useAdminList Hook 替代所有搜索、排序、筛选逻辑
+  const {
+    items: episodes,
+    isLoading,
+    refetch,
+    searchTerm,
+    setSearchTerm,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    selectedIds,
+    toggleSelect,
+    selectAll,
+    clearSelection,
+  } = useAdminList(`series/${seriesId}/episodes`, searchFields, sortFields, 'number', 'asc');
 
   // 添加剧集 mutation
   const addEpisodeMutation = useMutation({
     mutationFn: async (data) => {
-      const response = await fetch(`/api/admin/series/${seriesId}/episodes`, {
+      const response = await adminFetch(`/api/admin/series/${seriesId}/episodes`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           number: parseInt(data.number),
           title: data.title,
@@ -63,7 +75,10 @@ export default function AdminEpisodesPage() {
           ttfEligible: data.ttfEligible,
         }),
       });
-      if (!response.ok) throw new Error('添加剧集失败');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || '添加剧集失败');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -77,59 +92,58 @@ export default function AdminEpisodesPage() {
       });
       refetch();
     },
+    onError: (error) => {
+      alert(`添加失败: ${error.message}`);
+    },
   });
 
-  // 批量更新 mutation
-  const bulkUpdateMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) => {
+  // 批量更新 mutation - 用 useBulkMutation
+  const bulkUpdateMutation = useBulkMutation(
+    {
+      endpoint: `series/${seriesId}/episodes`,
+      method: 'PATCH',
+      bodyBuilder: (id) => {
         const episode = episodes.find((ep) => ep.id === id);
-        if (!episode) return Promise.resolve();
+        if (!episode) return {};
+        return {
+          ...episode,
+          pricePts: bulkActionData.pricePts ? parseInt(bulkActionData.pricePts) : episode.pricePts,
+          previewFreePages: bulkActionData.previewFreePages
+            ? parseInt(bulkActionData.previewFreePages)
+            : episode.previewFreePages,
+        };
+      },
+    },
+    {
+      onSuccess: () => {
+        clearSelection();
+        setIsBulkActionModalOpen(false);
+        setBulkActionData({ pricePts: '', previewFreePages: '' });
+        refetch();
+      },
+      onError: (error) => {
+        alert(`批量更新失败: ${error.message}`);
+      },
+    }
+  );
 
-        return fetch(`/api/admin/series/${seriesId}/episodes/${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...episode,
-            pricePts: bulkActionData.pricePts ? parseInt(bulkActionData.pricePts) : episode.pricePts,
-            previewFreePages: bulkActionData.previewFreePages
-              ? parseInt(bulkActionData.previewFreePages)
-              : episode.previewFreePages,
-          }),
-        });
-      });
-      await Promise.all(promises);
+  // 批量删除 mutation - 用 useBulkMutation
+  const bulkDeleteMutation = useBulkMutation(
+    {
+      endpoint: `series/${seriesId}/episodes`,
+      method: 'DELETE',
     },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsBulkActionModalOpen(false);
-      setBulkActionData({ pricePts: '', previewFreePages: '' });
-      refetch();
-    },
-  });
-
-  // 批量删除 mutation
-  const bulkDeleteMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) =>
-        fetch(`/api/admin/series/${seriesId}/episodes/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        })
-      );
-      await Promise.all(promises);
-    },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    },
-  });
+    {
+      onSuccess: () => {
+        clearSelection();
+        setIsDeleteConfirmOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        alert(`批量删除失败: ${error.message}`);
+      },
+    }
+  );
 
   // 单个剧集更新 mutation
   const updateEpisodeMutation = useMutation({
@@ -137,22 +151,25 @@ export default function AdminEpisodesPage() {
       const episode = episodes.find((ep) => ep.id === episodeId);
       if (!episode) throw new Error('剧集不存在');
 
-      const response = await fetch(`/api/admin/series/${seriesId}/episodes/${episodeId}`, {
+      const response = await adminFetch(`/api/admin/series/${seriesId}/episodes/${episodeId}`, {
         method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...episode,
           [field]: field === 'ttfEligible' ? value : field.includes('Pts') || field.includes('Pages') ? parseInt(value) || 0 : value,
         }),
       });
-      if (!response.ok) throw new Error('更新剧集失败');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || '更新剧集失败');
+      }
       return response.json();
     },
     onSuccess: () => {
       refetch();
+    },
+    onError: (error) => {
+      alert(`更新失败: ${error.message}`);
     },
   });
 
@@ -164,164 +181,16 @@ export default function AdminEpisodesPage() {
     addEpisodeMutation.mutate(newEpisode);
   };
 
-  const handleBulkUpdate = () => bulkUpdateMutation.mutate(selectedIds);
-  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
-  const handleEpisodeUpdate = (episodeId, field, value) => updateEpisodeMutation.mutate({ episodeId, field, value });
-
-  // 过滤和排序
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const filteredEpisodes = useMemo(() => {
-    let result = episodes ? [...episodes] : [];
-
-    // 搜索过滤
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (ep) =>
-          ep.number.toString().includes(term) ||
-          (ep.title && ep.title.toLowerCase().includes(term))
-      );
-    }
-
-    // 排序
-    result.sort((a, b) => {
-      let aVal, bVal;
-      if (sortBy === 'number') {
-        aVal = Number(a.number) || 0;
-        bVal = Number(b.number) || 0;
-      } else if (sortBy === 'title') {
-        aVal = a.title || '';
-        bVal = b.title || '';
-      } else if (sortBy === 'price') {
-        aVal = Number(a.pricePts) || 0;
-        bVal = Number(b.pricePts) || 0;
-      }
-
-      if (sortOrder === 'asc') {
-        return aVal > bVal ? 1 : -1;
-      } else {
-        return aVal < bVal ? 1 : -1;
-      }
-    });
-
-    return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [episodes, searchTerm, sortBy, sortOrder]);
-
-  // 处理添加剧集
-  const handleAddEpisode = async () => {
-    if (!newEpisode.number || !newEpisode.title) {
-      alert('请填写剧集号和标题');
+  const handleBulkUpdate = () => {
+    if (!bulkActionData.pricePts && !bulkActionData.previewFreePages) {
+      alert('请至少填写一个要更新的字段');
       return;
     }
-
-    try {
-      const response = await fetch(`/api/admin/series/${seriesId}/episodes`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          number: parseInt(newEpisode.number),
-          title: newEpisode.title,
-          pricePts: parseInt(newEpisode.pricePts) || 0,
-          previewFreePages: parseInt(newEpisode.previewFreePages) || 0,
-          ttfEligible: newEpisode.ttfEligible,
-        }),
-      });
-
-      if (response.ok) {
-        setIsAddModalOpen(false);
-        setNewEpisode({
-          number: '',
-          title: '',
-          pricePts: 0,
-          previewFreePages: 0,
-          ttfEligible: false,
-        });
-        refetch();
-      }
-    } catch (error) {
-      console.error('添加剧集失败:', error);
-    }
+    bulkUpdateMutation.mutate(selectedIds);
   };
 
-  // 处理批量更新
-  const handleBulkUpdate = async () => {
-    try {
-      for (const id of selectedIds) {
-        const episode = episodes.find((ep) => ep.id === id);
-        if (!episode) continue;
-
-        await fetch(`/api/admin/series/${seriesId}/episodes/${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...episode,
-            pricePts: bulkActionData.pricePts ? parseInt(bulkActionData.pricePts) : episode.pricePts,
-            previewFreePages: bulkActionData.previewFreePages
-              ? parseInt(bulkActionData.previewFreePages)
-              : episode.previewFreePages,
-          }),
-        });
-      }
-
-      setSelectedIds([]);
-      setIsBulkActionModalOpen(false);
-      setBulkActionData({ pricePts: '', previewFreePages: '' });
-      refetch();
-    } catch (error) {
-      console.error('批量更新失败:', error);
-    }
-  };
-
-  // 处理批量删除
-  const handleBulkDelete = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/series/${seriesId}/episodes/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        });
-      }
-
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    } catch (error) {
-      console.error('批量删除失败:', error);
-    }
-  };
-
-  // 处理单个剧集更新
-  const handleEpisodeUpdate = async (episodeId, field, value) => {
-    const episode = episodes.find((ep) => ep.id === episodeId);
-    if (!episode) return;
-
-    try {
-      await fetch(`/api/admin/series/${seriesId}/episodes/${episodeId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...episode,
-          [field]: field === 'ttfEligible' ? value : field.includes('Pts') || field.includes('Pages') ? parseInt(value) || 0 : value,
-        }),
-      });
-
-      refetch();
-    } catch (error) {
-      console.error('更新剧集失败:', error);
-    }
-  };
+  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
+  const handleEpisodeUpdate = (episodeId, field, value) => updateEpisodeMutation.mutate({ episodeId, field, value });
 
   return (
     <div className="min-h-screen bg-neutral-900 p-6">
@@ -349,7 +218,7 @@ export default function AdminEpisodesPage() {
           >
             <option value="number">按剧集号排序</option>
             <option value="title">按标题排序</option>
-            <option value="price">按价格排序</option>
+            <option value="pricePts">按价格排序</option>
           </select>
 
           <button
@@ -364,6 +233,13 @@ export default function AdminEpisodesPage() {
             className="ml-auto px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
           >
             + 添加剧集
+          </button>
+
+          <button
+            onClick={() => setIsUploadModalOpen(true)}
+            className="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700"
+          >
+            📦 批量上传
           </button>
         </div>
 
@@ -385,7 +261,7 @@ export default function AdminEpisodesPage() {
                 删除
               </button>
               <button
-                onClick={() => setSelectedIds([])}
+                onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
                 取消
@@ -397,7 +273,7 @@ export default function AdminEpisodesPage() {
         {/* 剧集列表 */}
         {isLoading ? (
           <LoadingState.Spinner size="md" />
-        ) : filteredEpisodes.length > 0 ? (
+        ) : episodes.length > 0 ? (
           <div className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -406,12 +282,12 @@ export default function AdminEpisodesPage() {
                     <th className="px-4 py-3 text-left">
                       <input
                         type="checkbox"
-                        checked={selectedIds.length === filteredEpisodes.length && filteredEpisodes.length > 0}
+                        checked={selectedIds.length === episodes.length && episodes.length > 0}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedIds(filteredEpisodes.map((ep) => ep.id));
+                            selectAll(episodes);
                           } else {
-                            setSelectedIds([]);
+                            clearSelection();
                           }
                         }}
                         className="rounded"
@@ -426,19 +302,13 @@ export default function AdminEpisodesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEpisodes.map((episode) => (
+                  {episodes.map((episode) => (
                     <tr key={episode.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
                           checked={selectedIds.includes(episode.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIds([...selectedIds, episode.id]);
-                            } else {
-                              setSelectedIds(selectedIds.filter((id) => id !== episode.id));
-                            }
-                          }}
+                          onChange={() => toggleSelect(episode.id)}
                           className="rounded"
                         />
                       </td>
@@ -471,7 +341,8 @@ export default function AdminEpisodesPage() {
                       <td className="px-4 py-3">
                         <button
                           onClick={() => {
-                            setSelectedIds([episode.id]);
+                            clearSelection();
+                            toggleSelect(episode.id);
                             setIsDeleteConfirmOpen(true);
                           }}
                           className="text-red-400 hover:text-red-300 text-sm"
@@ -552,9 +423,10 @@ export default function AdminEpisodesPage() {
 
           <button
             onClick={handleAddEpisode}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            disabled={addEpisodeMutation.isPending}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            添加
+            {addEpisodeMutation.isPending ? '添加中...' : '添加'}
           </button>
         </div>
       </Modal>
@@ -588,9 +460,10 @@ export default function AdminEpisodesPage() {
 
           <button
             onClick={handleBulkUpdate}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            disabled={bulkUpdateMutation.isPending}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            确认更新
+            {bulkUpdateMutation.isPending ? '更新中...' : '确认更新'}
           </button>
         </div>
       </Modal>
@@ -606,6 +479,17 @@ export default function AdminEpisodesPage() {
         onConfirm={handleBulkDelete}
         onCancel={() => setIsDeleteConfirmOpen(false)}
       />
+
+      {/* 批量上传模态框 */}
+      <BulkUploadModal
+        isOpen={isUploadModalOpen}
+        seriesId={seriesId}
+        onClose={() => setIsUploadModalOpen(false)}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
     </div>
   );
 }
+

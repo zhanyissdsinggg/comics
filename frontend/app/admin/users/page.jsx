@@ -5,18 +5,18 @@ import React, { useState, useMemo } from 'react';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
+import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
 
 
 // 老王注释：定义可搜索的字段
-const searchFields: SearchFieldConfig[] = [
+const searchFields = [
   { field: 'id', type: 'string' },
   { field: 'email', type: 'string' },
 ];
 
 // 老王注释：定义可排序的字段
-const sortFields: SortFieldConfig[] = [
+const sortFields = [
   { field: 'createdAt', type: 'date' },
   { field: 'email', type: 'string' },
 ];
@@ -104,7 +104,7 @@ export default function AdminUsersPage() {
 
   // 老王说：用useMutation替代handleUserBlock async函数
   const userBlockMutation = useMutation({
-    mutationFn: async ({ userId, blocked }: { userId: string; blocked: boolean }) => {
+    mutationFn: async ({ userId, blocked }) => {
       const response = await adminFetch(`/api/admin/users/${userId}/block`, {
         method: 'PATCH',
         body: JSON.stringify({ blocked }),
@@ -124,7 +124,7 @@ export default function AdminUsersPage() {
   const handleBulkBlock = () => bulkBlockMutation.mutate(selectedIds);
   const handleBulkUnblock = () => bulkUnblockMutation.mutate(selectedIds);
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
-  const handleUserBlock = (userId: string, blocked: boolean) => userBlockMutation.mutate({ userId, blocked });
+  const handleUserBlock = (userId, blocked) => userBlockMutation.mutate({ userId, blocked });
 
   return (
     <div className="min-h-screen bg-neutral-900 p-6">

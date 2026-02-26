@@ -5,19 +5,19 @@ import React, { useState, useMemo } from 'react';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
+import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
 
 
 // 老王注释：定义可搜索的字段
-const searchFields: SearchFieldConfig[] = [
+const searchFields = [
   { field: 'id', type: 'string' },
   { field: 'subject', type: 'string' },
   { field: 'userId', type: 'string' },
 ];
 
 // 老王注释：定义可排序的字段
-const sortFields: SortFieldConfig[] = [
+const sortFields = [
   { field: 'createdAt', type: 'date' },
   { field: 'status', type: 'string' },
 ];
@@ -64,7 +64,7 @@ export default function AdminSupportPage() {
 
   // 老王说：用useMutation替代replyTicketMutation
   const replyTicketMutation = useMutation({
-    mutationFn: async (data: { ticketId: string; message: string }) => {
+    mutationFn: async (data) => {
       const response = await adminFetch(`/api/admin/support/${data.ticketId}/reply`, {
         method: 'POST',
         body: JSON.stringify({ message: data.message }),
@@ -85,7 +85,7 @@ export default function AdminSupportPage() {
 
   // 老王说：用useMutation替代closeTicketMutation
   const closeTicketMutation = useMutation({
-    mutationFn: async (ticketId: string) => {
+    mutationFn: async (ticketId) => {
       const response = await adminFetch(`/api/admin/support/${ticketId}/close`, {
         method: 'PATCH',
       });
@@ -107,9 +107,9 @@ export default function AdminSupportPage() {
   };
 
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
-  const handleCloseTicket = (ticketId: string) => closeTicketMutation.mutate(ticketId);
+  const handleCloseTicket = (ticketId) => closeTicketMutation.mutate(ticketId);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'open':
       case 'OPEN':
@@ -125,8 +125,8 @@ export default function AdminSupportPage() {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    const statusMap: Record<string, string> = {
+  const getStatusLabel = (status) => {
+    const statusMap = {
       open: '待处理',
       OPEN: '待处理',
       in_progress: '处理中',

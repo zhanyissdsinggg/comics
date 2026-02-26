@@ -4,17 +4,17 @@ import React, { useState, useMemo } from 'react';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
+import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
 
 // 定义可搜索的字段
-const searchFields: SearchFieldConfig[] = [
+const searchFields = [
   { field: 'id', type: 'string' },
   { field: 'title', type: 'string' },
 ];
 
 // 定义可排序的字段
-const sortFields: SortFieldConfig[] = [
+const sortFields = [
   { field: 'createdAt', type: 'date' },
   { field: 'rating', type: 'number' },
   { field: 'title', type: 'string' },

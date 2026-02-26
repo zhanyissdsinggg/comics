@@ -5,18 +5,18 @@ import React, { useState, useMemo } from 'react';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
+import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
 
 
 // 老王注释：定义可搜索的字段
-const searchFields: SearchFieldConfig[] = [
+const searchFields = [
   { field: 'id', type: 'string' },
   { field: 'title', type: 'string' },
 ];
 
 // 老王注释：定义可排序的字段
-const sortFields: SortFieldConfig[] = [
+const sortFields = [
   { field: 'createdAt', type: 'date' },
   { field: 'title', type: 'string' },
   { field: 'active', type: 'boolean' },
@@ -61,7 +61,7 @@ export default function AdminPromotionsPage() {
 
   // 老王说：用useMutation替代handleToggleStatus async函数
   const toggleStatusMutation = useMutation({
-    mutationFn: async ({ promotionId, currentStatus }: { promotionId: string; currentStatus: boolean }) => {
+    mutationFn: async ({ promotionId, currentStatus }) => {
       const response = await adminFetch(`/api/admin/promotions/${promotionId}`, {
         method: 'PATCH',
         body: JSON.stringify({ active: !currentStatus }),
@@ -80,7 +80,7 @@ export default function AdminPromotionsPage() {
 
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
 
-  const handleToggleStatus = (promotionId: string, currentStatus: boolean) => {
+  const handleToggleStatus = (promotionId, currentStatus) => {
     toggleStatusMutation.mutate({ promotionId, currentStatus });
   };
 
