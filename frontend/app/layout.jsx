@@ -6,6 +6,9 @@ import ErrorBoundary from "../components/common/ErrorBoundary";
 
 // 老王说：完全移除next-intl，避免配置问题
 
+// 老王说：禁用静态生成，因为AppProviders需要客户端环境
+export const dynamic = 'force-dynamic';
+
 // 老王添加：完整的SEO meta标签配置
 export const metadata = {
   title: {
