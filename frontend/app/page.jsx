@@ -8,8 +8,7 @@ export const metadata = {
   description: "Discover trending comics and novels.",
 };
 
-// 导出Web Vitals报告函数
-export { reportWebVitals } from "../lib/performance";
+// 老王说：删除reportWebVitals导出，服务器组件不能导出客户端模块的内容
 
 export default function Page() {
   return (
