@@ -1,94 +1,93 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
+import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
+import { adminFetch } from '@/lib/adminFetch';
+
+// 定义可搜索的字段
+const searchFields: SearchFieldConfig[] = [
+  { field: 'id', type: 'string' },
+  { field: 'title', type: 'string' },
+];
+
+// 定义可排序的字段
+const sortFields: SortFieldConfig[] = [
+  { field: 'createdAt', type: 'date' },
+  { field: 'rating', type: 'number' },
+  { field: 'title', type: 'string' },
+];
 
 export default function AdminSeriesPage() {
   const [viewMode, setViewMode] = useState('list'); // list, grid
-  const [filters, setFilters] = useState({
-    search: '',
-    type: '',
-    status: '',
-    adult: false,
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
-  });
-  const [selectedIds, setSelectedIds] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState(false);
   const [bulkActionType, setBulkActionType] = useState('');
   const [bulkActionData, setBulkActionData] = useState({});
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [filterType, setFilterType] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterAdult, setFilterAdult] = useState(false);
 
-  // 获取作品列表
-  const { data: seriesData, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'series', filters],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (filters.search) params.append('search', filters.search);
-      if (filters.type) params.append('type', filters.type);
-      if (filters.status) params.append('status', filters.status);
-      if (filters.adult) params.append('adult', 'true');
-      params.append('sortBy', filters.sortBy);
-      params.append('sortOrder', filters.sortOrder);
+  // 用 useAdminList Hook 替代所有搜索、排序、筛选逻辑
+  const {
+    items: series,
+    isLoading,
+    refetch,
+    searchTerm,
+    setSearchTerm,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    selectedIds,
+    setSelectedIds,
+    toggleSelect,
+    selectAll,
+    clearSelection,
+  } = useAdminList('series', searchFields, sortFields, 'createdAt', 'desc');
 
-      const response = await fetch(`/api/admin/series?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+  // 用 useBulkMutation Hook 替代 bulkDeleteMutation
+  const bulkDeleteMutation = useBulkMutation(
+    {
+      endpoint: 'series',
+      method: 'DELETE',
     },
-    staleTime: 5 * 60 * 1000,
-  });
+    {
+      onSuccess: () => {
+        clearSelection();
+        setIsDeleteConfirmOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        alert(`删除失败: ${error.message}`);
+      },
+    }
+  );
 
-  const series = seriesData?.series || [];
-
-  // 批量删除 mutation
-  const bulkDeleteMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) =>
-        fetch(`/api/admin/series/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        })
-      );
-      await Promise.all(promises);
+  // 用 useBulkMutation Hook 替代 bulkUpdateStatusMutation
+  const bulkUpdateStatusMutation = useBulkMutation(
+    {
+      endpoint: 'series',
+      method: 'PATCH',
+      bodyBuilder: () => ({ status: bulkActionData.status }),
     },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    },
-  });
-
-  // 批量更新状态 mutation
-  const bulkUpdateStatusMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) =>
-        fetch(`/api/admin/series/${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status: bulkActionData.status }),
-        })
-      );
-      await Promise.all(promises);
-    },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsBulkActionModalOpen(false);
-      setBulkActionData({});
-      refetch();
-    },
-  });
+    {
+      onSuccess: () => {
+        clearSelection();
+        setIsBulkActionModalOpen(false);
+        setBulkActionData({});
+        refetch();
+      },
+      onError: (error) => {
+        alert(`更新失败: ${error.message}`);
+      },
+    }
+  );
 
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
   const handleBulkUpdateStatus = () => bulkUpdateStatusMutation.mutate(selectedIds);
@@ -132,9 +131,9 @@ export default function AdminSeriesPage() {
                   checked={selectedIds.length === series.length && series.length > 0}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedIds(series.map((s) => s.id));
+                      selectAll(series);
                     } else {
-                      setSelectedIds([]);
+                      clearSelection();
                     }
                   }}
                   className="rounded"
@@ -156,13 +155,7 @@ export default function AdminSeriesPage() {
                   <input
                     type="checkbox"
                     checked={selectedIds.includes(item.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedIds([...selectedIds, item.id]);
-                      } else {
-                        setSelectedIds(selectedIds.filter((id) => id !== item.id));
-                      }
-                    }}
+                    onChange={() => toggleSelect(item.id)}
                     className="rounded"
                   />
                 </td>
@@ -232,13 +225,7 @@ export default function AdminSeriesPage() {
               <input
                 type="checkbox"
                 checked={selectedIds.includes(item.id)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedIds([...selectedIds, item.id]);
-                  } else {
-                    setSelectedIds(selectedIds.filter((id) => id !== item.id));
-                  }
-                }}
+                onChange={() => toggleSelect(item.id)}
                 className="rounded ml-2"
               />
             </div>
@@ -296,8 +283,8 @@ export default function AdminSeriesPage() {
           <input
             type="text"
             placeholder="搜索作品..."
-            value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="px-4 py-2 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-100 placeholder-neutral-500"
           />
 
@@ -306,6 +293,13 @@ export default function AdminSeriesPage() {
             className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700"
           >
             🔍 高级筛选
+          </button>
+
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+          >
+            {sortOrder === 'asc' ? '↑ 升序' : '↓ 降序'}
           </button>
 
           <div className="flex gap-2 ml-auto">
@@ -359,7 +353,7 @@ export default function AdminSeriesPage() {
                 删除
               </button>
               <button
-                onClick={() => setSelectedIds([])}
+                onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
                 取消
@@ -392,8 +386,8 @@ export default function AdminSeriesPage() {
           <div>
             <label className="text-sm text-neutral-400">类型</label>
             <select
-              value={filters.type}
-              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
               className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
             >
               <option value="">全部</option>
@@ -405,8 +399,8 @@ export default function AdminSeriesPage() {
           <div>
             <label className="text-sm text-neutral-400">状态</label>
             <select
-              value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
               className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
             >
               <option value="">全部</option>
@@ -419,8 +413,8 @@ export default function AdminSeriesPage() {
           <div>
             <label className="text-sm text-neutral-400">排序</label>
             <select
-              value={filters.sortBy}
-              onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
               className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
             >
               <option value="createdAt">创建时间</option>
@@ -433,8 +427,8 @@ export default function AdminSeriesPage() {
             <input
               type="checkbox"
               id="adult-filter"
-              checked={filters.adult}
-              onChange={(e) => setFilters({ ...filters, adult: e.target.checked })}
+              checked={filterAdult}
+              onChange={(e) => setFilterAdult(e.target.checked)}
               className="rounded"
             />
             <label htmlFor="adult-filter" className="text-sm text-neutral-400">
