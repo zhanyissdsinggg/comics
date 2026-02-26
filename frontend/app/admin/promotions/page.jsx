@@ -1,4 +1,5 @@
 'use client';
+nexport const dynamic = 'force-dynamic';
 
 import React, { useState, useMemo } from 'react';
 
