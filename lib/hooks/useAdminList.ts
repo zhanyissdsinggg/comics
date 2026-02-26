@@ -6,7 +6,7 @@
 
 import { useState, useMemo } from 'react';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { adminFetch } from '../adminFetch';
+import { adminFetch } from '../adminApiClient';
 
 /**
  * 搜索字段配置

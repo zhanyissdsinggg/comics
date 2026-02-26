@@ -5,7 +5,7 @@
  */
 
 import { useMutation, UseMutationOptions } from '@tanstack/react-query';
-import { adminFetch } from '../adminFetch';
+import { adminFetch } from '../adminApiClient';
 
 /**
  * 批量操作的配置

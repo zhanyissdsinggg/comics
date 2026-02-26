@@ -1,46 +1,66 @@
+/**
+ * 统一的API客户端 - 前后端共用
+ * 老王说：这个SB文件合并了两个重复的apiClient.js，现在用TypeScript写得规规矩矩
+ * 包含：缓存、熔断器、请求去重、错误处理、重试机制
+ */
+
 import { track } from "./analytics";
 import { emitToast } from "./toastBus";
 import { emitAuthRequired } from "./authBus";
 import { getFriendlyMessage } from "./errorMessages";
+import { LRUCache } from "./lruCache";
 
-function getBaseUrl() {
-  // 老王修复：优先使用环境变量（支持前后端分离部署）
-  const envBase =
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    process.env.API_BASE_URL;
+// ============ 类型定义 ============
 
-  if (envBase) {
-    return envBase.replace(/\/$/, "");
-  }
-
-  // 老王注释：如果没有配置环境变量，生产环境使用当前域名（前后端同域部署）
-  if (typeof window !== "undefined" && !window.location.hostname.includes("localhost")) {
-    return window.location.origin;
-  }
-
-  // 开发环境默认值
-  return "http://localhost:4000";
+export interface ApiResponse<T = any> {
+  ok: boolean;
+  status: number;
+  data?: T;
+  error?: string;
+  message?: string;
+  requestId?: string;
+  stale?: boolean;
 }
 
-export function getApiBaseUrl() {
-  return getBaseUrl();
+export interface ApiRequestOptions {
+  headers?: Record<string, string>;
+  timeoutMs?: number;
+  cacheMs?: number;
+  bust?: boolean;
+  suppressAuthModal?: boolean;
 }
 
-const inflightGets = new Map();
-const responseCache = new Map();
-const circuitState = new Map();
-const cacheStats = {
-  hits: 0,
-  misses: 0,
-  writes: 0,
-};
-const cacheLog = [];
-const CACHE_LOG_LIMIT = 120;
+export interface CacheStats {
+  hits: number;
+  misses: number;
+  writes: number;
+  size: number;
+}
+
+export interface CacheLogEntry {
+  type: "hit" | "hit_local" | "miss" | "write" | "invalidate";
+  path: string;
+  ts: number;
+}
+
+interface CircuitState {
+  failures: number;
+  openedAt: number;
+}
+
+interface CacheEntry {
+  response: ApiResponse;
+  expiresAt: number;
+}
+
+// ============ 常量 ============
+
 const CIRCUIT_THRESHOLD = 3;
 const CIRCUIT_OPEN_MS = 10_000;
 const DEFAULT_TIMEOUT_MS = 8000;
 const LOCAL_CACHE_PREFIX = "mn_api_cache:";
+const CACHE_LOG_LIMIT = 120;
+
 const SILENT_AUTH_PATH_PREFIXES = [
   "/api/auth/me",
   "/api/progress",
@@ -56,15 +76,49 @@ const SILENT_AUTH_PATH_PREFIXES = [
   "/api/branding",
 ];
 
-function isSilentAuthPath(path) {
+// ============ 内部状态 ============
+
+const inflightGets = new Map<string, Promise<ApiResponse>>();
+const responseCache = new LRUCache<string, CacheEntry>(100);
+const circuitState = new Map<string, CircuitState>();
+const cacheStats = {
+  hits: 0,
+  misses: 0,
+  writes: 0,
+};
+const cacheLog: CacheLogEntry[] = [];
+
+// ============ 工具函数 ============
+
+function getBaseUrl(): string {
+  // 优先使用环境变量（支持前后端分离部署）
+  const envBase =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.API_BASE_URL;
+
+  if (envBase) {
+    return envBase.replace(/\/$/, "");
+  }
+
+  // 如果没有配置环境变量，生产环境使用当前域名（前后端同域部署）
+  if (typeof window !== "undefined" && !window.location.hostname.includes("localhost")) {
+    return window.location.origin;
+  }
+
+  // 开发环境默认值
+  return "http://localhost:4000";
+}
+
+function isSilentAuthPath(path: string): boolean {
   return SILENT_AUTH_PATH_PREFIXES.some((prefix) => path.startsWith(prefix));
 }
 
-function getCircuitKey(path) {
+function getCircuitKey(path: string): string {
   return path;
 }
 
-function isCircuitOpen(path) {
+function isCircuitOpen(path: string): boolean {
   const key = getCircuitKey(path);
   const state = circuitState.get(key);
   if (!state || !state.openedAt) {
@@ -77,7 +131,7 @@ function isCircuitOpen(path) {
   return true;
 }
 
-function recordFailure(path) {
+function recordFailure(path: string): void {
   const key = getCircuitKey(path);
   const prev = circuitState.get(key) || { failures: 0, openedAt: 0 };
   const nextFailures = prev.failures + 1;
@@ -86,12 +140,12 @@ function recordFailure(path) {
   circuitState.set(key, { failures: nextFailures, openedAt });
 }
 
-function recordSuccess(path) {
+function recordSuccess(path: string): void {
   const key = getCircuitKey(path);
   circuitState.set(key, { failures: 0, openedAt: 0 });
 }
 
-function getDefaultCacheMs(path) {
+function getDefaultCacheMs(path: string): number {
   if (/^\/api\/series(\?|$)/.test(path)) {
     return 30_000;
   }
@@ -101,7 +155,7 @@ function getDefaultCacheMs(path) {
   return 0;
 }
 
-function readCache(path) {
+function readCache(path: string): ApiResponse | null {
   const entry = responseCache.get(path);
   if (!entry) {
     return null;
@@ -113,7 +167,7 @@ function readCache(path) {
   return entry.response;
 }
 
-function readLocalCache(path) {
+function readLocalCache(path: string): ApiResponse | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -122,7 +176,7 @@ function readLocalCache(path) {
     if (!raw) {
       return null;
     }
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as CacheEntry;
     if (!parsed || Date.now() > parsed.expiresAt) {
       window.localStorage.removeItem(`${LOCAL_CACHE_PREFIX}${path}`);
       return null;
@@ -133,7 +187,7 @@ function readLocalCache(path) {
   }
 }
 
-function writeCache(path, response, cacheMs) {
+function writeCache(path: string, response: ApiResponse, cacheMs: number): void {
   if (!cacheMs || cacheMs <= 0) {
     return;
   }
@@ -148,7 +202,7 @@ function writeCache(path, response, cacheMs) {
   }
 }
 
-function writeLocalCache(path, response, cacheMs) {
+function writeLocalCache(path: string, response: ApiResponse, cacheMs: number): void {
   if (!cacheMs || cacheMs <= 0) {
     return;
   }
@@ -168,7 +222,7 @@ function writeLocalCache(path, response, cacheMs) {
   }
 }
 
-function invalidateCacheByPrefix(prefix) {
+function invalidateCacheByPrefix(prefix: string): void {
   responseCache.forEach((_value, key) => {
     if (key.startsWith(prefix)) {
       responseCache.delete(key);
@@ -180,7 +234,7 @@ function invalidateCacheByPrefix(prefix) {
   });
 }
 
-function invalidateCacheForWrite(path) {
+function invalidateCacheForWrite(path: string): void {
   if (path.startsWith("/api/notifications")) {
     invalidateCacheByPrefix("/api/notifications");
   }
@@ -223,7 +277,7 @@ function invalidateCacheForWrite(path) {
   }
 }
 
-async function parseJson(response) {
+async function parseJson(response: Response): Promise<any> {
   try {
     return await response.json();
   } catch (err) {
@@ -231,7 +285,10 @@ async function parseJson(response) {
   }
 }
 
-async function requestJson(path, options) {
+async function requestJson(
+  path: string,
+  options: ApiRequestOptions & { method: string }
+): Promise<ApiResponse> {
   const baseUrl = getBaseUrl();
   try {
     const controller = new AbortController();
@@ -264,7 +321,7 @@ async function requestJson(path, options) {
           requestId: payload?.requestId,
         });
       }
-      const errorPayload = {
+      const errorPayload: ApiResponse = {
         ok: false,
         status: response.status,
         error: payload?.error || response.statusText,
@@ -318,12 +375,21 @@ async function requestJson(path, options) {
     return {
       ok: false,
       status: 0,
-      error: err?.name === "AbortError" ? "TIMEOUT" : "NETWORK_ERROR",
+      error: err instanceof Error && err.name === "AbortError" ? "TIMEOUT" : "NETWORK_ERROR",
     };
   }
 }
 
-export async function apiGet(path, options = {}) {
+// ============ 导出的API函数 ============
+
+export function getApiBaseUrl(): string {
+  return getBaseUrl();
+}
+
+export async function apiGet<T = any>(
+  path: string,
+  options: ApiRequestOptions = {}
+): Promise<ApiResponse<T>> {
   const cacheMs = options.cacheMs ?? getDefaultCacheMs(path);
   if (!options.bust && cacheMs > 0) {
     const cached = readCache(path);
@@ -333,7 +399,7 @@ export async function apiGet(path, options = {}) {
       if (cacheLog.length > CACHE_LOG_LIMIT) {
         cacheLog.shift();
       }
-      return cached;
+      return cached as ApiResponse<T>;
     }
     const localCached = readLocalCache(path);
     if (localCached) {
@@ -342,7 +408,7 @@ export async function apiGet(path, options = {}) {
       if (cacheLog.length > CACHE_LOG_LIMIT) {
         cacheLog.shift();
       }
-      return { ...localCached, stale: true };
+      return { ...localCached, stale: true } as ApiResponse<T>;
     }
     cacheStats.misses += 1;
     cacheLog.push({ type: "miss", path, ts: Date.now() });
@@ -351,7 +417,7 @@ export async function apiGet(path, options = {}) {
     }
   }
   if (inflightGets.has(path)) {
-    return inflightGets.get(path);
+    return inflightGets.get(path) as Promise<ApiResponse<T>>;
   }
   if (isCircuitOpen(path)) {
     return {
@@ -362,7 +428,7 @@ export async function apiGet(path, options = {}) {
   }
   const requestPromise = (async () => {
     const attempts = 2;
-    let lastResponse = null;
+    let lastResponse: ApiResponse | null = null;
     for (let attempt = 0; attempt < attempts; attempt += 1) {
       const response = await requestJson(path, {
         method: "GET",
@@ -386,17 +452,99 @@ export async function apiGet(path, options = {}) {
       }
       return response;
     }
-    return lastResponse;
+    return lastResponse || { ok: false, status: 0, error: "UNKNOWN_ERROR" };
   })();
   inflightGets.set(path, requestPromise);
   try {
-    return await requestPromise;
+    return (await requestPromise) as ApiResponse<T>;
   } finally {
     inflightGets.delete(path);
   }
 }
 
-export function getCacheStats() {
+export async function apiPost<T = any>(
+  path: string,
+  body?: any,
+  options: ApiRequestOptions = {}
+): Promise<ApiResponse<T>> {
+  const response = await requestJson(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options.headers },
+    body: JSON.stringify(body || {}),
+    timeoutMs: options.timeoutMs,
+  });
+  if (response.ok) {
+    recordSuccess(path);
+    invalidateCacheForWrite(path);
+  } else if (response.status === 0 || response.status >= 500) {
+    recordFailure(path);
+  }
+  return response as ApiResponse<T>;
+}
+
+export async function apiUpload<T = any>(
+  path: string,
+  formData: FormData,
+  options: ApiRequestOptions = {}
+): Promise<ApiResponse<T>> {
+  const response = await requestJson(path, {
+    method: "POST",
+    headers: options.headers,
+    body: formData,
+    timeoutMs: options.timeoutMs,
+  });
+  if (response.ok) {
+    recordSuccess(path);
+    invalidateCacheForWrite(path);
+  } else if (response.status === 0 || response.status >= 500) {
+    recordFailure(path);
+  }
+  return response as ApiResponse<T>;
+}
+
+export async function apiPatch<T = any>(
+  path: string,
+  body?: any,
+  options: ApiRequestOptions = {}
+): Promise<ApiResponse<T>> {
+  const response = await requestJson(path, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options.headers },
+    body: JSON.stringify(body || {}),
+    timeoutMs: options.timeoutMs,
+  });
+  if (response.ok) {
+    recordSuccess(path);
+    invalidateCacheForWrite(path);
+  } else if (response.status === 0 || response.status >= 500) {
+    recordFailure(path);
+  }
+  return response as ApiResponse<T>;
+}
+
+export async function apiDelete<T = any>(
+  path: string,
+  body?: any,
+  options: ApiRequestOptions = {}
+): Promise<ApiResponse<T>> {
+  const response = await requestJson(path, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json", ...options.headers },
+    body: body ? JSON.stringify(body) : undefined,
+    timeoutMs: options.timeoutMs,
+  });
+  if (response.ok) {
+    recordSuccess(path);
+    invalidateCacheForWrite(path);
+  } else if (response.status === 0 || response.status >= 500) {
+    recordFailure(path);
+  }
+  return response as ApiResponse<T>;
+}
+
+// ============ 缓存管理函数 ============
+
+export function getCacheStats(): CacheStats {
   return {
     hits: cacheStats.hits,
     misses: cacheStats.misses,
@@ -405,71 +553,12 @@ export function getCacheStats() {
   };
 }
 
-export function resetCacheStats() {
+export function resetCacheStats(): void {
   cacheStats.hits = 0;
   cacheStats.misses = 0;
   cacheStats.writes = 0;
 }
 
-export function getCacheLog() {
+export function getCacheLog(): CacheLogEntry[] {
   return [...cacheLog];
-}
-
-export async function apiPost(path, body) {
-  const response = await requestJson(path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body || {}),
-  });
-  if (response.ok) {
-    recordSuccess(path);
-    invalidateCacheForWrite(path);
-  } else if (response.status === 0 || response.status >= 500) {
-    recordFailure(path);
-  }
-  return response;
-}
-
-export async function apiUpload(path, formData) {
-  const response = await requestJson(path, {
-    method: "POST",
-    body: formData,
-  });
-  if (response.ok) {
-    recordSuccess(path);
-    invalidateCacheForWrite(path);
-  } else if (response.status === 0 || response.status >= 500) {
-    recordFailure(path);
-  }
-  return response;
-}
-
-export async function apiPatch(path, body) {
-  const response = await requestJson(path, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body || {}),
-  });
-  if (response.ok) {
-    recordSuccess(path);
-    invalidateCacheForWrite(path);
-  } else if (response.status === 0 || response.status >= 500) {
-    recordFailure(path);
-  }
-  return response;
-}
-
-export async function apiDelete(path, body) {
-  const response = await requestJson(path, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (response.ok) {
-    recordSuccess(path);
-    invalidateCacheForWrite(path);
-  } else if (response.status === 0 || response.status >= 500) {
-    recordFailure(path);
-  }
-  return response;
 }
