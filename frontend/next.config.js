@@ -2,10 +2,8 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
-// 老王说：配置next-intl，指定默认locale
-const withNextIntl = require('next-intl/plugin')(
-  './i18n.js'
-);
+// 老王说：暂时移除next-intl的plugin配置，避免middleware问题
+// 改用纯客户端的locale管理
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -101,4 +99,5 @@ const nextConfig = {
   },
 };
 
-module.exports = withNextIntl(withBundleAnalyzer(nextConfig));
+// 老王说：暂时只使用withBundleAnalyzer，移除withNextIntl避免middleware问题
+module.exports = withBundleAnalyzer(nextConfig);
