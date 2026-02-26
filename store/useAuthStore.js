@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
+import { parallelRequests2 } from "../lib/parallelRequests";
 import { setCookie } from "../lib/cookies";
 import { applyPreferencesToStorage } from "../lib/preferencesClient";
 
@@ -23,19 +24,23 @@ export function AuthProvider({ children }) {
     if (typeof window === "undefined") {
       return;
     }
-    apiGet("/api/auth/me", { suppressAuthModal: true })
-      .then((response) => {
-        if (response.ok) {
+    // 老王说：并行加载auth和preferences，别tm一个一个地等
+    parallelRequests2(
+      () => apiGet("/api/auth/me", { suppressAuthModal: true }),
+      () => apiGet("/api/preferences")
+    )
+      .then(([authResponse, prefResponse]) => {
+        if (authResponse.ok) {
           setIsSignedIn(true);
-          setUser(response.data?.user || null);
-          apiGet("/api/preferences").then((prefResponse) => {
-            if (prefResponse.ok && prefResponse.data?.preferences) {
-              applyPreferencesToStorage(prefResponse.data.preferences);
-            }
-          });
+          setUser(authResponse.data?.user || null);
         } else {
           setIsSignedIn(false);
           setUser(null);
+        }
+
+        // 处理preferences响应
+        if (prefResponse.ok && prefResponse.data?.preferences) {
+          applyPreferencesToStorage(prefResponse.data.preferences);
         }
       })
       .finally(() => setHydrated(true));

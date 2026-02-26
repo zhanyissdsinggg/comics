@@ -12,6 +12,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { apiGet } from "../../lib/apiClient";
+import { parallelRequests2 } from "../../lib/parallelRequests";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
@@ -38,17 +39,23 @@ export function HomeDataProvider({ children }) {
 
   const showStale = useStaleNotice(seriesResponse);
 
-  // Fetch series list
+  // 老王说：并行加载series和hotKeywords，别tm一个一个地等
+  // 这样可以显著提升首屏加载速度
   useEffect(() => {
     const adultFlag = isAdultMode ? "1" : "0";
     setLoading(true);
 
-    apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 })
-      .then((response) => {
-        setSeriesResponse(response);
-        if (response.ok) {
-          setSeriesList(response.data?.series || []);
-        } else if (response.status === 0 || response.status >= 500) {
+    // 并行执行两个请求
+    parallelRequests2(
+      () => apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }),
+      () => apiGet(`/api/search/hot?adult=${adultFlag}&window=${hotWindow}`)
+    )
+      .then(([seriesResponse, hotKeywordsResponse]) => {
+        // 处理series响应
+        setSeriesResponse(seriesResponse);
+        if (seriesResponse.ok) {
+          setSeriesList(seriesResponse.data?.series || []);
+        } else if (seriesResponse.status === 0 || seriesResponse.status >= 500) {
           // Retry on network or server errors
           if (shouldRetry(`home_series_${adultFlag}`)) {
             setTimeout(() => {
@@ -64,22 +71,16 @@ export function HomeDataProvider({ children }) {
             }, 600);
           }
         }
+
+        // 处理hotKeywords响应
+        if (hotKeywordsResponse.ok) {
+          setHotKeywords(hotKeywordsResponse.data?.keywords || []);
+        }
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [isAdultMode, shouldRetry]);
-
-  // Fetch hot keywords
-  useEffect(() => {
-    const adultFlag = isAdultMode ? "1" : "0";
-    apiGet(`/api/search/hot?adult=${adultFlag}&window=${hotWindow}`)
-      .then((response) => {
-        if (response.ok) {
-          setHotKeywords(response.data?.keywords || []);
-        }
-      });
-  }, [isAdultMode, hotWindow]);
+  }, [isAdultMode, hotWindow, shouldRetry]);
 
   const value = {
     seriesList,
