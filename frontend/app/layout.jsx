@@ -3,8 +3,8 @@ import AppProviders from "../components/layout/AppProviders";
 import { PerformanceMonitor } from "../lib/performance";
 import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+
+// 老王说：完全移除next-intl，避免配置问题
 
 // 老王添加：完整的SEO meta标签配置
 export const metadata = {
@@ -66,22 +66,17 @@ export const metadata = {
   },
 };
 
-export default async function RootLayout({ children }) {
-  // 老王说：不使用middleware时，直接加载默认的中文messages
-  // 避免getMessages()调用失败导致的错误
-  const messages = (await import('../messages/zh.json')).default;
-
+export default function RootLayout({ children }) {
+  // 老王说：完全移除next-intl，直接渲染children
   return (
     <html lang="en">
       <body>
-        <NextIntlClientProvider messages={messages}>
-          <ErrorBoundary name="RootBoundary">
-            <PerformanceMonitor>
-              <AppProviders>{children}</AppProviders>
-              <CookieConsent />
-            </PerformanceMonitor>
-          </ErrorBoundary>
-        </NextIntlClientProvider>
+        <ErrorBoundary name="RootBoundary">
+          <PerformanceMonitor>
+            <AppProviders>{children}</AppProviders>
+            <CookieConsent />
+          </PerformanceMonitor>
+        </ErrorBoundary>
       </body>
     </html>
   );
