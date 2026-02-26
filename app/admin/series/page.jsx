@@ -23,9 +23,8 @@ const sortFields: SortFieldConfig[] = [
 export default function AdminSeriesPage() {
   const [viewMode, setViewMode] = useState('list'); // list, grid
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState(false);
-  const [bulkActionData, setBulkActionData] = useState({});
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [bulkActionData, setBulkActionData] = useState({});
   const [filterType, setFilterType] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterAdult, setFilterAdult] = useState(false);
@@ -338,10 +337,7 @@ export default function AdminSeriesPage() {
             <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
             <div className="flex gap-2">
               <button
-                onClick={() => {
-                  setBulkActionType('status');
-                  setIsBulkActionModalOpen(true);
-                }}
+                onClick={() => setIsBulkActionModalOpen(true)}
                 className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"
               >
                 更改状态
@@ -452,37 +448,6 @@ export default function AdminSeriesPage() {
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             应用筛选
-          </button>
-        </div>
-      </Modal>
-
-      {/* 批量操作模态框 */}
-      <Modal
-        isOpen={isBulkActionModalOpen}
-        title="批量更改状态"
-        onClose={() => setIsBulkActionModalOpen(false)}
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-neutral-400">新状态</label>
-            <select
-              value={bulkActionData.status || ''}
-              onChange={(e) => setBulkActionData({ ...bulkActionData, status: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="">选择状态</option>
-              <option value="Ongoing">连载中</option>
-              <option value="Completed">已完结</option>
-              <option value="Hiatus">暂停</option>
-            </select>
-          </div>
-
-          <button
-            onClick={handleBulkUpdateStatus}
-            disabled={!bulkActionData.status}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            确认更新
           </button>
         </div>
       </Modal>

@@ -23,9 +23,7 @@ const sortFields: SortFieldConfig[] = [
 
 export default function AdminUsersPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  
 
   // 老王说：用useAdminList Hook替代所有搜索、排序、筛选逻辑
   const {
@@ -168,20 +166,14 @@ export default function AdminUsersPage() {
             <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
             <div className="flex gap-2">
               <button
-                onClick={() => {
-                  setBulkActionType('block');
-                  setIsBulkActionModalOpen(true);
-                }}
+                onClick={() => setIsBulkActionModalOpen(true)}
                 disabled={bulkBlockMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
               >
                 {bulkBlockMutation.isPending ? '封禁中...' : '封禁'}
               </button>
               <button
-                onClick={() => {
-                  setBulkActionType('unblock');
-                  setIsBulkActionModalOpen(true);
-                }}
+                onClick={handleBulkUnblock}
                 disabled={bulkUnblockMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm disabled:opacity-50"
               >
@@ -319,18 +311,6 @@ export default function AdminUsersPage() {
           </button>
         </div>
       </Modal>
-
-      {/* 批量操作确认对话框 */}
-      <ConfirmDialog
-        isOpen={isBulkActionModalOpen}
-        title={bulkActionType === 'block' ? '确认封禁' : '确认解封'}
-        message={`确定要${bulkActionType === 'block' ? '封禁' : '解封'}这 ${selectedIds.length} 个用户吗？`}
-        confirmText={bulkActionType === 'block' ? '封禁' : '解封'}
-        cancelText="取消"
-        isDangerous={bulkActionType === 'block'}
-        onConfirm={bulkActionType === 'block' ? handleBulkBlock : handleBulkUnblock}
-        onCancel={() => setIsBulkActionModalOpen(false)}
-      />
 
       {/* 删除确认对话框 */}
       <ConfirmDialog

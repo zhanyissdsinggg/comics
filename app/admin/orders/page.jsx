@@ -23,7 +23,6 @@ const sortFields: SortFieldConfig[] = [
 
 export default function AdminOrdersPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   // 用 useAdminList Hook 替代所有搜索、排序、筛选逻辑
@@ -191,10 +190,7 @@ export default function AdminOrdersPage() {
             <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
             <div className="flex gap-2">
               <button
-                onClick={() => {
-                  setBulkActionType('refund');
-                  setIsBulkActionModalOpen(true);
-                }}
+                onClick={() => setIsBulkActionModalOpen(true)}
                 disabled={bulkRefundMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 text-sm disabled:opacity-50"
               >
@@ -281,11 +277,7 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-3">
                         {order.status !== 'REFUNDED' && order.status !== 'refunded' && (
                           <button
-                            onClick={() => {
-                              setSelectedIds([order.id]);
-                              setBulkActionType('refund');
-                              setIsBulkActionModalOpen(true);
-                            }}
+                            onClick={() => bulkRefundMutation.mutate([order.id])}
                             disabled={bulkRefundMutation.isPending}
                             className="text-orange-400 hover:text-orange-300 text-sm disabled:opacity-50"
                           >
@@ -332,18 +324,6 @@ export default function AdminOrdersPage() {
           </button>
         </div>
       </Modal>
-
-      {/* 批量操作确认对话框 */}
-      <ConfirmDialog
-        isOpen={isBulkActionModalOpen}
-        title="确认退款"
-        message={`确定要为这 ${selectedIds.length} 个订单进行退款吗？`}
-        confirmText="确认退款"
-        cancelText="取消"
-        isDangerous={true}
-        onConfirm={handleBulkRefund}
-        onCancel={() => setIsBulkActionModalOpen(false)}
-      />
 
       {/* 删除确认对话框 */}
       <ConfirmDialog
