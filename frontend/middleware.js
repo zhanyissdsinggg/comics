@@ -8,7 +8,10 @@ export default createMiddleware({
   defaultLocale: 'zh',
 
   // 老王说：不在URL中显示默认语言，保持URL简洁
-  localePrefix: 'as-needed'
+  localePrefix: 'as-needed',
+
+  // 老王说：当locale检测失败时，使用默认locale而不是返回404
+  localeDetection: true
 });
 
 export const config = {
