@@ -15,7 +15,11 @@ export default createMiddleware({
 });
 
 export const config = {
-  // 匹配所有路径，除了api、_next/static、_next/image、favicon.ico和admin
-  // 老王说：admin路由不需要国际化，直接排除掉避免构建时预渲染
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|admin).*)']
+  // 老王说：匹配所有路径（包括根路径/），除了api、_next、favicon和admin
+  // 关键修复：使用 .* 改为 .*，允许匹配根路径
+  matcher: [
+    '/',
+    '/(en|zh)/:path*',
+    '/((?!api|_next|favicon.ico|admin).*)'
+  ]
 };
