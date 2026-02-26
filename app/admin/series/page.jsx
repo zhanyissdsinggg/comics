@@ -90,7 +90,13 @@ export default function AdminSeriesPage() {
   );
 
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
-  const handleBulkUpdateStatus = () => bulkUpdateStatusMutation.mutate(selectedIds);
+  const handleBulkUpdateStatus = () => {
+    if (!bulkActionData.status) {
+      alert('请选择新状态');
+      return;
+    }
+    bulkUpdateStatusMutation.mutate(selectedIds);
+  };
 
   // 处理批量导出
   const handleBulkExport = () => {
