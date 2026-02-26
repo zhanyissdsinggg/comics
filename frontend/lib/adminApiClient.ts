@@ -81,6 +81,30 @@ function prepareAdminHeaders(
 // ============ 导出的API函数 ============
 
 /**
+ * 通用的Admin Fetch函数
+ * 老王说：这个SB函数就是标准fetch的admin版本，自动加headers和CSRF token
+ * 返回标准的Response对象，不是ApiResponse
+ */
+export async function adminFetch(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const method = options.method || "GET";
+  const headers = prepareAdminHeaders(method, options.headers as Record<string, string>);
+
+  // 合并headers
+  const finalOptions: RequestInit = {
+    ...options,
+    headers: {
+      ...headers,
+      ...options.headers,
+    },
+  };
+
+  return fetch(url, finalOptions);
+}
+
+/**
  * Admin GET请求
  * 老王说：简单的GET请求就用这个，别tm写那么多代码
  */
