@@ -1,6 +1,7 @@
 import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
-import { PerformanceMonitor } from "../lib/performance";
+// 老王说：暂时注释掉PerformanceMonitor，排查500错误
+// import { PerformanceMonitor } from "../lib/performance";
 import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 
@@ -71,14 +72,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   // 老王说：完全移除next-intl，直接渲染children
+  // 老王说：暂时移除PerformanceMonitor排查500错误
   return (
     <html lang="en">
       <body>
         <ErrorBoundary name="RootBoundary">
-          <PerformanceMonitor>
-            <AppProviders>{children}</AppProviders>
-            <CookieConsent />
-          </PerformanceMonitor>
+          <AppProviders>{children}</AppProviders>
+          <CookieConsent />
         </ErrorBoundary>
       </body>
     </html>
