@@ -1,50 +1,39 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useAdminList } from '@/lib/hooks/useAdminList';
+import { adminFetch } from '@/lib/adminApiClient';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 
 export default function AdminCommentsPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [selectedIds, setSelectedIds] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
-  // 获取评论列表
-  const { data: commentsData, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'comments', { searchTerm, sortBy, sortOrder }],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      params.append('sortBy', sortBy);
-      params.append('sortOrder', sortOrder);
-
-      const response = await fetch(`/api/admin/comments?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const comments = commentsData?.comments || [];
+  // 使用通用的 admin 列表 hook
+  const {
+    items: comments,
+    isLoading,
+    refetch,
+    searchTerm,
+    setSearchTerm,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    selectedIds,
+    setSelectedIds,
+    selectAll,
+    clearSelection,
+  } = useAdminList('comments', [], []);
 
   // 批量删除 mutation
   const bulkDeleteMutation = useMutation({
     mutationFn: async (ids) => {
       const promises = ids.map((id) =>
-        fetch(`/api/admin/comments/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        })
+        adminFetch(`/api/admin/comments/${id}`, { method: 'DELETE' })
       );
       await Promise.all(promises);
     },
@@ -53,69 +42,13 @@ export default function AdminCommentsPage() {
       setIsDeleteConfirmOpen(false);
       refetch();
     },
+    onError: (error) => {
+      console.error('批量删除失败:', error);
+    },
   });
 
-  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
-
-  // 过滤和排序
-  const filteredComments = useMemo(() => {
-    let result = comments ? [...comments] : [];
-
-    // 搜索过滤
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (comment) =>
-          comment.id.toString().includes(term) ||
-          comment.userId?.toString().includes(term) ||
-          (comment.content && comment.content.toLowerCase().includes(term)) ||
-          (comment.text && comment.text.toLowerCase().includes(term))
-      );
-    }
-
-    // 排序
-    result.sort((a, b) => {
-      let aVal, bVal;
-      if (sortBy === 'createdAt') {
-        aVal = new Date(a.createdAt || 0).getTime();
-        bVal = new Date(b.createdAt || 0).getTime();
-      } else if (sortBy === 'rating') {
-        aVal = Number(a.rating) || 0;
-        bVal = Number(b.rating) || 0;
-      } else if (sortBy === 'userId') {
-        aVal = a.userId || '';
-        bVal = b.userId || '';
-      }
-
-      if (sortOrder === 'asc') {
-        return aVal > bVal ? 1 : -1;
-      } else {
-        return aVal < bVal ? 1 : -1;
-      }
-    });
-
-    return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comments, searchTerm, sortBy, sortOrder]);
-
-  // 处理批量删除
-  const handleBulkDelete = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/comments/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        });
-      }
-
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    } catch (error) {
-      console.error('批量删除失败:', error);
-    }
+  const handleBulkDelete = () => {
+    bulkDeleteMutation.mutate(selectedIds);
   };
 
   const getContentPreview = (content) => {
@@ -164,12 +97,13 @@ export default function AdminCommentsPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setIsDeleteConfirmOpen(true)}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm"
+                disabled={bulkDeleteMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
               >
-                删除
+                {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
               </button>
               <button
-                onClick={() => setSelectedIds([])}
+                onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
                 取消
@@ -181,7 +115,7 @@ export default function AdminCommentsPage() {
         {/* 评论列表 */}
         {isLoading ? (
           <LoadingState.Spinner size="md" />
-        ) : filteredComments.length > 0 ? (
+        ) : comments.length > 0 ? (
           <div className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -190,12 +124,12 @@ export default function AdminCommentsPage() {
                     <th className="px-4 py-3 text-left">
                       <input
                         type="checkbox"
-                        checked={selectedIds.length === filteredComments.length && filteredComments.length > 0}
+                        checked={selectedIds.length === comments.length && comments.length > 0}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedIds(filteredComments.map((c) => c.id));
+                            selectAll(comments);
                           } else {
-                            setSelectedIds([]);
+                            clearSelection();
                           }
                         }}
                         className="rounded"
@@ -209,17 +143,17 @@ export default function AdminCommentsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredComments.map((comment) => (
+                  {comments.map((comment) => (
                     <tr key={comment.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
                           checked={selectedIds.includes(comment.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIds([...selectedIds, comment.id]);
-                            } else {
+                          onChange={() => {
+                            if (selectedIds.includes(comment.id)) {
                               setSelectedIds(selectedIds.filter((id) => id !== comment.id));
+                            } else {
+                              setSelectedIds([...selectedIds, comment.id]);
                             }
                           }}
                           className="rounded"

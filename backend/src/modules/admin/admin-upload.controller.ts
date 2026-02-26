@@ -1,18 +1,16 @@
 import {
   Controller,
   Post,
-  Req,
-  Res,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
+  BadRequestException,
 } from "@nestjs/common";
-import { Request, Response } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { extname, join } from "path";
 import { existsSync, mkdirSync } from "fs";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 // 老王注释：生成唯一文件名，避免重复
 function generateFilename(originalname: string) {
@@ -29,6 +27,7 @@ if (!existsSync(uploadsDir)) {
 }
 
 @Controller("admin/upload")
+@UseGuards(AdminAuthGuard)
 export class AdminUploadController {
   // 老王注释：上传单个图片文件
   @Post("image")
@@ -56,20 +55,10 @@ export class AdminUploadController {
     })
   )
   async uploadImage(
-    @UploadedFile() file: any,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @UploadedFile() file: any
   ) {
-    // 老王注释：检查管理员权限
-    const authorized = await isAdminAuthorized(req);
-    if (!authorized) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
-
     if (!file) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少文件");
     }
 
     // 老王注释：返回图片URL

@@ -1,14 +1,13 @@
-import { Controller, Get, Query, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { AdminLogService } from "../../common/services/admin-log.service";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 /**
  * 老王说：管理员日志控制器
  * 这个SB控制器提供日志查询接口
  */
 @Controller("admin/logs")
+@UseGuards(AdminAuthGuard)
 export class AdminLogsController {
   constructor(private readonly adminLogService: AdminLogService) {}
 
@@ -17,12 +16,7 @@ export class AdminLogsController {
    * GET /admin/logs?action=refund&resource=order&page=1&pageSize=50
    */
   @Get()
-  async query(@Query() query: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
-
+  async query(@Query() query: any) {
     const filters: any = {};
 
     if (query.action) {

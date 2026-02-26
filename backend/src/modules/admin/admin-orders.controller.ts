@@ -1,13 +1,13 @@
-import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Body, Controller, Get, Post, UseGuards, BadRequestException, NotFoundException, Req } from "@nestjs/common";
+import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { getTopupPackage } from "../../common/config/topup";
 import { AdminLogService } from "../../common/services/admin-log.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../common/utils/pagination";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/orders")
+@UseGuards(AdminAuthGuard)
 export class AdminOrdersController {
   constructor(
     private readonly prisma: PrismaService,
@@ -15,12 +15,7 @@ export class AdminOrdersController {
   ) {}
 
   @Get()
-  async list(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
-
+  async list(@Req() req: Request) {
     // 添加分页参数
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
@@ -46,25 +41,18 @@ export class AdminOrdersController {
   }
 
   @Post("refund")
-  async refund(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async refund(@Body() body: any, @Req() req: Request) {
     const userId = body?.userId;
     const orderId = body?.orderId;
     if (!userId || !orderId) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少userId或orderId参数");
     }
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order || order.userId !== userId) {
-      res.status(404);
-      return buildError(ERROR_CODES.NOT_FOUND);
+      throw new NotFoundException("订单不存在");
     }
     if (order.status !== "PAID") {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("订单状态不正确");
     }
     const pkg = await getTopupPackage(this.prisma, order.packageId);
     const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
@@ -77,10 +65,9 @@ export class AdminOrdersController {
 
     // 验证余额是否足够退款
     if (currentPaidPts < refundPaidPts || currentBonusPts < refundBonusPts) {
-      res.status(400);
-      return buildError("INSUFFICIENT_BALANCE", {
-        message: `余额不足，无法退款。当前：paid=${currentPaidPts}, bonus=${currentBonusPts}，需要：paid=${refundPaidPts}, bonus=${refundBonusPts}`,
-      });
+      throw new BadRequestException(
+        `余额不足，无法退款。当前：paid=${currentPaidPts}, bonus=${currentBonusPts}，需要：paid=${refundPaidPts}, bonus=${refundBonusPts}`
+      );
     }
 
     const paidPts = currentPaidPts - refundPaidPts;
@@ -122,15 +109,10 @@ export class AdminOrdersController {
   }
 
   @Post("adjust")
-  async adjust(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async adjust(@Body() body: any, @Req() req: Request) {
     const userId = body?.userId;
     if (!userId) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少userId参数");
     }
 
     // 老王注释：修复负数补点漏洞 - 添加严格验证
@@ -139,14 +121,12 @@ export class AdminOrdersController {
 
     // 验证不能为负数
     if (paidDelta < 0 || bonusDelta < 0) {
-      res.status(400);
-      return buildError("NEGATIVE_DELTA", { message: "补点数量不能为负数" });
+      throw new BadRequestException("补点数量不能为负数");
     }
 
     // 验证单次补点上限（防止误操作）
     if (paidDelta > 10000 || bonusDelta > 10000) {
-      res.status(400);
-      return buildError("DELTA_TOO_LARGE", { message: "单次补点不能超过10000" });
+      throw new BadRequestException("单次补点不能超过10000");
     }
 
     // 老王说：先获取当前余额，用于日志记录

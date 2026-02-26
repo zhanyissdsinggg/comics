@@ -1,29 +1,21 @@
-import { Body, Controller, Delete, Get, Patch, Post, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Body, Controller, Delete, Get, Patch, Post, UseGuards, BadRequestException, NotFoundException, Req } from "@nestjs/common";
+import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/promotions")
+@UseGuards(AdminAuthGuard)
 export class AdminPromotionsController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  async list(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async list() {
     const promotions = await this.prisma.promotion.findMany({ orderBy: { title: "asc" } });
     return { promotions };
   }
 
   @Get("defaults")
-  async defaults(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async defaults() {
     const fallback = await this.prisma.promotionFallback.findUnique({
       where: { key: "default" },
     });
@@ -31,11 +23,7 @@ export class AdminPromotionsController {
   }
 
   @Patch("defaults")
-  async updateDefaults(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async updateDefaults(@Body() body: any) {
     const payload = body?.defaults || {};
     const defaults = await this.prisma.promotionFallback.upsert({
       where: { key: "default" },
@@ -46,15 +34,10 @@ export class AdminPromotionsController {
   }
 
   @Post()
-  async create(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async create(@Body() body: any) {
     const promo = body?.promotion;
     if (!promo?.id) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少promotion.id参数");
     }
     const payload = {
       id: String(promo.id),
@@ -77,11 +60,7 @@ export class AdminPromotionsController {
   }
 
   @Patch(":id")
-  async update(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async update(@Body() body: any, @Req() req: Request) {
     const promoId = String(req.params.id || "");
     const promo = body?.promotion || {};
     const payload = {
@@ -108,16 +87,11 @@ export class AdminPromotionsController {
   }
 
   @Delete(":id")
-  async remove(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async remove(@Req() req: Request) {
     const promoId = String(req.params.id || "");
     const existing = await this.prisma.promotion.findUnique({ where: { id: promoId } });
     if (!existing) {
-      res.status(404);
-      return buildError(ERROR_CODES.NOT_FOUND);
+      throw new NotFoundException("促销活动不存在");
     }
     await this.prisma.promotion.delete({ where: { id: promoId } });
     return { ok: true };

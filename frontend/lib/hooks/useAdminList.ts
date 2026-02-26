@@ -85,9 +85,9 @@ export function useAdminList<T extends { id: string }>(
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // 老王注释：获取列表数据
+  // 获取列表数据
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['admin', endpoint, searchTerm, sortBy, sortOrder, JSON.stringify(filters)],
+    queryKey: ['admin', endpoint, { searchTerm, sortBy, sortOrder, filters }],
     queryFn: async () => {
       const params = new URLSearchParams();
 

@@ -1,10 +1,9 @@
-import { Controller, Get, Query, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { StatsService } from "../../common/services/stats.service";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/stats")
+@UseGuards(AdminAuthGuard)
 export class AdminStatsController {
   constructor(private readonly statsService: StatsService) {}
 
@@ -15,14 +14,8 @@ export class AdminStatsController {
   @Get("dashboard")
   async dashboard(
     @Query("from") from: string,
-    @Query("to") to: string,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Query("to") to: string
   ) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
     const stats = await this.statsService.getDashboardStats(from, to);
     return stats;
   }
@@ -30,14 +23,8 @@ export class AdminStatsController {
   @Get()
   async list(
     @Query("from") from: string,
-    @Query("to") to: string,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Query("to") to: string
   ) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
     const stats = await this.statsService.getDailyStats(from, to);
     const summary = stats.reduce(
       (acc, item) => {

@@ -1,29 +1,20 @@
-import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/regions")
+@UseGuards(AdminAuthGuard)
 export class AdminRegionsController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  async getConfig(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async getConfig() {
     const config = await this.prisma.regionConfig.findUnique({ where: { key: "default" } });
     return { config: config?.payload || { countryCodes: [], lengthRules: {} } };
   }
 
   @Post()
-  async save(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async save(@Body() body: any) {
     const countryCodes = Array.isArray(body?.countryCodes) ? body.countryCodes : [];
     const lengthRules = body?.lengthRules || {};
     const payload = {

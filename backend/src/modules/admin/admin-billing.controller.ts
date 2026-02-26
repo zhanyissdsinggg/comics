@@ -1,35 +1,25 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 import { listTopupPackages } from "../../common/config/topup";
 import { getPlanCatalog } from "../../common/config/plans";
 
 @Controller("admin/billing")
+@UseGuards(AdminAuthGuard)
 export class AdminBillingController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get("topups")
-  async listTopups(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async listTopups() {
     const packages = await listTopupPackages(this.prisma);
     return { packages };
   }
 
   @Post("topups")
-  async createTopup(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async createTopup(@Body() body: any) {
     const id = body?.packageId || body?.id;
     if (!id) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new Error('Package ID is required');
     }
     const payload = {
       id,
@@ -50,19 +40,9 @@ export class AdminBillingController {
   }
 
   @Patch("topups/:id")
-  async updateTopup(
-    @Param("id") id: string,
-    @Body() body: any,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
-  ) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async updateTopup(@Param("id") id: string, @Body() body: any) {
     if (!id) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new Error('Package ID is required');
     }
     const record = await this.prisma.topupPackage.update({
       where: { id },
@@ -80,25 +60,16 @@ export class AdminBillingController {
   }
 
   @Get("plans")
-  async listPlans(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async listPlans() {
     const catalog = await getPlanCatalog(this.prisma);
     return { plans: Object.values(catalog) };
   }
 
   @Post("plans")
-  async createPlan(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async createPlan(@Body() body: any) {
     const id = body?.id;
     if (!id) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new Error('Plan ID is required');
     }
     const payload = {
       id,
@@ -120,19 +91,9 @@ export class AdminBillingController {
   }
 
   @Patch("plans/:id")
-  async updatePlan(
-    @Param("id") id: string,
-    @Body() body: any,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
-  ) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async updatePlan(@Param("id") id: string, @Body() body: any) {
     if (!id) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new Error('Plan ID is required');
     }
     const record = await this.prisma.subscriptionPlan.update({
       where: { id },

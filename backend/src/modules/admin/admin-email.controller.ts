@@ -1,12 +1,12 @@
-import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Body, Controller, Get, Post, UseGuards, BadRequestException, Req } from "@nestjs/common";
+import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { EmailService } from "../email/email.service";
 import { encryptString, isEncrypted } from "../../common/utils/crypto";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/email")
+@UseGuards(AdminAuthGuard)
 export class AdminEmailController {
   constructor(
     private readonly prisma: PrismaService,
@@ -14,11 +14,7 @@ export class AdminEmailController {
   ) {}
 
   @Get()
-  async getConfig(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async getConfig() {
     const config = await this.prisma.emailConfig.findUnique({ where: { key: "default" } });
     const payload = (config?.payload || {}) as Record<string, any>;
     const safePayload = {
@@ -31,11 +27,7 @@ export class AdminEmailController {
   }
 
   @Post()
-  async save(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async save(@Body() body: any, @Req() req: Request) {
     const existing = await this.prisma.emailConfig.findUnique({ where: { key: "default" } });
     const current = (existing?.payload || {}) as Record<string, any>;
     const nextResendKeyRaw = String(body?.resendApiKey || "");
@@ -89,15 +81,10 @@ export class AdminEmailController {
   }
 
   @Post("test")
-  async test(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async test(@Body() body: any) {
     const to = String(body?.to || "").trim();
     if (!to) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少收件人地址");
     }
     const result = await this.emailService.sendEmail(
       to,

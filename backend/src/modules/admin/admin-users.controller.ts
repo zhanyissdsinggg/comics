@@ -1,21 +1,16 @@
-import { Body, Controller, Get, Patch, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Body, Controller, Get, Patch, UseGuards, BadRequestException, Req } from "@nestjs/common";
+import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../common/utils/pagination";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/users")
+@UseGuards(AdminAuthGuard)
 export class AdminUsersController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  async list(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
-
+  async list(@Req() req: Request) {
     // 添加分页参数
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
@@ -34,12 +29,7 @@ export class AdminUsersController {
   }
 
   @Get("support")
-  async tickets(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
-
+  async tickets(@Req() req: Request) {
     // 添加分页参数
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
@@ -57,15 +47,10 @@ export class AdminUsersController {
   }
 
   @Patch("block")
-  async block(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async block(@Body() body: any) {
     const userId = body?.userId;
     if (!userId) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少userId参数");
     }
     const user = await this.prisma.user.update({
       where: { id: userId },

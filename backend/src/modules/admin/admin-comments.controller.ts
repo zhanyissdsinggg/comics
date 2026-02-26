@@ -1,19 +1,14 @@
-import { Body, Controller, Get, Patch, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Body, Controller, Get, Patch, UseGuards, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/comments")
+@UseGuards(AdminAuthGuard)
 export class AdminCommentsController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  async list(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async list() {
     const comments = await this.prisma.comment.findMany({
       orderBy: { createdAt: "desc" },
       include: { user: { select: { email: true } } },
@@ -32,17 +27,12 @@ export class AdminCommentsController {
   }
 
   @Patch("hide")
-  async hide(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async hide(@Body() body: any) {
     const seriesId = body?.seriesId;
     const commentId = body?.commentId;
     const hidden = Boolean(body?.hidden);
     if (!seriesId || !commentId) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少必需参数");
     }
     const comment = await this.prisma.comment.update({
       where: { id: commentId },
@@ -52,15 +42,10 @@ export class AdminCommentsController {
   }
 
   @Patch("recalc-rating")
-  async recalc(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async recalc(@Body() body: any) {
     const seriesId = body?.seriesId;
     if (!seriesId) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少seriesId参数");
     }
     const stats = await this.prisma.rating.aggregate({
       where: { seriesId },

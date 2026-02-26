@@ -1,8 +1,6 @@
-import { Controller, Get, Query, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { StatsService } from "../../common/services/stats.service";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 function getRange(range?: string) {
   const today = new Date();
@@ -23,6 +21,7 @@ function getRange(range?: string) {
 }
 
 @Controller("admin/rankings")
+@UseGuards(AdminAuthGuard)
 export class AdminRankingsController {
   constructor(private readonly statsService: StatsService) {}
 
@@ -30,14 +29,8 @@ export class AdminRankingsController {
   async list(
     @Query("range") range: string,
     @Query("type") type: string,
-    @Query("limit") limit: string,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Query("limit") limit: string
   ) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
     const { from, to } = getRange(range);
     const size = Number(limit || 10);
     const list = await this.statsService.getTopSeries(from, to, type || "all", size);

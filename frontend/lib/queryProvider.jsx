@@ -18,16 +18,16 @@ function createQueryClient() {
       queries: {
         // 数据缓存5分钟
         staleTime: 5 * 60 * 1000,
-        // 后台重新获取数据的间隔
-        refetchInterval: 10 * 60 * 1000,
-        // 窗口获得焦点时重新获取
-        refetchOnWindowFocus: true,
-        // 重新连接时重新获取
-        refetchOnReconnect: true,
-        // 挂载时重新获取
-        refetchOnMount: true,
-        // 重试次数
-        retry: 3,
+        // 垃圾回收时间10分钟
+        gcTime: 10 * 60 * 1000,
+        // 禁用窗口获得焦点时重新获取（避免过度重新获取）
+        refetchOnWindowFocus: false,
+        // 重新连接时仅在数据过期时重新获取
+        refetchOnReconnect: 'stale',
+        // 挂载时仅在数据过期时重新获取
+        refetchOnMount: 'stale',
+        // 重试次数减少到2次
+        retry: 2,
         // 重试延迟（指数退避）
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       },

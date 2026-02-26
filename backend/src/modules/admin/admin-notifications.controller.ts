@@ -1,21 +1,16 @@
-import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
-import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Body, Controller, Get, Post, UseGuards, BadRequestException, Req } from "@nestjs/common";
+import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../common/utils/pagination";
+import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/notifications")
+@UseGuards(AdminAuthGuard)
 export class AdminNotificationsController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  async list(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
-
+  async list(@Req() req: Request) {
     // 添加分页参数
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
@@ -33,15 +28,10 @@ export class AdminNotificationsController {
   }
 
   @Post()
-  async create(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    if (!isAdminAuthorized(req, body)) {
-      res.status(403);
-      return buildError(ERROR_CODES.FORBIDDEN);
-    }
+  async create(@Body() body: any) {
     const payload = body?.notification || body || {};
     if (!payload.title) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少title参数");
     }
     if (payload.broadcast) {
       // 艹！这个SB代码之前直接加载所有用户到内存，现在改成分页处理
@@ -80,8 +70,7 @@ export class AdminNotificationsController {
     }
     const userId = payload.userId;
     if (!userId) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      throw new BadRequestException("缺少userId参数");
     }
     const notification = await this.prisma.notification.create({
       data: {
