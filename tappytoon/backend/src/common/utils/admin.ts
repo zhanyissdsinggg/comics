@@ -38,21 +38,19 @@ if (!validateAdminKey(ADMIN_KEY)) {
 console.log("✅ 管理员密钥验证通过");
 
 export function isAdminAuthorized(req: Request, body?: any) {
-  // 老王说：优先检查JWT认证（middleware设置的req.user）
+  // 优先检查JWT认证（middleware设置的req.user）
   const user = (req as any).user;
   if (user && user.role === "admin") {
     return true;
   }
 
-  // 老王说：如果JWT认证失败，尝试旧的密钥认证（向后兼容）
-  const keyFromQuery = req.query?.key;
-  const keyFromBody = body?.key;
-  const headerKey = req.headers["x-admin-key"];
+  // 仅从Authorization header读取token（安全做法）
+  // 不允许从query参数或body传递admin key（防止日志泄露）
   const authHeader = req.headers.authorization;
   const bearer =
     typeof authHeader === "string" && authHeader.toLowerCase().startsWith("bearer ")
       ? authHeader.slice(7)
       : "";
-  const key = (keyFromQuery || keyFromBody || headerKey || bearer || "").toString();
-  return key === ADMIN_KEY;
+
+  return bearer === ADMIN_KEY;
 }

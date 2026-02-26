@@ -265,10 +265,11 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     const bonusShortfall = Math.max(0, refundBonusPts - currentBonusPts);
     const totalShortfall = paidShortfall + bonusShortfall;
 
-    // 老王说：如果点数不足，拒绝退款
+    // 如果点数不足，拒绝退款
     if (totalShortfall > 0) {
+      // 脱敏日志：不记录具体的用户点数信息
       console.error(
-        `❌ 退款失败：用户点数不足。当前付费点数=${currentPaidPts}, 需扣除=${refundPaidPts}, 不足=${paidShortfall}; 当前赠送点数=${currentBonusPts}, 需扣除=${refundBonusPts}, 不足=${bonusShortfall}`
+        `❌ 退款失败：用户点数不足。缺少点数: ${totalShortfall}`
       );
       return {
         ok: false,

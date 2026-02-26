@@ -5,6 +5,7 @@ import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { getTopupPackage } from "../../common/config/topup";
 import { AdminLogService } from "../../common/services/admin-log.service";
+import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../common/utils/pagination";
 
 @Controller("admin/orders")
 export class AdminOrdersController {
@@ -19,15 +20,29 @@ export class AdminOrdersController {
       res.status(403);
       return buildError(ERROR_CODES.FORBIDDEN);
     }
-    const orders = await this.prisma.order.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    return {
-      orders: orders.map((order: any) => ({
+
+    // 添加分页参数
+    const { page, pageSize } = parsePaginationParams(req.query);
+    const offset = calculateOffset(page, pageSize);
+
+    const [orders, total] = await Promise.all([
+      this.prisma.order.findMany({
+        orderBy: { createdAt: "desc" },
+        take: pageSize,
+        skip: offset,
+      }),
+      this.prisma.order.count(),
+    ]);
+
+    return buildPaginationResult(
+      orders.map((order: any) => ({
         ...order,
         orderId: order.id,
       })),
-    };
+      total,
+      page,
+      pageSize
+    );
   }
 
   @Post("refund")

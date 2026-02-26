@@ -6,18 +6,30 @@
 
 /**
  * 获取admin token
- * 老王注释：从localStorage里拿token，别tm乱搞
+ * 注意：token现在存储在httpOnly cookie中，浏览器会自动处理
+ * 前端不需要手动读取token，fetch会自动包含cookie
  */
 export function getAdminToken(): string {
-  if (typeof window === 'undefined') {
+  // 返回空字符串，因为token已经在httpOnly cookie中
+  // 浏览器会自动在请求中包含cookie
+  return '';
+}
+
+/**
+ * 获取CSRF token
+ * 从meta标签中读取CSRF token，用于防止CSRF攻击
+ */
+function getCsrfToken(): string {
+  if (typeof document === 'undefined') {
     return '';
   }
-  return localStorage.getItem('admin_token') || '';
+  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  return token || '';
 }
 
 /**
  * 统一的admin fetch wrapper
- * 老王说：所有admin API请求都用这个函数，别tm手动添加Authorization header
+ * 所有admin API请求都用这个函数，自动处理Authorization和CSRF保护
  *
  * @param url - API路径
  * @param options - fetch选项
@@ -31,12 +43,12 @@ export async function adminFetch(
 
   const headers = new Headers(options.headers || {});
 
-  // 老王注释：如果没有Authorization header，自动添加
+  // 如果没有Authorization header，自动添加
   if (!headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  // 老王注释：如果是POST/PATCH/PUT且没有Content-Type，设置为application/json
+  // 如果是POST/PATCH/PUT且没有Content-Type，设置为application/json
   if (
     ['POST', 'PATCH', 'PUT'].includes(options.method?.toUpperCase() || '') &&
     !headers.has('Content-Type') &&
@@ -45,9 +57,19 @@ export async function adminFetch(
     headers.set('Content-Type', 'application/json');
   }
 
+  // 为POST/PATCH/DELETE请求添加CSRF token（防止CSRF攻击）
+  if (['POST', 'PATCH', 'DELETE'].includes(options.method?.toUpperCase() || '')) {
+    const csrfToken = getCsrfToken();
+    if (csrfToken && !headers.has('X-CSRF-Token')) {
+      headers.set('X-CSRF-Token', csrfToken);
+    }
+  }
+
+  // 确保credentials包含cookie（httpOnly cookie会自动包含）
   return fetch(url, {
     ...options,
     headers,
+    credentials: 'include',
   });
 }
 

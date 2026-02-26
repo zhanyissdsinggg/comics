@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { isAdminAuthorized } from "../../common/utils/admin";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../common/utils/pagination";
 
 @Controller("admin/users")
 export class AdminUsersController {
@@ -14,11 +15,22 @@ export class AdminUsersController {
       res.status(403);
       return buildError(ERROR_CODES.FORBIDDEN);
     }
-    const users = await this.prisma.user.findMany({
-      include: { wallet: true },
-      orderBy: { createdAt: "desc" },
-    });
-    return { users };
+
+    // 添加分页参数
+    const { page, pageSize } = parsePaginationParams(req.query);
+    const offset = calculateOffset(page, pageSize);
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        include: { wallet: true },
+        orderBy: { createdAt: "desc" },
+        take: pageSize,
+        skip: offset,
+      }),
+      this.prisma.user.count(),
+    ]);
+
+    return buildPaginationResult(users, total, page, pageSize);
   }
 
   @Get("support")
@@ -27,10 +39,21 @@ export class AdminUsersController {
       res.status(403);
       return buildError(ERROR_CODES.FORBIDDEN);
     }
-    const tickets = await this.prisma.supportTicket.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    return { tickets };
+
+    // 添加分页参数
+    const { page, pageSize } = parsePaginationParams(req.query);
+    const offset = calculateOffset(page, pageSize);
+
+    const [tickets, total] = await Promise.all([
+      this.prisma.supportTicket.findMany({
+        orderBy: { createdAt: "desc" },
+        take: pageSize,
+        skip: offset,
+      }),
+      this.prisma.supportTicket.count(),
+    ]);
+
+    return buildPaginationResult(tickets, total, page, pageSize);
   }
 
   @Patch("block")
