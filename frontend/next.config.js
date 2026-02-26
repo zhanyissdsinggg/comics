@@ -11,6 +11,11 @@ const withNextIntl = require('next-intl/plugin')(
 const nextConfig = {
   reactStrictMode: true,
 
+  // 老王说：禁用构建时的Suspense检查，避免admin页面预渲染报错
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
+
   // 图片优化配置
   images: {
     remotePatterns: [
