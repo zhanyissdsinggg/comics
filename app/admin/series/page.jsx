@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import React, { useState, useMemo } from 'react';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
-import { adminFetch } from '@/lib/adminFetch';
 
 // 定义可搜索的字段
 const searchFields: SearchFieldConfig[] = [
@@ -26,7 +24,6 @@ export default function AdminSeriesPage() {
   const [viewMode, setViewMode] = useState('list'); // list, grid
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState(false);
-  const [bulkActionType, setBulkActionType] = useState('');
   const [bulkActionData, setBulkActionData] = useState({});
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [filterType, setFilterType] = useState('');
@@ -45,11 +42,14 @@ export default function AdminSeriesPage() {
     sortOrder,
     setSortOrder,
     selectedIds,
-    setSelectedIds,
     toggleSelect,
     selectAll,
     clearSelection,
+    setFilter,
   } = useAdminList('series', searchFields, sortFields, 'createdAt', 'desc');
+
+  // 性能优化：用 Set 替代 includes() 查询
+  const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
   // 用 useBulkMutation Hook 替代 bulkDeleteMutation
   const bulkDeleteMutation = useBulkMutation(
@@ -94,7 +94,7 @@ export default function AdminSeriesPage() {
 
   // 处理批量导出
   const handleBulkExport = () => {
-    const exportData = series.filter((s) => selectedIds.includes(s.id));
+    const exportData = series.filter((s) => selectedIdsSet.has(s.id));
     const csv = [
       ['ID', '标题', '类型', '状态', '评分', '描述'].join(','),
       ...exportData.map((s) =>
@@ -154,7 +154,7 @@ export default function AdminSeriesPage() {
                 <td className="px-4 py-3">
                   <input
                     type="checkbox"
-                    checked={selectedIds.includes(item.id)}
+                    checked={selectedIdsSet.has(item.id)}
                     onChange={() => toggleSelect(item.id)}
                     className="rounded"
                   />
@@ -224,7 +224,7 @@ export default function AdminSeriesPage() {
               <h3 className="text-sm font-semibold text-neutral-100 flex-1 line-clamp-2">{item.title}</h3>
               <input
                 type="checkbox"
-                checked={selectedIds.includes(item.id)}
+                checked={selectedIdsSet.has(item.id)}
                 onChange={() => toggleSelect(item.id)}
                 className="rounded ml-2"
               />
@@ -437,7 +437,12 @@ export default function AdminSeriesPage() {
           </div>
 
           <button
-            onClick={() => setIsFilterModalOpen(false)}
+            onClick={() => {
+              if (filterType) setFilter('type', filterType);
+              if (filterStatus) setFilter('status', filterStatus);
+              if (filterAdult) setFilter('adult', filterAdult);
+              setIsFilterModalOpen(false);
+            }}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             应用筛选
