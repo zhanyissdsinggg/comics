@@ -1,56 +1,75 @@
 ﻿'use client';
 
-import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import React, { useState, useMemo } from 'react';
+
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
+import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
+
+
+// 老王注释：定义可搜索的字段
+const searchFields: SearchFieldConfig[] = [
+  { field: 'id', type: 'string' },
+  { field: 'subject', type: 'string' },
+  { field: 'userId', type: 'string' },
+];
+
+// 老王注释：定义可排序的字段
+const sortFields: SortFieldConfig[] = [
+  { field: 'createdAt', type: 'date' },
+  { field: 'status', type: 'string' },
+];
 
 export default function AdminSupportPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [selectedIds, setSelectedIds] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [replyContent, setReplyContent] = useState('');
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
-  // 获取工单列表
-  const { data: ticketsData, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'support', { searchTerm, statusFilter, sortBy, sortOrder }],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      if (statusFilter) params.append('status', statusFilter);
-      params.append('sortBy', sortBy);
-      params.append('sortOrder', sortOrder);
+  // 老王说：用useAdminList Hook替代所有搜索、排序、筛选逻辑
+  const {
+    items: filteredTickets,
+    isLoading,
+    refetch,
+    searchTerm,
+    setSearchTerm,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    selectedIds,
+    
+    toggleSelect,
+    selectAll,
+    clearSelection,
+  } = useAdminList('support', searchFields, sortFields, 'createdAt', 'desc');
 
-      const response = await fetch(`/api/admin/support?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+  // 性能优化：用 Set 替代 includes() 查询
+  const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  // 老王说：用useBulkDelete Hook替代handleBulkDelete async函数
+  const bulkDeleteMutation = useBulkDelete('support', {
+    onSuccess: () => {
+      clearSelection();
+      setIsDeleteConfirmOpen(false);
+      refetch();
     },
-    staleTime: 5 * 60 * 1000,
+    onError: (error) => {
+      alert(`删除失败: ${error.message}`);
+    },
   });
 
-  const tickets = ticketsData?.tickets || [];
-
-  // 回复工单 mutation
+  // 老王说：用useMutation替代replyTicketMutation
   const replyTicketMutation = useMutation({
-    mutationFn: async (data) => {
-      const response = await fetch(`/api/admin/support/${data.ticketId}/reply`, {
+    mutationFn: async (data: { ticketId: string; message: string }) => {
+      const response = await adminFetch(`/api/admin/support/${data.ticketId}/reply`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ message: data.message }),
       });
+
       if (!response.ok) throw new Error('回复工单失败');
       return response.json();
     },
@@ -59,43 +78,26 @@ export default function AdminSupportPage() {
       setIsReplyModalOpen(false);
       refetch();
     },
-  });
-
-  // 批量删除 mutation
-  const bulkDeleteMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) =>
-        fetch(`/api/admin/support/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        })
-      );
-      await Promise.all(promises);
-    },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
+    onError: (error) => {
+      alert(`回复失败: ${error.message}`);
     },
   });
 
-  // 关闭工单 mutation
+  // 老王说：用useMutation替代closeTicketMutation
   const closeTicketMutation = useMutation({
-    mutationFn: async (ticketId) => {
-      const response = await fetch(`/api/admin/support/${ticketId}/close`, {
+    mutationFn: async (ticketId: string) => {
+      const response = await adminFetch(`/api/admin/support/${ticketId}/close`, {
         method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
       });
+
       if (!response.ok) throw new Error('关闭工单失败');
       return response.json();
     },
     onSuccess: () => {
       refetch();
+    },
+    onError: (error) => {
+      alert(`关闭失败: ${error.message}`);
     },
   });
 
@@ -105,9 +107,9 @@ export default function AdminSupportPage() {
   };
 
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
-  const handleCloseTicket = (ticketId) => closeTicketMutation.mutate(ticketId);
+  const handleCloseTicket = (ticketId: string) => closeTicketMutation.mutate(ticketId);
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
       case 'OPEN':
@@ -123,8 +125,8 @@ export default function AdminSupportPage() {
     }
   };
 
-  const getStatusLabel = (status) => {
-    const statusMap = {
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
       open: '待处理',
       OPEN: '待处理',
       in_progress: '处理中',
@@ -176,12 +178,13 @@ export default function AdminSupportPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setIsDeleteConfirmOpen(true)}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm"
+                disabled={bulkDeleteMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
               >
-                删除
+                {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
               </button>
               <button
-                onClick={() => setSelectedIds([])}
+                onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
                 取消
@@ -193,7 +196,7 @@ export default function AdminSupportPage() {
         {/* 工单列表 */}
         {isLoading ? (
           <LoadingState.Spinner size="md" />
-        ) : tickets.length > 0 ? (
+        ) : filteredTickets.length > 0 ? (
           <div className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -202,12 +205,12 @@ export default function AdminSupportPage() {
                     <th className="px-4 py-3 text-left">
                       <input
                         type="checkbox"
-                        checked={selectedIds.length === tickets.length && tickets.length > 0}
+                        checked={selectedIds.length === filteredTickets.length && filteredTickets.length > 0}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedIds(tickets.map((t) => t.id));
+                            selectAll(filteredTickets);
                           } else {
-                            setSelectedIds([]);
+                            clearSelection();
                           }
                         }}
                         className="rounded"
@@ -222,19 +225,13 @@ export default function AdminSupportPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {tickets.map((ticket) => (
+                  {filteredTickets.map((ticket) => (
                     <tr key={ticket.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
-                          checked={selectedIds.includes(ticket.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIds([...selectedIds, ticket.id]);
-                            } else {
-                              setSelectedIds(selectedIds.filter((id) => id !== ticket.id));
-                            }
-                          }}
+                          checked={selectedIdsSet.has(ticket.id)}
+                          onChange={() => toggleSelect(ticket.id)}
                           className="rounded"
                         />
                       </td>
@@ -255,14 +252,16 @@ export default function AdminSupportPage() {
                             setSelectedTicketId(ticket.id);
                             setIsReplyModalOpen(true);
                           }}
-                          className="text-blue-400 hover:text-blue-300 text-sm"
+                          disabled={replyTicketMutation.isPending}
+                          className="text-blue-400 hover:text-blue-300 text-sm disabled:opacity-50"
                         >
                           回复
                         </button>
                         {ticket.status !== 'closed' && ticket.status !== 'CLOSED' && (
                           <button
                             onClick={() => handleCloseTicket(ticket.id)}
-                            className="text-green-400 hover:text-green-300 text-sm"
+                            disabled={closeTicketMutation.isPending}
+                            className="text-green-400 hover:text-green-300 text-sm disabled:opacity-50"
                           >
                             关闭
                           </button>
@@ -286,20 +285,6 @@ export default function AdminSupportPage() {
         onClose={() => setIsFilterModalOpen(false)}
       >
         <div className="space-y-4">
-          <div>
-            <label className="text-sm text-neutral-400">工单状态</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="">全部</option>
-              <option value="open">待处理</option>
-              <option value="in_progress">处理中</option>
-              <option value="closed">已关闭</option>
-            </select>
-          </div>
-
           <div>
             <label className="text-sm text-neutral-400">排序字段</label>
             <select
@@ -338,10 +323,10 @@ export default function AdminSupportPage() {
 
           <button
             onClick={handleReplyTicket}
-            disabled={!replyContent.trim()}
+            disabled={!replyContent.trim() || replyTicketMutation.isPending}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            发送回复
+            {replyTicketMutation.isPending ? '发送中...' : '发送回复'}
           </button>
         </div>
       </Modal>

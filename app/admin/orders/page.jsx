@@ -1,180 +1,98 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
+import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
+
+// 老王注释：定义可搜索的字段
+const searchFields: SearchFieldConfig[] = [
+  { field: 'id', type: 'string' },
+  { field: 'orderId', type: 'string' },
+  { field: 'userId', type: 'string' },
+];
+
+// 老王注释：定义可排序的字段
+const sortFields: SortFieldConfig[] = [
+  { field: 'createdAt', type: 'date' },
+  { field: 'amount', type: 'number' },
+  { field: 'status', type: 'string' },
+];
 
 export default function AdminOrdersPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [selectedIds, setSelectedIds] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [bulkActionType, setBulkActionType] = useState('');
 
-  // 获取订单列表
-  const { data: ordersData, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'orders', { searchTerm, statusFilter, sortBy, sortOrder }],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      if (statusFilter) params.append('status', statusFilter);
-      params.append('sortBy', sortBy);
-      params.append('sortOrder', sortOrder);
+  // 用 useAdminList Hook 替代所有搜索、排序、筛选逻辑
+  const {
+    items: filteredOrders,
+    isLoading,
+    refetch,
+    searchTerm,
+    setSearchTerm,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    selectedIds,
+    toggleSelect,
+    selectAll,
+    clearSelection,
+  } = useAdminList('orders', searchFields, sortFields, 'createdAt', 'desc');
 
-      const response = await fetch(`/api/admin/orders?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+  // 性能优化：用 Set 替代 includes() 查询
+  const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  // 老王说：用useBulkMutation Hook替代bulkRefundMutation
+  const bulkRefundMutation = useBulkMutation(
+    {
+      endpoint: 'orders/refund',
+      method: 'POST',
+      bodyBuilder: (id) => {
+        // 老王注释：这里需要从filteredOrders中找到对应的order获取userId
+        const order = filteredOrders.find((o) => o.id === id);
+        return { userId: order?.userId };
+      },
     },
-    staleTime: 5 * 60 * 1000,
-  });
+    {
+      onSuccess: () => {
+        clearSelection();
+        setIsBulkActionModalOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        alert(`退款失败: ${error.message}`);
+      },
+    }
+  );
 
-  const orders = ordersData?.orders || [];
-
-  // 批量退款 mutation
-  const bulkRefundMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) => {
-        const order = orders.find((o) => o.id === id);
-        if (!order) return Promise.resolve();
-
-        return fetch(`/api/admin/orders/${id}/refund`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId: order.userId }),
-        });
-      });
-      await Promise.all(promises);
+  // 老王说：用useBulkMutation Hook替代bulkDeleteMutation
+  const bulkDeleteMutation = useBulkMutation(
+    {
+      endpoint: 'orders',
+      method: 'DELETE',
     },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsBulkActionModalOpen(false);
-      refetch();
-    },
-  });
-
-  // 批量删除 mutation
-  const bulkDeleteMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) =>
-        fetch(`/api/admin/orders/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        })
-      );
-      await Promise.all(promises);
-    },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    },
-  });
+    {
+      onSuccess: () => {
+        clearSelection();
+        setIsDeleteConfirmOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        alert(`删除失败: ${error.message}`);
+      },
+    }
+  );
 
   const handleBulkRefund = () => bulkRefundMutation.mutate(selectedIds);
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
 
-  // 过滤和排序
-  const filteredOrders = useMemo(() => {
-    let result = orders ? [...orders] : [];
-
-    // 搜索过滤
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (order) =>
-          order.id.toString().includes(term) ||
-          order.orderId?.toString().includes(term) ||
-          order.userId?.toString().includes(term)
-      );
-    }
-
-    // 排序
-    result.sort((a, b) => {
-      let aVal, bVal;
-      if (sortBy === 'createdAt') {
-        aVal = new Date(a.createdAt || 0).getTime();
-        bVal = new Date(b.createdAt || 0).getTime();
-      } else if (sortBy === 'amount') {
-        aVal = Number(a.amount) || 0;
-        bVal = Number(b.amount) || 0;
-      } else if (sortBy === 'status') {
-        aVal = a.status || '';
-        bVal = b.status || '';
-      }
-
-      if (sortOrder === 'asc') {
-        return aVal > bVal ? 1 : -1;
-      } else {
-        return aVal < bVal ? 1 : -1;
-      }
-    });
-
-    return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orders, searchTerm, sortBy, sortOrder]);
-
-  // 处理批量退款
-  const handleBulkRefund = async () => {
-    try {
-      for (const id of selectedIds) {
-        const order = orders.find((o) => o.id === id);
-        if (!order) continue;
-
-        await fetch(`/api/admin/orders/${id}/refund`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId: order.userId }),
-        });
-      }
-
-      setSelectedIds([]);
-      setIsBulkActionModalOpen(false);
-      refetch();
-    } catch (error) {
-      console.error('批量退款失败:', error);
-    }
-  };
-
-  // 处理批量删除
-  const handleBulkDelete = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/orders/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        });
-      }
-
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    } catch (error) {
-      console.error('批量删除失败:', error);
-    }
-  };
-
-  // 处理导出
+  // 老王说：处理导出
   const handleExport = () => {
-    const exportData = filteredOrders.filter((o) => selectedIds.includes(o.id));
+    const exportData = filteredOrders.filter((o) => selectedIdsSet.has(o.id));
     const csv = [
       ['订单ID', '用户ID', '金额', '状态', '创建时间'].join(','),
       ...exportData.map((o) =>
@@ -198,8 +116,8 @@ export default function AdminOrdersPage() {
   };
 
   // 状态映射
-  const getStatusLabel = (status) => {
-    const statusMap = {
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
       PENDING: '待支付',
       PAID: '已支付',
       COMPLETED: '已完成',
@@ -213,7 +131,7 @@ export default function AdminOrdersPage() {
     return statusMap[status] || status || '-';
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'PENDING':
       case 'pending':
@@ -277,9 +195,10 @@ export default function AdminOrdersPage() {
                   setBulkActionType('refund');
                   setIsBulkActionModalOpen(true);
                 }}
-                className="px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 text-sm"
+                disabled={bulkRefundMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 text-sm disabled:opacity-50"
               >
-                退款
+                {bulkRefundMutation.isPending ? '退款中...' : '退款'}
               </button>
               <button
                 onClick={handleExport}
@@ -289,12 +208,13 @@ export default function AdminOrdersPage() {
               </button>
               <button
                 onClick={() => setIsDeleteConfirmOpen(true)}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm"
+                disabled={bulkDeleteMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
               >
-                删除
+                {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
               </button>
               <button
-                onClick={() => setSelectedIds([])}
+                onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
                 取消
@@ -318,9 +238,9 @@ export default function AdminOrdersPage() {
                         checked={selectedIds.length === filteredOrders.length && filteredOrders.length > 0}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedIds(filteredOrders.map((o) => o.id));
+                            selectAll(filteredOrders);
                           } else {
-                            setSelectedIds([]);
+                            clearSelection();
                           }
                         }}
                         className="rounded"
@@ -340,14 +260,8 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
-                          checked={selectedIds.includes(order.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIds([...selectedIds, order.id]);
-                            } else {
-                              setSelectedIds(selectedIds.filter((id) => id !== order.id));
-                            }
-                          }}
+                          checked={selectedIdsSet.has(order.id)}
+                          onChange={() => toggleSelect(order.id)}
                           className="rounded"
                         />
                       </td>
@@ -372,7 +286,8 @@ export default function AdminOrdersPage() {
                               setBulkActionType('refund');
                               setIsBulkActionModalOpen(true);
                             }}
-                            className="text-orange-400 hover:text-orange-300 text-sm"
+                            disabled={bulkRefundMutation.isPending}
+                            className="text-orange-400 hover:text-orange-300 text-sm disabled:opacity-50"
                           >
                             退款
                           </button>
@@ -396,22 +311,6 @@ export default function AdminOrdersPage() {
         onClose={() => setIsFilterModalOpen(false)}
       >
         <div className="space-y-4">
-          <div>
-            <label className="text-sm text-neutral-400">订单状态</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="">全部</option>
-              <option value="PENDING">待支付</option>
-              <option value="PAID">已支付</option>
-              <option value="COMPLETED">已完成</option>
-              <option value="REFUNDED">已退款</option>
-              <option value="FAILED">失败</option>
-            </select>
-          </div>
-
           <div>
             <label className="text-sm text-neutral-400">排序字段</label>
             <select

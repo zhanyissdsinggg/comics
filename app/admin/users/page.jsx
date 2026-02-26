@@ -1,249 +1,132 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { useAdminList, SearchFieldConfig, SortFieldConfig } from '@/lib/hooks/useAdminList';
+import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
+
+
+// 老王注释：定义可搜索的字段
+const searchFields: SearchFieldConfig[] = [
+  { field: 'id', type: 'string' },
+  { field: 'email', type: 'string' },
+];
+
+// 老王注释：定义可排序的字段
+const sortFields: SortFieldConfig[] = [
+  { field: 'createdAt', type: 'date' },
+  { field: 'email', type: 'string' },
+];
 
 export default function AdminUsersPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [selectedIds, setSelectedIds] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isBulkActionModalOpen, setIsBulkActionModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [bulkActionType, setBulkActionType] = useState('');
+  
 
-  // 获取用户列表
-  const { data: usersData, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'users', { searchTerm, statusFilter, sortBy, sortOrder }],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      if (statusFilter) params.append('status', statusFilter);
-      params.append('sortBy', sortBy);
-      params.append('sortOrder', sortOrder);
+  // 老王说：用useAdminList Hook替代所有搜索、排序、筛选逻辑
+  const {
+    items: filteredUsers,
+    isLoading,
+    refetch,
+    searchTerm,
+    setSearchTerm,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    selectedIds,
+    
+    toggleSelect,
+    selectAll,
+    clearSelection,
+  } = useAdminList('users', searchFields, sortFields, 'createdAt', 'desc');
 
-      const response = await fetch(`/api/admin/users?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+  // 性能优化：用 Set 替代 includes() 查询
+  const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-  const users = usersData?.users || [];
+  // 老王说：用useBulkMutation Hook替代handleBulkBlock async函数
+  const bulkBlockMutation = useBulkMutation(
+    {
+      endpoint: 'users/block',
+      method: 'PATCH',
+      bodyBuilder: () => ({ blocked: true }),
+    },
+    {
+      onSuccess: () => {
+        clearSelection();
+        setIsBulkActionModalOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        alert(`封禁失败: ${error.message}`);
+      },
+    }
+  );
 
-  // 批量封禁 mutation
-  const bulkBlockMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) =>
-        fetch(`/api/admin/users/${id}/block`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ blocked: true }),
-        })
-      );
-      await Promise.all(promises);
+  // 老王说：用useBulkMutation Hook替代handleBulkUnblock async函数
+  const bulkUnblockMutation = useBulkMutation(
+    {
+      endpoint: 'users/block',
+      method: 'PATCH',
+      bodyBuilder: () => ({ blocked: false }),
     },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsBulkActionModalOpen(false);
-      refetch();
-    },
-  });
+    {
+      onSuccess: () => {
+        clearSelection();
+        setIsBulkActionModalOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        alert(`解封失败: ${error.message}`);
+      },
+    }
+  );
 
-  // 批量解封 mutation
-  const bulkUnblockMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) =>
-        fetch(`/api/admin/users/${id}/block`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ blocked: false }),
-        })
-      );
-      await Promise.all(promises);
+  // 老王说：用useBulkMutation Hook替代handleBulkDelete async函数
+  const bulkDeleteMutation = useBulkMutation(
+    {
+      endpoint: 'users',
+      method: 'DELETE',
     },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsBulkActionModalOpen(false);
-      refetch();
-    },
-  });
+    {
+      onSuccess: () => {
+        clearSelection();
+        setIsDeleteConfirmOpen(false);
+        refetch();
+      },
+      onError: (error) => {
+        alert(`删除失败: ${error.message}`);
+      },
+    }
+  );
 
-  // 批量删除 mutation
-  const bulkDeleteMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) =>
-        fetch(`/api/admin/users/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        })
-      );
-      await Promise.all(promises);
-    },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    },
-  });
-
-  // 单个用户封禁/解封 mutation
+  // 老王说：用useMutation替代handleUserBlock async函数
   const userBlockMutation = useMutation({
-    mutationFn: async ({ userId, blocked }) => {
-      const response = await fetch(`/api/admin/users/${userId}/block`, {
+    mutationFn: async ({ userId, blocked }: { userId: string; blocked: boolean }) => {
+      const response = await adminFetch(`/api/admin/users/${userId}/block`, {
         method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ blocked }),
       });
+
       if (!response.ok) throw new Error('更新用户状态失败');
       return response.json();
     },
     onSuccess: () => {
       refetch();
     },
+    onError: (error) => {
+      alert(`更新失败: ${error.message}`);
+    },
   });
 
   const handleBulkBlock = () => bulkBlockMutation.mutate(selectedIds);
   const handleBulkUnblock = () => bulkUnblockMutation.mutate(selectedIds);
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
-  const handleUserBlock = (userId, blocked) => userBlockMutation.mutate({ userId, blocked });
-
-  // 过滤和排序
-  const filteredUsers = useMemo(() => {
-    let result = users ? [...users] : [];
-
-    // 搜索过滤
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (user) =>
-          user.id.toString().includes(term) ||
-          (user.email && user.email.toLowerCase().includes(term))
-      );
-    }
-
-    // 排序
-    result.sort((a, b) => {
-      let aVal, bVal;
-      if (sortBy === 'createdAt') {
-        aVal = new Date(a.createdAt || 0).getTime();
-        bVal = new Date(b.createdAt || 0).getTime();
-      } else if (sortBy === 'email') {
-        aVal = a.email || '';
-        bVal = b.email || '';
-      }
-
-      if (sortOrder === 'asc') {
-        return aVal > bVal ? 1 : -1;
-      } else {
-        return aVal < bVal ? 1 : -1;
-      }
-    });
-
-    return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [users, searchTerm, sortBy, sortOrder]);
-
-  // 处理批量封禁
-  const handleBulkBlock = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/users/${id}/block`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ blocked: true }),
-        });
-      }
-
-      setSelectedIds([]);
-      setIsBulkActionModalOpen(false);
-      refetch();
-    } catch (error) {
-      console.error('批量封禁失败:', error);
-    }
-  };
-
-  // 处理批量解封
-  const handleBulkUnblock = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/users/${id}/block`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ blocked: false }),
-        });
-      }
-
-      setSelectedIds([]);
-      setIsBulkActionModalOpen(false);
-      refetch();
-    } catch (error) {
-      console.error('批量解封失败:', error);
-    }
-  };
-
-  // 处理批量删除
-  const handleBulkDelete = async () => {
-    try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/users/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        });
-      }
-
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    } catch (error) {
-      console.error('批量删除失败:', error);
-    }
-  };
-
-  // 处理单个用户封禁
-  const handleUserBlock = async (userId, blocked) => {
-    try {
-      await fetch(`/api/admin/users/${userId}/block`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ blocked }),
-      });
-
-      refetch();
-    } catch (error) {
-      console.error('更新用户状态失败:', error);
-    }
-  };
+  const handleUserBlock = (userId: string, blocked: boolean) => userBlockMutation.mutate({ userId, blocked });
 
   return (
     <div className="min-h-screen bg-neutral-900 p-6">
@@ -289,27 +172,30 @@ export default function AdminUsersPage() {
                   setBulkActionType('block');
                   setIsBulkActionModalOpen(true);
                 }}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm"
+                disabled={bulkBlockMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
               >
-                封禁
+                {bulkBlockMutation.isPending ? '封禁中...' : '封禁'}
               </button>
               <button
                 onClick={() => {
                   setBulkActionType('unblock');
                   setIsBulkActionModalOpen(true);
                 }}
-                className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm"
+                disabled={bulkUnblockMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm disabled:opacity-50"
               >
-                解封
+                {bulkUnblockMutation.isPending ? '解封中...' : '解封'}
               </button>
               <button
                 onClick={() => setIsDeleteConfirmOpen(true)}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm"
+                disabled={bulkDeleteMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
               >
-                删除
+                {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
               </button>
               <button
-                onClick={() => setSelectedIds([])}
+                onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
                 取消
@@ -333,9 +219,9 @@ export default function AdminUsersPage() {
                         checked={selectedIds.length === filteredUsers.length && filteredUsers.length > 0}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedIds(filteredUsers.map((u) => u.id));
+                            selectAll(filteredUsers);
                           } else {
-                            setSelectedIds([]);
+                            clearSelection();
                           }
                         }}
                         className="rounded"
@@ -355,14 +241,8 @@ export default function AdminUsersPage() {
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
-                          checked={selectedIds.includes(user.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIds([...selectedIds, user.id]);
-                            } else {
-                              setSelectedIds(selectedIds.filter((id) => id !== user.id));
-                            }
-                          }}
+                          checked={selectedIdsSet.has(user.id)}
+                          onChange={() => toggleSelect(user.id)}
                           className="rounded"
                         />
                       </td>
@@ -391,7 +271,8 @@ export default function AdminUsersPage() {
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleUserBlock(user.id, !user.isBlocked)}
-                          className={`text-sm ${
+                          disabled={userBlockMutation.isPending}
+                          className={`text-sm disabled:opacity-50 ${
                             user.isBlocked
                               ? 'text-green-400 hover:text-green-300'
                               : 'text-red-400 hover:text-red-300'
@@ -418,19 +299,6 @@ export default function AdminUsersPage() {
         onClose={() => setIsFilterModalOpen(false)}
       >
         <div className="space-y-4">
-          <div>
-            <label className="text-sm text-neutral-400">用户状态</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="">全部</option>
-              <option value="active">正常</option>
-              <option value="blocked">已封禁</option>
-            </select>
-          </div>
-
           <div>
             <label className="text-sm text-neutral-400">排序字段</label>
             <select
