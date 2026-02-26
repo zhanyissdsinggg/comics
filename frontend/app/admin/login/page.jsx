@@ -1,5 +1,5 @@
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'error';
 
 import AdminLoginPage from "../../../components/admin/AdminLoginPage";
 

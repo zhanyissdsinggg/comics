@@ -5,7 +5,7 @@
 
 'use client';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'error';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
