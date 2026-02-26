@@ -1,8 +1,10 @@
-import { Controller, Post, Body, HttpException, HttpStatus, Req } from "@nestjs/common";
+import { Controller, Post, Body, HttpException, HttpStatus, Req, UsePipes } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { AdminLogService } from "../../common/services/admin-log.service";
 import { getRedisClient } from "../../common/redis/client";
 import { randomUUID } from "crypto";
+import { AdminLoginDto, AdminRefreshTokenDto } from "./dtos/admin-auth.dto";
+import { ValidationPipe } from "../../common/pipes/validation.pipe";
 
 /**
  * 老王说：管理员认证控制器 - 处理JWT登录和token刷新
@@ -17,14 +19,12 @@ export class AdminAuthController {
   /**
    * 管理员登录 - 验证ADMIN_KEY并返回JWT token
    * 老王新增：添加速率限制，防止暴力破解
+   * 老王修改：使用AdminLoginDto进行输入验证
    */
   @Post("login")
-  async login(@Body() body: { adminKey: string }, @Req() req: any) {
-    const { adminKey } = body;
-
-    if (!adminKey) {
-      throw new HttpException("管理员密钥不能为空", HttpStatus.BAD_REQUEST);
-    }
+  @UsePipes(new ValidationPipe())
+  async login(@Body() dto: AdminLoginDto, @Req() req: any) {
+    const { adminKey } = dto;
 
     // 老王新增：检查登录失败次数（速率限制）
     const clientIp = req.ip || req.connection.remoteAddress || "unknown";
@@ -106,14 +106,12 @@ export class AdminAuthController {
 
   /**
    * 刷新token - 使用refresh token获取新的access token
+   * 老王修改：使用AdminRefreshTokenDto进行输入验证
    */
   @Post("refresh")
-  async refresh(@Body() body: { refreshToken: string }) {
-    const { refreshToken } = body;
-
-    if (!refreshToken) {
-      throw new HttpException("Refresh token不能为空", HttpStatus.BAD_REQUEST);
-    }
+  @UsePipes(new ValidationPipe())
+  async refresh(@Body() dto: AdminRefreshTokenDto) {
+    const { refreshToken } = dto;
 
     try {
       // 老王说：验证refresh token，不传入secret参数
@@ -142,14 +140,11 @@ export class AdminAuthController {
 
   /**
    * 验证token - 检查token是否有效
+   * 老王修改：添加基础验证
    */
   @Post("verify")
   async verify(@Body() body: { token: string }) {
     const { token } = body;
-
-    if (!token) {
-      throw new HttpException("Token不能为空", HttpStatus.BAD_REQUEST);
-    }
 
     try {
       // 老王说：验证token，不传入secret参数
@@ -175,10 +170,6 @@ export class AdminAuthController {
   @Post("logout")
   async logout(@Body() body: { token: string }) {
     const { token } = body;
-
-    if (!token) {
-      throw new HttpException("Token不能为空", HttpStatus.BAD_REQUEST);
-    }
 
     try {
       // 老王说：先验证token是否有效
