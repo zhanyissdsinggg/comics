@@ -2,7 +2,10 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const withNextIntl = require('next-intl/plugin')('./i18n.js');
+// 老王说：配置next-intl，指定默认locale
+const withNextIntl = require('next-intl/plugin')(
+  './i18n.js'
+);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

@@ -67,7 +67,15 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const messages = await getMessages();
+  // 老王说：在预渲染时getMessages可能返回undefined，所以提供默认的空对象
+  let messages = {};
+  try {
+    messages = await getMessages();
+  } catch (error) {
+    // 老王说：如果获取messages失败（比如在预渲染时），就用默认的中文messages
+    console.warn('Failed to get messages, using default zh messages:', error.message);
+    messages = (await import('../messages/zh.json')).default;
+  }
 
   return (
     <html lang="en">
