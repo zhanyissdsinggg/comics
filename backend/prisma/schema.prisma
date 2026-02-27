@@ -158,6 +158,7 @@ model Entitlement {
   seriesId  String
   episodeId String
   createdAt DateTime @default(now())
+  @@unique([userId, episodeId])
   @@map("entitlements")
 }
 
