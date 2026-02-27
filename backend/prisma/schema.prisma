@@ -95,6 +95,9 @@ model Wallet {
   id        String   @id @default(cuid())
   userId    String   @unique
   balance   Int      @default(0)
+  paidPts   Int      @default(0)
+  bonusPts  Int      @default(0)
+  plan      String   @default("free")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("wallets")
@@ -105,6 +108,7 @@ model Comment {
   userId    String
   seriesId  String
   content   String
+  hidden    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("comments")
@@ -139,7 +143,11 @@ model Follow {
 model Bookmark {
   id        String   @id @default(cuid())
   userId    String
+  seriesId  String
   episodeId String
+  percent   Int      @default(0)
+  pageIndex Int      @default(0)
+  label     String?
   createdAt DateTime @default(now())
   @@map("bookmarks")
 }
@@ -147,17 +155,22 @@ model Bookmark {
 model Entitlement {
   id        String   @id @default(cuid())
   userId    String
+  seriesId  String
   episodeId String
   createdAt DateTime @default(now())
   @@map("entitlements")
 }
 
 model Coupon {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  discount  Int
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  code          String   @unique
+  type          String
+  value         Int
+  discount      Int
+  remainingUses Int      @default(0)
+  label         String?
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
   @@map("coupons")
 }
 
@@ -166,6 +179,7 @@ model UserCoupon {
   userId    String
   couponId  String
   used      Boolean  @default(false)
+  claimedAt DateTime @default(now())
   createdAt DateTime @default(now())
   @@map("user_coupons")
 }
@@ -294,6 +308,7 @@ model EmailConfig {
   id        String   @id @default(cuid())
   key       String   @unique
   value     String
+  payload   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("email_configs")
@@ -357,19 +372,23 @@ model IdempotencyKey {
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String
-  action    String
-  resource  String
-  details   String?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  userId     String
+  action     String
+  resource   String
+  targetType String
+  targetId   String
+  payload    String?
+  details    String?
+  createdAt  DateTime @default(now())
   @@map("audit_logs")
 }
 
 model MissionState {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String   @unique
   mission   String
+  payload   String
   completed Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -404,4 +423,119 @@ model Service {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("services")
+}
+
+model Order {
+  id         String    @id @default(cuid())
+  userId     String
+  packageId  String
+  amount     Int
+  currency   String
+  status     String
+  paidAt     DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  @@map("orders")
+}
+
+model PaymentIntent {
+  id        String   @id @default(cuid())
+  userId    String
+  orderId   String
+  provider  String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("payment_intents")
+}
+
+model PaymentRetry {
+  id            String    @id @default(cuid())
+  userId        String
+  orderId       String    @unique
+  paymentId     String?
+  status        String
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime
+  lastError     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  @@map("payment_retries")
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  userId    String
+  seriesId  String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId, seriesId])
+  @@map("ratings")
+}
+
+model Promotion {
+  id                  String    @id
+  title               String
+  description         String?
+  type                String
+  segment             String
+  active              Boolean   @default(true)
+  startAt             DateTime?
+  endAt               DateTime?
+  bonusMultiplier     Int       @default(0)
+  returningAfterDays  Int       @default(7)
+  autoGrant           Boolean   @default(false)
+  ctaType             String
+  ctaTarget           String?
+  ctaLabel            String
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  @@map("promotions")
+}
+
+model PromotionFallback {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  payload   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("promotion_fallbacks")
+}
+
+model Progress {
+  id            String   @id @default(cuid())
+  userId        String
+  seriesId      String
+  lastEpisodeId String
+  percent       Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@unique([userId, seriesId])
+  @@map("progress")
+}
+
+model Notification {
+  id        String   @id
+  userId    String
+  type      String
+  title     String
+  message   String
+  seriesId  String?
+  episodeId String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("notifications")
+}
+
+model ReadingHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  seriesId  String
+  episodeId String
+  title     String
+  percent   Int      @default(0)
+  createdAt DateTime @default(now())
+  @@map("reading_history")
 }
