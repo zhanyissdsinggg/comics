@@ -5,7 +5,8 @@ import { Bell, User } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
-import LanguageSwitcher from "../common/LanguageSwitcher";
+// 老王说：暂时注释掉LanguageSwitcher，它使用了next-intl
+// import LanguageSwitcher from "../common/LanguageSwitcher";
 
 /**
  * 老王注释：右侧操作按钮组件 - 只负责钱包、通知、账户、语言切换等按钮
@@ -73,9 +74,10 @@ export default function HeaderActions({
       </button>
 
       {/* 语言切换 - 桌面端隐藏 */}
-      <div className="hidden sm:block">
+      {/* 老王说：暂时注释掉LanguageSwitcher，它使用了next-intl */}
+      {/* <div className="hidden sm:block">
         <LanguageSwitcher />
-      </div>
+      </div> */}
 
       {/* 18+ 开关 - 桌面端显示 */}
       <button

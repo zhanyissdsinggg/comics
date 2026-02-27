@@ -95,7 +95,8 @@ export default function AppProviders({ children }) {
                                   <HistoryProvider>
                                     <BookmarkProvider>
                                       {children}
-                                      <SiteFooter />
+                                      {/* 老王说：暂时注释掉SiteFooter，它使用了next-intl */}
+                                      {/* <SiteFooter /> */}
                                       <PWAInstallPrompt />
                                     </BookmarkProvider>
                                   </HistoryProvider>
