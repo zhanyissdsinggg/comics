@@ -81,16 +81,22 @@ model AdminLog {
 model DailyActive {
   id        String   @id @default(cuid())
   userId    String
+  dateKey   String
   date      DateTime
   createdAt DateTime @default(now())
+  @@unique([dateKey, userId])
   @@map("daily_actives")
 }
 
 model DailyStat {
-  id        String   @id @default(cuid())
-  date      DateTime @unique
-  users     Int      @default(0)
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  dateKey       String   @unique
+  date          DateTime @unique
+  users         Int      @default(0)
+  views         Int      @default(0)
+  registrations Int      @default(0)
+  paidOrders    Int      @default(0)
+  createdAt     DateTime @default(now())
   @@map("daily_stats")
 }
 
@@ -291,9 +297,11 @@ model SearchLog {
 model SeriesViewStat {
   id        String   @id @default(cuid())
   seriesId  String
+  dateKey   String
   views     Int      @default(0)
   date      DateTime
   createdAt DateTime @default(now())
+  @@unique([dateKey, seriesId])
   @@map("series_view_stats")
 }
 
