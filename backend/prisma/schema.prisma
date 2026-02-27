@@ -207,7 +207,7 @@ model SubscriptionUsage {
 model SubscriptionVoucherUsage {
   id        String   @id @default(cuid())
   userId    String
-  voucherId String
+  voucherId String?
   dateKey   String
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
