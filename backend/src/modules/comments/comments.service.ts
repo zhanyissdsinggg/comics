@@ -20,7 +20,7 @@ export class CommentsService {
 
   async add(seriesId: string, userId: string, text: string) {
     const comment = await this.prisma.comment.create({
-      data: { seriesId, userId, text },
+      data: { seriesId, userId, content: text },
       include: this.commentMapper.getStandardInclude(),
     });
     return this.commentMapper.decorate(comment, userId);
@@ -61,7 +61,7 @@ export class CommentsService {
     try {
       // 直接create，Prisma会自动验证commentId存在性（通过外键约束）
       await this.prisma.commentReply.create({
-        data: { commentId, userId, text },
+        data: { commentId, userId, content: text },
       });
     } catch (error) {
       // 如果commentId不存在，会抛出异常

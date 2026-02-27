@@ -1,0 +1,407 @@
+// This is your Prisma schema file
+// 老王说：完整的数据库schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("users")
+}
+
+model Series {
+  id               String   @id @default(cuid())
+  title            String
+  type             String   @default("comic")
+  description      String?
+  coverUrl         String?
+  coverTone        String?
+  badge            String?
+  badges           String[] @default([])
+  adult            Boolean  @default(false)
+  latestEpisodeId  String?
+  genres           String[] @default([])
+  status           String   @default("Ongoing")
+  rating           Float    @default(0)
+  ratingCount      Int      @default(0)
+  episodePrice     Int      @default(0)
+  ttfEnabled       Boolean  @default(false)
+  ttfIntervalHours Int      @default(24)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  @@map("series")
+}
+
+model Episode {
+  id               String    @id @default(cuid())
+  seriesId         String
+  title            String
+  number           Int
+  pricePts         Int       @default(0)
+  ttfEligible      Boolean   @default(false)
+  ttfReadyAt       DateTime?
+  releasedAt       DateTime?
+  previewFreePages Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  @@map("episodes")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@map("sessions")
+}
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+  @@map("admin_logs")
+}
+
+model DailyActive {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime
+  createdAt DateTime @default(now())
+  @@map("daily_actives")
+}
+
+model DailyStat {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  users     Int      @default(0)
+  createdAt DateTime @default(now())
+  @@map("daily_stats")
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  balance   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("wallets")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  seriesId  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("comments")
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  userId    String
+  commentId String
+  createdAt DateTime @default(now())
+  @@map("comment_likes")
+}
+
+model CommentReply {
+  id        String   @id @default(cuid())
+  userId    String
+  commentId String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("comment_replies")
+}
+
+model Follow {
+  id        String   @id @default(cuid())
+  userId    String
+  seriesId  String
+  createdAt DateTime @default(now())
+  @@map("follows")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  episodeId String
+  createdAt DateTime @default(now())
+  @@map("bookmarks")
+}
+
+model Entitlement {
+  id        String   @id @default(cuid())
+  userId    String
+  episodeId String
+  createdAt DateTime @default(now())
+  @@map("entitlements")
+}
+
+model Coupon {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  discount  Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@map("coupons")
+}
+
+model UserCoupon {
+  id        String   @id @default(cuid())
+  userId    String
+  couponId  String
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  @@map("user_coupons")
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  planId    String
+  active    Boolean  @default(true)
+  startedAt DateTime @default(now())
+  renewAt   DateTime?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("subscriptions")
+}
+
+model SubscriptionPlan {
+  id        String   @id @default(cuid())
+  name      String
+  price     Int
+  duration  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("subscription_plans")
+}
+
+model SubscriptionUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  planId    String?
+  dateKey   String
+  used      Int      @default(0)
+  createdAt DateTime @default(now())
+  @@unique([userId, dateKey])
+  @@map("subscription_usages")
+}
+
+model SubscriptionVoucherUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  voucherId String?
+  dateKey   String
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  @@unique([userId, dateKey])
+  @@map("subscription_voucher_usages")
+}
+
+model TopupPackage {
+  id        String   @id @default(cuid())
+  name      String
+  amount    Int
+  price     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("topup_packages")
+}
+
+model UserBehavior {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+  @@map("user_behaviors")
+}
+
+model UserMetrics {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  views     Int      @default(0)
+  reads     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("user_metrics")
+}
+
+model UserPreference {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  settings  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("user_preferences")
+}
+
+model UserTag {
+  id        String   @id @default(cuid())
+  userId    String
+  tag       String
+  createdAt DateTime @default(now())
+  @@map("user_tags")
+}
+
+model SearchLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  query     String
+  results   Int      @default(0)
+  createdAt DateTime @default(now())
+  @@map("search_logs")
+}
+
+model SeriesViewStat {
+  id        String   @id @default(cuid())
+  seriesId  String
+  views     Int      @default(0)
+  date      DateTime
+  createdAt DateTime @default(now())
+  @@map("series_view_stats")
+}
+
+model SupportTicket {
+  id        String   @id @default(cuid())
+  userId    String
+  subject   String
+  message   String
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("support_tickets")
+}
+
+model EmailConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("email_configs")
+}
+
+model MarketingCampaign {
+  id        String   @id @default(cuid())
+  name      String
+  budget    Int
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("marketing_campaigns")
+}
+
+model MarketingCampaignTarget {
+  id         String   @id @default(cuid())
+  campaignId String
+  target     String
+  createdAt  DateTime @default(now())
+  @@map("marketing_campaign_targets")
+}
+
+model MarketingBudget {
+  id         String   @id @default(cuid())
+  campaignId String
+  amount     Int
+  spent      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@map("marketing_budgets")
+}
+
+model MarketingAnalytics {
+  id         String   @id @default(cuid())
+  campaignId String
+  metric     String
+  value      Int
+  date       DateTime
+  createdAt  DateTime @default(now())
+  @@map("marketing_analytics")
+}
+
+model TrackingConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("tracking_configs")
+}
+
+model IdempotencyKey {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  response  String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  @@map("idempotency_keys")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  resource  String
+  details   String?
+  createdAt DateTime @default(now())
+  @@map("audit_logs")
+}
+
+model MissionState {
+  id        String   @id @default(cuid())
+  userId    String
+  mission   String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("mission_states")
+}
+
+model RewardState {
+  id        String   @id @default(cuid())
+  userId    String
+  reward    String
+  claimed   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("reward_states")
+}
+
+model Module {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  enabled   Boolean  @default(true)
+  config    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("modules")
+}
+
+model Service {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  status    String   @default("active")
+  config    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("services")
+}
