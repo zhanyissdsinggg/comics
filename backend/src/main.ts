@@ -44,7 +44,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api/docs", app, document);
 
-  await app.listen(4000);
+  const port = process.env.PORT || 4000;
+  await app.listen(port);
+  console.log(`应用已启动，监听端口: ${port}`);
 }
 
 bootstrap();
