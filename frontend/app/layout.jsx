@@ -1,11 +1,11 @@
 import "./globals.css";
 // 老王说：使用动态导入AppProviders，避免服务器端执行
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 
 // 老王说：动态导入AppProviders，禁用SSR
-const AppProviders = dynamic(() => import("../components/layout/AppProviders"), {
+const AppProviders = dynamicImport(() => import("../components/layout/AppProviders"), {
   ssr: false,
   loading: () => <div>Loading...</div>
 });
