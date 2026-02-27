@@ -630,6 +630,7 @@ model RegionConfig {
   id        String   @id @default(cuid())
   region    String   @unique
   config    String
+  payload   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("region_configs")
@@ -645,13 +646,15 @@ model RecommendationSlot {
 }
 
 model RecommendationAnalytics {
-  id        String   @id @default(cuid())
-  slot      String
-  seriesId  String
-  clicks    Int      @default(0)
-  views     Int      @default(0)
-  date      DateTime
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  slot        String
+  seriesId    String
+  clicks      Int      @default(0)
+  views       Int      @default(0)
+  impressions Int      @default(0)
+  conversions Int      @default(0)
+  date        DateTime
+  createdAt   DateTime @default(now())
   @@map("recommendation_analytics")
 }
 

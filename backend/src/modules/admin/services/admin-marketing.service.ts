@@ -234,6 +234,7 @@ export class AdminMarketingService {
     const targets = userIds.map((userId) => ({
       campaignId,
       userId,
+      target: userId,
     }));
 
     return this.prisma.marketingCampaignTarget.createMany({

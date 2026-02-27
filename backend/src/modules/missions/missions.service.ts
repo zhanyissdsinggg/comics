@@ -64,11 +64,11 @@ export class MissionsService {
   async list(userId: string) {
     const state = await this.prisma.missionState.findUnique({ where: { userId } });
     if (state) {
-      return state.payload;
+      return JSON.parse(state.payload);
     }
     const payload = this.cloneDefault();
     await this.prisma.missionState.create({
-      data: { userId, payload },
+      data: { userId, mission: "default", payload: JSON.stringify(payload) },
     });
     return payload;
   }
@@ -90,8 +90,8 @@ export class MissionsService {
     }
     await this.prisma.missionState.upsert({
       where: { userId },
-      update: { payload },
-      create: { userId, payload },
+      update: { payload: JSON.stringify(payload) },
+      create: { userId, mission: "default", payload: JSON.stringify(payload) },
     });
     return payload;
   }
@@ -109,8 +109,8 @@ export class MissionsService {
     target.claimed = true;
     await this.prisma.missionState.upsert({
       where: { userId },
-      update: { payload },
-      create: { userId, payload },
+      update: { payload: JSON.stringify(payload) },
+      create: { userId, mission: "default", payload: JSON.stringify(payload) },
     });
     return { ok: true, reward: target.reward, state: payload };
   }

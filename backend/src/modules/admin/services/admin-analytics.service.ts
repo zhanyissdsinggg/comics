@@ -197,6 +197,7 @@ export class AdminAnalyticsService {
     const createdTags = await this.prisma.userTag.createMany({
       data: tags.map((tag) => ({
         userId,
+        tag: `${tag.tagType}:${tag.tagValue}`,
         tagType: tag.tagType,
         tagValue: tag.tagValue,
       })),
