@@ -41,29 +41,32 @@ export class StatsService {
       return;
     }
     const dateKey = getDateKey();
+    const date = new Date();
     await this.prisma.dailyActive.upsert({
       where: { dateKey_userId: { dateKey, userId } },
       update: {},
-      create: { dateKey, userId },
+      create: { dateKey, userId, date },
     });
   }
 
   async recordRegistration(userId: string) {
     const dateKey = getDateKey();
+    const date = new Date();
     await this.prisma.dailyStat.upsert({
       where: { dateKey },
       update: { registrations: { increment: 1 } },
-      create: { dateKey, registrations: 1, views: 0, paidOrders: 0 },
+      create: { dateKey, date, registrations: 1, views: 0, paidOrders: 0 },
     });
     await this.recordDailyActive(userId);
   }
 
   async recordComicView(userId: string | null) {
     const dateKey = getDateKey();
+    const date = new Date();
     await this.prisma.dailyStat.upsert({
       where: { dateKey },
       update: { views: { increment: 1 } },
-      create: { dateKey, views: 1, registrations: 0, paidOrders: 0 },
+      create: { dateKey, date, views: 1, registrations: 0, paidOrders: 0 },
     });
     if (userId) {
       await this.recordDailyActive(userId);
@@ -75,15 +78,16 @@ export class StatsService {
       return;
     }
     const dateKey = getDateKey();
+    const date = new Date();
     await this.prisma.seriesViewStat.upsert({
       where: { dateKey_seriesId: { dateKey, seriesId } },
       update: { views: { increment: 1 } },
-      create: { dateKey, seriesId, views: 1 },
+      create: { dateKey, seriesId, date, views: 1 },
     });
     await this.prisma.dailyStat.upsert({
       where: { dateKey },
       update: { views: { increment: 1 } },
-      create: { dateKey, views: 1, registrations: 0, paidOrders: 0 },
+      create: { dateKey, date, views: 1, registrations: 0, paidOrders: 0 },
     });
     if (userId) {
       await this.recordDailyActive(userId);
@@ -92,10 +96,11 @@ export class StatsService {
 
   async recordPaidOrder() {
     const dateKey = getDateKey();
+    const date = new Date();
     await this.prisma.dailyStat.upsert({
       where: { dateKey },
       update: { paidOrders: { increment: 1 } },
-      create: { dateKey, paidOrders: 1, views: 0, registrations: 0 },
+      create: { dateKey, date, paidOrders: 1, views: 0, registrations: 0 },
     });
   }
 
