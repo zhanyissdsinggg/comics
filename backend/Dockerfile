@@ -10,7 +10,8 @@ RUN npx prisma generate
 
 COPY tsconfig*.json ./
 COPY src ./src
-COPY scripts ./scripts
+# 老王说：scripts目录不存在，暂时注释掉
+# COPY scripts ./scripts
 
 RUN npm run build
 
