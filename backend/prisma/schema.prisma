@@ -20,23 +20,40 @@ model User {
 }
 
 model Series {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  coverUrl    String?
-  adult       Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(cuid())
+  title            String
+  type             String   @default("comic")
+  description      String?
+  coverUrl         String?
+  coverTone        String?
+  badge            String?
+  badges           String[] @default([])
+  adult            Boolean  @default(false)
+  latestEpisodeId  String?
+  genres           String[] @default([])
+  status           String   @default("Ongoing")
+  rating           Float    @default(0)
+  ratingCount      Int      @default(0)
+  episodePrice     Int      @default(0)
+  ttfEnabled       Boolean  @default(false)
+  ttfIntervalHours Int      @default(24)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
   @@map("series")
 }
 
 model Episode {
-  id        String   @id @default(cuid())
-  seriesId  String
-  title     String
-  number    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String    @id @default(cuid())
+  seriesId         String
+  title            String
+  number           Int
+  pricePts         Int       @default(0)
+  ttfEligible      Boolean   @default(false)
+  ttfReadyAt       DateTime?
+  releasedAt       DateTime?
+  previewFreePages Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
   @@map("episodes")
 }
 
