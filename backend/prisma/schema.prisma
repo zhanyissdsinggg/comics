@@ -172,8 +172,11 @@ model UserCoupon {
 
 model Subscription {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String   @unique
   planId    String
+  active    Boolean  @default(true)
+  startedAt DateTime @default(now())
+  renewAt   DateTime?
   expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -193,9 +196,11 @@ model SubscriptionPlan {
 model SubscriptionUsage {
   id        String   @id @default(cuid())
   userId    String
-  planId    String
+  planId    String?
+  dateKey   String
   used      Int      @default(0)
   createdAt DateTime @default(now())
+  @@unique([userId, dateKey])
   @@map("subscription_usages")
 }
 
@@ -203,7 +208,10 @@ model SubscriptionVoucherUsage {
   id        String   @id @default(cuid())
   userId    String
   voucherId String
+  dateKey   String
+  used      Boolean  @default(false)
   createdAt DateTime @default(now())
+  @@unique([userId, dateKey])
   @@map("subscription_voucher_usages")
 }
 
