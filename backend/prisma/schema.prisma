@@ -11,12 +11,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  isBlocked Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String         @id @default(cuid())
+  email          String         @unique
+  name           String?
+  isBlocked      Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  comments       Comment[]      @relation("UserComments")
+  commentLikes   CommentLike[]  @relation("UserCommentLikes")
+  commentReplies CommentReply[] @relation("UserCommentReplies")
   @@map("users")
 }
 
@@ -115,14 +118,17 @@ model Wallet {
 }
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   userId    String
   seriesId  String
   content   String
   text      String?
-  hidden    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  hidden    Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation("UserComments", fields: [userId], references: [id])
+  likes     CommentLike[]  @relation("CommentLikes")
+  replies   CommentReply[] @relation("CommentReplies")
   @@map("comments")
 }
 
@@ -131,6 +137,8 @@ model CommentLike {
   userId    String
   commentId String
   createdAt DateTime @default(now())
+  user      User     @relation("UserCommentLikes", fields: [userId], references: [id])
+  comment   Comment  @relation("CommentLikes", fields: [commentId], references: [id])
   @@unique([commentId, userId])
   @@map("comment_likes")
 }
@@ -143,6 +151,8 @@ model CommentReply {
   text      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation("UserCommentReplies", fields: [userId], references: [id])
+  comment   Comment  @relation("CommentReplies", fields: [commentId], references: [id])
   @@map("comment_replies")
 }
 
