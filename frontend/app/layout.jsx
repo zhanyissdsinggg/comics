@@ -1,7 +1,8 @@
 import "./globals.css";
 // 老王说：使用动态导入AppProviders，避免服务器端执行
 import dynamicImport from 'next/dynamic';
-import CookieConsent from "../components/common/CookieConsent";
+// 老王说：暂时注释掉CookieConsent，它使用了next-intl
+// import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 
 // 老王说：动态导入AppProviders，禁用SSR
@@ -77,12 +78,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   // 老王说：使用动态导入的AppProviders，完全避免服务器端执行
+  // 老王说：暂时移除CookieConsent，它使用了next-intl
   return (
     <html lang="en">
       <body>
         <ErrorBoundary name="RootBoundary">
           <AppProviders>{children}</AppProviders>
-          <CookieConsent />
         </ErrorBoundary>
       </body>
     </html>
