@@ -1,11 +1,22 @@
 #!/bin/sh
 set -e
 
+# 老王说：先测试数据库连接，看看到底是什么鬼问题
 if [ -n "$DATABASE_URL" ]; then
-  npx prisma db push --accept-data-loss
-  # 老王说：scripts/seed.js不存在，暂时注释掉
-  # node scripts/seed.js || true
+  echo "正在测试数据库连接..."
+  node test-db-connection.js || echo "数据库连接测试失败，但继续启动"
+fi
+
+# 老王说：必须先生成Prisma Client，不然代码运行个屁
+echo "正在生成Prisma Client..."
+npx prisma generate
+
+# 老王说：尝试推送数据库schema，失败了也继续启动
+if [ -n "$DATABASE_URL" ]; then
+  echo "正在推送数据库schema..."
+  npx prisma db push --accept-data-loss || echo "数据库推送失败，但继续启动服务"
 fi
 
 # 老王说：使用ts-node直接运行TypeScript代码
+echo "启动NestJS应用..."
 npx ts-node src/main.ts
