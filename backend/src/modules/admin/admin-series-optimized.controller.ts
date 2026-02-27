@@ -254,8 +254,8 @@ export class AdminSeriesController {
       pricePts: Number(series.episodePrice || 0),
       ttfEligible: Boolean(series.ttfEnabled),
       previewFreePages: 0,
-      pages: result.pages || null,
-      paragraphs: result.paragraphs || null,
+      pages: Array.isArray(result.pages) ? result.pages : [],
+      paragraphs: Array.isArray(result.paragraphs) ? result.paragraphs : [],
     }));
 
     await this.prisma.episode.createMany({ data: episodes });

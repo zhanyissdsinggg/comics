@@ -12,7 +12,7 @@ export class AdminTrackingController {
     const config = await this.prisma.trackingConfig.findUnique({
       where: { key: "default" },
     });
-    return { config: config?.payload || { values: {}, updatedAt: null } };
+    return { config: config?.payload ? JSON.parse(config.payload) : { values: {}, updatedAt: null } };
   }
 
   @Post()
@@ -21,9 +21,9 @@ export class AdminTrackingController {
     const payload = { values, updatedAt: new Date().toISOString() };
     const config = await this.prisma.trackingConfig.upsert({
       where: { key: "default" },
-      update: { payload },
-      create: { key: "default", payload },
+      update: { payload: JSON.stringify(payload) },
+      create: { key: "default", payload: JSON.stringify(payload) },
     });
-    return { config: config.payload };
+    return { config: JSON.parse(config.payload || "{}") };
   }
 }

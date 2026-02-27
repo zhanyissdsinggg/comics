@@ -9,8 +9,8 @@ export class AdminRegionsController {
 
   @Get()
   async getConfig() {
-    const config = await this.prisma.regionConfig.findUnique({ where: { key: "default" } });
-    return { config: config?.payload || { countryCodes: [], lengthRules: {} } };
+    const config = await this.prisma.regionConfig.findUnique({ where: { region: "default" } });
+    return { config: config?.payload ? JSON.parse(config.payload) : { countryCodes: [], lengthRules: {} } };
   }
 
   @Post()
@@ -28,10 +28,10 @@ export class AdminRegionsController {
       updatedAt: new Date().toISOString(),
     };
     const config = await this.prisma.regionConfig.upsert({
-      where: { key: "default" },
-      update: { payload },
-      create: { key: "default", payload },
+      where: { region: "default" },
+      update: { payload: JSON.stringify(payload) },
+      create: { region: "default", config: "default", payload: JSON.stringify(payload) },
     });
-    return { config: config.payload };
+    return { config: JSON.parse(config.payload || "{}") };
   }
 }

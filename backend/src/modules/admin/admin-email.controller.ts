@@ -60,8 +60,8 @@ export class AdminEmailController {
     }
     const config = await this.prisma.emailConfig.upsert({
       where: { key: "default" },
-      update: { payload },
-      create: { key: "default", payload },
+      update: { payload: JSON.stringify(payload) },
+      create: { key: "default", payload: JSON.stringify(payload), value: "default" },
     });
     try {
       await this.prisma.auditLog.create({
