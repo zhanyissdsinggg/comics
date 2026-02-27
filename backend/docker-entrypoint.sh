@@ -17,6 +17,6 @@ if [ -n "$DATABASE_URL" ]; then
   npx prisma db push --accept-data-loss || echo "数据库推送失败，但继续启动服务"
 fi
 
-# 老王说：使用ts-node直接运行TypeScript代码
+# 老王说：使用ts-node直接运行TypeScript代码，跳过类型检查加快启动
 echo "启动NestJS应用..."
-npx ts-node src/main.ts
+npx ts-node --transpile-only src/main.ts
