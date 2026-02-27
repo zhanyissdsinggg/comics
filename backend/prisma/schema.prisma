@@ -17,6 +17,7 @@ model User {
   isBlocked      Boolean        @default(false)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+  wallet         Wallet?        @relation("UserWallet")
   sessions       Session[]      @relation("UserSessions")
   comments       Comment[]      @relation("UserComments")
   commentLikes   CommentLike[]  @relation("UserCommentLikes")
@@ -120,6 +121,7 @@ model Wallet {
   plan      String   @default("free")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation("UserWallet", fields: [userId], references: [id])
   @@map("wallets")
 }
 
@@ -167,6 +169,7 @@ model Follow {
   userId    String
   seriesId  String
   createdAt DateTime @default(now())
+  @@unique([userId, seriesId])
   @@map("follows")
 }
 
@@ -287,11 +290,12 @@ model TopupPackage {
 }
 
 model UserBehavior {
-  id        String   @id @default(cuid())
-  userId    String
-  action    String
-  details   String?
-  createdAt DateTime @default(now())
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  action       String
+  details      String?
+  lastActiveAt DateTime?
+  createdAt    DateTime  @default(now())
   @@map("user_behaviors")
 }
 
