@@ -1,9 +1,14 @@
 import "./globals.css";
-import AppProviders from "../components/layout/AppProviders";
-// 老王说：暂时注释掉PerformanceMonitor，排查500错误
-// import { PerformanceMonitor } from "../lib/performance";
+// 老王说：使用动态导入AppProviders，避免服务器端执行
+import dynamic from 'next/dynamic';
 import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
+
+// 老王说：动态导入AppProviders，禁用SSR
+const AppProviders = dynamic(() => import("../components/layout/AppProviders"), {
+  ssr: false,
+  loading: () => <div>Loading...</div>
+});
 
 // 老王说：完全移除next-intl，避免配置问题
 
@@ -71,11 +76,14 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  // 老王说：暂时移除所有Provider，排查500错误根源
+  // 老王说：使用动态导入的AppProviders，完全避免服务器端执行
   return (
     <html lang="en">
       <body>
-        {children}
+        <ErrorBoundary name="RootBoundary">
+          <AppProviders>{children}</AppProviders>
+          <CookieConsent />
+        </ErrorBoundary>
       </body>
     </html>
   );
