@@ -52,6 +52,9 @@ model Episode {
   ttfReadyAt       DateTime?
   releasedAt       DateTime?
   previewFreePages Int       @default(0)
+  pages            String[]  @default([])
+  paragraphs       String[]  @default([])
+  text             String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   @@map("episodes")
