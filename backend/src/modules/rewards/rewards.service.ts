@@ -15,24 +15,31 @@ export class RewardsService {
       return state;
     }
     return this.prisma.rewardState.create({
-      data: { userId, lastCheckInDate: "", streakCount: 0, makeUpUsedToday: false },
+      data: {
+        userId,
+        reward: "none",
+        lastCheckInDate: null,
+        streakCount: 0,
+        makeUpUsedToday: false
+      },
     });
   }
 
   async checkIn(userId: string) {
     const state = await this.getState(userId);
     const today = this.getTodayKey();
-    if (state.lastCheckInDate === today) {
+    const lastCheckIn = state.lastCheckInDate ? state.lastCheckInDate.toISOString().slice(0, 10) : "";
+    if (lastCheckIn === today) {
       return { ok: false, error: "ALREADY_CHECKED_IN", state };
     }
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
       .toISOString()
       .slice(0, 10);
-    const nextStreak = state.lastCheckInDate === yesterday ? state.streakCount + 1 : 1;
+    const nextStreak = lastCheckIn === yesterday ? state.streakCount + 1 : 1;
     const updated = await this.prisma.rewardState.update({
       where: { userId },
       data: {
-        lastCheckInDate: today,
+        lastCheckInDate: new Date(today),
         streakCount: Math.min(nextStreak, 7),
         makeUpUsedToday: false,
       },
@@ -49,7 +56,7 @@ export class RewardsService {
     const updated = await this.prisma.rewardState.update({
       where: { userId },
       data: {
-        lastCheckInDate: today,
+        lastCheckInDate: new Date(today),
         streakCount: Math.min(Math.max(state.streakCount, 1) + 1, 7),
         makeUpUsedToday: true,
       },
