@@ -193,15 +193,16 @@ model Entitlement {
 }
 
 model Coupon {
-  id            String   @id @default(cuid())
-  code          String   @unique
+  id            String       @id @default(cuid())
+  code          String       @unique
   type          String
   value         Int
   discount      Int
-  remainingUses Int      @default(0)
+  remainingUses Int          @default(0)
   label         String?
   expiresAt     DateTime
-  createdAt     DateTime @default(now())
+  createdAt     DateTime     @default(now())
+  userCoupons   UserCoupon[] @relation("CouponUserCoupons")
   @@map("coupons")
 }
 
@@ -212,6 +213,8 @@ model UserCoupon {
   used      Boolean  @default(false)
   claimedAt DateTime @default(now())
   createdAt DateTime @default(now())
+  coupon    Coupon   @relation("CouponUserCoupons", fields: [couponId], references: [id])
+  @@unique([userId, couponId])
   @@map("user_coupons")
 }
 

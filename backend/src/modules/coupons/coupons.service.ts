@@ -7,16 +7,20 @@ const COUPON_CATALOG = {
     code: "HOLIDAY10",
     type: "DISCOUNT_PCT",
     value: 10,
+    discount: 10,
     remainingUses: 1,
     label: "Holiday 10% OFF",
+    expiresAt: new Date("2099-12-31"),
   },
   WELCOME5: {
     id: "WELCOME5",
     code: "WELCOME5",
     type: "DISCOUNT_PTS",
     value: 5,
+    discount: 5,
     remainingUses: 1,
     label: "Welcome 5 POINTS",
+    expiresAt: new Date("2099-12-31"),
   },
 };
 
