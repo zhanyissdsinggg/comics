@@ -290,12 +290,17 @@ model TopupPackage {
 }
 
 model UserBehavior {
-  id           String    @id @default(cuid())
-  userId       String    @unique
-  action       String
-  details      String?
-  lastActiveAt DateTime?
-  createdAt    DateTime  @default(now())
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  action         String
+  details        String?
+  lastActiveAt   DateTime?
+  readingTime    Int       @default(0)
+  seriesViewed   Int       @default(0)
+  commentsCount  Int       @default(0)
+  ratingsCount   Int       @default(0)
+  bookmarksCount Int       @default(0)
+  createdAt      DateTime  @default(now())
   @@map("user_behaviors")
 }
 
@@ -313,6 +318,7 @@ model UserPreference {
   id        String   @id @default(cuid())
   userId    String   @unique
   settings  String?
+  payload   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("user_preferences")
@@ -322,6 +328,8 @@ model UserTag {
   id        String   @id @default(cuid())
   userId    String
   tag       String
+  tagType   String?
+  tagValue  String?
   createdAt DateTime @default(now())
   @@map("user_tags")
 }
@@ -369,41 +377,61 @@ model EmailConfig {
 }
 
 model MarketingCampaign {
-  id        String   @id @default(cuid())
-  name      String
-  budget    Int
-  startDate DateTime
-  endDate   DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String                      @id @default(cuid())
+  name          String
+  type          String?
+  targetSegment String?
+  spent         Int                         @default(0)
+  budget        Int
+  startDate     DateTime
+  endDate       DateTime
+  createdAt     DateTime                    @default(now())
+  updatedAt     DateTime                    @updatedAt
+  analytics     MarketingAnalytics[]        @relation("CampaignAnalytics")
+  budgets       MarketingBudget[]           @relation("CampaignBudgets")
+  targets       MarketingCampaignTarget[]   @relation("CampaignTargets")
   @@map("marketing_campaigns")
 }
 
 model MarketingCampaignTarget {
-  id         String   @id @default(cuid())
+  id         String            @id @default(cuid())
   campaignId String
   target     String
-  createdAt  DateTime @default(now())
+  userId     String?
+  createdAt  DateTime          @default(now())
+  campaign   MarketingCampaign @relation("CampaignTargets", fields: [campaignId], references: [id])
   @@map("marketing_campaign_targets")
 }
 
 model MarketingBudget {
-  id         String   @id @default(cuid())
-  campaignId String
+  id         String            @id @default(cuid())
+  campaignId String            @unique
   amount     Int
-  spent      Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  spent      Int               @default(0)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  campaign   MarketingCampaign @relation("CampaignBudgets", fields: [campaignId], references: [id])
   @@map("marketing_budgets")
 }
 
 model MarketingAnalytics {
-  id         String   @id @default(cuid())
-  campaignId String
-  metric     String
-  value      Int
-  date       DateTime
-  createdAt  DateTime @default(now())
+  id             String            @id @default(cuid())
+  campaignId     String
+  metric         String
+  value          Int
+  date           DateTime
+  sent           Int               @default(0)
+  opened         Int               @default(0)
+  clicked        Int               @default(0)
+  converted      Int               @default(0)
+  revenue        Int               @default(0)
+  openRate       Float             @default(0)
+  clickRate      Float             @default(0)
+  conversionRate Float             @default(0)
+  cac            Float             @default(0)
+  roi            Float             @default(0)
+  createdAt      DateTime          @default(now())
+  campaign       MarketingCampaign @relation("CampaignAnalytics", fields: [campaignId], references: [id])
   @@map("marketing_analytics")
 }
 
@@ -451,12 +479,15 @@ model MissionState {
 }
 
 model RewardState {
-  id        String   @id @default(cuid())
-  userId    String
-  reward    String
-  claimed   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  reward          String
+  claimed         Boolean   @default(false)
+  streakCount     Int       @default(0)
+  lastCheckInDate DateTime?
+  makeUpUsedToday Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   @@map("reward_states")
 }
 
@@ -593,4 +624,42 @@ model ReadingHistory {
   percent   Int      @default(0)
   createdAt DateTime @default(now())
   @@map("reading_history")
+}
+
+model RegionConfig {
+  id        String   @id @default(cuid())
+  region    String   @unique
+  config    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("region_configs")
+}
+
+model RecommendationSlot {
+  id        String   @id @default(cuid())
+  slot      String   @unique
+  seriesIds String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("recommendation_slots")
+}
+
+model RecommendationAnalytics {
+  id        String   @id @default(cuid())
+  slot      String
+  seriesId  String
+  clicks    Int      @default(0)
+  views     Int      @default(0)
+  date      DateTime
+  createdAt DateTime @default(now())
+  @@map("recommendation_analytics")
+}
+
+model RankingConfig {
+  id        String   @id @default(cuid())
+  ranking   String   @unique
+  config    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("ranking_configs")
 }
