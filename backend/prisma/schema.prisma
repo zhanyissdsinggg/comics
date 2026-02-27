@@ -17,6 +17,7 @@ model User {
   isBlocked      Boolean        @default(false)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+  sessions       Session[]      @relation("UserSessions")
   comments       Comment[]      @relation("UserComments")
   commentLikes   CommentLike[]  @relation("UserCommentLikes")
   commentReplies CommentReply[] @relation("UserCommentReplies")
@@ -70,16 +71,21 @@ model Session {
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+  user      User     @relation("UserSessions", fields: [userId], references: [id])
   @@map("sessions")
 }
 
 model AdminLog {
-  id        String   @id @default(cuid())
-  userId    String
-  action    String
-  resource  String
-  details   String?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  userId     String
+  action     String
+  resource   String
+  resourceId String
+  adminId    String
+  details    String?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
   @@map("admin_logs")
 }
 
@@ -315,10 +321,11 @@ model UserTag {
 
 model SearchLog {
   id        String   @id @default(cuid())
-  userId    String?
-  query     String
-  results   Int      @default(0)
+  dateKey   String
+  keyword   String
+  count     Int      @default(1)
   createdAt DateTime @default(now())
+  @@unique([dateKey, keyword])
   @@map("search_logs")
 }
 
