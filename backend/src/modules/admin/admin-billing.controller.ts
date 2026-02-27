@@ -23,6 +23,8 @@ export class AdminBillingController {
     }
     const payload = {
       id,
+      name: body?.name || `Package ${id}`,
+      amount: Number(body?.amount || body?.paidPts || 0),
       paidPts: Number(body?.paidPts || 0),
       bonusPts: Number(body?.bonusPts || 0),
       price: Number(body?.price || 0),
@@ -73,6 +75,8 @@ export class AdminBillingController {
     }
     const payload = {
       id,
+      name: body?.name || `Plan ${id}`,
+      duration: Number(body?.duration || 30),
       discountPct: Number(body?.discountPct || 0),
       dailyFreeUnlocks: Number(body?.dailyFreeUnlocks || 0),
       ttfMultiplier: Number(body?.ttfMultiplier || 0),

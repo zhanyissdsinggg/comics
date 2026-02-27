@@ -14,10 +14,11 @@ export class SubscriptionService {
     }
     const now = new Date();
     const renewAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
     await this.prisma.subscription.upsert({
       where: { userId },
-      update: { planId, active: true, startedAt: now, renewAt },
-      create: { userId, planId, active: true, startedAt: now, renewAt },
+      update: { planId, active: true, startedAt: now, renewAt, expiresAt },
+      create: { userId, planId, active: true, startedAt: now, renewAt, expiresAt },
     });
     await this.prisma.wallet.upsert({
       where: { userId },

@@ -37,6 +37,7 @@ export class AdminLogService {
 
       await this.prisma.adminLog.create({
         data: {
+          userId: adminId,
           action,
           resource,
           resourceId,
