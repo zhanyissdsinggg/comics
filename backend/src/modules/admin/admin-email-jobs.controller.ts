@@ -35,10 +35,10 @@ export class AdminEmailJobsController {
         data: {
           userId: req.userId || null,
           action: "admin_email_retry",
+          resource: "email_job",
           targetType: "email_job",
           targetId: String(jobId),
-          payload: { ok: result.ok },
-          requestId: req.requestId || "",
+          payload: JSON.stringify({ ok: result.ok }),
         },
       });
     } catch {

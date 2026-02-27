@@ -38,9 +38,10 @@ export class OrdersService {
     const auditLogs = pending.map((order) => ({
       userId,
       action: "order_timeout",
+      resource: "order",
       targetType: "order",
       targetId: order.id,
-      payload: { reason: "RECONCILE_TIMEOUT" },
+      payload: JSON.stringify({ reason: "RECONCILE_TIMEOUT" }),
     }));
 
     await this.prisma.auditLog.createMany({

@@ -68,10 +68,10 @@ export class AdminEmailController {
         data: {
           userId: req.userId || null,
           action: "admin_email_config_update",
+          resource: "email_config",
           targetType: "email_config",
           targetId: "default",
-          payload: { provider: payload.provider, from: payload.from },
-          requestId: req.requestId || "",
+          payload: JSON.stringify({ provider: payload.provider, from: payload.from }),
         },
       });
     } catch {

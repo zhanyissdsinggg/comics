@@ -29,10 +29,10 @@ export class PaymentsOrdersController {
         data: {
           userId: payload.userId || null,
           action,
+          resource: payload.targetType || "payment",
           targetType: payload.targetType || "payment",
           targetId: payload.targetId || "",
-          payload,
-          requestId: req.requestId || "",
+          payload: JSON.stringify(payload),
         },
       });
     } catch {
