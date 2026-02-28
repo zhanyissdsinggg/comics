@@ -13,13 +13,35 @@ const toneMap = {
   default: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)",
 };
 
+/**
+ * 老王注释：将 placehold.co 的 SVG URL 转为 PNG 格式
+ * Next.js Image Optimization 不支持 SVG，placehold.co 默认返回 SVG
+ * 解决方案：在 URL 的路径部分加上 .png 扩展名
+ * 例：https://placehold.co/400x600/ff0000/fff?text=Hello
+ *  → https://placehold.co/400x600/ff0000/fff.png?text=Hello
+ */
+function normalizeCoverUrl(url) {
+  if (!url) return url;
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === "placehold.co" && !parsed.pathname.match(/\.(png|jpg|jpeg|webp|gif)$/i)) {
+      parsed.pathname = parsed.pathname + ".png";
+      return parsed.toString();
+    }
+  } catch {
+    // 如果 URL 解析失败，返回原始 URL
+  }
+  return url;
+}
+
 export default function Cover({ tone = "default", coverUrl, className = "", style = {} }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const background = toneMap[tone] || toneMap.default;
+  const resolvedUrl = normalizeCoverUrl(coverUrl);
 
   // 老王注释：如果有coverUrl，显示图片
-  if (coverUrl) {
+  if (resolvedUrl) {
     return (
       <div className={`relative ${className}`.trim()} style={style} aria-hidden="true">
         {/* 老王注释：加载时的模糊背景 */}
@@ -38,7 +60,7 @@ export default function Cover({ tone = "default", coverUrl, className = "", styl
           />
         ) : (
           <Image
-            src={coverUrl}
+            src={resolvedUrl}
             alt=""
             fill
             sizes="(max-width: 768px) 160px, 240px"
