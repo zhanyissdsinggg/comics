@@ -15,6 +15,7 @@ function mapSeriesCard(series, subtitle, badgeOverride, extra = {}) {
     title: series.title,
     subtitle: subtitle || series.status || "Series",
     coverTone: series.coverTone,
+    coverUrl: series.coverUrl,
     badge: badgeOverride || series.badge,
     ...extra,
   };

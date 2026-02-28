@@ -63,6 +63,7 @@ export function useHomeRecommendations() {
         title: series.title,
         subtitle: series.latest || "New episode",
         coverTone: series.coverTone,
+        coverUrl: series.coverUrl,
         badge: series.badge,
       }))
       .sort((a, b) => parseLatestNumber(b.subtitle) - parseLatestNumber(a.subtitle));
@@ -84,6 +85,7 @@ export function useHomeRecommendations() {
           title: series.title,
           subtitle: `Last read ${entry.episodeId}`,
           coverTone: series.coverTone,
+          coverUrl: series.coverUrl,
           badge: series.badge,
         };
       })
@@ -131,6 +133,7 @@ export function useHomeRecommendations() {
       title: series.title,
       subtitle: series.genres?.join(", ") || "",
       coverTone: series.coverTone,
+      coverUrl: series.coverUrl,
       badge: series.badge,
     }));
   }, [seriesList, historySeriesIds, followedSeriesIds, progressSeriesIds, isSignedIn]);
@@ -156,6 +159,7 @@ export function useHomeRecommendations() {
         title: series.title,
         subtitle: series.genres?.join(", ") || "",
         coverTone: series.coverTone,
+        coverUrl: series.coverUrl,
         badge: series.badge,
       }));
   }, [isNewUser, seriesList]);
@@ -267,6 +271,7 @@ export function useHomeRecommendations() {
           title: series.title,
           subtitle: `⭐ ${series.rating?.toFixed(1) || "N/A"} · ${series.genres?.join(", ") || ""}`,
           coverTone: series.coverTone,
+          coverUrl: series.coverUrl,
           badge: series.badge,
         })),
       });
