@@ -46,7 +46,7 @@ select,
 textarea {
   font-family: inherit;
   letter-spacing: -0.005em;
-  border-radius: 9999px !important;
+  /* 移除强制圆角：让各组件自己控制 border-radius */
 }
 
 button {
@@ -74,6 +74,15 @@ textarea {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* scrollbar-hide: 隐藏滚动条（用于横向 chip 列表等） */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* 老王注释：骨架屏基础样式 - 深色背景 + 圆角 */

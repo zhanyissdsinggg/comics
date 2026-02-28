@@ -1,16 +1,6 @@
 /**
- * HomePage - 简化重构版本
- *
- * 职责：
- * - 组合各个子组件
- * - 处理页面级的状态和事件
- * - 提供整体布局
- *
- * 重构说明：
- * - 数据获取逻辑 → HomeDataProvider
- * - 推荐算法逻辑 → HomeRecommendations
- * - Rails渲染逻辑 → HomeRailsContainer
- * - 钱包侧边栏 → WalletAside (保持独立)
+ * HomePage - 参考 Webtoon/Tapas 首页设计
+ * Hero Banner + Genre Filter Chips + Rails 内容网格
  */
 
 "use client";
@@ -19,79 +9,80 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import HeroCarousel from "./HeroCarousel";
-import Chip from "../common/Chip";
-import LoginNotice from "./LoginNotice";
-import StaleDataNotice from "./StaleDataNotice";
-import NewUserWelcome from "./NewUserWelcome";
-import TrendingKeywords from "./TrendingKeywords";
-import OnboardingTour from "../common/OnboardingTour";
-import WalletAside from "./WalletAside";
-import LoginPrompt from "../auth/LoginPrompt"; // 老王添加：登录弹窗组件
+import LoginPrompt from "../auth/LoginPrompt";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import HomeRailsContainer from "./HomeRailsContainer";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
-import { useHomeStore } from "../../store/useHomeStore";
 import { useFollowStore } from "../../store/useFollowStore";
-import { useBrandingStore } from "../../store/useBrandingStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useBrandingStore } from "../../store/useBrandingStore";
 import { track } from "../../lib/analytics";
 
-// Hero carousel items (TODO: move to API)
-const baseHeroItems = [
-  {
-    id: "hero-1",
-    title: "Midnight Contract",
-    description: "A contract that binds two rivals under the midnight moon.",
-    coverTone: "warm",
-    bannerUrl:
-      "https://img2.baidu.com/it/u=2690835672,2180416117&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500",
-  },
-  {
-    id: "hero-2",
-    title: "Crimson Promise",
-    description: "A deadly promise turns into an unexpected romance.",
-    coverTone: "dusk",
-  },
+// Genre chip 配置
+const GENRE_CHIPS = [
+  { id: "all", label: "All" },
+  { id: "action", label: "Action" },
+  { id: "romance", label: "Romance" },
+  { id: "fantasy", label: "Fantasy" },
+  { id: "drama", label: "Drama" },
+  { id: "thriller", label: "Thriller" },
+  { id: "comedy", label: "Comedy" },
+  { id: "sci-fi", label: "Sci-Fi" },
+  { id: "horror", label: "Horror" },
 ];
+
+// 骨架屏
+function SkeletonRail() {
+  return (
+    <div className="space-y-4">
+      <div className="h-6 w-36 animate-pulse rounded bg-neutral-800" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="space-y-2">
+            <div className="aspect-[3/4] animate-pulse rounded-xl bg-neutral-800" />
+            <div className="h-3 w-3/4 animate-pulse rounded bg-neutral-800" />
+            <div className="h-3 w-1/2 animate-pulse rounded bg-neutral-800" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HeroBannerSkeleton() {
+  return (
+    <div className="aspect-[21/9] w-full animate-pulse rounded-2xl bg-neutral-800 sm:aspect-[21/8] md:aspect-[21/7]" />
+  );
+}
 
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAdultMode } = useAdultGateStore();
-  const { homeTab } = useHomeStore();
   const { loadFollowed } = useFollowStore();
   const { branding } = useBrandingStore();
   const { loadHistory } = useHistoryStore();
   const { isSignedIn } = useAuthStore();
-  const { hotKeywords, hotWindow, setHotWindow, loading, showStale, seriesList } = useHomeData();
+  const { loading, seriesList } = useHomeData();
 
-  const [activeChip, setActiveChip] = useState("popular");
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false); // 老王修改：改用弹窗而不是横幅
+  const [activeGenre, setActiveGenre] = useState("all");
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Load user data on mount
-  // 老王修复：只有登录用户才加载关注列表，避免401错误
+  // 加载用户数据
   useEffect(() => {
     if (isSignedIn) {
       loadFollowed();
-    }
-  }, [loadFollowed, isSignedIn]);
-
-  useEffect(() => {
-    if (isSignedIn) {
       loadHistory();
     }
-  }, [isSignedIn, loadHistory]);
+  }, [loadFollowed, loadHistory, isSignedIn]);
 
-  // 老王修改：检查是否需要显示登录弹窗
+  // 检查 URL 参数 - 登录弹窗
   useEffect(() => {
     const reason = searchParams.get("reason");
     const openLogin = searchParams.get("openLogin");
-
-    // 老王修复：支持从/login或/signin页面跳转过来打开登录弹窗
     if (reason === "NEED_LOGIN" || openLogin === "1") {
       setShowLoginPrompt(true);
-      // 清除 URL 参数，避免刷新页面时重复显示
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete("reason");
       newUrl.searchParams.delete("returnTo");
@@ -102,110 +93,84 @@ function HomeContent() {
 
   // Track page view
   useEffect(() => {
-    track("view_home", { tab: homeTab });
-  }, [homeTab]);
+    track("view_home", {});
+  }, []);
 
-  // Update active chip based on adult mode
-  useEffect(() => {
-    setActiveChip(isAdultMode ? "adult" : "popular");
-  }, [isAdultMode]);
-
-  // 老王修复：从seriesList动态生成hero items，不再使用硬编码数据
+  // Hero items - 从 seriesList 动态生成
   const heroItems = useMemo(() => {
-    // 如果seriesList为空，使用fallback数据
-    if (!seriesList || seriesList.length === 0) {
-      return baseHeroItems;
-    }
-
-    // 从seriesList中选择高评分或Hot标签的作品作为hero items
-    const featuredSeries = seriesList
-      .filter((series) => series.badge === "Hot" || series.rating >= 4.5)
+    if (!seriesList || seriesList.length === 0) return [];
+    const featured = seriesList
+      .filter((s) => s.badge === "HOT" || s.badge === "Hot" || (s.rating || 0) >= 4.5)
       .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-      .slice(0, 6) // 取前6个作品
-      .map((series) => ({
-        id: `hero-${series.id}`,
-        title: series.title,
-        description: series.description || `${series.type} · ${series.genres?.join(", ") || ""}`,
-        coverTone: series.coverTone || "warm",
-        coverUrl: series.coverUrl,
-        bannerUrl: series.bannerUrl, // 如果有bannerUrl就用，没有就用coverUrl
+      .slice(0, 6)
+      .map((s) => ({
+        id: `hero-${s.id}`,
+        title: s.title,
+        description: s.description || `${s.genres?.join(" · ") || ""}`,
+        coverTone: s.coverTone || "default",
+        coverUrl: s.coverUrl,
+        bannerUrl: s.bannerUrl || null,
+        badge: s.badge,
       }));
-
-    // 如果没有符合条件的作品，就取前6个
-    if (featuredSeries.length === 0) {
-      return seriesList.slice(0, 6).map((series) => ({
-        id: `hero-${series.id}`,
-        title: series.title,
-        description: series.description || `${series.type} · ${series.genres?.join(", ") || ""}`,
-        coverTone: series.coverTone || "warm",
-        coverUrl: series.coverUrl,
-        bannerUrl: series.bannerUrl,
-      }));
+    if (branding?.homeBannerUrl && featured.length > 0) {
+      featured[0] = { ...featured[0], bannerUrl: branding.homeBannerUrl };
     }
-
-    // 如果有branding的homeBannerUrl，应用到第一个item
-    if (branding?.homeBannerUrl && featuredSeries.length > 0) {
-      featuredSeries[0] = { ...featuredSeries[0], bannerUrl: branding.homeBannerUrl };
-    }
-
-    return featuredSeries;
+    return featured.length > 0 ? featured : seriesList.slice(0, 4).map((s) => ({
+      id: `hero-${s.id}`,
+      title: s.title,
+      description: s.description || "",
+      coverTone: s.coverTone || "default",
+      coverUrl: s.coverUrl,
+      bannerUrl: null,
+      badge: s.badge,
+    }));
   }, [seriesList, branding?.homeBannerUrl]);
-
-  // 老王修复：处理热搜关键词点击
-  const handleKeywordClick = (keyword) => {
-    router.push(`/search?q=${encodeURIComponent(keyword)}`);
-  };
-
-  // Category chips
-  const chips = [
-    { id: "popular", label: "Popular" },
-    { id: "daily", label: "Daily" },
-    { id: "new", label: "New" },
-    { id: "completed", label: "Completed" },
-    { id: "ttf", label: "TTF" },
-    ...(isAdultMode ? [{ id: "adult", label: "Adult" }] : []),
-  ];
 
   return (
     <div className="min-h-screen bg-neutral-950">
       <SiteHeader />
 
-      <main className="mx-auto max-w-[1200px] px-4 py-6 pb-24 sm:px-6 sm:pb-6">
-        {/* Stale data notice */}
-        {showStale && <StaleDataNotice />}
+      <main className="mx-auto max-w-[1280px] px-4 pb-24 sm:px-6 sm:pb-6 lg:px-8">
+        {/* ===== Hero Banner ===== */}
+        <div className="py-4 md:py-6">
+          {loading ? <HeroBannerSkeleton /> : <HeroCarousel items={heroItems} />}
+        </div>
 
-        {/* Rails container - FAKKU风格：直接展示内容网格 */}
+        {/* ===== Genre Filter Chips - 像 Webtoon 的分类筛选 ===== */}
+        <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {GENRE_CHIPS.map((chip) => (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => setActiveGenre(chip.id)}
+              className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+                activeGenre === chip.id
+                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                  : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+              }`}
+            >
+              {chip.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ===== Content Rails ===== */}
         {loading ? (
           <div className="space-y-10">
-            <div>
-              <div className="mb-4 h-8 w-48 bg-neutral-800 rounded animate-pulse" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="space-y-2">
-                    <div className="aspect-[3/4] bg-neutral-800 rounded-lg animate-pulse" />
-                    <div className="h-4 w-3/4 bg-neutral-800 rounded animate-pulse" />
-                    <div className="h-3 w-1/2 bg-neutral-800 rounded animate-pulse" />
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SkeletonRail />
+            <SkeletonRail />
+            <SkeletonRail />
           </div>
         ) : (
-          <HomeRailsContainer />
+          <HomeRailsContainer activeGenre={activeGenre} />
         )}
       </main>
 
-      {/* Onboarding tour */}
-      <OnboardingTour />
-
-      {/* 老王添加：登录弹窗 */}
+      {/* 登录弹窗 */}
       <LoginPrompt
         isOpen={showLoginPrompt}
         onClose={() => setShowLoginPrompt(false)}
-        onLogin={() => {
-          // 跳转到登录页面或触发登录流程
-          router.push("/login");
-        }}
+        onLogin={() => router.push("/login")}
       />
     </div>
   );
