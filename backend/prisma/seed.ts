@@ -1,4 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// 老王说：加载 .env 文件
+config({ path: resolve(__dirname, '../.env') });
 
 const prisma = new PrismaClient();
 

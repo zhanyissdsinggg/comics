@@ -31,7 +31,7 @@ export default function AccountPage() {
   const { isSignedIn, user } = useAuthStore();
   const { plan, subscription, loadWallet, cancelSubscription } = useWalletStore();
   const [region, setRegion] = useState("global");
-  const [language, setLanguage] = useState("zh");
+  const [language, setLanguage] = useState("en");
   const [hideAdultHistory, setHideAdultHistory] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [notifyNew, setNotifyNew] = useState(true);
@@ -49,7 +49,7 @@ export default function AccountPage() {
 
   useEffect(() => {
     const storedRegion = readStorage(REGION_KEY, "global");
-    const storedLang = readStorage(LANG_KEY, "zh");
+    const storedLang = readStorage(LANG_KEY, "en");
     const storedHide = readStorage(HIDE_ADULT_KEY, "0") === "1";
     const storedName = readStorage(DISPLAY_NAME_KEY, "");
     const storedNotifyNew = readStorage(NOTIFY_NEW_KEY, "1") !== "0";

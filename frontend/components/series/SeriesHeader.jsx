@@ -24,7 +24,7 @@ export default function SeriesHeader({
         {/* Cover + read button (desktop only) */}
         <div className="flex-shrink-0 w-28 sm:w-48 md:w-56">
           <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-neutral-800">
-            <Cover tone={series.coverTone} />
+            <Cover tone={series.coverTone} coverUrl={series.coverUrl} />
           </div>
           <div className="mt-3 hidden sm:block space-y-2">
             {onContinue ? (

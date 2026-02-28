@@ -63,7 +63,7 @@ model Episode {
   ttfReadyAt       DateTime?
   releasedAt       DateTime?
   previewFreePages Int       @default(0)
-  pages            String[]  @default([])
+  pages            Json      @default("[]")
   paragraphs       String[]  @default([])
   text             String?
   createdAt        DateTime  @default(now())

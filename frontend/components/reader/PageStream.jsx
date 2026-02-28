@@ -4,6 +4,21 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { track } from "../../lib/analytics";
 
+// 修复 placehold.co 返回 SVG 问题：Next.js Image 不支持 SVG，需要加 .png 后缀
+function normalizePageUrl(url) {
+  if (!url) return url;
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === "placehold.co" && !parsed.pathname.match(/\.(png|jpg|jpeg|webp|gif)$/i)) {
+      parsed.pathname = parsed.pathname + ".png";
+      return parsed.toString();
+    }
+  } catch {
+    // 解析失败返回原始 URL
+  }
+  return url;
+}
+
 function pushPerfMetric(name, value) {
   if (typeof window === "undefined") {
     return;
@@ -30,7 +45,7 @@ function preloadImages(pages, startIndex, count = 3) {
   const next = pages.slice(startIndex, startIndex + count);
   next.forEach((page) => {
     const img = new Image();
-    img.src = page.url;
+    img.src = normalizePageUrl(page.url);
   });
 }
 
@@ -267,8 +282,8 @@ export default function PageStream({
                   <Image
                     src={
                       reloadKeys[index]
-                        ? `${page.url}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
-                        : page.url
+                        ? `${normalizePageUrl(page.url)}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
+                        : normalizePageUrl(page.url)
                     }
                     alt=""
                     width={page.w || 800}

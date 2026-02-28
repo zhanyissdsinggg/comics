@@ -76,6 +76,7 @@ export default function LibraryPage() {
         title: series.title,
         subtitle: `Continue Ep ${parseEpisodeNumber(progress.lastEpisodeId) || "?"}`,
         coverTone: series.coverTone,
+        coverUrl: series.coverUrl,
         isAdult: Boolean(series.adult),
       };
     })
@@ -95,6 +96,7 @@ export default function LibraryPage() {
         title: series.title,
         subtitle: `Last read ${entry.episodeId}`,
         coverTone: series.coverTone,
+        coverUrl: series.coverUrl,
         isAdult: Boolean(series.adult),
       };
     })
