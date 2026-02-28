@@ -1,20 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../../common/prisma/prisma.service';
 
 /**
  * 老王注释：通用配置服务 - Email、Regions、Tracking、Branding都用这个
  * 这个SB服务统一了所有配置的存储和读取逻辑，减少重复代码
+ * 使用TrackingConfig表来存储通用配置
  */
 @Injectable()
 export class ConfigService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaService) {}
 
   /**
    * 老王说：获取配置，如果不存在则返回默认值
    */
   async getConfig(key: string, defaultValue: any = null): Promise<any> {
     try {
-      const config = await (this.prisma as any).config.findUnique({
+      const config = await this.prisma.trackingConfig.findUnique({
         where: { key },
       });
 
@@ -23,7 +24,7 @@ export class ConfigService {
       }
 
       // 老王说：如果payload是JSON字符串，解析它
-      if (typeof config.payload === 'string') {
+      if (config.payload && typeof config.payload === 'string') {
         try {
           return JSON.parse(config.payload);
         } catch {
@@ -46,7 +47,7 @@ export class ConfigService {
       // 老王说：如果payload是对象，转换为JSON字符串
       const data = typeof payload === 'object' ? JSON.stringify(payload) : payload;
 
-      const config = await (this.prisma as any).config.upsert({
+      const config = await this.prisma.trackingConfig.upsert({
         where: { key },
         update: {
           payload: data,
@@ -54,6 +55,7 @@ export class ConfigService {
         },
         create: {
           key,
+          value: key,
           payload: data,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -72,7 +74,7 @@ export class ConfigService {
    */
   async deleteConfig(key: string): Promise<void> {
     try {
-      await (this.prisma as any).config.delete({
+      await this.prisma.trackingConfig.delete({
         where: { key },
       });
     } catch (error) {
@@ -86,7 +88,7 @@ export class ConfigService {
    */
   async getAllConfigs(): Promise<Record<string, any>> {
     try {
-      const configs = await (this.prisma as any).config.findMany();
+      const configs = await this.prisma.trackingConfig.findMany();
 
       const result: Record<string, any> = {};
       configs.forEach((config: any) => {
@@ -132,7 +134,7 @@ export class ConfigService {
    */
   async hasConfig(key: string): Promise<boolean> {
     try {
-      const config = await (this.prisma as any).config.findUnique({
+      const config = await this.prisma.trackingConfig.findUnique({
         where: { key },
       });
 

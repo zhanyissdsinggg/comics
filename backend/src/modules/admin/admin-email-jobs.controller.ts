@@ -33,7 +33,7 @@ export class AdminEmailJobsController {
     try {
       await this.prisma.auditLog.create({
         data: {
-          userId: req.userId || null,
+          userId: (req as any)?.user?.userId || "admin",
           action: "admin_email_retry",
           resource: "email_job",
           targetType: "email_job",

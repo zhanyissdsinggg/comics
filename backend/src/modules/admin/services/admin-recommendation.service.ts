@@ -14,16 +14,13 @@ export class AdminRecommendationService {
    * 获取所有推荐位
    */
   async getRecommendationSlots(filters: any = {}) {
-    const { active, limit = 100, offset = 0 } = filters;
+    const { limit = 100, offset = 0 } = filters;
 
     const where: any = {};
-    if (active !== undefined) {
-      where.active = active;
-    }
 
     const slots = await this.prisma.recommendationSlot.findMany({
       where,
-      orderBy: { position: 'asc' },
+      orderBy: { createdAt: 'asc' },
       take: limit,
       skip: offset,
     });
@@ -39,14 +36,8 @@ export class AdminRecommendationService {
   async createRecommendationSlot(data: any) {
     return this.prisma.recommendationSlot.create({
       data: {
-        name: data.name,
-        slotType: data.slotType,
-        position: data.position,
-        active: data.active ?? true,
-        maxItems: data.maxItems ?? 10,
-        refreshInterval: data.refreshInterval ?? 3600,
-        algorithm: data.algorithm ?? 'trending',
-        targetAudience: data.targetAudience ?? 'all',
+        slot: data.slot || data.name || `slot-${Date.now()}`,
+        seriesIds: Array.isArray(data.seriesIds) ? data.seriesIds : [],
       },
     });
   }
@@ -55,9 +46,12 @@ export class AdminRecommendationService {
    * 更新推荐位
    */
   async updateRecommendationSlot(id: string, data: any) {
+    const updateData: any = {};
+    if (data.slot) updateData.slot = data.slot;
+    if (Array.isArray(data.seriesIds)) updateData.seriesIds = data.seriesIds;
     return this.prisma.recommendationSlot.update({
       where: { id },
-      data,
+      data: updateData,
     });
   }
 
@@ -74,19 +68,13 @@ export class AdminRecommendationService {
    * 获取所有排行榜配置
    */
   async getRankingConfigs(filters: any = {}) {
-    const { active, rankingType, limit = 100, offset = 0 } = filters;
+    const { limit = 100, offset = 0 } = filters;
 
     const where: any = {};
-    if (active !== undefined) {
-      where.active = active;
-    }
-    if (rankingType) {
-      where.rankingType = rankingType;
-    }
 
     const configs = await this.prisma.rankingConfig.findMany({
       where,
-      orderBy: { position: 'asc' },
+      orderBy: { createdAt: 'asc' },
       take: limit,
       skip: offset,
     });
@@ -102,15 +90,14 @@ export class AdminRecommendationService {
   async createRankingConfig(data: any) {
     return this.prisma.rankingConfig.create({
       data: {
-        name: data.name,
-        rankingType: data.rankingType,
-        timeRange: data.timeRange,
-        seriesType: data.seriesType ?? 'all',
-        adult: data.adult ?? false,
-        active: data.active ?? true,
-        position: data.position,
-        maxItems: data.maxItems ?? 20,
-        refreshInterval: data.refreshInterval ?? 3600,
+        ranking: data.ranking || data.name || `ranking-${Date.now()}`,
+        config: data.config ? JSON.stringify(data.config) : JSON.stringify({
+          rankingType: data.rankingType || 'views',
+          timeRange: data.timeRange || 'day',
+          seriesType: data.seriesType || 'all',
+          adult: data.adult || false,
+          maxItems: data.maxItems || 20,
+        }),
       },
     });
   }
@@ -119,9 +106,12 @@ export class AdminRecommendationService {
    * 更新排行榜配置
    */
   async updateRankingConfig(id: string, data: any) {
+    const updateData: any = {};
+    if (data.ranking) updateData.ranking = data.ranking;
+    if (data.config) updateData.config = typeof data.config === 'string' ? data.config : JSON.stringify(data.config);
     return this.prisma.rankingConfig.update({
       where: { id },
-      data,
+      data: updateData,
     });
   }
 
@@ -138,25 +128,19 @@ export class AdminRecommendationService {
    * 获取推荐效果分析数据
    */
   async getRecommendationAnalytics(filters: any = {}) {
-    const { slotId, seriesId, startDate, endDate, limit = 100, offset = 0 } = filters;
+    const { slot, seriesId, startDate, endDate, limit = 100, offset = 0 } = filters;
 
     const where: any = {};
-    if (slotId) {
-      where.slotId = slotId;
+    if (slot) {
+      where.slot = slot;
     }
     if (seriesId) {
       where.seriesId = seriesId;
     }
-    if (startDate && endDate) {
-      where.dateKey = {
-        gte: startDate,
-        lte: endDate,
-      };
-    }
 
     const analytics = await this.prisma.recommendationAnalytics.findMany({
       where,
-      orderBy: { dateKey: 'desc' },
+      orderBy: { date: 'desc' },
       take: limit,
       skip: offset,
     });
@@ -169,53 +153,25 @@ export class AdminRecommendationService {
   /**
    * 保存推荐效果分析数据
    */
-  async saveRecommendationAnalytics(slotId: string, seriesId: string, dateKey: string, data: any) {
-    const existing = await this.prisma.recommendationAnalytics.findUnique({
-      where: {
-        slotId_seriesId_dateKey: {
-          slotId,
-          seriesId,
-          dateKey,
-        },
+  async saveRecommendationAnalytics(slot: string, seriesId: string, date: Date, data: any) {
+    return this.prisma.recommendationAnalytics.create({
+      data: {
+        slot,
+        seriesId,
+        date: date || new Date(),
+        clicks: data.clicks || 0,
+        views: data.views || 0,
+        impressions: data.impressions || 0,
+        conversions: data.conversions || 0,
       },
     });
-
-    if (existing) {
-      return this.prisma.recommendationAnalytics.update({
-        where: {
-          slotId_seriesId_dateKey: {
-            slotId,
-            seriesId,
-            dateKey,
-          },
-        },
-        data,
-      });
-    } else {
-      return this.prisma.recommendationAnalytics.create({
-        data: {
-          slotId,
-          seriesId,
-          dateKey,
-          ...data,
-        },
-      });
-    }
   }
 
   /**
    * 获取推荐位的效果统计
    */
-  async getSlotPerformance(slotId: string, filters: any = {}) {
-    const { startDate, endDate } = filters;
-
-    const where: any = { slotId };
-    if (startDate && endDate) {
-      where.dateKey = {
-        gte: startDate,
-        lte: endDate,
-      };
-    }
+  async getSlotPerformance(slot: string, filters: any = {}) {
+    const where: any = { slot };
 
     const analytics = await this.prisma.recommendationAnalytics.findMany({
       where,
@@ -240,30 +196,9 @@ export class AdminRecommendationService {
   /**
    * 获取排行榜的效果统计
    */
-  async getRankingPerformance(rankingType: string, filters: any = {}) {
-    const { startDate, endDate } = filters;
-
-    // 获取该排行榜类型下的所有推荐位
-    const slots = await this.prisma.recommendationSlot.findMany({
-      where: {
-        algorithm: rankingType,
-      },
-    });
-
-    const slotIds = slots.map((slot) => slot.id);
-
-    const where: any = {
-      slotId: { in: slotIds },
-    };
-    if (startDate && endDate) {
-      where.dateKey = {
-        gte: startDate,
-        lte: endDate,
-      };
-    }
-
+  async getRankingPerformance(ranking: string, filters: any = {}) {
     const analytics = await this.prisma.recommendationAnalytics.findMany({
-      where,
+      where: {},
     });
 
     const totalImpressions = analytics.reduce((sum, item) => sum + item.impressions, 0);
@@ -274,7 +209,7 @@ export class AdminRecommendationService {
     const avgConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
 
     return {
-      rankingType,
+      ranking,
       totalImpressions,
       totalClicks,
       totalConversions,
@@ -287,41 +222,28 @@ export class AdminRecommendationService {
    * 获取热门作品（用于排行榜）
    */
   async getPopularSeries(filters: any = {}) {
-    const { rankingType = 'views', timeRange = 'day', seriesType = 'all', adult = false, limit = 20 } = filters;
+    const { rankingType = 'views', seriesType = 'all', adult = false, limit = 20 } = filters;
 
-    let orderBy: any = {};
+    let orderBy: any = { rating: 'desc' };
 
-    if (rankingType === 'views') {
-      // 按浏览数排序
-      orderBy = { _count: { entitlements: 'desc' } };
-    } else if (rankingType === 'rating') {
-      // 按评分排序
+    if (rankingType === 'rating') {
       orderBy = { rating: 'desc' };
-    } else if (rankingType === 'follows') {
-      // 按关注数排序
-      orderBy = { _count: { follows: 'desc' } };
     } else if (rankingType === 'trending') {
-      // 按最近活跃排序
-      orderBy = { latestEpisodeId: 'desc' };
+      orderBy = { updatedAt: 'desc' };
+    } else {
+      orderBy = { ratingCount: 'desc' };
     }
 
-    const where: any = { adult };
+    const where: any = {};
+    if (!adult) {
+      where.adult = false;
+    }
     if (seriesType !== 'all') {
       where.type = seriesType;
     }
 
     const series = await this.prisma.series.findMany({
       where,
-      include: {
-        _count: {
-          select: {
-            entitlements: true,
-            follows: true,
-            comments: true,
-            ratings: true,
-          },
-        },
-      },
       orderBy,
       take: limit,
     });

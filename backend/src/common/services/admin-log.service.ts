@@ -42,7 +42,7 @@ export class AdminLogService {
           resource,
           resourceId,
           adminId,
-          details,
+          details: details ? JSON.stringify(details) : null,
           ip,
           userAgent,
         },

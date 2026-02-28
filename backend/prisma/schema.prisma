@@ -22,6 +22,10 @@ model User {
   comments       Comment[]      @relation("UserComments")
   commentLikes   CommentLike[]  @relation("UserCommentLikes")
   commentReplies CommentReply[] @relation("UserCommentReplies")
+  userTags       UserTag[]      @relation("UserTags")
+  userMetrics    UserMetrics?   @relation("UserMetrics")
+  userBehavior   UserBehavior?  @relation("UserBehavior")
+
   @@map("users")
 }
 
@@ -45,6 +49,7 @@ model Series {
   ttfIntervalHours Int      @default(24)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
   @@map("series")
 }
 
@@ -63,6 +68,7 @@ model Episode {
   text             String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+
   @@map("episodes")
 }
 
@@ -73,6 +79,7 @@ model Session {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation("UserSessions", fields: [userId], references: [id])
+
   @@map("sessions")
 }
 
@@ -87,6 +94,7 @@ model AdminLog {
   ip         String?
   userAgent  String?
   createdAt  DateTime @default(now())
+
   @@map("admin_logs")
 }
 
@@ -96,6 +104,7 @@ model DailyActive {
   dateKey   String
   date      DateTime
   createdAt DateTime @default(now())
+
   @@unique([dateKey, userId])
   @@map("daily_actives")
 }
@@ -109,6 +118,7 @@ model DailyStat {
   registrations Int      @default(0)
   paidOrders    Int      @default(0)
   createdAt     DateTime @default(now())
+
   @@map("daily_stats")
 }
 
@@ -122,6 +132,7 @@ model Wallet {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation("UserWallet", fields: [userId], references: [id])
+
   @@map("wallets")
 }
 
@@ -137,6 +148,7 @@ model Comment {
   user      User           @relation("UserComments", fields: [userId], references: [id])
   likes     CommentLike[]  @relation("CommentLikes")
   replies   CommentReply[] @relation("CommentReplies")
+
   @@map("comments")
 }
 
@@ -147,6 +159,7 @@ model CommentLike {
   createdAt DateTime @default(now())
   user      User     @relation("UserCommentLikes", fields: [userId], references: [id])
   comment   Comment  @relation("CommentLikes", fields: [commentId], references: [id])
+
   @@unique([commentId, userId])
   @@map("comment_likes")
 }
@@ -161,6 +174,7 @@ model CommentReply {
   updatedAt DateTime @updatedAt
   user      User     @relation("UserCommentReplies", fields: [userId], references: [id])
   comment   Comment  @relation("CommentReplies", fields: [commentId], references: [id])
+
   @@map("comment_replies")
 }
 
@@ -169,6 +183,7 @@ model Follow {
   userId    String
   seriesId  String
   createdAt DateTime @default(now())
+
   @@unique([userId, seriesId])
   @@map("follows")
 }
@@ -182,6 +197,7 @@ model Bookmark {
   pageIndex Int      @default(0)
   label     String?
   createdAt DateTime @default(now())
+
   @@map("bookmarks")
 }
 
@@ -191,6 +207,7 @@ model Entitlement {
   seriesId  String
   episodeId String
   createdAt DateTime @default(now())
+
   @@unique([userId, episodeId])
   @@map("entitlements")
 }
@@ -206,6 +223,7 @@ model Coupon {
   expiresAt     DateTime
   createdAt     DateTime     @default(now())
   userCoupons   UserCoupon[] @relation("CouponUserCoupons")
+
   @@map("coupons")
 }
 
@@ -217,20 +235,22 @@ model UserCoupon {
   claimedAt DateTime @default(now())
   createdAt DateTime @default(now())
   coupon    Coupon   @relation("CouponUserCoupons", fields: [couponId], references: [id])
+
   @@unique([userId, couponId])
   @@map("user_coupons")
 }
 
 model Subscription {
-  id        String   @id @default(cuid())
-  userId    String   @unique
+  id        String    @id @default(cuid())
+  userId    String    @unique
   planId    String
-  active    Boolean  @default(true)
-  startedAt DateTime @default(now())
+  active    Boolean   @default(true)
+  startedAt DateTime  @default(now())
   renewAt   DateTime?
   expiresAt DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   @@map("subscriptions")
 }
 
@@ -248,6 +268,7 @@ model SubscriptionPlan {
   label            String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
   @@map("subscription_plans")
 }
 
@@ -258,6 +279,7 @@ model SubscriptionUsage {
   dateKey   String
   used      Int      @default(0)
   createdAt DateTime @default(now())
+
   @@unique([userId, dateKey])
   @@map("subscription_usages")
 }
@@ -269,6 +291,7 @@ model SubscriptionVoucherUsage {
   dateKey   String
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
+
   @@unique([userId, dateKey])
   @@map("subscription_voucher_usages")
 }
@@ -286,6 +309,7 @@ model TopupPackage {
   tags      String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("topup_packages")
 }
 
@@ -301,6 +325,8 @@ model UserBehavior {
   ratingsCount   Int       @default(0)
   bookmarksCount Int       @default(0)
   createdAt      DateTime  @default(now())
+  user           User      @relation("UserBehavior", fields: [userId], references: [id])
+
   @@map("user_behaviors")
 }
 
@@ -309,8 +335,12 @@ model UserMetrics {
   userId    String   @unique
   views     Int      @default(0)
   reads     Int      @default(0)
+  ltv       Float    @default(0)
+  churnRisk String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation("UserMetrics", fields: [userId], references: [id])
+
   @@map("user_metrics")
 }
 
@@ -321,6 +351,7 @@ model UserPreference {
   payload   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("user_preferences")
 }
 
@@ -331,6 +362,8 @@ model UserTag {
   tagType   String?
   tagValue  String?
   createdAt DateTime @default(now())
+  user      User     @relation("UserTags", fields: [userId], references: [id])
+
   @@map("user_tags")
 }
 
@@ -340,6 +373,7 @@ model SearchLog {
   keyword   String
   count     Int      @default(1)
   createdAt DateTime @default(now())
+
   @@unique([dateKey, keyword])
   @@map("search_logs")
 }
@@ -351,6 +385,7 @@ model SeriesViewStat {
   views     Int      @default(0)
   date      DateTime
   createdAt DateTime @default(now())
+
   @@unique([dateKey, seriesId])
   @@map("series_view_stats")
 }
@@ -363,6 +398,7 @@ model SupportTicket {
   status    String   @default("open")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("support_tickets")
 }
 
@@ -373,23 +409,29 @@ model EmailConfig {
   payload   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("email_configs")
 }
 
 model MarketingCampaign {
-  id            String                      @id @default(cuid())
+  id            String                    @id @default(cuid())
   name          String
+  description   String?
   type          String?
+  status        String                    @default("draft")
   targetSegment String?
-  spent         Int                         @default(0)
-  budget        Int
-  startDate     DateTime
-  endDate       DateTime
-  createdAt     DateTime                    @default(now())
-  updatedAt     DateTime                    @updatedAt
-  analytics     MarketingAnalytics[]        @relation("CampaignAnalytics")
-  budgets       MarketingBudget[]           @relation("CampaignBudgets")
-  targets       MarketingCampaignTarget[]   @relation("CampaignTargets")
+  spent         Int                       @default(0)
+  budget        Int                       @default(0)
+  startAt       DateTime?
+  endAt         DateTime?
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  analytics     MarketingAnalytics[]      @relation("CampaignAnalytics")
+  budgets       MarketingBudget[]         @relation("CampaignBudgets")
+  targets       MarketingCampaignTarget[] @relation("CampaignTargets")
+
   @@map("marketing_campaigns")
 }
 
@@ -398,28 +440,37 @@ model MarketingCampaignTarget {
   campaignId String
   target     String
   userId     String?
+  status     String            @default("pending")
   createdAt  DateTime          @default(now())
   campaign   MarketingCampaign @relation("CampaignTargets", fields: [campaignId], references: [id])
+
+  @@unique([campaignId, userId])
   @@map("marketing_campaign_targets")
 }
 
 model MarketingBudget {
-  id         String            @id @default(cuid())
-  campaignId String            @unique
-  amount     Int
-  spent      Int               @default(0)
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
-  campaign   MarketingCampaign @relation("CampaignBudgets", fields: [campaignId], references: [id])
+  id             String            @id @default(cuid())
+  campaignId     String            @unique
+  totalBudget    Int               @default(0)
+  emailBudget    Int               @default(0)
+  pushBudget     Int               @default(0)
+  bannerBudget   Int               @default(0)
+  discountBudget Int               @default(0)
+  spent          Int               @default(0)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  campaign       MarketingCampaign @relation("CampaignBudgets", fields: [campaignId], references: [id])
+
   @@map("marketing_budgets")
 }
 
 model MarketingAnalytics {
   id             String            @id @default(cuid())
   campaignId     String
-  metric         String
-  value          Int
-  date           DateTime
+  dateKey        String
+  metric         String?
+  value          Int               @default(0)
+  date           DateTime?
   sent           Int               @default(0)
   opened         Int               @default(0)
   clicked        Int               @default(0)
@@ -432,6 +483,8 @@ model MarketingAnalytics {
   roi            Float             @default(0)
   createdAt      DateTime          @default(now())
   campaign       MarketingCampaign @relation("CampaignAnalytics", fields: [campaignId], references: [id])
+
+  @@unique([campaignId, dateKey])
   @@map("marketing_analytics")
 }
 
@@ -442,6 +495,7 @@ model TrackingConfig {
   payload   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("tracking_configs")
 }
 
@@ -451,6 +505,7 @@ model IdempotencyKey {
   response  String?
   createdAt DateTime @default(now())
   expiresAt DateTime
+
   @@map("idempotency_keys")
 }
 
@@ -464,6 +519,7 @@ model AuditLog {
   payload    String?
   details    String?
   createdAt  DateTime @default(now())
+
   @@map("audit_logs")
 }
 
@@ -475,6 +531,7 @@ model MissionState {
   completed Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("mission_states")
 }
 
@@ -488,6 +545,7 @@ model RewardState {
   makeUpUsedToday Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
   @@map("reward_states")
 }
 
@@ -498,6 +556,7 @@ model Module {
   config    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("modules")
 }
 
@@ -508,19 +567,21 @@ model Service {
   config    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("services")
 }
 
 model Order {
-  id         String    @id @default(cuid())
-  userId     String
-  packageId  String
-  amount     Int
-  currency   String
-  status     String
-  paidAt     DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id        String    @id @default(cuid())
+  userId    String
+  packageId String
+  amount    Int
+  currency  String
+  status    String
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   @@map("orders")
 }
 
@@ -532,20 +593,22 @@ model PaymentIntent {
   status    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("payment_intents")
 }
 
 model PaymentRetry {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   userId        String
-  orderId       String    @unique
+  orderId       String   @unique
   paymentId     String?
   status        String
-  attempts      Int       @default(0)
+  attempts      Int      @default(0)
   nextAttemptAt DateTime
   lastError     String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
   @@map("payment_retries")
 }
 
@@ -556,27 +619,29 @@ model Rating {
   rating    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@unique([userId, seriesId])
   @@map("ratings")
 }
 
 model Promotion {
-  id                  String    @id
-  title               String
-  description         String?
-  type                String
-  segment             String
-  active              Boolean   @default(true)
-  startAt             DateTime?
-  endAt               DateTime?
-  bonusMultiplier     Int       @default(0)
-  returningAfterDays  Int       @default(7)
-  autoGrant           Boolean   @default(false)
-  ctaType             String
-  ctaTarget           String?
-  ctaLabel            String
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id                 String    @id
+  title              String
+  description        String?
+  type               String
+  segment            String
+  active             Boolean   @default(true)
+  startAt            DateTime?
+  endAt              DateTime?
+  bonusMultiplier    Int       @default(0)
+  returningAfterDays Int       @default(7)
+  autoGrant          Boolean   @default(false)
+  ctaType            String
+  ctaTarget          String?
+  ctaLabel           String
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
   @@map("promotions")
 }
 
@@ -586,6 +651,7 @@ model PromotionFallback {
   payload   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("promotion_fallbacks")
 }
 
@@ -597,6 +663,7 @@ model Progress {
   percent       Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
   @@unique([userId, seriesId])
   @@map("progress")
 }
@@ -612,6 +679,7 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("notifications")
 }
 
@@ -623,6 +691,7 @@ model ReadingHistory {
   title     String
   percent   Int      @default(0)
   createdAt DateTime @default(now())
+
   @@map("reading_history")
 }
 
@@ -633,6 +702,7 @@ model RegionConfig {
   payload   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("region_configs")
 }
 
@@ -642,6 +712,7 @@ model RecommendationSlot {
   seriesIds String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("recommendation_slots")
 }
 
@@ -655,6 +726,7 @@ model RecommendationAnalytics {
   conversions Int      @default(0)
   date        DateTime
   createdAt   DateTime @default(now())
+
   @@map("recommendation_analytics")
 }
 
@@ -664,5 +736,6 @@ model RankingConfig {
   config    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("ranking_configs")
 }

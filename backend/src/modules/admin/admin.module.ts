@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer, APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/common";
+import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { EmailModule } from "../email/email.module";
 import { AdminLogService } from "../../common/services/admin-log.service";
@@ -20,6 +20,8 @@ import { ConfigService } from "./services/config.service";
 import { FileProcessingService } from "./services/file-processing.service";
 import { StreamingService } from "./services/streaming.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { AdminBillingController as AdminBillingManageController } from "./admin-billing.controller";
+import { AdminEmailJobsController as AdminEmailJobsLegacyController } from "./admin-email-jobs.controller";
 
 // 老王说：导入优化版本的controller
 import {
@@ -73,6 +75,7 @@ import { AdminEpisodesUploadController } from "./controllers/admin-episodes-uplo
     // 老王说：使用优化版本的controller
     AdminPromotionsController,
     AdminBillingController,
+    AdminBillingManageController,
     AdminNotificationsController,
     AdminCommentsController,
     AdminStatsController,
@@ -85,6 +88,7 @@ import { AdminEpisodesUploadController } from "./controllers/admin-episodes-uplo
     AdminUploadController,
     AdminEmailController,
     AdminEmailJobsController,
+    AdminEmailJobsLegacyController,
     // 老王说：拆分后的Series和Episodes Controller
     AdminSeriesController,
     AdminEpisodesController,
@@ -100,21 +104,9 @@ import { AdminEpisodesUploadController } from "./controllers/admin-episodes-uplo
     AdminAnalyticsService,
     AdminRecommendationService,
     AdminMarketingService,
-    // 老王说：注册全局异常过滤器
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
-    },
-    // 老王说：注册全局认证守卫
-    {
-      provide: APP_GUARD,
-      useClass: AdminAuthGuard,
-    },
-    // 老王说：注册全局审计日志拦截器
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: AdminAuditInterceptor,
-    },
+    AdminAuthGuard,
+    AdminAuditInterceptor,
+    AllExceptionsFilter,
   ],
   exports: [AdminLogService, CrudService, ConfigService, FileProcessingService, StreamingService],
 })

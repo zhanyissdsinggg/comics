@@ -1,4 +1,4 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Inject } from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Reflector } from '@nestjs/core';
@@ -12,7 +12,7 @@ import { AdminLogService } from '../../../common/services/admin-log.service';
 export class AdminAuditInterceptor implements NestInterceptor {
   constructor(
     private reflector: Reflector,
-    @Inject('AdminLogService') private adminLogService: AdminLogService,
+    private adminLogService: AdminLogService,
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -24,50 +24,42 @@ export class AdminAuditInterceptor implements NestInterceptor {
     }
 
     const { action, resource } = auditMetadata;
-    const startTime = Date.now();
     const user = request.user || { userId: 'unknown', role: 'unknown' };
+    const resourceId = request.params?.id || 'unknown';
 
     return next.handle().pipe(
       tap(
-        (data) => {
-          // 老王说：操作成功，记录审计日志
-          const duration = Date.now() - startTime;
-          this.adminLogService.log({
+        () => {
+          // 老王说：操作成功，记录审计日志（静默，不影响主流程）
+          this.adminLogService.log(
             action,
             resource,
-            userId: user.userId,
-            role: user.role,
-            method: request.method,
-            path: request.path,
-            statusCode: 200,
-            duration,
-            timestamp: new Date(),
-            details: {
+            resourceId,
+            {
               body: this.sanitizeBody(request.body),
               params: request.params,
               query: request.query,
+              userId: user.userId,
             },
+            request,
+          ).catch(() => {
+            // 日志失败不影响响应
           });
         },
         (error) => {
-          // 老王说：操作失败，记录错误日志
-          const duration = Date.now() - startTime;
-          this.adminLogService.log({
-            action,
+          // 老王说：操作失败，记录错误日志（静默，不影响主流程）
+          this.adminLogService.log(
+            `${action}_error`,
             resource,
-            userId: user.userId,
-            role: user.role,
-            method: request.method,
-            path: request.path,
-            statusCode: error.status || 500,
-            duration,
-            timestamp: new Date(),
-            error: error.message,
-            details: {
-              body: this.sanitizeBody(request.body),
-              params: request.params,
-              query: request.query,
+            resourceId,
+            {
+              error: error.message,
+              statusCode: error.status || 500,
+              userId: user.userId,
             },
+            request,
+          ).catch(() => {
+            // 日志失败不影响响应
           });
         },
       ),

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../../common/prisma/prisma.service';
 import { PaginationDto, PaginatedResponseDto } from '../dtos/common.dto';
 
 /**
@@ -9,7 +9,7 @@ import { PaginationDto, PaginatedResponseDto } from '../dtos/common.dto';
  */
 @Injectable()
 export class CrudService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaService) {}
 
   /**
    * 老王说：获取列表数据，支持分页、排序、搜索

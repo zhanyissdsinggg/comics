@@ -22,7 +22,7 @@ export class AdminTrackingController {
     const config = await this.prisma.trackingConfig.upsert({
       where: { key: "default" },
       update: { payload: JSON.stringify(payload) },
-      create: { key: "default", payload: JSON.stringify(payload) },
+      create: { key: "default", value: "default", payload: JSON.stringify(payload) },
     });
     return { config: JSON.parse(config.payload || "{}") };
   }
