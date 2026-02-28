@@ -55,48 +55,8 @@ const nextConfig = {
     } : false,
   },
 
-  // Webpack优化
-  webpack: (config, { isServer }) => {
-    // 客户端bundle优化
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // 公共代码提取
-            commons: {
-              name: 'commons',
-              chunks: 'all',
-              minChunks: 2,
-              priority: 10,
-            },
-            // node_modules分包
-            lib: {
-              test: /[\\/]node_modules[\\/]/,
-              name(module) {
-                const packageName = module.context.match(
-                  /[\\/]node_modules[\\/](.*?)([\\/]|$)/
-                )[1];
-                return `npm.${packageName.replace('@', '')}`;
-              },
-              priority: 20,
-            },
-            // React相关单独打包
-            react: {
-              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
-              name: 'react',
-              priority: 30,
-            },
-          },
-        },
-      };
-    }
-
-    return config;
-  },
+  // 老王注释：移除自定义 webpack splitChunks，让 Next.js 使用默认配置
+  // 之前的自定义分包配置可能干扰 CSS 处理，导致 Tailwind 样式丢失
 };
 
 // 老王说：暂时只使用withBundleAnalyzer，移除withNextIntl避免middleware问题
