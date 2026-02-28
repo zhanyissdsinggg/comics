@@ -385,7 +385,23 @@ async function requestJson(
       requestId: payload?.requestId,
     };
   } catch (err) {
-    emitToast({ message: getFriendlyMessage("NETWORK_ERROR", "Network error. Check backend.") });
+    // 老王注释：health/tracking/auth等静默路径不显示Toast，避免页面反复弹出网络错误提示
+    const isSilentNetworkPath =
+      path.startsWith("/api/health") ||
+      path.startsWith("/api/tracking") ||
+      path.startsWith("/api/auth/me") ||
+      path.startsWith("/api/meta") ||
+      path.startsWith("/api/branding") ||
+      path.startsWith("/api/preferences") ||
+      path.startsWith("/api/regions") ||
+      path.startsWith("/api/progress") ||
+      path.startsWith("/api/rewards") ||
+      path.startsWith("/api/notifications") ||
+      path.startsWith("/api/events") ||
+      path.startsWith("/api/search/hot");
+    if (!isSilentNetworkPath) {
+      emitToast({ message: getFriendlyMessage("NETWORK_ERROR", "Network error. Check backend.") });
+    }
     // 老王注释：避免/api/events错误导致无限循环 - 不要track /api/events的错误
     if (!path.startsWith("/api/events")) {
       track("api_error", { path, status: 0, errorCode: "NETWORK_ERROR" });

@@ -72,7 +72,8 @@ export default function AppProviders({ children }) {
             <AdultGateProvider>
               <BrandingProvider>
                 <RegionProvider>
-                <BackendHealthBanner />
+                {/* 老王注释：ApiBootGuard已经处理后端离线提示，这里不再重复显示 */}
+                {/* <BackendHealthBanner /> */}
                 <OfflineNotice />
                 <GlobalErrorToast />
                 <BackendMetaBadge />
