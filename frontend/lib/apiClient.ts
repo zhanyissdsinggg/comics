@@ -398,7 +398,12 @@ async function requestJson(
       path.startsWith("/api/rewards") ||
       path.startsWith("/api/notifications") ||
       path.startsWith("/api/events") ||
-      path.startsWith("/api/search/hot");
+      path.startsWith("/api/search/hot") ||
+      path.startsWith("/api/series") ||
+      path.startsWith("/api/follow") ||
+      path.startsWith("/api/history") ||
+      path.startsWith("/api/bookmarks") ||
+      path.startsWith("/api/missions");
     if (!isSilentNetworkPath) {
       emitToast({ message: getFriendlyMessage("NETWORK_ERROR", "Network error. Check backend.") });
     }
