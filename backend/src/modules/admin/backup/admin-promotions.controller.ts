@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Patch, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
-import { isAdminAuthorized } from "../../common/utils/admin";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
-import { PrismaService } from "../../common/prisma/prisma.service";
+import { isAdminAuthorized } from "../../../common/utils/admin";
+import { buildError, ERROR_CODES } from "../../../common/utils/errors";
+import { PrismaService } from "../../../common/prisma/prisma.service";
 
 @Controller("admin/promotions")
 export class AdminPromotionsController {

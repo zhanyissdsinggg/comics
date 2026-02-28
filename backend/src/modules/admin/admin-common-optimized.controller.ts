@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
-import { BaseAdminController } from '../base/base-admin.controller';
-import { CrudService } from '../services/crud.service';
-import { ConfigService } from '../services/config.service';
-import { AdminAudit } from '../decorators/admin-audit.decorator';
-import { PaginationDto } from '../dtos/common.dto';
+import { BaseAdminController } from './base/base-admin.controller';
+import { CrudService } from './services/crud.service';
+import { ConfigService } from './services/config.service';
+import { AdminAudit } from './decorators/admin-audit.decorator';
+import { PaginationDto } from './dtos/common.dto';
 
 /**
  * 老王注释：优化后的Promotions Controller - 继承BaseAdminController

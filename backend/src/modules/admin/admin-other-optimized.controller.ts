@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { BaseAdminController } from '../base/base-admin.controller';
-import { CrudService } from '../services/crud.service';
-import { ConfigService } from '../services/config.service';
-import { AdminAudit } from '../decorators/admin-audit.decorator';
-import { PaginationDto } from '../dtos/common.dto';
+import { BaseAdminController } from './base/base-admin.controller';
+import { CrudService } from './services/crud.service';
+import { ConfigService } from './services/config.service';
+import { AdminAudit } from './decorators/admin-audit.decorator';
+import { PaginationDto } from './dtos/common.dto';
 
 /**
  * 老王注释：优化后的Stats Controller - 继承BaseAdminController
