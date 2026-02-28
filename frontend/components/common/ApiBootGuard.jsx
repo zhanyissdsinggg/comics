@@ -56,20 +56,22 @@ export function ApiBootGuard({ children }) {
     );
   }, [shouldBlock, countdown]);
 
-  if (!shouldBlock) {
-    return children;
-  }
-
+  // 老王修改：后端离线时不阻断页面，只显示警告banner，让用户仍能看到UI
   return (
-    <div className="min-h-screen bg-neutral-950 px-4 py-12 text-neutral-100">
-      {content}
-      <button
-        type="button"
-        onClick={() => router.refresh()}
-        className="mt-4 rounded-full border border-yellow-500/60 px-4 py-2 text-xs text-yellow-200"
-      >
-        Retry now
-      </button>
-    </div>
+    <>
+      {shouldBlock && content && (
+        <div className="flex items-center gap-2 px-4 py-2">
+          {content}
+          <button
+            type="button"
+            onClick={() => router.refresh()}
+            className="rounded-full border border-yellow-500/60 px-3 py-1 text-xs text-yellow-200 whitespace-nowrap"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      {children}
+    </>
   );
 }
