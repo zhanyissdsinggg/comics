@@ -164,11 +164,29 @@ function recordSuccess(path: string): void {
 }
 
 function getDefaultCacheMs(path: string): number {
+  // 系列列表缓存 5 分钟
   if (/^\/api\/series(\?|$)/.test(path)) {
-    return 30_000;
+    return 300_000;
   }
+  // 系列详情缓存 5 分钟
+  if (/^\/api\/series\/[^/]+(\?|$)/.test(path)) {
+    return 300_000;
+  }
+  // Episode 详情缓存 10 分钟
+  if (/^\/api\/series\/[^/]+\/episodes\/[^/]+(\?|$)/.test(path)) {
+    return 600_000;
+  }
+  // 通知缓存 5 秒
   if (/^\/api\/notifications(\?|$)/.test(path)) {
     return 5_000;
+  }
+  // 排行榜缓存 10 分钟
+  if (/^\/api\/rankings(\?|$)/.test(path)) {
+    return 600_000;
+  }
+  // 搜索结果缓存 2 分钟
+  if (/^\/api\/search(\?|$)/.test(path)) {
+    return 120_000;
   }
   return 0;
 }
