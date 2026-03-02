@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
 import { apiDelete, apiGet, apiPost, apiPatch } from "../../lib/apiClient";
 import { ConfirmModal } from "../common/Modal";
+import BulkActionsToolbar from "./BulkActionsToolbar";
+import AdvancedFilters from "./AdvancedFilters";
 import {
   Search,
   Plus,
@@ -18,27 +20,30 @@ import {
   Eye,
   EyeOff,
   Image as ImageIcon,
+  Upload,
+  X,
 } from "lucide-react";
 
 /**
- * 老王重新设计：极简作品管理页面
+ * 老王重新设计：iOS 26风格作品管理页面
  * 新增功能：
+ * - 批量选择和批量操作（发布/取消发布/删除）
+ * - 高级筛选（状态、发布状态、成人内容、排序）
+ * - 拖拽上传封面图片
  * - 卡片/列表视图切换
- * - 显示作品缩略图
- * - 清晰的筛选和搜索
- * - emerald绿色主题
+ * - iOS 26设计系统（圆角、阴影、颜色、动画）
  */
 
 const TYPE_TABS = [
-  { label: "全部", value: "all", color: "bg-emerald-500" },
-  { label: "漫画", value: "comic", color: "bg-blue-500" },
-  { label: "小说", value: "novel", color: "bg-purple-500" },
+  { label: "全部", value: "all", color: "bg-ios-blue" },
+  { label: "漫画", value: "comic", color: "bg-ios-purple" },
+  { label: "小说", value: "novel", color: "bg-ios-green" },
 ];
 
 const STATUS_MAP = {
-  Ongoing: { label: "连载中", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" },
-  Completed: { label: "已完结", color: "bg-blue-500/20 text-blue-300 border-blue-500/30" },
-  Hiatus: { label: "暂停", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" },
+  Ongoing: { label: "连载中", color: "bg-ios-green/20 text-ios-green border-ios-green/30" },
+  Completed: { label: "已完结", color: "bg-ios-blue/20 text-ios-blue border-ios-blue/30" },
+  Hiatus: { label: "暂停", color: "bg-ios-orange/20 text-ios-orange border-ios-orange/30" },
 };
 
 export default function AdminSeriesPageNew() {
@@ -56,7 +61,20 @@ export default function AdminSeriesPageNew() {
     title: "",
     type: "comic",
     adult: false,
+    coverImage: null, // 老王添加：封面图片
   });
+  // 老王添加：批量选择状态
+  const [selectedSeries, setSelectedSeries] = useState([]);
+  // 老王添加：高级筛选状态
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    status: "all",
+    publishStatus: "all",
+    adultContent: "all",
+    sortBy: "createdAt_desc",
+  });
+  // 老王添加：拖拽上传状态
+  const [isDragging, setIsDragging] = useState(false);
   // 老王添加：确认对话框状态
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
@@ -106,6 +124,11 @@ export default function AdminSeriesPageNew() {
     }
   }, [isAuthenticated, loadSeries]);
 
+  // 老王优化：使用useCallback避免每次render都创建新函数
+  const handleEditClick = useCallback((seriesId) => {
+    router.push(`/admin/series/${seriesId}`);
+  }, [router]);
+
   const handleCreate = async () => {
     if (!createForm.title) {
       setConfirmDialog({
@@ -128,14 +151,12 @@ export default function AdminSeriesPageNew() {
       const randomStr = Math.random().toString(36).substring(2, 8);
       const autoId = `series-${timestamp}-${randomStr}`;
 
-      console.log(`创建作品，ID: ${autoId}，剩余重试次数: ${retries}`);
-      console.log("表单数据:", createForm);
-
       const response = await apiPost("/api/admin/series", {
         series: {
           ...createForm,
           id: autoId,
           adult: Boolean(createForm.adult),
+          coverImage: createForm.coverImage || undefined, // 老王添加：保存封面图片
           genres: [],
           pricing: { currency: "POINTS", episodePrice: 5, discount: 0 },
           ttf: { enabled: true, intervalHours: 24 },
@@ -144,11 +165,9 @@ export default function AdminSeriesPageNew() {
         },
       });
 
-      console.log("API响应:", response);
-
       if (response.ok) {
         setShowCreateModal(false);
-        setCreateForm({ id: "", title: "", type: "comic", adult: false });
+        setCreateForm({ id: "", title: "", type: "comic", adult: false, coverImage: null });
         loadSeries();
         setConfirmDialog({
           isOpen: true,
@@ -160,7 +179,6 @@ export default function AdminSeriesPageNew() {
         return;
       } else if (response.status === 409) {
         // 老王新增：ID冲突，重试
-        console.warn(`ID冲突，重新生成ID并重试... 剩余次数: ${retries - 1}`);
         lastError = response.error || "ID冲突";
         retries--;
         // 等待100ms后重试，避免时间戳重复
@@ -168,7 +186,6 @@ export default function AdminSeriesPageNew() {
         continue;
       } else {
         // 其他错误，直接返回
-        console.error("创建失败，错误信息:", response.error);
         setConfirmDialog({
           isOpen: true,
           title: "错误",
@@ -258,115 +275,402 @@ export default function AdminSeriesPageNew() {
     }
   };
 
-  // 过滤和搜索
-  const filteredSeries = seriesList.filter((series) => {
-    const matchesType = typeFilter === "all" || series.type === typeFilter;
-    const matchesSearch =
-      !searchQuery ||
-      series.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      series.id.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
-  });
+  // 老王添加：批量选择处理
+  const handleSelectAll = () => {
+    if (selectedSeries.length === filteredSeries.length) {
+      setSelectedSeries([]);
+    } else {
+      setSelectedSeries(filteredSeries.map((s) => s.id));
+    }
+  };
 
-  // 老王添加：卡片视图渲染
+  const handleSelectSeries = (seriesId) => {
+    setSelectedSeries((prev) =>
+      prev.includes(seriesId)
+        ? prev.filter((id) => id !== seriesId)
+        : [...prev, seriesId]
+    );
+  };
+
+  // 老王添加：批量发布
+  const handleBulkPublish = async () => {
+    const promises = selectedSeries.map((id) => {
+      const series = seriesList.find((s) => s.id === id);
+      return apiPatch(`/api/admin/series/${id}`, {
+        series: { ...series, isPublished: true },
+      });
+    });
+    await Promise.all(promises);
+    setSelectedSeries([]);
+    loadSeries();
+  };
+
+  // 老王添加：批量取消发布
+  const handleBulkUnpublish = async () => {
+    const promises = selectedSeries.map((id) => {
+      const series = seriesList.find((s) => s.id === id);
+      return apiPatch(`/api/admin/series/${id}`, {
+        series: { ...series, isPublished: false },
+      });
+    });
+    await Promise.all(promises);
+    setSelectedSeries([]);
+    loadSeries();
+  };
+
+  // 老王添加：批量删除
+  const handleBulkDelete = async () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: "确认批量删除",
+      message: `确定要删除选中的 ${selectedSeries.length} 个作品吗？此操作不可撤销！`,
+      onConfirm: async () => {
+        const promises = selectedSeries.map((id) =>
+          apiDelete(`/api/admin/series/${id}`)
+        );
+        await Promise.all(promises);
+        setSelectedSeries([]);
+        loadSeries();
+      },
+      variant: "danger",
+    });
+  };
+
+  // 老王添加：拖拽上传处理
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      const file = files[0];
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setCreateForm({ ...createForm, coverImage: e.target.result });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setCreateForm({ ...createForm, coverImage: e.target.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 老王优化：过滤、搜索和排序
+  const filteredSeries = seriesList
+    .filter((series) => {
+      const matchesType = typeFilter === "all" || series.type === typeFilter;
+      const matchesSearch =
+        !searchQuery ||
+        series.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        series.id.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // 老王添加：高级筛选
+      const matchesStatus =
+        advancedFilters.status === "all" || series.status === advancedFilters.status;
+      const matchesPublishStatus =
+        advancedFilters.publishStatus === "all" ||
+        (advancedFilters.publishStatus === "published" && series.isPublished) ||
+        (advancedFilters.publishStatus === "unpublished" && !series.isPublished);
+      const matchesAdultContent =
+        advancedFilters.adultContent === "all" ||
+        (advancedFilters.adultContent === "adult" && series.adult) ||
+        (advancedFilters.adultContent === "general" && !series.adult);
+
+      return matchesType && matchesSearch && matchesStatus && matchesPublishStatus && matchesAdultContent;
+    })
+    .sort((a, b) => {
+      // 老王添加：排序逻辑
+      const [field, order] = advancedFilters.sortBy.split("_");
+      let comparison = 0;
+
+      if (field === "createdAt" || field === "updatedAt") {
+        const dateA = new Date(a[field] || 0);
+        const dateB = new Date(b[field] || 0);
+        comparison = dateA - dateB;
+      } else if (field === "title") {
+        comparison = a.title.localeCompare(b.title);
+      }
+
+      return order === "desc" ? -comparison : comparison;
+    });
+
+  // 老王优化：卡片视图渲染（iOS 26风格 + 批量选择）
   const renderGridView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {filteredSeries.map((series) => (
-        <div
-          key={series.id}
-          className="group relative rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/10 hover:scale-[1.02]"
-        >
-          {/* 老王添加：缩略图 */}
-          <div className="relative h-48 bg-neutral-800/50 overflow-hidden">
-            {series.coverImage ? (
-              <img
-                src={series.coverImage}
-                alt={series.title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+      {filteredSeries.map((series) => {
+        const isSelected = selectedSeries.includes(series.id);
+        return (
+          <div
+            key={series.id}
+            className={`group relative rounded-5xl border backdrop-blur-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] animate-scale-in ${
+              isSelected
+                ? "border-ios-blue shadow-ios-glow bg-ios-blue/10"
+                : "border-ios-gray-700/30 bg-ios-gray-900/50 hover:border-ios-blue/30 hover:shadow-ios"
+            }`}
+          >
+            {/* 老王添加：批量选择复选框 */}
+            <div className="absolute top-4 left-4 z-10">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => handleSelectSeries(series.id)}
+                className="w-5 h-5 rounded-lg border-2 border-ios-gray-600 bg-ios-gray-800/80 backdrop-blur-xl checked:bg-ios-blue checked:border-ios-blue transition-all duration-200 cursor-pointer"
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <ImageIcon size={48} className="text-neutral-600" />
-              </div>
-            )}
-            {/* 类型标签 */}
-            <div className="absolute top-3 left-3">
-              <span
-                className={`px-3 py-1 rounded-[8px] text-xs font-medium backdrop-blur-xl ${
-                  series.type === "novel"
-                    ? "bg-purple-500/80 text-white border border-purple-400/50"
-                    : "bg-blue-500/80 text-white border border-blue-400/50"
-                }`}
-              >
-                {series.type === "novel" ? "小说" : "漫画"}
-              </span>
             </div>
-            {/* 成人标识 */}
-            {series.adult && (
-              <div className="absolute top-3 right-3">
-                <span className="flex items-center gap-1 px-2 py-1 rounded-[8px] bg-rose-500/80 text-white border border-rose-400/50 text-xs backdrop-blur-xl">
-                  <Eye size={12} />
-                  18+
+
+            {/* 老王添加：缩略图 */}
+            <div className="relative h-48 bg-ios-gray-800/50 overflow-hidden">
+              {series.coverImage ? (
+                <img
+                  src={series.coverImage}
+                  alt={series.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <ImageIcon size={48} className="text-ios-gray-600" />
+                </div>
+              )}
+              {/* 类型标签 */}
+              <div className="absolute top-4 right-4">
+                <span
+                  className={`px-3 py-1.5 rounded-3xl text-xs font-semibold backdrop-blur-2xl shadow-ios-sm ${
+                    series.type === "novel"
+                      ? "bg-ios-purple/90 text-white border border-ios-purple/50"
+                      : "bg-ios-blue/90 text-white border border-ios-blue/50"
+                  }`}
+                >
+                  {series.type === "novel" ? "小说" : "漫画"}
                 </span>
               </div>
-            )}
-          </div>
-
-          <div className="p-6">
-            {/* 标题和ID */}
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-neutral-100 mb-1 line-clamp-2 group-hover:text-emerald-300 transition-colors duration-300">
-                {series.title}
-              </h3>
-              <p className="text-xs text-neutral-500 font-mono">{series.id}</p>
-            </div>
-
-            {/* 老王添加：关键数据统计（章节数、更新时间） */}
-            <div className="flex items-center gap-3 mb-4 text-xs">
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[6px] bg-emerald-500/10 border border-emerald-500/20">
-                <Grid size={12} className="text-emerald-400" />
-                <span className="text-emerald-300 font-medium">{series.episodeCount || 0} 章节</span>
-              </div>
-              {series.updatedAt && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[6px] bg-neutral-800/50 border border-neutral-700/30 text-neutral-400">
-                  <span className="font-medium">更新：</span>
-                  <span>{new Date(series.updatedAt).toLocaleDateString('zh-CN', {month: 'short', day: 'numeric'})}</span>
+              {/* 成人标识 */}
+              {series.adult && (
+                <div className="absolute bottom-4 right-4">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-3xl bg-ios-red/90 text-white border border-ios-red/50 text-xs font-semibold backdrop-blur-2xl shadow-ios-sm">
+                    <Eye size={12} />
+                    18+
+                  </span>
                 </div>
               )}
             </div>
 
-            {/* 状态标签 */}
-            <div className="flex items-center gap-2 mb-4">
-              <span
-                className={`px-3 py-1 rounded-[8px] text-xs font-medium border ${
-                  STATUS_MAP[series.status]?.color ||
-                  "bg-neutral-500/20 text-neutral-300 border-neutral-500/30"
-                }`}
-              >
-                {STATUS_MAP[series.status]?.label || series.status}
-              </span>
-              {!series.isPublished && (
-                <span className="px-3 py-1 rounded-[8px] text-xs font-medium bg-neutral-500/20 text-neutral-400 border border-neutral-500/30">
-                  未发布
+            <div className="p-6">
+              {/* 标题和ID */}
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-white mb-1.5 line-clamp-2 group-hover:text-ios-blue transition-colors duration-300">
+                  {series.title}
+                </h3>
+                <p className="text-xs text-ios-gray-500 font-mono">{series.id}</p>
+              </div>
+
+              {/* 老王添加：关键数据统计（章节数、更新时间） */}
+              <div className="flex items-center gap-3 mb-4 text-xs">
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-3xl bg-ios-blue/10 border border-ios-blue/20 backdrop-blur-xl">
+                  <Grid size={12} className="text-ios-blue" />
+                  <span className="text-ios-blue font-semibold">{series.episodeCount || 0} 章节</span>
+                </div>
+                {series.updatedAt && (
+                  <div className="flex items-center gap-1.5 px-3 py-2 rounded-3xl bg-ios-gray-800/50 border border-ios-gray-700/30 text-ios-gray-400 backdrop-blur-xl">
+                    <span className="font-medium">更新：</span>
+                    <span>{new Date(series.updatedAt).toLocaleDateString('zh-CN', {month: 'short', day: 'numeric'})}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* 状态标签 */}
+              <div className="flex items-center gap-2 mb-4">
+                <span
+                  className={`px-3 py-1.5 rounded-3xl text-xs font-semibold border backdrop-blur-xl ${
+                    STATUS_MAP[series.status]?.color ||
+                    "bg-ios-gray-500/20 text-ios-gray-300 border-ios-gray-500/30"
+                  }`}
+                >
+                  {STATUS_MAP[series.status]?.label || series.status}
                 </span>
+                {!series.isPublished && (
+                  <span className="px-3 py-1.5 rounded-3xl text-xs font-semibold bg-ios-gray-500/20 text-ios-gray-400 border border-ios-gray-500/30 backdrop-blur-xl">
+                    未发布
+                  </span>
+                )}
+              </div>
+
+              {/* 操作按钮 */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleEditClick(series.id)}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-3xl bg-ios-blue/20 text-ios-blue text-xs font-semibold hover:bg-ios-blue/30 transition-all duration-300 shadow-ios-sm"
+                >
+                  <Edit size={14} />
+                  编辑
+                </button>
+                <button
+                  onClick={() => handleTogglePublish(series)}
+                  className={`px-3 py-2.5 rounded-3xl text-xs font-semibold transition-all duration-300 shadow-ios-sm ${
+                    series.isPublished
+                      ? "bg-ios-gray-800/50 text-ios-gray-400 hover:text-white"
+                      : "bg-ios-green/20 text-ios-green hover:bg-ios-green/30"
+                  }`}
+                  title={series.isPublished ? "取消发布" : "发布"}
+                >
+                  {series.isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
+                </button>
+                <button
+                  onClick={() => handleDuplicate(series)}
+                  className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-white text-xs transition-all duration-300 shadow-ios-sm"
+                  title="复制"
+                >
+                  <Copy size={14} />
+                </button>
+                <button
+                  onClick={() => handleDelete(series.id)}
+                  className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-ios-red hover:bg-ios-red/10 text-xs transition-all duration-300 shadow-ios-sm"
+                  title="删除"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  // 老王优化：列表视图渲染（iOS 26风格 + 批量选择）
+  const renderListView = () => (
+    <div className="space-y-3">
+      {filteredSeries.map((series) => {
+        const isSelected = selectedSeries.includes(series.id);
+        return (
+          <div
+            key={series.id}
+            className={`group flex items-center gap-4 rounded-4xl border backdrop-blur-2xl p-4 transition-all duration-300 animate-fade-in ${
+              isSelected
+                ? "border-ios-blue shadow-ios-glow bg-ios-blue/10"
+                : "border-ios-gray-700/30 bg-ios-gray-900/50 hover:border-ios-blue/30 hover:shadow-ios"
+            }`}
+          >
+            {/* 老王添加：批量选择复选框 */}
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => handleSelectSeries(series.id)}
+              className="w-5 h-5 rounded-lg border-2 border-ios-gray-600 bg-ios-gray-800/80 backdrop-blur-xl checked:bg-ios-blue checked:border-ios-blue transition-all duration-200 cursor-pointer flex-shrink-0"
+            />
+
+            {/* 缩略图 */}
+            <div className="relative w-24 h-24 rounded-3xl bg-ios-gray-800/50 overflow-hidden flex-shrink-0 shadow-ios-sm">
+              {series.coverImage ? (
+                <img
+                  src={series.coverImage}
+                  alt={series.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <ImageIcon size={32} className="text-ios-gray-600" />
+                </div>
               )}
             </div>
 
+            {/* 信息区域 */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start gap-3 mb-2">
+                <h3 className="text-base font-semibold text-white group-hover:text-ios-blue transition-colors duration-300 line-clamp-1">
+                  {series.title}
+                </h3>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span
+                    className={`px-2.5 py-1 rounded-3xl text-xs font-semibold backdrop-blur-xl shadow-ios-sm ${
+                      series.type === "novel"
+                        ? "bg-ios-purple/20 text-ios-purple border border-ios-purple/30"
+                        : "bg-ios-blue/20 text-ios-blue border border-ios-blue/30"
+                    }`}
+                  >
+                    {series.type === "novel" ? "小说" : "漫画"}
+                  </span>
+                  {series.adult && (
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-3xl bg-ios-red/20 text-ios-red border border-ios-red/30 text-xs font-semibold backdrop-blur-xl shadow-ios-sm">
+                      <Eye size={10} />
+                      18+
+                    </span>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-ios-gray-500 font-mono mb-2">{series.id}</p>
+
+              {/* 老王添加：列表视图的关键数据 */}
+              <div className="flex items-center gap-2 mb-3 text-xs">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-3xl bg-ios-blue/10 border border-ios-blue/20 text-ios-blue backdrop-blur-xl">
+                  <Grid size={12} />
+                  <span className="font-semibold">{series.episodeCount || 0} 章</span>
+                </div>
+                {series.updatedAt && (
+                  <div className="text-ios-gray-500">
+                    更新：{new Date(series.updatedAt).toLocaleDateString('zh-CN', {month: 'short', day: 'numeric'})}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`px-2.5 py-1 rounded-3xl text-xs font-semibold border backdrop-blur-xl ${
+                    STATUS_MAP[series.status]?.color ||
+                    "bg-ios-gray-500/20 text-ios-gray-300 border-ios-gray-500/30"
+                  }`}
+                >
+                  {STATUS_MAP[series.status]?.label || series.status}
+                </span>
+                {!series.isPublished && (
+                  <span className="px-2.5 py-1 rounded-3xl text-xs font-semibold bg-ios-gray-500/20 text-ios-gray-400 border border-ios-gray-500/30 backdrop-blur-xl">
+                    未发布
+                  </span>
+                )}
+              </div>
+            </div>
+
             {/* 操作按钮 */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <button
-                onClick={() => router.push(`/admin/series/${series.id}`)}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-[10px] bg-emerald-500/20 text-emerald-300 text-xs font-medium hover:bg-emerald-500/30 transition-all duration-300"
+                onClick={() => handleEditClick(series.id)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-3xl bg-ios-blue/20 text-ios-blue text-xs font-semibold hover:bg-ios-blue/30 transition-all duration-300 shadow-ios-sm"
               >
                 <Edit size={14} />
                 编辑
               </button>
               <button
                 onClick={() => handleTogglePublish(series)}
-                className={`px-3 py-2 rounded-[10px] text-xs font-medium transition-all duration-300 ${
+                className={`px-3 py-2.5 rounded-3xl text-xs font-semibold transition-all duration-300 shadow-ios-sm ${
                   series.isPublished
-                    ? "bg-neutral-800/50 text-neutral-400 hover:text-neutral-200"
-                    : "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
+                    ? "bg-ios-gray-800/50 text-ios-gray-400 hover:text-white"
+                    : "bg-ios-green/20 text-ios-green hover:bg-ios-green/30"
                 }`}
                 title={series.isPublished ? "取消发布" : "发布"}
               >
@@ -374,140 +678,22 @@ export default function AdminSeriesPageNew() {
               </button>
               <button
                 onClick={() => handleDuplicate(series)}
-                className="px-3 py-2 rounded-[10px] bg-neutral-800/50 text-neutral-400 hover:text-neutral-200 text-xs transition-all duration-300"
+                className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-white text-xs transition-all duration-300 shadow-ios-sm"
                 title="复制"
               >
                 <Copy size={14} />
               </button>
               <button
                 onClick={() => handleDelete(series.id)}
-                className="px-3 py-2 rounded-[10px] bg-neutral-800/50 text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 text-xs transition-all duration-300"
+                className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-ios-red hover:bg-ios-red/10 text-xs transition-all duration-300 shadow-ios-sm"
                 title="删除"
               >
                 <Trash2 size={14} />
               </button>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
-  );
-
-  // 老王添加：列表视图渲染
-  const renderListView = () => (
-    <div className="space-y-3">
-      {filteredSeries.map((series) => (
-        <div
-          key={series.id}
-          className="group flex items-center gap-4 rounded-[16px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10"
-        >
-          {/* 缩略图 */}
-          <div className="relative w-24 h-24 rounded-[12px] bg-neutral-800/50 overflow-hidden flex-shrink-0">
-            {series.coverImage ? (
-              <img
-                src={series.coverImage}
-                alt={series.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <ImageIcon size={32} className="text-neutral-600" />
-              </div>
-            )}
-          </div>
-
-          {/* 信息区域 */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start gap-3 mb-2">
-              <h3 className="text-base font-semibold text-neutral-100 group-hover:text-emerald-300 transition-colors duration-300 line-clamp-1">
-                {series.title}
-              </h3>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <span
-                  className={`px-2 py-1 rounded-[6px] text-xs font-medium ${
-                    series.type === "novel"
-                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                      : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-                  }`}
-                >
-                  {series.type === "novel" ? "小说" : "漫画"}
-                </span>
-                {series.adult && (
-                  <span className="flex items-center gap-1 px-2 py-1 rounded-[6px] bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs">
-                    <Eye size={10} />
-                    18+
-                  </span>
-                )}
-              </div>
-            </div>
-            <p className="text-xs text-neutral-500 font-mono mb-2">{series.id}</p>
-
-            {/* 老王添加：列表视图的关键数据 */}
-            <div className="flex items-center gap-2 mb-3 text-xs">
-              <div className="flex items-center gap-1 px-2 py-1 rounded-[6px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
-                <Grid size={12} />
-                <span className="font-medium">{series.episodeCount || 0} 章</span>
-              </div>
-              {series.updatedAt && (
-                <div className="text-neutral-500">
-                  更新：{new Date(series.updatedAt).toLocaleDateString('zh-CN', {month: 'short', day: 'numeric'})}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className={`px-2 py-1 rounded-[6px] text-xs font-medium border ${
-                  STATUS_MAP[series.status]?.color ||
-                  "bg-neutral-500/20 text-neutral-300 border-neutral-500/30"
-                }`}
-              >
-                {STATUS_MAP[series.status]?.label || series.status}
-              </span>
-              {!series.isPublished && (
-                <span className="px-2 py-1 rounded-[6px] text-xs font-medium bg-neutral-500/20 text-neutral-400 border border-neutral-500/30">
-                  未发布
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* 操作按钮 */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-              onClick={() => router.push(`/admin/series/${series.id}`)}
-              className="flex items-center gap-2 px-4 py-2 rounded-[10px] bg-emerald-500/20 text-emerald-300 text-xs font-medium hover:bg-emerald-500/30 transition-all duration-300"
-            >
-              <Edit size={14} />
-              编辑
-            </button>
-            <button
-              onClick={() => handleTogglePublish(series)}
-              className={`px-3 py-2 rounded-[10px] text-xs font-medium transition-all duration-300 ${
-                series.isPublished
-                  ? "bg-neutral-800/50 text-neutral-400 hover:text-neutral-200"
-                  : "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
-              }`}
-              title={series.isPublished ? "取消发布" : "发布"}
-            >
-              {series.isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
-            </button>
-            <button
-              onClick={() => handleDuplicate(series)}
-              className="px-3 py-2 rounded-[10px] bg-neutral-800/50 text-neutral-400 hover:text-neutral-200 text-xs transition-all duration-300"
-              title="复制"
-            >
-              <Copy size={14} />
-            </button>
-            <button
-              onClick={() => handleDelete(series.id)}
-              className="px-3 py-2 rounded-[10px] bg-neutral-800/50 text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 text-xs transition-all duration-300"
-              title="删除"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 
@@ -518,7 +704,7 @@ export default function AdminSeriesPageNew() {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl h-64 animate-pulse"
+              className="rounded-5xl border border-ios-gray-700/30 bg-ios-gray-900/50 backdrop-blur-2xl h-64 animate-pulse"
             />
           ))}
         </div>
@@ -528,66 +714,108 @@ export default function AdminSeriesPageNew() {
 
   return (
     <div className="space-y-6">
-      {/* 老王重新设计：筛选、搜索和视图切换栏 */}
-      <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* 类型筛选 */}
-            <div className="flex items-center gap-2">
-              <Filter size={16} className="text-neutral-400" />
-              {TYPE_TABS.map((tab) => (
-                <button
-                  key={tab.value}
-                  onClick={() => setTypeFilter(tab.value)}
-                  className={`px-4 py-2 rounded-[10px] text-sm font-medium transition-all duration-300 ${
-                    typeFilter === tab.value
-                      ? `${tab.color} text-white shadow-lg`
-                      : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800 hover:text-emerald-300"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {/* 搜索框 */}
-            <div className="flex-1 flex items-center gap-2 px-4 py-2 rounded-[12px] bg-neutral-800/50 border border-emerald-500/20">
-              <Search size={16} className="text-neutral-400" />
-              <input
-                type="text"
-                placeholder="搜索作品标题或ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 bg-transparent text-neutral-200 text-sm placeholder:text-neutral-500 focus:outline-none"
-              />
-            </div>
-
-            {/* 老王添加：视图切换按钮 */}
-            <div className="flex items-center gap-2">
+      {/* 老王重新设计：筛选、搜索和视图切换栏（iOS 26风格） */}
+      <div className="rounded-5xl border border-ios-gray-700/30 bg-ios-gray-900/50 backdrop-blur-2xl p-5 shadow-ios animate-fade-in">
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* 类型筛选 */}
+          <div className="flex items-center gap-2">
+            <Filter size={16} className="text-ios-gray-400" />
+            {TYPE_TABS.map((tab) => (
               <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-[10px] transition-all duration-300 ${
-                  viewMode === "grid"
-                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                    : "bg-neutral-800/50 text-neutral-400 hover:text-neutral-200"
+                key={tab.value}
+                onClick={() => setTypeFilter(tab.value)}
+                className={`px-4 py-2.5 rounded-3xl text-sm font-semibold transition-all duration-300 ${
+                  typeFilter === tab.value
+                    ? `${tab.color} text-white shadow-ios`
+                    : "bg-ios-gray-800/50 text-ios-gray-300 hover:bg-ios-gray-800 hover:text-white"
                 }`}
-                title="卡片视图"
               >
-                <Grid size={18} />
+                {tab.label}
               </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-[10px] transition-all duration-300 ${
-                  viewMode === "list"
-                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                    : "bg-neutral-800/50 text-neutral-400 hover:text-neutral-200"
-                }`}
-                title="列表视图"
-              >
-                <List size={18} />
-              </button>
-            </div>
+            ))}
           </div>
+
+          {/* 搜索框 */}
+          <div className="flex-1 flex items-center gap-2 px-4 py-2.5 rounded-4xl bg-ios-gray-800/50 border border-ios-gray-700/30 backdrop-blur-xl">
+            <Search size={16} className="text-ios-gray-400" />
+            <input
+              type="text"
+              placeholder="搜索作品标题或ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent text-white text-sm placeholder:text-ios-gray-500 focus:outline-none"
+            />
+          </div>
+
+          {/* 老王添加：高级筛选按钮 */}
+          <button
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={`px-4 py-2.5 rounded-3xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
+              showAdvancedFilters
+                ? "bg-ios-blue text-white shadow-ios"
+                : "bg-ios-gray-800/50 text-ios-gray-300 hover:bg-ios-gray-800 hover:text-white"
+            }`}
+          >
+            <Filter size={16} />
+            高级筛选
+          </button>
+
+          {/* 老王添加：全选按钮 */}
+          {filteredSeries.length > 0 && (
+            <button
+              onClick={handleSelectAll}
+              className="px-4 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-300 hover:bg-ios-gray-800 hover:text-white text-sm font-semibold transition-all duration-300"
+            >
+              {selectedSeries.length === filteredSeries.length ? "取消全选" : "全选"}
+            </button>
+          )}
+
+          {/* 老王添加：视图切换按钮 */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2.5 rounded-3xl transition-all duration-300 ${
+                viewMode === "grid"
+                  ? "bg-ios-blue text-white shadow-ios"
+                  : "bg-ios-gray-800/50 text-ios-gray-400 hover:text-white"
+              }`}
+              title="卡片视图"
+            >
+              <Grid size={18} />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2.5 rounded-3xl transition-all duration-300 ${
+                viewMode === "list"
+                  ? "bg-ios-blue text-white shadow-ios"
+                  : "bg-ios-gray-800/50 text-ios-gray-400 hover:text-white"
+              }`}
+              title="列表视图"
+            >
+              <List size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* 老王添加：高级筛选面板 */}
+        {showAdvancedFilters && (
+          <div className="mt-4 pt-4 border-t border-ios-gray-700/30">
+            <AdvancedFilters
+              filters={advancedFilters}
+              onFiltersChange={setAdvancedFilters}
+            />
+          </div>
+        )}
       </div>
+
+      {/* 老王添加：批量操作工具栏 */}
+      <BulkActionsToolbar
+        selectedCount={selectedSeries.length}
+        onPublish={handleBulkPublish}
+        onUnpublish={handleBulkUnpublish}
+        onDelete={handleBulkDelete}
+        onCancel={() => setSelectedSeries([])}
+      />
 
       <>
         {/* 老王添加：根据viewMode渲染不同视图 */}
@@ -595,59 +823,104 @@ export default function AdminSeriesPageNew() {
 
         {/* 空状态 */}
         {filteredSeries.length === 0 && !loading && (
-          <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 backdrop-blur-xl p-12 text-center">
-            <BookOpen size={48} className="mx-auto text-neutral-600 mb-4" />
-            <p className="text-neutral-400 mb-2">没有找到作品</p>
-            <p className="text-sm text-neutral-500">
+          <div className="rounded-5xl border border-ios-gray-700/30 bg-ios-gray-900/50 backdrop-blur-2xl p-12 text-center shadow-ios animate-fade-in">
+            <BookOpen size={48} className="mx-auto text-ios-gray-600 mb-4" />
+            <p className="text-ios-gray-400 mb-2 font-semibold">没有找到作品</p>
+            <p className="text-sm text-ios-gray-500">
               {searchQuery || typeFilter !== "all"
                 ? "尝试调整筛选条件或搜索关键词"
                 : "点击右上角「添加作品」按钮创建第一个作品"}
             </p>
           </div>
-      )}
+        )}
+      </>
 
-      {/* 老王添加：创建作品弹窗 */}
+      {/* 老王优化：创建作品弹窗（iOS 26风格 + 拖拽上传） */}
       {showCreateModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in"
           onClick={() => setShowCreateModal(false)}
         >
           <div
-            className="bg-neutral-900 rounded-[20px] border border-emerald-500/20 shadow-2xl w-full max-w-md p-6"
+            className="bg-ios-gray-900 rounded-5xl border border-ios-gray-700/30 shadow-ios-xl w-full max-w-md p-6 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-neutral-100 mb-6">添加新作品</h2>
+            <h2 className="text-xl font-bold text-white mb-6">添加新作品</h2>
             <div className="space-y-4">
+              {/* 老王添加：拖拽上传封面 */}
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">作品标题 *</label>
+                <label className="block text-sm font-semibold text-ios-gray-300 mb-2">封面图片</label>
+                <div
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  className={`relative rounded-4xl border-2 border-dashed transition-all duration-300 overflow-hidden ${
+                    isDragging
+                      ? "border-ios-blue bg-ios-blue/10"
+                      : "border-ios-gray-700/50 bg-ios-gray-800/30"
+                  }`}
+                >
+                  {createForm.coverImage ? (
+                    <div className="relative h-48">
+                      <img
+                        src={createForm.coverImage}
+                        alt="封面预览"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={() => setCreateForm({ ...createForm, coverImage: null })}
+                        className="absolute top-2 right-2 p-2 rounded-full bg-ios-red/90 text-white hover:bg-ios-red transition-all duration-200 shadow-ios"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center h-48 cursor-pointer">
+                      <Upload size={32} className="text-ios-gray-500 mb-2" />
+                      <p className="text-sm text-ios-gray-400 mb-1">拖拽图片到这里或点击上传</p>
+                      <p className="text-xs text-ios-gray-500">支持 JPG、PNG、GIF 格式</p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-ios-gray-300 mb-2">作品标题 *</label>
                 <input
                   type="text"
                   value={createForm.title}
                   onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
                   placeholder="例如: 我的第一部漫画"
-                  className="w-full px-4 py-3 rounded-[12px] bg-neutral-800/50 border border-emerald-500/20 text-neutral-200 text-sm placeholder:text-neutral-500 focus:outline-none focus:border-emerald-500/50 transition-colors duration-300"
+                  className="w-full px-4 py-3 rounded-4xl bg-ios-gray-800/50 border border-ios-gray-700/30 text-white text-sm placeholder:text-ios-gray-500 focus:outline-none focus:border-ios-blue/50 transition-colors duration-300 backdrop-blur-xl"
                 />
-                <p className="mt-1 text-xs text-neutral-500">ID将自动生成</p>
+                <p className="mt-1.5 text-xs text-ios-gray-500">ID将自动生成</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">作品类型</label>
+                <label className="block text-sm font-semibold text-ios-gray-300 mb-2">作品类型</label>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCreateForm({ ...createForm, type: "comic" })}
-                    className={`flex-1 px-4 py-3 rounded-[12px] text-sm font-medium transition-all duration-300 ${
+                    className={`flex-1 px-4 py-3 rounded-4xl text-sm font-semibold transition-all duration-300 ${
                       createForm.type === "comic"
-                        ? "bg-blue-500 text-white"
-                        : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800"
+                        ? "bg-ios-blue text-white shadow-ios"
+                        : "bg-ios-gray-800/50 text-ios-gray-300 hover:bg-ios-gray-800"
                     }`}
                   >
                     漫画
                   </button>
                   <button
                     onClick={() => setCreateForm({ ...createForm, type: "novel" })}
-                    className={`flex-1 px-4 py-3 rounded-[12px] text-sm font-medium transition-all duration-300 ${
+                    className={`flex-1 px-4 py-3 rounded-4xl text-sm font-semibold transition-all duration-300 ${
                       createForm.type === "novel"
-                        ? "bg-purple-500 text-white"
-                        : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800"
+                        ? "bg-ios-purple text-white shadow-ios"
+                        : "bg-ios-gray-800/50 text-ios-gray-300 hover:bg-ios-gray-800"
                     }`}
                   >
                     小说
@@ -660,22 +933,25 @@ export default function AdminSeriesPageNew() {
                   id="adult"
                   checked={createForm.adult}
                   onChange={(e) => setCreateForm({ ...createForm, adult: e.target.checked })}
-                  className="w-4 h-4 rounded border-emerald-500/20 bg-neutral-800/50 text-emerald-500 focus:ring-emerald-500/50"
+                  className="w-5 h-5 rounded-lg border-2 border-ios-gray-700/30 bg-ios-gray-800/50 text-ios-blue focus:ring-ios-blue/50 cursor-pointer"
                 />
-                <label htmlFor="adult" className="text-sm text-neutral-300">
+                <label htmlFor="adult" className="text-sm text-ios-gray-300 font-medium cursor-pointer">
                   成人内容（18+）
                 </label>
               </div>
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="flex-1 px-4 py-3 rounded-[12px] bg-neutral-800/50 text-neutral-300 text-sm font-medium hover:bg-neutral-800 transition-all duration-300"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setCreateForm({ id: "", title: "", type: "comic", adult: false, coverImage: null });
+                  }}
+                  className="flex-1 px-4 py-3 rounded-4xl bg-ios-gray-800/50 text-ios-gray-300 text-sm font-semibold hover:bg-ios-gray-800 transition-all duration-300"
                 >
                   取消
                 </button>
                 <button
                   onClick={handleCreate}
-                  className="flex-1 px-4 py-3 rounded-[12px] bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-all duration-300 shadow-lg shadow-emerald-500/30"
+                  className="flex-1 px-4 py-3 rounded-4xl bg-ios-blue text-white text-sm font-semibold hover:bg-ios-blue/90 transition-all duration-300 shadow-ios"
                 >
                   创建
                 </button>
@@ -697,38 +973,38 @@ export default function AdminSeriesPageNew() {
         variant={confirmDialog.variant}
       />
 
-      {/* 老王添加：复制作品对话框 */}
+      {/* 老王优化：复制作品对话框（iOS 26风格） */}
       {duplicateDialog.isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in"
           onClick={() => setDuplicateDialog({ isOpen: false, seriesData: null, newId: "" })}
         >
           <div
-            className="bg-neutral-900 rounded-[20px] border border-emerald-500/20 shadow-2xl w-full max-w-md p-6"
+            className="bg-ios-gray-900 rounded-5xl border border-ios-gray-700/30 shadow-ios-xl w-full max-w-md p-6 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-neutral-100 mb-6">复制作品</h2>
+            <h2 className="text-xl font-bold text-white mb-6">复制作品</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">新作品ID *</label>
+                <label className="block text-sm font-semibold text-ios-gray-300 mb-2">新作品ID *</label>
                 <input
                   type="text"
                   value={duplicateDialog.newId}
                   onChange={(e) => setDuplicateDialog({ ...duplicateDialog, newId: e.target.value })}
                   placeholder="请输入新作品ID"
-                  className="w-full px-4 py-3 rounded-[12px] bg-neutral-800/50 border border-emerald-500/20 text-neutral-200 text-sm placeholder:text-neutral-500 focus:outline-none focus:border-emerald-500/50 transition-colors duration-300"
+                  className="w-full px-4 py-3 rounded-4xl bg-ios-gray-800/50 border border-ios-gray-700/30 text-white text-sm placeholder:text-ios-gray-500 focus:outline-none focus:border-ios-blue/50 transition-colors duration-300 backdrop-blur-xl"
                 />
               </div>
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setDuplicateDialog({ isOpen: false, seriesData: null, newId: "" })}
-                  className="flex-1 px-4 py-3 rounded-[12px] bg-neutral-800/50 text-neutral-300 text-sm font-medium hover:bg-neutral-800 transition-all duration-300"
+                  className="flex-1 px-4 py-3 rounded-4xl bg-ios-gray-800/50 text-ios-gray-300 text-sm font-semibold hover:bg-ios-gray-800 transition-all duration-300"
                 >
                   取消
                 </button>
                 <button
                   onClick={executeDuplicate}
-                  className="flex-1 px-4 py-3 rounded-[12px] bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-all duration-300 shadow-lg shadow-emerald-500/30"
+                  className="flex-1 px-4 py-3 rounded-4xl bg-ios-blue text-white text-sm font-semibold hover:bg-ios-blue/90 transition-all duration-300 shadow-ios"
                 >
                   复制
                 </button>
@@ -737,7 +1013,6 @@ export default function AdminSeriesPageNew() {
           </div>
         </div>
       )}
-      </>
     </div>
   );
 }

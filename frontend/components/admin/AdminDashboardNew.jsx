@@ -17,6 +17,8 @@ import {
   Receipt,
   TrendingUp,
   Users,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 
 const DEFAULT_STATS = {
@@ -273,22 +275,22 @@ function StatCard({ icon: Icon, label, value, change, trend, color }) {
   const TrendIcon = isPositive ? ArrowUp : ArrowDown;
 
   return (
-    <div className="group relative overflow-hidden rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10">
-      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-5 transition-opacity duration-300 group-hover:opacity-10`} />
+    <div className="group relative overflow-hidden rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl transition-all duration-300 hover:scale-[1.03] hover:border-ios-green/30 hover:shadow-ios hover:shadow-ios-glow animate-scale-in">
+      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-5 transition-opacity duration-300 group-hover:opacity-15`} />
 
       <div className="relative">
         <div className="mb-4 flex items-center justify-between">
-          <div className={`flex h-12 w-12 items-center justify-center rounded-[14px] bg-gradient-to-br ${color} shadow-lg`}>
-            <Icon size={24} className="text-white" />
+          <div className={`flex h-14 w-14 items-center justify-center rounded-4xl bg-gradient-to-br ${color} shadow-ios transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6`}>
+            <Icon size={26} className="text-white" />
           </div>
-          <div className={`flex items-center gap-1 text-sm font-medium ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
-            <TrendIcon size={16} />
+          <div className={`flex items-center gap-1.5 text-sm font-bold ${isPositive ? "text-ios-green" : "text-ios-red"}`}>
+            <TrendIcon size={18} className="animate-bounce-subtle" />
             <span>{Math.abs(safeChange)}%</span>
           </div>
         </div>
         <div>
-          <p className="mb-1 text-sm text-neutral-400">{label}</p>
-          <p className="text-3xl font-bold text-neutral-100">{safeValue.toLocaleString("zh-CN")}</p>
+          <p className="mb-1 text-sm text-ios-gray-500 font-medium">{label}</p>
+          <p className="text-3xl font-bold text-neutral-100 tabular-nums">{safeValue.toLocaleString("zh-CN")}</p>
         </div>
       </div>
     </div>
@@ -299,12 +301,12 @@ function QuickAction({ icon: Icon, label, href, color }) {
   return (
     <a
       href={href}
-      className="group flex flex-col items-center gap-3 rounded-[16px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-95"
+      className="group flex flex-col items-center gap-3 rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl transition-all duration-300 hover:scale-110 hover:border-ios-green/30 hover:shadow-ios hover:shadow-ios-glow active:scale-95 animate-scale-in"
     >
-      <div className={`flex h-14 w-14 items-center justify-center rounded-[14px] bg-gradient-to-br ${color} shadow-lg transition-transform duration-300 group-hover:scale-110`}>
-        <Icon size={28} className="text-white" />
+      <div className={`flex h-16 w-16 items-center justify-center rounded-4xl bg-gradient-to-br ${color} shadow-ios transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12`}>
+        <Icon size={30} className="text-white" />
       </div>
-      <span className="text-sm font-medium text-neutral-200 transition-colors duration-300 group-hover:text-emerald-300">
+      <span className="text-sm font-bold text-neutral-200 transition-colors duration-300 group-hover:text-ios-green">
         {label}
       </span>
     </a>
@@ -313,24 +315,24 @@ function QuickAction({ icon: Icon, label, href, color }) {
 
 function ActivityItem({ activity }) {
   const iconByType = {
-    order: <Receipt size={16} className="text-emerald-400" />,
-    comment: <MessageSquare size={16} className="text-blue-400" />,
-    user: <Users size={16} className="text-purple-400" />,
-    series: <BookOpen size={16} className="text-orange-400" />,
+    order: <Receipt size={18} className="text-ios-green" />,
+    comment: <MessageSquare size={18} className="text-ios-blue" />,
+    user: <Users size={18} className="text-ios-purple" />,
+    series: <BookOpen size={18} className="text-ios-orange" />,
   };
 
   return (
-    <div className="group flex items-start gap-3 rounded-[14px] p-3 transition-all duration-300 hover:bg-emerald-500/5">
-      <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-neutral-800/50 transition-colors duration-300 group-hover:bg-emerald-500/10">
-        {iconByType[activity.type] || <Bell size={16} className="text-neutral-400" />}
+    <div className="group flex items-start gap-3 rounded-4xl p-3 transition-all duration-300 hover:bg-ios-green/5 hover:scale-[1.02] active:scale-95">
+      <div className="flex h-10 w-10 items-center justify-center rounded-3xl bg-neutral-800/50 transition-all duration-300 group-hover:bg-ios-green/10 group-hover:scale-110 group-hover:rotate-6 shadow-ios-sm">
+        {iconByType[activity.type] || <Bell size={18} className="text-ios-gray-400" />}
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm text-neutral-200">
-          <span className="font-medium text-emerald-300">{activity.user}</span>
+          <span className="font-bold text-ios-green">{activity.user}</span>
           {" "}
-          <span className="text-neutral-400">{activity.action}</span>
+          <span className="text-ios-gray-400">{activity.action}</span>
         </p>
-        <p className="mt-0.5 text-xs text-neutral-500">{activity.time}</p>
+        <p className="mt-0.5 text-xs text-ios-gray-500">{activity.time}</p>
       </div>
     </div>
   );
@@ -339,27 +341,27 @@ function ActivityItem({ activity }) {
 function TopSeriesItem({ series, rank, metric }) {
   const rankColor =
     rank === 1
-      ? "from-yellow-500 to-yellow-600"
+      ? "from-ios-yellow to-yellow-600"
       : rank === 2
         ? "from-gray-400 to-gray-500"
         : rank === 3
-          ? "from-orange-600 to-orange-700"
+          ? "from-ios-orange to-orange-700"
           : "from-neutral-700 to-neutral-800";
 
   return (
-    <div className="group flex items-center gap-3 rounded-[14px] p-3 transition-all duration-300 hover:bg-emerald-500/5">
-      <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br ${rankColor} shadow-lg`}>
+    <div className="group flex items-center gap-3 rounded-4xl p-3 transition-all duration-300 hover:bg-ios-green/5 hover:scale-[1.02] active:scale-95">
+      <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br ${rankColor} shadow-ios transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6`}>
         <span className="text-sm font-bold text-white">{rank}</span>
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
-          <p className="truncate text-sm font-medium text-neutral-200">{series.title}</p>
-          <span className={`flex-shrink-0 rounded-[6px] bg-neutral-800/50 px-2 py-0.5 text-xs ${series.type === "comic" ? "text-blue-400" : "text-purple-400"}`}>
+          <p className="truncate text-sm font-bold text-neutral-200">{series.title}</p>
+          <span className={`flex-shrink-0 rounded-2xl bg-neutral-800/50 px-2.5 py-1 text-xs font-medium ${series.type === "comic" ? "text-ios-blue" : "text-ios-purple"}`}>
             {series.type === "comic" ? "漫画" : "小说"}
           </span>
         </div>
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-ios-gray-400 font-medium">
           {metric === "views"
             ? `${toNumber(series.views).toLocaleString("zh-CN")} 次浏览`
             : `¥${toNumber(series.revenue).toLocaleString("zh-CN")} 收入`}
@@ -371,19 +373,19 @@ function TopSeriesItem({ series, rank, metric }) {
 
 function RecentUpdateItem({ series }) {
   return (
-    <div className="group flex items-center gap-3 rounded-[14px] p-3 transition-all duration-300 hover:bg-emerald-500/5">
-      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[10px] bg-emerald-500/10 transition-colors duration-300 group-hover:bg-emerald-500/20">
-        <Clock size={16} className="text-emerald-400" />
+    <div className="group flex items-center gap-3 rounded-4xl p-3 transition-all duration-300 hover:bg-ios-green/5 hover:scale-[1.02] active:scale-95">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-3xl bg-ios-green/10 transition-all duration-300 group-hover:bg-ios-green/20 group-hover:scale-110 group-hover:rotate-6 shadow-ios-sm">
+        <Clock size={18} className="text-ios-green" />
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
-          <p className="truncate text-sm font-medium text-neutral-200">{series.title}</p>
-          <span className={`flex-shrink-0 rounded-[6px] bg-neutral-800/50 px-2 py-0.5 text-xs ${series.type === "comic" ? "text-blue-400" : "text-purple-400"}`}>
+          <p className="truncate text-sm font-bold text-neutral-200">{series.title}</p>
+          <span className={`flex-shrink-0 rounded-2xl bg-neutral-800/50 px-2.5 py-1 text-xs font-medium ${series.type === "comic" ? "text-ios-blue" : "text-ios-purple"}`}>
             {series.type === "comic" ? "漫画" : "小说"}
           </span>
         </div>
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-ios-gray-400 font-medium">
           {toNumber(series.episodeCount)} 章节 · {getRelativeTime(series.updatedAt)}
         </p>
       </div>
@@ -393,7 +395,7 @@ function RecentUpdateItem({ series }) {
 
 function EmptyBlock({ text }) {
   return (
-    <div className="rounded-[14px] border border-dashed border-neutral-700 p-4 text-center text-sm text-neutral-500">
+    <div className="rounded-4xl border border-dashed border-ios-gray-700 bg-ios-gray-900/30 p-6 text-center text-sm text-ios-gray-500 font-medium animate-fade-in">
       {text}
     </div>
   );
@@ -405,6 +407,7 @@ export default function AdminDashboardNew() {
   const [recentUpdates, setRecentUpdates] = useState(DEFAULT_RECENT_UPDATES);
   const [activities, setActivities] = useState(DEFAULT_ACTIVITIES);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [dateRange, setDateRange] = useState("all");
   const [customFrom, setCustomFrom] = useState("");
@@ -487,19 +490,101 @@ export default function AdminDashboardNew() {
     };
   }, [queryString]);
 
+  // 老王添加：手动刷新数据
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
+      const endpoint = `${baseUrl}/api/admin/stats/dashboard${queryString}`;
+      const token = localStorage.getItem("admin_token");
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(endpoint, { headers });
+
+      if (!response.ok) {
+        throw new Error(`request failed: ${response.status}`);
+      }
+
+      const payload = await response.json();
+      const normalized = normalizeDashboardPayload(payload);
+
+      setStats(normalized.stats);
+      setTopSeries(normalized.topSeries);
+      setRecentUpdates(normalized.recentUpdates);
+      setActivities(normalized.activities);
+    } catch (error) {
+      console.error("刷新数据失败:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // 老王添加：导出数据为CSV
+  const handleExportData = () => {
+    const csvData = [
+      ["指标", "数值", "变化率", "趋势"],
+      ["总用户数", stats.users.total, `${stats.users.change}%`, stats.users.trend],
+      ["作品数量", stats.series.total, `${stats.series.change}%`, stats.series.trend],
+      ["订单数量", stats.orders.total, `${stats.orders.change}%`, stats.orders.trend],
+      ["总收入", stats.revenue.total, `${stats.revenue.change}%`, stats.revenue.trend],
+      ["总浏览量", stats.views.total, `${stats.views.change}%`, stats.views.trend],
+      ["评论数量", stats.comments.total, `${stats.comments.change}%`, stats.comments.trend],
+      ["漫画作品", stats.seriesByType.comic.total, `${stats.seriesByType.comic.change}%`, stats.seriesByType.comic.trend],
+      ["小说作品", stats.seriesByType.novel.total, `${stats.seriesByType.novel.change}%`, stats.seriesByType.novel.trend],
+      ["总章节数", stats.episodes.total, `${stats.episodes.change}%`, stats.episodes.trend],
+    ];
+
+    const csv = csvData.map((row) => row.join(",")).join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `dashboard-data-${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="rounded-[20px] border border-emerald-500/10 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-6 backdrop-blur-xl">
+    <div className="space-y-6 animate-fade-in">
+      <div className="rounded-5xl border border-ios-gray-800 bg-gradient-to-br from-ios-green/10 to-emerald-600/5 p-6 backdrop-blur-2xl shadow-ios">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="mb-2 flex items-center gap-2 text-2xl font-bold text-neutral-100">
-              <TrendingUp size={24} className="text-emerald-400" />
+              <TrendingUp size={26} className="text-ios-green" />
               后台数据看板
             </h2>
-            <p className="text-sm text-neutral-400">实时监控内容运营、订单和用户增长表现</p>
+            <p className="text-sm text-ios-gray-400 font-medium">实时监控内容运营、订单和用户增长表现</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* 老王添加：刷新按钮 */}
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 rounded-4xl border border-ios-green/20 bg-ios-green/5 px-4 py-2.5 text-xs text-ios-green font-bold transition-all duration-300 hover:bg-ios-green/10 hover:border-ios-green/30 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+              <span className="hidden sm:inline">{isRefreshing ? "刷新中..." : "刷新"}</span>
+            </button>
+
+            {/* 老王添加：导出按钮 */}
+            <button
+              onClick={handleExportData}
+              className="flex items-center gap-2 rounded-4xl border border-ios-blue/20 bg-ios-blue/5 px-4 py-2.5 text-xs text-ios-blue font-bold transition-all duration-300 hover:bg-ios-blue/10 hover:border-ios-blue/30 hover:scale-105 hover:shadow-ios-sm active:scale-95"
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">导出</span>
+            </button>
+
             {[
               { value: "all", label: "全部" },
               { value: "7days", label: "最近7天" },
@@ -509,10 +594,10 @@ export default function AdminDashboardNew() {
               <button
                 key={option.value}
                 onClick={() => setDateRange(option.value)}
-                className={`rounded-[12px] px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                className={`rounded-4xl px-5 py-2.5 text-sm font-bold transition-all duration-300 ${
                   dateRange === option.value
-                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                    : "bg-neutral-800/50 text-neutral-300 hover:bg-neutral-800 hover:text-emerald-300"
+                    ? "bg-ios-green text-white shadow-ios shadow-ios-glow scale-105"
+                    : "bg-neutral-800/50 text-ios-gray-300 hover:bg-neutral-800 hover:text-ios-green hover:scale-105 active:scale-95"
                 }`}
               >
                 {option.label}
@@ -522,23 +607,23 @@ export default function AdminDashboardNew() {
         </div>
 
         {dateRange === "custom" && (
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-3 animate-slide-in-right">
             <div className="flex items-center gap-2">
-              <label className="text-sm text-neutral-400">从</label>
+              <label className="text-sm text-ios-gray-400 font-medium">从</label>
               <input
                 type="date"
                 value={customFrom}
                 onChange={(event) => setCustomFrom(event.target.value)}
-                className="rounded-[10px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-200 transition-colors duration-300 focus:border-emerald-500/50 focus:outline-none"
+                className="rounded-3xl border border-ios-green/20 bg-neutral-800/50 px-4 py-2.5 text-sm text-neutral-200 transition-all duration-300 focus:border-ios-green/50 focus:outline-none focus:ring-2 focus:ring-ios-green/20 shadow-ios-sm"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm text-neutral-400">到</label>
+              <label className="text-sm text-ios-gray-400 font-medium">到</label>
               <input
                 type="date"
                 value={customTo}
                 onChange={(event) => setCustomTo(event.target.value)}
-                className="rounded-[10px] border border-emerald-500/20 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-200 transition-colors duration-300 focus:border-emerald-500/50 focus:outline-none"
+                className="rounded-3xl border border-ios-green/20 bg-neutral-800/50 px-4 py-2.5 text-sm text-neutral-200 transition-all duration-300 focus:border-ios-green/50 focus:outline-none focus:ring-2 focus:ring-ios-green/20 shadow-ios-sm"
               />
             </div>
           </div>
@@ -550,11 +635,11 @@ export default function AdminDashboardNew() {
           {[1, 2, 3, 4, 5, 6].map((item) => (
             <div
               key={item}
-              className="h-32 animate-pulse rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl"
+              className="h-36 animate-pulse rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios"
             >
-              <div className="mb-4 h-12 w-12 rounded-[14px] bg-neutral-800" />
-              <div className="mb-2 h-4 w-20 rounded bg-neutral-800" />
-              <div className="h-8 w-32 rounded bg-neutral-800" />
+              <div className="mb-4 h-14 w-14 rounded-4xl bg-neutral-800 animate-shimmer" />
+              <div className="mb-2 h-4 w-24 rounded-2xl bg-neutral-800 animate-shimmer" />
+              <div className="h-8 w-36 rounded-2xl bg-neutral-800 animate-shimmer" />
             </div>
           ))}
         </div>
@@ -649,9 +734,9 @@ export default function AdminDashboardNew() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl">
+            <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios animate-scale-in">
               <div className="mb-4 flex items-center gap-2">
-                <Award size={20} className="text-emerald-400" />
+                <Award size={22} className="text-ios-green" />
                 <h3 className="text-lg font-bold text-neutral-100">热门作品（浏览量）</h3>
               </div>
               <div className="space-y-2">
@@ -665,9 +750,9 @@ export default function AdminDashboardNew() {
               </div>
             </div>
 
-            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl">
+            <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios animate-scale-in">
               <div className="mb-4 flex items-center gap-2">
-                <DollarSign size={20} className="text-emerald-400" />
+                <DollarSign size={22} className="text-ios-green" />
                 <h3 className="text-lg font-bold text-neutral-100">热门作品（收入）</h3>
               </div>
               <div className="space-y-2">
@@ -683,9 +768,9 @@ export default function AdminDashboardNew() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl">
+            <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios animate-scale-in">
               <div className="mb-4 flex items-center gap-2">
-                <Clock size={20} className="text-emerald-400" />
+                <Clock size={22} className="text-ios-green" />
                 <h3 className="text-lg font-bold text-neutral-100">最近更新</h3>
               </div>
               <div className="space-y-2">
@@ -697,10 +782,10 @@ export default function AdminDashboardNew() {
               </div>
             </div>
 
-            <div className="rounded-[20px] border border-emerald-500/10 bg-neutral-900/50 p-6 backdrop-blur-xl">
+            <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios animate-scale-in">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-bold text-neutral-100">最近活动</h3>
-                <a href="/admin/tracking" className="text-sm text-emerald-400 transition-colors duration-300 hover:text-emerald-300">
+                <a href="/admin/tracking" className="text-sm text-ios-green font-medium transition-all duration-300 hover:text-emerald-300 hover:scale-105">
                   查看全部 →
                 </a>
               </div>
