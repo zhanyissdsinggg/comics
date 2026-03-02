@@ -33,6 +33,8 @@ export class AdminBillingController {
     }
     const payload = {
       id,
+      name: body?.name || body?.label || `Package ${id}`,
+      amount: Number(body?.price || 0),
       paidPts: Number(body?.paidPts || 0),
       bonusPts: Number(body?.bonusPts || 0),
       price: Number(body?.price || 0),

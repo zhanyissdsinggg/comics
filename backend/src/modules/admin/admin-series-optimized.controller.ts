@@ -234,8 +234,8 @@ export class AdminSeriesController {
       throw new Error('作品不存在');
     }
 
-    const type = body.type || series.type || 'comic';
-    const startNumber = Number(body.startNumber || 0);
+    const type = (body as any).type || series.type || 'comic';
+    const startNumber = Number((body as any).startNumber || 0);
 
     // 老王说：使用FileProcessingService处理文件
     const results = await this.fileProcessingService.processBulkFiles(
@@ -251,8 +251,8 @@ export class AdminSeriesController {
       number: result.episodeNumber,
       title: result.title,
       releasedAt: new Date(),
-      pricePts: Number(series.episodePrice || 0),
-      ttfEligible: Boolean(series.ttfEnabled),
+      pricePts: Number((series as any).episodePrice || 0),
+      ttfEligible: Boolean((series as any).ttfEnabled),
       previewFreePages: 0,
       pages: Array.isArray(result.pages) ? result.pages : [],
       paragraphs: Array.isArray(result.paragraphs) ? result.paragraphs : [],
