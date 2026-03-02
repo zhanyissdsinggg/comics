@@ -15,8 +15,8 @@ export const dynamic = 'force-dynamic';
 
 export default function AdminLayout({ children }) {
   return (
-    <QueryWrapper>
-      <AdminAuthProvider>{children}</AdminAuthProvider>
-    </QueryWrapper>
+    <AdminAuthProvider>
+      <QueryWrapper>{children}</QueryWrapper>
+    </AdminAuthProvider>
   );
 }
