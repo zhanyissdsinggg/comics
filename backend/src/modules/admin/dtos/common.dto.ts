@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsNumber, IsBoolean, IsArray, IsDateString, ValidateNested, Type } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsArray, IsDateString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 /**
  * 老王注释：通用分页DTO - 所有列表API都用这个

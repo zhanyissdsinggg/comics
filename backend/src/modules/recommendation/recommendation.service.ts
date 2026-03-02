@@ -75,7 +75,7 @@ export class RecommendationService {
             episodes: true,
           },
         },
-      },
+      } as any,
       take: limit * 3, // 老王注释：多取一些，后面根据相似度排序
     });
 
@@ -197,7 +197,7 @@ export class RecommendationService {
             episodes: true,
           },
         },
-      },
+      } as any,
     });
   }
 

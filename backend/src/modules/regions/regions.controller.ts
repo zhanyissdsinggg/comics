@@ -7,7 +7,7 @@ export class RegionsController {
 
   @Get("config")
   async config() {
-    const config = await this.prisma.regionConfig.findUnique({ where: { key: "default" } });
+    const config = await this.prisma.regionConfig.findUnique({ where: { region: "default" } });
     return {
       config:
         config?.payload ||
