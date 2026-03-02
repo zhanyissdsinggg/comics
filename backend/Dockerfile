@@ -16,7 +16,7 @@ COPY nest-cli.json ./
 COPY src ./src
 
 # 老王说：构建应用
-RUN npm run build
+RUN npm run build && ls -la dist/ && echo "✅ dist/main.js exists" && test -f dist/main.js || (echo "❌ dist/main.js NOT FOUND" && exit 1)
 
 # 老王说：暴露端口
 EXPOSE 4000
