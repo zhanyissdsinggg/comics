@@ -1,7 +1,7 @@
-FROM node:20-alpine
+FROM node:20-slim
 
-# 老王说：安装OpenSSL，Prisma需要这个SB库
-RUN apk add --no-cache openssl1.1-compat
+# 老王说：安装OpenSSL和其他必需的库，Prisma需要这些SB库
+RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
