@@ -1,6 +1,6 @@
 # Railway Nixpacks 配置
 # 老王说：确保执行 npm run build 生成 dist 目录
-# 强制重新构建 - 2026-03-01
+# 强制重新构建 - 2026-03-02
 
 [phases.setup]
 nixPkgs = ["nodejs_20"]
