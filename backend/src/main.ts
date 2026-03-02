@@ -11,7 +11,14 @@ import { requireAuthMiddleware } from "./common/middleware/require-auth.middlewa
 import { json } from "express";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // 老王说：生产环境只输出错误和警告，避免日志爆炸
+  const logLevels = process.env.NODE_ENV === 'production'
+    ? ['error', 'warn']
+    : ['log', 'error', 'warn', 'debug', 'verbose'];
+
+  const app = await NestFactory.create(AppModule, {
+    logger: logLevels,
+  });
   app.setGlobalPrefix("api");
   const originEnv = process.env.FRONTEND_ORIGIN || "";
   const allowedOrigins = originEnv
