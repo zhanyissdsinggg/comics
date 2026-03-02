@@ -1,5 +1,8 @@
 FROM node:20-alpine
 
+# 老王说：安装OpenSSL，Prisma需要这个SB库
+RUN apk add --no-cache openssl1.1-compat
+
 WORKDIR /app
 
 # 老王说：复制package文件并安装依赖
