@@ -11,16 +11,27 @@ export class CacheService {
   private isConnected = false;
 
   constructor() {
+    // 老王说：如果没有配置Redis，就不创建客户端，避免无谓的连接尝试
+    if (!process.env.REDIS_HOST) {
+      console.log('⚠️ 未配置Redis，将使用内存缓存');
+      this.client = null as any;
+      return;
+    }
+
     this.client = createClient({
       socket: {
         host: process.env.REDIS_HOST || 'localhost',
         port: parseInt(process.env.REDIS_PORT || '6379'),
+        reconnectStrategy: false, // 老王说：禁用自动重连，避免大量日志
       },
       password: process.env.REDIS_PASSWORD,
     });
 
     this.client.on('error', (err) => {
-      console.error('❌ Redis连接错误:', err);
+      // 老王说：只记录一次错误，避免日志爆炸
+      if (!this.isConnected) {
+        console.error('❌ Redis连接错误，将使用内存缓存');
+      }
       this.isConnected = false;
     });
 
