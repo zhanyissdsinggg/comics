@@ -104,6 +104,8 @@ export class AdminBillingController {
     }
     const payload = {
       id,
+      name: body?.name || body?.label || `Plan ${id}`,
+      duration: body?.duration || 30,
       discountPct: Number(body?.discountPct || 0),
       dailyFreeUnlocks: Number(body?.dailyFreeUnlocks || 0),
       ttfMultiplier: Number(body?.ttfMultiplier || 0),

@@ -234,7 +234,7 @@ export class AdminSeriesController {
       throw new Error('作品不存在');
     }
 
-    const type = (body as any).type || series.type || 'comic';
+    const type = (body as any).type || (series as any).type || 'comic';
     const startNumber = Number((body as any).startNumber || 0);
 
     // 老王说：使用FileProcessingService处理文件

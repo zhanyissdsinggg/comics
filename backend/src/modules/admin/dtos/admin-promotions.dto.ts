@@ -14,8 +14,8 @@ import {
   IsEnum,
   IsArray,
   ValidateNested,
-  Type,
 } from "class-validator";
+import { Type } from "class-transformer";
 
 /**
  * 促销类型枚举

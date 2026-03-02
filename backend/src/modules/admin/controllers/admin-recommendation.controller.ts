@@ -133,7 +133,7 @@ export class AdminRecommendationController {
     const result = await this.recommendationService.saveRecommendationAnalytics(
       body.slotId,
       body.seriesId,
-      body.dateKey,
+      new Date(body.dateKey),
       body.data
     );
     return { result };
