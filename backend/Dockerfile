@@ -4,7 +4,7 @@ WORKDIR /app
 
 # 老王说：复制package文件并安装依赖
 COPY package*.json ./
-RUN npm install --legacy-peer-deps --ignore-scripts
+RUN npm install --legacy-peer-deps
 
 # 老王说：复制Prisma schema并生成client
 COPY prisma ./prisma
