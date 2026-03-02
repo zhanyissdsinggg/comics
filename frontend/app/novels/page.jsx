@@ -4,8 +4,22 @@ import Skeleton from "../../components/common/Skeleton";
 import ErrorBoundary from "../../components/common/ErrorBoundary";
 
 export const metadata = {
-  title: "Novels",
-  description: "Discover trending novels and web novels.",
+  title: "Novels - Browse All Series",
+  description: "Discover trending web novels and light novels. Browse by genre and find your next favorite story.",
+  // 老王添加：Open Graph标签
+  openGraph: {
+    title: "Novels - Browse All Series | Gush Comics",
+    description: "Discover trending web novels and light novels. Browse by genre and find your next favorite story.",
+    url: "https://gushcomics.com/novels",
+    siteName: "Gush Comics",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Novels - Browse All Series | Gush Comics",
+    description: "Discover trending web novels and light novels. Browse by genre and find your next favorite story.",
+  },
 };
 
 export default function Page() {

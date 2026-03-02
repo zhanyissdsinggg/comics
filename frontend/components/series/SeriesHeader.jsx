@@ -1,5 +1,6 @@
 "use client";
 
+import { Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 
@@ -98,19 +99,32 @@ export default function SeriesHeader({
             {series.description || "No description available."}
           </p>
 
-          {/* Action buttons */}
+          {/* Action buttons - 老王优化：让收藏按钮更明显 */}
           <div className="mt-3 sm:mt-5 flex items-center gap-2 sm:gap-3">
             {onFollowToggle && (
               <button
                 type="button"
                 onClick={onFollowToggle}
-                className={`rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors ${
+                className={`group relative flex items-center gap-2 rounded-lg px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-semibold transition-all duration-200 ${
                   isFollowing
-                    ? "bg-emerald-600/20 border border-emerald-500/50 text-emerald-400"
-                    : "border border-neutral-700 text-neutral-300 hover:border-neutral-500"
+                    ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 hover:scale-105"
+                    : "border-2 border-pink-500/30 bg-pink-500/10 text-pink-400 hover:border-pink-500/50 hover:bg-pink-500/20 hover:scale-105"
                 }`}
+                aria-label={isFollowing ? "Unfollow series" : "Follow series"}
               >
-                {isFollowing ? "✓ Following" : "+ Follow"}
+                <Heart
+                  size={18}
+                  className={`transition-all duration-200 ${
+                    isFollowing ? "fill-current" : "group-hover:scale-110"
+                  }`}
+                />
+                <span>{isFollowing ? "Following" : "Follow"}</span>
+                {isFollowing && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                  </span>
+                )}
               </button>
             )}
             <ShareButton

@@ -136,17 +136,17 @@ function HomeContent() {
           {loading ? <HeroBannerSkeleton /> : <HeroCarousel items={heroItems} />}
         </div>
 
-        {/* ===== Genre Filter Chips - 像 Webtoon 的分类筛选 ===== */}
-        <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        {/* 老王优化：iOS 26风格的Genre Filter Chips - 胶囊形状 + 毛玻璃 */}
+        <div className="mb-8 flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {GENRE_CHIPS.map((chip) => (
             <button
               key={chip.id}
               type="button"
               onClick={() => setActiveGenre(chip.id)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${
+              className={`shrink-0 rounded-full px-6 py-2.5 text-sm font-bold transition-all duration-300 backdrop-blur-xl ${
                 activeGenre === chip.id
-                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                  : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-ios-glow scale-105"
+                  : "bg-white/5 border border-white/10 text-neutral-400 hover:bg-white/10 hover:border-white/20 hover:text-white hover:scale-105"
               }`}
             >
               {chip.label}

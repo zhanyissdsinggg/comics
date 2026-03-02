@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import ErrorBoundary from "../common/ErrorBoundary";
+import ThemeProvider from "../common/ThemeProvider";
 import { AuthProvider } from "../../store/useAuthStore";
 import { WalletProvider } from "../../store/useWalletStore";
 import { AdultGateProvider } from "../../store/useAdultGateStore";
@@ -66,7 +67,8 @@ export default function AppProviders({ children }) {
   const showAuthModal = !pathname?.startsWith("/admin");
   return (
     <ErrorBoundary name="AppRoot" title="Application Error" message="Something went wrong with the application. Please reload the page.">
-      <ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
         <AuthProvider>
           <WalletProvider>
             <AdultGateProvider>
@@ -117,6 +119,7 @@ export default function AppProviders({ children }) {
         </WalletProvider>
       </AuthProvider>
     </ToastProvider>
+    </ThemeProvider>
     </ErrorBoundary>
   );
 }

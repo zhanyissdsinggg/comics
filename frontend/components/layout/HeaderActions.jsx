@@ -5,6 +5,7 @@ import { Bell, User } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
+import ThemeToggle from "../common/ThemeToggle";
 // 老王说：暂时注释掉LanguageSwitcher，它使用了next-intl
 // import LanguageSwitcher from "../common/LanguageSwitcher";
 
@@ -25,17 +26,17 @@ export default function HeaderActions({
   const { unreadCount } = useNotificationsStore();
 
   return (
-    <div className="flex items-center gap-2 md:gap-3">
-      {/* 手机端钱包余额显示 - iOS风格 */}
+    <div className="flex items-center gap-3">
+      {/* 老王优化：iOS 26风格的钱包按钮 - 胶囊形状 + 毛玻璃 */}
       <button
         type="button"
         onClick={onWalletClick}
-        className="group relative flex items-center gap-1.5 min-h-[44px] rounded-[20px] border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:scale-[1.05] active:scale-[0.95] md:hidden touch-manipulation"
+        className="group relative flex items-center gap-2 min-h-[44px] rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-xl px-4 py-2 transition-all duration-300 hover:border-emerald-500/50 hover:bg-emerald-500/20 hover:scale-105 hover:shadow-ios-glow active:scale-95 md:hidden touch-manipulation"
         aria-label="Wallet"
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
         <svg
-          className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:scale-110"
+          className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -47,26 +48,26 @@ export default function HeaderActions({
             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <span className="text-xs font-semibold text-emerald-400 tabular-nums">
+        <span className="text-xs font-bold text-emerald-400 tabular-nums">
           {(paidPts + bonusPts).toLocaleString()}
         </span>
       </button>
 
-      {/* 通知按钮 */}
+      {/* 老王优化：iOS 26风格的通知按钮 - 圆形 + 毛玻璃 */}
       <button
         type="button"
         onClick={() => router.push("/notifications")}
-        className="group relative min-h-[44px] min-w-[44px] rounded-[20px] border border-white/5 bg-white/5 p-2 text-neutral-300 transition-all duration-300 hover:border-emerald-500/20 hover:bg-emerald-500/10 hover:text-white touch-manipulation hover:scale-[1.05] active:scale-[0.95]"
+        className="group relative min-h-[44px] min-w-[44px] rounded-full border border-white/10 bg-white/5 backdrop-blur-xl p-2.5 text-neutral-300 transition-all duration-300 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-white hover:scale-110 hover:shadow-ios active:scale-95 touch-manipulation"
         aria-label="Notifications"
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
-        <Bell size={16} className="transition-transform duration-300 group-hover:scale-110" />
+        <Bell size={18} className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
         {unreadCount > 0 ? (
           <>
             {/* iOS风格脉冲动画 */}
             <span className="absolute -right-1 -top-1 flex h-5 w-5 animate-ping rounded-full bg-red-500 opacity-75"></span>
             {/* iOS风格未读数量徽章 */}
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-r from-red-400 to-red-500 px-1 text-[10px] font-semibold text-white shadow-lg shadow-red-500/30">
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-rose-500 px-1 text-[10px] font-bold text-white shadow-lg shadow-red-500/50">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           </>
@@ -79,37 +80,47 @@ export default function HeaderActions({
         <LanguageSwitcher />
       </div> */}
 
-      {/* 18+ 开关 - 桌面端显示 */}
+      {/* 老王添加：主题切换按钮 */}
+      <div className="hidden sm:block">
+        <ThemeToggle />
+      </div>
+
+      {/* 老王优化：iOS 26风格的18+开关 - 胶囊形状 + 毛玻璃 */}
       <button
         type="button"
         onClick={onAdultToggleClick}
-        className={`hidden sm:block min-h-[44px] rounded-[16px] border px-4 py-2 text-xs font-semibold transition-all duration-300 touch-manipulation hover:scale-[1.05] active:scale-[0.95] ${
+        className={`hidden sm:flex items-center gap-2 min-h-[44px] rounded-full border px-5 py-2.5 text-xs font-bold transition-all duration-300 touch-manipulation hover:scale-105 active:scale-95 backdrop-blur-xl ${
           isAdultMode
-            ? "border-red-500/30 bg-red-500/10 text-red-300 shadow-lg shadow-red-500/20"
-            : "border-white/5 bg-white/5 text-neutral-300 hover:border-red-500/20 hover:bg-red-500/5"
+            ? "border-red-500/40 bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-300 shadow-lg shadow-red-500/30"
+            : "border-white/10 bg-white/5 text-neutral-300 hover:border-red-500/30 hover:bg-red-500/10"
         }`}
         style={{ WebkitTapHighlightColor: "transparent" }}
         aria-label={`Adult content ${isAdultMode ? "on" : "off"}`}
       >
-        18+ {isAdultMode ? "ON" : "OFF"}
+        <span className={`transition-transform duration-300 ${isAdultMode ? "scale-110" : ""}`}>
+          18+
+        </span>
+        <span className={`text-[10px] font-bold ${isAdultMode ? "text-red-400" : "text-neutral-500"}`}>
+          {isAdultMode ? "ON" : "OFF"}
+        </span>
       </button>
 
-      {/* 账户按钮 */}
+      {/* 老王优化：iOS 26风格的账户按钮 */}
       {isSignedIn ? (
         <button
           type="button"
           onClick={() => router.push("/profile")}
-          className="group relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[20px] border border-emerald-500/20 bg-emerald-500/5 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:scale-[1.05] active:scale-[0.95]"
+          className="group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 backdrop-blur-xl transition-all duration-300 hover:border-emerald-500/50 hover:bg-emerald-500/20 hover:scale-110 hover:shadow-ios-glow active:scale-95"
           aria-label="Profile"
           title="View Profile"
         >
-          <User size={18} className="text-emerald-400 transition-transform duration-300 group-hover:scale-110" />
+          <User size={20} className="text-emerald-400 transition-transform duration-300 group-hover:scale-110" />
         </button>
       ) : (
         <button
           type="button"
           onClick={onLoginClick}
-          className="rounded-[16px] border border-white/5 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200 transition-all duration-300 hover:border-emerald-500/20 hover:bg-emerald-500/5 hover:text-white hover:scale-[1.05] active:scale-[0.95]"
+          className="rounded-full border border-white/10 bg-white/5 backdrop-blur-xl px-5 py-2.5 text-sm font-bold text-neutral-200 transition-all duration-300 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-white hover:scale-105 hover:shadow-ios active:scale-95"
         >
           Sign in
         </button>

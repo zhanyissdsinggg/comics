@@ -77,21 +77,21 @@ export default function SiteHeader({ onSearch }) {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 transition-all duration-300 ${
+        className={`sticky top-0 z-40 transition-all duration-500 ease-out ${
           scrolled
-            ? "border-b border-white/8 bg-neutral-950/95 shadow-lg shadow-black/30 backdrop-blur-xl"
-            : "border-b border-white/5 bg-neutral-950/80 backdrop-blur-lg"
+            ? "border-b border-white/10 bg-neutral-950/98 shadow-ios-lg backdrop-blur-2xl"
+            : "border-b border-white/5 bg-neutral-950/90 backdrop-blur-xl"
         }`}
       >
-        {/* 单行布局 - 像 Webtoon 那样紧凑 */}
-        <div className="mx-auto flex h-14 max-w-[1280px] items-center gap-4 px-4 sm:px-6 lg:px-8">
+        {/* 老王优化：iOS 26风格的单行布局 - 更大的高度和间距 */}
+        <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-6 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <HeaderLogo />
 
           {/* 桌面导航 */}
           <HeaderNav />
 
-          {/* 搜索栏 - 居中伸展 */}
+          {/* 老王优化：搜索栏 - iOS 26风格的圆角 */}
           <div className="flex-1 md:max-w-xs lg:max-w-sm">
             <HeaderSearch onSearch={onSearch} />
           </div>

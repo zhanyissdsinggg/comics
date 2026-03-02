@@ -2,7 +2,7 @@
 import SiteHeader from "../../components/layout/SiteHeader";
 
 export const metadata = {
-  title: "Privacy Policy - Gush",
+  title: "Privacy Policy",
   description: "Our commitment to protecting your privacy and personal information.",
 };
 

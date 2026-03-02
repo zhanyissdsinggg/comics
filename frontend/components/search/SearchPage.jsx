@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
 import SiteHeader from "../layout/SiteHeader";
@@ -232,6 +232,11 @@ export default function SearchPage() {
     });
   }, [recoRails]);
 
+  // 老王优化：使用useCallback避免每次render都创建新函数
+  const handleSeriesClick = useCallback((seriesId) => {
+    router.push(`/series/${seriesId}`);
+  }, [router]);
+
   useEffect(() => {
     if (!query) {
       return;
@@ -446,7 +451,7 @@ export default function SearchPage() {
                 <button
                   key={series.id}
                   type="button"
-                  onClick={() => router.push(`/series/${series.id}`)}
+                  onClick={() => handleSeriesClick(series.id)}
                   className="rounded-2xl border border-neutral-900 bg-neutral-900/40 p-4 text-left"
                 >
                   <Cover tone={series.coverTone} coverUrl={series.coverUrl} className="h-40" />

@@ -2,7 +2,7 @@
 import SiteHeader from "../../components/layout/SiteHeader";
 
 export const metadata = {
-  title: "Terms of Service - Gush",
+  title: "Terms of Service",
   description: "Terms and conditions for using Gush services.",
 };
 

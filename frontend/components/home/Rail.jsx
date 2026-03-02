@@ -9,21 +9,43 @@ import { ensureArray } from "../../lib/validators";
  * - 左侧彩色竖线装饰标题
  * - 右侧 "See All" 按钮
  * - 网格卡片布局
+ * - 老王添加：推荐理由标签
  */
-export default function Rail({ title, items, tone, railName, onItemClick }) {
+export default function Rail({ title, items, tone, railName, onItemClick, reason }) {
   const router = useRouter();
   const safeItems = ensureArray(items);
 
   return (
     <section className="space-y-4">
-      {/* Section 标题行 */}
+      {/* Section 标题行 - 老王优化：添加推荐理由 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* 左侧品牌色竖线 - 像 Webtoon 那样 */}
           <div className="h-6 w-1 rounded-full bg-emerald-500" />
-          <h2 className="text-lg font-bold tracking-tight text-white md:text-xl">
-            {title}
-          </h2>
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg font-bold tracking-tight text-white md:text-xl">
+              {title}
+            </h2>
+            {/* 老王添加：推荐理由标签 */}
+            {reason && (
+              <span className="text-xs text-gray-400 flex items-center gap-1.5">
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                {reason}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* See All 按钮 */}

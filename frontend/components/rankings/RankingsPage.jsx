@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import Cover from "../common/Cover";
@@ -29,6 +29,11 @@ export default function RankingsPage() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const { isAdultMode } = useAdultGateStore();
+
+  // 老王优化：使用useCallback避免每次render都创建新函数
+  const handleSeriesClick = useCallback((seriesId) => {
+    router.push(`/series/${seriesId}`);
+  }, [router]);
 
   useEffect(() => {
     setLoading(true);
@@ -94,7 +99,7 @@ export default function RankingsPage() {
               <button
                 key={series.id}
                 type="button"
-                onClick={() => router.push(`/series/${series.id}`)}
+                onClick={() => handleSeriesClick(series.id)}
                 className="rounded-2xl border border-neutral-900 bg-neutral-900/40 p-4 text-left"
               >
                 <div className="flex items-center justify-between">

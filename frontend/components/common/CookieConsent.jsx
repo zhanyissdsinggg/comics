@@ -1,18 +1,16 @@
+/**
+ * Cookie Consent Banner Component
+ * 老王重构：移除next-intl依赖，直接用英文文本
+ * 符合 GDPR/CCPA 要求的 Cookie 同意横幅
+ */
 "use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useTranslations } from 'next-intl';
+import { Cookie, X } from "lucide-react";
 
-/**
- * Cookie Consent Banner Component
- * 老王注释：符合 GDPR/CCPA 要求的 Cookie 同意横幅
- * 首次访问时显示，用户可以接受或拒绝 Cookie
- */
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
-  const t = useTranslations('cookie');
-  const tFooter = useTranslations('footer');
 
   useEffect(() => {
     // 老王注释：检查用户是否已经做出选择
@@ -41,39 +39,57 @@ export default function CookieConsent() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4">
-      <div className="mx-auto max-w-7xl">
-        {/* 老王优化：北美风格的紧凑横幅 */}
-        <div className="rounded-lg border border-neutral-800 bg-neutral-900/98 backdrop-blur-md px-4 py-3 shadow-xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-            {/* 老王优化：简化内容，去掉图标 */}
-            <div className="flex-1">
-              <p className="text-sm text-neutral-300">
-                <span className="font-semibold text-white">{t('title')}</span>
-                {" — "}
-                {t('description')}{" "}
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6">
+      <div className="mx-auto max-w-6xl">
+        <div className="relative rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 shadow-2xl p-6 md:p-8">
+          {/* 关闭按钮 */}
+          <button
+            onClick={handleDecline}
+            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-800 transition-colors"
+            aria-label="Close"
+          >
+            <X size={20} className="text-gray-400" />
+          </button>
+
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            {/* Cookie图标 */}
+            <div className="flex-shrink-0">
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <Cookie size={32} className="text-amber-400" />
+              </div>
+            </div>
+
+            {/* 文本内容 */}
+            <div className="flex-1 space-y-2">
+              <h3 className="text-lg font-semibold text-white">
+                We use cookies
+              </h3>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                We use cookies and similar technologies to enhance your browsing experience,
+                personalize content and ads, provide social media features, and analyze our traffic.
+                By clicking &quot;Accept All&quot;, you consent to our use of cookies.{" "}
                 <Link
                   href="/privacy-policy"
-                  className="text-emerald-500 hover:text-emerald-400 underline"
+                  className="text-blue-400 hover:text-blue-300 underline"
                 >
-                  {t('learnMore')}
+                  Learn more
                 </Link>
               </p>
             </div>
 
-            {/* 老王优化：紧凑的按钮组 */}
-            <div className="flex gap-2 w-full sm:w-auto">
+            {/* 按钮组 */}
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <button
                 onClick={handleDecline}
-                className="flex-1 sm:flex-none px-4 py-2 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-neutral-100 transition-colors text-sm font-medium whitespace-nowrap"
+                className="px-6 py-2.5 rounded-lg border border-gray-600 bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white transition-all duration-200 text-sm font-medium whitespace-nowrap"
               >
-                {t('decline')}
+                Decline
               </button>
               <button
                 onClick={handleAccept}
-                className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors text-sm font-medium whitespace-nowrap"
+                className="px-6 py-2.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 text-sm font-medium whitespace-nowrap shadow-lg shadow-emerald-500/20"
               >
-                {t('acceptAll')}
+                Accept All
               </button>
             </div>
           </div>
@@ -82,3 +98,4 @@ export default function CookieConsent() {
     </div>
   );
 }
+

@@ -1,4 +1,5 @@
 import { NestFactory } from "@nestjs/core";
+import { LogLevel } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import cookieParser = require("cookie-parser");
@@ -12,7 +13,7 @@ import { json } from "express";
 
 async function bootstrap() {
   // 老王说：生产环境只输出错误和警告，避免日志爆炸
-  const logLevels = process.env.NODE_ENV === 'production'
+  const logLevels: LogLevel[] = process.env.NODE_ENV === 'production'
     ? ['error', 'warn']
     : ['log', 'error', 'warn', 'debug', 'verbose'];
 

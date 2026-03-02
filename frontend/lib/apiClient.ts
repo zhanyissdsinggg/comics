@@ -365,18 +365,9 @@ async function requestJson(
         ...payload,
       };
       const friendly = getFriendlyMessage(errorPayload.error, errorPayload.message);
-      // 老王注释：避免/api/events错误导致无限循环 - 不要track /api/events的错误
-      if (!path.startsWith("/api/events")) {
-        track("api_error", {
-          path,
-          status: response.status,
-          errorCode: errorPayload.error,
-          requestId: payload?.requestId,
-        });
-      }
       // 老王注释：移除401错误自动触发登录弹窗，让用户自由浏览
       if (response.status === 401) {
-        // 老王修复：401错误静默处理，不显示toast和console错误
+        // 老王修复：401错误静默处理，不显示toast、不track、不输出console错误
         const suppressAuth =
           options?.suppressAuthModal ||
           path.startsWith("/api/admin") ||
@@ -384,8 +375,18 @@ async function requestJson(
         if (!suppressAuth) {
           // emitAuthRequired({ path }); // 不触发登录弹窗
         }
-        // 老王注释：静默返回401错误，不显示toast提示
+        // 老王注释：静默返回401错误，不显示toast提示，不track api_error
         return errorPayload;
+      }
+      // 老王注释：避免/api/events错误导致无限循环 - 不要track /api/events的错误
+      // 401错误已经在上面处理了，这里只track非401错误
+      if (!path.startsWith("/api/events")) {
+        track("api_error", {
+          path,
+          status: response.status,
+          errorCode: errorPayload.error,
+          requestId: payload?.requestId,
+        });
       }
       if (response.status >= 500) {
         emitToast({
