@@ -326,110 +326,115 @@ async function requestJson(
   options: ApiRequestOptions & { method: string }
 ): Promise<ApiResponse> {
   const baseUrl = getBaseUrl();
-  try {
-    const controller = new AbortController();
-    const timeoutMs = options?.timeoutMs || DEFAULT_TIMEOUT_MS;
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const maxRetries = options?.maxRetries || 3;
+  let lastError: Error | null = null;
 
-    // 老王修改：Token现在存储在httpOnly cookie中，浏览器会自动发送
-    // 不需要手动从localStorage读取和添加到请求头
-    const headers = { ...options?.headers };
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutMs = options?.timeoutMs || DEFAULT_TIMEOUT_MS;
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    const response = await fetch(`${baseUrl}${path}`, {
-      ...options,
-      headers,
-      credentials: "include",
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    const payload = await parseJson(response);
-    if (!response.ok) {
-      if (payload?.error === "ADULT_GATED") {
-        track("adult_gate_blocked", {
-          path,
-          reason: payload?.reason,
-          status: response.status,
-          requestId: payload?.requestId,
-        });
-      }
-      const errorPayload: ApiResponse = {
-        ok: false,
-        status: response.status,
-        error: payload?.error || response.statusText,
-        requestId: payload?.requestId,
-        ...payload,
-      };
-      const friendly = getFriendlyMessage(errorPayload.error, errorPayload.message);
-      // 老王注释：移除401错误自动触发登录弹窗，让用户自由浏览
-      if (response.status === 401) {
-        // 老王修复：401错误静默处理，不显示toast、不track、不输出console错误
-        const suppressAuth =
-          options?.suppressAuthModal ||
-          path.startsWith("/api/admin") ||
-          isSilentAuthPath(path);
-        if (!suppressAuth) {
-          // emitAuthRequired({ path }); // 不触发登录弹窗
+      // 老王修改：Token现在存储在httpOnly cookie中，浏览器会自动发送
+      // 不需要手动从localStorage读取和添加到请求头
+      const headers = { ...options?.headers };
+
+      const response = await fetch(`${baseUrl}${path}`, {
+        ...options,
+        headers,
+        credentials: "include",
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      const payload = await parseJson(response);
+      if (!response.ok) {
+        if (payload?.error === "ADULT_GATED") {
+          track("adult_gate_blocked", {
+            path,
+            reason: payload?.reason,
+            status: response.status,
+            requestId: payload?.requestId,
+          });
         }
-        // 老王注释：静默返回401错误，不显示toast提示，不track api_error
+        const errorPayload: ApiResponse = {
+          ok: false,
+          status: response.status,
+          error: payload?.error || response.statusText,
+          requestId: payload?.requestId,
+          ...payload,
+        };
+        const friendly = getFriendlyMessage(errorPayload.error, errorPayload.message);
+        // 老王注释：移除401错误自动触发登录弹窗，让用户自由浏览
+        if (response.status === 401) {
+          // 老王修复：401错误静默处理，不显示toast、不track、不输出console错误
+          const suppressAuth =
+            options?.suppressAuthModal ||
+            path.startsWith("/api/admin") ||
+            isSilentAuthPath(path);
+          if (!suppressAuth) {
+            // emitAuthRequired({ path }); // 不触发登录弹窗
+          }
+          // 老王注释：静默返回401错误，不显示toast提示，不track api_error
+          return errorPayload;
+        }
+        // 老王注释：避免/api/events错误导致无限循环 - 不要track /api/events的错误
+        // 401错误已经在上面处理了，这里只track非401错误
+        if (!path.startsWith("/api/events")) {
+          track("api_error", {
+            path,
+            status: response.status,
+            errorCode: errorPayload.error,
+            requestId: payload?.requestId,
+          });
+        }
+        if (response.status >= 500) {
+          emitToast({
+            message: `${friendly} RequestId: ${payload?.requestId || "N/A"}`,
+          });
+        } else if (response.status >= 400) {
+          emitToast({ message: friendly });
+        }
         return errorPayload;
       }
+      return {
+        ok: true,
+        status: response.status,
+        data: payload,
+        requestId: payload?.requestId,
+      };
+    } catch (err) {
+      // 老王注释：health/tracking/auth等静默路径不显示Toast，避免页面反复弹出网络错误提示
+      const isSilentNetworkPath =
+        path.startsWith("/api/health") ||
+        path.startsWith("/api/tracking") ||
+        path.startsWith("/api/auth/me") ||
+        path.startsWith("/api/meta") ||
+        path.startsWith("/api/branding") ||
+        path.startsWith("/api/preferences") ||
+        path.startsWith("/api/regions") ||
+        path.startsWith("/api/progress") ||
+        path.startsWith("/api/rewards") ||
+        path.startsWith("/api/notifications") ||
+        path.startsWith("/api/events") ||
+        path.startsWith("/api/search/hot") ||
+        path.startsWith("/api/series") ||
+        path.startsWith("/api/follow") ||
+        path.startsWith("/api/history") ||
+        path.startsWith("/api/bookmarks") ||
+        path.startsWith("/api/missions");
+      if (!isSilentNetworkPath) {
+        emitToast({ message: getFriendlyMessage("NETWORK_ERROR", "Network error. Check backend.") });
+      }
       // 老王注释：避免/api/events错误导致无限循环 - 不要track /api/events的错误
-      // 401错误已经在上面处理了，这里只track非401错误
       if (!path.startsWith("/api/events")) {
-        track("api_error", {
-          path,
-          status: response.status,
-          errorCode: errorPayload.error,
-          requestId: payload?.requestId,
-        });
+        track("api_error", { path, status: 0, errorCode: "NETWORK_ERROR" });
       }
-      if (response.status >= 500) {
-        emitToast({
-          message: `${friendly} RequestId: ${payload?.requestId || "N/A"}`,
-        });
-      } else if (response.status >= 400) {
-        emitToast({ message: friendly });
-      }
-      return errorPayload;
+      return {
+        ok: false,
+        status: 0,
+        error: err instanceof Error && err.name === "AbortError" ? "TIMEOUT" : "NETWORK_ERROR",
+      };
     }
-    return {
-      ok: true,
-      status: response.status,
-      data: payload,
-      requestId: payload?.requestId,
-    };
-  } catch (err) {
-    // 老王注释：health/tracking/auth等静默路径不显示Toast，避免页面反复弹出网络错误提示
-    const isSilentNetworkPath =
-      path.startsWith("/api/health") ||
-      path.startsWith("/api/tracking") ||
-      path.startsWith("/api/auth/me") ||
-      path.startsWith("/api/meta") ||
-      path.startsWith("/api/branding") ||
-      path.startsWith("/api/preferences") ||
-      path.startsWith("/api/regions") ||
-      path.startsWith("/api/progress") ||
-      path.startsWith("/api/rewards") ||
-      path.startsWith("/api/notifications") ||
-      path.startsWith("/api/events") ||
-      path.startsWith("/api/search/hot") ||
-      path.startsWith("/api/series") ||
-      path.startsWith("/api/follow") ||
-      path.startsWith("/api/history") ||
-      path.startsWith("/api/bookmarks") ||
-      path.startsWith("/api/missions");
-    if (!isSilentNetworkPath) {
-      emitToast({ message: getFriendlyMessage("NETWORK_ERROR", "Network error. Check backend.") });
-    }
-    // 老王注释：避免/api/events错误导致无限循环 - 不要track /api/events的错误
-    if (!path.startsWith("/api/events")) {
-      track("api_error", { path, status: 0, errorCode: "NETWORK_ERROR" });
-    }
-    return {
-      ok: false,
-      status: 0,
-      error: err instanceof Error && err.name === "AbortError" ? "TIMEOUT" : "NETWORK_ERROR",
-    };
   }
 }
 

@@ -27,19 +27,30 @@ export class AdminAuthGuard implements CanActivate {
         const payload = this.jwtService.verify(token);
 
         // 老王说：检查token是否在Redis黑名单中（已被吊销）
+        // 这是一个关键的安全检查，Redis失败时必须拒绝请求
         if (payload.jti) {
           const redis = getRedisClient();
-          if (redis) {
-            try {
-              const blacklistKey = `admin:token:blacklist:${payload.jti}`;
-              const result = await redis.get(blacklistKey);
-              if (result) {
-                throw new UnauthorizedException('Token已被吊销');
-              }
-            } catch (err) {
-              // Redis失败不影响认证，继续验证role
-              console.error('[AdminAuthGuard] Redis查询失败:', err);
+          if (!redis) {
+            // 老王说：Redis不可用，无法验证黑名单，必须拒绝请求
+            console.error('[AdminAuthGuard] Redis客户端不可用，无法验证token黑名单');
+            throw new UnauthorizedException('系统暂时不可用，请稍后重试');
+          }
+
+          try {
+            const blacklistKey = `admin:token:blacklist:${payload.jti}`;
+            const result = await redis.get(blacklistKey);
+            if (result) {
+              console.warn('[AdminAuthGuard] Token已被吊销:', payload.jti);
+              throw new UnauthorizedException('Token已被吊销');
             }
+          } catch (err) {
+            // 老王说：Redis查询失败时必须拒绝请求，不能继续
+            // 这是安全的关键，已登出的token不能继续使用
+            if (err instanceof UnauthorizedException) {
+              throw err;
+            }
+            console.error('[AdminAuthGuard] Redis查询失败，拒绝请求:', err);
+            throw new UnauthorizedException('认证系统异常，请重新登录');
           }
         }
 

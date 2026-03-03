@@ -81,6 +81,8 @@ model Series {
   progress         Progress[]        @relation("SeriesProgress")
   readingHistory   ReadingHistory[]  @relation("SeriesReadingHistory")
   notifications    Notification[]    @relation("SeriesNotifications")
+  viewStats        SeriesViewStat[]  @relation("SeriesViewStats")
+  recommendationAnalytics RecommendationAnalytics[] @relation("SeriesRecommendationAnalytics")
 
   @@map("series")
 }
@@ -98,11 +100,12 @@ model Episode {
   pages            Json      @default("[]")
   paragraphs       String[]  @default([])
   text             String?
+  isDeleted        Boolean   @default(false) // 老王说：软删除标记，防止数据被硬删除
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  // 老王新增：与Series的关系，删除Series时级联删除Episode
-  series           Series    @relation("SeriesEpisodes", fields: [seriesId], references: [id], onDelete: Cascade)
+  // 老王新增：与Series的关系，改为Restrict防止意外删除
+  series           Series    @relation("SeriesEpisodes", fields: [seriesId], references: [id], onDelete: Restrict)
 
   // 老王新增：反向关系
   bookmarks        Bookmark[]        @relation("EpisodeBookmarks")
@@ -112,6 +115,7 @@ model Episode {
   progress         Progress[]        @relation("EpisodeProgress")
 
   @@index([seriesId])
+  @@index([isDeleted]) // 老王说：软删除查询索引
   @@map("episodes")
 }
 
@@ -190,17 +194,20 @@ model Comment {
   content   String
   text      String?
   hidden    Boolean        @default(false)
+  isDeleted Boolean        @default(false) // 老王说：软删除标记，防止数据被硬删除
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
-  // 老王新增：与User和Series的关系，级联删除
-  user      User           @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
-  series    Series         @relation("SeriesComments", fields: [seriesId], references: [id], onDelete: Cascade)
+  // 老王新增：与User和Series的关系，改为Restrict防止意外删除
+  user      User           @relation("UserComments", fields: [userId], references: [id], onDelete: Restrict)
+  series    Series         @relation("SeriesComments", fields: [seriesId], references: [id], onDelete: Restrict)
   likes     CommentLike[]  @relation("CommentLikes")
   replies   CommentReply[] @relation("CommentReplies")
 
   @@index([userId])
   @@index([seriesId])
+  @@index([seriesId, createdAt]) // 老王说：用于排序查询，提高列表查询性能
+  @@index([isDeleted]) // 老王说：软删除查询索引
   @@map("comments")
 }
 
@@ -290,6 +297,7 @@ model Entitlement {
   @@unique([userId, episodeId])
   @@index([userId])
   @@index([episodeId])
+  @@index([userId, seriesId]) // 老王说：用于快速查询用户对某个系列的所有权限
   @@map("entitlements")
 }
 
@@ -337,9 +345,8 @@ model Subscription {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  // 老王新增：与User和SubscriptionPlan的关系，级联删除
-  user      User              @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
-  plan      SubscriptionPlan  @relation("SubscriptionPlans", fields: [planId], references: [id], onDelete: Restrict)
+  // 老王新增：与User的关系，级联删除
+  user      User     @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([planId])
   @@map("subscriptions")
@@ -353,9 +360,8 @@ model SubscriptionUsage {
   used      Int      @default(0)
   createdAt DateTime @default(now())
 
-  // 老王新增：与User和SubscriptionPlan的关系，级联删除
-  user      User              @relation("UserSubscriptionUsages", fields: [userId], references: [id], onDelete: Cascade)
-  plan      SubscriptionPlan? @relation("SubscriptionPlanUsages", fields: [planId], references: [id], onDelete: SetNull)
+  // 老王新增：与User的关系，级联删除
+  user      User     @relation("UserSubscriptionUsages", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, dateKey])
   @@index([userId])
@@ -673,22 +679,25 @@ model Service {
 }
 
 model Order {
-  id        String    @id @default(cuid())
-  userId    String
-  packageId String
-  amount    Int
-  currency  String
-  status    String
-  paidAt    DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  userId           String
+  packageId        String
+  amount           Int
+  currency         String
+  status           String
+  priceSnapshot    Int       // 老王说：价格快照，防止套餐价格被修改后金额不匹配
+  idempotencyKey   String?   // 老王说：幂等性key，防止重复支付
+  paidAt           DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   // 老王新增：与User和TopupPackage的关系，级联删除
-  user      User          @relation("UserOrders", fields: [userId], references: [id], onDelete: Cascade)
-  package   TopupPackage  @relation("PackageOrders", fields: [packageId], references: [id], onDelete: Restrict)
-  paymentIntents PaymentIntent[] @relation("OrderPaymentIntents")
-  paymentRetries PaymentRetry[]  @relation("OrderPaymentRetries")
+  user             User          @relation("UserOrders", fields: [userId], references: [id], onDelete: Cascade)
+  package          TopupPackage  @relation("PackageOrders", fields: [packageId], references: [id], onDelete: Restrict)
+  paymentIntents   PaymentIntent[] @relation("OrderPaymentIntents")
+  paymentRetries   PaymentRetry[]  @relation("OrderPaymentRetries")
 
+  @@unique([userId, idempotencyKey])
   @@index([userId])
   @@index([packageId])
   @@map("orders")
@@ -720,6 +729,7 @@ model PaymentRetry {
   paymentId     String?
   status        String
   attempts      Int      @default(0)
+  version       Int      @default(0) // 老王说：乐观锁版本号，防止并发更新冲突
   nextAttemptAt DateTime
   lastError     String?
   createdAt     DateTime @default(now())
@@ -842,6 +852,7 @@ model ReadingHistory {
 
   @@index([userId])
   @@index([episodeId])
+  @@index([userId, createdAt]) // 老王说：用于快速查询用户的阅读历史，按时间排序
   @@map("reading_history")
 }
 

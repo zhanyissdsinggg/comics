@@ -6,6 +6,7 @@ import cookieParser = require("cookie-parser");
 import { loggerMiddleware } from "./common/middleware/logger.middleware";
 import { requestIdMiddleware } from "./common/middleware/request-id.middleware";
 import { ResponseEnvelopeInterceptor } from "./common/interceptors/response-envelope.interceptor";
+import { TimeoutInterceptor } from "./common/interceptors/timeout.interceptor";
 import { PrismaService } from "./common/prisma/prisma.service";
 import { createSessionMiddleware } from "./common/middleware/session.middleware";
 import { requireAuthMiddleware } from "./common/middleware/require-auth.middleware";
@@ -44,6 +45,7 @@ async function bootstrap() {
   app.use(requestIdMiddleware);
   app.use(loggerMiddleware);
   app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());
+  app.useGlobalInterceptors(new TimeoutInterceptor());
   const config = new DocumentBuilder()
     .setTitle("Gush Backend")
     .setDescription("Mock backend API for Gush.")

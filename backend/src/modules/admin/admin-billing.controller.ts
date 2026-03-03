@@ -69,50 +69,13 @@ export class AdminBillingController {
 
   @Post("plans")
   async createPlan(@Body() body: any) {
-    const id = body?.id;
-    if (!id) {
-      throw new Error('Plan ID is required');
-    }
-    const payload = {
-      id,
-      name: body?.name || `Plan ${id}`,
-      duration: Number(body?.duration || 30),
-      discountPct: Number(body?.discountPct || 0),
-      dailyFreeUnlocks: Number(body?.dailyFreeUnlocks || 0),
-      ttfMultiplier: Number(body?.ttfMultiplier || 0),
-      voucherPts: Number(body?.voucherPts || 0),
-      price: Number(body?.price || 0),
-      currency: body?.currency || "USD",
-      active: body?.active !== false,
-      label: body?.label || "",
-    };
-    const record = await this.prisma.subscriptionPlan.upsert({
-      where: { id },
-      update: payload,
-      create: payload,
-    });
-    return { plan: record };
+    // 老王说：subscriptionPlan模型已删除，此方法已禁用
+    throw new Error('This endpoint is no longer available');
   }
 
   @Patch("plans/:id")
   async updatePlan(@Param("id") id: string, @Body() body: any) {
-    if (!id) {
-      throw new Error('Plan ID is required');
-    }
-    const record = await this.prisma.subscriptionPlan.update({
-      where: { id },
-      data: {
-        discountPct: body?.discountPct !== undefined ? Number(body.discountPct) : undefined,
-        dailyFreeUnlocks:
-          body?.dailyFreeUnlocks !== undefined ? Number(body.dailyFreeUnlocks) : undefined,
-        ttfMultiplier: body?.ttfMultiplier !== undefined ? Number(body.ttfMultiplier) : undefined,
-        voucherPts: body?.voucherPts !== undefined ? Number(body.voucherPts) : undefined,
-        price: body?.price !== undefined ? Number(body.price) : undefined,
-        currency: body?.currency || undefined,
-        active: body?.active !== undefined ? Boolean(body.active) : undefined,
-        label: body?.label || undefined,
-      },
-    });
-    return { plan: record };
+    // 老王说：subscriptionPlan模型已删除，此方法已禁用
+    throw new Error('This endpoint is no longer available');
   }
 }

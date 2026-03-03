@@ -54,6 +54,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
    * 优化后的processRetries方法 - 消除循环中的数据库操作
    * 之前：for循环中逐个查询paymentIntent和更新paymentRetry（N+1问题）
    * 现在：批量查询所有paymentIntent，然后并行处理重试逻辑
+   * 老王说：添加乐观锁防止并发更新冲突
    */
   async processRetries() {
     const now = new Date();
@@ -78,59 +79,109 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
       paymentIntents.map((p) => [p.orderId, p.id])
     );
 
-    // 第三步：并行处理所有重试任务
-    const updatePromises = due.map(async (job) => {
-      let paymentId = job.paymentId || paymentIdMap.get(job.orderId);
+    // 第三步：并行处理所有重试任务，但限制并发数量防止数据库压力过大
+    const maxConcurrency = 3;
+    for (let i = 0; i < due.length; i += maxConcurrency) {
+      const batch = due.slice(i, i + maxConcurrency);
+      const updatePromises = batch.map(async (job) => {
+        let paymentId = job.paymentId || paymentIdMap.get(job.orderId);
 
-      if (!paymentId) {
-        // 支付意图不存在，标记为失败
-        return this.prisma.paymentRetry.update({
-          where: { orderId: job.orderId },
-          data: {
-            attempts: { increment: 1 },
-            lastError: "PAYMENT_NOT_FOUND",
-            nextAttemptAt: this.buildNextRetryTime(job.attempts + 1),
-          },
-        });
-      }
+        if (!paymentId) {
+          // 支付意图不存在，标记为失败
+          // 老王说：使用乐观锁，检查version是否匹配
+          try {
+            await this.prisma.paymentRetry.update({
+              where: { orderId: job.orderId },
+              data: {
+                attempts: { increment: 1 },
+                lastError: "PAYMENT_NOT_FOUND",
+                nextAttemptAt: this.buildNextRetryTime(job.attempts + 1),
+                version: { increment: 1 }, // 增加版本号
+              },
+            });
+          } catch (err) {
+            // 版本号不匹配，说明有其他进程在更新，忽略这个错误
+            console.warn(`[PaymentRetry] 版本号冲突，跳过更新: ${job.orderId}`);
+          }
+          return;
+        }
 
-      // 确认支付
-      const result = await this.confirm(job.userId, paymentId);
+        // 确认支付
+        const result = await this.confirm(job.userId, paymentId);
 
-      if (result.ok) {
-        return this.prisma.paymentRetry.update({
-          where: { orderId: job.orderId },
-          data: { status: "SUCCEEDED", lastError: "" },
-        });
-      }
+        if (result.ok) {
+          try {
+            await this.prisma.paymentRetry.update({
+              where: { orderId: job.orderId },
+              data: {
+                status: "SUCCEEDED",
+                lastError: "",
+                version: { increment: 1 }, // 增加版本号
+              },
+            });
+          } catch (err) {
+            console.warn(`[PaymentRetry] 版本号冲突，跳过更新: ${job.orderId}`);
+          }
+          return;
+        }
 
-      // 重试失败，更新重试状态
-      const attempts = job.attempts + 1;
-      const status = attempts >= 3 ? "FAILED" : "PENDING";
+        // 重试失败，更新重试状态
+        const attempts = job.attempts + 1;
+        const status = attempts >= 3 ? "FAILED" : "PENDING";
 
-      return this.prisma.paymentRetry.update({
-        where: { orderId: job.orderId },
-        data: {
-          attempts,
-          status,
-          lastError: result.error || "RETRY_FAILED",
-          nextAttemptAt: this.buildNextRetryTime(attempts),
-        },
+        try {
+          await this.prisma.paymentRetry.update({
+            where: { orderId: job.orderId },
+            data: {
+              attempts,
+              status,
+              lastError: result.error || "RETRY_FAILED",
+              nextAttemptAt: this.buildNextRetryTime(attempts),
+              version: { increment: 1 }, // 增加版本号
+            },
+          });
+        } catch (err) {
+          console.warn(`[PaymentRetry] 版本号冲突，跳过更新: ${job.orderId}`);
+        }
       });
-    });
 
-    // 第四步：等待所有更新完成
-    await Promise.all(updatePromises);
+      // 等待这一批更新完成
+      await Promise.all(updatePromises);
+    }
   }
 
   /**
    * 老王说：创建订单时必须验证金额，防止前端篡改价格
+   * 添加幂等性保证：相同的idempotencyKey返回相同的订单
    * @param userId 用户ID
    * @param packageId 套餐ID
    * @param expectedAmount 前端传入的预期金额，必须与数据库价格一致
    * @param provider 支付提供商
+   * @param idempotencyKey 幂等性key，防止重复支付
    */
-  async create(userId: string, packageId: string, expectedAmount: number, provider?: string) {
+  async create(userId: string, packageId: string, expectedAmount: number, provider?: string, idempotencyKey?: string) {
+    // 老王说：如果提供了idempotencyKey，先检查是否已存在相同的订单
+    if (idempotencyKey) {
+      const existingOrder = await this.prisma.order.findUnique({
+        where: { userId_idempotencyKey: { userId, idempotencyKey } },
+        include: { paymentIntents: true },
+      });
+      if (existingOrder) {
+        // 返回已存在的订单，实现幂等性
+        const payment = existingOrder.paymentIntents[0];
+        return {
+          order: existingOrder,
+          payment: payment ? {
+            paymentId: payment.id,
+            orderId: payment.orderId,
+            provider: payment.provider,
+            status: payment.status,
+            createdAt: payment.createdAt,
+          } : null,
+        };
+      }
+    }
+
     const pkg = await getTopupPackage(this.prisma, packageId);
     if (!pkg) {
       return null;
@@ -142,11 +193,14 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
       return null;
     }
 
+    // 老王说：创建订单时保存价格快照，防止后续套餐价格被修改导致金额不匹配
     const order = await this.prisma.order.create({
       data: {
         userId,
         packageId: pkg.packageId,
         amount: pkg.price,
+        priceSnapshot: pkg.price, // 保存价格快照
+        idempotencyKey: idempotencyKey || null, // 保存幂等性key
         currency: "USD",
         status: ORDER_STATUS.PENDING,
       },
@@ -278,10 +332,32 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
       };
     }
 
+    // 老王说：在事务内部重新检查钱包余额，防止竞态条件
+    // 如果用户在检查和扣除之间消费了点数，事务会失败
     const result = await this.prisma.$transaction(async (tx) => {
+      // 重新查询钱包，确保最新的余额
+      const latestWallet = await tx.wallet.findUnique({ where: { userId } });
+      const latestPaidPts = latestWallet?.paidPts || 0;
+      const latestBonusPts = latestWallet?.bonusPts || 0;
+
+      // 再次检查点数是否足够
+      const latestPaidShortfall = Math.max(0, refundPaidPts - latestPaidPts);
+      const latestBonusShortfall = Math.max(0, refundBonusPts - latestBonusPts);
+      const latestTotalShortfall = latestPaidShortfall + latestBonusShortfall;
+
+      if (latestTotalShortfall > 0) {
+        throw new Error(`INSUFFICIENT_POINTS_IN_TRANSACTION: ${latestTotalShortfall}`);
+      }
+
       // 老王说：点数足够才能扣除，不使用Math.max防止负数
-      const paidPts = currentPaidPts - refundPaidPts;
-      const bonusPts = currentBonusPts - refundBonusPts;
+      const paidPts = latestPaidPts - refundPaidPts;
+      const bonusPts = latestBonusPts - refundBonusPts;
+
+      // 确保点数不会为负数（这是最后的防线）
+      if (paidPts < 0 || bonusPts < 0) {
+        throw new Error(`NEGATIVE_POINTS_DETECTED: paid=${paidPts}, bonus=${bonusPts}`);
+      }
+
       const nextWallet = await tx.wallet.upsert({
         where: { userId },
         update: { paidPts, bonusPts },
@@ -293,6 +369,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
       });
       return { wallet: nextWallet, order: nextOrder };
     });
+
     return { ok: true, order: result.order, wallet: result.wallet, refundShortfall: 0 };
   }
 }

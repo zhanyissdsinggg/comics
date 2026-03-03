@@ -88,13 +88,13 @@ export class RecommendationService {
 
       // 老王注释：类型标签匹配
       const genreMatches = this.countMatches(
-        currentSeries.genres || [],
-        series.genres || [],
+        (currentSeries.genres as unknown as string[]) || [],
+        (series.genres as unknown as string[]) || [],
       );
       score += genreMatches * 5;
 
       // 老王注释：评分加权（高评分作品优先）
-      if (series.rating) {
+      if (series.rating && typeof series.rating === 'number') {
         score += series.rating * 2;
       }
 

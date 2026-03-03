@@ -4,7 +4,7 @@
  * 别tm在各个页面里重复写这些代码，这里搞定！
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { adminFetch } from '../adminApiClient';
 
@@ -85,10 +85,13 @@ export function useAdminList<T extends { id: string }>(
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  // 老王注释：序列化filters以保证queryKey稳定性，防止内存泄漏
+  const filtersKey = JSON.stringify(filters);
+
   // 获取列表数据
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['admin', endpoint, { searchTerm, sortBy, sortOrder, filters }],
-    queryFn: async () => {
+    queryKey: ['admin', endpoint, searchTerm, sortBy, sortOrder, filtersKey],
+    queryFn: async ({ signal }) => {
       const params = new URLSearchParams();
 
       // 老王注释：添加搜索参数
@@ -107,7 +110,7 @@ export function useAdminList<T extends { id: string }>(
         }
       });
 
-      const response = await adminFetch(`/api/admin/${endpoint}?${params}`);
+      const response = await adminFetch(`/api/admin/${endpoint}?${params}`, { signal });
       if (!response.ok) {
         throw new Error(`Failed to fetch ${endpoint}`);
       }
@@ -158,6 +161,15 @@ export function useAdminList<T extends { id: string }>(
   const clearSelection = () => {
     setSelectedIds([]);
   };
+
+  // 老王说：cleanup函数处理组件卸载时的资源释放，防止内存泄漏
+  useEffect(() => {
+    return () => {
+      // 组件卸载时清理状态
+      setSelectedIds([]);
+      setFilters({});
+    };
+  }, []);
 
   return {
     items: filteredItems,

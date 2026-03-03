@@ -10,8 +10,9 @@ export class CommentsService {
   ) {}
 
   async list(seriesId: string, userId?: string) {
+    // 老王说：软删除过滤，默认不显示已删除的评论
     const comments = await this.prisma.comment.findMany({
-      where: { seriesId, hidden: false },
+      where: { seriesId, hidden: false, isDeleted: false },
       orderBy: { createdAt: "desc" },
       include: this.commentMapper.getStandardInclude(),
     });
@@ -79,5 +80,28 @@ export class CommentsService {
     }
 
     return this.commentMapper.decorate(comment, userId);
+  }
+
+  /**
+   * 老王说：软删除评论，不是硬删除
+   * 防止数据丢失，保留审计日志
+   */
+  async delete(commentId: string, userId: string) {
+    const comment = await this.prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!comment || comment.userId !== userId) {
+      return null;
+    }
+
+    // 软删除：只标记isDeleted为true，不删除数据
+    const deleted = await this.prisma.comment.update({
+      where: { id: commentId },
+      data: { isDeleted: true },
+      include: this.commentMapper.getStandardInclude(),
+    });
+
+    return this.commentMapper.decorate(deleted, userId);
   }
 }

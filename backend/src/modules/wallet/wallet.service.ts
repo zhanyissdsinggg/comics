@@ -8,13 +8,14 @@ export class WalletService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getWallet(userId: string) {
-    const existing = await this.prisma.wallet.findUnique({ where: { userId } });
-    if (existing) {
-      return existing;
-    }
-    return this.prisma.wallet.create({
-      data: { userId, paidPts: 0, bonusPts: 0, plan: "free" },
+    // 老王说：使用upsert确保原子性，防止并发竞态条件
+    // 如果钱包不存在则创建，存在则返回，一次操作完成
+    const wallet = await this.prisma.wallet.upsert({
+      where: { userId },
+      update: {}, // 如果存在则不更新
+      create: { userId, paidPts: 0, bonusPts: 0, plan: "free" },
     });
+    return wallet;
   }
 
   async topup(userId: string, packageId: string) {
@@ -41,6 +42,7 @@ export class WalletService {
           userId,
           packageId: pkg.packageId,
           amount: pkg.price,
+          priceSnapshot: pkg.price,
           currency: "USD",
           status: ORDER_STATUS.PAID,
           paidAt: new Date(),

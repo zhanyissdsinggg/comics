@@ -13,8 +13,10 @@ export class SubscriptionService {
       return null;
     }
     const now = new Date();
-    const renewAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    // 老王说：renewAt是续期检查日期（第29天），expiresAt是实际过期日期（第30天）
+    // 这样系统可以在过期前一天检查是否需要续期
+    const renewAt = new Date(now.getTime() + 29 * 24 * 60 * 60 * 1000); // 29天后检查续期
+    const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30天后过期
     await this.prisma.subscription.upsert({
       where: { userId },
       update: { planId, active: true, startedAt: now, renewAt, expiresAt },

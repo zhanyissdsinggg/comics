@@ -302,20 +302,8 @@ async function main() {
   console.log(`  ✓ 充值套餐: ${topupPackages.length} 个`);
 
   // 插入订阅方案
-  const subscriptionPlans = [
-    { id: 'plan-monthly', name: 'Monthly', duration: 30, discountPct: 15, dailyFreeUnlocks: 1, ttfMultiplier: 2, voucherPts: 50, price: 1299, currency: 'CNY', active: true, label: '月度会员' },
-    { id: 'plan-quarterly', name: 'Quarterly', duration: 90, discountPct: 25, dailyFreeUnlocks: 2, ttfMultiplier: 3, voucherPts: 200, price: 2999, currency: 'CNY', active: true, label: '季度会员' },
-    { id: 'plan-yearly', name: 'Annual', duration: 365, discountPct: 40, dailyFreeUnlocks: 5, ttfMultiplier: 5, voucherPts: 1000, price: 8999, currency: 'CNY', active: true, label: '年度会员' },
-  ];
-
-  for (const plan of subscriptionPlans) {
-    await prisma.subscriptionPlan.upsert({
-      where: { id: plan.id },
-      update: {},
-      create: plan,
-    });
-  }
-  console.log(`  ✓ 订阅方案: ${subscriptionPlans.length} 个`);
+  // 老王说：subscriptionPlan模型已删除，不再需要种子数据
+  console.log(`  ✓ 订阅方案: 已跳过（模型不存在）`);
 
   console.log('\n✅ 种子数据插入完成！');
 }

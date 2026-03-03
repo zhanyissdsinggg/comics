@@ -37,9 +37,11 @@ export class EntitlementsService {
   }
 
   async getEntitlement(userId: string, seriesId: string) {
+    // 老王说：优化查询，使用distinct避免N+1问题
     const rows = await this.prisma.entitlement.findMany({
       where: { userId, seriesId },
       select: { episodeId: true },
+      distinct: ['episodeId'], // 确保不重复
     });
     return { seriesId, unlockedEpisodeIds: rows.map((row) => row.episodeId) };
   }

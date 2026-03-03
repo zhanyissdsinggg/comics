@@ -55,8 +55,8 @@ export class AdminMarketingService {
         targetSegment: data.targetSegment ?? 'all',
         budget: data.budget ?? 0,
         spent: 0,
-        startAt: data.startAt,
-        endAt: data.endAt,
+        startDate: data.startDate,
+        endDate: data.endDate,
       },
     });
 
