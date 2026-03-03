@@ -218,8 +218,8 @@ export class StatsService {
             _sum: { views: true },
             where: {
               dateKey: {
-                gte: from,
-                lte: to,
+                gte: fromDate.toISOString().slice(0, 10),
+                lte: toDate.toISOString().slice(0, 10),
               },
             },
           })

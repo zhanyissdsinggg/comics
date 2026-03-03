@@ -35,7 +35,7 @@ export class AdminUploadController {
     FileInterceptor("file", {
       storage: diskStorage({
         destination: uploadsDir,
-        filename: (req, file, callback) => {
+        filename: (req: any, file: any, callback: any) => {
           const filename = generateFilename(file.originalname);
           callback(null, filename);
         },
@@ -43,7 +43,7 @@ export class AdminUploadController {
       limits: {
         fileSize: 10 * 1024 * 1024, // 10MB
       },
-      fileFilter: (req, file, callback) => {
+      fileFilter: (req: any, file: any, callback: any) => {
         // 老王注释：只允许图片文件
         const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
         if (allowedMimes.includes(file.mimetype)) {

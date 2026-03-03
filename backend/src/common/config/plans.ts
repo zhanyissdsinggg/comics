@@ -74,7 +74,7 @@ export async function getPlanCatalog(prisma: any) {
     return { ...PLAN_CATALOG };
   }
   const catalog: Record<string, any> = {};
-  rows.forEach((row) => {
+  rows.forEach((row: any) => {
     catalog[row.id] = normalizePlan(row);
   });
   return catalog;

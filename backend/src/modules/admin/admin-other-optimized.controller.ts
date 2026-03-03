@@ -200,7 +200,7 @@ export class AdminRegionsController extends BaseAdminController {
 @Controller('admin/branding')
 export class AdminBrandingController extends BaseAdminController {
   constructor(private configService: ConfigService) {
-    super(null);
+    super(undefined);
   }
 
   @Get()
@@ -293,7 +293,7 @@ export class AdminUploadController extends BaseAdminController {
 @Controller('admin/email')
 export class AdminEmailController extends BaseAdminController {
   constructor(private configService: ConfigService) {
-    super(null);
+    super(undefined);
   }
 
   @Get()

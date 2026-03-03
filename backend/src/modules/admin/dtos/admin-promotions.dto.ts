@@ -35,7 +35,7 @@ export enum PromotionType {
 export class CreatePromotionDto {
   @IsString({ message: "促销名称必须是字符串" })
   @IsNotEmpty({ message: "促销名称不能为空" })
-  name: string;
+  name!: string;
 
   @IsString({ message: "促销描述必须是字符串" })
   @IsOptional()
@@ -43,7 +43,7 @@ export class CreatePromotionDto {
 
   @IsEnum(PromotionType, { message: "促销类型必须是有效的类型" })
   @IsNotEmpty({ message: "促销类型不能为空" })
-  type: PromotionType;
+  type!: PromotionType;
 
   @IsNumber({}, { message: "折扣率必须是数字" })
   @Min(0, { message: "折扣率不能为负数" })
@@ -59,12 +59,12 @@ export class CreatePromotionDto {
   @IsDate({ message: "开始时间必须是有效的日期" })
   @IsNotEmpty({ message: "开始时间不能为空" })
   @Type(() => Date)
-  startDate: Date;
+  startDate!: Date;
 
   @IsDate({ message: "结束时间必须是有效的日期" })
   @IsNotEmpty({ message: "结束时间不能为空" })
   @Type(() => Date)
-  endDate: Date;
+  endDate!: Date;
 
   @IsNumber({}, { message: "最大使用次数必须是数字" })
   @Min(0, { message: "最大使用次数不能为负数" })

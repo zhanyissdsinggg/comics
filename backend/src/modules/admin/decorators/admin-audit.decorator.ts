@@ -7,12 +7,14 @@ import { AdminAuditInterceptor } from '../interceptors/admin-audit.interceptor';
  * 这个装饰器会自动记录操作类型、资源类型、操作者、操作时间等信息
  */
 export const AdminAudit = (action: string, resource: string) => {
-  return (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
+  return (target: any, propertyKey?: string | symbol, descriptor?: PropertyDescriptor) => {
     // 老王说：设置元数据
-    SetMetadata('audit', { action, resource })(target, propertyKey, descriptor);
+    if (propertyKey && descriptor) {
+      SetMetadata('audit', { action, resource })(target, propertyKey, descriptor);
 
-    // 老王说：使用拦截器处理审计日志
-    UseInterceptors(AdminAuditInterceptor)(target, propertyKey, descriptor);
+      // 老王说：使用拦截器处理审计日志
+      UseInterceptors(AdminAuditInterceptor)(target, propertyKey, descriptor);
+    }
 
     return descriptor;
   };

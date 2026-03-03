@@ -331,14 +331,9 @@ async function requestJson(
     const timeoutMs = options?.timeoutMs || DEFAULT_TIMEOUT_MS;
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    // 老王说：如果是admin路径，添加JWT token到请求头
+    // 老王修改：Token现在存储在httpOnly cookie中，浏览器会自动发送
+    // 不需要手动从localStorage读取和添加到请求头
     const headers = { ...options?.headers };
-    if (path.startsWith("/api/admin") && typeof window !== "undefined") {
-      const token = window.localStorage.getItem("admin_token");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-    }
 
     const response = await fetch(`${baseUrl}${path}`, {
       ...options,

@@ -9,13 +9,13 @@ export class CommentsService {
     private readonly commentMapper: CommentMapper,
   ) {}
 
-  async list(seriesId: string, userId: string) {
+  async list(seriesId: string, userId?: string) {
     const comments = await this.prisma.comment.findMany({
       where: { seriesId, hidden: false },
       orderBy: { createdAt: "desc" },
       include: this.commentMapper.getStandardInclude(),
     });
-    return this.commentMapper.decorateList(comments, userId);
+    return this.commentMapper.decorateList(comments, userId || "");
   }
 
   async add(seriesId: string, userId: string, text: string) {

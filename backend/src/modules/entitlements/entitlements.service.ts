@@ -129,7 +129,7 @@ export class EntitlementsService {
     });
     const valid = episodeIds
       .map((id) => episodes.find((ep) => ep.id === id))
-      .filter(Boolean);
+      .filter(Boolean) as any[];
     if (valid.length === 0) {
       return { ok: false, status: 400, error: "INVALID_EPISODES" };
     }

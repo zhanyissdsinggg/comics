@@ -45,6 +45,13 @@ export class AdminAuthController {
 
     // 验证ADMIN_KEY
     const correctAdminKey = process.env.ADMIN_KEY;
+    if (!correctAdminKey) {
+      throw new HttpException(
+        "服务器配置错误：ADMIN_KEY未设置",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+
     if (adminKey !== correctAdminKey) {
       // 老王新增：记录失败次数
       if (redis) {
@@ -96,11 +103,20 @@ export class AdminAuthController {
       { message: "Admin logged in successfully" }
     );
 
+    // 老王修改：使用httpOnly cookie存储token，而不是返回给前端
+    // 这样可以防止XSS攻击窃取token
+    req.res.setHeader(
+      "Set-Cookie",
+      [
+        `admin_access_token=${accessToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=86400`,
+        `admin_refresh_token=${refreshToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=604800`,
+      ]
+    );
+
     return {
       success: true,
-      accessToken,
-      refreshToken,
       expiresIn: 86400, // 24小时（秒）
+      // 不再返回token给前端，token已经在httpOnly cookie中
     };
   }
 

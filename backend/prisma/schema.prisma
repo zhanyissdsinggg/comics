@@ -17,6 +17,8 @@ model User {
   isBlocked      Boolean        @default(false)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+
+  // 老王新增：所有反向关系
   wallet         Wallet?        @relation("UserWallet")
   sessions       Session[]      @relation("UserSessions")
   comments       Comment[]      @relation("UserComments")
@@ -25,6 +27,25 @@ model User {
   userTags       UserTag[]      @relation("UserTags")
   userMetrics    UserMetrics?   @relation("UserMetrics")
   userBehavior   UserBehavior?  @relation("UserBehavior")
+  follows        Follow[]       @relation("UserFollows")
+  bookmarks      Bookmark[]     @relation("UserBookmarks")
+  entitlements   Entitlement[]  @relation("UserEntitlements")
+  userCoupons    UserCoupon[]   @relation("UserCoupons")
+  ratings        Rating[]       @relation("UserRatings")
+  progress       Progress[]     @relation("UserProgress")
+  readingHistory ReadingHistory[] @relation("UserReadingHistory")
+  notifications  Notification[] @relation("UserNotifications")
+  orders         Order[]        @relation("UserOrders")
+  paymentIntents PaymentIntent[] @relation("UserPaymentIntents")
+  paymentRetries PaymentRetry[]  @relation("UserPaymentRetries")
+  dailyActives   DailyActive[]  @relation("UserDailyActives")
+  supportTickets SupportTicket[] @relation("UserSupportTickets")
+  subscriptions  Subscription[] @relation("UserSubscriptions")
+  subscriptionUsages SubscriptionUsage[] @relation("UserSubscriptionUsages")
+  subscriptionVoucherUsages SubscriptionVoucherUsage[] @relation("UserSubscriptionVoucherUsages")
+  missionStates  MissionState[] @relation("UserMissionStates")
+  rewardStates   RewardState[]  @relation("UserRewardStates")
+  preferences    UserPreference? @relation("UserPreferences")
 
   @@map("users")
 }
@@ -50,6 +71,17 @@ model Series {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
+  // 老王新增：反向关系
+  episodes         Episode[]         @relation("SeriesEpisodes")
+  comments         Comment[]         @relation("SeriesComments")
+  follows          Follow[]          @relation("SeriesFollows")
+  bookmarks        Bookmark[]        @relation("SeriesBookmarks")
+  entitlements     Entitlement[]     @relation("SeriesEntitlements")
+  ratings          Rating[]          @relation("SeriesRatings")
+  progress         Progress[]        @relation("SeriesProgress")
+  readingHistory   ReadingHistory[]  @relation("SeriesReadingHistory")
+  notifications    Notification[]    @relation("SeriesNotifications")
+
   @@map("series")
 }
 
@@ -69,6 +101,17 @@ model Episode {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
+  // 老王新增：与Series的关系，删除Series时级联删除Episode
+  series           Series    @relation("SeriesEpisodes", fields: [seriesId], references: [id], onDelete: Cascade)
+
+  // 老王新增：反向关系
+  bookmarks        Bookmark[]        @relation("EpisodeBookmarks")
+  entitlements     Entitlement[]     @relation("EpisodeEntitlements")
+  readingHistory   ReadingHistory[]  @relation("EpisodeReadingHistory")
+  notifications    Notification[]    @relation("EpisodeNotifications")
+  progress         Progress[]        @relation("EpisodeProgress")
+
+  @@index([seriesId])
   @@map("episodes")
 }
 
@@ -105,7 +148,11 @@ model DailyActive {
   date      DateTime
   createdAt DateTime @default(now())
 
+  // 老王新增：与User的关系，级联删除
+  user      User     @relation("UserDailyActives", fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([dateKey, userId])
+  @@index([userId])
   @@map("daily_actives")
 }
 
@@ -145,10 +192,15 @@ model Comment {
   hidden    Boolean        @default(false)
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
-  user      User           @relation("UserComments", fields: [userId], references: [id])
+
+  // 老王新增：与User和Series的关系，级联删除
+  user      User           @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
+  series    Series         @relation("SeriesComments", fields: [seriesId], references: [id], onDelete: Cascade)
   likes     CommentLike[]  @relation("CommentLikes")
   replies   CommentReply[] @relation("CommentReplies")
 
+  @@index([userId])
+  @@index([seriesId])
   @@map("comments")
 }
 
@@ -157,10 +209,14 @@ model CommentLike {
   userId    String
   commentId String
   createdAt DateTime @default(now())
-  user      User     @relation("UserCommentLikes", fields: [userId], references: [id])
-  comment   Comment  @relation("CommentLikes", fields: [commentId], references: [id])
+
+  // 老王新增：与User和Comment的关系，级联删除
+  user      User     @relation("UserCommentLikes", fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment  @relation("CommentLikes", fields: [commentId], references: [id], onDelete: Cascade)
 
   @@unique([commentId, userId])
+  @@index([userId])
+  @@index([commentId])
   @@map("comment_likes")
 }
 
@@ -172,9 +228,13 @@ model CommentReply {
   text      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user      User     @relation("UserCommentReplies", fields: [userId], references: [id])
-  comment   Comment  @relation("CommentReplies", fields: [commentId], references: [id])
 
+  // 老王新增：与User和Comment的关系，级联删除
+  user      User     @relation("UserCommentReplies", fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment  @relation("CommentReplies", fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([commentId])
   @@map("comment_replies")
 }
 
@@ -184,7 +244,13 @@ model Follow {
   seriesId  String
   createdAt DateTime @default(now())
 
+  // 老王新增：与User和Series的关系，级联删除
+  user      User     @relation("UserFollows", fields: [userId], references: [id], onDelete: Cascade)
+  series    Series   @relation("SeriesFollows", fields: [seriesId], references: [id], onDelete: Cascade)
+
   @@unique([userId, seriesId])
+  @@index([userId])
+  @@index([seriesId])
   @@map("follows")
 }
 
@@ -198,6 +264,14 @@ model Bookmark {
   label     String?
   createdAt DateTime @default(now())
 
+  // 老王新增：与User、Series、Episode的关系，级联删除
+  user      User     @relation("UserBookmarks", fields: [userId], references: [id], onDelete: Cascade)
+  series    Series   @relation("SeriesBookmarks", fields: [seriesId], references: [id], onDelete: Cascade)
+  episode   Episode  @relation("EpisodeBookmarks", fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([seriesId])
+  @@index([episodeId])
   @@map("bookmarks")
 }
 
@@ -208,7 +282,14 @@ model Entitlement {
   episodeId String
   createdAt DateTime @default(now())
 
+  // 老王新增：与User、Series、Episode的关系，级联删除
+  user      User     @relation("UserEntitlements", fields: [userId], references: [id], onDelete: Cascade)
+  series    Series   @relation("SeriesEntitlements", fields: [seriesId], references: [id], onDelete: Cascade)
+  episode   Episode  @relation("EpisodeEntitlements", fields: [episodeId], references: [id], onDelete: Cascade)
+
   @@unique([userId, episodeId])
+  @@index([userId])
+  @@index([episodeId])
   @@map("entitlements")
 }
 
@@ -234,9 +315,14 @@ model UserCoupon {
   used      Boolean  @default(false)
   claimedAt DateTime @default(now())
   createdAt DateTime @default(now())
+
+  // 老王新增：与User和Coupon的关系，级联删除
+  user      User     @relation("UserCoupons", fields: [userId], references: [id], onDelete: Cascade)
   coupon    Coupon   @relation("CouponUserCoupons", fields: [couponId], references: [id])
 
   @@unique([userId, couponId])
+  @@index([userId])
+  @@index([couponId])
   @@map("user_coupons")
 }
 
@@ -251,25 +337,12 @@ model Subscription {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
+  // 老王新增：与User和SubscriptionPlan的关系，级联删除
+  user      User              @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+  plan      SubscriptionPlan  @relation("SubscriptionPlans", fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([planId])
   @@map("subscriptions")
-}
-
-model SubscriptionPlan {
-  id               String   @id @default(cuid())
-  name             String
-  price            Int
-  currency         String   @default("USD")
-  duration         Int
-  discountPct      Int      @default(0)
-  dailyFreeUnlocks Int      @default(0)
-  ttfMultiplier    Int      @default(1)
-  voucherPts       Int      @default(0)
-  active           Boolean  @default(true)
-  label            String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  @@map("subscription_plans")
 }
 
 model SubscriptionUsage {
@@ -280,7 +353,13 @@ model SubscriptionUsage {
   used      Int      @default(0)
   createdAt DateTime @default(now())
 
+  // 老王新增：与User和SubscriptionPlan的关系，级联删除
+  user      User              @relation("UserSubscriptionUsages", fields: [userId], references: [id], onDelete: Cascade)
+  plan      SubscriptionPlan? @relation("SubscriptionPlanUsages", fields: [planId], references: [id], onDelete: SetNull)
+
   @@unique([userId, dateKey])
+  @@index([userId])
+  @@index([planId])
   @@map("subscription_usages")
 }
 
@@ -292,7 +371,11 @@ model SubscriptionVoucherUsage {
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
 
+  // 老王新增：与User的关系，级联删除
+  user      User     @relation("UserSubscriptionVoucherUsages", fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, dateKey])
+  @@index([userId])
   @@map("subscription_voucher_usages")
 }
 
@@ -309,6 +392,9 @@ model TopupPackage {
   tags      String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // 老王新增：反向关系
+  orders    Order[]  @relation("PackageOrders")
 
   @@map("topup_packages")
 }
@@ -352,6 +438,9 @@ model UserPreference {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // 老王新增：与User的关系，级联删除
+  user      User     @relation("UserPreferences", fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("user_preferences")
 }
 
@@ -386,7 +475,11 @@ model SeriesViewStat {
   date      DateTime
   createdAt DateTime @default(now())
 
+  // 老王新增：与Series的关系，级联删除
+  series    Series   @relation("SeriesViewStats", fields: [seriesId], references: [id], onDelete: Cascade)
+
   @@unique([dateKey, seriesId])
+  @@index([seriesId])
   @@map("series_view_stats")
 }
 
@@ -399,6 +492,10 @@ model SupportTicket {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // 老王新增：与User的关系，级联删除
+  user      User     @relation("UserSupportTickets", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
   @@map("support_tickets")
 }
 
@@ -422,8 +519,6 @@ model MarketingCampaign {
   targetSegment String?
   spent         Int                       @default(0)
   budget        Int                       @default(0)
-  startAt       DateTime?
-  endAt         DateTime?
   startDate     DateTime?
   endDate       DateTime?
   createdAt     DateTime                  @default(now())
@@ -532,6 +627,9 @@ model MissionState {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // 老王新增：与User的关系，级联删除
+  user      User     @relation("UserMissionStates", fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("mission_states")
 }
 
@@ -545,6 +643,9 @@ model RewardState {
   makeUpUsedToday Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  // 老王新增：与User的关系，级联删除
+  user            User      @relation("UserRewardStates", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reward_states")
 }
@@ -582,6 +683,14 @@ model Order {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
+  // 老王新增：与User和TopupPackage的关系，级联删除
+  user      User          @relation("UserOrders", fields: [userId], references: [id], onDelete: Cascade)
+  package   TopupPackage  @relation("PackageOrders", fields: [packageId], references: [id], onDelete: Restrict)
+  paymentIntents PaymentIntent[] @relation("OrderPaymentIntents")
+  paymentRetries PaymentRetry[]  @relation("OrderPaymentRetries")
+
+  @@index([userId])
+  @@index([packageId])
   @@map("orders")
 }
 
@@ -594,6 +703,13 @@ model PaymentIntent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // 老王新增：与User和Order的关系，级联删除
+  user      User     @relation("UserPaymentIntents", fields: [userId], references: [id], onDelete: Cascade)
+  order     Order    @relation("OrderPaymentIntents", fields: [orderId], references: [id], onDelete: Cascade)
+  retries   PaymentRetry[] @relation("PaymentIntentRetries")
+
+  @@index([userId])
+  @@index([orderId])
   @@map("payment_intents")
 }
 
@@ -609,6 +725,13 @@ model PaymentRetry {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  // 老王新增：与User、Order、PaymentIntent的关系，级联删除
+  user          User     @relation("UserPaymentRetries", fields: [userId], references: [id], onDelete: Cascade)
+  order         Order    @relation("OrderPaymentRetries", fields: [orderId], references: [id], onDelete: Cascade)
+  paymentIntent PaymentIntent? @relation("PaymentIntentRetries", fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([orderId])
   @@map("payment_retries")
 }
 
@@ -620,7 +743,13 @@ model Rating {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // 老王新增：与User和Series的关系，级联删除
+  user      User     @relation("UserRatings", fields: [userId], references: [id], onDelete: Cascade)
+  series    Series   @relation("SeriesRatings", fields: [seriesId], references: [id], onDelete: Cascade)
+
   @@unique([userId, seriesId])
+  @@index([userId])
+  @@index([seriesId])
   @@map("ratings")
 }
 
@@ -664,7 +793,14 @@ model Progress {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  // 老王新增：与User、Series、Episode的关系，级联删除
+  user          User     @relation("UserProgress", fields: [userId], references: [id], onDelete: Cascade)
+  series        Series   @relation("SeriesProgress", fields: [seriesId], references: [id], onDelete: Cascade)
+  lastEpisode   Episode  @relation("EpisodeProgress", fields: [lastEpisodeId], references: [id], onDelete: SetNull)
+
   @@unique([userId, seriesId])
+  @@index([userId])
+  @@index([seriesId])
   @@map("progress")
 }
 
@@ -680,6 +816,13 @@ model Notification {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // 老王新增：与User、Series、Episode的关系，级联删除
+  user      User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  series    Series?  @relation("SeriesNotifications", fields: [seriesId], references: [id], onDelete: SetNull)
+  episode   Episode? @relation("EpisodeNotifications", fields: [episodeId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([seriesId])
   @@map("notifications")
 }
 
@@ -692,6 +835,13 @@ model ReadingHistory {
   percent   Int      @default(0)
   createdAt DateTime @default(now())
 
+  // 老王新增：与User、Series、Episode的关系，级联删除
+  user      User     @relation("UserReadingHistory", fields: [userId], references: [id], onDelete: Cascade)
+  series    Series   @relation("SeriesReadingHistory", fields: [seriesId], references: [id], onDelete: Cascade)
+  episode   Episode  @relation("EpisodeReadingHistory", fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([episodeId])
   @@map("reading_history")
 }
 
@@ -727,6 +877,11 @@ model RecommendationAnalytics {
   date        DateTime
   createdAt   DateTime @default(now())
 
+  // 老王新增：与Series的关系，级联删除
+  series      Series   @relation("SeriesRecommendationAnalytics", fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@index([slot])
+  @@index([seriesId])
   @@map("recommendation_analytics")
 }
 

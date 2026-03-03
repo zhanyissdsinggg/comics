@@ -28,7 +28,7 @@ export class EventsController {
     const limit = Math.max(1, Math.min(100, Number(limitParam || 50)));
     const offset = Math.max(0, Number(offsetParam || 0));
     const sliced = filtered.slice(offset, offset + limit);
-    const counts = {};
+    const counts: Record<string, number> = {};
     filtered.forEach((item) => {
       const key = String(item.event || "unknown");
       counts[key] = (counts[key] || 0) + 1;

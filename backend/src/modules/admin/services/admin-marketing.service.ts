@@ -382,9 +382,10 @@ export class AdminMarketingService {
     const segments: any = {};
 
     campaigns.forEach((campaign) => {
-      if (!segments[campaign.targetSegment]) {
-        segments[campaign.targetSegment] = {
-          segment: campaign.targetSegment,
+      const segment = campaign.targetSegment || 'unknown';
+      if (!segments[segment]) {
+        segments[segment] = {
+          segment,
           count: 0,
           budget: 0,
           spent: 0,
@@ -393,13 +394,13 @@ export class AdminMarketingService {
         };
       }
 
-      segments[campaign.targetSegment].count += 1;
-      segments[campaign.targetSegment].budget += campaign.budget;
-      segments[campaign.targetSegment].spent += campaign.spent;
+      segments[segment].count += 1;
+      segments[segment].budget += campaign.budget;
+      segments[segment].spent += campaign.spent;
 
       campaign.analytics.forEach((analytic) => {
-        segments[campaign.targetSegment].revenue += analytic.revenue;
-        segments[campaign.targetSegment].converted += analytic.converted;
+        segments[segment].revenue += analytic.revenue;
+        segments[segment].converted += analytic.converted;
       });
     });
 
@@ -430,9 +431,10 @@ export class AdminMarketingService {
     const types: any = {};
 
     campaigns.forEach((campaign) => {
-      if (!types[campaign.type]) {
-        types[campaign.type] = {
-          type: campaign.type,
+      const type = campaign.type || 'unknown';
+      if (!types[type]) {
+        types[type] = {
+          type,
           count: 0,
           budget: 0,
           spent: 0,
@@ -441,13 +443,13 @@ export class AdminMarketingService {
         };
       }
 
-      types[campaign.type].count += 1;
-      types[campaign.type].budget += campaign.budget;
-      types[campaign.type].spent += campaign.spent;
+      types[type].count += 1;
+      types[type].budget += campaign.budget;
+      types[type].spent += campaign.spent;
 
       campaign.analytics.forEach((analytic) => {
-        types[campaign.type].revenue += analytic.revenue;
-        types[campaign.type].converted += analytic.converted;
+        types[type].revenue += analytic.revenue;
+        types[type].converted += analytic.converted;
       });
     });
 

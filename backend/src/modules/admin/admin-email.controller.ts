@@ -66,7 +66,7 @@ export class AdminEmailController {
     try {
       await this.prisma.auditLog.create({
         data: {
-          userId: req.userId || null,
+          userId: req.userId as string,
           action: "admin_email_config_update",
           resource: "email_config",
           targetType: "email_config",

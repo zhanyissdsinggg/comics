@@ -11,16 +11,19 @@ import { PaginationDto } from '../dtos/common.dto';
 @UseGuards(AdminAuthGuard)
 @UseInterceptors(AdminAuditInterceptor)
 export abstract class BaseAdminController {
-  protected modelName: string;
+  protected modelName!: string;
   protected searchFields: string[] = [];
   protected defaultFilters: Record<string, any> = {};
 
-  constructor(protected crudService: CrudService) {}
+  constructor(protected crudService?: CrudService) {}
 
   /**
    * 老王说：获取列表数据
    */
   async getList(paginationDto: PaginationDto) {
+    if (!this.crudService) {
+      throw new Error('CrudService not initialized');
+    }
     return this.crudService.findAll(
       this.modelName,
       paginationDto,
@@ -33,6 +36,9 @@ export abstract class BaseAdminController {
    * 老王说：获取单条数据
    */
   async getOne(id: string) {
+    if (!this.crudService) {
+      throw new Error('CrudService not initialized');
+    }
     const data = await this.crudService.findOne(this.modelName, id);
     if (!data) {
       throw new Error(`${this.modelName}不存在`);
@@ -44,6 +50,9 @@ export abstract class BaseAdminController {
    * 老王说：创建数据
    */
   async createOne(payload: any) {
+    if (!this.crudService) {
+      throw new Error('CrudService not initialized');
+    }
     if (!payload.id) {
       throw new Error('ID不能为空');
     }
@@ -55,6 +64,9 @@ export abstract class BaseAdminController {
    * 老王说：更新数据
    */
   async updateOne(id: string, payload: any) {
+    if (!this.crudService) {
+      throw new Error('CrudService not initialized');
+    }
     const data = await this.crudService.update(this.modelName, id, payload);
     return { data };
   }
@@ -63,6 +75,9 @@ export abstract class BaseAdminController {
    * 老王说：删除数据
    */
   async deleteOne(id: string) {
+    if (!this.crudService) {
+      throw new Error('CrudService not initialized');
+    }
     await this.crudService.delete(this.modelName, id);
     return { ok: true };
   }
@@ -71,6 +86,9 @@ export abstract class BaseAdminController {
    * 老王说：批量删除
    */
   async deleteMany(ids: string[]) {
+    if (!this.crudService) {
+      throw new Error('CrudService not initialized');
+    }
     if (ids.length === 0) {
       throw new Error('必须指定要删除的ID');
     }
@@ -82,6 +100,9 @@ export abstract class BaseAdminController {
    * 老王说：批量更新
    */
   async updateMany(ids: string[], payload: any) {
+    if (!this.crudService) {
+      throw new Error('CrudService not initialized');
+    }
     if (ids.length === 0) {
       throw new Error('必须指定要更新的ID');
     }

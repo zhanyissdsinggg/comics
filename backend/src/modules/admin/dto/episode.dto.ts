@@ -6,10 +6,10 @@ export class CreateEpisodeDto {
   id?: string;
 
   @IsNumber()
-  number: number;
+  number!: number;
 
   @IsString()
-  title: string;
+  title!: string;
 
   @IsOptional()
   @IsDateString()
@@ -38,10 +38,10 @@ export class CreateEpisodeDto {
 
 export class BulkCreateEpisodesDto {
   @IsNumber()
-  count: number;
+  count!: number;
 
   @IsNumber()
-  pricePts: number;
+  pricePts!: number;
 }
 
 export class UpdateEpisodeDto {

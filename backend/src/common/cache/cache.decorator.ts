@@ -11,7 +11,7 @@ export function Cacheable(keyPrefix: string, ttlSeconds: number = 3600) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (this: any, ...args: any[]) {
       const cacheService = this.cacheService as CacheService;
 
       // 构建缓存键
@@ -46,7 +46,7 @@ export function CacheEvict(keyPattern: string) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (this: any, ...args: any[]) {
       const cacheService = this.cacheService as CacheService;
 
       // 执行原方法

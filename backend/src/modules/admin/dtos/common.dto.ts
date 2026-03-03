@@ -32,7 +32,7 @@ export class PaginationDto {
  */
 export class CreateBaseDto {
   @IsString()
-  id: string;
+  id!: string;
 
   @IsOptional()
   @IsString()
@@ -69,7 +69,7 @@ export class UpdateBaseDto {
  */
 export class ConfigDto {
   @IsString()
-  key: string;
+  key!: string;
 
   @IsOptional()
   payload?: Record<string, any>;
@@ -85,7 +85,7 @@ export class ConfigDto {
 export class BulkOperationDto {
   @IsArray()
   @IsString({ each: true })
-  ids: string[];
+  ids!: string[];
 
   @IsOptional()
   payload?: Record<string, any>;
@@ -95,25 +95,25 @@ export class BulkOperationDto {
  * 老王注释：通用响应DTO - 所有API都返回这个格式
  */
 export class ResponseDto<T = any> {
-  statusCode: number;
-  message: string;
+  statusCode!: number;
+  message!: string;
   data?: T;
   error?: string;
-  timestamp: string;
+  timestamp!: string;
 }
 
 /**
  * 老王注释：通用分页响应DTO - 所有列表API都返回这个格式
  */
 export class PaginatedResponseDto<T = any> {
-  statusCode: number;
-  message: string;
-  data: T[];
-  pagination: {
+  statusCode!: number;
+  message!: string;
+  data!: T[];
+  pagination!: {
     page: number;
     limit: number;
     total: number;
     totalPages: number;
   };
-  timestamp: string;
+  timestamp!: string;
 }

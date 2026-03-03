@@ -20,7 +20,7 @@ export class RecommendationController {
     @Query('limit') limit?: string,
     @Req() req?: Request,
   ) {
-    const userId = getUserIdFromRequest(req, true);
+    const userId = (req ? getUserIdFromRequest(req, true) : null) || undefined;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
     const recommendations =
@@ -48,7 +48,7 @@ export class RecommendationController {
     @Query('limit') limit?: string,
     @Req() req?: Request,
   ) {
-    const userId = getUserIdFromRequest(req, true);
+    const userId = (req ? getUserIdFromRequest(req, true) : null) || undefined;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
     let recommendations;

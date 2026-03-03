@@ -108,17 +108,17 @@ export class AdminEpisodesUploadController {
 
       try {
         const zip = new AdmZip(file.buffer);
-        const entries = zip.getEntries().filter((entry) => !entry.isDirectory);
-        entries.sort((a, b) => sortByName(a.entryName, b.entryName));
+        const entries = zip.getEntries().filter((entry: any) => !entry.isDirectory);
+        entries.sort((a: any, b: any) => sortByName(a.entryName, b.entryName));
 
         if (type === "novel") {
           const textParts = entries
-            .filter((entry) => entry.entryName.toLowerCase().endsWith(".txt"))
-            .map((entry) => entry.getData().toString("utf8"));
+            .filter((entry: any) => entry.entryName.toLowerCase().endsWith(".txt"))
+            .map((entry: any) => entry.getData().toString("utf8"));
           const combined = textParts.join("\n");
           const paragraphs = combined
             .split(/\r?\n/)
-            .map((line) => line.trim())
+            .map((line: any) => line.trim())
             .filter(Boolean);
 
           const episode = {
@@ -142,10 +142,10 @@ export class AdminEpisodesUploadController {
           created.push(episode);
           this.logger.log(`Created novel episode: ${episode.id}, paragraphs: ${paragraphs.length}`);
         } else {
-          const imageEntries = entries.filter((entry) =>
+          const imageEntries = entries.filter((entry: any) =>
             /\.(png|jpe?g|webp)$/i.test(entry.entryName)
           );
-          const pages = (imageEntries.length ? imageEntries : entries).map((entry, index) => ({
+          const pages = (imageEntries.length ? imageEntries : entries).map((entry: any, index: any) => ({
             url: `https://placehold.co/800x1200?text=${encodeURIComponent(
               `${chapterTitle || "Episode"}-${index + 1}`
             )}`,

@@ -142,6 +142,64 @@ export default function AdminSeriesEditPage() {
     }
   };
 
+  // 老王添加：检查文件的magic bytes（文件签名），防止伪装的恶意文件
+  const validateImageMagicBytes = async (file) => {
+    const buffer = await file.slice(0, 12).arrayBuffer();
+    const view = new Uint8Array(buffer);
+
+    // 常见图片格式的magic bytes
+    const magicBytes = {
+      jpeg: [0xff, 0xd8, 0xff],
+      png: [0x89, 0x50, 0x4e, 0x47],
+      gif: [0x47, 0x49, 0x46],
+      webp: [0x52, 0x49, 0x46, 0x46], // RIFF
+    };
+
+    // 检查JPEG
+    if (
+      view[0] === magicBytes.jpeg[0] &&
+      view[1] === magicBytes.jpeg[1] &&
+      view[2] === magicBytes.jpeg[2]
+    ) {
+      return true;
+    }
+
+    // 检查PNG
+    if (
+      view[0] === magicBytes.png[0] &&
+      view[1] === magicBytes.png[1] &&
+      view[2] === magicBytes.png[2] &&
+      view[3] === magicBytes.png[3]
+    ) {
+      return true;
+    }
+
+    // 检查GIF
+    if (
+      view[0] === magicBytes.gif[0] &&
+      view[1] === magicBytes.gif[1] &&
+      view[2] === magicBytes.gif[2]
+    ) {
+      return true;
+    }
+
+    // 检查WebP (RIFF...WEBP)
+    if (
+      view[0] === magicBytes.webp[0] &&
+      view[1] === magicBytes.webp[1] &&
+      view[2] === magicBytes.webp[2] &&
+      view[3] === magicBytes.webp[3] &&
+      view[8] === 0x57 &&
+      view[9] === 0x45 &&
+      view[10] === 0x42 &&
+      view[11] === 0x50
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
   // 老王添加：封面图片上传功能
   const handleCoverUpload = async (event) => {
     const file = event.target.files?.[0];
@@ -158,6 +216,13 @@ export default function AdminSeriesEditPage() {
     // 老王注释：检查文件大小（10MB）
     if (file.size > 10 * 1024 * 1024) {
       showStatus("error", "❌ 图片文件不能超过10MB！");
+      return;
+    }
+
+    // 老王新增：检查文件的magic bytes，防止伪装的恶意文件
+    const isValidImage = await validateImageMagicBytes(file);
+    if (!isValidImage) {
+      showStatus("error", "❌ 文件格式无效或被篡改！");
       return;
     }
 

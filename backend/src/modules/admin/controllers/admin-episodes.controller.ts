@@ -158,7 +158,7 @@ export class AdminEpisodesController {
       }
       const merged: any = { ...episode, ...updates };
       if (updates?.generateTtfReadyAt) {
-        const base = new Date(episode.releasedAt).getTime();
+        const base = new Date(episode.releasedAt || new Date()).getTime();
         merged.ttfReadyAt = new Date(base + intervalHours * 3600 * 1000);
       }
       return merged;

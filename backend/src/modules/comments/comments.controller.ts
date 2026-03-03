@@ -18,7 +18,7 @@ export class CommentsController {
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST);
     }
-    const userId = getUserIdFromRequest(req, true);
+    const userId = getUserIdFromRequest(req, true) || undefined;
     const comments = await this.commentsService.list(seriesId, userId);
     return { comments };
   }

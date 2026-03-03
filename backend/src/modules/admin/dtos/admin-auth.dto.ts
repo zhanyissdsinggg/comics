@@ -14,7 +14,7 @@ export class AdminLoginDto {
   @IsNotEmpty({ message: "adminKey不能为空" })
   @MinLength(1, { message: "adminKey长度不能为空" })
   @MaxLength(500, { message: "adminKey长度不能超过500个字符" })
-  adminKey: string;
+  adminKey!: string;
 }
 
 /**
@@ -24,5 +24,5 @@ export class AdminLoginDto {
 export class AdminRefreshTokenDto {
   @IsString({ message: "refreshToken必须是字符串" })
   @IsNotEmpty({ message: "refreshToken不能为空" })
-  refreshToken: string;
+  refreshToken!: string;
 }

@@ -2,10 +2,10 @@ import { IsString, IsOptional, IsBoolean, IsNumber, IsArray, IsEnum } from 'clas
 
 export class CreateSeriesDto {
   @IsString()
-  id: string;
+  id!: string;
 
   @IsString()
-  title: string;
+  title!: string;
 
   @IsOptional()
   @IsEnum(['comic', 'novel'])
