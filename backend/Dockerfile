@@ -1,42 +1,54 @@
-FROM node:20-slim
-
-# 老王说：安装OpenSSL和其他必需的库，Prisma需要这些SB库
-RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+# Stage 1: Build
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# 老王说：复制package文件并安装依赖
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
+# 安装必需的库
+RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# 老王说：复制Prisma schema并生成client
+# 复制package文件并安装依赖
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps
+
+# 复制Prisma schema并生成client
 COPY prisma ./prisma
 RUN npx prisma generate
 
-# 老王说：复制源代码
+# 复制源代码和配置
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src
 
-# 老王说：构建应用
-RUN npm run build 2>&1 | tee build.log && \
-    echo "=== Build completed ===" && \
-    echo "=== Checking dist directory ===" && \
-    ls -la dist/ && \
-    echo "=== Checking dist/src directory ===" && \
-    ls -la dist/src/ && \
-    echo "=== Checking for main.js ===" && \
-    if [ -f dist/src/main.js ]; then \
-      echo "✅ dist/src/main.js exists"; \
-    else \
-      echo "❌ dist/src/main.js NOT FOUND"; \
-      echo "=== Build log ==="; \
-      cat build.log; \
-      exit 1; \
-    fi
+# 构建应用
+RUN npm run build
 
-# 老王说：暴露端口
+# Stage 2: Runtime
+FROM node:20-slim
+
+WORKDIR /app
+
+# 安装必需的库
+RUN apt-get update && apt-get install -y openssl ca-certificates curl && rm -rf /var/lib/apt/lists/*
+
+# 创建非root用户
+RUN groupadd -g 1001 -S nodejs && \
+    useradd -S nodejs -u 1001
+
+# 复制必要的文件
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
+COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
+
+# 切换到非root用户
+USER nodejs
+
+# 暴露端口
 EXPOSE 4000
 
-# 老王说：启动应用
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:4000/health || exit 1
+
+# 启动应用
 CMD ["node", "dist/src/main.js"]
