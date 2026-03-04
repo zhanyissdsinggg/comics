@@ -6,6 +6,18 @@ import { CrudService } from './services/crud.service';
 import { ConfigService } from './services/config.service';
 import { AdminAudit } from './decorators/admin-audit.decorator';
 import { PaginationDto } from './dtos/common.dto';
+import {
+  CreateRankingDto,
+  UpdateRankingDto,
+  UpdateTrackingDto,
+  CreateRegionDto,
+  UpdateRegionDto,
+  BulkDeleteDto,
+  BulkUpdateDto,
+  UpdateBrandingDto,
+  UpdateEmailConfigDto,
+  TestEmailDto,
+} from './dtos/admin-common.dto';
 
 /**
  * 老王注释：优化后的Stats Controller - 继承BaseAdminController
@@ -88,7 +100,7 @@ export class AdminRankingsController extends BaseAdminController {
 
   @Post()
   @AdminAudit('create', 'ranking')
-  async create(@Body() body: any) {
+  async create(@Body() body: CreateRankingDto) {
     return this.createOne(body.ranking || body);
   }
 
@@ -100,7 +112,7 @@ export class AdminRankingsController extends BaseAdminController {
 
   @Patch(':id')
   @AdminAudit('update', 'ranking')
-  async update(@Param('id') id: string, @Body() body: any) {
+  async update(@Param('id') id: string, @Body() body: UpdateRankingDto) {
     return this.updateOne(id, body.ranking || body);
   }
 
@@ -133,7 +145,7 @@ export class AdminTrackingController extends BaseAdminController {
 
   @Post()
   @AdminAudit('update', 'tracking')
-  async updateTracking(@Body() body: any) {
+  async updateTracking(@Body() body: UpdateTrackingDto) {
     await this.configService.setConfig('tracking', body.tracking || body);
     return { ok: true };
   }
@@ -159,7 +171,7 @@ export class AdminRegionsController extends BaseAdminController {
 
   @Post()
   @AdminAudit('create', 'region')
-  async create(@Body() body: any) {
+  async create(@Body() body: CreateRegionDto) {
     return this.createOne(body.region || body);
   }
 
@@ -171,7 +183,7 @@ export class AdminRegionsController extends BaseAdminController {
 
   @Patch(':id')
   @AdminAudit('update', 'region')
-  async update(@Param('id') id: string, @Body() body: any) {
+  async update(@Param('id') id: string, @Body() body: UpdateRegionDto) {
     return this.updateOne(id, body.region || body);
   }
 
@@ -183,13 +195,13 @@ export class AdminRegionsController extends BaseAdminController {
 
   @Delete()
   @AdminAudit('bulk-delete', 'region')
-  async bulkDelete(@Body() body: any) {
+  async bulkDelete(@Body() body: BulkDeleteDto) {
     return this.deleteMany(body.ids || []);
   }
 
   @Patch()
   @AdminAudit('bulk-update', 'region')
-  async bulkUpdate(@Body() body: any) {
+  async bulkUpdate(@Body() body: BulkUpdateDto) {
     return this.updateMany(body.ids || [], body.updates || {});
   }
 }
@@ -211,7 +223,7 @@ export class AdminBrandingController extends BaseAdminController {
 
   @Post()
   @AdminAudit('update', 'branding')
-  async updateBranding(@Body() body: any) {
+  async updateBranding(@Body() body: UpdateBrandingDto) {
     await this.configService.setConfig('branding', body.branding || body);
     return { ok: true };
   }
@@ -304,14 +316,14 @@ export class AdminEmailController extends BaseAdminController {
 
   @Post()
   @AdminAudit('update', 'email-config')
-  async updateEmailConfig(@Body() body: any) {
+  async updateEmailConfig(@Body() body: UpdateEmailConfigDto) {
     await this.configService.setConfig('email', body.config || body);
     return { ok: true };
   }
 
   @Post('test')
   @AdminAudit('test', 'email')
-  async testEmail(@Body() body: any) {
+  async testEmail(@Body() body: TestEmailDto) {
     // 老王说：发送测试邮件
     return { ok: true, message: '测试邮件已发送' };
   }
@@ -369,7 +381,7 @@ export class AdminEmailJobsController extends BaseAdminController {
 
   @Delete()
   @AdminAudit('bulk-delete', 'email-job')
-  async bulkDelete(@Body() body: any) {
+  async bulkDelete(@Body() body: BulkDeleteDto) {
     return { deleted: 0 };
   }
 }

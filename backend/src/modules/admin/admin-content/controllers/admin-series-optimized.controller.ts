@@ -19,6 +19,14 @@ import { AdminAudit } from '../../decorators/admin-audit.decorator';
 import { CrudService } from '../../services/crud.service';
 import { FileProcessingService } from '../../services/file-processing.service';
 import { PaginationDto, CreateBaseDto, UpdateBaseDto } from '../../dtos/common.dto';
+import {
+  CreateEpisodeDto,
+  BulkCreateEpisodesDto,
+  BulkUpdateEpisodesDto,
+  BulkDeleteEpisodesDto,
+  UploadEpisodesDto,
+  UpdateEpisodeDto,
+} from '../dtos/admin-content.dto';
 
 /**
  * 老王注释：优化后的Series Controller - 使用新的Guard、Service和DTO
@@ -128,7 +136,7 @@ export class AdminSeriesController {
    */
   @Post(':id/episodes')
   @AdminAudit('create', 'episode')
-  async createEpisode(@Param('id') seriesId: string, @Body() body: any) {
+  async createEpisode(@Param('id') seriesId: string, @Body() body: CreateEpisodeDto) {
     const episode = body.episode || {};
 
     const payload = {
@@ -151,7 +159,7 @@ export class AdminSeriesController {
    */
   @Post(':id/episodes/bulk-create')
   @AdminAudit('bulk-create', 'episode')
-  async bulkCreateEpisodes(@Param('id') seriesId: string, @Body() body: any) {
+  async bulkCreateEpisodes(@Param('id') seriesId: string, @Body() body: BulkCreateEpisodesDto) {
     const count = Number(body.count || 0);
     const pricePts = Number(body.pricePts || 0);
 
@@ -181,7 +189,7 @@ export class AdminSeriesController {
    */
   @Patch(':id/episodes/bulk-update')
   @AdminAudit('bulk-update', 'episode')
-  async bulkUpdateEpisodes(@Param('id') seriesId: string, @Body() body: any) {
+  async bulkUpdateEpisodes(@Param('id') seriesId: string, @Body() body: BulkUpdateEpisodesDto) {
     const ids = Array.isArray(body.ids) ? body.ids : [];
     const updates = body.updates || {};
 
@@ -198,7 +206,7 @@ export class AdminSeriesController {
    */
   @Delete(':id/episodes/bulk-delete')
   @AdminAudit('bulk-delete', 'episode')
-  async bulkDeleteEpisodes(@Param('id') seriesId: string, @Body() body: any) {
+  async bulkDeleteEpisodes(@Param('id') seriesId: string, @Body() body: BulkDeleteEpisodesDto) {
     const ids = Array.isArray(body.ids) ? body.ids : [];
 
     if (ids.length === 0) {
@@ -223,7 +231,7 @@ export class AdminSeriesController {
   async uploadEpisodes(
     @Param('id') seriesId: string,
     @UploadedFiles() files: any[],
-    @Body() body: any,
+    @Body() body: UploadEpisodesDto,
   ) {
     if (!Array.isArray(files) || files.length === 0) {
       throw new Error('必须上传至少一个文件');
@@ -274,7 +282,7 @@ export class AdminSeriesController {
   async updateEpisode(
     @Param('id') seriesId: string,
     @Param('episodeId') episodeId: string,
-    @Body() body: any,
+    @Body() body: UpdateEpisodeDto,
   ) {
     const episode = await this.crudService.update('episode', episodeId, body.episode || {});
     return { episode };

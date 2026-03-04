@@ -1,85 +1,83 @@
 "use client";
 
-import { memo, useState, useEffect, useRef, useCallback } from "react";
-import { Search, X, TrendingUp, Loader2, Trash2 } from "lucide-react"; // 老王添加：Loader2 和 Trash2 图标
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2, Search, Trash2, TrendingUp, X } from "lucide-react";
 
-/**
- * 老王注释：搜索栏组件
- * 功能：提供搜索输入、建议、历史记录
- * 遵循KISS原则：简洁的搜索体验
- * 遵循DRY原则：统一的搜索逻辑
- */
+const HISTORY_KEY = "mn_search_history";
+const MAX_HISTORY_ITEMS = 5;
+
+function readHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter(Boolean).slice(0, MAX_HISTORY_ITEMS) : [];
+  } catch {
+    localStorage.removeItem(HISTORY_KEY);
+    return [];
+  }
+}
+
+function writeHistory(items) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, MAX_HISTORY_ITEMS)));
+}
+
 const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search series" }) {
   const router = useRouter();
   const [value, setValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
-  const [isSearching, setIsSearching] = useState(false); // 老王添加：搜索加载状态
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef(null);
   const containerRef = useRef(null);
 
-  // 老王注释：加载搜索历史
   useEffect(() => {
-    const history = localStorage.getItem("mn_search_history");
-    if (history) {
-      try {
-        setSearchHistory(JSON.parse(history));
-      } catch (error) {
-        // 老王注释：解析失败就清空
-        localStorage.removeItem("mn_search_history");
-      }
-    }
+    setSearchHistory(readHistory());
   }, []);
 
-  // 老王注释：保存搜索历史
-  // 老王修复：将localStorage操作移到React状态更新之外，确保立即执行
   const saveToHistory = useCallback((query) => {
-    if (!query || query.trim().length < 2) {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
       return;
     }
-    const trimmed = query.trim();
-
-    // ✅ 立即更新localStorage（同步操作，不依赖React状态更新时机）
-    const history = JSON.parse(localStorage.getItem("mn_search_history") || "[]");
-    const filtered = history.filter((item) => item !== trimmed);
-    const updated = [trimmed, ...filtered].slice(0, 5);
-    localStorage.setItem("mn_search_history", JSON.stringify(updated));
-
-    // ✅ 然后更新React状态（用于UI显示）
+    const current = readHistory();
+    const updated = [trimmed, ...current.filter((item) => item !== trimmed)].slice(
+      0,
+      MAX_HISTORY_ITEMS
+    );
+    writeHistory(updated);
     setSearchHistory(updated);
   }, []);
 
-  // 老王注释：处理搜索
   const handleSearch = useCallback(
     (query) => {
       const trimmed = query.trim();
       if (!trimmed) {
         return;
       }
-      setIsSearching(true); // 老王添加：显示加载状态
+      setIsSearching(true);
       saveToHistory(trimmed);
       setShowSuggestions(false);
       router.push(`/search?q=${encodeURIComponent(trimmed)}`);
-      // 老王添加：延迟重置加载状态，让用户看到反馈
-      setTimeout(() => setIsSearching(false), 500);
+      window.setTimeout(() => setIsSearching(false), 500);
     },
     [router, saveToHistory]
   );
 
-  // 老王注释：处理输入变化
   const handleChange = useCallback(
     (event) => {
-      const newValue = event.target.value;
-      setValue(newValue);
-      onSearch?.(newValue);
-      setShowSuggestions(newValue.length > 0 || searchHistory.length > 0);
+      const nextValue = event.target.value;
+      setValue(nextValue);
+      onSearch?.(nextValue);
+      setShowSuggestions(nextValue.length > 0 || searchHistory.length > 0);
     },
     [onSearch, searchHistory.length]
   );
 
-  // 老王注释：清除输入
   const handleClear = useCallback(() => {
     setValue("");
     onSearch?.("");
@@ -87,7 +85,6 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
     inputRef.current?.focus();
   }, [onSearch]);
 
-  // 老王注释：点击历史记录
   const handleHistoryClick = useCallback(
     (query) => {
       setValue(query);
@@ -96,27 +93,22 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
     [handleSearch]
   );
 
-  // 老王添加：删除单个搜索历史
   const handleDeleteHistory = useCallback((event, query) => {
-    event.stopPropagation(); // 阻止事件冒泡，避免触发搜索
-    setSearchHistory((prev) => {
-      const updated = prev.filter((item) => item !== query);
-      localStorage.setItem("mn_search_history", JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
+    event.stopPropagation();
+    const updated = searchHistory.filter((item) => item !== query);
+    writeHistory(updated);
+    setSearchHistory(updated);
+  }, [searchHistory]);
 
-  // 老王添加：清空所有搜索历史
   const handleClearAllHistory = useCallback(() => {
     setSearchHistory([]);
-    localStorage.removeItem("mn_search_history");
+    localStorage.removeItem(HISTORY_KEY);
     setShowSuggestions(false);
   }, []);
 
-  // 老王注释：快捷键支持（Ctrl+K / Cmd+K）
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "k") {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         inputRef.current?.focus();
       }
@@ -125,7 +117,6 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // 老王注释：点击外部关闭建议
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -138,7 +129,6 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
 
   return (
     <div ref={containerRef} className="relative w-full">
-      {/* iOS风格搜索输入框 - 毛玻璃背景 + 大圆角 + 聚焦时放大并发光 */}
       <div
         className={`relative flex items-center gap-2 rounded-[20px] border bg-white/5 backdrop-blur-md px-4 py-3 transition-all duration-300 md:py-2.5 touch-manipulation ${
           isFocused
@@ -147,11 +137,13 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
         }`}
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
-        <Search size={18} className={`transition-colors duration-300 md:w-4 md:h-4 ${isFocused ? "text-emerald-400" : "text-neutral-400"}`} />
-        {/* 老王添加：搜索加载状态 */}
-        {isSearching && (
-          <Loader2 size={16} className="animate-spin text-emerald-400" />
-        )}
+        <Search
+          size={18}
+          className={`transition-colors duration-300 md:w-4 md:h-4 ${
+            isFocused ? "text-emerald-400" : "text-neutral-400"
+          }`}
+        />
+        {isSearching ? <Loader2 size={16} className="animate-spin text-emerald-400" /> : null}
         <input
           ref={inputRef}
           type="search"
@@ -170,7 +162,7 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
           }}
           className="flex-1 bg-transparent text-base md:text-sm text-neutral-200 placeholder:text-neutral-400 focus:outline-none"
         />
-        {value && (
+        {value ? (
           <button
             type="button"
             onClick={handleClear}
@@ -179,14 +171,13 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
           >
             <X size={14} className="transition-transform duration-300 group-hover:rotate-90" />
           </button>
-        )}
+        ) : null}
         <kbd className="hidden rounded-[8px] border border-white/5 bg-white/5 px-2 py-1 text-[10px] text-neutral-400 md:block">
-          ⌘K
+          Ctrl+K
         </kbd>
       </div>
 
-      {/* iOS风格搜索建议/历史 - 毛玻璃卡片 + 滑入动画 */}
-      {showSuggestions && searchHistory.length > 0 && (
+      {showSuggestions && searchHistory.length > 0 ? (
         <div className="absolute left-0 right-0 top-full z-50 mt-2 animate-slide-up overflow-hidden rounded-[20px] border border-white/5 bg-neutral-900/90 backdrop-blur-xl shadow-2xl shadow-black/20">
           <div className="p-2">
             <div className="mb-2 flex items-center justify-between px-3 py-1">
@@ -194,7 +185,6 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
                 <TrendingUp size={14} className="text-emerald-400" />
                 <span className="text-xs font-semibold text-emerald-400/80">Recent Searches</span>
               </div>
-              {/* 老王添加：清空所有历史按钮 */}
               <button
                 type="button"
                 onClick={handleClearAllHistory}
@@ -206,28 +196,37 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
               </button>
             </div>
             {searchHistory.map((query, index) => (
-              <button
-                key={index}
-                type="button"
+              <div
+                key={`${query}-${index}`}
+                role="button"
+                tabIndex={0}
                 onClick={() => handleHistoryClick(query)}
-                className="group flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-left text-sm text-neutral-300 transition-all duration-300 hover:bg-emerald-500/10 hover:text-emerald-300 hover:translate-x-1 active:scale-[0.98]"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleHistoryClick(query);
+                  }
+                }}
+                className="group flex w-full cursor-pointer items-center gap-3 rounded-[12px] px-3 py-2.5 text-left text-sm text-neutral-300 transition-all duration-300 hover:bg-emerald-500/10 hover:text-emerald-300 hover:translate-x-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 active:scale-[0.98]"
               >
-                <Search size={14} className="text-neutral-400 transition-colors duration-300 group-hover:text-emerald-400" />
+                <Search
+                  size={14}
+                  className="text-neutral-400 transition-colors duration-300 group-hover:text-emerald-400"
+                />
                 <span className="flex-1">{query}</span>
-                {/* 老王添加：删除单个历史按钮 */}
                 <button
                   type="button"
-                  onClick={(e) => handleDeleteHistory(e, query)}
+                  onClick={(event) => handleDeleteHistory(event, query)}
                   className="opacity-0 group-hover:opacity-100 rounded-full p-1 text-neutral-400 transition-all duration-300 hover:bg-red-500/10 hover:text-red-400 hover:scale-110 active:scale-95"
                   aria-label="Delete this search"
                 >
                   <X size={12} />
                 </button>
-              </button>
+              </div>
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 });

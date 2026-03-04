@@ -1,7 +1,7 @@
 /**
- * Admin API客户端 - 前端专用
- * 老王说：这个SB文件合并了adminApiClient.js和adminFetch.ts
- * 基于通用apiClient扩展，提供admin特定的便捷函数和CSRF保护
+ * Admin API瀹㈡埛绔?- 鍓嶇涓撶敤
+ * 鑰佺帇璇达細杩欎釜SB鏂囦欢鍚堝苟浜哸dminApiClient.js鍜宎dminFetch.ts
+ * 鍩轰簬閫氱敤apiClient鎵╁睍锛屾彁渚沘dmin鐗瑰畾鐨勪究鎹峰嚱鏁板拰CSRF淇濇姢
  */
 
 import {
@@ -15,7 +15,7 @@ import {
   ApiRequestOptions,
 } from "./apiClient";
 
-// ============ 类型定义 ============
+// ============ 绫诲瀷瀹氫箟 ============
 
 export interface AdminApiOptions extends ApiRequestOptions {
   skipCsrf?: boolean;
@@ -33,11 +33,11 @@ export interface PaginatedResponse<T> {
   };
 }
 
-// ============ 工具函数 ============
+// ============ 宸ュ叿鍑芥暟 ============
 
 /**
- * 获取CSRF token
- * 从meta标签中读取CSRF token，用于防止CSRF攻击
+ * 鑾峰彇CSRF token
+ * 浠巑eta鏍囩涓鍙朇SRF token锛岀敤浜庨槻姝SRF鏀诲嚮
  */
 function getCsrfToken(): string {
   if (typeof document === "undefined") {
@@ -48,9 +48,8 @@ function getCsrfToken(): string {
 }
 
 /**
- * 添加CSRF token到请求头
- * 老王说：POST/PATCH/DELETE请求必须加CSRF token，这是铁律
- */
+ * 娣诲姞CSRF token鍒拌姹傚ご
+ * 鑰佺帇璇达細POST/PATCH/DELETE璇锋眰蹇呴』鍔燙SRF token锛岃繖鏄搧寰? */
 function addCsrfToken(headers: Record<string, string>, method?: string): Record<string, string> {
   if (!method || !["POST", "PATCH", "DELETE"].includes(method.toUpperCase())) {
     return headers;
@@ -65,8 +64,8 @@ function addCsrfToken(headers: Record<string, string>, method?: string): Record<
 }
 
 /**
- * 准备admin请求的headers
- * 老王说：统一处理Authorization和CSRF token
+ * 鍑嗗admin璇锋眰鐨刪eaders
+ * 鑰佺帇璇达細缁熶竴澶勭悊Authorization鍜孋SRF token
  */
 function prepareAdminHeaders(
   method?: string,
@@ -74,16 +73,16 @@ function prepareAdminHeaders(
 ): Record<string, string> {
   const headers = { ...customHeaders };
 
-  // 添加CSRF token（POST/PATCH/DELETE）
+  // 娣诲姞CSRF token锛圥OST/PATCH/DELETE锛?
   return addCsrfToken(headers, method);
 }
 
-// ============ 导出的API函数 ============
+// ============ 瀵煎嚭鐨凙PI鍑芥暟 ============
 
 /**
- * 通用的Admin Fetch函数
- * 老王说：这个SB函数就是标准fetch的admin版本，自动加headers和CSRF token
- * 返回标准的Response对象，不是ApiResponse
+ * 閫氱敤鐨凙dmin Fetch鍑芥暟
+ * 鑰佺帇璇达細杩欎釜SB鍑芥暟灏辨槸鏍囧噯fetch鐨刟dmin鐗堟湰锛岃嚜鍔ㄥ姞headers鍜孋SRF token
+ * 杩斿洖鏍囧噯鐨凴esponse瀵硅薄锛屼笉鏄疉piResponse
  */
 export async function adminFetch(
   url: string,
@@ -92,7 +91,7 @@ export async function adminFetch(
   const method = options.method || "GET";
   const headers = prepareAdminHeaders(method, options.headers as Record<string, string>);
 
-  // 合并headers
+  // 鍚堝苟headers
   const finalOptions: RequestInit = {
     ...options,
     headers: {
@@ -105,8 +104,8 @@ export async function adminFetch(
 }
 
 /**
- * Admin GET请求
- * 老王说：简单的GET请求就用这个，别tm写那么多代码
+ * Admin GET璇锋眰
+ * 鑰佺帇璇达細绠€鍗曠殑GET璇锋眰灏辩敤杩欎釜锛屽埆tm鍐欓偅涔堝浠ｇ爜
  */
 export async function adminGet<T = any>(
   path: string,
@@ -117,8 +116,8 @@ export async function adminGet<T = any>(
 }
 
 /**
- * Admin POST请求
- * 老王说：POST请求用这个，自动处理JSON序列化和CSRF保护
+ * Admin POST璇锋眰
+ * 鑰佺帇璇达細POST璇锋眰鐢ㄨ繖涓紝鑷姩澶勭悊JSON搴忓垪鍖栧拰CSRF淇濇姢
  */
 export async function adminPost<T = any>(
   path: string,
@@ -130,8 +129,8 @@ export async function adminPost<T = any>(
 }
 
 /**
- * Admin PATCH请求
- * 老王说：PATCH请求用这个，自动处理JSON序列化和CSRF保护
+ * Admin PATCH璇锋眰
+ * 鑰佺帇璇达細PATCH璇锋眰鐢ㄨ繖涓紝鑷姩澶勭悊JSON搴忓垪鍖栧拰CSRF淇濇姢
  */
 export async function adminPatch<T = any>(
   path: string,
@@ -143,9 +142,8 @@ export async function adminPatch<T = any>(
 }
 
 /**
- * Admin DELETE请求
- * 老王说：DELETE请求用这个，简单粗暴
- */
+ * Admin DELETE璇锋眰
+ * 鑰佺帇璇达細DELETE璇锋眰鐢ㄨ繖涓紝绠€鍗曠矖鏆? */
 export async function adminDelete<T = any>(
   path: string,
   body?: any,
@@ -156,8 +154,8 @@ export async function adminDelete<T = any>(
 }
 
 /**
- * Admin文件上传
- * 老王说：上传文件用这个，自动处理FormData和CSRF保护
+ * Admin鏂囦欢涓婁紶
+ * 鑰佺帇璇达細涓婁紶鏂囦欢鐢ㄨ繖涓紝鑷姩澶勭悊FormData鍜孋SRF淇濇姢
  */
 export async function adminUpload<T = any>(
   path: string,
@@ -168,10 +166,10 @@ export async function adminUpload<T = any>(
   return apiUpload<T>(path, formData, { ...options, headers });
 }
 
-// ============ Admin特定的便捷函数 ============
+// ============ Admin鐗瑰畾鐨勪究鎹峰嚱鏁?============
 
 /**
- * 获取admin用户列表
+ * 鑾峰彇admin鐢ㄦ埛鍒楄〃
  */
 export async function getAdminUsers(
   page: number = 1,
@@ -182,7 +180,7 @@ export async function getAdminUsers(
 }
 
 /**
- * 获取admin订单列表
+ * 鑾峰彇admin璁㈠崟鍒楄〃
  */
 export async function getAdminOrders(
   page: number = 1,
@@ -193,7 +191,7 @@ export async function getAdminOrders(
 }
 
 /**
- * 获取admin通知列表
+ * 鑾峰彇admin閫氱煡鍒楄〃
  */
 export async function getAdminNotifications(
   page: number = 1,
@@ -204,7 +202,7 @@ export async function getAdminNotifications(
 }
 
 /**
- * 获取admin促销列表
+ * 鑾峰彇admin淇冮攢鍒楄〃
  */
 export async function getAdminPromotions(
   page: number = 1,
@@ -215,7 +213,7 @@ export async function getAdminPromotions(
 }
 
 /**
- * 创建admin促销
+ * 鍒涘缓admin淇冮攢
  */
 export async function createAdminPromotion(
   data: any,
@@ -225,7 +223,7 @@ export async function createAdminPromotion(
 }
 
 /**
- * 更新admin促销
+ * 鏇存柊admin淇冮攢
  */
 export async function updateAdminPromotion(
   id: string,
@@ -236,7 +234,7 @@ export async function updateAdminPromotion(
 }
 
 /**
- * 删除admin促销
+ * 鍒犻櫎admin淇冮攢
  */
 export async function deleteAdminPromotion(
   id: string,
@@ -246,7 +244,7 @@ export async function deleteAdminPromotion(
 }
 
 /**
- * 获取admin品牌设置
+ * 鑾峰彇admin鍝佺墝璁剧疆
  */
 export async function getAdminBranding(
   options: AdminApiOptions = {}
@@ -255,7 +253,7 @@ export async function getAdminBranding(
 }
 
 /**
- * 更新admin品牌设置
+ * 鏇存柊admin鍝佺墝璁剧疆
  */
 export async function updateAdminBranding(
   data: any,
@@ -265,7 +263,7 @@ export async function updateAdminBranding(
 }
 
 /**
- * 获取admin系列列表
+ * 鑾峰彇admin绯诲垪鍒楄〃
  */
 export async function getAdminSeries(
   page: number = 1,
@@ -276,7 +274,7 @@ export async function getAdminSeries(
 }
 
 /**
- * 创建admin系列
+ * 鍒涘缓admin绯诲垪
  */
 export async function createAdminSeries(
   data: any,
@@ -286,7 +284,7 @@ export async function createAdminSeries(
 }
 
 /**
- * 更新admin系列
+ * 鏇存柊admin绯诲垪
  */
 export async function updateAdminSeries(
   id: string,
@@ -297,7 +295,7 @@ export async function updateAdminSeries(
 }
 
 /**
- * 删除admin系列
+ * 鍒犻櫎admin绯诲垪
  */
 export async function deleteAdminSeries(
   id: string,
@@ -307,7 +305,7 @@ export async function deleteAdminSeries(
 }
 
 /**
- * 获取admin评论列表
+ * 鑾峰彇admin璇勮鍒楄〃
  */
 export async function getAdminComments(
   page: number = 1,
@@ -318,7 +316,7 @@ export async function getAdminComments(
 }
 
 /**
- * 删除admin评论
+ * 鍒犻櫎admin璇勮
  */
 export async function deleteAdminComment(
   id: string,
@@ -328,7 +326,7 @@ export async function deleteAdminComment(
 }
 
 /**
- * 获取admin日志列表
+ * 鑾峰彇admin鏃ュ織鍒楄〃
  */
 export async function getAdminLogs(
   page: number = 1,
@@ -339,7 +337,7 @@ export async function getAdminLogs(
 }
 
 /**
- * 获取admin账单列表
+ * 鑾峰彇admin璐﹀崟鍒楄〃
  */
 export async function getAdminBilling(
   page: number = 1,
@@ -350,8 +348,8 @@ export async function getAdminBilling(
 }
 
 /**
- * 获取API基础URL
- * 老王说：有时候前端需要知道API基础URL，比如构建文件上传的完整URL
+ * 鑾峰彇API鍩虹URL
+ * 鑰佺帇璇达細鏈夋椂鍊欏墠绔渶瑕佺煡閬揂PI鍩虹URL锛屾瘮濡傛瀯寤烘枃浠朵笂浼犵殑瀹屾暣URL
  */
 export function getAdminApiBaseUrl(): string {
   return getApiBaseUrl();

@@ -6,7 +6,7 @@ import SiteHeader from "../../components/layout/SiteHeader";
 import NotificationList from "../../components/notifications/NotificationList";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 
 export default function NotificationsPage() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function NotificationsPage() {
   const [workingId, setWorkingId] = useState(null);
 
   useEffect(() => {
-    track("view_notifications", {});
+    trackEvent("view_notifications", {});
     loadNotifications(isAdultMode ? "1" : "0")
       .then((response) => {
         if (!response.ok) {

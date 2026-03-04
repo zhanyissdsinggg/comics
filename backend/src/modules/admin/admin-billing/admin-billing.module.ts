@@ -1,12 +1,14 @@
 import { Module } from "@nestjs/common";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { AdminLogService } from "../../../common/services/admin-log.service";
+import { AdminAuthModule } from "../admin-auth/admin-auth.module";
+import { AdminBillingController } from "./controllers/admin-billing.controller";
+import { AdminOrdersController } from "./controllers/admin-orders.controller";
 
-/**
- * 老王说：管理员账单管理模块 - 处理所有账单和订单相关功能
- * 包括：billing, orders
- */
 @Module({
-  providers: [PrismaService],
+  imports: [AdminAuthModule],
+  controllers: [AdminBillingController, AdminOrdersController],
+  providers: [PrismaService, AdminLogService],
   exports: [PrismaService],
 })
 export class AdminBillingModule {}

@@ -4,11 +4,36 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 import { useRouter } from "next/navigation";
 import { getApiBaseUrl } from "../../lib/apiClient";
 
-/**
- * 老王说：管理员认证上下文，管理JWT token和登录状态
- * 这个SB上下文是整个管理员认证系统的核心
- */
+const ACCESS_TOKEN_KEY = "admin_token";
+const REFRESH_TOKEN_KEY = "admin_refresh_token";
+const REFRESH_INTERVAL_MS = 50 * 60 * 1000;
+
 const AdminAuthContext = createContext(null);
+
+function unwrapPayload(raw) {
+  if (!raw || typeof raw !== "object") {
+    return {};
+  }
+  return raw.data && typeof raw.data === "object" ? raw.data : raw;
+}
+
+function getStoredToken(key) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  return localStorage.getItem(key);
+}
+
+function setStoredToken(key, value) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  if (!value) {
+    localStorage.removeItem(key);
+    return;
+  }
+  localStorage.setItem(key, value);
+}
 
 export function AdminAuthProvider({ children }) {
   const [token, setToken] = useState(null);
@@ -17,109 +42,177 @@ export function AdminAuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // 老王说：从localStorage加载token
-  useEffect(() => {
-    const savedToken = localStorage.getItem("admin_token");
-    const savedRefreshToken = localStorage.getItem("admin_refresh_token");
-
-    if (savedToken && savedRefreshToken) {
-      setToken(savedToken);
-      setRefreshToken(savedRefreshToken);
-      setIsAuthenticated(true);
-    }
-
-    setIsLoading(false);
+  const clearLocalTokens = useCallback(() => {
+    setStoredToken(ACCESS_TOKEN_KEY, null);
+    setStoredToken(REFRESH_TOKEN_KEY, null);
   }, []);
 
-  /**
-   * 老王说：登出函数
-   */
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const baseUrl = getApiBaseUrl();
+    const currentToken = getStoredToken(ACCESS_TOKEN_KEY);
+
+    try {
+      await fetch(`${baseUrl}/api/admin/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(currentToken ? { token: currentToken } : {}),
+      });
+    } catch (error) {
+      console.error("admin logout failed:", error);
+    }
+
     setToken(null);
     setRefreshToken(null);
     setIsAuthenticated(false);
-
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_refresh_token");
-
+    clearLocalTokens();
     router.push("/admin/login");
-  }, [router]);
+  }, [clearLocalTokens, router]);
 
-  // 老王说：自动刷新token（在token过期前5分钟刷新）
   useEffect(() => {
-    if (!token || !refreshToken) return;
+    let cancelled = false;
 
-    // 每50分钟刷新一次（token有效期1小时）
-    const refreshInterval = setInterval(async () => {
+    async function initAuth() {
+      const savedAccessToken = getStoredToken(ACCESS_TOKEN_KEY);
+      const savedRefreshToken = getStoredToken(REFRESH_TOKEN_KEY);
+
+      if (savedAccessToken) {
+        setToken(savedAccessToken);
+      }
+      if (savedRefreshToken) {
+        setRefreshToken(savedRefreshToken);
+      }
+
+      const baseUrl = getApiBaseUrl();
       try {
-        const baseUrl = getApiBaseUrl();
+        const response = await fetch(`${baseUrl}/api/admin/auth/verify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(savedAccessToken ? { token: savedAccessToken } : {}),
+        });
+        const raw = await response.json().catch(() => ({}));
+        const data = unwrapPayload(raw);
+        const valid = Boolean(data.valid);
+
+        if (!cancelled) {
+          setIsAuthenticated(valid);
+          if (!valid) {
+            setToken(null);
+            setRefreshToken(null);
+            clearLocalTokens();
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setIsAuthenticated(Boolean(savedAccessToken));
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    initAuth();
+    return () => {
+      cancelled = true;
+    };
+  }, [clearLocalTokens]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
+    const timer = setInterval(async () => {
+      const baseUrl = getApiBaseUrl();
+      try {
         const response = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refreshToken }),
+          credentials: "include",
+          body: JSON.stringify(refreshToken ? { refreshToken } : {}),
         });
 
-        if (response.ok) {
-          const data = await response.json();
+        if (!response.ok) {
+          if (response.status === 401) {
+            logout();
+          }
+          return;
+        }
+
+        const raw = await response.json().catch(() => ({}));
+        const data = unwrapPayload(raw);
+        if (!data.success) {
+          return;
+        }
+
+        if (typeof data.accessToken === "string" && data.accessToken) {
           setToken(data.accessToken);
-          localStorage.setItem("admin_token", data.accessToken);
-        } else {
-          // 刷新失败，清除token并跳转到登录页
-          logout();
+          setStoredToken(ACCESS_TOKEN_KEY, data.accessToken);
+        }
+        if (typeof data.refreshToken === "string" && data.refreshToken) {
+          setRefreshToken(data.refreshToken);
+          setStoredToken(REFRESH_TOKEN_KEY, data.refreshToken);
         }
       } catch (error) {
-        console.error("刷新token失败:", error);
+        console.error("admin token refresh failed:", error);
       }
-    }, 50 * 60 * 1000); // 50分钟
+    }, REFRESH_INTERVAL_MS);
 
-    return () => clearInterval(refreshInterval);
-  }, [token, refreshToken, logout]);
+    return () => clearInterval(timer);
+  }, [isAuthenticated, refreshToken, logout]);
 
-  /**
-   * 老王说：登录函数
-   * @param {string} adminKey 管理员密钥
-   * @returns {Promise<{success: boolean, error?: string}>}
-   */
-  const login = async (adminKey) => {
+  const login = useCallback(async (adminKey) => {
     try {
       const baseUrl = getApiBaseUrl();
       const response = await fetch(`${baseUrl}/api/admin/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ adminKey }),
       });
 
-      if (!response.ok) {
-        return { success: false, error: "管理员密钥错误" };
+      const raw = await response.json().catch(() => ({}));
+      const data = unwrapPayload(raw);
+      if (!response.ok || data.success === false) {
+        return { success: false, error: data?.message || "管理员密钥错误" };
       }
 
-      const data = await response.json();
+      if (typeof data.accessToken === "string" && data.accessToken) {
+        setToken(data.accessToken);
+        setStoredToken(ACCESS_TOKEN_KEY, data.accessToken);
+      } else {
+        setToken(null);
+        setStoredToken(ACCESS_TOKEN_KEY, null);
+      }
 
-      setToken(data.accessToken);
-      setRefreshToken(data.refreshToken);
+      if (typeof data.refreshToken === "string" && data.refreshToken) {
+        setRefreshToken(data.refreshToken);
+        setStoredToken(REFRESH_TOKEN_KEY, data.refreshToken);
+      } else {
+        setRefreshToken(null);
+        setStoredToken(REFRESH_TOKEN_KEY, null);
+      }
+
       setIsAuthenticated(true);
-
-      // 保存到localStorage
-      localStorage.setItem("admin_token", data.accessToken);
-      localStorage.setItem("admin_refresh_token", data.refreshToken);
-
       return { success: true };
     } catch (error) {
-      console.error("登录失败:", error);
+      console.error("admin login failed:", error);
       return { success: false, error: "登录失败，请重试" };
     }
-  };
+  }, []);
 
-  /**
-   * 老王说：获取带认证头的fetch配置
-   * @returns {object} fetch配置对象
-   */
-  const getAuthHeaders = () => {
-    return {
-      Authorization: `Bearer ${token}`,
+  const getAuthHeaders = useCallback(() => {
+    const headers = {
       "Content-Type": "application/json",
     };
-  };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
+  }, [token]);
 
   const value = {
     token,
@@ -134,13 +227,10 @@ export function AdminAuthProvider({ children }) {
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;
 }
 
-/**
- * 老王说：使用管理员认证上下文的Hook
- */
 export function useAdminAuth() {
   const context = useContext(AdminAuthContext);
   if (!context) {
-    throw new Error("useAdminAuth必须在AdminAuthProvider内部使用");
+    throw new Error("useAdminAuth must be used within AdminAuthProvider");
   }
   return context;
 }

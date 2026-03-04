@@ -4,6 +4,7 @@ import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { EmailService } from "../../../email/email.service";
 import { encryptString, isEncrypted } from "../../../../common/utils/crypto";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { UpdateEmailConfigDto, TestEmailDto } from "../dtos/admin-system.dto";
 
 @Controller("admin/email")
 @UseGuards(AdminAuthGuard)
@@ -27,26 +28,26 @@ export class AdminEmailController {
   }
 
   @Post()
-  async save(@Body() body: any, @Req() req: Request) {
+  async save(@Body() body: UpdateEmailConfigDto, @Req() req: Request) {
     const existing = await this.prisma.emailConfig.findUnique({ where: { key: "default" } });
     const current = (existing?.payload || {}) as Record<string, any>;
-    const nextResendKeyRaw = String(body?.resendApiKey || "");
-    const nextSendgridKeyRaw = String(body?.sendgridApiKey || "");
-    const nextSmsWebhookRaw = String(body?.smsWebhookUrl || "");
+    const nextResendKeyRaw = String(body?.config?.resendApiKey || "");
+    const nextSendgridKeyRaw = String(body?.config?.sendgridApiKey || "");
+    const nextSmsWebhookRaw = String(body?.config?.smsWebhookUrl || "");
     const shouldKeepResend = !nextResendKeyRaw || nextResendKeyRaw.includes("????");
     const shouldKeepSendgrid = !nextSendgridKeyRaw || nextSendgridKeyRaw.includes("????");
     const shouldKeepSms = !nextSmsWebhookRaw || nextSmsWebhookRaw.includes("????");
     const payload = {
-      provider: String(body?.provider || "console"),
-      from: String(body?.from || ""),
-      webhookUrl: String(body?.webhookUrl || ""),
+      provider: String(body?.config?.provider || "console"),
+      from: String(body?.config?.from || ""),
+      webhookUrl: String(body?.config?.webhookUrl || ""),
       resendApiKey: shouldKeepResend ? current.resendApiKey || "" : encryptString(nextResendKeyRaw),
       sendgridApiKey: shouldKeepSendgrid
         ? current.sendgridApiKey || ""
         : encryptString(nextSendgridKeyRaw),
       smsWebhookUrl: shouldKeepSms ? current.smsWebhookUrl || "" : encryptString(nextSmsWebhookRaw),
-      adminNotifyEmail: String(body?.adminNotifyEmail || ""),
-      testRecipient: String(body?.testRecipient || ""),
+      adminNotifyEmail: String(body?.config?.adminNotifyEmail || ""),
+      testRecipient: String(body?.config?.testRecipient || ""),
       updatedAt: new Date().toISOString(),
     };
     if (payload.resendApiKey && !shouldKeepResend && !isEncrypted(payload.resendApiKey)) {
@@ -81,8 +82,8 @@ export class AdminEmailController {
   }
 
   @Post("test")
-  async test(@Body() body: any) {
-    const to = String(body?.to || "").trim();
+  async test(@Body() body: TestEmailDto) {
+    const to = String(body?.email?.to || "").trim();
     if (!to) {
       throw new BadRequestException("缺少收件人地址");
     }

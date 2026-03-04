@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/co
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { listTopupPackages } from "../../../../common/config/topup";
+import { CreateTopupDto, UpdateTopupDto } from "../dtos/admin-billing.dto";
 import { getPlanCatalog } from "../../../../common/config/plans";
 
 @Controller("admin/billing")
@@ -16,7 +17,7 @@ export class AdminBillingController {
   }
 
   @Post("topups")
-  async createTopup(@Body() body: any) {
+  async createTopup(@Body() body: CreateTopupDto) {
     const id = body?.packageId || body?.id;
     if (!id) {
       throw new Error('Package ID is required');
@@ -42,7 +43,7 @@ export class AdminBillingController {
   }
 
   @Patch("topups/:id")
-  async updateTopup(@Param("id") id: string, @Body() body: any) {
+  async updateTopup(@Param("id") id: string, @Body() body: CreateTopupDto) {
     if (!id) {
       throw new Error('Package ID is required');
     }
@@ -68,13 +69,13 @@ export class AdminBillingController {
   }
 
   @Post("plans")
-  async createPlan(@Body() body: any) {
+  async createPlan(@Body() body: CreateTopupDto) {
     // 老王说：subscriptionPlan模型已删除，此方法已禁用
     throw new Error('This endpoint is no longer available');
   }
 
   @Patch("plans/:id")
-  async updatePlan(@Param("id") id: string, @Body() body: any) {
+  async updatePlan(@Param("id") id: string, @Body() body: CreateTopupDto) {
     // 老王说：subscriptionPlan模型已删除，此方法已禁用
     throw new Error('This endpoint is no longer available');
   }

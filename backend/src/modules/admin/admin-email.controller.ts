@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, UseGuards, BadRequestException, Req } from
 import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { EmailService } from "../email/email.service";
+import { SaveEmailConfigDto, TestEmailDto } from "./dtos/admin-remaining.dto";
 import { encryptString, isEncrypted } from "../../common/utils/crypto";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
@@ -27,7 +28,7 @@ export class AdminEmailController {
   }
 
   @Post()
-  async save(@Body() body: any, @Req() req: Request) {
+  async save(@Body() body: SaveEmailConfigDto, @Req() req: Request) {
     const existing = await this.prisma.emailConfig.findUnique({ where: { key: "default" } });
     const current = (existing?.payload || {}) as Record<string, any>;
     const nextResendKeyRaw = String(body?.resendApiKey || "");
@@ -81,7 +82,7 @@ export class AdminEmailController {
   }
 
   @Post("test")
-  async test(@Body() body: any) {
+  async test(@Body() body: TestEmailDto) {
     const to = String(body?.to || "").trim();
     if (!to) {
       throw new BadRequestException("缺少收件人地址");

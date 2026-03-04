@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Patch, Post, UseGuards, BadRequestException, NotFoundException, Req } from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { UpdatePromotionDefaultsDto, CreatePromotionDto, UpdatePromotionDto } from "./dtos/admin-remaining.dto";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/promotions")
@@ -23,7 +24,7 @@ export class AdminPromotionsController {
   }
 
   @Patch("defaults")
-  async updateDefaults(@Body() body: any) {
+  async updateDefaults(@Body() body: UpdatePromotionDefaultsDto) {
     const payload = body?.defaults || {};
     const defaults = await this.prisma.promotionFallback.upsert({
       where: { key: "default" },
@@ -34,7 +35,7 @@ export class AdminPromotionsController {
   }
 
   @Post()
-  async create(@Body() body: any) {
+  async create(@Body() body: CreatePromotionDto) {
     const promo = body?.promotion;
     if (!promo?.id) {
       throw new BadRequestException("缺少promotion.id参数");
@@ -60,7 +61,7 @@ export class AdminPromotionsController {
   }
 
   @Patch(":id")
-  async update(@Body() body: any, @Req() req: Request) {
+  async update(@Body() body: UpdatePromotionDto, @Req() req: Request) {
     const promoId = String(req.params.id || "");
     const promo = body?.promotion || {};
     const payload = {

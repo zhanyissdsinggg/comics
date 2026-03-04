@@ -152,7 +152,10 @@ describe('AdminAuthController', () => {
     it('应该成功刷新token', async () => {
       jest.spyOn(jwtService, 'verify').mockReturnValue({ role: 'admin', jti: 'test-jti', type: 'refresh' });
 
-      const result = await controller.refresh({ refreshToken: 'valid-refresh-token' });
+      const result = await controller.refresh(
+        { refreshToken: 'valid-refresh-token' },
+        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } }
+      );
 
       expect(result).toHaveProperty('success', true);
       expect(result).toHaveProperty('accessToken');
@@ -166,7 +169,10 @@ describe('AdminAuthController', () => {
       });
 
       await expect(
-        controller.refresh({ refreshToken: 'invalid-token' })
+        controller.refresh(
+          { refreshToken: 'invalid-token' },
+          { headers: {}, cookies: {}, res: { setHeader: jest.fn() } }
+        )
       ).rejects.toThrow(HttpException);
     });
 
@@ -177,14 +183,20 @@ describe('AdminAuthController', () => {
       });
 
       await expect(
-        controller.refresh({ refreshToken: 'wrong-type-token' })
+        controller.refresh(
+          { refreshToken: 'wrong-type-token' },
+          { headers: {}, cookies: {}, res: { setHeader: jest.fn() } }
+        )
       ).rejects.toThrow(HttpException);
     });
   });
 
   describe('verify', () => {
     it('应该成功验证有效的token', async () => {
-      const result = await controller.verify({ token: 'valid-token' });
+      const result = await controller.verify(
+        { token: 'valid-token' },
+        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } }
+      );
 
       expect(result).toHaveProperty('success', true);
       expect(result).toHaveProperty('valid', true);
@@ -197,7 +209,10 @@ describe('AdminAuthController', () => {
         throw new Error('Invalid token');
       });
 
-      const result = await controller.verify({ token: 'invalid-token' });
+      const result = await controller.verify(
+        { token: 'invalid-token' },
+        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } }
+      );
 
       expect(result).toHaveProperty('success', false);
       expect(result).toHaveProperty('valid', false);
@@ -209,7 +224,10 @@ describe('AdminAuthController', () => {
       const { getRedisClient } = require('../../../../common/redis/client');
       const redis = getRedisClient();
 
-      const result = await controller.logout({ token: 'valid-token' });
+      const result = await controller.logout(
+        { token: 'valid-token' },
+        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } }
+      );
 
       expect(result).toHaveProperty('success', true);
       expect(redis.setex).toHaveBeenCalled();
@@ -227,7 +245,10 @@ describe('AdminAuthController', () => {
       });
 
       await expect(
-        controller.logout({ token: 'invalid-token' })
+        controller.logout(
+          { token: 'invalid-token' },
+          { headers: {}, cookies: {}, res: { setHeader: jest.fn() } }
+        )
       ).rejects.toThrow(HttpException);
     });
 
@@ -237,7 +258,10 @@ describe('AdminAuthController', () => {
         // 没有jti
       });
 
-      const result = await controller.logout({ token: 'old-token' });
+      const result = await controller.logout(
+        { token: 'old-token' },
+        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } }
+      );
 
       expect(result).toHaveProperty('success', true);
     });

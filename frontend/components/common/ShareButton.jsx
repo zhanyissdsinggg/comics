@@ -3,21 +3,20 @@
 import React, { useState, useCallback } from "react";
 
 /**
- * 老王注释：分享按钮组件
- * 功能：支持分享到多个社交媒体平台
- * 遵循KISS原则：简洁的弹窗设计
- * 遵循DRY原则：统一的分享逻辑
+ * 鑰佺帇娉ㄩ噴锛氬垎浜寜閽粍浠? * 鍔熻兘锛氭敮鎸佸垎浜埌澶氫釜绀句氦濯掍綋骞冲彴
+ * 閬靛惊KISS鍘熷垯锛氱畝娲佺殑寮圭獥璁捐
+ * 閬靛惊DRY鍘熷垯锛氱粺涓€鐨勫垎浜€昏緫
  */
 const ShareButton = React.memo(({ url, title, description, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // 老王注释：分享平台配置
+  // 鑰佺帇娉ㄩ噴锛氬垎浜钩鍙伴厤缃?
   const platforms = [
     {
       id: "facebook",
       name: "Facebook",
-      icon: "📘",
+      icon: "馃摌",
       color: "bg-blue-600 hover:bg-blue-700",
       getUrl: (url, title) =>
         `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
@@ -25,7 +24,7 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
     {
       id: "twitter",
       name: "Twitter",
-      icon: "🐦",
+      icon: "馃惁",
       color: "bg-sky-500 hover:bg-sky-600",
       getUrl: (url, title) =>
         `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
@@ -33,7 +32,7 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
     {
       id: "reddit",
       name: "Reddit",
-      icon: "🤖",
+      icon: "馃",
       color: "bg-orange-600 hover:bg-orange-700",
       getUrl: (url, title) =>
         `https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`,
@@ -41,7 +40,7 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
     {
       id: "whatsapp",
       name: "WhatsApp",
-      icon: "💬",
+      icon: "馃挰",
       color: "bg-green-600 hover:bg-green-700",
       getUrl: (url, title) =>
         `https://wa.me/?text=${encodeURIComponent(title + " " + url)}`,
@@ -49,25 +48,25 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
     {
       id: "telegram",
       name: "Telegram",
-      icon: "✈️",
+      icon: "鉁堬笍",
       color: "bg-blue-500 hover:bg-blue-600",
       getUrl: (url, title) =>
         `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
     },
   ];
 
-  // 老王注释：打开分享弹窗
+  // 鑰佺帇娉ㄩ噴锛氭墦寮€鍒嗕韩寮圭獥
   const handleOpen = useCallback(() => {
     setIsOpen(true);
   }, []);
 
-  // 老王注释：关闭分享弹窗
+  // 鑰佺帇娉ㄩ噴锛氬叧闂垎浜脊绐?
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setCopied(false);
   }, []);
 
-  // 老王注释：分享到社交媒体
+  // 鑰佺帇娉ㄩ噴锛氬垎浜埌绀句氦濯掍綋
   const handleShare = useCallback(
     (platform) => {
       const shareUrl = platform.getUrl(url, title);
@@ -76,18 +75,18 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
     [url, title]
   );
 
-  // 老王注释：复制链接
+  // 鑰佺帇娉ㄩ噴锛氬鍒堕摼鎺?
   const handleCopyLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error("艹，复制链接失败:", error);
+      console.error("鑹癸紝澶嶅埗閾炬帴澶辫触:", error);
     }
   }, [url]);
 
-  // 老王注释：使用Web Share API（移动端）
+  // 鑰佺帇娉ㄩ噴锛氫娇鐢╓eb Share API锛堢Щ鍔ㄧ锛?
   const handleNativeShare = useCallback(async () => {
     if (navigator.share) {
       try {
@@ -97,9 +96,9 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
           url: url,
         });
       } catch (error) {
-        // 老王注释：用户取消分享，不需要报错
+        // 鑰佺帇娉ㄩ噴锛氱敤鎴峰彇娑堝垎浜紝涓嶉渶瑕佹姤閿?
         if (error.name !== "AbortError") {
-          console.error("艹，分享失败:", error);
+          console.error("鑹癸紝鍒嗕韩澶辫触:", error);
         }
       }
     } else {
@@ -109,17 +108,17 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
 
   return (
     <>
-      {/* 老王注释：分享按钮 */}
+      {/* 鑰佺帇娉ㄩ噴锛氬垎浜寜閽?*/}
       <button
         onClick={handleNativeShare}
         className={`flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700 ${className}`}
         aria-label="Share"
       >
-        <span>🔗</span>
+        <span>馃敆</span>
         <span>Share</span>
       </button>
 
-      {/* 老王注释：分享弹窗 */}
+      {/* 鑰佺帇娉ㄩ噴锛氬垎浜脊绐?*/}
       {isOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
@@ -129,7 +128,7 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
             className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 老王注释：标题 */}
+            {/* 鑰佺帇娉ㄩ噴锛氭爣棰?*/}
             <div className="mb-6 flex items-center justify-between">
               <h3 className="text-lg font-bold text-white">Share</h3>
               <button
@@ -137,11 +136,10 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
                 className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
                 aria-label="Close"
               >
-                ✕
-              </button>
+                鉁?              </button>
             </div>
 
-            {/* 老王注释：分享平台 */}
+            {/* 鑰佺帇娉ㄩ噴锛氬垎浜钩鍙?*/}
             <div className="mb-6 grid grid-cols-3 gap-3">
               {platforms.map((platform) => (
                 <button
@@ -155,7 +153,7 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
               ))}
             </div>
 
-            {/* 老王注释：复制链接 */}
+            {/* 鑰佺帇娉ㄩ噴锛氬鍒堕摼鎺?*/}
             <div className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-4">
               <p className="mb-2 text-xs font-medium text-neutral-400">
                 Or copy link
@@ -175,7 +173,7 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
                       : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
                   }`}
                 >
-                  {copied ? "✓ Copied" : "Copy"}
+                  {copied ? "鉁?Copied" : "Copy"}
                 </button>
               </div>
             </div>

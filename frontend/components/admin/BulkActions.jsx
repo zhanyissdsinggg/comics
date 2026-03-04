@@ -1,11 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
-/**
- * 老王注释：批量操作工具栏组件 - 支持批量删除、批量更新等操作
- * 这个SB组件让用户能快速对多条数据进行操作，提高效率
- */
 export function BulkActions({
   selectedIds = [],
   onDelete = null,
@@ -16,19 +12,11 @@ export function BulkActions({
   actions = [],
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(null);
 
   if (selectedIds.length === 0) {
     return null;
   }
 
-  // 老王说：处理删除确认
-  const handleDeleteClick = () => {
-    setConfirmAction("delete");
-    setShowConfirm(true);
-  };
-
-  // 老王说：确认删除
   const confirmDelete = async () => {
     setShowConfirm(false);
     if (onDelete) {
@@ -36,109 +24,101 @@ export function BulkActions({
     }
   };
 
-  // 老王说：处理自定义操作
   const handleCustomAction = async (action) => {
-    if (action.handler) {
+    if (typeof action?.handler === "function") {
       await action.handler(selectedIds);
     }
   };
 
   return (
-    <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg mb-4">
-      {/* 老王说：选中数量提示 */}
+    <div className="mb-4 flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
       <div className="flex-1">
-        <span className="text-sm text-emerald-400">
-          已选中 {selectedIds.length} 项
-        </span>
+        <span className="text-sm text-emerald-400">Selected {selectedIds.length} items</span>
       </div>
 
-      {/* 老王说：操作按钮 */}
       <div className="flex items-center gap-2">
-        {/* 导出按钮 */}
-        {onExport && (
+        {onExport ? (
           <button
             onClick={() => onExport(selectedIds)}
             disabled={loading}
-            className="px-3 py-1 rounded text-sm border border-blue-500/20 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="rounded border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-sm text-blue-400 transition-colors hover:bg-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            📥 导出
+            Export
           </button>
-        )}
+        ) : null}
 
-        {/* 导入按钮 */}
-        {onImport && (
+        {onImport ? (
           <button
             onClick={() => onImport(selectedIds)}
             disabled={loading}
-            className="px-3 py-1 rounded text-sm border border-purple-500/20 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="rounded border border-purple-500/20 bg-purple-500/10 px-3 py-1 text-sm text-purple-400 transition-colors hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            📤 导入
+            Import
           </button>
-        )}
+        ) : null}
 
-        {/* 自定义操作按钮 */}
         {actions.map((action) => (
           <button
             key={action.id}
             onClick={() => handleCustomAction(action)}
             disabled={loading}
-            className={`px-3 py-1 rounded text-sm border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${action.className || "border-neutral-500/20 bg-neutral-500/10 text-neutral-400 hover:bg-neutral-500/20"}`}
+            className={`rounded border px-3 py-1 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              action.className || "border-neutral-500/20 bg-neutral-500/10 text-neutral-400 hover:bg-neutral-500/20"
+            }`}
           >
-            {action.icon} {action.label}
+            {action.icon ? `${action.icon} ` : ""}
+            {action.label}
           </button>
         ))}
 
-        {/* 更新按钮 */}
-        {onUpdate && (
+        {onUpdate ? (
           <button
             onClick={() => onUpdate(selectedIds)}
             disabled={loading}
-            className="px-3 py-1 rounded text-sm border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="rounded border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-sm text-cyan-400 transition-colors hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            ✏️ 编辑
+            Update
           </button>
-        )}
+        ) : null}
 
-        {/* 删除按钮 */}
-        {onDelete && (
+        {onDelete ? (
           <button
-            onClick={handleDeleteClick}
+            onClick={() => setShowConfirm(true)}
             disabled={loading}
-            className="px-3 py-1 rounded text-sm border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="rounded border border-red-500/20 bg-red-500/10 px-3 py-1 text-sm text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            🗑️ 删除
+            Delete
           </button>
-        )}
+        ) : null}
       </div>
 
-      {/* 老王说：删除确认对话框 */}
-      {showConfirm && confirmAction === "delete" && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-neutral-900 border border-white/10 rounded-lg p-6 max-w-sm">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              确认删除？
-            </h3>
-            <p className="text-neutral-400 mb-6">
-              你确定要删除这 {selectedIds.length} 项吗？此操作无法撤销。
+      {showConfirm ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="max-w-sm rounded-lg border border-white/10 bg-neutral-900 p-6">
+            <h3 className="mb-4 text-lg font-semibold text-white">Confirm Deletion</h3>
+            <p className="mb-6 text-neutral-400">
+              Delete {selectedIds.length} selected items? This action cannot be undone.
             </p>
-            <div className="flex gap-3 justify-end">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 rounded border border-white/10 text-neutral-300 hover:bg-white/5 transition-colors"
+                className="rounded border border-white/10 px-4 py-2 text-neutral-300 transition-colors hover:bg-white/5"
               >
-                取消
+                Cancel
               </button>
               <button
                 onClick={confirmDelete}
                 disabled={loading}
-                className="px-4 py-2 rounded bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="rounded border border-red-500/30 bg-red-500/20 px-4 py-2 text-red-400 transition-colors hover:bg-red-500/30 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? "删除中..." : "确认删除"}
+                {loading ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
+
+export default BulkActions;

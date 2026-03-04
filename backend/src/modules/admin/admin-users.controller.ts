@@ -2,6 +2,7 @@ import { Body, Controller, Get, Patch, UseGuards, BadRequestException, Req } fro
 import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../common/utils/pagination";
+import { BlockUserDto } from "./dtos/admin-remaining.dto";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
 @Controller("admin/users")
@@ -47,7 +48,7 @@ export class AdminUsersController {
   }
 
   @Patch("block")
-  async block(@Body() body: any) {
+  async block(@Body() body: BlockUserDto) {
     const userId = body?.userId;
     if (!userId) {
       throw new BadRequestException("缺少userId参数");

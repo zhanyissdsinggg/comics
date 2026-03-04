@@ -1,18 +1,15 @@
-"use client";
+﻿"use client";
 
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useWalletStore } from "../../store/useWalletStore";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 import LoginGateModal from "./LoginGateModal";
 import AgeGateModal from "./AgeGateModal";
 import WalletTopUpPrompt from "../wallet/WalletTopUpPrompt";
 
 /**
- * 老王注释：模态框容器组件 - 只负责管理所有模态框的状态和逻辑
- * 职责单一：处理登录、年龄验证、钱包充值等模态框的显示/隐藏和事件处理
- * 这个组件把所有模态框逻辑集中在一起，方便维护
- */
+ * 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欑鑶╅柟顑跨劍椤㈠鈧湱鎳撳▍鎺旂磼閸曨亝顐?- 闁告瑯浜ｇ粈瀣嫻閿濆浂鍚€闁荤偛妫欐晶宥夊嫉婢跺瑔渚€骞€娴ｈ鏀遍柣銊ュ婵悂骞€娴ｅ憡瀚查梺顐ｆ缁? * 闁煎崬鐭侀惌妤呭础閺囨氨顏遍柨娑欒壘椤︹晠鎮堕崱娆愵仮鐟滅増娲忛埀顑跨閸曠偓螞閸曨垳宕ｉ悹鍥﹂檷閳ь兛绶氶幐鍫曞礌閸涱厼甯犻柛濠呭亹閻℃垵螣閳╁啠鍋撴担璇℃敱闁汇劌瀚Ο澶岀矆?闂傚懏鍔樺Λ宀勫椽鐏炶偐鐨戝ù鐘烘硾椤︹晠鎮? * 閺夆晜鐟ら柌婊呯磼閸曨亝顐介柟璺猴攻婢у秹寮垫径瀣嗕線骞€娴ｈ鏀遍梺顐ｆ缁额偊姊块崱鏇″幀闁革负鍔嬬粩瀵告導閸戙倗绀夐柡鍌炩偓娑氣敀缂備礁鐡ㄦ慨? */
 export default function HeaderModals({
   activeModal,
   onModalClose,
@@ -42,7 +39,7 @@ export default function HeaderModals({
         const status = requestAdultToggle(true);
         if (status === "NEED_AGE_CONFIRM") {
           onModalClose("login");
-          onModalClose("age", true); // 打开年龄验证模态框
+          onModalClose("age", true); // 闁瑰灚鎸哥槐鎴︾嵁閹绢喚绐炲Δ鐘茬焷閻﹀螣閳╁啠鍋撴担璇℃敱
           return;
         }
       }
@@ -53,8 +50,6 @@ export default function HeaderModals({
         const returnTo = window.sessionStorage.getItem("mn_return_to");
         if (returnTo) {
           window.sessionStorage.removeItem("mn_return_to");
-          // 这里应该调用router.push，但由于这是一个纯逻辑组件，
-          // 我们通过事件或回调来处理导航
           window.location.href = returnTo;
         }
       }
@@ -69,15 +64,15 @@ export default function HeaderModals({
   };
 
   const handleAgeConfirm = (ruleKey) => {
-    track("adult_gate_confirm", { source: "header", ruleKey });
+    trackEvent("adult_gate_confirm", { source: "header", ruleKey });
     confirmAge(ruleKey);
     onModalClose("age");
-    track("adult_gate_enabled", { source: "header" });
+    trackEvent("adult_gate_enabled", { source: "header" });
   };
 
   const handleTopUp = (pkg) => {
-    track("wallet_topup_selected", { package: pkg.id, points: pkg.points, price: pkg.price });
-    // 导航到store页面
+    trackEvent("wallet_topup_selected", { package: pkg.id, points: pkg.points, price: pkg.price });
+    // 閻庝絻澹堥崺鍛村礆閻ㄥore濡炪倗鏁诲?
     if (typeof window !== "undefined") {
       window.location.href = "/store";
     }
@@ -85,7 +80,7 @@ export default function HeaderModals({
 
   return (
     <>
-      {/* 登录模态框 */}
+      {/* 闁谎嗩嚙缂嶅秴螣閳╁啠鍋撴担璇℃敱 */}
       <LoginGateModal
         open={activeModal === "login"}
         onClose={() => {
@@ -100,7 +95,7 @@ export default function HeaderModals({
         onSubmit={handleLogin}
       />
 
-      {/* 年龄验证模态框 */}
+      {/* 妤犵偞鎸崇欢鐐搭殽瀹€鍐婵☆垪鍓濋埀顑跨劍椤?*/}
       <AgeGateModal
         open={activeModal === "age"}
         onClose={() => onModalClose("age")}
@@ -109,7 +104,7 @@ export default function HeaderModals({
         legalAge={legalAge}
       />
 
-      {/* 钱包充值提示 */}
+      {/* 闂佽棄宕€垫﹢宕楅崨顓涘亾閸忕厧绲圭紒鈧?*/}
       <WalletTopUpPrompt
         isOpen={activeModal === "topup"}
         onClose={() => onModalClose("topup")}

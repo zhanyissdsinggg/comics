@@ -6,13 +6,13 @@ const SEARCH_HISTORY_KEY = "mn_search_history";
 const MAX_HISTORY_ITEMS = 10;
 
 /**
- * 老王注释：搜索历史和建议组件
- * 显示最近搜索历史和热门搜索建议
+ * 鑰佺帇娉ㄩ噴锛氭悳绱㈠巻鍙插拰寤鸿缁勪欢
+ * 鏄剧ず鏈€杩戞悳绱㈠巻鍙插拰鐑棬鎼滅储寤鸿
  */
 const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywords = [] }) {
   const [history, setHistory] = useState([]);
 
-  // 老王注释：从localStorage加载搜索历史
+  // 鑰佺帇娉ㄩ噴锛氫粠localStorage鍔犺浇鎼滅储鍘嗗彶
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem(SEARCH_HISTORY_KEY);
@@ -27,7 +27,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   }, []);
 
-  // 老王注释：添加搜索历史
+  // 鑰佺帇娉ㄩ噴锛氭坊鍔犳悳绱㈠巻鍙?
   const addToHistory = (keyword) => {
     if (!keyword || !keyword.trim()) {
       return;
@@ -46,7 +46,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   };
 
-  // 老王注释：删除单个历史记录
+  // 鑰佺帇娉ㄩ噴锛氬垹闄ゅ崟涓巻鍙茶褰?
   const removeFromHistory = (keyword) => {
     const newHistory = history.filter((item) => item !== keyword);
     setHistory(newHistory);
@@ -56,7 +56,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   };
 
-  // 老王注释：清空所有历史
+  // 鑰佺帇娉ㄩ噴锛氭竻绌烘墍鏈夊巻鍙?
   const clearHistory = () => {
     setHistory([]);
     if (typeof window !== "undefined") {
@@ -64,7 +64,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   };
 
-  // 老王注释：处理搜索点击
+  // 鑰佺帇娉ㄩ噴锛氬鐞嗘悳绱㈢偣鍑?
   const handleSearch = (keyword) => {
     addToHistory(keyword);
     if (onSearch) {
@@ -74,7 +74,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
 
   return (
     <div className="space-y-4 md:space-y-6">
-      {/* 老王注释：搜索历史 */}
+      {/* 鑰佺帇娉ㄩ噴锛氭悳绱㈠巻鍙?*/}
       {history.length > 0 ? (
         <div>
           <div className="mb-3 flex items-center justify-between">
@@ -133,7 +133,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
         </div>
       ) : null}
 
-      {/* 老王注释：热门搜索 */}
+      {/* 鑰佺帇娉ㄩ噴锛氱儹闂ㄦ悳绱?*/}
       {hotKeywords.length > 0 ? (
         <div>
           <h3 className="mb-3 text-sm font-medium text-neutral-300 md:text-base">Trending Searches</h3>
@@ -174,7 +174,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
         </div>
       ) : null}
 
-      {/* 老王注释：搜索建议 */}
+      {/* 鑰佺帇娉ㄩ噴锛氭悳绱㈠缓璁?*/}
       <div>
         <h3 className="mb-3 text-sm font-medium text-neutral-300 md:text-base">Quick Searches</h3>
         <div className="flex flex-wrap gap-2">

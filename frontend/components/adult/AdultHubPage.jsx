@@ -9,7 +9,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import AdultGateBlockingPanel from "../series/AdultGateBlockingPanel";
 import LoginGateModal from "../layout/LoginGateModal";
 import AgeGateModal from "../layout/AgeGateModal";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 import {
   LOGIN_GATE_DESCRIPTION,
   LOGIN_GATE_TITLE,
@@ -44,7 +44,7 @@ export default function AdultHubPage() {
 
   const handleGate = () => {
     const wasAdultMode = isAdultMode;
-    track("adult_toggle_attempt", { source: "adult-hub" });
+    trackEvent("adult_toggle_attempt", { source: "adult-hub" });
     const status = requestAdultToggle(isSignedIn);
     if (status === "NEED_LOGIN") {
       setActiveModal("login");
@@ -55,13 +55,13 @@ export default function AdultHubPage() {
       return;
     }
     if (!wasAdultMode) {
-      track("adult_gate_enabled", { source: "adult-hub" });
+      trackEvent("adult_gate_enabled", { source: "adult-hub" });
     }
     setActiveModal(null);
   };
 
   const handleLogin = async ({ email, password, mode }) => {
-    track("adult_gate_login", { source: "adult-hub" });
+    trackEvent("adult_gate_login", { source: "adult-hub" });
     const response = await signIn(email, password, mode);
     if (response?.status === 202) {
       setAuthError("");
@@ -81,14 +81,14 @@ export default function AdultHubPage() {
   };
 
   const handleAgeConfirm = (ruleKey) => {
-    track("adult_gate_confirm", { source: "adult-hub", ruleKey });
+    trackEvent("adult_gate_confirm", { source: "adult-hub", ruleKey });
     confirmAge(ruleKey);
     setActiveModal(null);
-    track("adult_gate_enabled", { source: "adult-hub" });
+    trackEvent("adult_gate_enabled", { source: "adult-hub" });
   };
 
   useEffect(() => {
-    track("view_adult", {});
+    trackEvent("view_adult", {});
   }, []);
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function AdultHubPage() {
     if (gateReportedRef.current) {
       return;
     }
-    track("adult_gate_blocked", { source: "adult-hub", reason: panelStatus });
+    trackEvent("adult_gate_blocked", { source: "adult-hub", reason: panelStatus });
     gateReportedRef.current = true;
   }, [isAdultMode, panelStatus]);
 

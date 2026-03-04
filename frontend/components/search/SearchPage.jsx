@@ -15,7 +15,7 @@ import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useProgressStore } from "../../store/useProgressStore";
 import { recommendRails } from "../../lib/reco/recommender";
 import PortraitCard from "../home/PortraitCard";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -227,12 +227,10 @@ export default function SearchPage() {
           return;
         }
         recoImpressionRef.current.add(key);
-        track("reco_impression", { railName: rail.title, seriesId: item.id });
+        trackEvent("reco_impression", { railName: rail.title, seriesId: item.id });
       });
     });
   }, [recoRails]);
-
-  // 老王优化：使用useCallback避免每次render都创建新函数
   const handleSeriesClick = useCallback((seriesId) => {
     router.push(`/series/${seriesId}`);
   }, [router]);
@@ -317,8 +315,6 @@ export default function SearchPage() {
             </div>
           </div>
         ) : null}
-
-        {/* 老王注释：搜索历史和热门搜索 */}
         {!query && (keywords.length > 0 || hotKeywords.length > 0) ? (
           <SearchHistoryPanel
             onSearch={(keyword) => updateParam("q", keyword)}
@@ -339,7 +335,7 @@ export default function SearchPage() {
                       key={item.id}
                       item={item}
                       onClick={() => {
-                        track("reco_click", { railName: rail.title, seriesId: item.id });
+                        trackEvent("reco_click", { railName: rail.title, seriesId: item.id });
                         router.push(`/series/${item.id}`);
                       }}
                     />
@@ -403,21 +399,21 @@ export default function SearchPage() {
         ) : error ? (
           <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-6 text-sm text-red-200">
             <p className="font-semibold mb-2">{error}</p>
-            <p className="text-xs text-red-300 mb-4">无法加载搜索结果，请检查网络连接或稍后重试。</p>
+            <p className="text-xs text-red-300 mb-4">Please check your connection and try again.</p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => window.location.reload()}
                 className="rounded-full border border-red-400 bg-red-500/20 px-4 py-2 text-xs text-red-200 hover:bg-red-500/30"
               >
-                重新加载
+                Retry
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/")}
                 className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
               >
-                返回首页
+                Go Home
               </button>
             </div>
           </div>
@@ -463,7 +459,7 @@ export default function SearchPage() {
                       {series.badge ? <Pill>{series.badge}</Pill> : null}
                     </div>
                     <p className="text-xs text-neutral-400">
-                      {series.type} · {series.status} · {series.rating}
+                      {series.type} • {series.status} • {series.rating}
                     </p>
                     <div className="flex flex-wrap gap-2 text-[10px] text-neutral-400">
                       {(series.genres || []).slice(0, 3).map((item) => (
@@ -486,7 +482,7 @@ export default function SearchPage() {
                     type="button"
                     onClick={() => updateParam("page", String(page - 1))}
                     disabled={page <= 1}
-                    aria-label="上一页"
+                    aria-label="Previous page"
                     className="rounded-full border border-neutral-800 px-3 py-1 text-xs disabled:opacity-50"
                   >
                     Prev
@@ -495,7 +491,7 @@ export default function SearchPage() {
                     type="button"
                     onClick={() => updateParam("page", String(page + 1))}
                     disabled={page >= Math.ceil(total / PAGE_SIZE)}
-                    aria-label="下一页"
+                    aria-label="Next page"
                     className="rounded-full border border-neutral-800 px-3 py-1 text-xs disabled:opacity-50"
                   >
                     Next
@@ -506,13 +502,10 @@ export default function SearchPage() {
           </>
         )}
       </div>
-
-      {/* 老王注释：高级筛选面板 */}
       <AdvancedFilterPanel
         isOpen={showAdvancedFilters}
         onClose={() => setShowAdvancedFilters(false)}
         onApply={(filters) => {
-          // 老王注释：应用筛选条件
           if (filters.types.length > 0) {
             updateParam("type", filters.types.join(","));
           }

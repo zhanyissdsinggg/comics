@@ -5,8 +5,7 @@ import Image from "next/image";
 import { apiPost } from "../../lib/apiClient";
 
 /**
- * 老王注释：个人资料编辑组件
- * 包括头像上传、昵称、生日、简介等信息编辑
+ * 鑰佺帇娉ㄩ噴锛氫釜浜鸿祫鏂欑紪杈戠粍浠? * 鍖呮嫭澶村儚涓婁紶銆佹樀绉般€佺敓鏃ャ€佺畝浠嬬瓑淇℃伅缂栬緫
  */
 const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) {
   const [avatar, setAvatar] = useState(user?.avatar || "");
@@ -17,20 +16,20 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  // 老王注释：处理头像文件上传
+  // 鑰佺帇娉ㄩ噴锛氬鐞嗗ご鍍忔枃浠朵笂浼?
   const handleAvatarUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
     }
 
-    // 老王注释：检查文件大小（最大2MB）
+    // 鑰佺帇娉ㄩ噴锛氭鏌ユ枃浠跺ぇ灏忥紙鏈€澶?MB锛?
     if (file.size > 2 * 1024 * 1024) {
       setMessage("Avatar file too large (max 2MB)");
       return;
     }
 
-    // 老王注释：检查文件类型
+    // 鑰佺帇娉ㄩ噴锛氭鏌ユ枃浠剁被鍨?
     if (!file.type.startsWith("image/")) {
       setMessage("Please upload an image file");
       return;
@@ -40,12 +39,12 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
     setMessage("");
 
     try {
-      // 老王注释：将图片转换为base64
+      // 鑰佺帇娉ㄩ噴锛氬皢鍥剧墖杞崲涓篵ase64
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64 = reader.result;
 
-        // 老王注释：上传到服务器
+        // 鑰佺帇娉ㄩ噴锛氫笂浼犲埌鏈嶅姟鍣?
         const response = await apiPost("/api/auth/upload-avatar", {
           avatar: base64,
         });
@@ -74,7 +73,7 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
     }
   };
 
-  // 老王注释：保存个人资料
+  // 鑰佺帇娉ㄩ噴锛氫繚瀛樹釜浜鸿祫鏂?
   const handleSave = async () => {
     setSaving(true);
     setMessage("");
@@ -107,7 +106,7 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
         ) : null}
       </div>
 
-      {/* 老王注释：头像上传区域 */}
+      {/* 鑰佺帇娉ㄩ噴锛氬ご鍍忎笂浼犲尯鍩?*/}
       <div className="flex items-start gap-6">
         <div className="flex-shrink-0">
           <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-neutral-800 bg-neutral-900">
@@ -121,7 +120,7 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-3xl text-neutral-600">
-                👤
+                馃懁
               </div>
             )}
           </div>
@@ -145,7 +144,7 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
         </div>
 
         <div className="flex-1 space-y-4">
-          {/* 老王注释：昵称输入 */}
+          {/* 鑰佺帇娉ㄩ噴锛氭樀绉拌緭鍏?*/}
           <div>
             <label className="block text-xs font-medium text-neutral-400">
               Nickname
@@ -163,7 +162,7 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
             </p>
           </div>
 
-          {/* 老王注释：生日输入 */}
+          {/* 鑰佺帇娉ㄩ噴锛氱敓鏃ヨ緭鍏?*/}
           <div>
             <label className="block text-xs font-medium text-neutral-400">
               Birthday
@@ -178,7 +177,7 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
         </div>
       </div>
 
-      {/* 老王注释：个人简介 */}
+      {/* 鑰佺帇娉ㄩ噴锛氫釜浜虹畝浠?*/}
       <div>
         <label className="block text-xs font-medium text-neutral-400">
           Bio
@@ -196,7 +195,7 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
         </p>
       </div>
 
-      {/* 老王注释：保存按钮 */}
+      {/* 鑰佺帇娉ㄩ噴锛氫繚瀛樻寜閽?*/}
       <div className="flex justify-end gap-3">
         <button
           type="button"

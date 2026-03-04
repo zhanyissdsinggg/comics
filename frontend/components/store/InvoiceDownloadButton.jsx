@@ -1,21 +1,19 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useCallback } from "react";
 
 /**
- * 老王注释：发票下载按钮组件
- * 功能：支持下载PDF和CSV格式的发票
- * 遵循KISS原则：简洁的下载流程
- * 遵循DRY原则：统一的下载逻辑
+ * 閼颁胶甯囧▔銊╁櫞閿涙艾褰傜粊銊ょ瑓鏉炶姤瀵滈柦顔剧矋娴? * 閸旂喕鍏橀敍姘暜閹镐椒绗呮潪绲嘍F閸滃瓔SV閺嶇厧绱￠惃鍕絺缁? * 闁潧鎯奒ISS閸樼喎鍨敍姘辩暆濞蹭胶娈戞稉瀣祰濞翠胶鈻?
+ * 闁潧鎯奃RY閸樼喎鍨敍姘辩埠娑撯偓閻ㄥ嫪绗呮潪浠嬧偓鏄忕帆
  */
 const InvoiceDownloadButton = React.memo(({ order, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [format, setFormat] = useState("pdf");
 
-  // 老王注释：生成PDF发票
+  // 閼颁胶甯囧▔銊╁櫞閿涙氨鏁撻幋鎬璂F閸欐垹銈?
   const generatePDF = useCallback((order) => {
-    // 老王注释：实际项目中应该调用后端API生成PDF
+    // 閼颁胶甯囧▔銊╁櫞閿涙艾鐤勯梽鍛淬€嶉惄顔昏厬鎼存棁顕氱拫鍐暏閸氬海顏珹PI閻㈢喐鍨歅DF
     const content = `
 INVOICE
 Order ID: ${order.id}
@@ -32,9 +30,9 @@ Total: $${order.amount}
     return blob;
   }, []);
 
-  // 老王注释：生成CSV发票
+  // 閼颁胶甯囧▔銊╁櫞閿涙氨鏁撻幋鎬孲V閸欐垹銈?
   const generateCSV = useCallback((order) => {
-    // 老王注释：实际项目中应该调用后端API生成CSV
+    // 閼颁胶甯囧▔銊╁櫞閿涙艾鐤勯梽鍛淬€嶉惄顔昏厬鎼存棁顕氱拫鍐暏閸氬海顏珹PI閻㈢喐鍨欳SV
     const headers = "Order ID,Date,Item,Price,Total\n";
     const rows =
       order.items
@@ -49,19 +47,19 @@ Total: $${order.amount}
     return blob;
   }, []);
 
-  // 老王注释：下载发票
+  // 閼颁胶甯囧▔銊╁櫞閿涙矮绗呮潪钘夊絺缁?
   const handleDownload = useCallback(async () => {
     setDownloading(true);
 
     try {
-      // 老王注释：模拟下载延迟
+      // 閼颁胶甯囧▔銊╁櫞閿涙碍膩閹风喍绗呮潪钘夋鏉?
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // 老王注释：生成发票文件
+      // 閼颁胶甯囧▔銊╁櫞閿涙氨鏁撻幋鎰絺缁併劍鏋冩禒?
       const blob =
         format === "pdf" ? generatePDF(order) : generateCSV(order);
 
-      // 老王注释：创建下载链接
+      // 閼颁胶甯囧▔銊╁櫞閿涙艾鍨卞杞扮瑓鏉炰粙鎽奸幒?
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -71,10 +69,9 @@ Total: $${order.amount}
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      // 老王注释：关闭弹窗
       setIsOpen(false);
     } catch (error) {
-      console.error("艹，下载发票失败:", error);
+      console.error("Failed to download invoice:", error);
       alert("Failed to download invoice. Please try again.");
     } finally {
       setDownloading(false);
@@ -83,17 +80,17 @@ Total: $${order.amount}
 
   return (
     <>
-      {/* 老王注释：下载按钮 */}
+      {/* 閼颁胶甯囧▔銊╁櫞閿涙矮绗呮潪鑺ュ瘻闁?*/}
       <button
         onClick={() => setIsOpen(true)}
         className={`flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700 ${className}`}
         aria-label="Download Invoice"
       >
-        <span>📄</span>
+        <span>DL</span>
         <span>Download Invoice</span>
       </button>
 
-      {/* 老王注释：下载弹窗 */}
+      {/* 閼颁胶甯囧▔銊╁櫞閿涙矮绗呮潪钘夎剨缁?*/}
       {isOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
@@ -103,7 +100,7 @@ Total: $${order.amount}
             className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 老王注释：标题 */}
+            {/* 閼颁胶甯囧▔銊╁櫞閿涙碍鐖ｆ０?*/}
             <div className="mb-6 flex items-center justify-between">
               <h3 className="text-lg font-bold text-white">
                 Download Invoice
@@ -114,11 +111,10 @@ Total: $${order.amount}
                 className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white disabled:opacity-50"
                 aria-label="Close"
               >
-                ✕
-              </button>
+                閴?              </button>
             </div>
 
-            {/* 老王注释：订单信息 */}
+            {/* 閼颁胶甯囧▔銊╁櫞閿涙俺顓归崡鏇氫繆閹?*/}
             <div className="mb-6 rounded-xl border border-neutral-800 bg-neutral-900/50 p-4">
               <div className="mb-2 flex items-center justify-between text-sm">
                 <span className="text-neutral-400">Order ID</span>
@@ -136,7 +132,7 @@ Total: $${order.amount}
               </div>
             </div>
 
-            {/* 老王注释：格式选择 */}
+            {/* 閼颁胶甯囧▔銊╁櫞閿涙碍鐗稿蹇涒偓澶嬪 */}
             <div className="mb-6">
               <label className="mb-3 block text-sm font-medium text-neutral-300">
                 Select Format
@@ -151,7 +147,7 @@ Total: $${order.amount}
                       : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
                   }`}
                 >
-                  <div className="mb-2 text-2xl">📕</div>
+                  <div className="mb-2 text-2xl">棣冩憙</div>
                   <div className="text-sm font-semibold text-white">PDF</div>
                   <div className="text-xs text-neutral-400">
                     Printable format
@@ -166,7 +162,7 @@ Total: $${order.amount}
                       : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
                   }`}
                 >
-                  <div className="mb-2 text-2xl">📊</div>
+                  <div className="mb-2 text-2xl">棣冩惓</div>
                   <div className="text-sm font-semibold text-white">CSV</div>
                   <div className="text-xs text-neutral-400">
                     Spreadsheet format
@@ -175,7 +171,7 @@ Total: $${order.amount}
               </div>
             </div>
 
-            {/* 老王注释：下载按钮 */}
+            {/* 閼颁胶甯囧▔銊╁櫞閿涙矮绗呮潪鑺ュ瘻闁?*/}
             <button
               onClick={handleDownload}
               disabled={downloading}

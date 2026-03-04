@@ -1,12 +1,9 @@
 /**
- * HomeRailsContainer - 负责渲染所有的内容rails
+ * HomeRailsContainer - 鐠愮喕鐭楀〒鍙夌厠閹碘偓閺堝娈戦崘鍛啇rails
  *
- * 职责：
- * - 渲染推荐rails
- * - 处理rail点击事件
- * - 追踪rail曝光
- * - 显示友好的空状态提示
- * - 老王添加：根据activeGenre过滤内容
+ * 閼卞矁鐭楅敍? * - 濞撳弶鐓嬮幒銊ㄥ礃rails
+ * - 婢跺嫮鎮妑ail閻愮懓鍤禍瀣╂
+ * - 鏉╁€熼嚋rail閺囨繂鍘? * - 閺勫墽銇氶崣瀣偨閻ㄥ嫮鈹栭悩鑸碘偓浣瑰絹缁€? * - 閼颁胶甯囧ǎ璇插閿涙碍鐗撮幑鐢tiveGenre鏉╁洦鎶ら崘鍛啇
  */
 
 "use client";
@@ -15,7 +12,7 @@ import { useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Rail from "./Rail";
 import EmptyState from "../common/EmptyState";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 import { useHomeRecommendations } from "./HomeRecommendations";
 import { useHomeData } from "./HomeDataProvider";
 
@@ -25,7 +22,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
   const { seriesList } = useHomeData();
   const recoImpressionRef = useRef(new Set());
 
-  // 老王优化：将seriesGenresMap提取到单独的useMemo，避免重复构建
+    // Build a map for efficient genre filtering
   const seriesGenresMap = useMemo(() => {
     const map = new Map();
     seriesList.forEach((series) => {
@@ -36,17 +33,17 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
     return map;
   }, [seriesList]);
 
-  // 老王添加：根据activeGenre过滤rails
+  // 閼颁胶甯囧ǎ璇插閿涙碍鐗撮幑鐢tiveGenre鏉╁洦鎶ails
   const filteredRails = useMemo(() => {
     if (activeGenre === "all") {
       return activeRails;
     }
 
-    // 老王注释：过滤每个rail的items，只保留包含activeGenre的series
+    // 閼颁胶甯囧▔銊╁櫞閿涙俺绻冨銈嗙槨娑撶尯ail閻ㄥ埇tems閿涘苯褰ф穱婵堟殌閸栧懎鎯坅ctiveGenre閻ㄥ墕eries
     return activeRails
       .map((rail) => {
         const filteredItems = rail.items.filter((item) => {
-          // 老王注释：从item.id中提取seriesId（可能是"seriesId-episodeId"格式）
+                    // Item ids can be in the form seriesId-episodeId
           const seriesId = item.id.split("-")[0];
           const genres = seriesGenresMap.get(seriesId);
 
@@ -54,7 +51,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
             return false;
           }
 
-          // 老王注释：检查genres数组是否包含activeGenre（不区分大小写）
+                    // Keep items whose genre matches the active chip
           return genres.some((g) => g.toLowerCase() === activeGenre.toLowerCase());
         });
 
@@ -63,7 +60,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
           items: filteredItems,
         };
       })
-      .filter((rail) => rail.items.length > 0); // 老王注释：移除空的rails
+      .filter((rail) => rail.items.length > 0); // 閼颁胶甯囧▔銊╁櫞閿涙氨些闂勩倗鈹栭惃鍓卆ils
   }, [activeRails, activeGenre, seriesGenresMap]);
 
   // Track rail impressions
@@ -75,21 +72,21 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
           return;
         }
         recoImpressionRef.current.add(key);
-        track("reco_impression", { railName: rail.title, seriesId: item.id });
+        trackEvent("reco_impression", { railName: rail.title, seriesId: item.id });
       });
     });
   }, [filteredRails]);
 
-  // 老王优化：使用useCallback避免不必要的re-render
+  // 閼颁胶甯囨导妯哄閿涙矮濞囬悽鈺眘eCallback闁灝鍘ゆ稉宥呯箑鐟曚胶娈憆e-render
   const handleItemClick = useCallback((rail, item) => {
-    track("reco_click", {
+    trackEvent("reco_click", {
       railName: rail.title,
       seriesId: item.id,
     });
     router.push(`/series/${item.id}`);
   }, [router]);
 
-  // 老王添加：根据rail类型生成推荐理由
+  // 閼颁胶甯囧ǎ璇插閿涙碍鐗撮幑鐣哸il缁鐎烽悽鐔稿灇閹恒劏宕橀悶鍡欐暠
   const getRailReason = useCallback((rail) => {
     const title = rail.title.toLowerCase();
     if (title.includes("trending") || title.includes("popular")) {
@@ -110,7 +107,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
     return "Recommended for you";
   }, []);
 
-  // 老王添加：友好的空状态处理
+    // Friendly empty state for current filter
   if (filteredRails.length === 0) {
     return (
       <EmptyState

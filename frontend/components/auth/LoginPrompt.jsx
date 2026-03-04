@@ -5,11 +5,10 @@ import { X, LogIn, Sparkles, Gift, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 /**
- * 老王注释：登录引导弹窗组件 - iOS风格
- * 功能：友好地引导用户登录，提升注册转化率
- * 遵循KISS原则：简洁明了的引导信息
- * 遵循DRY原则：可复用的弹窗组件
- */
+ * 鑰佺帇娉ㄩ噴锛氱櫥褰曞紩瀵煎脊绐楃粍浠?- iOS椋庢牸
+ * 鍔熻兘锛氬弸濂藉湴寮曞鐢ㄦ埛鐧诲綍锛屾彁鍗囨敞鍐岃浆鍖栫巼
+ * 閬靛惊KISS鍘熷垯锛氱畝娲佹槑浜嗙殑寮曞淇℃伅
+ * 閬靛惊DRY鍘熷垯锛氬彲澶嶇敤鐨勫脊绐楃粍浠? */
 const LoginPrompt = memo(function LoginPrompt({
   isOpen = false,
   onClose,
@@ -25,17 +24,17 @@ const LoginPrompt = memo(function LoginPrompt({
   const router = useRouter();
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // 老王注释：控制动画
+  // 鑰佺帇娉ㄩ噴锛氭帶鍒跺姩鐢?
   useEffect(() => {
     if (isOpen) {
-      // 延迟显示动画
+      // 寤惰繜鏄剧ず鍔ㄧ敾
       setTimeout(() => setIsAnimating(true), 50);
     } else {
       setIsAnimating(false);
     }
   }, [isOpen]);
 
-  // 老王注释：处理关闭
+  // 鑰佺帇娉ㄩ噴锛氬鐞嗗叧闂?
   const handleClose = () => {
     setIsAnimating(false);
     setTimeout(() => {
@@ -43,10 +42,10 @@ const LoginPrompt = memo(function LoginPrompt({
     }, 300);
   };
 
-  // 老王修复：触发打开真正的登录表单（LoginGateModal）
+  // 鑰佺帇淇锛氳Е鍙戞墦寮€鐪熸鐨勭櫥褰曡〃鍗曪紙LoginGateModal锛?
   const handleLogin = () => {
     handleClose();
-    // 延迟触发事件，让关闭动画完成
+    // 寤惰繜瑙﹀彂浜嬩欢锛岃鍏抽棴鍔ㄧ敾瀹屾垚
     setTimeout(() => {
       const event = new CustomEvent("auth:open", {
         detail: { returnTo: "/" }
@@ -55,7 +54,7 @@ const LoginPrompt = memo(function LoginPrompt({
     }, 300);
   };
 
-  // 老王修复：触发打开注册表单
+  // 鑰佺帇淇锛氳Е鍙戞墦寮€娉ㄥ唽琛ㄥ崟
   const handleSignup = () => {
     handleClose();
     setTimeout(() => {
@@ -66,7 +65,7 @@ const LoginPrompt = memo(function LoginPrompt({
     }, 300);
   };
 
-  // 老王注释：阻止点击事件冒泡
+  // 鑰佺帇娉ㄩ噴锛氶樆姝㈢偣鍑讳簨浠跺啋娉?
   const handleContentClick = (e) => {
     e.stopPropagation();
   };
@@ -83,7 +82,7 @@ const LoginPrompt = memo(function LoginPrompt({
       onClick={handleClose}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
-      {/* iOS风格弹窗 - 从底部滑入（移动端）或淡入（桌面端） */}
+      {/* iOS椋庢牸寮圭獥 - 浠庡簳閮ㄦ粦鍏ワ紙绉诲姩绔級鎴栨贰鍏ワ紙妗岄潰绔級 */}
       <div
         onClick={handleContentClick}
         className={`relative w-full sm:max-w-md bg-neutral-900/95 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 sm:rounded-3xl ${
@@ -96,12 +95,12 @@ const LoginPrompt = memo(function LoginPrompt({
           borderTopRightRadius: "1.5rem"
         }}
       >
-        {/* 老王注释：移动端拖动指示器 */}
+        {/* 鑰佺帇娉ㄩ噴锛氱Щ鍔ㄧ鎷栧姩鎸囩ず鍣?*/}
         <div className="flex justify-center pt-3 pb-2 sm:hidden">
           <div className="w-10 h-1 rounded-full bg-neutral-700" />
         </div>
 
-        {/* 老王注释：关闭按钮 */}
+        {/* 鑰佺帇娉ㄩ噴锛氬叧闂寜閽?*/}
         <button
           type="button"
           onClick={handleClose}
@@ -112,20 +111,20 @@ const LoginPrompt = memo(function LoginPrompt({
         </button>
 
         <div className="p-6 sm:p-8">
-          {/* 老王注释：图标 */}
+          {/* 鑰佺帇娉ㄩ噴锛氬浘鏍?*/}
           <div className="mb-4 flex justify-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-400">
               <LogIn size={32} />
             </div>
           </div>
 
-          {/* 老王注释：标题和描述 */}
+          {/* 鑰佺帇娉ㄩ噴锛氭爣棰樺拰鎻忚堪 */}
           <div className="mb-6 text-center">
             <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
             <p className="text-sm text-neutral-400">{message}</p>
           </div>
 
-          {/* 老王注释：功能列表 */}
+          {/* 鑰佺帇娉ㄩ噴锛氬姛鑳藉垪琛?*/}
           {showFeatures && features.length > 0 && (
             <div className="mb-6 space-y-3">
               {features.map((feature, index) => {
@@ -145,7 +144,7 @@ const LoginPrompt = memo(function LoginPrompt({
             </div>
           )}
 
-          {/* 老王注释：操作按钮 */}
+          {/* 鑰佺帇娉ㄩ噴锛氭搷浣滄寜閽?*/}
           <div className="space-y-3">
             <button
               type="button"
@@ -163,7 +162,7 @@ const LoginPrompt = memo(function LoginPrompt({
             </button>
           </div>
 
-          {/* 老王注释：底部提示 */}
+          {/* 鑰佺帇娉ㄩ噴锛氬簳閮ㄦ彁绀?*/}
           <p className="mt-4 text-center text-xs text-neutral-500">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>

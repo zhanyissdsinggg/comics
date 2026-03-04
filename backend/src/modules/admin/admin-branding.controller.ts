@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { getBrandingConfig, setBrandingConfig } from "../../common/storage/mock-store";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
+import { UpdateBrandingDto } from "./dtos/admin-remaining.dto";
 
 @Controller("admin/branding")
 @UseGuards(AdminAuthGuard)
@@ -12,7 +13,7 @@ export class AdminBrandingController {
 
   @Post()
   async save(
-    @Body() body: any
+    @Body() body: UpdateBrandingDto
   ) {
     const payload = {
       siteLogoUrl: String(body?.siteLogoUrl || "").trim(),

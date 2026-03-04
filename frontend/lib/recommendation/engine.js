@@ -1,31 +1,26 @@
-/**
- * 老王注释：个性化推荐引擎
- * 功能：基于用户阅读历史、评分、关注计算推荐作品
- * 遵循KISS原则：简单的协同过滤算法
- * 遵循DRY原则：复用数据计算逻辑
+﻿/**
+ * Recommendation engine.
+ *
+ * Exposes three strategies:
+ * - content: similarity by metadata
+ * - collaborative: user-behavior overlap
+ * - hybrid: weighted merge of both
  */
 
-/**
- * 老王注释：计算两个数组的交集大小
- */
 function getIntersectionSize(arr1, arr2) {
   const set1 = new Set(arr1);
   return arr2.filter((item) => set1.has(item)).length;
 }
 
-/**
- * 老王注释：计算作品相似度
- * 基于类型、标签、作者等属性
- */
 function calculateSeriesSimilarity(series1, series2) {
   let score = 0;
 
-  // 类型匹配（权重：30%）
+  // Type match: 30%
   if (series1.type === series2.type) {
     score += 0.3;
   }
 
-  // 标签匹配（权重：40%）
+  // Genre overlap: 40%
   const genres1 = series1.genres || [];
   const genres2 = series2.genres || [];
   const genreMatch = getIntersectionSize(genres1, genres2);
@@ -33,24 +28,20 @@ function calculateSeriesSimilarity(series1, series2) {
     score += 0.4 * (genreMatch / Math.max(genres1.length, genres2.length));
   }
 
-  // 作者匹配（权重：20%）
+  // Author match: 20%
   if (series1.author && series2.author && series1.author === series2.author) {
     score += 0.2;
   }
 
-  // 评分相近（权重：10%）
+  // Rating proximity: 10%
   if (series1.rating && series2.rating) {
     const ratingDiff = Math.abs(series1.rating - series2.rating);
-    score += 0.1 * (1 - ratingDiff / 5); // 假设评分范围是0-5
+    score += 0.1 * (1 - ratingDiff / 5);
   }
 
   return score;
 }
 
-/**
- * 老王注释：基于内容的推荐
- * 根据用户已阅读/关注的作品，推荐相似作品
- */
 export function getContentBasedRecommendations(
   allSeries,
   userSeriesIds,
@@ -60,8 +51,8 @@ export function getContentBasedRecommendations(
     return [];
   }
 
+  // Cold start: rank by quality + popularity.
   if (!Array.isArray(userSeriesIds) || userSeriesIds.length === 0) {
-    // 如果用户没有历史，返回热门作品
     return allSeries
       .filter((s) => s.rating && s.ratingCount)
       .sort((a, b) => {
@@ -72,21 +63,19 @@ export function getContentBasedRecommendations(
       .slice(0, limit);
   }
 
-  // 获取用户已阅读的作品
   const userSeries = allSeries.filter((s) => userSeriesIds.includes(s.id));
 
-  // 计算每个候选作品的推荐分数
-  const candidates = allSeries
-    .filter((s) => !userSeriesIds.includes(s.id)) // 排除已阅读的
+  return allSeries
+    .filter((s) => !userSeriesIds.includes(s.id))
     .map((candidate) => {
-      // 计算与用户所有已阅读作品的平均相似度
-      const similarities = userSeries.map((userSeries) =>
-        calculateSeriesSimilarity(userSeries, candidate)
+      const similarities = userSeries.map((s) =>
+        calculateSeriesSimilarity(s, candidate)
       );
       const avgSimilarity =
-        similarities.reduce((sum, s) => sum + s, 0) / similarities.length;
+        similarities.length > 0
+          ? similarities.reduce((sum, s) => sum + s, 0) / similarities.length
+          : 0;
 
-      // 综合相似度和作品热度
       const popularity = candidate.rating
         ? (candidate.rating / 5) * Math.log(candidate.ratingCount || 1)
         : 0;
@@ -99,15 +88,8 @@ export function getContentBasedRecommendations(
     })
     .sort((a, b) => b.recommendationScore - a.recommendationScore)
     .slice(0, limit);
-
-  return candidates;
 }
 
-/**
- * 老王注释：基于协同过滤的推荐
- * 找到相似用户，推荐他们喜欢的作品
- * 注意：这是简化版本，实际应用需要后端支持
- */
 export function getCollaborativeRecommendations(
   allSeries,
   userSeriesIds,
@@ -121,32 +103,35 @@ export function getCollaborativeRecommendations(
   if (
     !Array.isArray(userSeriesIds) ||
     userSeriesIds.length === 0 ||
+    !Array.isArray(allUsersBehavior) ||
     allUsersBehavior.length === 0
   ) {
     return [];
   }
 
-  // 计算与其他用户的相似度
   const userSimilarities = allUsersBehavior
     .map((otherUser) => {
-      const commonSeries = getIntersectionSize(
-        userSeriesIds,
-        otherUser.seriesIds
-      );
-      const similarity =
-        commonSeries /
-        Math.sqrt(userSeriesIds.length * otherUser.seriesIds.length);
+      const seriesIds = Array.isArray(otherUser?.seriesIds)
+        ? otherUser.seriesIds
+        : [];
+      if (seriesIds.length === 0) {
+        return null;
+      }
+
+      const commonSeries = getIntersectionSize(userSeriesIds, seriesIds);
+      const denominator = Math.sqrt(userSeriesIds.length * seriesIds.length);
+      const similarity = denominator > 0 ? commonSeries / denominator : 0;
+
       return {
-        userId: otherUser.userId,
+        userId: otherUser?.userId,
         similarity,
-        seriesIds: otherUser.seriesIds,
+        seriesIds,
       };
     })
-    .filter((u) => u.similarity > 0.1) // 过滤掉相似度太低的用户
+    .filter((u) => u && u.similarity > 0.1)
     .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, 20); // 取前20个相似用户
+    .slice(0, 20);
 
-  // 统计相似用户喜欢的作品
   const candidateScores = {};
   userSimilarities.forEach((similarUser) => {
     similarUser.seriesIds.forEach((seriesId) => {
@@ -157,8 +142,7 @@ export function getCollaborativeRecommendations(
     });
   });
 
-  // 排序并返回推荐
-  const recommendations = Object.entries(candidateScores)
+  return Object.entries(candidateScores)
     .map(([seriesId, score]) => {
       const series = allSeries.find((s) => s.id === seriesId);
       return series ? { ...series, recommendationScore: score } : null;
@@ -166,28 +150,20 @@ export function getCollaborativeRecommendations(
     .filter(Boolean)
     .sort((a, b) => b.recommendationScore - a.recommendationScore)
     .slice(0, limit);
-
-  return recommendations;
 }
 
-/**
- * 老王注释：混合推荐策略
- * 结合基于内容和协同过滤的推荐
- */
 export function getHybridRecommendations(
   allSeries,
   userSeriesIds,
   allUsersBehavior = [],
   limit = 10
 ) {
-  // 获取基于内容的推荐
   const contentBased = getContentBasedRecommendations(
     allSeries,
     userSeriesIds,
     limit * 2
   );
 
-  // 获取协同过滤推荐
   const collaborative = getCollaborativeRecommendations(
     allSeries,
     userSeriesIds,
@@ -195,38 +171,33 @@ export function getHybridRecommendations(
     limit * 2
   );
 
-  // 合并并去重
   const combined = new Map();
 
   contentBased.forEach((series) => {
     combined.set(series.id, {
       ...series,
-      score: (series.recommendationScore || 0) * 0.6, // 内容推荐权重60%
+      score: (series.recommendationScore || 0) * 0.6,
     });
   });
 
   collaborative.forEach((series) => {
     if (combined.has(series.id)) {
       const existing = combined.get(series.id);
-      existing.score += (series.recommendationScore || 0) * 0.4; // 协同过滤权重40%
-    } else {
-      combined.set(series.id, {
-        ...series,
-        score: (series.recommendationScore || 0) * 0.4,
-      });
+      existing.score += (series.recommendationScore || 0) * 0.4;
+      return;
     }
+
+    combined.set(series.id, {
+      ...series,
+      score: (series.recommendationScore || 0) * 0.4,
+    });
   });
 
-  // 排序并返回
   return Array.from(combined.values())
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 }
 
-/**
- * 老王注释：获取推荐作品
- * 主入口函数
- */
 export function getRecommendations({
   allSeries = [],
   historySeriesIds = [],
@@ -234,9 +205,8 @@ export function getRecommendations({
   progressSeriesIds = [],
   allUsersBehavior = [],
   limit = 10,
-  strategy = "hybrid", // 'content', 'collaborative', 'hybrid'
+  strategy = "hybrid",
 }) {
-  // 合并用户所有相关的作品ID
   const userSeriesIds = Array.from(
     new Set([...historySeriesIds, ...followedSeriesIds, ...progressSeriesIds])
   );

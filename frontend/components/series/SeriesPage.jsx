@@ -1,15 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SeriesHeader from "./SeriesHeader";
 import EpisodeList from "./EpisodeList";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
-import AdultLoginModal from "./AdultLoginModal";
-import AdultAgeModal from "./AdultAgeModal";
-import ActionModal from "./ActionModal";
-import CommentsSection from "./CommentsSection";
-import SimilarSeriesSection from "./SimilarSeriesSection";
 import SiteHeader from "../layout/SiteHeader";
 import Skeleton from "../common/Skeleton";
 import {
@@ -18,7 +14,7 @@ import {
   requestEnableAdult,
 } from "../../lib/adultGate";
 import { apiGet } from "../../lib/apiClient";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useEntitlementStore } from "../../store/useEntitlementStore";
 import { useRewardsStore } from "../../store/useRewardsStore";
@@ -27,6 +23,19 @@ import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useCouponStore } from "../../store/useCouponStore";
 import { useProgressStore } from "../../store/useProgressStore";
+
+const AdultLoginModal = dynamic(() => import("./AdultLoginModal"), {
+  ssr: false,
+});
+const AdultAgeModal = dynamic(() => import("./AdultAgeModal"), {
+  ssr: false,
+});
+const CommentsSection = dynamic(() => import("./CommentsSection"), {
+  ssr: false,
+});
+const SimilarSeriesSection = dynamic(() => import("./SimilarSeriesSection"), {
+  ssr: false,
+});
 
 function getFirstEpisodeId(episodes) {
   if (!Array.isArray(episodes) || episodes.length === 0) {
@@ -48,9 +57,10 @@ export default function SeriesPage({ seriesId }) {
   const [gateStatus, setGateStatus] = useState("OK");
   const [activeModal, setActiveModal] = useState(null);
   const [adultState, setAdultState] = useState(readAdultState());
-  const [infoModal, setInfoModal] = useState(null);
+  const [showSecondarySections, setShowSecondarySections] = useState(false);
   const [authError, setAuthError] = useState("");
   const gateReportedRef = useRef(false);
+  const secondarySectionsRef = useRef(null);
 
   const walletStore = useWalletStore();
   const { loadWallet } = walletStore;
@@ -105,7 +115,7 @@ export default function SeriesPage({ seriesId }) {
           setGateStatus(response.reason);
         }
         if (!gateReportedRef.current) {
-          track("adult_gate_blocked", {
+          trackEvent("adult_gate_blocked", {
             source: "series",
             seriesId,
             reason: response.reason,
@@ -129,7 +139,7 @@ export default function SeriesPage({ seriesId }) {
         setGateStatus(response.data.reason);
       }
       if (!gateReportedRef.current) {
-        track("adult_gate_blocked", {
+        trackEvent("adult_gate_blocked", {
           source: "series",
           seriesId,
           reason: response.data?.reason,
@@ -167,11 +177,11 @@ export default function SeriesPage({ seriesId }) {
 
   useEffect(() => {
     if (data?.series?.id) {
-      // 老王注释：这些不需要认证，所有用户都可以调用
-      track("view_series", { seriesId: data.series.id });
+      // 鑰佺帇娉ㄩ噴锛氳繖浜涗笉闇€瑕佽璇侊紝鎵€鏈夌敤鎴烽兘鍙互璋冪敤
+      trackEvent("view_series", { seriesId: data.series.id });
       viewSeries(data.series.id);
 
-      // 老王注释：这些API需要认证，只有登录用户才调用，避免401错误
+      // 鑰佺帇娉ㄩ噴锛氳繖浜汚PI闇€瑕佽璇侊紝鍙湁鐧诲綍鐢ㄦ埛鎵嶈皟鐢紝閬垮厤401閿欒
       if (isSignedIn) {
         loadWallet();
         loadEntitlement(data.series.id);
@@ -201,6 +211,32 @@ export default function SeriesPage({ seriesId }) {
     }
     setGateStatus("OK");
   }, [error, series?.adult, adultState.isAdultMode]);
+
+  useEffect(() => {
+    setShowSecondarySections(false);
+  }, [seriesId]);
+
+  useEffect(() => {
+    if (showSecondarySections || loading || error) {
+      return;
+    }
+    const target = secondarySectionsRef.current;
+    if (!target || typeof IntersectionObserver === "undefined") {
+      setShowSecondarySections(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShowSecondarySections(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "260px 0px" }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [showSecondarySections, loading, error]);
 
   const openGateModal = () => {
     const status = requestEnableAdult();
@@ -243,7 +279,7 @@ export default function SeriesPage({ seriesId }) {
   };
 
   const handleRead = useCallback((seriesIdValue, episodeId) => {
-    track("click_episode_read", { seriesId: seriesIdValue, episodeId });
+    trackEvent("click_episode_read", { seriesId: seriesIdValue, episodeId });
     router.push(`/read/${seriesIdValue}/${episodeId}`);
   }, [router]);
 
@@ -259,19 +295,9 @@ export default function SeriesPage({ seriesId }) {
   );
 
   const handleSubscribe = useCallback((seriesIdValue, episodeId) => {
-    track("click_subscribe_from_ttf", { seriesId: seriesIdValue, episodeId });
+    trackEvent("click_subscribe_from_ttf", { seriesId: seriesIdValue, episodeId });
     router.push("/subscribe");
   }, [router]);
-
-  const handleSubscribeSeries = useCallback(() => {
-    track("click_subscribe_from_series", { seriesId });
-    router.push(`/subscribe?returnTo=/series/${seriesId}`);
-  }, [router, seriesId]);
-
-  const handleStore = useCallback(() => {
-    track("offer_click", { offerId: "store_entry", entry: "SERIES" });
-    router.push(`/store?returnTo=/series/${seriesId}&focus=auto`);
-  }, [router, seriesId]);
 
   const handleContinue = lastReadEpisodeId
     ? () => handleRead(seriesId, lastReadEpisodeId)
@@ -374,22 +400,26 @@ export default function SeriesPage({ seriesId }) {
         <SiteHeader />
 
         <AdultGateBlockingPanel status={gateStatus} onOpenModal={openGateModal} />
-        <AdultLoginModal
-          open={activeModal === "login"}
-          onClose={() => {
-            setActiveModal(null);
-            setAuthError("");
-          }}
-          onSubmit={handleLogin}
-          errorMessage={authError}
-        />
-        <AdultAgeModal
-          open={activeModal === "age"}
-          onClose={() => setActiveModal(null)}
-          onConfirm={handleAgeConfirm}
-          ageRuleKey={adultState.ageRuleKey}
-          legalAge={adultState.legalAge}
-        />
+        {activeModal === "login" ? (
+          <AdultLoginModal
+            open
+            onClose={() => {
+              setActiveModal(null);
+              setAuthError("");
+            }}
+            onSubmit={handleLogin}
+            errorMessage={authError}
+          />
+        ) : null}
+        {activeModal === "age" ? (
+          <AdultAgeModal
+            open
+            onClose={() => setActiveModal(null)}
+            onConfirm={handleAgeConfirm}
+            ageRuleKey={adultState.ageRuleKey}
+            legalAge={adultState.legalAge}
+          />
+        ) : null}
       </main>
     );
   }
@@ -421,40 +451,46 @@ export default function SeriesPage({ seriesId }) {
           onSubscribe={handleSubscribe}
         />
 
-        <SimilarSeriesSection seriesId={seriesId} />
-
-        <div className="mt-8 border-t border-neutral-800 pt-6" />
-        <CommentsSection
-          seriesId={seriesId}
-          rating={series.rating}
-          ratingCount={series.ratingCount}
-          onRatingUpdate={handleRatingUpdate}
-        />
+        <div ref={secondarySectionsRef} className="mt-8 h-px w-full" />
+        {showSecondarySections ? (
+          <>
+            <SimilarSeriesSection seriesId={seriesId} />
+            <div className="mt-8 border-t border-neutral-800 pt-6" />
+            <CommentsSection
+              seriesId={seriesId}
+              rating={series.rating}
+              ratingCount={series.ratingCount}
+              onRatingUpdate={handleRatingUpdate}
+            />
+          </>
+        ) : (
+          <div className="mt-8 space-y-4">
+            <Skeleton className="h-8 w-48 rounded-lg" />
+            <Skeleton className="h-36 w-full rounded-2xl" />
+          </div>
+        )}
       </div>
 
-      <AdultLoginModal
-        open={activeModal === "login"}
-        onClose={() => {
-          setActiveModal(null);
-          setAuthError("");
-        }}
-        onSubmit={handleLogin}
-        errorMessage={authError}
-      />
-      <AdultAgeModal
-        open={activeModal === "age"}
-        onClose={() => setActiveModal(null)}
-        onConfirm={handleAgeConfirm}
-        ageRuleKey={adultState.ageRuleKey}
-        legalAge={adultState.legalAge}
-      />
-      <ActionModal
-        open={Boolean(infoModal)}
-        type={infoModal?.type}
-        title={infoModal?.title}
-        description={infoModal?.description}
-        onClose={() => setInfoModal(null)}
-      />
+      {activeModal === "login" ? (
+        <AdultLoginModal
+          open
+          onClose={() => {
+            setActiveModal(null);
+            setAuthError("");
+          }}
+          onSubmit={handleLogin}
+          errorMessage={authError}
+        />
+      ) : null}
+      {activeModal === "age" ? (
+        <AdultAgeModal
+          open
+          onClose={() => setActiveModal(null)}
+          onConfirm={handleAgeConfirm}
+          ageRuleKey={adultState.ageRuleKey}
+          legalAge={adultState.legalAge}
+        />
+      ) : null}
     </main>
   );
 }

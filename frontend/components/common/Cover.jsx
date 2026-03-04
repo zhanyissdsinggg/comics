@@ -1,5 +1,5 @@
 /**
- * 老王注释：封面组件，支持渐进式加载和blur-up效果
+ * 鑰佺帇娉ㄩ噴锛氬皝闈㈢粍浠讹紝鏀寔娓愯繘寮忓姞杞藉拰blur-up鏁堟灉
  */
 import { useState } from "react";
 import Image from "next/image";
@@ -14,11 +14,10 @@ const toneMap = {
 };
 
 /**
- * 老王注释：将 placehold.co 的 SVG URL 转为 PNG 格式
- * Next.js Image Optimization 不支持 SVG，placehold.co 默认返回 SVG
- * 解决方案：在 URL 的路径部分加上 .png 扩展名
- * 例：https://placehold.co/400x600/ff0000/fff?text=Hello
- *  → https://placehold.co/400x600/ff0000/fff.png?text=Hello
+ * 鑰佺帇娉ㄩ噴锛氬皢 placehold.co 鐨?SVG URL 杞负 PNG 鏍煎紡
+ * Next.js Image Optimization 涓嶆敮鎸?SVG锛宲lacehold.co 榛樿杩斿洖 SVG
+ * 瑙ｅ喅鏂规锛氬湪 URL 鐨勮矾寰勯儴鍒嗗姞涓?.png 鎵╁睍鍚? * 渚嬶細https://placehold.co/400x600/ff0000/fff?text=Hello
+ *  鈫?https://placehold.co/400x600/ff0000/fff.png?text=Hello
  */
 function normalizeCoverUrl(url) {
   if (!url) return url;
@@ -29,7 +28,7 @@ function normalizeCoverUrl(url) {
       return parsed.toString();
     }
   } catch {
-    // 如果 URL 解析失败，返回原始 URL
+    // 濡傛灉 URL 瑙ｆ瀽澶辫触锛岃繑鍥炲師濮?URL
   }
   return url;
 }
@@ -40,11 +39,11 @@ export default function Cover({ tone = "default", coverUrl, className = "", styl
   const background = toneMap[tone] || toneMap.default;
   const resolvedUrl = normalizeCoverUrl(coverUrl);
 
-  // 老王注释：如果有coverUrl，显示图片
+  // 鑰佺帇娉ㄩ噴锛氬鏋滄湁coverUrl锛屾樉绀哄浘鐗?
   if (resolvedUrl) {
     return (
       <div className={`relative ${className}`.trim()} style={style} aria-hidden="true">
-        {/* 老王注释：加载时的模糊背景 */}
+        {/* 鑰佺帇娉ㄩ噴锛氬姞杞芥椂鐨勬ā绯婅儗鏅?*/}
         {isLoading && (
           <div
             className="absolute inset-0 animate-pulse bg-neutral-800"
@@ -52,7 +51,7 @@ export default function Cover({ tone = "default", coverUrl, className = "", styl
           />
         )}
 
-        {/* 老王注释：图片加载失败时的fallback */}
+        {/* 鑰佺帇娉ㄩ噴锛氬浘鐗囧姞杞藉け璐ユ椂鐨刦allback */}
         {hasError ? (
           <div
             className="absolute inset-0"
@@ -79,7 +78,7 @@ export default function Cover({ tone = "default", coverUrl, className = "", styl
     );
   }
 
-  // 老王注释：没有coverUrl时，显示渐变背景
+  // 鑰佺帇娉ㄩ噴锛氭病鏈塩overUrl鏃讹紝鏄剧ず娓愬彉鑳屾櫙
   return (
     <div
       className={`cover ${className}`.trim()}

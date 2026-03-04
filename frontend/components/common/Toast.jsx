@@ -1,43 +1,36 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
-
-/**
- * 老王注释：Toast通知组件 - iOS风格
- * 功能：显示临时通知消息
- * 遵循KISS原则：简洁的通知展示
- * 遵循DRY原则：可复用的Toast组件
- */
 
 const iconMap = {
   success: CheckCircle,
   error: AlertCircle,
   warning: AlertTriangle,
-  info: Info
+  info: Info,
 };
 
 const colorMap = {
   success: {
     bg: "bg-emerald-500/10 border-emerald-500/20",
     icon: "text-emerald-400",
-    text: "text-emerald-300"
+    text: "text-emerald-300",
   },
   error: {
     bg: "bg-red-500/10 border-red-500/20",
     icon: "text-red-400",
-    text: "text-red-300"
+    text: "text-red-300",
   },
   warning: {
     bg: "bg-yellow-500/10 border-yellow-500/20",
     icon: "text-yellow-400",
-    text: "text-yellow-300"
+    text: "text-yellow-300",
   },
   info: {
     bg: "bg-blue-500/10 border-blue-500/20",
     icon: "text-blue-400",
-    text: "text-blue-300"
-  }
+    text: "text-blue-300",
+  },
 };
 
 export const Toast = memo(function Toast({
@@ -46,7 +39,7 @@ export const Toast = memo(function Toast({
   description,
   duration = 3000,
   onClose,
-  position = "top"
+  position = "top",
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -54,30 +47,30 @@ export const Toast = memo(function Toast({
   const Icon = iconMap[type];
   const colors = colorMap[type];
 
-  useEffect(() => {
-    // 老王注释：延迟显示动画
-    setTimeout(() => {
-      setIsVisible(true);
-      setIsAnimating(true);
-    }, 50);
-
-    // 老王注释：自动关闭
-    if (duration > 0) {
-      const timer = setTimeout(() => {
-        handleClose();
-      }, duration);
-
-      return () => clearTimeout(timer);
-    }
-  }, [duration]);
-
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsAnimating(false);
     setTimeout(() => {
       setIsVisible(false);
       onClose?.();
     }, 300);
-  };
+  }, [onClose]);
+
+  useEffect(() => {
+    const showTimer = setTimeout(() => {
+      setIsVisible(true);
+      setIsAnimating(true);
+    }, 50);
+
+    if (duration > 0) {
+      const closeTimer = setTimeout(handleClose, duration);
+      return () => {
+        clearTimeout(showTimer);
+        clearTimeout(closeTimer);
+      };
+    }
+
+    return () => clearTimeout(showTimer);
+  }, [duration, handleClose]);
 
   if (!isVisible) {
     return null;
@@ -85,7 +78,7 @@ export const Toast = memo(function Toast({
 
   const positionClasses = {
     top: "top-4",
-    bottom: "bottom-4"
+    bottom: "bottom-4",
   };
 
   return (
@@ -96,8 +89,8 @@ export const Toast = memo(function Toast({
         isAnimating
           ? "translate-y-0 opacity-100"
           : position === "top"
-          ? "-translate-y-4 opacity-0"
-          : "translate-y-4 opacity-0"
+            ? "-translate-y-4 opacity-0"
+            : "translate-y-4 opacity-0"
       }`}
     >
       <div
@@ -105,20 +98,15 @@ export const Toast = memo(function Toast({
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
         <div className="flex items-start gap-3">
-          {/* 老王注释：图标 */}
           <div className={`flex-shrink-0 ${colors.icon}`}>
             <Icon size={20} />
           </div>
-
-          {/* 老王注释：内容 */}
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <p className={`text-sm font-semibold ${colors.text}`}>{message}</p>
-            {description && (
+            {description ? (
               <p className="mt-1 text-xs text-neutral-400">{description}</p>
-            )}
+            ) : null}
           </div>
-
-          {/* 老王注释：关闭按钮 */}
           <button
             type="button"
             onClick={handleClose}
@@ -133,7 +121,6 @@ export const Toast = memo(function Toast({
   );
 });
 
-// Toast容器组件（用于管理多个Toast）
 export const ToastContainer = memo(function ToastContainer({ toasts = [], onRemove }) {
   return (
     <>
@@ -148,7 +135,6 @@ export const ToastContainer = memo(function ToastContainer({ toasts = [], onRemo
   );
 });
 
-// Toast Hook（用于在组件中显示Toast）
 export function useToast() {
   const [toasts, setToasts] = useState([]);
 
@@ -161,30 +147,14 @@ export function useToast() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const success = (message, description) => {
-    showToast({ type: "success", message, description });
-  };
-
-  const error = (message, description) => {
-    showToast({ type: "error", message, description });
-  };
-
-  const warning = (message, description) => {
-    showToast({ type: "warning", message, description });
-  };
-
-  const info = (message, description) => {
-    showToast({ type: "info", message, description });
-  };
-
   return {
     toasts,
     showToast,
     removeToast,
-    success,
-    error,
-    warning,
-    info
+    success: (message, description) => showToast({ type: "success", message, description }),
+    error: (message, description) => showToast({ type: "error", message, description }),
+    warning: (message, description) => showToast({ type: "warning", message, description }),
+    info: (message, description) => showToast({ type: "info", message, description }),
   };
 }
 

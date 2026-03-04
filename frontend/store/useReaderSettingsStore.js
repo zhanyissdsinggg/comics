@@ -13,24 +13,19 @@ const ReaderSettingsContext = createContext(null);
 const STORAGE_KEY = "mn_reader_settings";
 
 const DEFAULT_SETTINGS = {
-  // 老王注释：主题设置
-  theme: "light", // light, dark, sepia
-  nightMode: false, // 兼容旧版本
-
-  // 老王注释：布局设置
+  // 鑰佺帇娉ㄩ噴锛氫富棰樿缃?  theme: "light", // light, dark, sepia
+  nightMode: false, // 鍏煎鏃х増鏈?
+  // 鑰佺帇娉ㄩ噴锛氬竷灞€璁剧疆
   layoutMode: "vertical", // vertical, horizontal
   readingMode: "scroll", // scroll, single, double
 
-  // 老王注释：字体设置
-  fontSize: 16, // 12-24px
+  // 鑰佺帇娉ㄩ噴锛氬瓧浣撹缃?  fontSize: 16, // 12-24px
   lineHeight: 1.6, // 1.2-2.0
 
-  // 老王注释：显示设置
-  brightness: 100, // 50-150%
+  // 鑰佺帇娉ㄩ噴锛氭樉绀鸿缃?  brightness: 100, // 50-150%
   backgroundColor: "#ffffff",
 
-  // 老王注释：其他设置
-  fullscreen: false,
+  // 鑰佺帇娉ㄩ噴锛氬叾浠栬缃?  fullscreen: false,
   autoScroll: false,
   autoScrollSpeed: 1, // 1-5
 };
@@ -89,21 +84,21 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 老王注释：主题设置
+  // 鑰佺帇娉ㄩ噴锛氫富棰樿缃?
   const setTheme = useCallback((theme) => {
     setSettings((prev) => {
       const validThemes = ["light", "dark", "sepia"];
       const next = {
         ...prev,
         theme: validThemes.includes(theme) ? theme : "light",
-        nightMode: theme === "dark", // 同步nightMode以兼容旧版本
+        nightMode: theme === "dark", // 鍚屾nightMode浠ュ吋瀹规棫鐗堟湰
       };
       writeSettings(next);
       return next;
     });
   }, []);
 
-  // 老王注释：阅读模式设置
+  // 鑰佺帇娉ㄩ噴锛氶槄璇绘ā寮忚缃?
   const setReadingMode = useCallback((mode) => {
     setSettings((prev) => {
       const validModes = ["scroll", "single", "double"];
@@ -113,7 +108,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 老王注释：字体大小设置
+  // 鑰佺帇娉ㄩ噴锛氬瓧浣撳ぇ灏忚缃?
   const setFontSize = useCallback((size) => {
     setSettings((prev) => {
       const fontSize = Math.max(12, Math.min(24, Number(size) || 16));
@@ -123,7 +118,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 老王注释：行高设置
+  // 鑰佺帇娉ㄩ噴锛氳楂樿缃?
   const setLineHeight = useCallback((height) => {
     setSettings((prev) => {
       const lineHeight = Math.max(1.2, Math.min(2.0, Number(height) || 1.6));
@@ -133,7 +128,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 老王注释：亮度设置
+  // 鑰佺帇娉ㄩ噴锛氫寒搴﹁缃?
   const setBrightness = useCallback((brightness) => {
     setSettings((prev) => {
       const value = Math.max(50, Math.min(150, Number(brightness) || 100));
@@ -143,7 +138,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 老王注释：背景色设置
+  // 鑰佺帇娉ㄩ噴锛氳儗鏅壊璁剧疆
   const setBackgroundColor = useCallback((color) => {
     setSettings((prev) => {
       const next = { ...prev, backgroundColor: color || "#ffffff" };
@@ -152,7 +147,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 老王注释：全屏模式设置
+  // 鑰佺帇娉ㄩ噴锛氬叏灞忔ā寮忚缃?
   const setFullscreen = useCallback((value) => {
     setSettings((prev) => {
       const next = { ...prev, fullscreen: Boolean(value) };
@@ -169,7 +164,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 老王注释：自动滚动设置
+  // 鑰佺帇娉ㄩ噴锛氳嚜鍔ㄦ粴鍔ㄨ缃?
   const setAutoScroll = useCallback((value) => {
     setSettings((prev) => {
       const next = { ...prev, autoScroll: Boolean(value) };
@@ -189,11 +184,9 @@ export function ReaderSettingsProvider({ children }) {
 
   const value = useMemo(
     () => ({
-      // 老王注释：所有设置值
-      ...settings,
+      // 鑰佺帇娉ㄩ噴锛氭墍鏈夎缃€?      ...settings,
 
-      // 老王注释：所有设置方法
-      setNightMode,
+      // 鑰佺帇娉ㄩ噴锛氭墍鏈夎缃柟娉?      setNightMode,
       toggleNightMode,
       setLayoutMode,
       setTheme,

@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { useWalletStore } from "../../store/useWalletStore";
 import { apiPost } from "../../lib/apiClient";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 
 const TipModal = React.memo(({ open, seriesId, seriesTitle, authorName, onClose }) => {
   const { paidPts, bonusPts, loadWallet } = useWalletStore();
@@ -32,7 +32,7 @@ const TipModal = React.memo(({ open, seriesId, seriesTitle, authorName, onClose 
     }
 
     setIsWorking(true);
-    track("tip_start", { seriesId, amount });
+    trackEvent("tip_start", { seriesId, amount });
 
     try {
       const response = await apiPost("/api/tip", {
@@ -42,7 +42,7 @@ const TipModal = React.memo(({ open, seriesId, seriesTitle, authorName, onClose 
       });
 
       if (response.ok) {
-        track("tip_success", { seriesId, amount });
+        trackEvent("tip_success", { seriesId, amount });
         setResult({
           success: true,
           message: `Tipped ${amount} POINTS! Thank you for supporting the creator!`,
@@ -56,14 +56,14 @@ const TipModal = React.memo(({ open, seriesId, seriesTitle, authorName, onClose 
           setMessage("");
         }, 2000);
       } else {
-        track("tip_fail", { seriesId, amount, error: response.error });
+        trackEvent("tip_fail", { seriesId, amount, error: response.error });
         setResult({
           success: false,
           message: response.error || "Tip failed, please try again",
         });
       }
     } catch (error) {
-      track("tip_error", { seriesId, amount, error: error.message });
+      trackEvent("tip_error", { seriesId, amount, error: error.message });
       setResult({
         success: false,
         message: "Tip failed, please try again",
@@ -91,8 +91,7 @@ const TipModal = React.memo(({ open, seriesId, seriesTitle, authorName, onClose 
             className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
             aria-label="Close"
           >
-            ✕
-          </button>
+            鉁?          </button>
         </div>
 
         <div className="mb-6 rounded-xl border border-neutral-800 bg-neutral-950 p-4">
@@ -195,7 +194,7 @@ const TipModal = React.memo(({ open, seriesId, seriesTitle, authorName, onClose 
         </div>
 
         <div className="mt-4 rounded-xl border border-neutral-800 bg-neutral-950 p-3 text-xs text-neutral-400">
-          💡 Your tip directly supports the creator. Thank you for your generosity!
+          馃挕 Your tip directly supports the creator. Thank you for your generosity!
         </div>
       </div>
     </div>

@@ -17,6 +17,8 @@ import { SentryMiddleware } from "./common/sentry/sentry.middleware";
 import { WinstonMiddleware } from "./common/logger/winston.middleware";
 import { logger } from "./common/logger/winston.init";
 
+const normalizeOrigin = (origin: string) => origin.trim().replace(/\/+$/, "");
+
 async function bootstrap() {
   // 老王说：初始化Sentry错误追踪
   initSentry();
@@ -34,10 +36,29 @@ async function bootstrap() {
   const originEnv = process.env.FRONTEND_ORIGIN || "";
   const allowedOrigins = originEnv
     .split(",")
-    .map((value) => value.trim())
+    .map(normalizeOrigin)
     .filter(Boolean);
+  const allowedOriginSet = new Set(allowedOrigins);
+  const isProd = process.env.NODE_ENV === "production";
+  const localhostOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+
   app.enableCors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+    origin: (requestOrigin, callback) => {
+      if (!requestOrigin) {
+        return callback(null, true);
+      }
+
+      const normalizedRequestOrigin = normalizeOrigin(requestOrigin);
+      if (allowedOriginSet.has(normalizedRequestOrigin)) {
+        return callback(null, true);
+      }
+
+      if (!isProd && localhostOriginPattern.test(normalizedRequestOrigin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Blocked by CORS policy: ${requestOrigin}`), false);
+    },
     credentials: true,
   });
   app.use(

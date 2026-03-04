@@ -1,12 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, Res } from '@nestjs/common';
-import { AdminRecommendationService } from '../services/admin-recommendation.service';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { AdminRecommendationService } from '../admin-content/services/admin-recommendation.service';
 import { AdminAudit } from '../decorators/admin-audit.decorator';
+import { AdminAuthGuard } from "../guards/admin-auth.guard";
 
 /**
  * 老王说：推荐和排行榜管理控制器
  * 这个SB控制器处理所有推荐位和排行榜相关的API端点
  */
 @Controller('admin/recommendations')
+@UseGuards(AdminAuthGuard)
 export class AdminRecommendationController {
   constructor(private recommendationService: AdminRecommendationService) {}
 

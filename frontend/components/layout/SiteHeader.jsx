@@ -1,39 +1,44 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
-import { track } from "../../lib/analytics";
 import { getCookie } from "../../lib/cookies";
+import { trackEvent } from "../../lib/trackEvent";
 import HeaderLogo from "./HeaderLogo";
 import HeaderNav from "./HeaderNav";
-import HeaderActions from "./HeaderActions";
-import HeaderSearch from "./HeaderSearch";
 import MobileTabNav from "./MobileTabNav";
-import HeaderModals from "./HeaderModals";
+
+const HeaderActions = dynamic(() => import("./HeaderActions"), {
+  ssr: false,
+});
+const HeaderSearch = dynamic(() => import("./HeaderSearch"), {
+  ssr: false,
+});
 
 /**
- * SiteHeader - 参考 Webtoon/Tapas 的导航栏设计
- * - 单行布局：Logo | Nav | SearchBar | Actions
- * - 滚动时半透明毛玻璃效果
- * - 品牌色下划线导航
+ * SiteHeader - 鍙傝€?Webtoon/Tapas 鐨勫鑸爮璁捐
+ * - 鍗曡甯冨眬锛歀ogo | Nav | SearchBar | Actions
+ * - 婊氬姩鏃跺崐閫忔槑姣涚幓鐠冩晥鏋? * - 鍝佺墝鑹蹭笅鍒掔嚎瀵艰埅
  */
 export default function SiteHeader({ onSearch }) {
-  const router = useRouter();
   const { isAdultMode, requestAdultToggle } = useAdultGateStore();
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
-  const [region, setRegion] = useState("global");
+  const [actionsReady, setActionsReady] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [HeaderModalsComponent, setHeaderModalsComponent] = useState(null);
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? window.localStorage.getItem("mn_region") : null;
     const cookieRegion = getCookie("mn_region");
-    setRegion(stored || cookieRegion || "global");
+    if (typeof window !== "undefined" && stored !== cookieRegion) {
+      window.localStorage.setItem("mn_region", stored || cookieRegion || "global");
+    }
   }, []);
 
-  // 滚动检测 - 滚动后加深背景
+  // Scroll state for translucent/sticky header style
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -53,12 +58,53 @@ export default function SiteHeader({ onSearch }) {
     return () => window.removeEventListener("auth:open", handler);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (activeModal && !HeaderModalsComponent) {
+      import("./HeaderModals")
+        .then((mod) => {
+          if (!cancelled) {
+            setHeaderModalsComponent(() => mod.default);
+          }
+        })
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [activeModal, HeaderModalsComponent]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let timeoutId = null;
+    let idleId = null;
+    const enable = () => {
+      if (!cancelled) {
+        setActionsReady(true);
+      }
+    };
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(enable, { timeout: 800 });
+    } else {
+      timeoutId = window.setTimeout(enable, 180);
+    }
+    return () => {
+      cancelled = true;
+      if (idleId && typeof window !== "undefined" && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
   const handleAdultToggle = () => {
-    track("adult_toggle_attempt", { isAdultMode });
+    trackEvent("adult_toggle_attempt", { isAdultMode });
     const status = requestAdultToggle(true);
     if (status === "NEED_LOGIN") { setPendingAdultToggle(true); setActiveModal("login"); return; }
     if (status === "NEED_AGE_CONFIRM") { setActiveModal("age"); return; }
-    if (!isAdultMode) { track("adult_gate_enabled", { source: "header" }); }
+    if (!isAdultMode) { trackEvent("adult_gate_enabled", { source: "header" }); }
     setActiveModal(null);
   };
 
@@ -83,41 +129,57 @@ export default function SiteHeader({ onSearch }) {
             : "border-b border-white/5 bg-neutral-950/90 backdrop-blur-xl"
         }`}
       >
-        {/* 老王优化：iOS 26风格的单行布局 - 更大的高度和间距 */}
+        {/* 鑰佺帇浼樺寲锛歩OS 26椋庢牸鐨勫崟琛屽竷灞€ - 鏇村ぇ鐨勯珮搴﹀拰闂磋窛 */}
         <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-6 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <HeaderLogo />
 
-          {/* 桌面导航 */}
+          {/* 妗岄潰瀵艰埅 */}
           <HeaderNav />
 
-          {/* 老王优化：搜索栏 - iOS 26风格的圆角 */}
+          {/* 鑰佺帇浼樺寲锛氭悳绱㈡爮 - iOS 26椋庢牸鐨勫渾瑙?*/}
           <div className="flex-1 md:max-w-xs lg:max-w-sm">
             <HeaderSearch onSearch={onSearch} />
           </div>
 
-          {/* 右侧操作按钮 */}
-          <HeaderActions
-            onWalletClick={handleWalletClick}
-            onAdultToggleClick={handleAdultToggle}
-            onLoginClick={handleLoginClick}
-            isAdultMode={isAdultMode}
-          />
+          {/* 鍙充晶鎿嶄綔鎸夐挳 */}
+          {actionsReady ? (
+            <HeaderActions
+              onWalletClick={handleWalletClick}
+              onAdultToggleClick={handleAdultToggle}
+              onLoginClick={handleLoginClick}
+              isAdultMode={isAdultMode}
+            />
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-10 animate-pulse rounded-full border border-white/10 bg-white/5" />
+              <div className="h-10 w-10 animate-pulse rounded-full border border-white/10 bg-white/5" />
+              <button
+                type="button"
+                onClick={handleLoginClick}
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-neutral-300"
+              >
+                Sign in
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
-      {/* 移动端底部导航 */}
+      {/* 绉诲姩绔簳閮ㄥ鑸?*/}
       <MobileTabNav />
 
-      {/* 模态框 */}
-      <HeaderModals
-        activeModal={activeModal}
-        onModalClose={handleModalClose}
-        authError={authError}
-        onAuthError={setAuthError}
-        pendingAdultToggle={pendingAdultToggle}
-        onPendingAdultToggleChange={setPendingAdultToggle}
-      />
+      {/* 妯℃€佹 */}
+      {activeModal && HeaderModalsComponent ? (
+        <HeaderModalsComponent
+          activeModal={activeModal}
+          onModalClose={handleModalClose}
+          authError={authError}
+          onAuthError={setAuthError}
+          pendingAdultToggle={pendingAdultToggle}
+          onPendingAdultToggleChange={setPendingAdultToggle}
+        />
+      ) : null}
     </>
   );
 }

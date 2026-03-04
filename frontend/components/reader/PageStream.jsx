@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 
-// 修复 placehold.co 返回 SVG 问题：Next.js Image 不支持 SVG，需要加 .png 后缀
+// 淇 placehold.co 杩斿洖 SVG 闂锛歂ext.js Image 涓嶆敮鎸?SVG锛岄渶瑕佸姞 .png 鍚庣紑
 function normalizePageUrl(url) {
   if (!url) return url;
   try {
@@ -14,7 +14,7 @@ function normalizePageUrl(url) {
       return parsed.toString();
     }
   } catch {
-    // 解析失败返回原始 URL
+    // 瑙ｆ瀽澶辫触杩斿洖鍘熷 URL
   }
   return url;
 }
@@ -197,7 +197,7 @@ export default function PageStream({
 
   const handleError = (index) => {
     setErrorPages((prev) => ({ ...prev, [index]: true }));
-    track("reader_image_error", { index });
+    trackEvent("reader_image_error", { index });
     pushPerfMetric("reader_img_error", 1);
     const attempts = (retryAttemptsRef.current[index] || 0) + 1;
     retryAttemptsRef.current[index] = attempts;
@@ -216,7 +216,7 @@ export default function PageStream({
       return;
     }
     const durationMs = Date.now() - start;
-    track("reader_image_load", { index, durationMs });
+    trackEvent("reader_image_load", { index, durationMs });
     pushPerfMetric("reader_img_ms", durationMs);
     setLoadingPages((prev) => ({ ...prev, [index]: false }));
   };

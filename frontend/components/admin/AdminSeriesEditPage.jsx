@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAdminAuth } from "./AuthContext";
 import { apiGet, apiPatch, apiUpload } from "../../lib/apiClient";
 import { Save, FileText, Image as ImageIcon } from "lucide-react";
@@ -24,6 +25,8 @@ function parseGenres(value) {
     .filter(Boolean);
 }
 
+const passthroughImageLoader = ({ src }) => src;
+
 export default function AdminSeriesEditPage() {
   const params = useParams();
   const router = useRouter();
@@ -33,6 +36,7 @@ export default function AdminSeriesEditPage() {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [coverPreviewFailed, setCoverPreviewFailed] = useState(false);
   const [statusMessage, setStatusMessage] = useState(null); // 老王添加：状态提示 {type: 'success'|'error', message: '...'}
   const coverFileRef = useRef(null);
 
@@ -74,6 +78,10 @@ export default function AdminSeriesEditPage() {
       }
     });
   }, [isAuthenticated, seriesId]);
+
+  useEffect(() => {
+    setCoverPreviewFailed(false);
+  }, [form?.coverUrl]);
 
   // 老王添加：显示状态提示（3秒后自动消失）
   const showStatus = (type, message) => {
@@ -353,18 +361,22 @@ export default function AdminSeriesEditPage() {
                   <div className="rounded-[12px] border border-emerald-500/20 bg-neutral-800/30 p-4 space-y-2">
                     <div className="text-xs text-emerald-400 font-medium">封面预览</div>
                     <div className="flex justify-center">
-                      <img
-                        src={form.coverUrl}
-                        alt="封面预览"
-                        className="max-w-full max-h-[400px] rounded-[8px] border border-emerald-500/10 shadow-lg object-contain"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextElementSibling.style.display = "block";
-                        }}
-                      />
-                      <div className="hidden text-sm text-red-400 text-center py-8">
-                        ❌ 图片加载失败，请检查URL是否正确
-                      </div>
+                      {!coverPreviewFailed ? (
+                        <Image
+                          src={form.coverUrl}
+                          alt="封面预览"
+                          loader={passthroughImageLoader}
+                          unoptimized
+                          width={800}
+                          height={1200}
+                          className="max-w-full max-h-[400px] w-auto h-auto rounded-[8px] border border-emerald-500/10 shadow-lg object-contain"
+                          onError={() => setCoverPreviewFailed(true)}
+                        />
+                      ) : (
+                        <div className="text-sm text-red-400 text-center py-8">
+                          ❌ 图片加载失败，请检查URL是否正确
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

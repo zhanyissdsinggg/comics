@@ -5,7 +5,7 @@ import SiteHeader from "../layout/SiteHeader";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
 import CollectionManager from "./CollectionManager";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
 import { apiGet } from "../../lib/apiClient";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
@@ -103,7 +103,7 @@ export default function LibraryPage() {
     .filter(Boolean);
 
   useEffect(() => {
-    track("view_library", {});
+    trackEvent("view_library", {});
   }, []);
 
   useEffect(() => {

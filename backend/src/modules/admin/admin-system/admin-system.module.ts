@@ -1,13 +1,32 @@
 import { Module } from "@nestjs/common";
-import { AdminMarketingService } from "./services/admin-marketing.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminLogService } from "../../../common/services/admin-log.service";
+import { EmailModule } from "../../email/email.module";
+import { AdminAuthModule } from "../admin-auth/admin-auth.module";
+import { AdminMarketingService } from "./services/admin-marketing.service";
+import { AdminMarketingController } from "../controllers/admin-marketing.controller";
+import { AdminUsersController } from "./controllers/admin-users.controller";
+import { AdminRegionsController } from "./controllers/admin-regions.controller";
+import { AdminBrandingController } from "./controllers/admin-branding.controller";
+import { AdminNotificationsController } from "./controllers/admin-notifications.controller";
+import { AdminLogsController } from "./controllers/admin-logs.controller";
+import { AdminUploadController } from "./controllers/admin-upload.controller";
+import { AdminEmailController } from "./controllers/admin-email.controller";
+import { AdminEmailJobsController } from "./controllers/admin-email-jobs.controller";
 
-/**
- * 老王说：管理员系统管理模块 - 处理所有系统级别的功能
- * 包括：users, regions, branding, logs, upload, email, notifications, marketing
- */
 @Module({
+  imports: [AdminAuthModule, EmailModule],
+  controllers: [
+    AdminMarketingController,
+    AdminUsersController,
+    AdminRegionsController,
+    AdminBrandingController,
+    AdminNotificationsController,
+    AdminLogsController,
+    AdminUploadController,
+    AdminEmailController,
+    AdminEmailJobsController,
+  ],
   providers: [AdminMarketingService, PrismaService, AdminLogService],
   exports: [AdminMarketingService, AdminLogService],
 })

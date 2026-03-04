@@ -1,93 +1,14 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 
-/**
- * 老王注释：社交登录按钮组件 - 支持Google和Apple登录
- * 职责单一：显示社交登录按钮，处理社交登录流程
- * 这个SB组件把社交登录逻辑集中在一起，方便维护和扩展
- */
 export default function SocialAuthButton({ provider, onSuccess, onError, isLoading }) {
   const [loading, setLoading] = useState(false);
-
-  const handleGoogleLogin = useCallback(async () => {
-    setLoading(true);
-    try {
-      track("social_login_attempt", { provider: "google" });
-
-      // 初始化Google登录流程
-      if (typeof window === "undefined") return;
-
-      // 检查Google API是否已加载
-      if (!window.google) {
-        console.error("Google API not loaded");
-        onError("Google API not available");
-        return;
-      }
-
-      // 使用Google One Tap或Google Sign-In
-      window.google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        callback: handleGoogleCallback,
-      });
-
-      // 触发Google登录
-      window.google.accounts.id.renderButton(
-        document.getElementById("google-signin-button"),
-        { theme: "outline", size: "large" }
-      );
-    } catch (error) {
-      console.error("Google login error:", error);
-      track("social_login_error", { provider: "google", error: error.message });
-      onError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [onSuccess, onError]);
-
-  const handleAppleLogin = useCallback(async () => {
-    setLoading(true);
-    try {
-      track("social_login_attempt", { provider: "apple" });
-
-      // 初始化Apple登录流程
-      if (typeof window === "undefined") return;
-
-      // 检查Apple Sign In是否可用
-      if (!window.AppleID) {
-        console.error("Apple Sign In not loaded");
-        onError("Apple Sign In not available");
-        return;
-      }
-
-      // 使用Apple Sign In
-      window.AppleID.auth.init({
-        clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
-        teamId: process.env.NEXT_PUBLIC_APPLE_TEAM_ID,
-        redirectURI: `${window.location.origin}/api/auth/apple/callback`,
-        scope: "name email",
-        responseType: "code",
-        responseMode: "form_post",
-        usePopup: true,
-      });
-
-      // 触发Apple登录
-      const response = await window.AppleID.auth.signIn();
-      handleAppleCallback(response);
-    } catch (error) {
-      console.error("Apple login error:", error);
-      track("social_login_error", { provider: "apple", error: error.message });
-      onError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [onSuccess, onError]);
 
   const handleGoogleCallback = useCallback(
     async (response) => {
       try {
-        // 发送Google ID Token到后端
         const result = await fetch("/api/auth/google/callback", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -96,24 +17,24 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
 
         if (result.ok) {
           const data = await result.json();
-          track("social_login_success", { provider: "google" });
+          trackEvent("social_login_success", { provider: "google" });
           onSuccess(data);
-        } else {
-          const error = await result.json();
-          onError(error.message || "Google login failed");
+          return;
         }
+
+        const error = await result.json();
+        onError(error.message || "Google login failed");
       } catch (error) {
         console.error("Google callback error:", error);
         onError(error.message);
       }
     },
-    [onSuccess, onError]
+    [onError, onSuccess],
   );
 
   const handleAppleCallback = useCallback(
     async (response) => {
       try {
-        // 发送Apple授权码到后端
         const result = await fetch("/api/auth/apple/callback", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -125,19 +46,85 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
 
         if (result.ok) {
           const data = await result.json();
-          track("social_login_success", { provider: "apple" });
+          trackEvent("social_login_success", { provider: "apple" });
           onSuccess(data);
-        } else {
-          const error = await result.json();
-          onError(error.message || "Apple login failed");
+          return;
         }
+
+        const error = await result.json();
+        onError(error.message || "Apple login failed");
       } catch (error) {
         console.error("Apple callback error:", error);
         onError(error.message);
       }
     },
-    [onSuccess, onError]
+    [onError, onSuccess],
   );
+
+  const handleGoogleLogin = useCallback(async () => {
+    setLoading(true);
+    try {
+      trackEvent("social_login_attempt", { provider: "google" });
+
+      if (typeof window === "undefined") {
+        return;
+      }
+      if (!window.google) {
+        onError("Google API not available");
+        return;
+      }
+
+      window.google.accounts.id.initialize({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        callback: handleGoogleCallback,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-signin-button"),
+        { theme: "outline", size: "large" },
+      );
+    } catch (error) {
+      console.error("Google login error:", error);
+      trackEvent("social_login_error", { provider: "google", error: error.message });
+      onError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [handleGoogleCallback, onError]);
+
+  const handleAppleLogin = useCallback(async () => {
+    setLoading(true);
+    try {
+      trackEvent("social_login_attempt", { provider: "apple" });
+
+      if (typeof window === "undefined") {
+        return;
+      }
+      if (!window.AppleID) {
+        onError("Apple Sign In not available");
+        return;
+      }
+
+      window.AppleID.auth.init({
+        clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
+        teamId: process.env.NEXT_PUBLIC_APPLE_TEAM_ID,
+        redirectURI: `${window.location.origin}/api/auth/apple/callback`,
+        scope: "name email",
+        responseType: "code",
+        responseMode: "form_post",
+        usePopup: true,
+      });
+
+      const response = await window.AppleID.auth.signIn();
+      await handleAppleCallback(response);
+    } catch (error) {
+      console.error("Apple login error:", error);
+      trackEvent("social_login_error", { provider: "apple", error: error.message });
+      onError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [handleAppleCallback, onError]);
 
   if (provider === "google") {
     return (
@@ -145,7 +132,7 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
         type="button"
         onClick={handleGoogleLogin}
         disabled={loading || isLoading}
-        className="group relative flex items-center justify-center gap-2 min-h-[44px] w-full rounded-[12px] border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200 transition-all duration-300 hover:border-blue-500/20 hover:bg-blue-500/5 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="group relative flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[12px] border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200 transition-all duration-300 hover:border-blue-500/20 hover:bg-blue-500/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
         aria-label="Sign in with Google"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -165,7 +152,7 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
         type="button"
         onClick={handleAppleLogin}
         disabled={loading || isLoading}
-        className="group relative flex items-center justify-center gap-2 min-h-[44px] w-full rounded-[12px] border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200 transition-all duration-300 hover:border-neutral-400/20 hover:bg-neutral-400/5 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="group relative flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[12px] border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200 transition-all duration-300 hover:border-neutral-400/20 hover:bg-neutral-400/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
         aria-label="Sign in with Apple"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

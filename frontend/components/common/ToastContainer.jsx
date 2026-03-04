@@ -3,8 +3,8 @@
 import { useToast } from "./ToastContext";
 
 /**
- * 老王说：Toast容器组件
- * 这个SB组件显示所有Toast消息
+ * 鑰佺帇璇达細Toast瀹瑰櫒缁勪欢
+ * 杩欎釜SB缁勪欢鏄剧ず鎵€鏈塗oast娑堟伅
  */
 export default function ToastContainer() {
   const { toasts, removeToast } = useToast();
@@ -25,7 +25,7 @@ export default function ToastContainer() {
 function ToastItem({ toast, onClose }) {
   const { type, message } = toast;
 
-  // 老王说：根据类型选择颜色和图标
+  // 鑰佺帇璇达細鏍规嵁绫诲瀷閫夋嫨棰滆壊鍜屽浘鏍?
   const styles = {
     success: {
       bg: "bg-emerald-50 border-emerald-200",
@@ -92,7 +92,7 @@ function ToastItem({ toast, onClose }) {
       <button
         onClick={onClose}
         className="flex-shrink-0 hover:opacity-70 transition-opacity"
-        aria-label="关闭"
+        aria-label="鍏抽棴"
       >
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path

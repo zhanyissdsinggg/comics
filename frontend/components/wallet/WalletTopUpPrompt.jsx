@@ -4,11 +4,9 @@ import { memo, useState, useEffect } from "react";
 import { Wallet, Sparkles, Zap, Gift, X } from "lucide-react";
 
 /**
- * 老王注释：钱包充值引导组件 - iOS风格
- * 功能：引导用户充值，提升充值转化率
- * 遵循KISS原则：简洁的充值引导
- * 遵循DRY原则：可复用的引导组件
- */
+ * 鑰佺帇娉ㄩ噴锛氶挶鍖呭厖鍊煎紩瀵肩粍浠?- iOS椋庢牸
+ * 鍔熻兘锛氬紩瀵肩敤鎴峰厖鍊硷紝鎻愬崌鍏呭€艰浆鍖栫巼
+ * 閬靛惊KISS鍘熷垯锛氱畝娲佺殑鍏呭€煎紩瀵? * 閬靛惊DRY鍘熷垯锛氬彲澶嶇敤鐨勫紩瀵肩粍浠? */
 const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
   isOpen = false,
   onClose,
@@ -17,7 +15,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
 }) {
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // 老王注释：充值套餐
+  // 鑰佺帇娉ㄩ噴锛氬厖鍊煎椁?
   const packages = [
     {
       id: "starter",
@@ -42,7 +40,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }
   ];
 
-  // 老王注释：控制动画
+  // 鑰佺帇娉ㄩ噴锛氭帶鍒跺姩鐢?
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => setIsAnimating(true), 50);
@@ -51,7 +49,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }
   }, [isOpen]);
 
-  // 老王注释：处理关闭
+  // 鑰佺帇娉ㄩ噴锛氬鐞嗗叧闂?
   const handleClose = () => {
     setIsAnimating(false);
     setTimeout(() => {
@@ -59,7 +57,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }, 300);
   };
 
-  // 老王注释：处理充值
+  // 鑰佺帇娉ㄩ噴锛氬鐞嗗厖鍊?
   const handleSelectPackage = (pkg) => {
     handleClose();
     setTimeout(() => {
@@ -67,7 +65,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }, 300);
   };
 
-  // 老王注释：阻止点击事件冒泡
+  // 鑰佺帇娉ㄩ噴锛氶樆姝㈢偣鍑讳簨浠跺啋娉?
   const handleContentClick = (e) => {
     e.stopPropagation();
   };
@@ -84,7 +82,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
       onClick={handleClose}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
-      {/* iOS风格弹窗 */}
+      {/* iOS椋庢牸寮圭獥 */}
       <div
         onClick={handleContentClick}
         className={`relative w-full sm:max-w-lg bg-neutral-900/95 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 sm:rounded-3xl ${
@@ -97,12 +95,12 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
           borderTopRightRadius: "1.5rem"
         }}
       >
-        {/* 老王注释：移动端拖动指示器 */}
+        {/* 鑰佺帇娉ㄩ噴锛氱Щ鍔ㄧ鎷栧姩鎸囩ず鍣?*/}
         <div className="flex justify-center pt-3 pb-2 sm:hidden">
           <div className="w-10 h-1 rounded-full bg-neutral-700" />
         </div>
 
-        {/* 老王注释：关闭按钮 */}
+        {/* 鑰佺帇娉ㄩ噴锛氬叧闂寜閽?*/}
         <button
           type="button"
           onClick={handleClose}
@@ -113,7 +111,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
         </button>
 
         <div className="p-6 sm:p-8">
-          {/* 老王注释：头部 */}
+          {/* 鑰佺帇娉ㄩ噴锛氬ご閮?*/}
           <div className="mb-6 text-center">
             <div className="mb-4 flex justify-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-400">
@@ -126,7 +124,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </p>
           </div>
 
-          {/* 老王注释：充值套餐 */}
+          {/* 鑰佺帇娉ㄩ噴锛氬厖鍊煎椁?*/}
           <div className="mb-6 space-y-3">
             {packages.map((pkg) => (
               <button
@@ -139,7 +137,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                     : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
                 }`}
               >
-                {/* 老王注释：热门标签 */}
+                {/* 鑰佺帇娉ㄩ噴锛氱儹闂ㄦ爣绛?*/}
                 {pkg.popular && (
                   <div className="absolute -top-2 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
                     POPULAR
@@ -178,7 +176,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             ))}
           </div>
 
-          {/* 老王注释：优惠提示 */}
+          {/* 鑰佺帇娉ㄩ噴锛氫紭鎯犳彁绀?*/}
           <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
@@ -195,7 +193,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </div>
           </div>
 
-          {/* 老王注释：底部提示 */}
+          {/* 鑰佺帇娉ㄩ噴锛氬簳閮ㄦ彁绀?*/}
           <p className="mt-4 text-center text-xs text-neutral-500">
             Secure payment powered by Stripe
           </p>

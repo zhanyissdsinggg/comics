@@ -7,7 +7,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import LoginGateModal from "../layout/LoginGateModal";
 import AgeGateModal from "../layout/AgeGateModal";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 import {
   ADULT_GATE_ACTION_LABELS,
   ADULT_GATE_DESCRIPTIONS,
@@ -35,7 +35,7 @@ export default function AdultGatePage() {
   const descriptionMap = useMemo(() => ADULT_GATE_DESCRIPTIONS, []);
 
   const handleLogin = async ({ email, password, mode }) => {
-    track("adult_gate_login", { reason });
+    trackEvent("adult_gate_login", { reason });
     const response = await signIn(email, password, mode);
     if (response?.status === 202) {
       setAuthError("");
@@ -50,20 +50,20 @@ export default function AdultGatePage() {
       setActiveModal("age");
       return;
     }
-    track("adult_gate_enabled", { reason });
+    trackEvent("adult_gate_enabled", { reason });
     router.replace(returnTo);
     return response;
   };
 
   const handleAgeConfirm = (ruleKey) => {
-    track("adult_gate_confirm", { reason, ruleKey });
+    trackEvent("adult_gate_confirm", { reason, ruleKey });
     confirmAge(ruleKey);
-    track("adult_gate_enabled", { reason });
+    trackEvent("adult_gate_enabled", { reason });
     router.replace(returnTo);
   };
 
   const handleEnableAdult = () => {
-    track("adult_gate_enabled", { reason });
+    trackEvent("adult_gate_enabled", { reason });
     enableAdultMode();
     router.replace(returnTo);
   };
@@ -81,7 +81,7 @@ export default function AdultGatePage() {
   };
 
   useEffect(() => {
-    track("adult_gate_blocked", { source: "adult-gate-page", reason, returnTo });
+    trackEvent("adult_gate_blocked", { source: "adult-gate-page", reason, returnTo });
   }, [reason, returnTo]);
 
   return (

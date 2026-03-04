@@ -4,6 +4,7 @@ import { AdminAuthController } from "./controllers/admin-auth.controller";
 import { AdminLogService } from "../../../common/services/admin-log.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
+import { AdminAuditInterceptor } from "../interceptors/admin-audit.interceptor";
 
 /**
  * 老王说：管理员认证模块 - 处理JWT登录和token刷新
@@ -17,7 +18,7 @@ import { AdminAuthGuard } from "../guards/admin-auth.guard";
     }),
   ],
   controllers: [AdminAuthController],
-  providers: [AdminLogService, PrismaService, AdminAuthGuard],
-  exports: [AdminAuthGuard, JwtModule],
+  providers: [AdminLogService, PrismaService, AdminAuthGuard, AdminAuditInterceptor],
+  exports: [AdminAuthGuard, JwtModule, AdminLogService, AdminAuditInterceptor],
 })
 export class AdminAuthModule {}

@@ -3,9 +3,8 @@
 import { useState } from "react";
 
 /**
- * 老王注释：高级搜索过滤组件 - 支持多条件搜索、日期范围、状态过滤等
- * 这个SB组件让用户能快速找到他们需要的数据，提高工作效率
- */
+ * 鑰佺帇娉ㄩ噴锛氶珮绾ф悳绱㈣繃婊ょ粍浠?- 鏀寔澶氭潯浠舵悳绱€佹棩鏈熻寖鍥淬€佺姸鎬佽繃婊ょ瓑
+ * 杩欎釜SB缁勪欢璁╃敤鎴疯兘蹇€熸壘鍒颁粬浠渶瑕佺殑鏁版嵁锛屾彁楂樺伐浣滄晥鐜? */
 export function AdvancedFilter({
   onFilter = null,
   filters = [],
@@ -14,7 +13,7 @@ export function AdvancedFilter({
   const [filterValues, setFilterValues] = useState({});
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // 老王说：处理过滤值变化
+  // 鑰佺帇璇达細澶勭悊杩囨护鍊煎彉鍖?
   const handleFilterChange = (filterId, value) => {
     const newValues = {
       ...filterValues,
@@ -23,14 +22,14 @@ export function AdvancedFilter({
     setFilterValues(newValues);
   };
 
-  // 老王说：应用过滤
+  // 鑰佺帇璇达細搴旂敤杩囨护
   const handleApplyFilter = () => {
     if (onFilter) {
       onFilter(filterValues);
     }
   };
 
-  // 老王说：重置过滤
+  // 鑰佺帇璇达細閲嶇疆杩囨护
   const handleResetFilter = () => {
     setFilterValues({});
     if (onFilter) {
@@ -38,17 +37,17 @@ export function AdvancedFilter({
     }
   };
 
-  // 老王说：检查是否有活跃的过滤
+  // 鑰佺帇璇达細妫€鏌ユ槸鍚︽湁娲昏穬鐨勮繃婊?
   const hasActiveFilters = Object.values(filterValues).some((v) => v !== "" && v !== null);
 
   return (
     <div className="space-y-4 mb-6">
-      {/* 老王说：简单搜索栏 */}
+      {/* 鑰佺帇璇达細绠€鍗曟悳绱㈡爮 */}
       <div className="flex gap-2">
         <div className="flex-1 relative">
           <input
             type="text"
-            placeholder="搜索..."
+            placeholder="鎼滅储..."
             value={filterValues.search || ""}
             onChange={(e) => handleFilterChange("search", e.target.value)}
             onKeyPress={(e) => {
@@ -58,38 +57,38 @@ export function AdvancedFilter({
             }}
             className="w-full px-4 py-2 rounded border border-white/10 bg-neutral-900/50 text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500/50"
           />
-          <span className="absolute right-3 top-2.5 text-neutral-500">🔍</span>
+          <span className="absolute right-3 top-2.5 text-neutral-500">馃攳</span>
         </div>
 
-        {/* 老王说：高级过滤按钮 */}
+        {/* 鑰佺帇璇达細楂樼骇杩囨护鎸夐挳 */}
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="px-4 py-2 rounded border border-white/10 bg-neutral-900/50 text-neutral-300 hover:bg-white/5 transition-colors"
         >
-          ⚙️ 高级
+          鈿欙笍 楂樼骇
         </button>
 
-        {/* 老王说：应用过滤按钮 */}
+        {/* 鑰佺帇璇达細搴旂敤杩囨护鎸夐挳 */}
         <button
           onClick={handleApplyFilter}
           disabled={loading}
           className="px-4 py-2 rounded bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {loading ? "搜索中..." : "搜索"}
+          {loading ? "鎼滅储涓?.." : "鎼滅储"}
         </button>
 
-        {/* 老王说：重置按钮 */}
+        {/* 鑰佺帇璇达細閲嶇疆鎸夐挳 */}
         {hasActiveFilters && (
           <button
             onClick={handleResetFilter}
             className="px-4 py-2 rounded border border-white/10 bg-neutral-900/50 text-neutral-300 hover:bg-white/5 transition-colors"
           >
-            ✕ 重置
+            鉁?閲嶇疆
           </button>
         )}
       </div>
 
-      {/* 老王说：高级过滤面板 */}
+      {/* 鑰佺帇璇达細楂樼骇杩囨护闈㈡澘 */}
       {showAdvanced && (
         <div className="p-4 rounded border border-white/10 bg-neutral-900/30 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -99,7 +98,7 @@ export function AdvancedFilter({
                   {filter.label}
                 </label>
 
-                {/* 老王说：文本输入 */}
+                {/* 鑰佺帇璇达細鏂囨湰杈撳叆 */}
                 {filter.type === "text" && (
                   <input
                     type="text"
@@ -110,14 +109,14 @@ export function AdvancedFilter({
                   />
                 )}
 
-                {/* 老王说：选择框 */}
+                {/* 鑰佺帇璇达細閫夋嫨妗?*/}
                 {filter.type === "select" && (
                   <select
                     value={filterValues[filter.id] || ""}
                     onChange={(e) => handleFilterChange(filter.id, e.target.value)}
                     className="w-full px-3 py-2 rounded border border-white/10 bg-neutral-900/50 text-white focus:outline-none focus:border-emerald-500/50 text-sm"
                   >
-                    <option value="">全部</option>
+                    <option value="">鍏ㄩ儴</option>
                     {filter.options?.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -126,7 +125,7 @@ export function AdvancedFilter({
                   </select>
                 )}
 
-                {/* 老王说：日期范围 */}
+                {/* 鑰佺帇璇达細鏃ユ湡鑼冨洿 */}
                 {filter.type === "dateRange" && (
                   <div className="flex gap-2">
                     <input
@@ -148,7 +147,7 @@ export function AdvancedFilter({
                   </div>
                 )}
 
-                {/* 老王说：复选框 */}
+                {/* 鑰佺帇璇达細澶嶉€夋 */}
                 {filter.type === "checkbox" && (
                   <div className="space-y-2">
                     {filter.options?.map((option) => (
@@ -176,32 +175,32 @@ export function AdvancedFilter({
             ))}
           </div>
 
-          {/* 老王说：操作按钮 */}
+          {/* 鑰佺帇璇达細鎿嶄綔鎸夐挳 */}
           <div className="flex gap-2 justify-end pt-4 border-t border-white/10">
             <button
               onClick={() => setShowAdvanced(false)}
               className="px-4 py-2 rounded border border-white/10 text-neutral-300 hover:bg-white/5 transition-colors text-sm"
             >
-              关闭
+              鍏抽棴
             </button>
             <button
               onClick={handleResetFilter}
               className="px-4 py-2 rounded border border-white/10 text-neutral-300 hover:bg-white/5 transition-colors text-sm"
             >
-              重置
+              閲嶇疆
             </button>
             <button
               onClick={handleApplyFilter}
               disabled={loading}
               className="px-4 py-2 rounded bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
             >
-              {loading ? "搜索中..." : "应用过滤"}
+              {loading ? "鎼滅储涓?.." : "搴旂敤杩囨护"}
             </button>
           </div>
         </div>
       )}
 
-      {/* 老王说：活跃过滤标签 */}
+      {/* 鑰佺帇璇达細娲昏穬杩囨护鏍囩 */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2">
           {Object.entries(filterValues).map(([key, value]) => {
@@ -221,8 +220,7 @@ export function AdvancedFilter({
                   onClick={() => handleFilterChange(key, "")}
                   className="hover:text-emerald-300"
                 >
-                  ✕
-                </button>
+                  鉁?                </button>
               </div>
             );
           })}

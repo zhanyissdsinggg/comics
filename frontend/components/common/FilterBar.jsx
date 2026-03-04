@@ -1,6 +1,6 @@
 /**
- * FilterBar - 筛选和排序组件
- * 老王注释：参考Webtoon和MangaDex的筛选栏设计
+ * FilterBar - 绛涢€夊拰鎺掑簭缁勪欢
+ * 鑰佺帇娉ㄩ噴锛氬弬鑰僕ebtoon鍜孧angaDex鐨勭瓫閫夋爮璁捐
  */
 
 "use client";
@@ -20,23 +20,23 @@ export default function FilterBar({
 }) {
   const [showAllGenres, setShowAllGenres] = useState(false);
 
-  // 老王注释：排序选项 - 简化为2个最常用的
+  // 鑰佺帇娉ㄩ噴锛氭帓搴忛€夐」 - 绠€鍖栦负2涓渶甯哥敤鐨?
   const sortOptions = [
-    { id: "popular", label: "Popular", icon: "🔥" },
-    { id: "latest", label: "Latest", icon: "🆕" },
+    { id: "popular", label: "Popular", icon: "馃敟" },
+    { id: "latest", label: "Latest", icon: "馃啎" },
   ];
 
-  // 老王注释：完结状态选项
+  // 鑰佺帇娉ㄩ噴锛氬畬缁撶姸鎬侀€夐」
   const statusOptions = [
     { id: "all", label: "All" },
     { id: "ongoing", label: "Ongoing" },
     { id: "completed", label: "Completed" },
   ];
 
-  // 老王注释：默认显示前4个类型，点击"More"显示全部
+  // 鑰佺帇娉ㄩ噴锛氶粯璁ゆ樉绀哄墠4涓被鍨嬶紝鐐瑰嚮"More"鏄剧ず鍏ㄩ儴
   const displayedGenres = showAllGenres ? genres : genres.slice(0, 4);
 
-  // 老王注释：安全的回调函数调用
+  // 鑰佺帇娉ㄩ噴锛氬畨鍏ㄧ殑鍥炶皟鍑芥暟璋冪敤
   const handleSortChange = (id) => {
     if (onSortChange) onSortChange(id);
   };
@@ -51,16 +51,16 @@ export default function FilterBar({
 
   return (
     <div className="space-y-3 rounded-2xl bg-neutral-900/50 p-4 backdrop-blur-md border border-white/5">
-      {/* 老王注释：统计信息 */}
+      {/* 鑰佺帇娉ㄩ噴锛氱粺璁′俊鎭?*/}
       <div className="flex items-center justify-between">
         <p className="text-sm text-neutral-400">
           {totalCount > 0 ? `${totalCount} series found` : "Loading..."}
         </p>
       </div>
 
-      {/* 老王注释：排序和状态合并到一行 */}
+      {/* 鑰佺帇娉ㄩ噴锛氭帓搴忓拰鐘舵€佸悎骞跺埌涓€琛?*/}
       <div className="flex flex-col md:flex-row md:items-start gap-4">
-        {/* 排序选项 */}
+        {/* 鎺掑簭閫夐」 */}
         <div className="flex-1">
           <p className="mb-2 text-xs font-semibold text-neutral-300">Sort</p>
           <div className="flex flex-wrap gap-2">
@@ -81,7 +81,7 @@ export default function FilterBar({
           </div>
         </div>
 
-        {/* 完结状态筛选 */}
+        {/* 瀹岀粨鐘舵€佺瓫閫?*/}
         <div className="flex-1">
           <p className="mb-2 text-xs font-semibold text-neutral-300">Status</p>
           <div className="flex flex-wrap gap-2">
@@ -97,7 +97,7 @@ export default function FilterBar({
         </div>
       </div>
 
-      {/* 老王注释：类型筛选 */}
+      {/* 鑰佺帇娉ㄩ噴锛氱被鍨嬬瓫閫?*/}
       {genres.length > 0 && (
         <div>
           <p className="mb-2 text-xs font-semibold text-neutral-300">Genres</p>

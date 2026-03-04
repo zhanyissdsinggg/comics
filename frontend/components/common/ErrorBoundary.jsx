@@ -6,7 +6,7 @@
 "use client";
 
 import { Component } from 'react';
-import { track } from '../../lib/analytics';
+import { trackEvent } from '../../lib/trackEvent';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -28,7 +28,7 @@ class ErrorBoundary extends Component {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
 
     // 追踪错误
-    track('error_boundary_triggered', {
+    trackEvent('error_boundary_triggered', {
       error: error.toString(),
       componentStack: errorInfo.componentStack,
       errorBoundary: this.props.name || 'unnamed',

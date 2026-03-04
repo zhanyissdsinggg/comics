@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Patch, UseGuards, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
+import { HideCommentDto, RecalcRatingDto } from "./dtos/admin-remaining.dto";
 
 @Controller("admin/comments")
 @UseGuards(AdminAuthGuard)
@@ -27,7 +28,7 @@ export class AdminCommentsController {
   }
 
   @Patch("hide")
-  async hide(@Body() body: any) {
+  async hide(@Body() body: HideCommentDto) {
     const seriesId = body?.seriesId;
     const commentId = body?.commentId;
     const hidden = Boolean(body?.hidden);
@@ -42,7 +43,7 @@ export class AdminCommentsController {
   }
 
   @Patch("recalc-rating")
-  async recalc(@Body() body: any) {
+  async recalc(@Body() body: RecalcRatingDto) {
     const seriesId = body?.seriesId;
     if (!seriesId) {
       throw new BadRequestException("缺少seriesId参数");

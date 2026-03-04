@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 
+import { UpdateTrackingDto } from "../dtos/admin-analytics.dto";
 @Controller("admin/tracking")
 @UseGuards(AdminAuthGuard)
 export class AdminTrackingController {
@@ -16,7 +17,7 @@ export class AdminTrackingController {
   }
 
   @Post()
-  async save(@Body() body: any) {
+  async save(@Body() body: UpdateTrackingDto) {
     const values = body?.values || {};
     const payload = { values, updatedAt: new Date().toISOString() };
     const config = await this.prisma.trackingConfig.upsert({

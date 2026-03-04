@@ -167,7 +167,7 @@ export default function AccountPage() {
     }
   };
 
-  // 老王注释：处理密码重置
+  // 鑰佺帇娉ㄩ噴锛氬鐞嗗瘑鐮侀噸缃?
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setResetStatus("");
@@ -206,7 +206,7 @@ export default function AccountPage() {
           </div>
         ) : null}
 
-        {/* 老王注释：阅读统计组件 */}
+        {/* 鑰佺帇娉ㄩ噴锛氶槄璇荤粺璁＄粍浠?*/}
         {isSignedIn && <ReadingStats />}
 
         <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
@@ -288,7 +288,7 @@ export default function AccountPage() {
               {verifyStatus ? <div className="mt-2 text-[11px]">{verifyStatus}</div> : null}
             </div>
           ) : null}
-          {/* 老王注释：密码重置表单 - 包在form标签内符合最佳实践 */}
+          {/* 鑰佺帇娉ㄩ噴锛氬瘑鐮侀噸缃〃鍗?- 鍖呭湪form鏍囩鍐呯鍚堟渶浣冲疄璺?*/}
           <form onSubmit={handlePasswordReset} className="rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-xs text-neutral-300">
             <div className="flex flex-wrap items-center gap-3">
               <div className="text-xs text-neutral-400">Password reset</div>

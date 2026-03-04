@@ -7,8 +7,8 @@ import PackageCard from "./PackageCard";
 import PromoBanner from "./PromoBanner";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useCouponStore } from "../../store/useCouponStore";
-import { useAuthStore } from "../../store/useAuthStore"; // 老王添加：需要检查登录状态
-import { track } from "../../lib/analytics";
+import { useAuthStore } from "../../store/useAuthStore";
+import { trackEvent } from "../../lib/trackEvent";
 import { POINTS_PACKS, OFFERS } from "../../lib/offers/catalog";
 import { decideOffers } from "../../lib/offers/decide";
 import { getBucket, getOrCreateUserId, trackExposure } from "../../lib/experiments/ab";
@@ -24,7 +24,7 @@ export default function StorePage() {
   const { topup } = useWalletStore();
   const { paidPts, bonusPts, subscription } = useWalletStore();
   const { coupons, loadCoupons, claimCoupon } = useCouponStore();
-  const { isSignedIn } = useAuthStore(); // 老王添加：获取登录状态
+  const { isSignedIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
   const returnTo = searchParams.get("returnTo") || "/";
   const focus = searchParams.get("focus") || "";
@@ -51,7 +51,7 @@ export default function StorePage() {
   );
 
   useEffect(() => {
-    track("store_view", { focus });
+    trackEvent("store_view", { focus });
   }, [focus]);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function StorePage() {
     setRegion(stored || cookieRegion || "global");
   }, []);
 
-  // 老王修复：只有登录用户才加载优惠券，避免401错误
+  // Only signed-in users can load coupons to avoid 401 noise.
   useEffect(() => {
     if (isSignedIn) {
       loadCoupons();
@@ -160,7 +160,7 @@ export default function StorePage() {
     if (!focusId) {
       return;
     }
-    track("offer_impression", {
+    trackEvent("offer_impression", {
       offerId: `points_pack_${focusId}`,
       entry: "STORE_ENTRY",
     });
@@ -198,29 +198,29 @@ export default function StorePage() {
     if (!selected) {
       return packages;
     }
-    return [selected, ...packages.filter((pkg) => pkg.id !== focus)];
-  }, [focusId, focus, region, topupCatalog]);
+    return [selected, ...packages.filter((pkg) => pkg.id !== focusId)];
+  }, [focusId, region, topupCatalog]);
 
   const handleBuy = async (packageId) => {
     setBusyId(packageId);
-    track("topup_start", { packageId });
-    track("package_click", { packageId });
-    track("offer_click", { offerId: `points_pack_${packageId}`, entry: "STORE_ENTRY" });
+    trackEvent("topup_start", { packageId });
+    trackEvent("package_click", { packageId });
+    trackEvent("offer_click", { offerId: `points_pack_${packageId}`, entry: "STORE_ENTRY" });
     const response = await topup(packageId);
     setBusyId(null);
     if (response.ok) {
-      track("offer_purchase_success", {
+      trackEvent("offer_purchase_success", {
         offerId: `points_pack_${packageId}`,
         entry: "STORE_ENTRY",
         orderId: response.data?.order?.orderId,
       });
-      track("topup_success", { packageId, orderId: response.data?.order?.orderId });
+      trackEvent("topup_success", { packageId, orderId: response.data?.order?.orderId });
       router.replace(returnTo);
       setErrorMessage("");
       return;
     }
     if (response.status === 401) {
-      track("topup_fail", {
+      trackEvent("topup_fail", {
         packageId,
         status: response.status,
         errorCode: response.error,
@@ -233,7 +233,7 @@ export default function StorePage() {
       }
       return;
     }
-    track("topup_fail", {
+    trackEvent("topup_fail", {
       packageId,
       status: response.status,
       errorCode: response.error,
@@ -249,12 +249,12 @@ export default function StorePage() {
     }
     const response = await claimCoupon(code);
     if (response.ok) {
-      track("coupon_claim", { code });
+      trackEvent("coupon_claim", { code });
       setCouponMessage("Coupon applied.");
       setCouponCode("");
       return;
     }
-    track("coupon_claim_fail", { code, status: response.status, errorCode: response.error });
+    trackEvent("coupon_claim_fail", { code, status: response.status, errorCode: response.error });
     setCouponMessage(response.data?.message || response.error || "Invalid coupon.");
   };
 
@@ -290,8 +290,8 @@ export default function StorePage() {
           <div className="rounded-2xl border border-neutral-900 bg-neutral-900/40 p-4 text-xs text-neutral-300">
             <div className="text-sm font-semibold text-white">Subscriber savings</div>
             <div className="mt-2 text-xs text-neutral-400">
-              Save up to {subscriptionStats.maxDiscount}% on unlocks • Daily free up to{" "}
-              {subscriptionStats.maxDailyFree} • TTF as fast as{" "}
+              Save up to {subscriptionStats.maxDiscount}% on unlocks | Daily free up to{" "}
+              {subscriptionStats.maxDailyFree} | TTF as fast as{" "}
               {Math.round(subscriptionStats.bestTtf * 100)}%
             </div>
             <button
@@ -356,3 +356,4 @@ export default function StorePage() {
     </div>
   );
 }
+

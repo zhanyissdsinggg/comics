@@ -1,7 +1,7 @@
 "use client";
 
 import { getCookie, setCookie } from "../cookies";
-import { track } from "../analytics";
+import { trackEvent } from "../trackEvent";
 
 const USER_ID_KEY = "mn_user_id";
 const exposureCache = new Set();
@@ -56,5 +56,5 @@ export function trackExposure(experimentId, bucket) {
     return;
   }
   exposureCache.add(key);
-  track("experiment_exposure", { experimentId, bucket });
+  trackEvent("experiment_exposure", { experimentId, bucket });
 }

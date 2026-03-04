@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -6,7 +6,7 @@ import Image from "next/image";
 import Pill from "../common/Pill";
 import ActionModal from "./ActionModal";
 import { useWalletStore } from "../../store/useWalletStore";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 import { decideOffers } from "../../lib/offers/decide";
 import { getBucket, getOrCreateUserId, trackExposure } from "../../lib/experiments/ab";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -195,7 +195,7 @@ function EpisodeRow({
       return;
     }
     if (recommendedUnlockOffer?.id) {
-      track("offer_impression", { offerId: recommendedUnlockOffer.id, entry: "UNLOCK_MODAL" });
+      trackEvent("offer_impression", { offerId: recommendedUnlockOffer.id, entry: "UNLOCK_MODAL" });
       impressionRef.current = true;
     }
   }, [modalState?.type, recommendedUnlockOffer?.id]);
@@ -227,7 +227,7 @@ function EpisodeRow({
         type="button"
         onClick={async () => {
           setIsWorking(true);
-          track("ttf_claim", { seriesId, episodeId: episode?.id });
+          trackEvent("ttf_claim", { seriesId, episodeId: episode?.id });
           let response;
           try {
             response = await onClaim(seriesId, episode?.id);
@@ -235,14 +235,14 @@ function EpisodeRow({
             response = { ok: false, status: 500, error: "CLAIM_FAILED" };
           }
           if (response.ok) {
-            track("ttf_claim_success", { seriesId, episodeId: episode?.id });
+            trackEvent("ttf_claim_success", { seriesId, episodeId: episode?.id });
             setModalState({
               type: "SUCCESS",
               title: "Claimed",
               description: "Free claim successful.",
             });
           } else {
-            track("ttf_claim_fail", {
+            trackEvent("ttf_claim_fail", {
               seriesId,
               episodeId: episode?.id,
               status: response.status,
@@ -295,7 +295,7 @@ function EpisodeRow({
         type="button"
         onClick={async () => {
           setIsWorking(true);
-          track("click_unlock", { seriesId, episodeId: episode?.id });
+          trackEvent("click_unlock", { seriesId, episodeId: episode?.id });
           const idempotencyKey = createIdempotencyKey();
           let response;
           try {
@@ -304,7 +304,7 @@ function EpisodeRow({
             response = { ok: false, status: 500, error: "UNLOCK_FAILED" };
           }
           if (response.ok) {
-            track("unlock_success", { seriesId, episodeId: episode?.id });
+            trackEvent("unlock_success", { seriesId, episodeId: episode?.id });
             recordUnlock(seriesId, episode?.id);
             setModalState({
               type: "SUCCESS",
@@ -315,7 +315,7 @@ function EpisodeRow({
             return;
           }
 
-          track("unlock_fail", {
+          trackEvent("unlock_fail", {
             seriesId,
             episodeId: episode?.id,
             status: response.status,
@@ -423,7 +423,7 @@ function EpisodeRow({
                   label: "Top up POINTS",
                   onClick: () => {
                     router.push(`/store?returnTo=/series/${seriesId}&focus=auto`);
-                    track("offer_click", {
+                    trackEvent("offer_click", {
                       offerId: "store_entry",
                       entry: "UNLOCK_MODAL",
                     });
@@ -434,7 +434,7 @@ function EpisodeRow({
                 {
                   label: "Subscribe for perks",
                   onClick: () => {
-                    track("click_subscribe_from_shortfall", {
+                    trackEvent("click_subscribe_from_shortfall", {
                       seriesId,
                       episodeId: episode?.id,
                     });
@@ -451,8 +451,8 @@ function EpisodeRow({
                     const packageId =
                       recommendedTopup?.id?.replace("points_pack_", "") ||
                       "starter";
-                    track("topup_start", { packageId, entry: "UNLOCK_MODAL" });
-                    track("offer_click", {
+                    trackEvent("topup_start", { packageId, entry: "UNLOCK_MODAL" });
+                    trackEvent("offer_click", {
                       offerId: recommendedTopup?.id || "points_pack_starter",
                       entry: "UNLOCK_MODAL",
                     });
@@ -466,18 +466,18 @@ function EpisodeRow({
                         retry = { ok: false };
                       }
                       if (retry.ok) {
-                        track("unlock_success", {
+                        trackEvent("unlock_success", {
                           seriesId,
                           episodeId: episode?.id,
                           retry: true,
                         });
                         recordUnlock(seriesId, episode?.id);
-                        track("offer_purchase_success", {
+                        trackEvent("offer_purchase_success", {
                           offerId: recommendedTopup?.id || "points_pack_starter",
                           entry: "UNLOCK_MODAL",
                           orderId: topupResponse.data?.order?.orderId,
                         });
-                        track("topup_success", {
+                        trackEvent("topup_success", {
                           packageId,
                           orderId: topupResponse.data?.order?.orderId,
                         });
@@ -489,13 +489,13 @@ function EpisodeRow({
                         return;
                       }
                     }
-                    track("topup_fail", {
+                    trackEvent("topup_fail", {
                       packageId,
                       status: topupResponse.status,
                       errorCode: topupResponse.error,
                       requestId: topupResponse.requestId,
                     });
-                    track("unlock_fail", {
+                    trackEvent("unlock_fail", {
                       seriesId,
                       episodeId: episode?.id,
                       retry: true,

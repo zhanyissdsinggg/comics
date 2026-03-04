@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards, BadRequestException, NotFoundException, Req } from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { RefundOrderDto, AdjustWalletDto } from "./dtos/admin-remaining.dto";
 import { getTopupPackage } from "../../common/config/topup";
 import { AdminLogService } from "../../common/services/admin-log.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../common/utils/pagination";
@@ -41,7 +42,7 @@ export class AdminOrdersController {
   }
 
   @Post("refund")
-  async refund(@Body() body: any, @Req() req: Request) {
+  async refund(@Body() body: RefundOrderDto, @Req() req: Request) {
     const userId = body?.userId;
     const orderId = body?.orderId;
     if (!userId || !orderId) {
@@ -109,7 +110,7 @@ export class AdminOrdersController {
   }
 
   @Post("adjust")
-  async adjust(@Body() body: any, @Req() req: Request) {
+  async adjust(@Body() body: AdjustWalletDto, @Req() req: Request) {
     const userId = body?.userId;
     if (!userId) {
       throw new BadRequestException("缺少userId参数");

@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Pill from "../common/Pill";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 
 function formatPercent(value) {
   if (typeof value !== "number") {
@@ -77,7 +77,7 @@ export default function ReaderDrawer({
               <button
                 type="button"
                 onClick={() => {
-                  track("click_subscribe_from_toc", { seriesId: currentSeriesId });
+                  trackEvent("click_subscribe_from_toc", { seriesId: currentSeriesId });
                   onSubscribe();
                 }}
                 className="rounded-full border border-neutral-700 px-3 py-1 text-[10px]"

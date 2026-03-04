@@ -1,6 +1,5 @@
 /**
- * HomePage - 参考 Webtoon/Tapas 首页设计
- * Hero Banner + Genre Filter Chips + Rails 内容网格
+ * Home page shell: hero, genre chips and recommendation rails.
  */
 
 "use client";
@@ -17,9 +16,9 @@ import { useFollowStore } from "../../store/useFollowStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useBrandingStore } from "../../store/useBrandingStore";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 
-// Genre chip 配置
+// Genre chips
 const GENRE_CHIPS = [
   { id: "all", label: "All" },
   { id: "action", label: "Action" },
@@ -32,7 +31,7 @@ const GENRE_CHIPS = [
   { id: "horror", label: "Horror" },
 ];
 
-// 骨架屏
+// Skeleton rail while loading
 function SkeletonRail() {
   return (
     <div className="space-y-4">
@@ -69,15 +68,13 @@ function HomeContent() {
   const [activeGenre, setActiveGenre] = useState("all");
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // 加载用户数据
+  // Load user-related data after sign-in
   useEffect(() => {
     if (isSignedIn) {
       loadFollowed();
       loadHistory();
     }
   }, [loadFollowed, loadHistory, isSignedIn]);
-
-  // 检查 URL 参数 - 登录弹窗
   useEffect(() => {
     const reason = searchParams.get("reason");
     const openLogin = searchParams.get("openLogin");
@@ -93,10 +90,10 @@ function HomeContent() {
 
   // Track page view
   useEffect(() => {
-    track("view_home", {});
+    trackEvent("view_home", {});
   }, []);
 
-  // Hero items - 从 seriesList 动态生成
+  // Build hero items from live catalog
   const heroItems = useMemo(() => {
     if (!seriesList || seriesList.length === 0) return [];
     const featured = seriesList
@@ -106,7 +103,7 @@ function HomeContent() {
       .map((s) => ({
         id: `hero-${s.id}`,
         title: s.title,
-        description: s.description || `${s.genres?.join(" · ") || ""}`,
+        description: s.description || `${s.genres?.join(" • ") || ""}`,
         coverTone: s.coverTone || "default",
         coverUrl: s.coverUrl,
         bannerUrl: s.bannerUrl || null,
@@ -135,8 +132,6 @@ function HomeContent() {
         <div className="py-4 md:py-6">
           {loading ? <HeroBannerSkeleton /> : <HeroCarousel items={heroItems} />}
         </div>
-
-        {/* 老王优化：iOS 26风格的Genre Filter Chips - 胶囊形状 + 毛玻璃 */}
         <div className="mb-8 flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {GENRE_CHIPS.map((chip) => (
             <button
@@ -165,8 +160,6 @@ function HomeContent() {
           <HomeRailsContainer activeGenre={activeGenre} />
         )}
       </main>
-
-      {/* 登录弹窗 */}
       <LoginPrompt
         isOpen={showLoginPrompt}
         onClose={() => setShowLoginPrompt(false)}

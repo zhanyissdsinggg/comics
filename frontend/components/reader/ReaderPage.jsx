@@ -1,17 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiGet } from "../../lib/apiClient";
-import { track } from "../../lib/analytics";
+import { trackEvent } from "../../lib/trackEvent";
 import { useEntitlementStore } from "../../store/useEntitlementStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import PageStream from "./PageStream";
 import ReaderTopBar from "./ReaderTopBar";
-import EndOfEpisodeOverlay from "./EndOfEpisodeOverlay";
-import ActionModal from "../series/ActionModal";
-import ReaderDrawer from "./ReaderDrawer";
-import ReaderSettingsPanel from "./ReaderSettingsPanel";
 import { useProgressStore } from "../../store/useProgressStore";
 import { useRewardsStore } from "../../store/useRewardsStore";
 import { decideOffers } from "../../lib/offers/decide";
@@ -22,14 +19,31 @@ import { OFFERS } from "../../lib/offers/catalog";
 import { useCouponStore } from "../../store/useCouponStore";
 import { calculatePrice } from "../../lib/pricing";
 import AdultGateBlockingPanel from "../series/AdultGateBlockingPanel";
-import AdultLoginModal from "../series/AdultLoginModal";
-import AdultAgeModal from "../series/AdultAgeModal";
 import { confirmAge, readAdultState, requestEnableAdult } from "../../lib/adultGate";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
 import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAutoSaveProgress } from "../../hooks/useAutoSaveProgress";
+
+const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
+  ssr: false,
+});
+const ActionModal = dynamic(() => import("../series/ActionModal"), {
+  ssr: false,
+});
+const ReaderDrawer = dynamic(() => import("./ReaderDrawer"), {
+  ssr: false,
+});
+const ReaderSettingsPanel = dynamic(() => import("./ReaderSettingsPanel"), {
+  ssr: false,
+});
+const AdultLoginModal = dynamic(() => import("../series/AdultLoginModal"), {
+  ssr: false,
+});
+const AdultAgeModal = dynamic(() => import("../series/AdultAgeModal"), {
+  ssr: false,
+});
 
 function getEpisodeIndex(episodes, episodeId) {
   return episodes.findIndex((episode) => episode.id === episodeId);
@@ -69,7 +83,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [scrollPercent, setScrollPercent] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [settingsPanelOpen, setSettingsPanelOpen] = useState(false); // 老王注释：设置面板状态
+  const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
   const [gateStatus, setGateStatus] = useState("OK");
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
@@ -96,9 +110,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const { bookmarksBySeries, addBookmark, removeBookmark } = useBookmarkStore();
   const reportedRef = useRef(false);
 
-  // 启用阅读进度自动保存
+  // 闂佸憡鍑归崹鎶藉极閵堝鈷撻柛娑㈠亰閸ゃ垽寮堕埡鍌溾槈閻庤濞婇幊娑㈩敂閸曨倣妤€菐閸ャ劎绠撻柣?
   const { restoreProgress } = useAutoSaveProgress(seriesId, episodeId, {
-    enabled: isSignedIn, // 只为登录用户保存进度
+    enabled: isSignedIn, // 闂佸憡鐟禍娆戞嫻閻斿吋鍎岄悹鍥皺缁夊潡鏌ｉ～顒€濡介柛鈺傜⊕缁屽崬鈹戦崱娆愭喖闁哄鏅滅粙鎴犫偓?
   });
 
   const entitlement = bySeriesId[seriesId] || { unlockedEpisodeIds: [] };
@@ -202,7 +216,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
           setGateStatus(episodeResponse.reason);
         }
         if (!gateReportedRef.current) {
-          track("adult_gate_blocked", {
+          trackEvent("adult_gate_blocked", {
             source: "reader",
             seriesId,
             reason: episodeResponse.reason,
@@ -226,7 +240,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
           setGateStatus(seriesResponse.reason);
         }
         if (!gateReportedRef.current) {
-          track("adult_gate_blocked", {
+          trackEvent("adult_gate_blocked", {
             source: "reader",
             seriesId,
             reason: seriesResponse.reason,
@@ -248,7 +262,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     setLoading(false);
   }, [adultState.isAdultMode, episodeId, seriesId]);
 
-  // 恢复阅读进度
+  // 闂佽鍘归崹褰捤囬弻銉︹挀闁告盯鍋婇崵銏ゅ级閳哄倻鈽夐悗?
   useEffect(() => {
     if (!loading && episodeData && isSignedIn) {
       restoreProgress();
@@ -311,7 +325,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   useEffect(() => {
     if (episodeData?.id) {
-      track("view_reader", { seriesId, episodeId });
+      trackEvent("view_reader", { seriesId, episodeId });
     }
   }, [episodeData?.id, episodeId, seriesId]);
 
@@ -407,7 +421,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   useEffect(() => {
     if (showPaywall) {
-      track("paywall_impression", { seriesId, episodeId, source: "preview" });
+      trackEvent("paywall_impression", { seriesId, episodeId, source: "preview" });
     }
   }, [showPaywall, seriesId, episodeId]);
 
@@ -416,7 +430,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       return;
     }
     if (offerDecision?.recommendedUnlockOfferId) {
-      track("offer_impression", {
+      trackEvent("offer_impression", {
         offerId: offerDecision.recommendedUnlockOfferId,
         entry: "READER_END",
       });
@@ -428,7 +442,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       return;
     }
     if (offerDecision?.recommendedUnlockOffer?.id) {
-      track("offer_impression", {
+      trackEvent("offer_impression", {
         offerId: offerDecision.recommendedUnlockOffer.id,
         entry: "READER_PAYWALL",
       });
@@ -488,7 +502,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       episodeId,
       percent: scrollRef.current,
       pageIndex: activePageIndex,
-      label: `Ep ${episodeId} ? ${Math.round(scrollRef.current * 100)}%`,
+      label: `Ep ${episodeId} - ${Math.round(scrollRef.current * 100)}%`,
     });
     setModalState({
       type: "SUCCESS",
@@ -606,7 +620,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
   };
 
   const handleUnlockCurrent = async () => {
-    track("paywall_unlock_click", { seriesId, episodeId });
+    trackEvent("paywall_unlock_click", { seriesId, episodeId });
     const response = await handleUnlock(episodeId);
     if (response.ok) {
       setModalState({
@@ -629,7 +643,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       handleShortfall(response, episodeId);
       return;
     }
-    track("unlock_fail", {
+    trackEvent("unlock_fail", {
       seriesId,
       episodeId,
       status: response.status,
@@ -665,7 +679,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       handleShortfall(response, nextEpisode.id);
       return;
     }
-    track("unlock_fail", {
+    trackEvent("unlock_fail", {
       seriesId,
       episodeId: nextEpisode.id,
       status: response.status,
@@ -839,22 +853,26 @@ export default function ReaderPage({ seriesId, episodeId }) {
           onBack={() => router.push(`/series/${seriesId}`)}
         />
         <AdultGateBlockingPanel status={gateStatus} onOpenModal={openGateModal} />
-        <AdultLoginModal
-          open={activeModal === "login"}
-          onClose={() => {
-            setActiveModal(null);
-            setAuthError("");
-          }}
-          onSubmit={handleLogin}
-          errorMessage={authError}
-        />
-        <AdultAgeModal
-          open={activeModal === "age"}
-          onClose={() => setActiveModal(null)}
-          onConfirm={handleAgeConfirm}
-          ageRuleKey={adultState.ageRuleKey}
-          legalAge={adultState.legalAge}
-        />
+        {activeModal === "login" ? (
+          <AdultLoginModal
+            open
+            onClose={() => {
+              setActiveModal(null);
+              setAuthError("");
+            }}
+            onSubmit={handleLogin}
+            errorMessage={authError}
+          />
+        ) : null}
+        {activeModal === "age" ? (
+          <AdultAgeModal
+            open
+            onClose={() => setActiveModal(null)}
+            onConfirm={handleAgeConfirm}
+            ageRuleKey={adultState.ageRuleKey}
+            legalAge={adultState.legalAge}
+          />
+        ) : null}
       </main>
     );
   }
@@ -903,7 +921,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         onAddBookmark={handleAddBookmark}
         onToggleNight={toggleNightMode}
         onToggleLayout={handleToggleLayout}
-        onOpenSettings={() => setSettingsPanelOpen(true)} // 老王注释：打开设置面板
+        onOpenSettings={() => setSettingsPanelOpen(true)} // 闂佸ジ顣﹂懗鍓佹暜閸パ€鏋栭柕濞炬櫅濞呯偤鏌ㄥ☉娆戭暡濠⒀嶇畱椤曪綁鍩€椤掑倹濯奸柛鎾楀懏鐎梻鍌氱墑閸ㄥ搫顭?
         onToggleAutoScroll={() => {
           setAutoScroll((prev) => {
             const next = !prev;
@@ -934,7 +952,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         nextLocked={nextEpisode ? !nextUnlocked : false}
       />
       <div className="mx-auto hidden max-w-5xl px-4 pt-3 text-[11px] text-neutral-500 md:block">
-        Shortcuts: N = night mode, T = contents, B = bookmark, ←/→ = prev/next, A = auto scroll
+        Shortcuts: N = night mode, T = contents, B = bookmark, Left/Right = prev/next, A = auto scroll
       </div>
 
       <PageStream
@@ -996,7 +1014,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             <button
               type="button"
               onClick={() => {
-                track("click_subscribe_from_paywall", { seriesId, episodeId });
+                trackEvent("click_subscribe_from_paywall", { seriesId, episodeId });
                 router.push("/subscribe");
               }}
               className="mt-3 w-full rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-100"
@@ -1006,7 +1024,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             <button
               type="button"
               onClick={() => {
-                track("offer_click", { offerId: "store_entry", entry: "READER_PAYWALL" });
+                trackEvent("offer_click", { offerId: "store_entry", entry: "READER_PAYWALL" });
                 router.push(`/store?returnTo=/read/${seriesId}/${episodeId}&focus=auto`);
               }}
               className="mt-2 w-full rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300"
@@ -1017,176 +1035,182 @@ export default function ReaderPage({ seriesId, episodeId }) {
         </div>
       ) : null}
 
-      <EndOfEpisodeOverlay
-        open={showEndOverlay}
-        nextEpisode={nextEpisode}
-        nextUnlocked={nextUnlocked}
-        decision={offerDecision}
-        pricing={nextPricing}
-        packPricing={packPricing}
-        seriesTitle={seriesData?.series?.title}
-        episodeTitle={episodeData?.episode?.title}
-        onNext={() => router.push(`/read/${seriesId}/${nextEpisode?.id}`)}
-        onUnlock={handleUnlockNext}
-        onSubscribe={() => {
-          track("click_subscribe_from_reader_end", {
-            seriesId,
-            episodeId,
-            nextEpisodeId: nextEpisode?.id || null,
-          });
-          router.push("/subscribe");
-        }}
-        onClaim={handleClaimNext}
-        onOfferClick={(offerId) =>
-          track("offer_click", { offerId, entry: "READER_END" })
-        }
-        onPackOffer={handlePackOffer}
-        onNotify={() =>
-          setModalState({
-            type: "INFO",
-            title: "Notify me",
-            description: "We will notify you when it's ready.",
-          })
-        }
-      />
+      {showEndOverlay ? (
+        <EndOfEpisodeOverlay
+          open
+          nextEpisode={nextEpisode}
+          nextUnlocked={nextUnlocked}
+          decision={offerDecision}
+          pricing={nextPricing}
+          packPricing={packPricing}
+          seriesTitle={seriesData?.series?.title}
+          episodeTitle={episodeData?.episode?.title}
+          onNext={() => router.push(`/read/${seriesId}/${nextEpisode?.id}`)}
+          onUnlock={handleUnlockNext}
+          onSubscribe={() => {
+            trackEvent("click_subscribe_from_reader_end", {
+              seriesId,
+              episodeId,
+              nextEpisodeId: nextEpisode?.id || null,
+            });
+            router.push("/subscribe");
+          }}
+          onClaim={handleClaimNext}
+          onOfferClick={(offerId) =>
+            trackEvent("offer_click", { offerId, entry: "READER_END" })
+          }
+          onPackOffer={handlePackOffer}
+          onNotify={() =>
+            setModalState({
+              type: "INFO",
+              title: "Notify me",
+              description: "We will notify you when it's ready.",
+            })
+          }
+        />
+      ) : null}
 
-      <ReaderDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        episodes={episodes}
-        unlockedIds={entitlement.unlockedEpisodeIds}
-        currentSeriesId={seriesId}
-        currentEpisodeId={episodeId}
-        bookmarks={bookmarks}
-        onSelectEpisode={handleSelectEpisode}
-        onGoBookmark={handleGoBookmark}
-        onRemoveBookmark={(id) => removeBookmark(seriesId, id)}
-        onSubscribe={() => router.push("/subscribe")}
-      />
+      {drawerOpen ? (
+        <ReaderDrawer
+          open
+          onClose={() => setDrawerOpen(false)}
+          episodes={episodes}
+          unlockedIds={entitlement.unlockedEpisodeIds}
+          currentSeriesId={seriesId}
+          currentEpisodeId={episodeId}
+          bookmarks={bookmarks}
+          onSelectEpisode={handleSelectEpisode}
+          onGoBookmark={handleGoBookmark}
+          onRemoveBookmark={(id) => removeBookmark(seriesId, id)}
+          onSubscribe={() => router.push("/subscribe")}
+        />
+      ) : null}
 
-      <ActionModal
-        open={Boolean(modalState)}
-        type={modalState?.type}
-        title={modalState?.title}
-        description={modalState?.description}
-        shortfallPts={modalState?.shortfallPts}
-        offer={offerDecision?.recommendedUnlockOffer}
-        offerBadge={offerDecision?.recommendedUnlockOffer?.tag}
-        offerSavingsText={
-          offerDecision?.recommendedUnlockOffer?.savingsPct
-            ? `You save ${offerDecision.recommendedUnlockOffer.savingsPct}%`
-            : null
-        }
-        compareItems={
-          modalState?.type === "SHORTFALL" &&
-          offerDecision?.recommendedUnlockOffer?.episodes > 1
-            ? [
-                {
-                  label: "Single",
-                  value: `${episodeData?.pricePts || 0} POINTS`,
-                },
-                {
-                  label: `${offerDecision.recommendedUnlockOffer.episodes} Pack`,
-                  value: `${offerDecision.recommendedUnlockOffer.pricePts} POINTS`,
-                },
-              ]
-            : []
-        }
-        tips={
-          modalState?.type === "SHORTFALL"
-            ? [
-                "Unlock keeps this episode in your library.",
-                "Packs save more POINTS on future episodes.",
-                "Subscribers get daily free unlocks and faster TTF.",
-                "Subscribe to unlock daily free chapters.",
-              ]
-            : []
-        }
-        actions={
-          modalState?.type === "SHORTFALL"
-            ? [
-                {
-                  label: "Top up POINTS",
-                  onClick: () => {
-                    router.push(
-                      `/store?returnTo=/read/${seriesId}/${episodeId}&focus=auto`
-                    );
-                    track("offer_click", {
-                      offerId: "store_entry",
-                      entry: "READER_PAYWALL",
-                    });
-                    setModalState(null);
+      {modalState ? (
+        <ActionModal
+          open
+          type={modalState?.type}
+          title={modalState?.title}
+          description={modalState?.description}
+          shortfallPts={modalState?.shortfallPts}
+          offer={offerDecision?.recommendedUnlockOffer}
+          offerBadge={offerDecision?.recommendedUnlockOffer?.tag}
+          offerSavingsText={
+            offerDecision?.recommendedUnlockOffer?.savingsPct
+              ? `You save ${offerDecision.recommendedUnlockOffer.savingsPct}%`
+              : null
+          }
+          compareItems={
+            modalState?.type === "SHORTFALL" &&
+            offerDecision?.recommendedUnlockOffer?.episodes > 1
+              ? [
+                  {
+                    label: "Single",
+                    value: `${episodeData?.pricePts || 0} POINTS`,
                   },
-                  variant: "secondary",
-                },
-                {
-                  label: "Subscribe for perks",
-                  onClick: () => {
-                    track("click_subscribe_from_shortfall", {
-                      seriesId,
-                      episodeId,
-                    });
-                    router.push(`/subscribe?returnTo=/read/${seriesId}/${episodeId}`);
-                    setModalState(null);
+                  {
+                    label: `${offerDecision.recommendedUnlockOffer.episodes} Pack`,
+                    value: `${offerDecision.recommendedUnlockOffer.pricePts} POINTS`,
                   },
-                  variant: "secondary",
-                },
-                {
-                  label: "Quick top up",
-                  onClick: async () => {
-                    const packageId =
-                      offerDecision?.recommendedTopupOffer?.id?.replace(
-                        "points_pack_",
-                        ""
-                      ) || "starter";
-                    track("topup_start", { packageId, entry: "READER_PAYWALL" });
-                    track("offer_click", {
-                      offerId: offerDecision?.recommendedTopupOffer?.id,
-                      entry: "READER_PAYWALL",
-                    });
-                    const topupResponse = await topup(packageId);
-                    if (topupResponse.ok) {
-                      const retryId = modalState?.targetEpisodeId || episodeId;
-                      const retry = await handleUnlock(retryId);
-                      if (retry.ok && nextEpisode && retryId === nextEpisode.id) {
-                        router.push(`/read/${seriesId}/${nextEpisode.id}`);
-                        return;
-                      }
-                      track("offer_purchase_success", {
+                ]
+              : []
+          }
+          tips={
+            modalState?.type === "SHORTFALL"
+              ? [
+                  "Unlock keeps this episode in your library.",
+                  "Packs save more POINTS on future episodes.",
+                  "Subscribers get daily free unlocks and faster TTF.",
+                  "Subscribe to unlock daily free chapters.",
+                ]
+              : []
+          }
+          actions={
+            modalState?.type === "SHORTFALL"
+              ? [
+                  {
+                    label: "Top up POINTS",
+                    onClick: () => {
+                      router.push(
+                        `/store?returnTo=/read/${seriesId}/${episodeId}&focus=auto`
+                      );
+                      trackEvent("offer_click", {
+                        offerId: "store_entry",
+                        entry: "READER_PAYWALL",
+                      });
+                      setModalState(null);
+                    },
+                    variant: "secondary",
+                  },
+                  {
+                    label: "Subscribe for perks",
+                    onClick: () => {
+                      trackEvent("click_subscribe_from_shortfall", {
+                        seriesId,
+                        episodeId,
+                      });
+                      router.push(`/subscribe?returnTo=/read/${seriesId}/${episodeId}`);
+                      setModalState(null);
+                    },
+                    variant: "secondary",
+                  },
+                  {
+                    label: "Quick top up",
+                    onClick: async () => {
+                      const packageId =
+                        offerDecision?.recommendedTopupOffer?.id?.replace(
+                          "points_pack_",
+                          ""
+                        ) || "starter";
+                      trackEvent("topup_start", { packageId, entry: "READER_PAYWALL" });
+                      trackEvent("offer_click", {
                         offerId: offerDecision?.recommendedTopupOffer?.id,
                         entry: "READER_PAYWALL",
-                        orderId: topupResponse.data?.order?.orderId,
                       });
-                      track("topup_success", {
+                      const topupResponse = await topup(packageId);
+                      if (topupResponse.ok) {
+                        const retryId = modalState?.targetEpisodeId || episodeId;
+                        const retry = await handleUnlock(retryId);
+                        if (retry.ok && nextEpisode && retryId === nextEpisode.id) {
+                          router.push(`/read/${seriesId}/${nextEpisode.id}`);
+                          return;
+                        }
+                        trackEvent("offer_purchase_success", {
+                          offerId: offerDecision?.recommendedTopupOffer?.id,
+                          entry: "READER_PAYWALL",
+                          orderId: topupResponse.data?.order?.orderId,
+                        });
+                        trackEvent("topup_success", {
+                          packageId,
+                          orderId: topupResponse.data?.order?.orderId,
+                        });
+                        setModalState({
+                          type: "SUCCESS",
+                          title: "Unlocked",
+                          description: "Episode unlocked successfully.",
+                        });
+                        return;
+                      }
+                      trackEvent("topup_fail", {
                         packageId,
-                        orderId: topupResponse.data?.order?.orderId,
+                        status: topupResponse.status,
+                        errorCode: topupResponse.error,
+                        requestId: topupResponse.requestId,
                       });
                       setModalState({
-                        type: "SUCCESS",
-                        title: "Unlocked",
-                        description: "Episode unlocked successfully.",
+                        type: "ERROR",
+                        title: "Top up failed",
+                        description: "Unable to top up and unlock.",
                       });
-                      return;
-                    }
-                    track("topup_fail", {
-                      packageId,
-                      status: topupResponse.status,
-                      errorCode: topupResponse.error,
-                      requestId: topupResponse.requestId,
-                    });
-                    setModalState({
-                      type: "ERROR",
-                      title: "Top up failed",
-                      description: "Unable to top up and unlock.",
-                    });
+                    },
+                    variant: "primary",
                   },
-                  variant: "primary",
-                },
-              ]
-            : null
-        }
-        onClose={() => setModalState(null)}
-      />
+                ]
+              : null
+          }
+          onClose={() => setModalState(null)}
+        />
+      ) : null}
 
       {pendingResume ? (
         <div className="fixed bottom-20 right-6 z-40 rounded-2xl border border-neutral-800 bg-neutral-900/95 px-4 py-3 text-xs text-neutral-200 shadow-lg">
@@ -1233,8 +1257,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
         </div>
       ) : null}
 
-      {/* 老王注释：阅读器设置面板 */}
-      <ReaderSettingsPanel isOpen={settingsPanelOpen} onClose={() => setSettingsPanelOpen(false)} />
+      {/* 闂佸ジ顣﹂懗鍓佹暜閸パ€鏋栭柕濞炬櫅濞呯偤鏌ㄥ☉娆忓摵婵℃彃瀚幏鐘垫嫚閸欏褰滈柣鐘辩婢т粙鎮块崱娑欘棃闁靛繆鍓濈欢?*/}
+      {settingsPanelOpen ? (
+        <ReaderSettingsPanel isOpen onClose={() => setSettingsPanelOpen(false)} />
+      ) : null}
     </main>
   );
 }

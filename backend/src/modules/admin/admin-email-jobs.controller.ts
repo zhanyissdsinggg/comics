@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, UseGuards, BadRequestException, Req } from
 import { Request } from "express";
 import { listEmailJobs, listFailedEmailJobs } from "../../common/storage/mock-store";
 import { EmailService } from "../email/email.service";
+import { RetryEmailJobDto } from "./dtos/admin-remaining.dto";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
@@ -24,7 +25,7 @@ export class AdminEmailJobsController {
   }
 
   @Post("retry")
-  async retry(@Body() body: any, @Req() req: Request) {
+  async retry(@Body() body: RetryEmailJobDto, @Req() req: Request) {
     const jobId = body?.jobId;
     if (!jobId) {
       throw new BadRequestException("缺少jobId参数");

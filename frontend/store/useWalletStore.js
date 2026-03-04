@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { apiDelete, apiGet, apiPost } from "../lib/apiClient";
-import { track } from "../lib/analytics";
+import { trackEvent } from "../lib/trackEvent";
 import { useAuthStore } from "./useAuthStore";
 
 const WalletContext = createContext(null);
@@ -33,15 +33,15 @@ export function WalletProvider({ children }) {
   }, [isSignedIn]);
 
   const subscribe = useCallback(async (planId) => {
-    track("subscribe_start", { planId });
+    trackEvent("subscribe_start", { planId });
     const response = await apiPost("/api/subscription", { planId });
     if (response.ok && response.data?.subscription) {
       setWallet((prev) => ({ ...prev, subscription: response.data.subscription, plan: planId }));
       loadWallet();
-      track("subscribe_success", { planId });
+      trackEvent("subscribe_success", { planId });
       return response;
     }
-    track("subscribe_fail", { planId, status: response.status, errorCode: response.error });
+    trackEvent("subscribe_fail", { planId, status: response.status, errorCode: response.error });
     return response;
   }, [loadWallet]);
 
@@ -49,7 +49,7 @@ export function WalletProvider({ children }) {
     const response = await apiDelete("/api/subscription");
     if (response.ok) {
       setWallet((prev) => ({ ...prev, subscription: response.data?.subscription || null, plan: "free" }));
-      track("subscribe_cancel", {});
+      trackEvent("subscribe_cancel", {});
     }
     return response;
   }, []);
@@ -65,11 +65,11 @@ export function WalletProvider({ children }) {
     if (inflightRef.current.has(key)) {
       return inflightRef.current.get(key);
     }
-    track("topup_start", { packageId });
+    trackEvent("topup_start", { packageId });
     const requestPromise = (async () => {
       const created = await apiPost("/api/payments/create", { packageId, provider: "stripe" });
       if (!created.ok) {
-        track("topup_fail", {
+        trackEvent("topup_fail", {
           packageId,
           status: created.status,
           errorCode: created.error,
@@ -81,7 +81,7 @@ export function WalletProvider({ children }) {
         paymentId: created.data?.payment?.paymentId,
       });
       if (!confirm.ok) {
-        track("topup_fail", {
+        trackEvent("topup_fail", {
           packageId,
           status: confirm.status,
           errorCode: confirm.error,
@@ -95,7 +95,7 @@ export function WalletProvider({ children }) {
       if (typeof window !== "undefined") {
         window.localStorage.setItem("mn_has_purchased", "1");
       }
-      track("topup_success", { packageId });
+      trackEvent("topup_success", { packageId });
       return confirm;
     })();
     inflightRef.current.set(key, requestPromise);

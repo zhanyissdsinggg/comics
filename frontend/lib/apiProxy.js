@@ -1,21 +1,26 @@
+const LOOP_GUARD_HEADER = "x-gush-api-proxy-hop";
+
 function getBackendBaseUrl(requestUrl) {
   const envBase =
     process.env.API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_BASE_URL ||
     "http://localhost:4000";
-  const base = envBase.replace(/\/$/, "");
+
+  const normalizedBase = envBase.replace(/\/$/, "");
+
   try {
     const reqUrl = new URL(requestUrl);
-    const baseUrl = new URL(base);
-    // 老王注释：如果前后端在同一个域名（比如都在Vercel上），使用空字符串（相对路径）
-    if (baseUrl.host === reqUrl.host) {
-      return "";  // 返回空字符串，使用相对路径
+    const baseUrl = new URL(normalizedBase);
+    if (baseUrl.protocol === reqUrl.protocol && baseUrl.host === reqUrl.host) {
+      // 閬垮厤 Next API route 鍐嶆杞彂鍒拌嚜韬紝瀵艰嚧閫掑綊浠ｇ悊銆?
+      return null;
     }
   } catch {
-    // ignore parse errors
+    return null;
   }
-  return base;
+
+  return normalizedBase;
 }
 
 function stripHopByHopHeaders(headers) {
@@ -36,20 +41,28 @@ function stripHopByHopHeaders(headers) {
 }
 
 export async function handler(request) {
-  const backendBase = getBackendBaseUrl(request.url);
-  // 老王注释：backendBase可以是空字符串（相对路径），所以只检查null/undefined
-  if (backendBase === null || backendBase === undefined) {
+  if (request.headers.get(LOOP_GUARD_HEADER) === "1") {
     return new Response(
-      JSON.stringify({ error: "INVALID_BACKEND_BASE_URL" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ error: "PROXY_LOOP_DETECTED" }),
+      { status: 508, headers: { "Content-Type": "application/json" } },
     );
   }
+
+  const backendBase = getBackendBaseUrl(request.url);
+  if (!backendBase) {
+    return new Response(
+      JSON.stringify({ error: "INVALID_BACKEND_BASE_URL" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   const url = new URL(request.url);
-  const targetUrl = `${backendBase}${url.pathname}${url.search}`;
+  const targetUrl = new URL(`${url.pathname}${url.search}`, backendBase).toString();
   const method = request.method || "GET";
   const headers = stripHopByHopHeaders(request.headers);
+  headers.set(LOOP_GUARD_HEADER, "1");
 
-  let body = undefined;
+  let body;
   if (!["GET", "HEAD"].includes(method.toUpperCase())) {
     body = await request.arrayBuffer();
   }
@@ -61,9 +74,8 @@ export async function handler(request) {
     redirect: "manual",
   });
 
-  const responseHeaders = new Headers(response.headers);
   return new Response(response.body, {
     status: response.status,
-    headers: responseHeaders,
+    headers: new Headers(response.headers),
   });
 }

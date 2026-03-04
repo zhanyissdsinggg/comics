@@ -1,12 +1,14 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, Req, Res } from '@nestjs/common';
-import { AdminAnalyticsService } from '../services/admin-analytics.service';
+import { Controller, Get, Post, Patch, Body, Param, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { AdminAnalyticsService } from '../admin-analytics/services/admin-analytics.service';
 import { AdminAudit } from '../decorators/admin-audit.decorator';
+import { AdminAuthGuard } from "../guards/admin-auth.guard";
 
 /**
  * 老王说：用户价值分析控制器
  * 这个SB控制器处理所有用户分析相关的API端点
  */
 @Controller('admin/analytics')
+@UseGuards(AdminAuthGuard)
 export class AdminAnalyticsController {
   constructor(private analyticsService: AdminAnalyticsService) {}
 

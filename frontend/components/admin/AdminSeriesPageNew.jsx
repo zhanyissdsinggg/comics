@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useAdminAuth } from "./AuthContext";
 import { apiDelete, apiGet, apiPost, apiPatch } from "../../lib/apiClient";
 import { ConfirmModal } from "../common/Modal";
@@ -45,6 +46,8 @@ const STATUS_MAP = {
   Completed: { label: "已完结", color: "bg-ios-blue/20 text-ios-blue border-ios-blue/30" },
   Hiatus: { label: "暂停", color: "bg-ios-orange/20 text-ios-orange border-ios-orange/30" },
 };
+
+const passthroughImageLoader = ({ src }) => src;
 
 export default function AdminSeriesPageNew() {
   const router = useRouter();
@@ -449,9 +452,13 @@ export default function AdminSeriesPageNew() {
             {/* 老王添加：缩略图 */}
             <div className="relative h-48 bg-ios-gray-800/50 overflow-hidden">
               {series.coverImage ? (
-                <img
+                <Image
                   src={series.coverImage}
                   alt={series.title}
+                  fill
+                  unoptimized
+                  loader={passthroughImageLoader}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
               ) : (
@@ -589,9 +596,13 @@ export default function AdminSeriesPageNew() {
             {/* 缩略图 */}
             <div className="relative w-24 h-24 rounded-3xl bg-ios-gray-800/50 overflow-hidden flex-shrink-0 shadow-ios-sm">
               {series.coverImage ? (
-                <img
+                <Image
                   src={series.coverImage}
                   alt={series.title}
+                  fill
+                  unoptimized
+                  loader={passthroughImageLoader}
+                  sizes="96px"
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -863,9 +874,13 @@ export default function AdminSeriesPageNew() {
                 >
                   {createForm.coverImage ? (
                     <div className="relative h-48">
-                      <img
+                      <Image
                         src={createForm.coverImage}
                         alt="封面预览"
+                        fill
+                        unoptimized
+                        loader={passthroughImageLoader}
+                        sizes="(max-width: 768px) 100vw, 448px"
                         className="w-full h-full object-cover"
                       />
                       <button

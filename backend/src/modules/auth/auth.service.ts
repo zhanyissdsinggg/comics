@@ -1,7 +1,21 @@
 import { Injectable, UnauthorizedException, HttpException, HttpStatus } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import * as bcrypt from "bcrypt";
 import { logger } from "../../common/logger/winston.init";
+
+type BcryptLike = {
+  compare: (plainText: string, hashedText: string) => Promise<boolean>;
+  hash: (plainText: string, saltRounds: number) => Promise<string>;
+};
+
+const bcrypt: BcryptLike = (() => {
+  try {
+    // 优先使用原生 bcrypt，性能更好。
+    return require("bcrypt");
+  } catch (error) {
+    logger.warn("[auth] native bcrypt unavailable, fallback to bcryptjs");
+    return require("bcryptjs");
+  }
+})();
 
 /**
  * 老王说：认证服务，负责生成和验证JWT token

@@ -1,9 +1,11 @@
-import { Controller, Get, Req, Res } from "@nestjs/common";
+import { Controller, Get, Req, Res, UseGuards } from "@nestjs/common";
 import { Request, Response } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { ORDER_STATUS } from "../../../../common/utils/order-status";
+import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 
 @Controller("admin/metrics")
+@UseGuards(AdminAuthGuard)
 export class AdminMetricsController {
   constructor(private readonly prisma: PrismaService) {}
 

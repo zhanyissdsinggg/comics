@@ -60,6 +60,7 @@ describe('AdminAuthGuard', () => {
         userId: 'admin',
         role: 'admin',
         jti: undefined,
+        authSource: 'bearer',
       });
     });
 

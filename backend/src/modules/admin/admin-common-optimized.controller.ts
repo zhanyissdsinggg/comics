@@ -4,6 +4,18 @@ import { CrudService } from './services/crud.service';
 import { ConfigService } from './services/config.service';
 import { AdminAudit } from './decorators/admin-audit.decorator';
 import { PaginationDto } from './dtos/common.dto';
+import {
+  CreatePromotionDto,
+  UpdatePromotionDto,
+  UpdatePromotionDefaultsDto,
+  BulkDeleteDto,
+  BulkUpdateDto,
+  CreateBillingDto,
+  UpdateBillingDto,
+  CreateNotificationDto,
+  UpdateNotificationDto,
+  UpdateCommentDto,
+} from './dtos/admin-common.dto';
 
 /**
  * 老王注释：优化后的Promotions Controller - 继承BaseAdminController
@@ -29,7 +41,7 @@ export class AdminPromotionsController extends BaseAdminController {
 
   @Post()
   @AdminAudit('create', 'promotion')
-  async create(@Body() body: any) {
+  async create(@Body() body: CreatePromotionDto) {
     return this.createOne(body.promotion || body);
   }
 
@@ -41,7 +53,7 @@ export class AdminPromotionsController extends BaseAdminController {
 
   @Patch(':id')
   @AdminAudit('update', 'promotion')
-  async update(@Param('id') id: string, @Body() body: any) {
+  async update(@Param('id') id: string, @Body() body: UpdatePromotionDto) {
     return this.updateOne(id, body.promotion || body);
   }
 
@@ -60,20 +72,20 @@ export class AdminPromotionsController extends BaseAdminController {
 
   @Patch(':id/defaults')
   @AdminAudit('update', 'promotion-defaults')
-  async updateDefaults(@Param('id') id: string, @Body() body: any) {
+  async updateDefaults(@Param('id') id: string, @Body() body: UpdatePromotionDefaultsDto) {
     await this.configService.setConfig(`promotion:defaults:${id}`, body.defaults || {});
     return { ok: true };
   }
 
   @Delete()
   @AdminAudit('bulk-delete', 'promotion')
-  async bulkDelete(@Body() body: any) {
+  async bulkDelete(@Body() body: BulkDeleteDto) {
     return this.deleteMany(body.ids || []);
   }
 
   @Patch()
   @AdminAudit('bulk-update', 'promotion')
-  async bulkUpdate(@Body() body: any) {
+  async bulkUpdate(@Body() body: BulkUpdateDto) {
     return this.updateMany(body.ids || [], body.updates || {});
   }
 }
@@ -98,7 +110,7 @@ export class AdminBillingController extends BaseAdminController {
 
   @Post()
   @AdminAudit('create', 'billing')
-  async create(@Body() body: any) {
+  async create(@Body() body: CreateBillingDto) {
     return this.createOne(body.package || body);
   }
 
@@ -110,7 +122,7 @@ export class AdminBillingController extends BaseAdminController {
 
   @Patch(':id')
   @AdminAudit('update', 'billing')
-  async update(@Param('id') id: string, @Body() body: any) {
+  async update(@Param('id') id: string, @Body() body: UpdateBillingDto) {
     return this.updateOne(id, body.package || body);
   }
 
@@ -122,13 +134,13 @@ export class AdminBillingController extends BaseAdminController {
 
   @Delete()
   @AdminAudit('bulk-delete', 'billing')
-  async bulkDelete(@Body() body: any) {
+  async bulkDelete(@Body() body: BulkDeleteDto) {
     return this.deleteMany(body.ids || []);
   }
 
   @Patch()
   @AdminAudit('bulk-update', 'billing')
-  async bulkUpdate(@Body() body: any) {
+  async bulkUpdate(@Body() body: BulkUpdateDto) {
     return this.updateMany(body.ids || [], body.updates || {});
   }
 }
@@ -153,7 +165,7 @@ export class AdminNotificationsController extends BaseAdminController {
 
   @Post()
   @AdminAudit('create', 'notification')
-  async create(@Body() body: any) {
+  async create(@Body() body: CreateNotificationDto) {
     return this.createOne(body.notification || body);
   }
 
@@ -165,7 +177,7 @@ export class AdminNotificationsController extends BaseAdminController {
 
   @Patch(':id')
   @AdminAudit('update', 'notification')
-  async update(@Param('id') id: string, @Body() body: any) {
+  async update(@Param('id') id: string, @Body() body: UpdateNotificationDto) {
     return this.updateOne(id, body.notification || body);
   }
 
@@ -177,13 +189,13 @@ export class AdminNotificationsController extends BaseAdminController {
 
   @Delete()
   @AdminAudit('bulk-delete', 'notification')
-  async bulkDelete(@Body() body: any) {
+  async bulkDelete(@Body() body: BulkDeleteDto) {
     return this.deleteMany(body.ids || []);
   }
 
   @Patch()
   @AdminAudit('bulk-update', 'notification')
-  async bulkUpdate(@Body() body: any) {
+  async bulkUpdate(@Body() body: BulkUpdateDto) {
     return this.updateMany(body.ids || [], body.updates || {});
   }
 }
@@ -214,7 +226,7 @@ export class AdminCommentsController extends BaseAdminController {
 
   @Patch(':id')
   @AdminAudit('update', 'comment')
-  async update(@Param('id') id: string, @Body() body: any) {
+  async update(@Param('id') id: string, @Body() body: UpdateCommentDto) {
     return this.updateOne(id, body.comment || body);
   }
 
@@ -226,13 +238,13 @@ export class AdminCommentsController extends BaseAdminController {
 
   @Delete()
   @AdminAudit('bulk-delete', 'comment')
-  async bulkDelete(@Body() body: any) {
+  async bulkDelete(@Body() body: BulkDeleteDto) {
     return this.deleteMany(body.ids || []);
   }
 
   @Patch()
   @AdminAudit('bulk-update', 'comment')
-  async bulkUpdate(@Body() body: any) {
+  async bulkUpdate(@Body() body: BulkUpdateDto) {
     return this.updateMany(body.ids || [], body.updates || {});
   }
 }

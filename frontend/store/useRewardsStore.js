@@ -9,7 +9,7 @@ import {
 } from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
 import { useWalletStore } from "./useWalletStore";
-import { track } from "../lib/analytics";
+import { trackEvent } from "../lib/trackEvent";
 
 const RewardsContext = createContext(null);
 const MAKEUP_COST = 5;
@@ -46,31 +46,31 @@ export function RewardsProvider({ children }) {
   }, []);
 
   const checkIn = useCallback(async () => {
-    track("checkin_click", {});
+    trackEvent("checkin_click", {});
     const response = await apiPost("/api/rewards/checkin");
     if (response.ok) {
-      track("checkin_success", {});
+      trackEvent("checkin_success", {});
       setRewards(normalizeRewards(response.data?.state, response.data?.rewardPts));
       if (response.data?.wallet) {
         setWallet(response.data.wallet);
       }
     } else {
-      track("checkin_fail", { status: response.status, errorCode: response.error });
+      trackEvent("checkin_fail", { status: response.status, errorCode: response.error });
     }
     return response;
   }, [setWallet]);
 
   const makeUp = useCallback(async () => {
-    track("makeup_click", {});
+    trackEvent("makeup_click", {});
     const response = await apiPost("/api/rewards/makeup");
     if (response.ok) {
-      track("makeup_success", {});
+      trackEvent("makeup_success", {});
       setRewards(normalizeRewards(response.data?.state, response.data?.rewardPts));
       if (response.data?.wallet) {
         setWallet(response.data.wallet);
       }
     } else {
-      track("makeup_fail", { status: response.status, errorCode: response.error });
+      trackEvent("makeup_fail", { status: response.status, errorCode: response.error });
     }
     return response;
   }, [setWallet]);
@@ -88,10 +88,10 @@ export function RewardsProvider({ children }) {
 
   const claimMission = useCallback(
     async (missionId) => {
-      track("mission_claim_click", { missionId });
+      trackEvent("mission_claim_click", { missionId });
       const response = await apiPost("/api/missions/claim", { missionId });
       if (response.ok) {
-        track("mission_claim_success", { missionId });
+        trackEvent("mission_claim_success", { missionId });
         setMissions({
           daily: response.data?.daily || [],
           weekly: response.data?.weekly || [],
@@ -100,7 +100,7 @@ export function RewardsProvider({ children }) {
           setWallet(response.data.wallet);
         }
       } else {
-        track("mission_claim_fail", { missionId, status: response.status, errorCode: response.error });
+        trackEvent("mission_claim_fail", { missionId, status: response.status, errorCode: response.error });
       }
       return response;
     },
@@ -108,7 +108,7 @@ export function RewardsProvider({ children }) {
   );
 
   const report = useCallback(async (eventType) => {
-    track("mission_progress_event", { eventType });
+    trackEvent("mission_progress_event", { eventType });
     const response = await apiPost("/api/missions/report", { eventType });
     if (response.ok) {
       setMissions({

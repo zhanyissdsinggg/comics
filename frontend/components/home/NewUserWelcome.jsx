@@ -1,30 +1,27 @@
-"use client";
+﻿"use client";
 
 import { memo, useState, useEffect } from "react";
 import { Sparkles, BookOpen, Gift, X } from "lucide-react";
 
 /**
- * 老王注释：新用户欢迎横幅组件
- * 功能：引导新用户开始阅读，提供快速入口
- * 遵循KISS原则：简洁明了的欢迎信息
- * 遵循DRY原则：统一的按钮样式
- */
+ * 閼颁胶甯囧▔銊╁櫞閿涙碍鏌婇悽銊﹀煕濞嗐垼绻嬪Ο顏勭畽缂佸嫪娆?
+ * 閸旂喕鍏橀敍姘穿鐎靛吋鏌婇悽銊﹀煕瀵偓婵妲勭拠浼欑礉閹绘劒绶佃箛顐︹偓鐔峰弳閸? * 闁潧鎯奒ISS閸樼喎鍨敍姘辩暆濞蹭焦妲戞禍鍡欐畱濞嗐垼绻嬫穱鈩冧紖
+ * 闁潧鎯奃RY閸樼喎鍨敍姘辩埠娑撯偓閻ㄥ嫭瀵滈柦顔界壉瀵? */
 const NewUserWelcome = memo(function NewUserWelcome({ starterItems, onStartReading, onBrowsePopular }) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // 老王注释：检查是否已关闭欢迎横幅
+  // 閼颁胶甯囧▔銊╁櫞閿涙碍顥呴弻銉︽Ц閸氾箑鍑￠崗鎶芥４濞嗐垼绻嬪Ο顏勭畽
   useEffect(() => {
     const dismissed = localStorage.getItem("mn_welcome_banner_dismissed");
     if (dismissed) {
       setIsVisible(false);
     } else {
-      // 老王注释：延迟显示动画
       setTimeout(() => setIsAnimating(true), 100);
     }
   }, []);
 
-  // 老王注释：关闭横幅
+  // 閼颁胶甯囧▔銊╁櫞閿涙艾鍙ч梻顓熋獮?
   const handleDismiss = () => {
     setIsAnimating(false);
     setTimeout(() => {
@@ -43,9 +40,9 @@ const NewUserWelcome = memo(function NewUserWelcome({ starterItems, onStartReadi
         isAnimating ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
       }`}
     >
-      {/* 老王优化：更紧凑的北美风格布局 */}
+      {/* 閼颁胶甯囨导妯哄閿涙碍娲跨槐褍鍣鹃惃鍕缂囧酣顥撻弽鐓庣鐏炩偓 */}
 
-      {/* 老王注释：关闭按钮 */}
+      {/* 閼颁胶甯囧▔銊╁櫞閿涙艾鍙ч梻顓熷瘻闁?*/}
       <button
         type="button"
         onClick={handleDismiss}
@@ -56,7 +53,7 @@ const NewUserWelcome = memo(function NewUserWelcome({ starterItems, onStartReadi
       </button>
 
       <div className="relative flex flex-col md:flex-row md:items-center gap-3 md:gap-4 pr-8">
-        {/* 老王优化：左侧图标和文案 - 更紧凑 */}
+        {/* 閼颁胶甯囨导妯哄閿涙艾涔忔笟褍娴橀弽鍥ф嫲閺傚洦顢?- 閺囧鎻ｉ崙?*/}
         <div className="flex items-center gap-2 md:gap-3">
           <div className="flex h-8 w-8 md:h-10 md:w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
             <Sparkles size={16} className="md:hidden" />
@@ -70,7 +67,7 @@ const NewUserWelcome = memo(function NewUserWelcome({ starterItems, onStartReadi
           </div>
         </div>
 
-        {/* 老王优化：右侧特性标签 - 横向排列，更紧凑 */}
+        {/* 閼颁胶甯囨导妯哄閿涙艾褰告笟褏澹掗幀褎鐖ｇ粵?- 濡亜鎮滈幒鎺戝灙閿涘本娲跨槐褍鍣?*/}
         <div className="hidden md:flex items-center gap-3 text-xs text-neutral-400">
           <div className="flex items-center gap-1.5">
             <BookOpen size={14} className="text-emerald-400" />
@@ -88,7 +85,7 @@ const NewUserWelcome = memo(function NewUserWelcome({ starterItems, onStartReadi
           </div>
         </div>
 
-        {/* 老王优化：操作按钮 - 更紧凑 */}
+        {/* 閼颁胶甯囨导妯哄閿涙碍鎼锋担婊勫瘻闁?- 閺囧鎻ｉ崙?*/}
         <div className="flex items-center gap-2 md:ml-auto">
           <button
             type="button"

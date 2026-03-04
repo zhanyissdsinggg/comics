@@ -5,10 +5,9 @@ import Image from "next/image";
 import { User } from "lucide-react";
 
 /**
- * 老王注释：Avatar头像组件 - iOS风格
- * 功能：显示用户头像，支持图片、文字、图标
- * 遵循KISS原则：简洁的头像展示
- * 遵循DRY原则：可复用的Avatar组件
+ * 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欘儖vatar濠㈣埖娼欓崕姘辩磼閸曨亝顐?- iOS濡炲瀛╅悧?
+ * 闁告梻鍠曢崗姗€鏁嶅顓熲枖缂佲偓閾忚鏆忛柟鏉戝槻閵囨棃宕撹箛銉х闁衡偓椤栨稑鐦柛銉ュ⒔婢ф牠濡存担瑙勭€悗娑欍仠閳ь兛绀佸ù姗€寮? * 闂侇剟娼ч幆濂扞SS闁告鍠庨崹顖炴晬濮樿京鏆嗘繛韫兌濞堟垶寰勯弶鎴濆壖閻忕偞娲滈妵?
+ * 闂侇剟娼ч幆濂僐Y闁告鍠庨崹顖炴晬濮橆剙璁插璺虹Ф閺併倝鎯冮崙妾漚tar缂備礁瀚▎?
  */
 
 export const Avatar = memo(function Avatar({
@@ -44,7 +43,7 @@ export const Avatar = memo(function Avatar({
     busy: "bg-red-500"
   };
 
-  // 老王注释：获取名字的首字母
+  // 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欎亢楠炲繘宕ｉ弽褎鍊抽悗娑欘殘濞堟垶锛冮弽褏鎽熸慨?
   const getInitials = (name) => {
     if (!name) return "";
     const parts = name.trim().split(" ");
@@ -78,7 +77,7 @@ export const Avatar = memo(function Avatar({
         )}
       </div>
 
-      {/* 老王注释：状态指示器 */}
+      {/* 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欐皑婵悂骞€娴ｇ懓鐦圭紒鈧崫鍕彜 */}
       {status && (
         <span
           className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full border-2 border-neutral-900 ${statusColors[status]}`}
@@ -88,7 +87,7 @@ export const Avatar = memo(function Avatar({
   );
 });
 
-// 头像组
+// 濠㈣埖娼欓崕姘辩磼?
 export const AvatarGroup = memo(function AvatarGroup({
   avatars = [],
   max = 3,
@@ -133,7 +132,7 @@ export const AvatarGroup = memo(function AvatarGroup({
   );
 });
 
-// 带名字的头像
+// 閻㈩垽绠戦幃鏇犫偓娑欘殘濞堟垶寰勯弶鎴濆壖
 export const AvatarWithName = memo(function AvatarWithName({
   src,
   name,

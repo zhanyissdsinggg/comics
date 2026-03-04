@@ -12,20 +12,20 @@ import { apiGet, apiPost } from "../lib/apiClient";
 
 const FollowContext = createContext(null);
 
-// 老王注释：默认收藏夹
+// 閼颁胶甯囧▔銊╁櫞閿涙岸绮拋銈嗘暪閽樺繐銇?
 const DEFAULT_COLLECTIONS = [
-  { id: "default", name: "默认收藏夹", seriesIds: [] },
-  { id: "reading", name: "正在阅读", seriesIds: [] },
-  { id: "completed", name: "已完成", seriesIds: [] },
-  { id: "wishlist", name: "想看", seriesIds: [] },
+  { id: "default", name: "Default", seriesIds: [] },
+  { id: "reading", name: "Reading", seriesIds: [] },
+  { id: "completed", name: "Completed", seriesIds: [] },
+  { id: "wishlist", name: "Wishlist", seriesIds: [] },
 ];
 
 export function FollowProvider({ children }) {
   const [followedSeriesIds, setFollowedSeriesIds] = useState([]);
-  // 老王注释：收藏夹列表
+  // 閼颁胶甯囧▔銊╁櫞閿涙碍鏁归挊蹇撱仚閸掓銆?
   const [collections, setCollections] = useState(DEFAULT_COLLECTIONS);
 
-  // 老王注释：从localStorage加载收藏夹
+  // 閼颁胶甯囧▔銊╁櫞閿涙矮绮爈ocalStorage閸旂姾娴囬弨鎯版婢?
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -41,7 +41,7 @@ export function FollowProvider({ children }) {
     }
   }, []);
 
-  // 老王注释：保存收藏夹到localStorage
+  // 閼颁胶甯囧▔銊╁櫞閿涙矮绻氱€涙ɑ鏁归挊蹇撱仚閸掔櫦ocalStorage
   const saveCollections = useCallback((newCollections) => {
     if (typeof window !== "undefined") {
       window.localStorage.setItem("mn_collections", JSON.stringify(newCollections));
@@ -75,7 +75,7 @@ export function FollowProvider({ children }) {
     [updateFollow]
   );
 
-  // 老王注释：创建新收藏夹
+  // 閼颁胶甯囧▔銊╁櫞閿涙艾鍨卞鐑樻煀閺€鎯版婢?
   const createCollection = useCallback(
     (name) => {
       const newCollection = {
@@ -91,10 +91,10 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // 老王注释：删除收藏夹
+  // 閼颁胶甯囧▔銊╁櫞閿涙艾鍨归梽銈嗘暪閽樺繐銇?
   const deleteCollection = useCallback(
     (collectionId) => {
-      // 不允许删除默认收藏夹
+      // 娑撳秴鍘戠拋绋垮灩闂勩倝绮拋銈嗘暪閽樺繐銇?
       if (["default", "reading", "completed", "wishlist"].includes(collectionId)) {
         return { ok: false, error: "Cannot delete default collection" };
       }
@@ -105,7 +105,7 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // 老王注释：重命名收藏夹
+  // 閼颁胶甯囧▔銊╁櫞閿涙岸鍣搁崨钘夋倳閺€鎯版婢?
   const renameCollection = useCallback(
     (collectionId, newName) => {
       const newCollections = collections.map((c) =>
@@ -117,12 +117,12 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // 老王注释：添加作品到收藏夹
+  // 閼颁胶甯囧▔銊╁櫞閿涙碍鍧婇崝鐘辩稊閸濅礁鍩岄弨鎯版婢?
   const addToCollection = useCallback(
     (collectionId, seriesId) => {
       const newCollections = collections.map((c) => {
         if (c.id === collectionId) {
-          // 避免重复添加
+          // 闁灝鍘ら柌宥咁槻濞ｈ濮?
           if (c.seriesIds.includes(seriesId)) {
             return c;
           }
@@ -136,7 +136,7 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // 老王注释：从收藏夹移除作品
+  // 閼颁胶甯囧▔銊╁櫞閿涙矮绮犻弨鎯版婢跺湱些闂勩倓缍旈崫?
   const removeFromCollection = useCallback(
     (collectionId, seriesId) => {
       const newCollections = collections.map((c) => {
@@ -151,7 +151,7 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // 老王注释：获取作品所在的收藏夹
+  // 閼颁胶甯囧▔銊╁櫞閿涙俺骞忛崣鏍︾稊閸濅焦澧嶉崷銊ф畱閺€鎯版婢?
   const getCollectionsForSeries = useCallback(
     (seriesId) => {
       return collections.filter((c) => c.seriesIds.includes(seriesId));

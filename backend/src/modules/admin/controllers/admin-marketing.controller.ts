@@ -1,12 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, Res } from '@nestjs/common';
-import { AdminMarketingService } from '../services/admin-marketing.service';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { AdminMarketingService } from '../admin-system/services/admin-marketing.service';
 import { AdminAudit } from '../decorators/admin-audit.decorator';
+import { AdminAuthGuard } from "../guards/admin-auth.guard";
 
 /**
  * 老王说：营销活动管理控制器
  * 这个SB控制器处理所有营销活动相关的API端点
  */
 @Controller('admin/marketing')
+@UseGuards(AdminAuthGuard)
 export class AdminMarketingController {
   constructor(private marketingService: AdminMarketingService) {}
 

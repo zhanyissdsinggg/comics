@@ -1,6 +1,6 @@
 /**
- * LRU缓存实现
- * 艹！这个SB无限缓存导致内存泄漏，现在用LRU限制缓存大小
+ * LRU缂撳瓨瀹炵幇
+ * 鑹癸紒杩欎釜SB鏃犻檺缂撳瓨瀵艰嚧鍐呭瓨娉勬紡锛岀幇鍦ㄧ敤LRU闄愬埗缂撳瓨澶у皬
  */
 
 export class LRUCache {
@@ -14,7 +14,7 @@ export class LRUCache {
       return null;
     }
 
-    // 移到最后（最近使用）
+    // 绉诲埌鏈€鍚庯紙鏈€杩戜娇鐢級
     const value = this.cache.get(key);
     this.cache.delete(key);
     this.cache.set(key, value);
@@ -22,15 +22,15 @@ export class LRUCache {
   }
 
   set(key, value) {
-    // 如果key已存在，先删除
+    // 濡傛灉key宸插瓨鍦紝鍏堝垹闄?
     if (this.cache.has(key)) {
       this.cache.delete(key);
     }
 
-    // 添加新的key-value
+    // 娣诲姞鏂扮殑key-value
     this.cache.set(key, value);
 
-    // 超过大小限制时删除最旧的（第一个）
+    // 瓒呰繃澶у皬闄愬埗鏃跺垹闄ゆ渶鏃х殑锛堢涓€涓級
     if (this.cache.size > this.maxSize) {
       const firstKey = this.cache.keys().next().value;
       this.cache.delete(firstKey);

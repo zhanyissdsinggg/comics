@@ -3,9 +3,7 @@
 import { memo, useState } from "react";
 
 /**
- * 老王注释：高级筛选面板组件
- * 提供类型、标签、作者、状态等多维度筛选功能
- */
+ * 鑰佺帇娉ㄩ噴锛氶珮绾х瓫閫夐潰鏉跨粍浠? * 鎻愪緵绫诲瀷銆佹爣绛俱€佷綔鑰呫€佺姸鎬佺瓑澶氱淮搴︾瓫閫夊姛鑳? */
 const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose, onApply, initialFilters = {} }) {
   const [filters, setFilters] = useState({
     types: initialFilters.types || [],
@@ -15,12 +13,12 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     author: initialFilters.author || "",
   });
 
-  // 老王注释：可用的筛选选项
+  // 鑰佺帇娉ㄩ噴锛氬彲鐢ㄧ殑绛涢€夐€夐」
   const TYPE_OPTIONS = [
-    { value: "comic", label: "Comic", icon: "📚" },
-    { value: "novel", label: "Novel", icon: "📖" },
-    { value: "webtoon", label: "Webtoon", icon: "📱" },
-    { value: "manga", label: "Manga", icon: "🎌" },
+    { value: "comic", label: "Comic", icon: "馃摎" },
+    { value: "novel", label: "Novel", icon: "馃摉" },
+    { value: "webtoon", label: "Webtoon", icon: "馃摫" },
+    { value: "manga", label: "Manga", icon: "馃帉" },
   ];
 
   const TAG_OPTIONS = [
@@ -51,7 +49,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     { value: "alphabetical", label: "A-Z" },
   ];
 
-  // 老王注释：切换类型选择
+  // 鑰佺帇娉ㄩ噴锛氬垏鎹㈢被鍨嬮€夋嫨
   const toggleType = (type) => {
     setFilters((prev) => ({
       ...prev,
@@ -61,7 +59,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     }));
   };
 
-  // 老王注释：切换标签选择
+  // 鑰佺帇娉ㄩ噴锛氬垏鎹㈡爣绛鹃€夋嫨
   const toggleTag = (tag) => {
     setFilters((prev) => ({
       ...prev,
@@ -71,7 +69,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     }));
   };
 
-  // 老王注释：重置所有筛选
+  // 鑰佺帇娉ㄩ噴锛氶噸缃墍鏈夌瓫閫?
   const handleReset = () => {
     setFilters({
       types: [],
@@ -82,7 +80,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     });
   };
 
-  // 老王注释：应用筛选
+  // 鑰佺帇娉ㄩ噴锛氬簲鐢ㄧ瓫閫?
   const handleApply = () => {
     if (onApply) {
       onApply(filters);
@@ -102,7 +100,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
         className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-neutral-800 bg-neutral-950 p-4 shadow-xl md:p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 老王注释：标题栏 */}
+        {/* 鑰佺帇娉ㄩ噴锛氭爣棰樻爮 */}
         <div className="mb-4 flex items-center justify-between md:mb-6">
           <div>
             <h2 className="text-base font-semibold text-white md:text-lg">Advanced Filters</h2>
@@ -122,7 +120,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
         </div>
 
         <div className="space-y-4 md:space-y-6">
-          {/* 老王注释：类型筛选 */}
+          {/* 鑰佺帇娉ㄩ噴锛氱被鍨嬬瓫閫?*/}
           <div>
             <label className="mb-3 block text-sm font-medium text-neutral-300 md:text-base">Content Type</label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -144,7 +142,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
             </div>
           </div>
 
-          {/* 老王注释：标签筛选 */}
+          {/* 鑰佺帇娉ㄩ噴锛氭爣绛剧瓫閫?*/}
           <div>
             <label className="mb-3 block text-sm font-medium text-neutral-300 md:text-base">
               Genres & Tags
@@ -172,7 +170,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
             </div>
           </div>
 
-          {/* 老王注释：状态筛选 */}
+          {/* 鑰佺帇娉ㄩ噴锛氱姸鎬佺瓫閫?*/}
           <div>
             <label className="mb-3 block text-sm font-medium text-neutral-300 md:text-base">Status</label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -193,7 +191,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
             </div>
           </div>
 
-          {/* 老王注释：排序方式 */}
+          {/* 鑰佺帇娉ㄩ噴锛氭帓搴忔柟寮?*/}
           <div>
             <label className="mb-3 block text-sm font-medium text-neutral-300 md:text-base">Sort By</label>
             <select
@@ -209,7 +207,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
             </select>
           </div>
 
-          {/* 老王注释：作者筛选 */}
+          {/* 鑰佺帇娉ㄩ噴锛氫綔鑰呯瓫閫?*/}
           <div>
             <label className="mb-3 block text-sm font-medium text-neutral-300 md:text-base">Author</label>
             <input
@@ -222,7 +220,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
           </div>
         </div>
 
-        {/* 老王注释：底部按钮 */}
+        {/* 鑰佺帇娉ㄩ噴锛氬簳閮ㄦ寜閽?*/}
         <div className="mt-4 flex gap-3 md:mt-6">
           <button
             type="button"
@@ -240,7 +238,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
           </button>
         </div>
 
-        {/* 老王注释：当前筛选摘要 */}
+        {/* 鑰佺帇娉ㄩ噴锛氬綋鍓嶇瓫閫夋憳瑕?*/}
         {(filters.types.length > 0 || filters.tags.length > 0 || filters.status !== "all" || filters.author) ? (
           <div className="mt-4 rounded-xl border border-neutral-800 bg-neutral-900/50 px-4 py-3">
             <p className="text-xs font-medium text-neutral-400">Active Filters:</p>

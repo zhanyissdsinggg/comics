@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, UseGuards, BadRequestException, NotFoundEx
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { getTopupPackage } from "../../../../common/config/topup";
+import { CreateOrderDto, UpdateOrderDto } from "../dtos/admin-billing.dto";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../../../common/utils/pagination";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
@@ -41,7 +42,7 @@ export class AdminOrdersController {
   }
 
   @Post("refund")
-  async refund(@Body() body: any, @Req() req: Request) {
+  async refund(@Body() body: CreateOrderDto, @Req() req: Request) {
     const userId = body?.userId;
     const orderId = body?.orderId;
     if (!userId || !orderId) {
@@ -109,7 +110,7 @@ export class AdminOrdersController {
   }
 
   @Post("adjust")
-  async adjust(@Body() body: any, @Req() req: Request) {
+  async adjust(@Body() body: CreateOrderDto, @Req() req: Request) {
     const userId = body?.userId;
     if (!userId) {
       throw new BadRequestException("缺少userId参数");

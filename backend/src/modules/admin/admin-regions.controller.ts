@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
+import { SaveRegionConfigDto } from "./dtos/admin-remaining.dto";
 
 @Controller("admin/regions")
 @UseGuards(AdminAuthGuard)
@@ -14,7 +15,7 @@ export class AdminRegionsController {
   }
 
   @Post()
-  async save(@Body() body: any) {
+  async save(@Body() body: SaveRegionConfigDto) {
     const countryCodes = Array.isArray(body?.countryCodes) ? body.countryCodes : [];
     const lengthRules = body?.lengthRules || {};
     const payload = {

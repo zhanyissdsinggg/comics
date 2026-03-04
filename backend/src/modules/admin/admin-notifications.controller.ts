@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, UseGuards, BadRequestException, Req } from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { CreateNotificationDto } from "./dtos/admin-remaining.dto";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../common/utils/pagination";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
 
@@ -28,7 +29,7 @@ export class AdminNotificationsController {
   }
 
   @Post()
-  async create(@Body() body: any) {
+  async create(@Body() body: CreateNotificationDto) {
     const payload = body?.notification || body || {};
     if (!payload.title) {
       throw new BadRequestException("缺少title参数");
