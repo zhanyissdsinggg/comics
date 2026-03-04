@@ -1,16 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
-import { JwtModule } from "@nestjs/jwt";
 import { EmailModule } from "../email/email.module";
 import { AdminLogService } from "../../common/services/admin-log.service";
-import { AdminAuthController } from "./admin-auth.controller";
-import { AdminUsersController } from "./admin-users.controller";
-import { AdminOrdersController } from "./admin-orders.controller";
-import { AdminAnalyticsController } from "./controllers/admin-analytics.controller";
-import { AdminAnalyticsService } from "./services/admin-analytics.service";
-import { AdminRecommendationController } from "./controllers/admin-recommendation.controller";
-import { AdminRecommendationService } from "./services/admin-recommendation.service";
-import { AdminMarketingController } from "./controllers/admin-marketing.controller";
-import { AdminMarketingService } from "./services/admin-marketing.service";
 import { AdminKeyMiddleware } from "./admin.middleware";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
 import { AllExceptionsFilter } from "./filters/all-exceptions.filter";
@@ -20,31 +10,13 @@ import { ConfigService } from "./services/config.service";
 import { FileProcessingService } from "./services/file-processing.service";
 import { StreamingService } from "./services/streaming.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { AdminBillingController as AdminBillingManageController } from "./admin-billing.controller";
-import { AdminEmailJobsController as AdminEmailJobsLegacyController } from "./admin-email-jobs.controller";
 
-// 老王说：导入优化版本的controller
-import {
-  AdminPromotionsController,
-  AdminBillingController,
-  AdminNotificationsController,
-  AdminCommentsController,
-} from "./admin-common-optimized.controller";
-import {
-  AdminStatsController,
-  AdminMetricsController,
-  AdminRankingsController,
-  AdminTrackingController,
-  AdminRegionsController,
-  AdminBrandingController,
-  AdminLogsController,
-  AdminUploadController,
-  AdminEmailController,
-  AdminEmailJobsController,
-} from "./admin-other-optimized.controller";
-import { AdminSeriesController } from "./controllers/admin-series.controller";
-import { AdminEpisodesController } from "./controllers/admin-episodes.controller";
-import { AdminEpisodesUploadController } from "./controllers/admin-episodes-upload.controller";
+// 老王说：导入5个子模块
+import { AdminAuthModule } from "./admin-auth/admin-auth.module";
+import { AdminAnalyticsModule } from "./admin-analytics/admin-analytics.module";
+import { AdminContentModule } from "./admin-content/admin-content.module";
+import { AdminBillingModule } from "./admin-billing/admin-billing.module";
+import { AdminSystemModule } from "./admin-system/admin-system.module";
 
 /**
  * 老王说：管理员模块，现在支持JWT认证、全局异常处理和操作日志审计了
@@ -56,44 +28,20 @@ import { AdminEpisodesUploadController } from "./controllers/admin-episodes-uplo
  * 5. ConfigService - 统一配置管理
  * 6. FileProcessingService - 文件处理
  * 7. StreamingService - 流式处理大数据
+ *
+ * 老王新增：拆分成5个子模块，提高代码组织性和可维护性
  */
 @Module({
   imports: [
     EmailModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || "gush-jwt-secret-change-me",
-      signOptions: { expiresIn: "1h" }
-    })
+    // 老王说：导入5个子模块
+    AdminAuthModule,
+    AdminAnalyticsModule,
+    AdminContentModule,
+    AdminBillingModule,
+    AdminSystemModule,
   ],
-  controllers: [
-    AdminAuthController,
-    AdminUsersController,
-    AdminOrdersController,
-    AdminAnalyticsController,
-    AdminRecommendationController,
-    AdminMarketingController,
-    // 老王说：使用优化版本的controller
-    AdminPromotionsController,
-    AdminBillingController,
-    AdminBillingManageController,
-    AdminNotificationsController,
-    AdminCommentsController,
-    AdminStatsController,
-    AdminMetricsController,
-    AdminRankingsController,
-    AdminTrackingController,
-    AdminRegionsController,
-    AdminBrandingController,
-    AdminLogsController,
-    AdminUploadController,
-    AdminEmailController,
-    AdminEmailJobsController,
-    AdminEmailJobsLegacyController,
-    // 老王说：拆分后的Series和Episodes Controller
-    AdminSeriesController,
-    AdminEpisodesController,
-    AdminEpisodesUploadController,
-  ],
+  controllers: [],
   providers: [
     AdminLogService,
     PrismaService,
@@ -101,9 +49,6 @@ import { AdminEpisodesUploadController } from "./controllers/admin-episodes-uplo
     ConfigService,
     FileProcessingService,
     StreamingService,
-    AdminAnalyticsService,
-    AdminRecommendationService,
-    AdminMarketingService,
     AdminAuthGuard,
     AdminAuditInterceptor,
     AllExceptionsFilter,
@@ -115,25 +60,6 @@ export class AdminModule implements NestModule {
     // 老王说：保留旧的中间件以兼容性，但新的守卫会优先执行
     consumer
       .apply(AdminKeyMiddleware)
-      .forRoutes(
-        AdminUsersController,
-        AdminOrdersController,
-        AdminAnalyticsController,
-        AdminRecommendationController,
-        AdminMarketingController,
-        AdminPromotionsController,
-        AdminBillingController,
-        AdminNotificationsController,
-        AdminCommentsController,
-        AdminStatsController,
-        AdminRankingsController,
-        AdminTrackingController,
-        AdminRegionsController,
-        AdminBrandingController,
-        AdminLogsController,
-        AdminUploadController,
-        AdminEmailController,
-        AdminEmailJobsController
-      );
+      .forRoutes("admin/*");
   }
 }

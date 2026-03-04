@@ -1,3 +1,4 @@
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminSeriesController } from './admin-series.controller';
 import { PrismaService } from '../../../common/prisma/prisma.service';
@@ -10,6 +11,13 @@ describe('AdminSeriesController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminSeriesController],
       providers: [
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn().mockReturnValue("token"),
+            verify: jest.fn().mockReturnValue({ sub: "admin" }),
+          },
+        },
         {
           provide: PrismaService,
           useValue: {
