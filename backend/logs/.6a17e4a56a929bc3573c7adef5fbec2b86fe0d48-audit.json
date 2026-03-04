@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\86133\\Downloads\\tappytoon-nextjs\\backend\\logs\\.6a17e4a56a929bc3573c7adef5fbec2b86fe0d48-audit.json",
+    "files": [
+        {
+            "date": 1772596726886,
+            "name": "C:\\Users\\86133\\Downloads\\tappytoon-nextjs\\backend\\logs\\exceptions-2026-03-04.log",
+            "hash": "e6ed2b831a6fadd7cf21b8778125ede4be2f0d049e250b1cf13bcdf083c9f043"
+        }
+    ],
+    "hashType": "sha256"
+}

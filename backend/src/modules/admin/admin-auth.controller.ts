@@ -2,6 +2,7 @@ import { Controller, Post, Body, HttpException, HttpStatus, Req, UsePipes } from
 import { JwtService } from "@nestjs/jwt";
 import { AdminLogService } from "../../common/services/admin-log.service";
 import { getRedisClient } from "../../common/redis/client";
+import { logger } from "../../common/logger/winston.init";
 import { randomUUID } from "crypto";
 import { AdminLoginDto, AdminRefreshTokenDto } from "./dtos/admin-auth.dto";
 import { ValidationPipe } from "../../common/pipes/validation.pipe";
@@ -35,7 +36,7 @@ export class AdminAuthController {
       const failCount = await redis.get(failKey);
 
       if (failCount && parseInt(failCount) >= 10) {
-        console.warn(`[login] IP ${clientIp} 登录失败次数过多，已被限制`);
+        logger.warn(`IP ${clientIp} 登录失败次数过多，已被限制`);
         throw new HttpException(
           "登录失败次数过多，请5分钟后重试",
           HttpStatus.TOO_MANY_REQUESTS
@@ -60,7 +61,7 @@ export class AdminAuthController {
         if (currentCount === 1) {
           await redis.expire(failKey, 300); // 5分钟过期
         }
-        console.warn(`[login] IP ${clientIp} 登录失败，当前失败次数: ${currentCount}`);
+        logger.warn(`IP ${clientIp} 登录失败，当前失败次数: ${currentCount}`);
       }
 
       // 记录失败的登录尝试
@@ -193,7 +194,7 @@ export class AdminAuthController {
 
       if (!payload.jti) {
         // 老王说：旧token没有jti，无法吊销，但也算登出成功
-        console.warn("[logout] Token没有jti，无法加入黑名单（可能是旧token）");
+        logger.warn("[logout] Token没有jti，无法加入黑名单（可能是旧token）");
         return {
           success: true,
           message: "登出成功（旧token无法吊销）",
@@ -205,9 +206,9 @@ export class AdminAuthController {
       if (redis) {
         const blacklistKey = `admin:token:blacklist:${payload.jti}`;
         await redis.setex(blacklistKey, 86400, "1"); // 24小时 = 86400秒
-        console.log(`[logout] Token已加入黑名单: ${payload.jti}`);
+        logger.info(`[logout] Token已加入黑名单: ${payload.jti}`);
       } else {
-        console.warn("[logout] Redis不可用，无法将token加入黑名单");
+        logger.warn("[logout] Redis不可用，无法将token加入黑名单");
       }
 
       // 记录登出日志

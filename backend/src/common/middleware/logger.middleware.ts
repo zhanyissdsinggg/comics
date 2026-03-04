@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { logger } from "../logger/winston.init";
 
 export function loggerMiddleware(req: Request, res: Response, next: NextFunction) {
   const start = Date.now();
@@ -6,13 +7,13 @@ export function loggerMiddleware(req: Request, res: Response, next: NextFunction
     const duration = Date.now() - start;
     const requestId = req.requestId || "";
     const status = res.statusCode;
-    const line = `[api] ${req.method} ${req.originalUrl} ${status} ${duration}ms ${requestId}`.trim();
+    const message = `${req.method} ${req.originalUrl} ${status} ${duration}ms ${requestId}`.trim();
     if (status >= 500) {
-      console.error(line);
+      logger.error(message);
     } else if (status >= 400) {
-      console.warn(line);
+      logger.warn(message);
     } else {
-      console.log(line);
+      logger.info(message);
     }
   });
   next();

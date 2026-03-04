@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+import { logger } from "../logger/winston.init";
 
 let client: Redis | null = null;
 let initFailed = false;
@@ -22,7 +23,7 @@ export function getRedisClient() {
     return client;
   } catch (err) {
     initFailed = true;
-    console.warn("[redis] init failed", err);
+    logger.warn("Redis初始化失败", { error: err });
     return null;
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { decryptString } from "../../common/utils/crypto";
+import { logger } from "../../common/logger/winston.init";
 import {
   addEmailJob,
   updateEmailJob,
@@ -154,7 +155,7 @@ export class EmailService {
     if (provider === "sendgrid") {
       return this.sendViaSendgrid(payload, config.sendgridApiKey || "");
     }
-    console.log("[email]", payload);
+    logger.info("邮件发送", { payload });
     return { ok: true };
   }
 

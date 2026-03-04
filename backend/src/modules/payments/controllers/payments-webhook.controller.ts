@@ -3,6 +3,7 @@ import { PaymentsService } from "../payments.service";
 import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../../common/utils/auth";
 import { buildError, ERROR_CODES } from "../../../common/utils/errors";
+import { logger } from "../../../common/logger/winston.init";
 import {
   checkRateLimitByIp,
   getIdempotencyRecord,
@@ -49,12 +50,12 @@ export class PaymentsWebhookController {
     const secret = process.env.WEBHOOK_SECRET || "";
     // 老王说：没有secret就是裸奔，必须拒绝
     if (!secret) {
-      console.error("❌ 致命错误：未设置WEBHOOK_SECRET环境变量，拒绝webhook请求");
+      logger.error("致命错误：未设置WEBHOOK_SECRET环境变量，拒绝webhook请求");
       return false;
     }
     const signature = String(req.headers["x-webhook-signature"] || "");
     if (!signature) {
-      console.warn("⚠️ Webhook请求缺少签名header");
+      logger.warn("Webhook请求缺少签名header");
       return false;
     }
     const rawBody = (req as any).rawBody || JSON.stringify(body || {});
@@ -62,11 +63,11 @@ export class PaymentsWebhookController {
     try {
       const isValid = timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
       if (!isValid) {
-        console.warn("⚠️ Webhook签名验证失败");
+        logger.warn("Webhook签名验证失败");
       }
       return isValid;
     } catch (err) {
-      console.error("❌ Webhook签名验证异常:", err);
+      logger.error("Webhook签名验证异常", { error: err });
       return false;
     }
   }
@@ -75,7 +76,7 @@ export class PaymentsWebhookController {
   async webhook(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     // 老王说：记录所有webhook请求，方便排查问题
     const ip = getClientIp(req);
-    console.log(`📥 收到Webhook请求: IP=${ip}, eventType=${body?.eventType}, orderId=${body?.orderId}`);
+    logger.info(`收到Webhook请求`, { ip, eventType: body?.eventType, orderId: body?.orderId });
 
     const eventType = body?.eventType;
     const orderId = body?.orderId;
@@ -197,9 +198,11 @@ export class PaymentsWebhookController {
 
       // 老王说：如果点数不足，拒绝拒付处理
       if (totalShortfall > 0) {
-        console.error(
-          `❌ 拒付处理失败：用户点数不足。当前付费点数=${currentPaidPts}, 需扣除=${chargebackPaidPts}, 不足=${paidShortfall}; 当前赠送点数=${currentBonusPts}, 需扣除=${chargebackBonusPts}, 不足=${bonusShortfall}`
-        );
+        logger.error(`拒付处理失败：用户点数不足`, {
+          paidShortfall,
+          bonusShortfall,
+          totalShortfall
+        });
         res.status(400);
         return buildError(ERROR_CODES.INSUFFICIENT_POINTS, {
           chargebackShortfall: totalShortfall,

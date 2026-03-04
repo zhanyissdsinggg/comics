@@ -1,5 +1,6 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { logger } from "../../common/logger/winston.init";
 import { getTopupPackage } from "../../common/config/topup";
 import { ORDER_STATUS, PAYMENT_STATUS } from "../../common/utils/order-status";
 
@@ -101,7 +102,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
             });
           } catch (err) {
             // 版本号不匹配，说明有其他进程在更新，忽略这个错误
-            console.warn(`[PaymentRetry] 版本号冲突，跳过更新: ${job.orderId}`);
+            logger.warn(`版本号冲突，跳过更新: ${job.orderId}`);
           }
           return;
         }
@@ -120,7 +121,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
               },
             });
           } catch (err) {
-            console.warn(`[PaymentRetry] 版本号冲突，跳过更新: ${job.orderId}`);
+            logger.warn(`版本号冲突，跳过更新: ${job.orderId}`);
           }
           return;
         }
@@ -141,7 +142,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
             },
           });
         } catch (err) {
-          console.warn(`[PaymentRetry] 版本号冲突，跳过更新: ${job.orderId}`);
+          logger.warn(`版本号冲突，跳过更新: ${job.orderId}`);
         }
       });
 
@@ -189,7 +190,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
 
     // 老王说：金额验证是第一道防线，前端传的金额必须和数据库一致
     if (expectedAmount !== pkg.price) {
-      console.error(`❌ 金额验证失败: 预期${expectedAmount}, 实际${pkg.price}, 套餐${packageId}`);
+      logger.error(`金额验证失败`, { expected: expectedAmount, actual: pkg.price, packageId });
       return null;
     }
 
@@ -258,9 +259,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
 
     // 老王说：确认支付时再次验证金额，防止订单创建后套餐价格被修改
     if (order.amount !== pkg.price) {
-      console.error(
-        `❌ 确认支付时金额验证失败: 订单金额${order.amount}, 当前套餐价格${pkg.price}, 订单${order.id}`
-      );
+      logger.error(`确认支付时金额验证失败`, { orderAmount: order.amount, packagePrice: pkg.price, orderId: order.id });
       return { ok: false, error: "AMOUNT_MISMATCH" };
     }
 
@@ -322,9 +321,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     // 如果点数不足，拒绝退款
     if (totalShortfall > 0) {
       // 脱敏日志：不记录具体的用户点数信息
-      console.error(
-        `❌ 退款失败：用户点数不足。缺少点数: ${totalShortfall}`
-      );
+      logger.error(`退款失败：用户点数不足`, { shortfall: totalShortfall });
       return {
         ok: false,
         error: "INSUFFICIENT_POINTS",

@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getRedisClient } from '../../../common/redis/client';
+import { logger } from '../../../common/logger/winston.init';
 import { isAdminAuthorized } from '../../../common/utils/admin';
 
 /**
@@ -32,7 +33,7 @@ export class AdminAuthGuard implements CanActivate {
           const redis = getRedisClient();
           if (!redis) {
             // 老王说：Redis不可用，无法验证黑名单，必须拒绝请求
-            console.error('[AdminAuthGuard] Redis客户端不可用，无法验证token黑名单');
+            logger.error('Redis客户端不可用，无法验证token黑名单');
             throw new UnauthorizedException('系统暂时不可用，请稍后重试');
           }
 
@@ -40,7 +41,7 @@ export class AdminAuthGuard implements CanActivate {
             const blacklistKey = `admin:token:blacklist:${payload.jti}`;
             const result = await redis.get(blacklistKey);
             if (result) {
-              console.warn('[AdminAuthGuard] Token已被吊销:', payload.jti);
+              logger.warn(`Token已被吊销: ${payload.jti}`);
               throw new UnauthorizedException('Token已被吊销');
             }
           } catch (err) {
@@ -49,7 +50,7 @@ export class AdminAuthGuard implements CanActivate {
             if (err instanceof UnauthorizedException) {
               throw err;
             }
-            console.error('[AdminAuthGuard] Redis查询失败，拒绝请求:', err);
+            logger.error('Redis查询失败，拒绝请求', { error: err });
             throw new UnauthorizedException('认证系统异常，请重新登录');
           }
         }
@@ -70,7 +71,7 @@ export class AdminAuthGuard implements CanActivate {
         if (error instanceof UnauthorizedException || error instanceof ForbiddenException) {
           throw error;
         }
-        console.error('[AdminAuthGuard] JWT验证失败:', error.message);
+        logger.error('JWT验证失败', { message: error.message });
       }
     }
 

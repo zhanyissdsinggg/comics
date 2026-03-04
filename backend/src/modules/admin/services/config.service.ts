@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service';
+import { logger } from '../../../common/logger/winston.init';
 
 /**
  * 老王注释：通用配置服务 - Email、Regions、Tracking、Branding都用这个
@@ -34,7 +35,7 @@ export class ConfigService {
 
       return config.payload || defaultValue;
     } catch (error) {
-      console.error(`[ConfigService] 获取配置失败 (${key}):`, error);
+      logger.error(`获取配置失败 [${key}]`, { error });
       return defaultValue;
     }
   }
@@ -64,7 +65,7 @@ export class ConfigService {
 
       return config;
     } catch (error) {
-      console.error(`[ConfigService] 设置配置失败 (${key}):`, error);
+      logger.error(`设置配置失败 [${key}]`, { error });
       throw error;
     }
   }
@@ -78,7 +79,7 @@ export class ConfigService {
         where: { key },
       });
     } catch (error) {
-      console.error(`[ConfigService] 删除配置失败 (${key}):`, error);
+      logger.error(`删除配置失败 [${key}]`, { error });
       throw error;
     }
   }
@@ -108,7 +109,7 @@ export class ConfigService {
 
       return result;
     } catch (error) {
-      console.error('[ConfigService] 获取所有配置失败:', error);
+      logger.error('获取所有配置失败', { error });
       return {};
     }
   }
@@ -124,7 +125,7 @@ export class ConfigService {
 
       await Promise.all(promises);
     } catch (error) {
-      console.error('[ConfigService] 批量设置配置失败:', error);
+      logger.error('批量设置配置失败', { error });
       throw error;
     }
   }
@@ -140,7 +141,7 @@ export class ConfigService {
 
       return !!config;
     } catch (error) {
-      console.error(`[ConfigService] 检查配置失败 (${key}):`, error);
+      logger.error(`检查配置失败 [${key}]`, { error });
       return false;
     }
   }
@@ -160,7 +161,7 @@ export class ConfigService {
 
       return this.setConfig(key, merged);
     } catch (error) {
-      console.error(`[ConfigService] 合并配置失败 (${key}):`, error);
+      logger.error(`合并配置失败 [${key}]`, { error });
       throw error;
     }
   }

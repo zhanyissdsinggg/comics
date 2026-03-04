@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { logger } from "../logger/winston.init";
 
 /**
  * 老王说：管理员密钥必须设置，不能用默认值
@@ -23,19 +24,19 @@ function validateAdminKey(key: string): boolean {
 // 老王说：启动时检查ADMIN_KEY环境变量，不符合要求就拒绝启动
 const ADMIN_KEY = process.env.ADMIN_KEY || "";
 if (!ADMIN_KEY) {
-  console.error("❌ 致命错误：未设置ADMIN_KEY环境变量");
-  console.error("请在.env文件中设置ADMIN_KEY，至少16个字符，包含大小写字母、数字、特殊字符");
+  logger.error("致命错误：未设置ADMIN_KEY环境变量");
+  logger.error("请在.env文件中设置ADMIN_KEY，至少16个字符，包含大小写字母、数字、特殊字符");
   process.exit(1);
 }
 
 if (!validateAdminKey(ADMIN_KEY)) {
-  console.error("❌ 致命错误：ADMIN_KEY不符合安全要求");
-  console.error("要求：至少16个字符，必须包含大小写字母、数字、特殊字符");
-  console.error("示例：MySecureAdm1nK3y!2024");
+  logger.error("致命错误：ADMIN_KEY不符合安全要求");
+  logger.error("要求：至少16个字符，必须包含大小写字母、数字、特殊字符");
+  logger.error("示例：MySecureAdm1nK3y!2024");
   process.exit(1);
 }
 
-console.log("✅ 管理员密钥验证通过");
+logger.info("管理员密钥验证通过");
 
 export function isAdminAuthorized(req: Request, body?: any) {
   // 优先检查JWT认证（middleware设置的req.user）

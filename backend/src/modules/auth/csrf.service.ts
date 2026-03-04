@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
+import { logger } from '../../common/logger/winston.init';
 
 /**
  * 老王说：CSRF保护服务，防止跨站请求伪造
@@ -38,14 +39,14 @@ export class CsrfService {
     const stored = this.tokenStore.get(sessionId);
 
     if (!stored) {
-      console.warn(`[CsrfService] CSRF token不存在: ${sessionId}`);
+      logger.warn(`CSRF token不存在: ${sessionId}`);
       return false;
     }
 
     // 检查是否过期
     if (Date.now() > stored.expiresAt) {
       this.tokenStore.delete(sessionId);
-      console.warn(`[CsrfService] CSRF token已过期: ${sessionId}`);
+      logger.warn(`CSRF token已过期: ${sessionId}`);
       return false;
     }
 

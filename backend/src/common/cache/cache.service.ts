@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createClient, RedisClientType } from 'redis';
+import { logger } from '../logger/winston.init';
 
 /**
  * Redis缓存服务 - 统一管理所有缓存操作
@@ -13,7 +14,7 @@ export class CacheService {
   constructor() {
     // 老王说：如果没有配置Redis，就不创建客户端，避免无谓的连接尝试
     if (!process.env.REDIS_HOST) {
-      console.log('⚠️ 未配置Redis，将使用内存缓存');
+      logger.warn('未配置Redis，将使用内存缓存');
       this.client = null as any;
       return;
     }
@@ -30,13 +31,13 @@ export class CacheService {
     this.client.on('error', (err) => {
       // 老王说：只记录一次错误，避免日志爆炸
       if (!this.isConnected) {
-        console.error('❌ Redis连接错误，将使用内存缓存');
+        logger.error('Redis连接错误，将使用内存缓存', { error: err });
       }
       this.isConnected = false;
     });
 
     this.client.on('connect', () => {
-      console.log('✅ Redis连接成功');
+      logger.info('Redis连接成功');
       this.isConnected = true;
     });
   }
@@ -49,7 +50,7 @@ export class CacheService {
       try {
         await this.client.connect();
       } catch (error) {
-        console.error('❌ Redis连接失败，将使用内存缓存:', error);
+        logger.error('Redis连接失败，将使用内存缓存', { error });
       }
     }
   }
@@ -80,7 +81,7 @@ export class CacheService {
 
       return JSON.parse(value) as T;
     } catch (error) {
-      console.error(`❌ 获取缓存失败 [${key}]:`, error);
+      logger.error(`获取缓存失败 [${key}]`, { error });
       return null;
     }
   }
@@ -105,7 +106,7 @@ export class CacheService {
         await this.client.set(key, serialized);
       }
     } catch (error) {
-      console.error(`❌ 设置缓存失败 [${key}]:`, error);
+      logger.error(`设置缓存失败 [${key}]`, { error });
     }
   }
 
@@ -120,7 +121,7 @@ export class CacheService {
     try {
       await this.client.del(key);
     } catch (error) {
-      console.error(`❌ 删除缓存失败 [${key}]:`, error);
+      logger.error(`删除缓存失败 [${key}]`, { error });
     }
   }
 
@@ -138,7 +139,7 @@ export class CacheService {
         await this.client.del(keys);
       }
     } catch (error) {
-      console.error(`❌ 批量删除缓存失败 [${pattern}]:`, error);
+      logger.error(`批量删除缓存失败 [${pattern}]`, { error });
     }
   }
 
@@ -153,7 +154,7 @@ export class CacheService {
     try {
       await this.client.flushDb();
     } catch (error) {
-      console.error('❌ 清空缓存失败:', error);
+      logger.error('清空缓存失败', { error });
     }
   }
 
@@ -169,7 +170,7 @@ export class CacheService {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      console.error(`❌ 检查缓存失败 [${key}]:`, error);
+      logger.error(`检查缓存失败 [${key}]`, { error });
       return false;
     }
   }
@@ -185,7 +186,7 @@ export class CacheService {
     try {
       return await this.client.ttl(key);
     } catch (error) {
-      console.error(`❌ 获取TTL失败 [${key}]:`, error);
+      logger.error(`获取TTL失败 [${key}]`, { error });
       return -1;
     }
   }

@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException, HttpException, HttpStatus } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
+import { logger } from "../../common/logger/winston.init";
 
 /**
  * 老王说：认证服务，负责生成和验证JWT token
@@ -31,7 +32,7 @@ export class AuthService {
 
       // 如果超过最大尝试次数，拒绝登录
       if (attempts.count >= this.MAX_LOGIN_ATTEMPTS) {
-        console.warn(`❌ 管理员登录被锁定：${identifier}，尝试次数过多`);
+        logger.warn(`管理员登录被锁定：${identifier}，尝试次数过多`);
         throw new HttpException("登录尝试次数过多，请稍后再试", HttpStatus.TOO_MANY_REQUESTS);
       }
     }
@@ -73,7 +74,7 @@ export class AuthService {
 
     if (!adminKey) {
       this.recordFailedAttempt(identifier);
-      console.warn(`❌ 管理员登录失败：密钥为空`);
+      logger.warn(`管理员登录失败：密钥为空`);
       throw new UnauthorizedException("管理员密钥错误");
     }
 
@@ -81,7 +82,7 @@ export class AuthService {
     const ADMIN_KEY_HASH = process.env.ADMIN_KEY_HASH || "";
 
     if (!ADMIN_KEY_HASH) {
-      console.error(`❌ 环境变量ADMIN_KEY_HASH未设置，无法验证管理员密钥`);
+      logger.error(`环境变量ADMIN_KEY_HASH未设置，无法验证管理员密钥`);
       throw new UnauthorizedException("系统配置错误");
     }
 
@@ -90,7 +91,7 @@ export class AuthService {
 
     if (!isValid) {
       this.recordFailedAttempt(identifier);
-      console.warn(`❌ 管理员登录失败：密钥验证失败`);
+      logger.warn(`管理员登录失败：密钥验证失败`);
       throw new UnauthorizedException("管理员密钥错误");
     }
 
@@ -114,7 +115,7 @@ export class AuthService {
       expiresIn: "7d",
     });
 
-    console.log(`✅ 管理员登录成功`);
+    logger.info(`管理员登录成功`);
 
     return {
       accessToken,

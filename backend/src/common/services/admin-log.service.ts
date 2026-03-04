@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { logger } from "../logger/winston.init";
 import { Request } from "express";
 
 /**
@@ -49,7 +50,7 @@ export class AdminLogService {
       });
     } catch (error) {
       // 老王说：日志记录失败不应该影响主业务，只打印错误
-      console.error("记录管理员操作日志失败:", error);
+      logger.error("记录管理员操作日志失败", { error });
     }
   }
 

@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { CsrfService } from './csrf.service';
+import { logger } from '../../common/logger/winston.init';
 
 /**
  * 老王说：CSRF保护守卫
@@ -22,7 +23,7 @@ export class CsrfGuard implements CanActivate {
     const csrfToken = request.headers['x-csrf-token'] || request.body?.csrfToken;
 
     if (!csrfToken) {
-      console.warn(`[CsrfGuard] CSRF token缺失: ${request.path}`);
+      logger.warn(`CSRF token缺失: ${request.path}`);
       throw new ForbiddenException('CSRF token缺失');
     }
 
@@ -30,7 +31,7 @@ export class CsrfGuard implements CanActivate {
     const sessionId = request.sessionID || request.headers['x-session-id'];
 
     if (!sessionId) {
-      console.warn(`[CsrfGuard] Session ID缺失: ${request.path}`);
+      logger.warn(`Session ID缺失: ${request.path}`);
       throw new ForbiddenException('Session ID缺失');
     }
 
@@ -38,7 +39,7 @@ export class CsrfGuard implements CanActivate {
     const isValid = this.csrfService.verifyToken(sessionId, csrfToken);
 
     if (!isValid) {
-      console.warn(`[CsrfGuard] CSRF token验证失败: ${request.path}`);
+      logger.warn(`CSRF token验证失败: ${request.path}`);
       throw new ForbiddenException('CSRF token验证失败');
     }
 

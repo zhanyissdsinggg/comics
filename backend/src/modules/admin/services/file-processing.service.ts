@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import AdmZip from 'adm-zip';
+import { logger } from '../../../common/logger/winston.init';
 
 /**
  * 老王注释：文件处理服务 - 处理ZIP文件上传、解析、批量导入
@@ -82,7 +83,7 @@ export class FileProcessingService {
         return { pages };
       }
     } catch (error) {
-      console.error('[FileProcessingService] 解析ZIP文件失败:', error);
+      logger.error('解析ZIP文件失败', { error });
       return {
         error: error instanceof Error ? error.message : '未知错误',
       };

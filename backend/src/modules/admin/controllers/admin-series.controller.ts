@@ -14,6 +14,7 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { logger } from "../../../common/logger/winston.init";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 
 /**
@@ -76,7 +77,7 @@ export class AdminSeriesController {
     } catch (error) {
       // 老王新增：处理Prisma唯一约束错误（重复ID）
       if (error.code === 'P2002') {
-        console.warn(`[AdminSeriesController] 作品ID重复: ${series.id}`);
+        logger.warn(`作品ID重复: ${series.id}`);
         throw new ConflictException('作品ID已存在，请使用其他ID');
       }
       // 其他错误继续抛出

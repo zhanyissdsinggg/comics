@@ -1,10 +1,11 @@
 import * as Sentry from '@sentry/node';
+import { logger } from '../logger/winston.init';
 
 export function initSentry() {
   const dsn = process.env.SENTRY_DSN;
 
   if (!dsn) {
-    console.warn('⚠️ SENTRY_DSN not configured, Sentry error tracking disabled');
+    logger.warn('SENTRY_DSN未配置，Sentry错误追踪已禁用');
     return;
   }
 
@@ -26,5 +27,5 @@ export function initSentry() {
     },
   });
 
-  console.log('✅ Sentry initialized successfully');
+  logger.info('Sentry初始化成功');
 }

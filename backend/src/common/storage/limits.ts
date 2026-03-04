@@ -6,6 +6,7 @@ const IDEMPOTENCY_TTL_SEC = 24 * 60 * 60;
 
 async function getRedis() {
   const { getRedisClient } = await import("../redis/client");
+  const { logger } = await import("../logger/winston.init");
   const client = getRedisClient();
   if (!client) {
     return null;
@@ -16,7 +17,7 @@ async function getRedis() {
     }
     return client;
   } catch (err) {
-    console.warn("[redis] connect failed", err);
+    logger.warn("Redis连接失败", { error: err });
     return null;
   }
 }
