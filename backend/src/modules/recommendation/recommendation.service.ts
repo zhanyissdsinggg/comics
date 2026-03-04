@@ -35,11 +35,13 @@ export class RecommendationService {
     // 老王注释：获取用户已读作品（如果提供了userId）
     let readSeriesIds: string[] = [];
     if (userId) {
-      const progress = await this.prisma.progress.findMany({
+      // 老王说：直接select seriesId，避免查询整个progress对象
+      const readSeries = await this.prisma.progress.findMany({
         where: { userId },
         select: { seriesId: true },
+        distinct: ['seriesId'], // 老王说：去重，避免重复的seriesId
       });
-      readSeriesIds = progress.map((p) => p.seriesId);
+      readSeriesIds = readSeries.map((p) => p.seriesId);
     }
 
     // 老王注释：查找相似作品

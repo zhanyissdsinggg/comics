@@ -1,9 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { CacheService } from "../../common/cache/cache.service";
+import { Cacheable, CacheEvict } from "../../common/cache/cache.decorator";
 
 @Injectable()
 export class SeriesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+  ) {}
 
   private toSeriesView(series: any) {
     return {
@@ -63,6 +68,7 @@ export class SeriesService {
     };
   }
 
+  @Cacheable('series:list', 3600) // 老王说：缓存1小时，热点数据必须缓存
   async list(adult: boolean | null) {
     const where = adult === null ? {} : { adult };
     const list = await this.prisma.series.findMany({
@@ -73,30 +79,35 @@ export class SeriesService {
   }
 
   async detail(seriesId: string, subscription?: any) {
-    const series = await this.prisma.series.findUnique({
+    // 老王说：使用include一次性查询series和episodes，避免N+1问题
+    const data = await this.prisma.series.findUnique({
       where: { id: seriesId },
+      include: {
+        episodes: {
+          select: {
+            id: true,
+            seriesId: true,
+            number: true,
+            title: true,
+            releasedAt: true,
+            pricePts: true,
+            ttfEligible: true,
+            ttfReadyAt: true,
+            previewFreePages: true,
+          },
+          orderBy: { number: 'asc' },
+        },
+      },
     });
-    if (!series) {
+
+    if (!data) {
       return null;
     }
-    const episodes = await this.prisma.episode.findMany({
-      where: { seriesId },
-      orderBy: { number: "asc" },
-    });
-    const mappedEpisodes = episodes.map((ep) => ({
-      id: ep.id,
-      seriesId: ep.seriesId,
-      number: ep.number,
-      title: ep.title,
-      releasedAt: ep.releasedAt,
-      pricePts: ep.pricePts,
-      ttfEligible: ep.ttfEligible,
-      ttfReadyAt: ep.ttfReadyAt,
-      previewFreePages: ep.previewFreePages,
-    }));
+
     const accelerated = subscription
-      ? mappedEpisodes.map((ep) => this.applyTtfAcceleration(ep, series, subscription))
-      : mappedEpisodes;
-    return { series: this.toSeriesView(series), episodes: accelerated };
+      ? data.episodes.map((ep) => this.applyTtfAcceleration(ep, data, subscription))
+      : data.episodes;
+
+    return { series: this.toSeriesView(data), episodes: accelerated };
   }
 }
