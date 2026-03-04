@@ -1,7 +1,6 @@
-import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { EmailModule } from "../email/email.module";
 import { AdminLogService } from "../../common/services/admin-log.service";
-import { AdminKeyMiddleware } from "./admin.middleware";
 import { AdminAuthGuard } from "./guards/admin-auth.guard";
 import { AllExceptionsFilter } from "./filters/all-exceptions.filter";
 import { AdminAuditInterceptor } from "./interceptors/admin-audit.interceptor";
@@ -55,11 +54,4 @@ import { AdminSystemModule } from "./admin-system/admin-system.module";
   ],
   exports: [AdminLogService, CrudService, ConfigService, FileProcessingService, StreamingService],
 })
-export class AdminModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    // 老王说：保留旧的中间件以兼容性，但新的守卫会优先执行
-    consumer
-      .apply(AdminKeyMiddleware)
-      .forRoutes("admin/*");
-  }
-}
+export class AdminModule {}
