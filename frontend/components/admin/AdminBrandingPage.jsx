@@ -102,7 +102,7 @@ export default function AdminBrandingPage() {
       setStatus(`${label} uploaded successfully.`);
     },
     onError: (error) => {
-      alert(`Upload failed: ${error.message}`);
+      setStatus(`Upload failed: ${error.message}`);
     },
   });
 

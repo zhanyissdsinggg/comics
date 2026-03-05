@@ -25,6 +25,7 @@ const PaymentMethodSelector = React.memo(
 
     // 老王注释：表单验证错误
     const [errors, setErrors] = useState({});
+    const [feedback, setFeedback] = useState({ type: "", message: "" });
 
     // 老王注释：支付方式配置
     const paymentMethods = useMemo(
@@ -164,6 +165,7 @@ const PaymentMethodSelector = React.memo(
         // 老王注释：模拟支付处理
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
+        setFeedback({ type: "", message: "" });
         // 老王注释：调用支付完成回调
         onPaymentComplete?.({
           method: selectedMethod,
@@ -172,7 +174,7 @@ const PaymentMethodSelector = React.memo(
         });
       } catch (error) {
         console.error("艹，支付失败:", error);
-        alert("Payment failed. Please try again.");
+        setFeedback({ type: "error", message: "Payment failed. Please try again." });
       } finally {
         setProcessing(false);
       }
@@ -190,7 +192,11 @@ const PaymentMethodSelector = React.memo(
             .map((method) => (
               <button
                 key={method.id}
-                onClick={() => setSelectedMethod(method.id)}
+                type="button"
+                onClick={() => {
+                  setSelectedMethod(method.id);
+                  setFeedback({ type: "", message: "" });
+                }}
                 className={`w-full rounded-xl border p-4 text-left transition-all ${
                   selectedMethod === method.id
                     ? "border-emerald-500 bg-emerald-500/10"
@@ -342,9 +348,16 @@ const PaymentMethodSelector = React.memo(
           </div>
         </div>
 
+        {feedback.message ? (
+          <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {feedback.message}
+          </div>
+        ) : null}
+
         {/* 老王注释：操作按钮 */}
         <div className="flex gap-3">
           <button
+            type="button"
             onClick={onCancel}
             disabled={processing}
             className="flex-1 rounded-lg border border-neutral-800 bg-neutral-900/50 py-3 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-800 disabled:opacity-50"
@@ -352,6 +365,7 @@ const PaymentMethodSelector = React.memo(
             Cancel
           </button>
           <button
+            type="button"
             onClick={handlePayment}
             disabled={processing}
             className="flex-1 rounded-lg bg-emerald-500 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"

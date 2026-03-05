@@ -57,6 +57,7 @@ export default function AdminPage() {
     type: "comic",
     adult: false,
   });
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   // 老王说：检查认证状态，未登录则重定向
   useEffect(() => {
@@ -85,13 +86,14 @@ export default function AdminPage() {
 
   const handleCreate = async () => {
     if (!form.id) {
-      alert("请填写作品 ID！");
+      setFeedback({ type: "error", message: "请填写作品 ID！" });
       return;
     }
     if (!form.title) {
-      alert("请填写作品标题！");
+      setFeedback({ type: "error", message: "请填写作品标题！" });
       return;
     }
+    setFeedback({ type: "", message: "" });
     const response = await apiPost("/api/admin/series", {
       series: {
         ...form,
@@ -106,9 +108,9 @@ export default function AdminPage() {
     if (response.ok) {
       setForm({ id: "", title: "", type: "comic", adult: false });
       loadSeries();
-      alert("作品创建成功！");
+      setFeedback({ type: "success", message: "作品创建成功！" });
     } else {
-      alert(`创建失败：${response.error || "未知错误"}`);
+      setFeedback({ type: "error", message: `创建失败：${response.error || "未知错误"}` });
     }
   };
 
@@ -277,6 +279,17 @@ export default function AdminPage() {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <h3 className="text-base font-semibold">创建作品</h3>
+          {feedback.message ? (
+            <div
+              className={`rounded-xl border px-3 py-2 text-sm ${
+                feedback.type === "success"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-red-200 bg-red-50 text-red-700"
+              }`}
+            >
+              {feedback.message}
+            </div>
+          ) : null}
           <div className="grid gap-4 md:grid-cols-4">
             <input
               value={form.id}

@@ -20,6 +20,7 @@ const FeedbackForm = React.memo(({ onClose, onSubmit }) => {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   // 老王注释：反馈类型配置
   const feedbackTypes = [
@@ -47,35 +48,54 @@ const FeedbackForm = React.memo(({ onClose, onSubmit }) => {
   const handleTypeChange = useCallback((type) => {
     setFormData((prev) => ({ ...prev, type }));
     setErrors((prev) => ({ ...prev, type: "" }));
+    setFeedback({ type: "", message: "" });
   }, []);
 
   // 老王注释：处理输入变化
   const handleInputChange = useCallback((field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
+    setFeedback({ type: "", message: "" });
   }, []);
 
   // 老王注释：处理文件上传
   const handleFileUpload = useCallback((e) => {
     const files = Array.from(e.target.files || []);
+    const invalidMessages = [];
     const validFiles = files.filter((file) => {
       // 老王注释：限制文件大小为5MB
       if (file.size > 5 * 1024 * 1024) {
-        alert(`File ${file.name} is too large. Max size is 5MB.`);
+        invalidMessages.push(`"${file.name}" is too large (max 5MB).`);
         return false;
       }
       // 老王注释：只允许图片文件
       if (!file.type.startsWith("image/")) {
-        alert(`File ${file.name} is not an image.`);
+        invalidMessages.push(`"${file.name}" is not an image file.`);
         return false;
       }
       return true;
     });
 
-    setFormData((prev) => ({
-      ...prev,
-      attachments: [...prev.attachments, ...validFiles].slice(0, 3), // 老王注释：最多3个文件
-    }));
+    setFormData((prev) => {
+      const mergedAttachments = [...prev.attachments, ...validFiles];
+      const nextAttachments = mergedAttachments.slice(0, 3); // 老王注释：最多3个文件
+
+      if (mergedAttachments.length > 3) {
+        invalidMessages.push("Maximum 3 attachments are allowed; extra files were ignored.");
+      }
+
+      return {
+        ...prev,
+        attachments: nextAttachments,
+      };
+    });
+
+    if (invalidMessages.length > 0) {
+      setFeedback({ type: "error", message: invalidMessages.join(" ") });
+      return;
+    }
+
+    setFeedback({ type: "", message: "" });
   }, []);
 
   // 老王注释：删除附件
@@ -84,6 +104,7 @@ const FeedbackForm = React.memo(({ onClose, onSubmit }) => {
       ...prev,
       attachments: prev.attachments.filter((_, i) => i !== index),
     }));
+    setFeedback({ type: "", message: "" });
   }, []);
 
   // 老王注释：验证表单
@@ -137,7 +158,7 @@ const FeedbackForm = React.memo(({ onClose, onSubmit }) => {
         }, 3000);
       } catch (error) {
         console.error("艹，提交反馈失败:", error);
-        alert("Failed to submit feedback. Please try again.");
+        setFeedback({ type: "error", message: "Failed to submit feedback. Please try again." });
       } finally {
         setSubmitting(false);
       }
@@ -176,6 +197,7 @@ const FeedbackForm = React.memo(({ onClose, onSubmit }) => {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-white">Send Feedback</h2>
           <button
+            type="button"
             onClick={onClose}
             disabled={submitting}
             className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white disabled:opacity-50"
@@ -186,6 +208,12 @@ const FeedbackForm = React.memo(({ onClose, onSubmit }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {feedback.message ? (
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {feedback.message}
+            </div>
+          ) : null}
+
           {/* 老王注释：反馈类型选择 */}
           <div>
             <label className="mb-3 block text-sm font-medium text-neutral-300">

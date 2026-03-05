@@ -25,6 +25,10 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [startNumber, setStartNumber] = useState('');
+  const [feedback, setFeedback] = useState<{ type: '' | 'error' | 'success'; message: string }>({
+    type: '',
+    message: '',
+  });
 
   const uploadMutation = useMutation({
     mutationFn: async (filesToUpload: File[]) => {
@@ -56,6 +60,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
       setUploadProgress((prev) =>
         prev.map((p) => ({ ...p, status: 'success', progress: 100 }))
       );
+      setFeedback({ type: 'success', message: '批量上传成功。' });
       setTimeout(() => {
         onSuccess();
         handleClose();
@@ -76,6 +81,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
     setFiles([]);
     setUploadProgress([]);
     setStartNumber('');
+    setFeedback({ type: '', message: '' });
     onClose();
   };
 
@@ -87,15 +93,16 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
     );
 
     if (zipFiles.length === 0) {
-      alert('请选择ZIP格式的文件');
+      setFeedback({ type: 'error', message: '请选择 ZIP 格式文件。' });
       return;
     }
 
     if (zipFiles.length > 50) {
-      alert('单次最多上传50个文件');
+      setFeedback({ type: 'error', message: '单次最多上传 50 个文件。' });
       return;
     }
 
+    setFeedback({ type: '', message: '' });
     setFiles(zipFiles);
     setUploadProgress(
       zipFiles.map((file) => ({
@@ -127,10 +134,11 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
 
   const handleUpload = () => {
     if (files.length === 0) {
-      alert('请先选择文件');
+      setFeedback({ type: 'error', message: '请先选择文件。' });
       return;
     }
 
+    setFeedback({ type: '', message: '' });
     setUploadProgress((prev) =>
       prev.map((p) => ({ ...p, status: 'uploading', progress: 50 }))
     );
@@ -146,6 +154,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-neutral-100">批量上传剧集</h2>
           <button
+            type="button"
             onClick={handleClose}
             className="text-neutral-400 hover:text-neutral-300"
             disabled={uploadMutation.isPending}
@@ -153,6 +162,18 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
             ✕
           </button>
         </div>
+
+        {feedback.message ? (
+          <div
+            className={`mb-4 rounded-lg border px-3 py-2 text-sm ${
+              feedback.type === 'success'
+                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                : 'border-red-500/30 bg-red-500/10 text-red-300'
+            }`}
+          >
+            {feedback.message}
+          </div>
+        ) : null}
 
         {/* 起始剧集号 */}
         <div className="mb-4">
@@ -272,6 +293,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
         {/* 操作按钮 */}
         <div className="mt-6 flex gap-3">
           <button
+            type="button"
             onClick={handleUpload}
             disabled={files.length === 0 || uploadMutation.isPending}
             className="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -279,6 +301,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
             {uploadMutation.isPending ? '上传中...' : `开始上传 (${files.length})`}
           </button>
           <button
+            type="button"
             onClick={handleClose}
             disabled={uploadMutation.isPending}
             className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 disabled:opacity-50"
