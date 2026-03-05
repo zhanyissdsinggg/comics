@@ -29,7 +29,20 @@ export class SeriesController {
   }
 
   @Get(":id")
-  async detail(@Param("id") id: string, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async detail(
+    @Param("id") id: string,
+    @Query("adult") adultParam: string,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const adult = parseBool(adultParam);
+    if (adult === true) {
+      const gate = checkAdultGate(req.cookies || {});
+      if (!gate.ok) {
+        res.status(403);
+        return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+      }
+    }
     const userId = getUserIdFromRequest(req, true);
     const subscription = userId ? await getSubscriptionPayload(this.prisma, userId) : null;
     const result = await this.seriesService.detail(id, subscription);
