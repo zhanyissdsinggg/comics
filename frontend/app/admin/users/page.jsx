@@ -3,10 +3,12 @@
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useMemo } from 'react';
+import { useMutation } from '@tanstack/react-query';
 
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { adminFetch } from '@/lib/adminApiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
 
@@ -26,6 +28,7 @@ const sortFields = [
 export default function AdminUsersPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
 
   // 老王说：用useAdminList Hook替代所有搜索、排序、筛选逻辑
   const {
@@ -58,11 +61,11 @@ export default function AdminUsersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setIsBulkActionModalOpen(false);
+        setFeedback({ type: 'success', message: '批量封禁成功。' });
         refetch();
       },
       onError: (error) => {
-        alert(`封禁失败: ${error.message}`);
+        setFeedback({ type: 'error', message: `封禁失败: ${error.message}` });
       },
     }
   );
@@ -77,11 +80,11 @@ export default function AdminUsersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setIsBulkActionModalOpen(false);
+        setFeedback({ type: 'success', message: '批量解封成功。' });
         refetch();
       },
       onError: (error) => {
-        alert(`解封失败: ${error.message}`);
+        setFeedback({ type: 'error', message: `解封失败: ${error.message}` });
       },
     }
   );
@@ -96,10 +99,11 @@ export default function AdminUsersPage() {
       onSuccess: () => {
         clearSelection();
         setIsDeleteConfirmOpen(false);
+        setFeedback({ type: 'success', message: '批量删除成功。' });
         refetch();
       },
       onError: (error) => {
-        alert(`删除失败: ${error.message}`);
+        setFeedback({ type: 'error', message: `删除失败: ${error.message}` });
       },
     }
   );
@@ -115,11 +119,15 @@ export default function AdminUsersPage() {
       if (!response.ok) throw new Error('更新用户状态失败');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      setFeedback({
+        type: 'success',
+        message: variables.blocked ? '用户已封禁。' : '用户已解封。',
+      });
       refetch();
     },
     onError: (error) => {
-      alert(`更新失败: ${error.message}`);
+      setFeedback({ type: 'error', message: `更新失败: ${error.message}` });
     },
   });
 
@@ -137,6 +145,18 @@ export default function AdminUsersPage() {
           <p className="text-neutral-400 mt-2">管理所有用户、权限和状态</p>
         </div>
 
+        {feedback.message ? (
+          <div
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
+              feedback.type === 'success'
+                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                : 'border-red-500/30 bg-red-500/10 text-red-300'
+            }`}
+          >
+            {feedback.message}
+          </div>
+        ) : null}
+
         {/* 工具栏 */}
         <div className="mb-6 flex gap-4 flex-wrap items-center">
           <input
@@ -148,6 +168,7 @@ export default function AdminUsersPage() {
           />
 
           <button
+            type="button"
             onClick={() => setIsFilterModalOpen(true)}
             className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700"
           >
@@ -155,6 +176,7 @@ export default function AdminUsersPage() {
           </button>
 
           <button
+            type="button"
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
             className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
           >
@@ -168,13 +190,15 @@ export default function AdminUsersPage() {
             <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
             <div className="flex gap-2">
               <button
-                onClick={() => setIsBulkActionModalOpen(true)}
+                type="button"
+                onClick={handleBulkBlock}
                 disabled={bulkBlockMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
               >
                 {bulkBlockMutation.isPending ? '封禁中...' : '封禁'}
               </button>
               <button
+                type="button"
                 onClick={handleBulkUnblock}
                 disabled={bulkUnblockMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm disabled:opacity-50"
@@ -182,6 +206,7 @@ export default function AdminUsersPage() {
                 {bulkUnblockMutation.isPending ? '解封中...' : '解封'}
               </button>
               <button
+                type="button"
                 onClick={() => setIsDeleteConfirmOpen(true)}
                 disabled={bulkDeleteMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
@@ -189,6 +214,7 @@ export default function AdminUsersPage() {
                 {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
               </button>
               <button
+                type="button"
                 onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
@@ -264,6 +290,7 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-3">
                         <button
+                          type="button"
                           onClick={() => handleUserBlock(user.id, !user.isBlocked)}
                           disabled={userBlockMutation.isPending}
                           className={`text-sm disabled:opacity-50 ${
@@ -306,6 +333,7 @@ export default function AdminUsersPage() {
           </div>
 
           <button
+            type="button"
             onClick={() => setIsFilterModalOpen(false)}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >

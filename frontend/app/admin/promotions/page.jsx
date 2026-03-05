@@ -3,10 +3,12 @@
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useMemo } from 'react';
+import { useMutation } from '@tanstack/react-query';
 
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { adminFetch } from '@/lib/adminApiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
 
@@ -27,6 +29,7 @@ const sortFields = [
 export default function AdminPromotionsPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
 
   // 老王说：用useAdminList Hook替代所有搜索、排序、筛选逻辑
   const {
@@ -54,10 +57,11 @@ export default function AdminPromotionsPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
+      setFeedback({ type: 'success', message: '批量删除促销活动成功。' });
       refetch();
     },
     onError: (error) => {
-      alert(`删除失败: ${error.message}`);
+      setFeedback({ type: 'error', message: `删除失败: ${error.message}` });
     },
   });
 
@@ -72,11 +76,15 @@ export default function AdminPromotionsPage() {
       if (!response.ok) throw new Error('更新促销活动状态失败');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      setFeedback({
+        type: 'success',
+        message: variables.currentStatus ? '促销活动已禁用。' : '促销活动已启用。',
+      });
       refetch();
     },
     onError: (error) => {
-      alert(`更新失败: ${error.message}`);
+      setFeedback({ type: 'error', message: `更新失败: ${error.message}` });
     },
   });
 
@@ -95,6 +103,18 @@ export default function AdminPromotionsPage() {
           <p className="text-neutral-400 mt-2">管理所有促销活动和优惠</p>
         </div>
 
+        {feedback.message ? (
+          <div
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
+              feedback.type === 'success'
+                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                : 'border-red-500/30 bg-red-500/10 text-red-300'
+            }`}
+          >
+            {feedback.message}
+          </div>
+        ) : null}
+
         {/* 工具栏 */}
         <div className="mb-6 flex gap-4 flex-wrap items-center">
           <input
@@ -106,6 +126,7 @@ export default function AdminPromotionsPage() {
           />
 
           <button
+            type="button"
             onClick={() => setIsFilterModalOpen(true)}
             className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700"
           >
@@ -113,6 +134,7 @@ export default function AdminPromotionsPage() {
           </button>
 
           <button
+            type="button"
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
             className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
           >
@@ -126,6 +148,7 @@ export default function AdminPromotionsPage() {
             <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={() => setIsDeleteConfirmOpen(true)}
                 disabled={bulkDeleteMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
@@ -133,6 +156,7 @@ export default function AdminPromotionsPage() {
                 {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
               </button>
               <button
+                type="button"
                 onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
@@ -201,6 +225,7 @@ export default function AdminPromotionsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <button
+                          type="button"
                           onClick={() => handleToggleStatus(promo.id, promo.active)}
                           disabled={toggleStatusMutation.isPending}
                           className={`text-sm disabled:opacity-50 ${
@@ -244,6 +269,7 @@ export default function AdminPromotionsPage() {
           </div>
 
           <button
+            type="button"
             onClick={() => setIsFilterModalOpen(false)}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >

@@ -10,6 +10,7 @@ const frontendRoot = path.join(repoRoot, "frontend");
 const ignoredDirs = new Set(["node_modules", ".next", "dist", "coverage", "test-results"]);
 const codeExtPattern = /\.(js|jsx|ts|tsx)$/;
 const dynamicTailwindPattern = /\b(?:bg|text|border|from|to|ring|stroke|fill)-\$\{/;
+const adminAppPathPattern = /^frontend\/app\/admin\//;
 
 function walk(dir, list = []) {
   if (!fs.existsSync(dir)) {
@@ -46,6 +47,8 @@ const files = walk(frontendRoot);
 for (const file of files) {
   const content = fs.readFileSync(file, "utf8");
   const lines = content.split(/\r?\n/);
+  const relativePath = path.relative(repoRoot, file).replace(/\\/g, "/");
+  const isAdminAppFile = adminAppPathPattern.test(relativePath);
 
   lines.forEach((line, index) => {
     if (line.includes("onKeyPress=")) {
@@ -72,6 +75,15 @@ for (const file of files) {
         line: index + 1,
         rule: "unsafe-window-open",
         detail: "window.open must include noopener,noreferrer in feature string.",
+      });
+    }
+
+    if (isAdminAppFile && line.includes("alert(")) {
+      violations.push({
+        file,
+        line: index + 1,
+        rule: "blocking-alert-in-admin-app",
+        detail: "Avoid blocking alert() in app/admin pages; use non-blocking inline feedback.",
       });
     }
   });

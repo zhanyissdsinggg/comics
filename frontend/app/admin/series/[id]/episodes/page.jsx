@@ -45,6 +45,7 @@ export default function AdminEpisodesPage() {
     pricePts: '',
     previewFreePages: '',
   });
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
 
   // 用 useAdminList Hook 替代所有搜索、排序、筛选逻辑
   const {
@@ -92,10 +93,11 @@ export default function AdminEpisodesPage() {
         previewFreePages: 0,
         ttfEligible: false,
       });
+      setFeedback({ type: 'success', message: '剧集添加成功。' });
       refetch();
     },
     onError: (error) => {
-      alert(`添加失败: ${error.message}`);
+      setFeedback({ type: 'error', message: `添加失败: ${error.message}` });
     },
   });
 
@@ -121,10 +123,11 @@ export default function AdminEpisodesPage() {
         clearSelection();
         setIsBulkActionModalOpen(false);
         setBulkActionData({ pricePts: '', previewFreePages: '' });
+        setFeedback({ type: 'success', message: '批量更新成功。' });
         refetch();
       },
       onError: (error) => {
-        alert(`批量更新失败: ${error.message}`);
+        setFeedback({ type: 'error', message: `批量更新失败: ${error.message}` });
       },
     }
   );
@@ -139,10 +142,11 @@ export default function AdminEpisodesPage() {
       onSuccess: () => {
         clearSelection();
         setIsDeleteConfirmOpen(false);
+        setFeedback({ type: 'success', message: '批量删除成功。' });
         refetch();
       },
       onError: (error) => {
-        alert(`批量删除失败: ${error.message}`);
+        setFeedback({ type: 'error', message: `批量删除失败: ${error.message}` });
       },
     }
   );
@@ -171,13 +175,13 @@ export default function AdminEpisodesPage() {
       refetch();
     },
     onError: (error) => {
-      alert(`更新失败: ${error.message}`);
+      setFeedback({ type: 'error', message: `更新失败: ${error.message}` });
     },
   });
 
   const handleAddEpisode = () => {
     if (!newEpisode.number || !newEpisode.title) {
-      alert('请填写剧集号和标题');
+      setFeedback({ type: 'error', message: '请填写剧集号和标题。' });
       return;
     }
     addEpisodeMutation.mutate(newEpisode);
@@ -185,7 +189,7 @@ export default function AdminEpisodesPage() {
 
   const handleBulkUpdate = () => {
     if (!bulkActionData.pricePts && !bulkActionData.previewFreePages) {
-      alert('请至少填写一个要更新的字段');
+      setFeedback({ type: 'error', message: '请至少填写一个要更新的字段。' });
       return;
     }
     bulkUpdateMutation.mutate(selectedIds);
@@ -202,6 +206,18 @@ export default function AdminEpisodesPage() {
           <h1 className="text-3xl font-bold text-neutral-100">剧集管理</h1>
           <p className="text-neutral-400 mt-2">管理作品的所有剧集</p>
         </div>
+
+        {feedback.message ? (
+          <div
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
+              feedback.type === 'success'
+                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                : 'border-red-500/30 bg-red-500/10 text-red-300'
+            }`}
+          >
+            {feedback.message}
+          </div>
+        ) : null}
 
         {/* 工具栏 */}
         <div className="mb-6 flex gap-4 flex-wrap items-center">
@@ -224,6 +240,7 @@ export default function AdminEpisodesPage() {
           </select>
 
           <button
+            type="button"
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
             className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
           >
@@ -231,6 +248,7 @@ export default function AdminEpisodesPage() {
           </button>
 
           <button
+            type="button"
             onClick={() => setIsAddModalOpen(true)}
             className="ml-auto px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
           >
@@ -238,6 +256,7 @@ export default function AdminEpisodesPage() {
           </button>
 
           <button
+            type="button"
             onClick={() => setIsUploadModalOpen(true)}
             className="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700"
           >
@@ -251,18 +270,21 @@ export default function AdminEpisodesPage() {
             <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={() => setIsBulkActionModalOpen(true)}
                 className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"
               >
                 批量编辑
               </button>
               <button
+                type="button"
                 onClick={() => setIsDeleteConfirmOpen(true)}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm"
               >
                 删除
               </button>
               <button
+                type="button"
                 onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
@@ -342,6 +364,7 @@ export default function AdminEpisodesPage() {
                       </td>
                       <td className="px-4 py-3">
                         <button
+                          type="button"
                           onClick={() => {
                             clearSelection();
                             toggleSelect(episode.id);
@@ -424,6 +447,7 @@ export default function AdminEpisodesPage() {
           </div>
 
           <button
+            type="button"
             onClick={handleAddEpisode}
             disabled={addEpisodeMutation.isPending}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
@@ -461,6 +485,7 @@ export default function AdminEpisodesPage() {
           </div>
 
           <button
+            type="button"
             onClick={handleBulkUpdate}
             disabled={bulkUpdateMutation.isPending}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
@@ -494,4 +519,3 @@ export default function AdminEpisodesPage() {
     </div>
   );
 }
-

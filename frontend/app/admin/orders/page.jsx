@@ -26,6 +26,7 @@ const sortFields = [
 export default function AdminOrdersPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
 
   // 用 useAdminList Hook 替代所有搜索、排序、筛选逻辑
   const {
@@ -61,11 +62,11 @@ export default function AdminOrdersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setIsBulkActionModalOpen(false);
+        setFeedback({ type: 'success', message: '批量退款成功。' });
         refetch();
       },
       onError: (error) => {
-        alert(`退款失败: ${error.message}`);
+        setFeedback({ type: 'error', message: `退款失败: ${error.message}` });
       },
     }
   );
@@ -80,10 +81,11 @@ export default function AdminOrdersPage() {
       onSuccess: () => {
         clearSelection();
         setIsDeleteConfirmOpen(false);
+        setFeedback({ type: 'success', message: '批量删除成功。' });
         refetch();
       },
       onError: (error) => {
-        alert(`删除失败: ${error.message}`);
+        setFeedback({ type: 'error', message: `删除失败: ${error.message}` });
       },
     }
   );
@@ -161,6 +163,18 @@ export default function AdminOrdersPage() {
           <p className="text-neutral-400 mt-2">管理所有订单、退款和交易</p>
         </div>
 
+        {feedback.message ? (
+          <div
+            className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
+              feedback.type === 'success'
+                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                : 'border-red-500/30 bg-red-500/10 text-red-300'
+            }`}
+          >
+            {feedback.message}
+          </div>
+        ) : null}
+
         {/* 工具栏 */}
         <div className="mb-6 flex gap-4 flex-wrap items-center">
           <input
@@ -192,19 +206,22 @@ export default function AdminOrdersPage() {
             <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
             <div className="flex gap-2">
               <button
-                onClick={() => setIsBulkActionModalOpen(true)}
+                type="button"
+                onClick={handleBulkRefund}
                 disabled={bulkRefundMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 text-sm disabled:opacity-50"
               >
                 {bulkRefundMutation.isPending ? '退款中...' : '退款'}
               </button>
               <button
+                type="button"
                 onClick={handleExport}
                 className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm"
               >
                 导出
               </button>
               <button
+                type="button"
                 onClick={() => setIsDeleteConfirmOpen(true)}
                 disabled={bulkDeleteMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
@@ -212,6 +229,7 @@ export default function AdminOrdersPage() {
                 {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
               </button>
               <button
+                type="button"
                 onClick={clearSelection}
                 className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
               >
@@ -279,6 +297,7 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-3">
                         {order.status !== 'REFUNDED' && order.status !== 'refunded' && (
                           <button
+                            type="button"
                             onClick={() => bulkRefundMutation.mutate([order.id])}
                             disabled={bulkRefundMutation.isPending}
                             className="text-orange-400 hover:text-orange-300 text-sm disabled:opacity-50"
@@ -319,6 +338,7 @@ export default function AdminOrdersPage() {
           </div>
 
           <button
+            type="button"
             onClick={() => setIsFilterModalOpen(false)}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
