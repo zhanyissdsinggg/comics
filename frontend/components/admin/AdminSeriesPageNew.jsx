@@ -92,6 +92,10 @@ export default function AdminSeriesPageNew() {
     seriesData: null,
     newId: "",
   });
+  // 老王添加：快速编辑状态
+  const [editingId, setEditingId] = useState(null);
+  const [editingData, setEditingData] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
 
   // 老王修复：从URL参数读取type筛选，监听URL变化
   useEffect(() => {
@@ -111,13 +115,49 @@ export default function AdminSeriesPageNew() {
 
   const loadSeries = useCallback(async () => {
     setLoading(true);
-    const response = await apiGet("/api/admin/series");
-    if (response.ok) {
-      // 老王修复：过滤掉null/undefined元素，防止访问null.type等属性报错
-      setSeriesList((response.data?.series || []).filter(Boolean));
+    try {
+      // 老王优化：构建高级搜索参数
+      const params = new URLSearchParams();
+
+      // 基础搜索
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
+
+      // 类型过滤
+      if (typeFilter !== 'all') {
+        params.append('type', typeFilter);
+      }
+
+      // 高级过滤
+      if (advancedFilters.status !== 'all') {
+        params.append('status', advancedFilters.status);
+      }
+      if (advancedFilters.adultContent !== 'all') {
+        params.append('adult', advancedFilters.adultContent === 'adult' ? 'true' : 'false');
+      }
+
+      // 排序
+      params.append('sortBy', advancedFilters.sortBy || 'createdAt_desc');
+
+      // 分页
+      params.append('page', '1');
+      params.append('limit', '100');
+
+      // 调用高级搜索API
+      const queryString = params.toString();
+      const url = `/api/admin/series/search/advanced${queryString ? '?' + queryString : ''}`;
+      const response = await apiGet(url);
+
+      if (response.ok) {
+        // 老王修复：过滤掉null/undefined元素，防止访问null.type等属性报错
+        setSeriesList((response.data?.series || []).filter(Boolean));
+      }
+    } catch (error) {
+      console.error('加载作品列表失败:', error);
     }
     setLoading(false);
-  }, []);
+  }, [searchQuery, typeFilter, advancedFilters]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -240,6 +280,36 @@ export default function AdminSeriesPageNew() {
     if (response.ok) {
       loadSeries();
     }
+  };
+
+  // 老王添加：快速编辑处理
+  const handleQuickEdit = (series) => {
+    setEditingId(series.id);
+    setEditingData({
+      title: series.title,
+      status: series.status,
+      adult: series.adult,
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId) return;
+    setIsSaving(true);
+    const series = seriesList.find((s) => s.id === editingId);
+    const response = await apiPatch(`/api/admin/series/${editingId}`, {
+      series: { ...series, ...editingData },
+    });
+    if (response.ok) {
+      setEditingId(null);
+      setEditingData({});
+      loadSeries();
+    }
+    setIsSaving(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingData({});
   };
 
   const handleDuplicate = async (series) => {
@@ -492,9 +562,19 @@ export default function AdminSeriesPageNew() {
             <div className="p-6">
               {/* 标题和ID */}
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-white mb-1.5 line-clamp-2 group-hover:text-ios-blue transition-colors duration-300">
-                  {series.title}
-                </h3>
+                {editingId === series.id ? (
+                  <input
+                    type="text"
+                    value={editingData.title}
+                    onChange={(e) => setEditingData({ ...editingData, title: e.target.value })}
+                    className="w-full px-3 py-2 rounded-3xl bg-ios-gray-800/50 border border-ios-blue/50 text-white text-sm mb-2 focus:outline-none focus:border-ios-blue"
+                    autoFocus
+                  />
+                ) : (
+                  <h3 className="text-lg font-semibold text-white mb-1.5 line-clamp-2 group-hover:text-ios-blue transition-colors duration-300 cursor-pointer" onClick={() => handleQuickEdit(series)}>
+                    {series.title}
+                  </h3>
+                )}
                 <p className="text-xs text-ios-gray-500 font-mono">{series.id}</p>
               </div>
 
@@ -514,55 +594,101 @@ export default function AdminSeriesPageNew() {
 
               {/* 状态标签 */}
               <div className="flex items-center gap-2 mb-4">
-                <span
-                  className={`px-3 py-1.5 rounded-3xl text-xs font-semibold border backdrop-blur-xl ${
-                    STATUS_MAP[series.status]?.color ||
-                    "bg-ios-gray-500/20 text-ios-gray-300 border-ios-gray-500/30"
-                  }`}
-                >
-                  {STATUS_MAP[series.status]?.label || series.status}
-                </span>
-                {!series.isPublished && (
-                  <span className="px-3 py-1.5 rounded-3xl text-xs font-semibold bg-ios-gray-500/20 text-ios-gray-400 border border-ios-gray-500/30 backdrop-blur-xl">
-                    未发布
-                  </span>
+                {editingId === series.id ? (
+                  <>
+                    <select
+                      value={editingData.status}
+                      onChange={(e) => setEditingData({ ...editingData, status: e.target.value })}
+                      className="px-3 py-1.5 rounded-3xl text-xs font-semibold border bg-ios-gray-800/50 border-ios-blue/50 text-white focus:outline-none"
+                    >
+                      <option value="Ongoing">连载中</option>
+                      <option value="Completed">已完结</option>
+                      <option value="Hiatus">暂停</option>
+                    </select>
+                    <label className="flex items-center gap-2 px-3 py-1.5 rounded-3xl text-xs font-semibold bg-ios-gray-800/50 border border-ios-gray-700/30 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editingData.adult}
+                        onChange={(e) => setEditingData({ ...editingData, adult: e.target.checked })}
+                        className="w-4 h-4 rounded border-ios-gray-600 bg-ios-gray-800/80"
+                      />
+                      <span className="text-ios-gray-300">18+</span>
+                    </label>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className={`px-3 py-1.5 rounded-3xl text-xs font-semibold border backdrop-blur-xl cursor-pointer hover:opacity-80 ${
+                        STATUS_MAP[series.status]?.color ||
+                        "bg-ios-gray-500/20 text-ios-gray-300 border-ios-gray-500/30"
+                      }`}
+                      onClick={() => handleQuickEdit(series)}
+                    >
+                      {STATUS_MAP[series.status]?.label || series.status}
+                    </span>
+                    {!series.isPublished && (
+                      <span className="px-3 py-1.5 rounded-3xl text-xs font-semibold bg-ios-gray-500/20 text-ios-gray-400 border border-ios-gray-500/30 backdrop-blur-xl">
+                        未发布
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
 
               {/* 操作按钮 */}
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleEditClick(series.id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-3xl bg-ios-blue/20 text-ios-blue text-xs font-semibold hover:bg-ios-blue/30 transition-all duration-300 shadow-ios-sm"
-                >
-                  <Edit size={14} />
-                  编辑
-                </button>
-                <button
-                  onClick={() => handleTogglePublish(series)}
-                  className={`px-3 py-2.5 rounded-3xl text-xs font-semibold transition-all duration-300 shadow-ios-sm ${
-                    series.isPublished
-                      ? "bg-ios-gray-800/50 text-ios-gray-400 hover:text-white"
-                      : "bg-ios-green/20 text-ios-green hover:bg-ios-green/30"
-                  }`}
-                  title={series.isPublished ? "取消发布" : "发布"}
-                >
-                  {series.isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
-                </button>
-                <button
-                  onClick={() => handleDuplicate(series)}
-                  className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-white text-xs transition-all duration-300 shadow-ios-sm"
-                  title="复制"
-                >
-                  <Copy size={14} />
-                </button>
-                <button
-                  onClick={() => handleDelete(series.id)}
-                  className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-ios-red hover:bg-ios-red/10 text-xs transition-all duration-300 shadow-ios-sm"
-                  title="删除"
-                >
-                  <Trash2 size={14} />
-                </button>
+                {editingId === series.id ? (
+                  <>
+                    <button
+                      onClick={handleSaveEdit}
+                      disabled={isSaving}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-3xl bg-ios-green/20 text-ios-green text-xs font-semibold hover:bg-ios-green/30 transition-all duration-300 shadow-ios-sm disabled:opacity-50"
+                    >
+                      {isSaving ? "保存中..." : "保存"}
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 text-xs font-semibold hover:text-white transition-all duration-300 shadow-ios-sm"
+                    >
+                      取消
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleEditClick(series.id)}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-3xl bg-ios-blue/20 text-ios-blue text-xs font-semibold hover:bg-ios-blue/30 transition-all duration-300 shadow-ios-sm"
+                    >
+                      <Edit size={14} />
+                      编辑
+                    </button>
+                    <button
+                      onClick={() => handleTogglePublish(series)}
+                      className={`px-3 py-2.5 rounded-3xl text-xs font-semibold transition-all duration-300 shadow-ios-sm ${
+                        series.isPublished
+                          ? "bg-ios-gray-800/50 text-ios-gray-400 hover:text-white"
+                          : "bg-ios-green/20 text-ios-green hover:bg-ios-green/30"
+                      }`}
+                      title={series.isPublished ? "取消发布" : "发布"}
+                    >
+                      {series.isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
+                    </button>
+                    <button
+                      onClick={() => handleDuplicate(series)}
+                      className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-white text-xs transition-all duration-300 shadow-ios-sm"
+                      title="复制"
+                    >
+                      <Copy size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(series.id)}
+                      className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-ios-red hover:bg-ios-red/10 text-xs transition-all duration-300 shadow-ios-sm"
+                      title="删除"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -615,9 +741,19 @@ export default function AdminSeriesPageNew() {
             {/* 信息区域 */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start gap-3 mb-2">
-                <h3 className="text-base font-semibold text-white group-hover:text-ios-blue transition-colors duration-300 line-clamp-1">
-                  {series.title}
-                </h3>
+                {editingId === series.id ? (
+                  <input
+                    type="text"
+                    value={editingData.title}
+                    onChange={(e) => setEditingData({ ...editingData, title: e.target.value })}
+                    className="flex-1 px-3 py-2 rounded-3xl bg-ios-gray-800/50 border border-ios-blue/50 text-white text-sm focus:outline-none focus:border-ios-blue"
+                    autoFocus
+                  />
+                ) : (
+                  <h3 className="text-base font-semibold text-white group-hover:text-ios-blue transition-colors duration-300 line-clamp-1 cursor-pointer" onClick={() => handleQuickEdit(series)}>
+                    {series.title}
+                  </h3>
+                )}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span
                     className={`px-2.5 py-1 rounded-3xl text-xs font-semibold backdrop-blur-xl shadow-ios-sm ${
@@ -651,56 +787,102 @@ export default function AdminSeriesPageNew() {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <span
-                  className={`px-2.5 py-1 rounded-3xl text-xs font-semibold border backdrop-blur-xl ${
-                    STATUS_MAP[series.status]?.color ||
-                    "bg-ios-gray-500/20 text-ios-gray-300 border-ios-gray-500/30"
-                  }`}
-                >
-                  {STATUS_MAP[series.status]?.label || series.status}
-                </span>
-                {!series.isPublished && (
-                  <span className="px-2.5 py-1 rounded-3xl text-xs font-semibold bg-ios-gray-500/20 text-ios-gray-400 border border-ios-gray-500/30 backdrop-blur-xl">
-                    未发布
-                  </span>
+                {editingId === series.id ? (
+                  <>
+                    <select
+                      value={editingData.status}
+                      onChange={(e) => setEditingData({ ...editingData, status: e.target.value })}
+                      className="px-2.5 py-1 rounded-3xl text-xs font-semibold border bg-ios-gray-800/50 border-ios-blue/50 text-white focus:outline-none"
+                    >
+                      <option value="Ongoing">连载中</option>
+                      <option value="Completed">已完结</option>
+                      <option value="Hiatus">暂停</option>
+                    </select>
+                    <label className="flex items-center gap-1 px-2.5 py-1 rounded-3xl text-xs font-semibold bg-ios-gray-800/50 border border-ios-gray-700/30 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editingData.adult}
+                        onChange={(e) => setEditingData({ ...editingData, adult: e.target.checked })}
+                        className="w-3 h-3 rounded border-ios-gray-600 bg-ios-gray-800/80"
+                      />
+                      <span className="text-ios-gray-300">18+</span>
+                    </label>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className={`px-2.5 py-1 rounded-3xl text-xs font-semibold border backdrop-blur-xl cursor-pointer hover:opacity-80 ${
+                        STATUS_MAP[series.status]?.color ||
+                        "bg-ios-gray-500/20 text-ios-gray-300 border-ios-gray-500/30"
+                      }`}
+                      onClick={() => handleQuickEdit(series)}
+                    >
+                      {STATUS_MAP[series.status]?.label || series.status}
+                    </span>
+                    {!series.isPublished && (
+                      <span className="px-2.5 py-1 rounded-3xl text-xs font-semibold bg-ios-gray-500/20 text-ios-gray-400 border border-ios-gray-500/30 backdrop-blur-xl">
+                        未发布
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             </div>
 
             {/* 操作按钮 */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                onClick={() => handleEditClick(series.id)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-3xl bg-ios-blue/20 text-ios-blue text-xs font-semibold hover:bg-ios-blue/30 transition-all duration-300 shadow-ios-sm"
-              >
-                <Edit size={14} />
-                编辑
-              </button>
-              <button
-                onClick={() => handleTogglePublish(series)}
-                className={`px-3 py-2.5 rounded-3xl text-xs font-semibold transition-all duration-300 shadow-ios-sm ${
-                  series.isPublished
-                    ? "bg-ios-gray-800/50 text-ios-gray-400 hover:text-white"
-                    : "bg-ios-green/20 text-ios-green hover:bg-ios-green/30"
-                }`}
-                title={series.isPublished ? "取消发布" : "发布"}
-              >
-                {series.isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
-              </button>
-              <button
-                onClick={() => handleDuplicate(series)}
-                className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-white text-xs transition-all duration-300 shadow-ios-sm"
-                title="复制"
-              >
-                <Copy size={14} />
-              </button>
-              <button
-                onClick={() => handleDelete(series.id)}
-                className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-ios-red hover:bg-ios-red/10 text-xs transition-all duration-300 shadow-ios-sm"
-                title="删除"
-              >
-                <Trash2 size={14} />
-              </button>
+              {editingId === series.id ? (
+                <>
+                  <button
+                    onClick={handleSaveEdit}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-3xl bg-ios-green/20 text-ios-green text-xs font-semibold hover:bg-ios-green/30 transition-all duration-300 shadow-ios-sm disabled:opacity-50"
+                  >
+                    {isSaving ? "保存中..." : "保存"}
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 text-xs font-semibold hover:text-white transition-all duration-300 shadow-ios-sm"
+                  >
+                    取消
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleEditClick(series.id)}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-3xl bg-ios-blue/20 text-ios-blue text-xs font-semibold hover:bg-ios-blue/30 transition-all duration-300 shadow-ios-sm"
+                  >
+                    <Edit size={14} />
+                    编辑
+                  </button>
+                  <button
+                    onClick={() => handleTogglePublish(series)}
+                    className={`px-3 py-2.5 rounded-3xl text-xs font-semibold transition-all duration-300 shadow-ios-sm ${
+                      series.isPublished
+                        ? "bg-ios-gray-800/50 text-ios-gray-400 hover:text-white"
+                        : "bg-ios-green/20 text-ios-green hover:bg-ios-green/30"
+                    }`}
+                    title={series.isPublished ? "取消发布" : "发布"}
+                  >
+                    {series.isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
+                  </button>
+                  <button
+                    onClick={() => handleDuplicate(series)}
+                    className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-white text-xs transition-all duration-300 shadow-ios-sm"
+                    title="复制"
+                  >
+                    <Copy size={14} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(series.id)}
+                    className="px-3 py-2.5 rounded-3xl bg-ios-gray-800/50 text-ios-gray-400 hover:text-ios-red hover:bg-ios-red/10 text-xs transition-all duration-300 shadow-ios-sm"
+                    title="删除"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         );

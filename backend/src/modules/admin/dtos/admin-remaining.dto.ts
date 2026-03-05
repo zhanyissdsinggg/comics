@@ -211,3 +211,78 @@ export class BlockUserDto {
   @IsBoolean()
   blocked?: boolean;
 }
+
+// Billing
+export class CreateTopupDto {
+  @IsOptional()
+  packageId?: string;
+
+  @IsOptional()
+  id?: string;
+
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  amount?: number | string;
+
+  @IsOptional()
+  paidPts?: number | string;
+
+  @IsOptional()
+  bonusPts?: number | string;
+
+  @IsOptional()
+  price?: number | string;
+
+  @IsOptional()
+  @IsString()
+  currency?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+
+  @IsOptional()
+  @IsString()
+  label?: string;
+
+  @IsOptional()
+  @IsArray()
+  tags?: string[];
+}
+
+export class UpdateTopupDto {
+  @IsOptional()
+  paidPts?: number | string;
+
+  @IsOptional()
+  bonusPts?: number | string;
+
+  @IsOptional()
+  price?: number | string;
+
+  @IsOptional()
+  @IsString()
+  currency?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+
+  @IsOptional()
+  @IsString()
+  label?: string;
+
+  @IsOptional()
+  @IsArray()
+  tags?: string[];
+}
+
+// Episodes
+export class UpdateEpisodeDto {
+  @IsOptional()
+  @IsObject()
+  episode?: any;
+}

@@ -52,7 +52,7 @@ export class AdminEpisodesController {
   }
 
   @Post()
-  async createEpisode(@Body() body: any, @Req() req: Request) {
+  async createEpisode(@Body() body: Record<string, any>, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
 
     // 批量创建
@@ -139,7 +139,7 @@ export class AdminEpisodesController {
   }
 
   @Post("bulk")
-  async bulkUpdateEpisodes(@Body() body: any, @Req() req: Request) {
+  async bulkUpdateEpisodes(@Body() body: Record<string, any>, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const updates = body?.updates || {};
     const ids = Array.isArray(body?.ids) ? body.ids : [];
@@ -190,7 +190,7 @@ export class AdminEpisodesController {
   }
 
   @Patch(":episodeId")
-  async updateEpisode(@Body() body: any, @Req() req: Request) {
+  async updateEpisode(@Body() body: Record<string, any>, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const episodeId = String(req.params.episodeId || "");
     const episode = body?.episode || {};

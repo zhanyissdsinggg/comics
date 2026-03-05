@@ -24,7 +24,7 @@ export class CommentsController {
   }
 
   @Post()
-  async create(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async create(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);

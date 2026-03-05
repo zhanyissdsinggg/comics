@@ -29,7 +29,7 @@ export class AdminRecommendationController {
    */
   @Post('slots')
   @AdminAudit('create', 'recommendation_slot')
-  async createSlot(@Body() body: any, @Req() req: any, @Res({ passthrough: true }) res: any) {
+  async createSlot(@Body() body: Record<string, any>, @Req() req: any, @Res({ passthrough: true }) res: any) {
     const slot = await this.recommendationService.createRecommendationSlot(body);
     return { slot };
   }
@@ -42,7 +42,7 @@ export class AdminRecommendationController {
   @AdminAudit('update', 'recommendation_slot')
   async updateSlot(
     @Param('id') id: string,
-    @Body() body: any,
+    @Body() body: Record<string, any>,
     @Req() req: any,
     @Res({ passthrough: true }) res: any
   ) {
@@ -78,7 +78,7 @@ export class AdminRecommendationController {
    */
   @Post('rankings')
   @AdminAudit('create', 'ranking_config')
-  async createRanking(@Body() body: any, @Req() req: any, @Res({ passthrough: true }) res: any) {
+  async createRanking(@Body() body: Record<string, any>, @Req() req: any, @Res({ passthrough: true }) res: any) {
     const config = await this.recommendationService.createRankingConfig(body);
     return { config };
   }
@@ -91,7 +91,7 @@ export class AdminRecommendationController {
   @AdminAudit('update', 'ranking_config')
   async updateRanking(
     @Param('id') id: string,
-    @Body() body: any,
+    @Body() body: Record<string, any>,
     @Req() req: any,
     @Res({ passthrough: true }) res: any
   ) {

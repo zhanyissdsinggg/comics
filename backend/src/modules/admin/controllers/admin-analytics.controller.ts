@@ -98,7 +98,7 @@ export class AdminAnalyticsController {
   @AdminAudit('update', 'user_metrics')
   async updateUserMetrics(
     @Param('userId') userId: string,
-    @Body() body: any,
+    @Body() body: Record<string, any>,
     @Req() req: any,
     @Res({ passthrough: true }) res: any
   ) {

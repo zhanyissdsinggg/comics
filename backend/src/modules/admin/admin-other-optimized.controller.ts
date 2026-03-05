@@ -261,7 +261,7 @@ export class AdminLogsController extends BaseAdminController {
 
   @Delete()
   @AdminAudit('bulk-delete', 'log')
-  async bulkDelete(@Body() body: any) {
+  async bulkDelete(@Body() body: BulkDeleteDto) {
     return this.deleteMany(body.ids || []);
   }
 }

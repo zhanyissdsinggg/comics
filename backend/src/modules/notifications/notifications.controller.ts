@@ -35,7 +35,7 @@ export class NotificationsController {
 
   @Post("read")
   markRead(
-    @Body() body: any,
+    @Body() body: Record<string, any>,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {

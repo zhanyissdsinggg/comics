@@ -73,7 +73,7 @@ export class PaymentsWebhookController {
   }
 
   @Post("webhook")
-  async webhook(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async webhook(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     // 老王说：记录所有webhook请求，方便排查问题
     const ip = getClientIp(req);
     logger.info(`收到Webhook请求`, { ip, eventType: body?.eventType, orderId: body?.orderId });

@@ -41,7 +41,7 @@ export class PaymentsOrdersController {
   }
 
   @Post("create")
-  async create(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async create(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);
@@ -113,7 +113,7 @@ export class PaymentsOrdersController {
   }
 
   @Post("confirm")
-  async confirm(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async confirm(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);
@@ -178,7 +178,7 @@ export class PaymentsOrdersController {
   }
 
   @Post("refund")
-  async refund(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async refund(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);

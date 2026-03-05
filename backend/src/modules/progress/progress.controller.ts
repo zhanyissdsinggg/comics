@@ -20,7 +20,7 @@ export class ProgressController {
   }
 
   @Post("update")
-  async update(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async update(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);

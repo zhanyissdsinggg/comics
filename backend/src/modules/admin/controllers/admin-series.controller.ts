@@ -64,7 +64,7 @@ export class AdminSeriesController {
   }
 
   @Post()
-  async create(@Body() body: any) {
+  async create(@Body() body: Record<string, any>) {
     const series = body?.series;
     if (!series?.id) {
       throw new BadRequestException("缺少series.id参数");
@@ -96,7 +96,7 @@ export class AdminSeriesController {
   }
 
   @Patch(":id")
-  async update(@Body() body: any, @Req() req: Request) {
+  async update(@Body() body: Record<string, any>, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const series = body?.series || {};
     const existing = await this.prisma.series.findUnique({ where: { id: seriesId } });

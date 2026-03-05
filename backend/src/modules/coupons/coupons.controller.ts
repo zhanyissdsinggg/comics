@@ -19,7 +19,7 @@ export class CouponsController {
   }
 
   @Post()
-  async claim(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async claim(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);

@@ -27,6 +27,7 @@ import {
   UploadEpisodesDto,
   UpdateEpisodeDto,
 } from '../dtos/admin-content.dto';
+import { SeriesAdvancedQueryDto, SeriesQueryResponseDto } from '../dtos/admin-series-query.dto';
 
 /**
  * 老王注释：优化后的Series Controller - 使用新的Guard、Service和DTO
@@ -54,6 +55,114 @@ export class AdminSeriesController {
       ['title', 'description'], // 可搜索字段
       { adult: false }, // 默认过滤条件
     );
+  }
+
+  /**
+   * 老王说：高级查询端点 - 支持复杂搜索、排序、分页、统计
+   * 这个端点是作品管理的核心，性能优化到极致
+   */
+  @Get('search/advanced')
+  @AdminAudit('search', 'series')
+  async advancedSearch(@Query() query: SeriesAdvancedQueryDto): Promise<SeriesQueryResponseDto> {
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    // 老王说：构建查询条件
+    const where: any = {};
+
+    // 搜索关键词
+    if (query.search) {
+      where.OR = [
+        { title: { contains: query.search, mode: 'insensitive' } },
+        { description: { contains: query.search, mode: 'insensitive' } },
+        { id: { contains: query.search, mode: 'insensitive' } },
+      ];
+    }
+
+    // 类型过滤
+    if (query.type) {
+      where.type = query.type;
+    }
+
+    // 状态过滤
+    if (query.status) {
+      where.status = query.status;
+    }
+
+    // 成人内容过滤
+    if (query.adult !== undefined) {
+      where.adult = query.adult;
+    }
+
+    // 评分范围过滤
+    if (query.minRating !== undefined || query.maxRating !== undefined) {
+      where.rating = {};
+      if (query.minRating !== undefined) {
+        where.rating.gte = query.minRating;
+      }
+      if (query.maxRating !== undefined) {
+        where.rating.lte = query.maxRating;
+      }
+    }
+
+    // 老王说：构建排序条件
+    const orderBy: any = {};
+    const [field, order] = (query.sortBy || 'createdAt_desc').split('_');
+    orderBy[field] = order === 'asc' ? 'asc' : 'desc';
+
+    // 老王说：并行查询总数和数据
+    const [series, total] = await Promise.all([
+      this.prisma.series.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          type: true,
+          status: true,
+          adult: true,
+          rating: true,
+          ratingCount: true,
+          coverUrl: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      this.prisma.series.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+    const hasMore = page < totalPages;
+
+    // 老王说：如果需要统计信息，额外查询
+    let stats = undefined;
+    if (query.includeStats) {
+      const [totalSeries, adultCount, generalCount] = await Promise.all([
+        this.prisma.series.count(),
+        this.prisma.series.count({ where: { adult: true } }),
+        this.prisma.series.count({ where: { adult: false } }),
+      ]);
+
+      stats = {
+        totalSeries,
+        adultCount,
+        generalCount,
+      };
+    }
+
+    return {
+      series,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasMore,
+      stats,
+    };
   }
 
   /**

@@ -37,7 +37,7 @@ export class EventsController {
   }
 
   @Post()
-  add(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  add(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);
@@ -82,7 +82,7 @@ export class EventsController {
   }
 
   @Post("batch")
-  addBatch(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  addBatch(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       // 未登录时返回成功但不记录事件

@@ -29,7 +29,7 @@ export class AdminMarketingController {
    */
   @Post('campaigns')
   @AdminAudit('create', 'marketing_campaign')
-  async createCampaign(@Body() body: any, @Req() req: any, @Res({ passthrough: true }) res: any) {
+  async createCampaign(@Body() body: Record<string, any>, @Req() req: any, @Res({ passthrough: true }) res: any) {
     const campaign = await this.marketingService.createCampaign(body);
     return { campaign };
   }
@@ -53,7 +53,7 @@ export class AdminMarketingController {
   @AdminAudit('update', 'marketing_campaign')
   async updateCampaign(
     @Param('id') id: string,
-    @Body() body: any,
+    @Body() body: Record<string, any>,
     @Req() req: any,
     @Res({ passthrough: true }) res: any
   ) {
@@ -145,7 +145,7 @@ export class AdminMarketingController {
   async updateTargetUserStatus(
     @Param('campaignId') campaignId: string,
     @Param('userId') userId: string,
-    @Body() body: any,
+    @Body() body: Record<string, any>,
     @Req() req: any,
     @Res({ passthrough: true }) res: any
   ) {
@@ -172,7 +172,7 @@ export class AdminMarketingController {
   @AdminAudit('update', 'marketing_budget')
   async updateCampaignBudget(
     @Param('id') id: string,
-    @Body() body: any,
+    @Body() body: Record<string, any>,
     @Req() req: any,
     @Res({ passthrough: true }) res: any
   ) {

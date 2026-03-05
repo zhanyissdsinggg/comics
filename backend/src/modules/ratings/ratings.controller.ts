@@ -9,7 +9,7 @@ export class RatingsController {
   constructor(private readonly ratingsService: RatingsService) {}
 
   @Post()
-  async setRating(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async setRating(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);

@@ -19,7 +19,7 @@ export class ReadingController {
   }
 
   @Post("bookmarks")
-  async addBookmark(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async addBookmark(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);
@@ -35,7 +35,7 @@ export class ReadingController {
   }
 
   @Delete("bookmarks")
-  async removeBookmark(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async removeBookmark(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);
@@ -61,7 +61,7 @@ export class ReadingController {
   }
 
   @Post("history")
-  async addHistory(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async addHistory(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);
