@@ -1,9 +1,10 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
 import { apiDelete, apiGet, apiPatch, apiPost } from "../../lib/apiClient";
+import { Modal, ConfirmModal } from "../common/Modal";
 
 const TYPE_TABS = [
   { label: "全部", value: "all" },
@@ -58,6 +59,19 @@ export default function AdminPage() {
     adult: false,
   });
   const [feedback, setFeedback] = useState({ type: "", message: "" });
+  const [deleteDialog, setDeleteDialog] = useState({
+    isOpen: false,
+    seriesId: "",
+  });
+  const [duplicateDialog, setDuplicateDialog] = useState({
+    isOpen: false,
+    sourceId: "",
+    nextId: "",
+  });
+  const duplicateSource = useMemo(
+    () => seriesList.find((item) => item.id === duplicateDialog.sourceId) || null,
+    [duplicateDialog.sourceId, seriesList]
+  );
 
   // 老王说：检查认证状态，未登录则重定向
   useEffect(() => {
@@ -114,9 +128,40 @@ export default function AdminPage() {
     }
   };
 
-  const handleDelete = async (seriesId) => {
-    await apiDelete(`/api/admin/series/${seriesId}`);
-    loadSeries();
+  const openDeleteDialog = (seriesId) => {
+    setFeedback({ type: "", message: "" });
+    setDeleteDialog({
+      isOpen: true,
+      seriesId,
+    });
+  };
+  const closeDeleteDialog = () => {
+    setDeleteDialog({
+      isOpen: false,
+      seriesId: "",
+    });
+  };
+  const handleDelete = (seriesId) => {
+    openDeleteDialog(seriesId);
+  };
+  const confirmDelete = async () => {
+    const targetId = deleteDialog.seriesId;
+    closeDeleteDialog();
+    if (!targetId) {
+      return;
+    }
+
+    try {
+      const response = await apiDelete(`/api/admin/series/${targetId}`);
+      if (response.ok) {
+        await loadSeries();
+        setFeedback({ type: "success", message: `作品 ${targetId} 删除成功！` });
+      } else {
+        setFeedback({ type: "error", message: `删除失败：${response.error || "未知错误"}` });
+      }
+    } catch (error) {
+      setFeedback({ type: "error", message: "删除失败：网络错误" });
+    }
   };
 
   const updateSeries = async (seriesId, changes) => {
@@ -132,24 +177,69 @@ export default function AdminPage() {
     }
   };
 
-  const handleDuplicate = async (seriesId) => {
+  const openDuplicateDialog = (seriesId) => {
     const target = seriesList.find((item) => item.id === seriesId);
     if (!target) {
       return;
     }
-    const nextId = window.prompt("请输入新作品 ID", `${seriesId}_copy`);
-    if (!nextId) {
+    setFeedback({ type: "", message: "" });
+    setDuplicateDialog({
+      isOpen: true,
+      sourceId: seriesId,
+      nextId: `${seriesId}_copy`,
+    });
+  };
+  const closeDuplicateDialog = () => {
+    setDuplicateDialog({
+      isOpen: false,
+      sourceId: "",
+      nextId: "",
+    });
+  };
+  const handleDuplicate = (seriesId) => {
+    openDuplicateDialog(seriesId);
+  };
+  const confirmDuplicate = async () => {
+    const sourceId = duplicateDialog.sourceId;
+    const nextId = duplicateDialog.nextId.trim();
+
+    if (!sourceId) {
+      closeDuplicateDialog();
       return;
     }
-    const response = await apiPost("/api/admin/series", {
-      series: {
-        ...target,
-        id: nextId,
-        title: `${target.title}（复制）`,
-      },
-    });
-    if (response.ok) {
-      loadSeries();
+
+    if (!nextId) {
+      setFeedback({ type: "error", message: "请输入新作品 ID！" });
+      return;
+    }
+    if (seriesList.some((item) => item.id === nextId)) {
+      setFeedback({ type: "error", message: `作品 ID "${nextId}" 已存在，请更换。` });
+      return;
+    }
+    const target = seriesList.find((item) => item.id === sourceId);
+    if (!target) {
+      closeDuplicateDialog();
+      setFeedback({ type: "error", message: "复制失败：源作品不存在。" });
+      return;
+    }
+
+    try {
+      const response = await apiPost("/api/admin/series", {
+        series: {
+          ...target,
+          id: nextId,
+          title: `${target.title}（复制）`,
+        },
+      });
+      if (response.ok) {
+        closeDuplicateDialog();
+        await loadSeries();
+        setFeedback({ type: "success", message: `作品复制成功：${nextId}` });
+      } else {
+        setFeedback({ type: "error", message: `复制失败：${response.error || "未知错误"}` });
+      }
+    } catch (error) {
+      setFeedback({ type: "error", message: "复制失败：网络错误" });
     }
   };
 
@@ -666,6 +756,65 @@ export default function AdminPage() {
           </div>
         </section>
       </div>
+
+      <Modal
+        isOpen={duplicateDialog.isOpen}
+        onClose={closeDuplicateDialog}
+        title="复制作品"
+        size="sm"
+        footer={
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={closeDuplicateDialog}
+              className="flex-1 rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={confirmDuplicate}
+              className="flex-1 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              确认复制
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-neutral-300">
+            {duplicateSource ? `复制作品「${duplicateSource.title}」并设置新的作品 ID。` : "请选择要复制的作品。"}
+          </p>
+          <div>
+            <label className="mb-1 block text-xs text-neutral-400">新作品 ID</label>
+            <input
+              value={duplicateDialog.nextId}
+              onChange={(event) =>
+                setDuplicateDialog((prev) => ({ ...prev, nextId: event.target.value }))
+              }
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void confirmDuplicate();
+                }
+              }}
+              placeholder="请输入新作品 ID"
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100"
+            />
+          </div>
+        </div>
+      </Modal>
+
+      <ConfirmModal
+        isOpen={deleteDialog.isOpen}
+        title="确认删除作品"
+        message={`确定要删除作品 ${deleteDialog.seriesId || ""} 吗？此操作不可撤销。`}
+        confirmText="删除"
+        cancelText="取消"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onClose={closeDeleteDialog}
+      />
     </div>
   );
 }

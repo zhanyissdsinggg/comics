@@ -286,14 +286,7 @@ export default function AdminEpisodesPage() {
   };
 
   // 老王注释：删除章节（带错误处理）
-  const handleDelete = async (episodeId) => {
-    const episode = episodes.find((ep) => ep.id === episodeId);
-    const episodeLabel = episode ? `章节 ${episode.number}` : `章节 ${episodeId}`;
-
-    if (!confirm(`⚠️ 确定要删除${episodeLabel}吗？\n\n此操作不可撤销！`)) {
-      return;
-    }
-
+  const executeDelete = async (episodeId, episodeLabel) => {
     try {
       const response = await apiDelete(`/api/admin/series/${seriesId}/episodes/${episodeId}`);
       if (response.ok) {
@@ -306,23 +299,27 @@ export default function AdminEpisodesPage() {
       showDialog("删除失败", "删除失败：网络错误", "danger");
     }
   };
+  const handleDelete = (episodeId) => {
+    const episode = episodes.find((ep) => ep.id === episodeId);
+    const episodeLabel = episode ? `章节 ${episode.number}` : `章节 ${episodeId}`;
+    setConfirmDialog({
+      isOpen: true,
+      title: "确认删除",
+      message: `确定要删除${episodeLabel}吗？此操作不可撤销。`,
+      onConfirm: () => {
+        void executeDelete(episodeId, episodeLabel);
+      },
+      variant: "danger",
+    });
+  };
 
   // 老王注释：批量删除（带错误处理）
-  const handleBatchDelete = async () => {
-    if (selectedIds.length === 0) {
-      showDialog("提示", "请先选择要删除的章节！", "warning");
-      return;
-    }
-
-    if (!confirm(`⚠️ 确定要删除选中的 ${selectedIds.length} 个章节吗？\n\n此操作不可撤销！`)) {
-      return;
-    }
-
+  const executeBatchDelete = async (targetIds) => {
     let successCount = 0;
     let failCount = 0;
     const errors = [];
 
-    for (const id of selectedIds) {
+    for (const id of targetIds) {
       try {
         const response = await apiDelete(`/api/admin/series/${seriesId}/episodes/${id}`);
         if (response.ok) {
@@ -351,6 +348,23 @@ export default function AdminEpisodesPage() {
     }
 
     loadEpisodes();
+  };
+  const handleBatchDelete = () => {
+    if (selectedIds.length === 0) {
+      showDialog("提示", "请先选择要删除的章节！", "warning");
+      return;
+    }
+
+    const targetIds = [...selectedIds];
+    setConfirmDialog({
+      isOpen: true,
+      title: "确认批量删除",
+      message: `确定要删除选中的 ${targetIds.length} 个章节吗？此操作不可撤销。`,
+      onConfirm: () => {
+        void executeBatchDelete(targetIds);
+      },
+      variant: "danger",
+    });
   };
 
   // 老王注释：添加单个章节（带错误处理）
@@ -391,24 +405,7 @@ export default function AdminEpisodesPage() {
   };
 
   // 老王注释：快速设置价格（带错误处理）
-  const handleQuickSetPrice = async () => {
-    if (!bulkPrice) {
-      showDialog("提示", "请输入价格！", "warning");
-      return;
-    }
-
-    const price = parseNumber(bulkPrice);
-    if (price < 0) {
-      showDialog("提示", "价格不能为负数！", "warning");
-      return;
-    }
-
-    const targetIds = selectedIds.length > 0 ? selectedIds : episodes.map((ep) => ep.id);
-
-    if (!confirm(`💰 确定要将 ${targetIds.length} 个章节的价格设置为 ${price} 吗？`)) {
-      return;
-    }
-
+  const executeQuickSetPrice = async (targetIds, price) => {
     let successCount = 0;
     let failCount = 0;
     const errors = [];
@@ -451,21 +448,32 @@ export default function AdminEpisodesPage() {
     loadEpisodes();
     setBulkPrice("");
   };
+  const handleQuickSetPrice = () => {
+    if (!bulkPrice) {
+      showDialog("提示", "请输入价格！", "warning");
+      return;
+    }
 
-  // 老王添加：批量设置TTF（带错误处理）
-  const handleQuickSetTtf = async () => {
-    if (bulkTtf === "keep") {
-      showDialog("提示", "请选择TTF设置！", "warning");
+    const price = parseNumber(bulkPrice);
+    if (price < 0) {
+      showDialog("提示", "价格不能为负数！", "warning");
       return;
     }
 
     const targetIds = selectedIds.length > 0 ? selectedIds : episodes.map((ep) => ep.id);
-    const ttfEnabled = bulkTtf === "enable";
+    setConfirmDialog({
+      isOpen: true,
+      title: "确认批量设置价格",
+      message: `确定要将 ${targetIds.length} 个章节的价格设置为 ${price} 吗？`,
+      onConfirm: () => {
+        void executeQuickSetPrice(targetIds, price);
+      },
+      variant: "warning",
+    });
+  };
 
-    if (!confirm(`🔄 确定要将 ${targetIds.length} 个章节的TTF设置为 ${ttfEnabled ? "启用" : "禁用"} 吗？`)) {
-      return;
-    }
-
+  // 老王添加：批量设置TTF（带错误处理）
+  const executeQuickSetTtf = async (targetIds, ttfEnabled) => {
     let successCount = 0;
     let failCount = 0;
     const errors = [];
@@ -507,6 +515,24 @@ export default function AdminEpisodesPage() {
 
     loadEpisodes();
     setBulkTtf("keep");
+  };
+  const handleQuickSetTtf = () => {
+    if (bulkTtf === "keep") {
+      showDialog("提示", "请选择TTF设置！", "warning");
+      return;
+    }
+
+    const targetIds = selectedIds.length > 0 ? selectedIds : episodes.map((ep) => ep.id);
+    const ttfEnabled = bulkTtf === "enable";
+    setConfirmDialog({
+      isOpen: true,
+      title: "确认批量设置 TTF",
+      message: `确定要将 ${targetIds.length} 个章节的 TTF 设置为 ${ttfEnabled ? "启用" : "禁用"} 吗？`,
+      onConfirm: () => {
+        void executeQuickSetTtf(targetIds, ttfEnabled);
+      },
+      variant: "warning",
+    });
   };
 
   // 老王注释：批量上传章节

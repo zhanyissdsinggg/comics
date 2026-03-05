@@ -10,7 +10,8 @@ const frontendRoot = path.join(repoRoot, "frontend");
 const ignoredDirs = new Set(["node_modules", ".next", "dist", "coverage", "test-results"]);
 const codeExtPattern = /\.(js|jsx|ts|tsx)$/;
 const dynamicTailwindPattern = /\b(?:bg|text|border|from|to|ring|stroke|fill)-\$\{/;
-const adminAppPathPattern = /^frontend\/app\/admin\//;
+const adminSurfacePathPattern = /^frontend\/(?:app|components)\/admin\//;
+const blockingDialogPattern = /(?:^|[^.\w$])(?:window\.)?(?:alert|confirm|prompt)\(/;
 
 function walk(dir, list = []) {
   if (!fs.existsSync(dir)) {
@@ -48,7 +49,7 @@ for (const file of files) {
   const content = fs.readFileSync(file, "utf8");
   const lines = content.split(/\r?\n/);
   const relativePath = path.relative(repoRoot, file).replace(/\\/g, "/");
-  const isAdminAppFile = adminAppPathPattern.test(relativePath);
+  const isAdminSurfaceFile = adminSurfacePathPattern.test(relativePath);
 
   lines.forEach((line, index) => {
     if (line.includes("onKeyPress=")) {
@@ -78,12 +79,12 @@ for (const file of files) {
       });
     }
 
-    if (isAdminAppFile && line.includes("alert(")) {
+    if (isAdminSurfaceFile && blockingDialogPattern.test(line)) {
       violations.push({
         file,
         line: index + 1,
-        rule: "blocking-alert-in-admin-app",
-        detail: "Avoid blocking alert() in app/admin pages; use non-blocking inline feedback.",
+        rule: "blocking-browser-dialog-in-admin",
+        detail: "Avoid alert()/confirm()/prompt() in admin surfaces; use non-blocking modal or inline feedback.",
       });
     }
   });
