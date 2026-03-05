@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { CacheService } from "../../common/cache/cache.service";
 import { Cacheable, CacheEvict } from "../../common/cache/cache.decorator";
@@ -68,7 +69,85 @@ export class SeriesService {
     };
   }
 
-  @Cacheable('series:list', 3600) // 老王说：缓存1小时，热点数据必须缓存
+  private isMissingPreviewFreePagesField(error: unknown): boolean {
+    if (!error || typeof error !== "object") {
+      return false;
+    }
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code !== "P2022") {
+        return false;
+      }
+      const missingColumn = String((error.meta as { column?: string } | undefined)?.column || "");
+      if (missingColumn.includes("previewFreePages")) {
+        return true;
+      }
+    }
+
+    const message = String((error as { message?: string }).message || "");
+    return message.includes("previewFreePages");
+  }
+
+  private async fetchSeriesWithEpisodes(seriesId: string) {
+    try {
+      return await this.prisma.series.findUnique({
+        where: { id: seriesId },
+        include: {
+          episodes: {
+            select: {
+              id: true,
+              seriesId: true,
+              number: true,
+              title: true,
+              releasedAt: true,
+              pricePts: true,
+              ttfEligible: true,
+              ttfReadyAt: true,
+              previewFreePages: true,
+            },
+            orderBy: { number: "asc" },
+          },
+        },
+      });
+    } catch (error) {
+      if (!this.isMissingPreviewFreePagesField(error)) {
+        throw error;
+      }
+
+      const fallback = await this.prisma.series.findUnique({
+        where: { id: seriesId },
+        include: {
+          episodes: {
+            select: {
+              id: true,
+              seriesId: true,
+              number: true,
+              title: true,
+              releasedAt: true,
+              pricePts: true,
+              ttfEligible: true,
+              ttfReadyAt: true,
+            },
+            orderBy: { number: "asc" },
+          },
+        },
+      });
+
+      if (!fallback) {
+        return fallback;
+      }
+
+      return {
+        ...fallback,
+        episodes: fallback.episodes.map((episode) => ({
+          ...episode,
+          previewFreePages: 0,
+        })),
+      };
+    }
+  }
+
+  @Cacheable("series:list", 3600)
   async list(adult: boolean | null) {
     const where = adult === null ? {} : { adult };
     const list = await this.prisma.series.findMany({
@@ -79,26 +158,7 @@ export class SeriesService {
   }
 
   async detail(seriesId: string, subscription?: any) {
-    // 老王说：使用include一次性查询series和episodes，避免N+1问题
-    const data = await this.prisma.series.findUnique({
-      where: { id: seriesId },
-      include: {
-        episodes: {
-          select: {
-            id: true,
-            seriesId: true,
-            number: true,
-            title: true,
-            releasedAt: true,
-            pricePts: true,
-            ttfEligible: true,
-            ttfReadyAt: true,
-            previewFreePages: true,
-          },
-          orderBy: { number: 'asc' },
-        },
-      },
-    });
+    const data = await this.fetchSeriesWithEpisodes(seriesId);
 
     if (!data) {
       return null;
