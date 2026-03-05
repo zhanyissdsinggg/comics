@@ -2,11 +2,34 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+
+const STAT_CARD_STYLES = {
+  blue: {
+    container: 'bg-blue-900/20 border-blue-700',
+    value: 'text-blue-400',
+  },
+  green: {
+    container: 'bg-green-900/20 border-green-700',
+    value: 'text-green-400',
+  },
+  purple: {
+    container: 'bg-purple-900/20 border-purple-700',
+    value: 'text-purple-400',
+  },
+  orange: {
+    container: 'bg-orange-900/20 border-orange-700',
+    value: 'text-orange-400',
+  },
+  emerald: {
+    container: 'bg-emerald-900/20 border-emerald-700',
+    value: 'text-emerald-400',
+  },
+};
 
 export default function AdminMarketingPage() {
   const [viewMode, setViewMode] = useState('campaigns'); // campaigns, analytics, budget, segments
@@ -127,15 +150,19 @@ export default function AdminMarketingPage() {
   const handleDeleteCampaign = () => deleteCampaignMutation.mutate(selectedCampaign.id);
 
   // 渲染统计卡片
-  const renderStatCard = (title, value, color = 'blue', unit = '') => (
-    <div className={`rounded-lg bg-${color}-900/20 p-4 border border-${color}-700`}>
-      <p className="text-sm text-neutral-400">{title}</p>
-      <p className={`text-2xl font-bold text-${color}-400 mt-2`}>
-        {typeof value === 'number' ? value.toFixed(2) : value}
-        {unit && <span className="text-sm ml-1">{unit}</span>}
-      </p>
-    </div>
-  );
+  const renderStatCard = (title, value, color = 'blue', unit = '') => {
+    const style = STAT_CARD_STYLES[color] || STAT_CARD_STYLES.blue;
+
+    return (
+      <div className={`rounded-lg border p-4 ${style.container}`}>
+        <p className="text-sm text-neutral-400">{title}</p>
+        <p className={`mt-2 text-2xl font-bold ${style.value}`}>
+          {typeof value === 'number' ? value.toFixed(2) : value}
+          {unit && <span className="text-sm ml-1">{unit}</span>}
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-neutral-900 p-6">

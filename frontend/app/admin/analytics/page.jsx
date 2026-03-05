@@ -7,12 +7,36 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { adminApiClient } from '@/lib/adminApiClient';
-import { Modal } from '@/components/admin/common/Modal';
 import { LoadingState } from '@/components/admin/common/LoadingState';
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+
+const STAT_CARD_STYLES = {
+  blue: {
+    container: 'bg-blue-900/20 border-blue-700',
+    value: 'text-blue-400',
+  },
+  emerald: {
+    container: 'bg-emerald-900/20 border-emerald-700',
+    value: 'text-emerald-400',
+  },
+  purple: {
+    container: 'bg-purple-900/20 border-purple-700',
+    value: 'text-purple-400',
+  },
+  yellow: {
+    container: 'bg-yellow-900/20 border-yellow-700',
+    value: 'text-yellow-400',
+  },
+  red: {
+    container: 'bg-red-900/20 border-red-700',
+    value: 'text-red-400',
+  },
+  green: {
+    container: 'bg-green-900/20 border-green-700',
+    value: 'text-green-400',
+  },
+};
 
 export default function AdminUserAnalyticsPage() {
   const [viewMode, setViewMode] = useState('stats'); // stats, segments, user-detail
@@ -75,12 +99,16 @@ export default function AdminUserAnalyticsPage() {
   const userDetail = userDetailData?.analytics;
 
   // 渲染统计卡片
-  const renderStatCard = (title, value, color = 'blue') => (
-    <div className={`rounded-lg bg-${color}-900/20 p-4 border border-${color}-700`}>
-      <p className="text-sm text-neutral-400">{title}</p>
-      <p className={`text-2xl font-bold text-${color}-400 mt-2`}>{value}</p>
-    </div>
-  );
+  const renderStatCard = (title, value, color = 'blue') => {
+    const style = STAT_CARD_STYLES[color] || STAT_CARD_STYLES.blue;
+
+    return (
+      <div className={`rounded-lg border p-4 ${style.container}`}>
+        <p className="text-sm text-neutral-400">{title}</p>
+        <p className={`mt-2 text-2xl font-bold ${style.value}`}>{value}</p>
+      </div>
+    );
+  };
 
   // 渲染用户分层表格
   const renderSegmentsTable = () => {

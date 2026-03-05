@@ -14,12 +14,12 @@ export default function ShareButtons({ title, url, description }) {
   const shareOnTwitter = useCallback(() => {
     const text = `${title} - ${description || "Check this out!"}`;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-    window.open(twitterUrl, "_blank", "width=550,height=420");
+    window.open(twitterUrl, "_blank", "noopener,noreferrer,width=550,height=420");
   }, [title, url, description]);
 
   const shareOnFacebook = useCallback(() => {
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-    window.open(facebookUrl, "_blank", "width=550,height=420");
+    window.open(facebookUrl, "_blank", "noopener,noreferrer,width=550,height=420");
   }, [url]);
 
   const copyLink = useCallback(async () => {
@@ -53,6 +53,7 @@ export default function ShareButtons({ title, url, description }) {
     <div className="flex items-center gap-2">
       {/* Twitter分享 */}
       <button
+        type="button"
         onClick={shareOnTwitter}
         className="p-2 rounded-lg bg-gray-800/50 hover:bg-blue-500/20 hover:text-blue-400 transition-all duration-200 group"
         aria-label="Share on Twitter"
@@ -63,6 +64,7 @@ export default function ShareButtons({ title, url, description }) {
 
       {/* Facebook分享 */}
       <button
+        type="button"
         onClick={shareOnFacebook}
         className="p-2 rounded-lg bg-gray-800/50 hover:bg-blue-600/20 hover:text-blue-500 transition-all duration-200 group"
         aria-label="Share on Facebook"
@@ -73,6 +75,7 @@ export default function ShareButtons({ title, url, description }) {
 
       {/* 复制链接 */}
       <button
+        type="button"
         onClick={copyLink}
         className="p-2 rounded-lg bg-gray-800/50 hover:bg-green-500/20 hover:text-green-400 transition-all duration-200 group relative"
         aria-label="Copy link"
@@ -89,6 +92,7 @@ export default function ShareButtons({ title, url, description }) {
       {/* 原生分享（移动端） */}
       {typeof navigator !== "undefined" && navigator.share && (
         <button
+          type="button"
           onClick={shareNative}
           className="p-2 rounded-lg bg-gray-800/50 hover:bg-purple-500/20 hover:text-purple-400 transition-all duration-200 group"
           aria-label="Share"

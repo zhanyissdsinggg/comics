@@ -112,11 +112,12 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
             type="text"
             value={newCollectionName}
             onChange={(e) => setNewCollectionName(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleCreate()}
+            onKeyDown={(e) => e.key === "Enter" && handleCreate()}
             placeholder="Collection name"
             className="flex-1 rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus:border-emerald-500 focus:outline-none"
           />
           <button
+            type="button"
             onClick={handleCreate}
             className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
           >
@@ -154,7 +155,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                     type="text"
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
                     className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-2 py-1 text-sm text-neutral-300 focus:border-emerald-500 focus:outline-none"
                     autoFocus
                   />
@@ -174,12 +175,14 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                 {isEditing ? (
                   <>
                     <button
+                      type="button"
                       onClick={handleSaveEdit}
                       className="rounded-lg bg-emerald-500 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-emerald-600"
                     >
                       Save
                     </button>
                     <button
+                      type="button"
                       onClick={handleCancelEdit}
                       className="rounded-lg border border-neutral-700 px-3 py-1 text-xs font-medium text-neutral-400 transition-colors hover:bg-neutral-800"
                     >
@@ -189,6 +192,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                 ) : (
                   <>
                     <button
+                      type="button"
                       onClick={() => handleStartEdit(collection)}
                       className="rounded-lg border border-neutral-700 px-3 py-1 text-xs font-medium text-neutral-400 transition-colors hover:bg-neutral-800"
                     >
@@ -196,6 +200,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                     </button>
                     {!isDefault && (
                       <button
+                        type="button"
                         onClick={() => handleDelete(collection.id)}
                         className="rounded-lg border border-red-500/20 px-3 py-1 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10"
                       >
@@ -220,4 +225,3 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
 CollectionManager.displayName = "CollectionManager";
 
 export default CollectionManager;
-
