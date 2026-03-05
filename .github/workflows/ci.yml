@@ -29,6 +29,12 @@ jobs:
       - name: Build
         run: npm run build --prefix backend
 
+      - name: Unit Tests
+        run: npm run test --prefix backend -- --runInBand --passWithNoTests
+
+      - name: E2E Smoke Tests
+        run: npm run test:e2e --prefix backend
+
   frontend:
     runs-on: ubuntu-latest
 
@@ -45,8 +51,5 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefix frontend
 
-      - name: Lint
-        run: npm run lint --prefix frontend
-
-      - name: Build
-        run: npm run build --prefix frontend
+      - name: Frontend Quality Gate
+        run: npm run check:all --prefix frontend

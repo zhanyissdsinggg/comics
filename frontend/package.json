@@ -9,8 +9,10 @@
     "start": "next start",
     "init-db": "npm --prefix ../backend run seed",
     "health-check": "npm run lint && npm run build",
-    "check:all": "npm run lint && npm run build",
+    "check:all": "npm run lint && npm run build && npm run perf:budget && npm run smoke:routes",
     "lint": "next lint",
+    "perf:budget": "node scripts/check-performance-budget.mjs",
+    "smoke:routes": "node scripts/smoke-routes.mjs",
     "analyze": "cross-env ANALYZE=true next build",
     "analyze:server": "cross-env BUNDLE_ANALYZE=server next build",
     "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build"
