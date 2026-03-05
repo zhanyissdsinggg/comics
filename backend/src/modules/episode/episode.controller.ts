@@ -18,6 +18,48 @@ export class EpisodeController {
     private readonly statsService: StatsService
   ) {}
 
+  private buildFallbackEpisodePayload(
+    seriesId: string,
+    episodeId: string,
+    seriesType: string,
+  ) {
+    const normalizedSeriesType = String(seriesType || "comic").toLowerCase();
+    const number = Number(episodeId.replace(`${seriesId}e`, "")) || 1;
+    if (normalizedSeriesType === "novel") {
+      return {
+        episode: {
+          id: episodeId,
+          seriesId,
+          number,
+          title: `Episode ${number}`,
+          type: "novel",
+          paragraphs: Array.from({ length: 12 }, (_, idx) =>
+            `(${seriesId}-${episodeId}) Paragraph ${idx + 1}.`,
+          ),
+          previewParagraphs: 3,
+        },
+      };
+    }
+
+    return {
+      episode: {
+        id: episodeId,
+        seriesId,
+        number,
+        title: `Episode ${number}`,
+        type: "comic",
+        pages: Array.from({ length: 12 }, (_, idx) => ({
+          url: `https://placehold.co/800x1200?text=${seriesId}-${episodeId}-P${idx + 1}`,
+          w: 800,
+          h: 1200,
+        })),
+        isPreview: true,
+        previewCount: 3,
+        previewFreePages: 3,
+      },
+    };
+  }
+
   private isSchemaDriftError(error: unknown): boolean {
     if (!error || typeof error !== "object") {
       return false;
@@ -109,69 +151,81 @@ export class EpisodeController {
       return buildError(ERROR_CODES.INVALID_REQUEST, { message: "episodeId is required" });
     }
 
-    const series = await this.findSeriesLite(normalizedSeriesId);
-    if (!series) {
-      res.status(404);
-      return buildError(ERROR_CODES.NOT_FOUND);
-    }
-
-    if (series.adult) {
-      const gate = checkAdultGate(req.cookies || {});
-      if (!gate.ok) {
-        res.status(403);
-        return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+    let seriesType = "comic";
+    try {
+      const series = await this.findSeriesLite(normalizedSeriesId);
+      if (!series) {
+        res.status(404);
+        return buildError(ERROR_CODES.NOT_FOUND);
       }
-    }
 
-    const userId = getUserIdFromRequest(req, false);
-    let hasAccess = false;
+      seriesType = String(series.type || "comic");
 
-    if (userId) {
-      try {
-        const entitlement = await this.prisma.entitlement.findUnique({
-          where: {
-            userId_episodeId: {
-              userId,
-              episodeId: normalizedEpisodeId,
+      if (series.adult) {
+        const gate = checkAdultGate(req.cookies || {});
+        if (!gate.ok) {
+          res.status(403);
+          return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+        }
+      }
+
+      const userId = getUserIdFromRequest(req, false);
+      let hasAccess = false;
+
+      if (userId) {
+        try {
+          const entitlement = await this.prisma.entitlement.findUnique({
+            where: {
+              userId_episodeId: {
+                userId,
+                episodeId: normalizedEpisodeId,
+              },
             },
-          },
-        });
-        hasAccess = !!entitlement;
+          });
+          hasAccess = !!entitlement;
+        } catch (error) {
+          this.logger.warn(
+            `Entitlement lookup failed for user ${userId}, episode ${normalizedEpisodeId}.`
+          );
+          if (error instanceof Error) {
+            this.logger.debug(error.message);
+          }
+        }
+      }
+
+      const payload = await this.episodeService.getEpisode(normalizedSeriesId, normalizedEpisodeId);
+      if (!payload) {
+        res.status(404);
+        return buildError(ERROR_CODES.NOT_FOUND);
+      }
+
+      if (!hasAccess && payload.episode?.pages && Array.isArray(payload.episode.pages)) {
+        const previewCount = Number((payload.episode as any)?.previewFreePages || 3) || 3;
+        payload.episode.pages = payload.episode.pages.slice(0, previewCount);
+        (payload.episode as any).isPreview = true;
+        (payload.episode as any).previewCount = previewCount;
+      }
+
+      try {
+        await this.statsService.recordSeriesView(userId, normalizedSeriesId);
+        if (series.type === "comic") {
+          await this.statsService.recordComicView(userId);
+        }
       } catch (error) {
-        this.logger.warn(
-          `Entitlement lookup failed for user ${userId}, episode ${normalizedEpisodeId}.`
-        );
+        this.logger.warn(`Stats recording failed for series ${normalizedSeriesId}, skipped.`);
         if (error instanceof Error) {
           this.logger.debug(error.message);
         }
       }
-    }
 
-    const payload = await this.episodeService.getEpisode(normalizedSeriesId, normalizedEpisodeId);
-    if (!payload) {
-      res.status(404);
-      return buildError(ERROR_CODES.NOT_FOUND);
-    }
-
-    if (!hasAccess && payload.episode?.pages && Array.isArray(payload.episode.pages)) {
-      const previewCount = Number((payload.episode as any)?.previewFreePages || 3) || 3;
-      payload.episode.pages = payload.episode.pages.slice(0, previewCount);
-      (payload.episode as any).isPreview = true;
-      (payload.episode as any).previewCount = previewCount;
-    }
-
-    try {
-      await this.statsService.recordSeriesView(userId, normalizedSeriesId);
-      if (series.type === "comic") {
-        await this.statsService.recordComicView(userId);
-      }
+      return payload;
     } catch (error) {
-      this.logger.warn(`Stats recording failed for series ${normalizedSeriesId}, skipped.`);
-      if (error instanceof Error) {
-        this.logger.debug(error.message);
-      }
+      const stack = error instanceof Error ? error.stack || error.message : String(error);
+      this.logger.error(
+        `Episode endpoint degraded for series ${normalizedSeriesId}, episode ${normalizedEpisodeId}.`,
+        stack,
+      );
+      return this.buildFallbackEpisodePayload(normalizedSeriesId, normalizedEpisodeId, seriesType);
     }
-
-    return payload;
   }
 }

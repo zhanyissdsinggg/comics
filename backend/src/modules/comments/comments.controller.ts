@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Logger, Post, Query, Req, Res } from "@nestjs/common";
 import { CommentsService } from "./comments.service";
 import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../common/utils/auth";
@@ -6,6 +6,8 @@ import { buildError, ERROR_CODES } from "../../common/utils/errors";
 
 @Controller("comments")
 export class CommentsController {
+  private readonly logger = new Logger(CommentsController.name);
+
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get()
@@ -19,8 +21,14 @@ export class CommentsController {
       return buildError(ERROR_CODES.INVALID_REQUEST);
     }
     const userId = getUserIdFromRequest(req, true) || undefined;
-    const comments = await this.commentsService.list(seriesId, userId);
-    return { comments };
+    try {
+      const comments = await this.commentsService.list(seriesId, userId);
+      return { comments };
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack || error.message : String(error);
+      this.logger.error(`Comments endpoint degraded for series ${seriesId}.`, stack);
+      return { comments: [] };
+    }
   }
 
   @Post()

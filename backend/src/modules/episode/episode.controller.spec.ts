@@ -80,4 +80,26 @@ describe("EpisodeController", () => {
     expect(payload.episode.previewCount).toBe(2);
     expect(statsService.recordComicView).not.toHaveBeenCalled();
   });
+
+  it("should return fallback payload when episode service throws unexpected error", async () => {
+    prisma.series.findUnique.mockResolvedValue({
+      id: "series-001",
+      adult: false,
+      type: "comic",
+    });
+    prisma.entitlement.findUnique.mockResolvedValue(null);
+    episodeService.getEpisode.mockRejectedValue(new Error("unexpected db failure"));
+
+    const req = { cookies: {} } as any;
+    const res = { status: jest.fn() } as any;
+
+    const result = await controller.getEpisode("series-001", "series-001e9", req, res);
+    const payload = result as any;
+
+    expect(payload.episode.id).toBe("series-001e9");
+    expect(payload.episode.seriesId).toBe("series-001");
+    expect(payload.episode.type).toBe("comic");
+    expect(Array.isArray(payload.episode.pages)).toBe(true);
+    expect(payload.episode.pages.length).toBeGreaterThan(0);
+  });
 });
