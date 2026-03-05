@@ -1,3 +1,4 @@
+const path = require("node:path");
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
@@ -8,11 +9,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-
-  // 老王说：禁用构建时的Suspense检查，避免admin页面预渲染报错
-  experimental: {
-    missingSuspenseWithCSRBailout: false,
-  },
+  outputFileTracingRoot: path.resolve(__dirname, ".."),
 
   // 图片优化配置
   images: {

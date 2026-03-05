@@ -14,8 +14,9 @@ test.describe("Critical route rendering", () => {
       const response = await page.goto(route, { waitUntil: "domcontentloaded" });
       expect(response?.ok()).toBeTruthy();
 
-      await expect(page.locator("html")).toBeVisible();
-      await expect(page.locator("body")).toBeVisible();
+      const body = page.locator("body");
+      await expect(body).toBeVisible();
+      await expect(body).not.toHaveCSS("visibility", "hidden");
 
       // Let hydration settle before checking runtime errors.
       await page.waitForTimeout(300);

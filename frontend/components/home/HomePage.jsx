@@ -5,10 +5,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import HeroCarousel from "./HeroCarousel";
-import LoginPrompt from "../auth/LoginPrompt";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import HomeRailsContainer from "./HomeRailsContainer";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -17,6 +17,10 @@ import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useBrandingStore } from "../../store/useBrandingStore";
 import { trackEvent } from "../../lib/trackEvent";
+
+const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
+  ssr: false,
+});
 
 // Genre chips
 const GENRE_CHIPS = [

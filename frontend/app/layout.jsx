@@ -1,20 +1,10 @@
 import "./globals.css";
-// 老王说：使用动态导入AppProviders，避免服务器端执行
-import dynamicImport from 'next/dynamic';
+import AppProviders from "../components/layout/AppProviders";
 // 老王重构：CookieConsent已经移除next-intl依赖，可以正常使用了
 import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 
-// 老王说：动态导入AppProviders，禁用SSR
-const AppProviders = dynamicImport(() => import("../components/layout/AppProviders"), {
-  ssr: false,
-  loading: () => <div>Loading...</div>
-});
-
 // 老王说：完全移除next-intl，避免配置问题
-
-// 老王说：禁用静态生成，因为AppProviders需要客户端环境
-export const dynamic = 'force-dynamic';
 
 // 老王添加：完整的SEO meta标签配置
 export const metadata = {
