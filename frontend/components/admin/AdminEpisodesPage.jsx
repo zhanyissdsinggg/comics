@@ -59,7 +59,6 @@ export default function AdminEpisodesPage() {
 
   // 老王注释：批量设置状态
   const [bulkPrice, setBulkPrice] = useState("");
-  const [bulkPreview, setBulkPreview] = useState("");
   const [bulkTtf, setBulkTtf] = useState("keep");
 
   // 老王注释：展开/折叠状态

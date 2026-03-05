@@ -68,6 +68,7 @@ export default function AdminPage() {
     sourceId: "",
     nextId: "",
   });
+  const [actionPending, setActionPending] = useState(false);
   const duplicateSource = useMemo(
     () => seriesList.find((item) => item.id === duplicateDialog.sourceId) || null,
     [duplicateDialog.sourceId, seriesList]
@@ -145,6 +146,9 @@ export default function AdminPage() {
     openDeleteDialog(seriesId);
   };
   const confirmDelete = async () => {
+    if (actionPending) {
+      return;
+    }
     const targetId = deleteDialog.seriesId;
     closeDeleteDialog();
     if (!targetId) {
@@ -152,6 +156,7 @@ export default function AdminPage() {
     }
 
     try {
+      setActionPending(true);
       const response = await apiDelete(`/api/admin/series/${targetId}`);
       if (response.ok) {
         await loadSeries();
@@ -161,6 +166,8 @@ export default function AdminPage() {
       }
     } catch (error) {
       setFeedback({ type: "error", message: "删除失败：网络错误" });
+    } finally {
+      setActionPending(false);
     }
   };
 
@@ -200,6 +207,9 @@ export default function AdminPage() {
     openDuplicateDialog(seriesId);
   };
   const confirmDuplicate = async () => {
+    if (actionPending) {
+      return;
+    }
     const sourceId = duplicateDialog.sourceId;
     const nextId = duplicateDialog.nextId.trim();
 
@@ -224,6 +234,7 @@ export default function AdminPage() {
     }
 
     try {
+      setActionPending(true);
       const response = await apiPost("/api/admin/series", {
         series: {
           ...target,
@@ -240,6 +251,8 @@ export default function AdminPage() {
       }
     } catch (error) {
       setFeedback({ type: "error", message: "复制失败：网络错误" });
+    } finally {
+      setActionPending(false);
     }
   };
 
@@ -767,6 +780,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={closeDuplicateDialog}
+              disabled={actionPending}
               className="flex-1 rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
             >
               取消
@@ -774,9 +788,10 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={confirmDuplicate}
+              disabled={actionPending}
               className="flex-1 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
             >
-              确认复制
+              {actionPending ? "处理中..." : "确认复制"}
             </button>
           </div>
         }
@@ -792,6 +807,7 @@ export default function AdminPage() {
               onChange={(event) =>
                 setDuplicateDialog((prev) => ({ ...prev, nextId: event.target.value }))
               }
+              disabled={actionPending}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
