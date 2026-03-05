@@ -7,7 +7,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendRoot = path.resolve(__dirname, "..");
 
-const ROUTES = ["/", "/search", "/store", "/rankings", "/admin/login"];
+const ROUTES = [
+  "/",
+  "/search",
+  "/store",
+  "/rankings",
+  "/admin/login",
+  "/admin",
+  "/admin/users",
+  "/admin/support",
+  "/admin/orders",
+  "/admin/promotions",
+  "/admin/series",
+];
 
 function getFreePort() {
   return new Promise((resolve, reject) => {

@@ -1,6 +1,18 @@
 import { expect, test } from "@playwright/test";
 
-const ROUTES = ["/", "/search", "/store", "/rankings", "/admin/login"];
+const ROUTES = [
+  "/",
+  "/search",
+  "/store",
+  "/rankings",
+  "/admin/login",
+  "/admin",
+  "/admin/users",
+  "/admin/support",
+  "/admin/orders",
+  "/admin/promotions",
+  "/admin/series",
+];
 
 test.describe("Critical route rendering", () => {
   for (const route of ROUTES) {
