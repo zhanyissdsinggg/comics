@@ -4,34 +4,56 @@
  */
 "use client";
 
-import { AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { AlertTriangle, Eye } from "lucide-react";
 import { useState } from "react";
 
 // NOTE: cleaned corrupted comment.
 const WARNING_TYPES = {
   adult: {
     label: "Adult Content",
-    color: "red",
+    tone: "red",
     icon: AlertTriangle,
     description: "This content contains mature themes and is intended for adults only.",
   },
   violence: {
     label: "Violence",
-    color: "orange",
+    tone: "orange",
     icon: AlertTriangle,
     description: "This content contains violent scenes that may be disturbing.",
   },
   sensitive: {
     label: "Sensitive Content",
-    color: "yellow",
+    tone: "yellow",
     icon: AlertTriangle,
     description: "This content discusses sensitive topics that may be triggering.",
+  },
+};
+
+const WARNING_STYLES = {
+  red: {
+    badge: "bg-red-500/20 border-red-500/30",
+    icon: "text-red-400",
+    label: "text-red-300",
+    panel: "bg-red-500/10 border-red-500/20",
+  },
+  orange: {
+    badge: "bg-orange-500/20 border-orange-500/30",
+    icon: "text-orange-400",
+    label: "text-orange-300",
+    panel: "bg-orange-500/10 border-orange-500/20",
+  },
+  yellow: {
+    badge: "bg-yellow-500/20 border-yellow-500/30",
+    icon: "text-yellow-400",
+    label: "text-yellow-300",
+    panel: "bg-yellow-500/10 border-yellow-500/20",
   },
 };
 
 export default function ContentWarning({ type = "adult", children, alwaysShow = false }) {
   const [revealed, setRevealed] = useState(alwaysShow);
   const warning = WARNING_TYPES[type] || WARNING_TYPES.adult;
+  const warningStyle = WARNING_STYLES[warning.tone] || WARNING_STYLES.red;
   const Icon = warning.icon;
 
   // NOTE: cleaned corrupted comment.
@@ -41,9 +63,9 @@ export default function ContentWarning({ type = "adult", children, alwaysShow = 
         {children}
         {/* 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欑濡绮堟潪鎵伇濞戞搩浜滈惃顒勫冀閸モ晩鍔柟缁樺姉閵囨碍娼诲▎鎰﹂柛娆愵殜濡炬椽宕橀崨顓у晣 */}
         <div className="absolute top-2 right-2 z-10">
-          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg bg-${warning.color}-500/20 border border-${warning.color}-500/30 backdrop-blur-sm`}>
-            <Icon size={14} className={`text-${warning.color}-400`} />
-            <span className={`text-xs font-medium text-${warning.color}-300`}>
+          <div className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 backdrop-blur-sm ${warningStyle.badge}`}>
+            <Icon size={14} className={warningStyle.icon} />
+            <span className={`text-xs font-medium ${warningStyle.label}`}>
               {warning.label}
             </span>
           </div>
@@ -65,8 +87,8 @@ export default function ContentWarning({ type = "adult", children, alwaysShow = 
         <div className="max-w-md p-8 text-center space-y-4">
           {/* 闁搞儳鍋撻悥?*/}
           <div className="flex justify-center">
-            <div className={`p-4 rounded-full bg-${warning.color}-500/10 border border-${warning.color}-500/20`}>
-              <Icon size={48} className={`text-${warning.color}-400`} />
+            <div className={`rounded-full border p-4 ${warningStyle.panel}`}>
+              <Icon size={48} className={warningStyle.icon} />
             </div>
           </div>
 
@@ -82,6 +104,7 @@ export default function ContentWarning({ type = "adult", children, alwaysShow = 
 
           {/* 闁圭顦甸幐?*/}
           <button
+            type="button"
             onClick={() => setRevealed(true)}
             className="flex items-center justify-center gap-2 w-full px-6 py-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-all duration-200 font-medium"
           >

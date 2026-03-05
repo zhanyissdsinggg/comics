@@ -82,6 +82,7 @@ Total: $${order.amount}
     <>
       {/* 閼颁胶甯囧▔銊╁櫞閿涙矮绗呮潪鑺ュ瘻闁?*/}
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
         className={`flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700 ${className}`}
         aria-label="Download Invoice"
@@ -106,12 +107,14 @@ Total: $${order.amount}
                 Download Invoice
               </h3>
               <button
+                type="button"
                 onClick={() => !downloading && setIsOpen(false)}
                 disabled={downloading}
                 className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white disabled:opacity-50"
                 aria-label="Close"
               >
-                閴?              </button>
+                X
+              </button>
             </div>
 
             {/* 閼颁胶甯囧▔銊╁櫞閿涙俺顓归崡鏇氫繆閹?*/}
@@ -139,6 +142,7 @@ Total: $${order.amount}
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
+                  type="button"
                   onClick={() => setFormat("pdf")}
                   disabled={downloading}
                   className={`rounded-xl border p-4 text-center transition-all disabled:opacity-50 ${
@@ -147,13 +151,14 @@ Total: $${order.amount}
                       : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
                   }`}
                 >
-                  <div className="mb-2 text-2xl">棣冩憙</div>
+                  <div className="mb-2 text-sm font-semibold tracking-wide text-neutral-300">PDF</div>
                   <div className="text-sm font-semibold text-white">PDF</div>
                   <div className="text-xs text-neutral-400">
                     Printable format
                   </div>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setFormat("csv")}
                   disabled={downloading}
                   className={`rounded-xl border p-4 text-center transition-all disabled:opacity-50 ${
@@ -162,7 +167,7 @@ Total: $${order.amount}
                       : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
                   }`}
                 >
-                  <div className="mb-2 text-2xl">棣冩惓</div>
+                  <div className="mb-2 text-sm font-semibold tracking-wide text-neutral-300">CSV</div>
                   <div className="text-sm font-semibold text-white">CSV</div>
                   <div className="text-xs text-neutral-400">
                     Spreadsheet format
@@ -173,6 +178,7 @@ Total: $${order.amount}
 
             {/* 閼颁胶甯囧▔銊╁櫞閿涙矮绗呮潪鑺ュ瘻闁?*/}
             <button
+              type="button"
               onClick={handleDownload}
               disabled={downloading}
               className="w-full rounded-lg bg-emerald-500 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"

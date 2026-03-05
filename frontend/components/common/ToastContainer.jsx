@@ -90,9 +90,10 @@ function ToastItem({ toast, onClose }) {
       <div className="flex-shrink-0 mt-0.5">{style.icon}</div>
       <div className="flex-1 text-sm font-medium">{message}</div>
       <button
+        type="button"
         onClick={onClose}
         className="flex-shrink-0 hover:opacity-70 transition-opacity"
-        aria-label="鍏抽棴"
+        aria-label="Close"
       >
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path
