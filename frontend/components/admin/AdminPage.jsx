@@ -171,16 +171,30 @@ export default function AdminPage() {
     }
   };
 
-  const updateSeries = async (seriesId, changes) => {
+  const patchSeries = async (seriesId, changes) => {
     const target = seriesList.find((item) => item.id === seriesId);
     if (!target) {
-      return;
+      return { ok: false, error: "作品不存在" };
     }
-    const response = await apiPatch(`/api/admin/series/${seriesId}`, {
+    return apiPatch(`/api/admin/series/${seriesId}`, {
       series: { ...target, ...changes },
     });
-    if (response.ok) {
-      loadSeries();
+  };
+  const updateSeries = async (seriesId, changes) => {
+    if (actionPending) {
+      return;
+    }
+
+    try {
+      setActionPending(true);
+      const response = await patchSeries(seriesId, changes);
+      if (response.ok) {
+        await loadSeries();
+      } else {
+        setFeedback({ type: "error", message: `更新失败：${response.error || "未知错误"}` });
+      }
+    } finally {
+      setActionPending(false);
     }
   };
 
@@ -335,10 +349,33 @@ export default function AdminPage() {
     if (selectedIds.length === 0) {
       return;
     }
-    for (const id of selectedIds) {
-      await updateSeries(id, changes);
+
+    if (actionPending) {
+      return;
     }
-    setSelectedMap({});
+
+    const targetIds = [...selectedIds];
+    try {
+      setActionPending(true);
+      const results = await Promise.all(targetIds.map((id) => patchSeries(id, changes)));
+      const successCount = results.filter((result) => result?.ok).length;
+      const failCount = results.length - successCount;
+
+      if (successCount > 0) {
+        await loadSeries();
+      }
+      if (failCount === 0) {
+        setFeedback({ type: "success", message: `批量更新成功：${successCount} 个作品。` });
+      } else {
+        setFeedback({
+          type: "error",
+          message: `批量更新部分失败：成功 ${successCount} 个，失败 ${failCount} 个。`,
+        });
+      }
+      setSelectedMap({});
+    } finally {
+      setActionPending(false);
+    }
   };
 
   // 老王说：如果正在加载或未认证，显示加载状态

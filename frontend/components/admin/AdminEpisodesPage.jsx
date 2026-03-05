@@ -260,11 +260,12 @@ export default function AdminEpisodesPage() {
 
     setSaving(true);
     const modifiedEpisodes = episodes.filter((ep) => modifiedIds.has(ep.id));
+    const initialModifiedIds = new Set(modifiedIds);
     let successCount = 0;
     let failCount = 0;
     const errors = [];
 
-    for (const episode of modifiedEpisodes) {
+    const results = await mapWithConcurrency(modifiedEpisodes, 6, async (episode) => {
       try {
         const response = await apiPatch(`/api/admin/series/${seriesId}/episodes/${episode.id}`, {
           key,
@@ -277,21 +278,29 @@ export default function AdminEpisodesPage() {
         });
 
         if (response.ok) {
-          successCount++;
-          setModifiedIds((prev) => {
-            const next = new Set(prev);
-            next.delete(episode.id);
-            return next;
-          });
-        } else {
-          failCount++;
-          errors.push(`章节 ${episode.number}: ${response.error || "保存失败"}`);
+          return { ok: true, episodeId: episode.id };
         }
+        return { ok: false, message: `章节 ${episode.number}: ${response.error || "保存失败"}` };
       } catch (error) {
-        failCount++;
-        errors.push(`章节 ${episode.number}: 网络错误`);
+        return { ok: false, message: `章节 ${episode.number}: 网络错误` };
+      }
+    });
+
+    for (const result of results) {
+      if (result?.ok) {
+        successCount += 1;
+        if (result.episodeId) {
+          initialModifiedIds.delete(result.episodeId);
+        }
+      } else {
+        failCount += 1;
+        if (result?.message) {
+          errors.push(result.message);
+        }
       }
     }
+
+    setModifiedIds(initialModifiedIds);
 
     setSaving(false);
 
