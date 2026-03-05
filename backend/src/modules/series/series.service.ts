@@ -116,6 +116,133 @@ export class SeriesService {
     };
   }
 
+  private toStringArray(value: unknown): string[] {
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item || "").trim()).filter(Boolean);
+    }
+    if (typeof value !== "string") {
+      return [];
+    }
+    const raw = value.trim();
+    if (!raw) {
+      return [];
+    }
+    if (raw.startsWith("[") && raw.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.map((item) => String(item || "").trim()).filter(Boolean);
+        }
+      } catch {
+        return [];
+      }
+    }
+    if (raw.startsWith("{") && raw.endsWith("}")) {
+      return raw
+        .slice(1, -1)
+        .split(",")
+        .map((item) => item.replace(/^"+|"+$/g, "").trim())
+        .filter(Boolean);
+    }
+    return [raw];
+  }
+
+  private asNumber(value: unknown, fallback = 0): number {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : fallback;
+  }
+
+  private normalizeSeriesRecord(series: Record<string, any>) {
+    return {
+      id: String(series.id || ""),
+      title: String(series.title || ""),
+      type: String(series.type || "comic"),
+      adult: Boolean(series.adult),
+      coverTone: String(series.coverTone || ""),
+      coverUrl: String(series.coverUrl || ""),
+      badge: String(series.badge || ""),
+      badges: this.toStringArray(series.badges),
+      latestEpisodeId: String(series.latestEpisodeId || ""),
+      genres: this.toStringArray(series.genres),
+      status: String(series.status || "Ongoing"),
+      rating: this.asNumber(series.rating, 0),
+      ratingCount: Math.max(0, Math.floor(this.asNumber(series.ratingCount, 0))),
+      description: String(series.description || ""),
+      episodePrice: Math.max(0, Math.floor(this.asNumber(series.episodePrice, 0))),
+      ttfEnabled: Boolean(series.ttfEnabled),
+      ttfIntervalHours: Math.max(1, Math.floor(this.asNumber(series.ttfIntervalHours, 24))),
+    };
+  }
+
+  private async fetchSeriesRecordWithFallback(seriesId: string) {
+    try {
+      return await this.prisma.series.findUnique({ where: { id: seriesId } });
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        `Series full query failed for ${seriesId}, switching to compatibility mode.`,
+      );
+    }
+
+    try {
+      const columns = await this.prisma.$queryRawUnsafe<Array<{ column_name: string }>>(
+        `SELECT column_name
+         FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = 'series'`,
+      );
+
+      const available = new Set(
+        columns
+          .map((item) => String(item?.column_name || "").trim())
+          .filter(Boolean),
+      );
+      const candidates = [
+        "id",
+        "title",
+        "type",
+        "adult",
+        "coverTone",
+        "coverUrl",
+        "badge",
+        "badges",
+        "latestEpisodeId",
+        "genres",
+        "status",
+        "rating",
+        "ratingCount",
+        "description",
+        "episodePrice",
+        "ttfEnabled",
+        "ttfIntervalHours",
+      ];
+      const selected = candidates.filter((name) => available.has(name));
+      if (!selected.includes("id")) {
+        selected.unshift("id");
+      }
+      const selectClause = selected
+        .map((column) => `"${column.replace(/"/g, "\"\"")}"`)
+        .join(", ");
+      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, any>>>(
+        `SELECT ${selectClause} FROM "series" WHERE "id" = $1 LIMIT 1`,
+        seriesId,
+      );
+      if (!rows.length) {
+        return null;
+      }
+      return this.normalizeSeriesRecord(rows[0]);
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        `Series compatibility query failed for ${seriesId}, falling back to not found.`,
+      );
+      return null;
+    }
+  }
+
   private inferEpisodeCount(series: any): number {
     const latestRaw = String(series?.latestEpisodeId || "");
     const match = latestRaw.match(/(\d+)$/);
@@ -199,7 +326,7 @@ export class SeriesService {
   }
 
   private async fetchSeriesWithEpisodes(seriesId: string) {
-    const series = await this.prisma.series.findUnique({ where: { id: seriesId } });
+    const series = await this.fetchSeriesRecordWithFallback(seriesId);
     if (!series) {
       return null;
     }

@@ -21,6 +21,49 @@ export class EpisodeService {
     return message.includes("does not exist") || message.includes("Unknown column");
   }
 
+  private async findSeriesType(seriesId: string): Promise<{ id: string; type: string } | null> {
+    try {
+      const row = await this.prisma.series.findUnique({
+        where: { id: seriesId },
+        select: { id: true, type: true },
+      });
+      if (!row) {
+        return null;
+      }
+      return {
+        id: String(row.id || ""),
+        type: String(row.type || "comic"),
+      };
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        `Series type query failed for ${seriesId}, switching to compatibility mode.`,
+      );
+    }
+
+    try {
+      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, any>>>(
+        `SELECT "id", "type" FROM "series" WHERE "id" = $1 LIMIT 1`,
+        seriesId,
+      );
+      if (!rows.length) {
+        return null;
+      }
+      return {
+        id: String(rows[0].id || ""),
+        type: String(rows[0].type || "comic"),
+      };
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+      this.logger.warn(`Series compatibility query failed for ${seriesId}.`);
+      return null;
+    }
+  }
+
   private async findStoredEpisode(episodeId: string): Promise<any> {
     try {
       return await this.prisma.episode.findUnique({
@@ -63,7 +106,7 @@ export class EpisodeService {
   }
 
   async getEpisode(seriesId: string, episodeId: string) {
-    const series = await this.prisma.series.findUnique({ where: { id: seriesId } });
+    const series = await this.findSeriesType(seriesId);
     if (!series) {
       return null;
     }

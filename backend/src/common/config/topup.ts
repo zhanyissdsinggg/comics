@@ -23,31 +23,39 @@ function normalizePackage(input: any) {
 }
 
 async function ensureTopupPackages(prisma: any) {
-  const count = await prisma.topupPackage.count();
-  if (count > 0) {
-    return;
+  try {
+    const count = await prisma.topupPackage.count();
+    if (count > 0) {
+      return;
+    }
+    const values = Object.values(TOPUP_PACKAGES).map((item) => ({
+      id: item.packageId,
+      paidPts: item.paidPts,
+      bonusPts: item.bonusPts,
+      price: item.price,
+      currency: "USD",
+      active: true,
+      label: "",
+      tags: [],
+    }));
+    await prisma.topupPackage.createMany({ data: values, skipDuplicates: true });
+  } catch {
+    // Schema drift or missing table: fallback to static config.
   }
-  const values = Object.values(TOPUP_PACKAGES).map((item) => ({
-    id: item.packageId,
-    paidPts: item.paidPts,
-    bonusPts: item.bonusPts,
-    price: item.price,
-    currency: "USD",
-    active: true,
-    label: "",
-    tags: [],
-  }));
-  await prisma.topupPackage.createMany({ data: values, skipDuplicates: true });
 }
 
 export async function getTopupPackage(prisma: any, packageId: string) {
   if (!packageId || !prisma) {
     return null;
   }
-  await ensureTopupPackages(prisma);
-  const found = await prisma.topupPackage.findUnique({ where: { id: packageId } });
-  if (found) {
-    return normalizePackage(found);
+  try {
+    await ensureTopupPackages(prisma);
+    const found = await prisma.topupPackage.findUnique({ where: { id: packageId } });
+    if (found) {
+      return normalizePackage(found);
+    }
+  } catch {
+    // fallback below
   }
   return normalizePackage(TOPUP_PACKAGES[String(packageId)]);
 }
@@ -56,12 +64,16 @@ export async function listTopupPackages(prisma: any) {
   if (!prisma) {
     return Object.values(TOPUP_PACKAGES).map(normalizePackage);
   }
-  await ensureTopupPackages(prisma);
-  const rows = await prisma.topupPackage.findMany({
-    orderBy: { price: "asc" },
-  });
-  if (rows.length > 0) {
-    return rows.map(normalizePackage);
+  try {
+    await ensureTopupPackages(prisma);
+    const rows = await prisma.topupPackage.findMany({
+      orderBy: { price: "asc" },
+    });
+    if (rows.length > 0) {
+      return rows.map(normalizePackage);
+    }
+  } catch {
+    // fallback below
   }
   return Object.values(TOPUP_PACKAGES).map(normalizePackage);
 }

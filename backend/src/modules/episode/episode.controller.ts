@@ -1,4 +1,5 @@
 import { Controller, Get, Logger, Query, Req, Res } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { EpisodeService } from "./episode.service";
 import { Request, Response } from "express";
 import { checkAdultGate } from "../../common/utils/adult-gate";
@@ -16,6 +17,77 @@ export class EpisodeController {
     private readonly prisma: PrismaService,
     private readonly statsService: StatsService
   ) {}
+
+  private isSchemaDriftError(error: unknown): boolean {
+    if (!error || typeof error !== "object") {
+      return false;
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return error.code === "P2021" || error.code === "P2022";
+    }
+    const message = String((error as { message?: string }).message || "");
+    return message.includes("does not exist") || message.includes("Unknown column");
+  }
+
+  private async findSeriesLite(seriesId: string) {
+    try {
+      return await this.prisma.series.findUnique({
+        where: { id: seriesId },
+        select: {
+          id: true,
+          type: true,
+          adult: true,
+        },
+      });
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        `Series lite query failed for ${seriesId}, switching to compatibility mode.`,
+      );
+    }
+
+    try {
+      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, any>>>(
+        `SELECT "id", "type", "adult" FROM "series" WHERE "id" = $1 LIMIT 1`,
+        seriesId,
+      );
+      if (!rows.length) {
+        return null;
+      }
+      return {
+        id: String(rows[0].id || ""),
+        type: String(rows[0].type || "comic"),
+        adult: Boolean(rows[0].adult),
+      };
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+    }
+
+    try {
+      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, any>>>(
+        `SELECT "id", "type" FROM "series" WHERE "id" = $1 LIMIT 1`,
+        seriesId,
+      );
+      if (!rows.length) {
+        return null;
+      }
+      return {
+        id: String(rows[0].id || ""),
+        type: String(rows[0].type || "comic"),
+        adult: false,
+      };
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+      this.logger.warn(`Series compatibility query failed for ${seriesId}.`);
+      return null;
+    }
+  }
 
   @Get()
   async getEpisode(
@@ -37,7 +109,7 @@ export class EpisodeController {
       return buildError(ERROR_CODES.INVALID_REQUEST, { message: "episodeId is required" });
     }
 
-    const series = await this.prisma.series.findUnique({ where: { id: normalizedSeriesId } });
+    const series = await this.findSeriesLite(normalizedSeriesId);
     if (!series) {
       res.status(404);
       return buildError(ERROR_CODES.NOT_FOUND);

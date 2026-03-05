@@ -46,48 +46,60 @@ function normalizePlan(input: any) {
 }
 
 async function ensurePlans(prisma: any) {
-  const count = await prisma.subscriptionPlan.count();
-  if (count > 0) {
-    return;
+  try {
+    const count = await prisma.subscriptionPlan.count();
+    if (count > 0) {
+      return;
+    }
+    const values = Object.values(PLAN_CATALOG).map((item) => ({
+      id: item.id,
+      discountPct: item.discountPct,
+      dailyFreeUnlocks: item.dailyFreeUnlocks,
+      ttfMultiplier: item.ttfMultiplier,
+      voucherPts: item.voucherPts,
+      price: item.price || 0,
+      currency: item.currency || "USD",
+      active: true,
+      label: "",
+    }));
+    await prisma.subscriptionPlan.createMany({ data: values, skipDuplicates: true });
+  } catch {
+    // Schema drift or missing table: fallback to static catalog.
   }
-  const values = Object.values(PLAN_CATALOG).map((item) => ({
-    id: item.id,
-    discountPct: item.discountPct,
-    dailyFreeUnlocks: item.dailyFreeUnlocks,
-    ttfMultiplier: item.ttfMultiplier,
-    voucherPts: item.voucherPts,
-    price: item.price || 0,
-    currency: item.currency || "USD",
-    active: true,
-    label: "",
-  }));
-  await prisma.subscriptionPlan.createMany({ data: values, skipDuplicates: true });
 }
 
 export async function getPlanCatalog(prisma: any) {
   if (!prisma) {
     return { ...PLAN_CATALOG };
   }
-  await ensurePlans(prisma);
-  const rows = await prisma.subscriptionPlan.findMany();
-  if (!rows.length) {
+  try {
+    await ensurePlans(prisma);
+    const rows = await prisma.subscriptionPlan.findMany();
+    if (!rows.length) {
+      return { ...PLAN_CATALOG };
+    }
+    const catalog: Record<string, any> = {};
+    rows.forEach((row: any) => {
+      catalog[row.id] = normalizePlan(row);
+    });
+    return catalog;
+  } catch {
     return { ...PLAN_CATALOG };
   }
-  const catalog: Record<string, any> = {};
-  rows.forEach((row: any) => {
-    catalog[row.id] = normalizePlan(row);
-  });
-  return catalog;
 }
 
 export async function getPlanById(prisma: any, planId: string) {
   if (!prisma || !planId) {
     return PLAN_CATALOG[planId] || null;
   }
-  await ensurePlans(prisma);
-  const row = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
-  if (row) {
-    return normalizePlan(row);
+  try {
+    await ensurePlans(prisma);
+    const row = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
+    if (row) {
+      return normalizePlan(row);
+    }
+  } catch {
+    // fallback below
   }
   return PLAN_CATALOG[planId] || null;
 }
