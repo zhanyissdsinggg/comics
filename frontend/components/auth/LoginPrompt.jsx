@@ -5,10 +5,10 @@ import { X, LogIn, Sparkles, Gift, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 /**
- * 鑰佺帇娉ㄩ噴锛氱櫥褰曞紩瀵煎脊绐楃粍浠?- iOS椋庢牸
- * 鍔熻兘锛氬弸濂藉湴寮曞鐢ㄦ埛鐧诲綍锛屾彁鍗囨敞鍐岃浆鍖栫巼
- * 閬靛惊KISS鍘熷垯锛氱畝娲佹槑浜嗙殑寮曞淇℃伅
- * 閬靛惊DRY鍘熷垯锛氬彲澶嶇敤鐨勫脊绐楃粍浠? */
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment. */
 const LoginPrompt = memo(function LoginPrompt({
   isOpen = false,
   onClose,
@@ -24,7 +24,7 @@ const LoginPrompt = memo(function LoginPrompt({
   const router = useRouter();
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // 鑰佺帇娉ㄩ噴锛氭帶鍒跺姩鐢?
+  // NOTE: cleaned corrupted comment.
   useEffect(() => {
     if (isOpen) {
       // 寤惰繜鏄剧ず鍔ㄧ敾
@@ -34,7 +34,7 @@ const LoginPrompt = memo(function LoginPrompt({
     }
   }, [isOpen]);
 
-  // 鑰佺帇娉ㄩ噴锛氬鐞嗗叧闂?
+  // NOTE: cleaned corrupted comment.
   const handleClose = () => {
     setIsAnimating(false);
     setTimeout(() => {
@@ -42,10 +42,10 @@ const LoginPrompt = memo(function LoginPrompt({
     }, 300);
   };
 
-  // 鑰佺帇淇锛氳Е鍙戞墦寮€鐪熸鐨勭櫥褰曡〃鍗曪紙LoginGateModal锛?
+  // NOTE: cleaned corrupted comment.
   const handleLogin = () => {
     handleClose();
-    // 寤惰繜瑙﹀彂浜嬩欢锛岃鍏抽棴鍔ㄧ敾瀹屾垚
+    // NOTE: cleaned corrupted comment.
     setTimeout(() => {
       const event = new CustomEvent("auth:open", {
         detail: { returnTo: "/" }
@@ -54,7 +54,7 @@ const LoginPrompt = memo(function LoginPrompt({
     }, 300);
   };
 
-  // 鑰佺帇淇锛氳Е鍙戞墦寮€娉ㄥ唽琛ㄥ崟
+  // NOTE: cleaned corrupted comment.
   const handleSignup = () => {
     handleClose();
     setTimeout(() => {
@@ -65,7 +65,7 @@ const LoginPrompt = memo(function LoginPrompt({
     }, 300);
   };
 
-  // 鑰佺帇娉ㄩ噴锛氶樆姝㈢偣鍑讳簨浠跺啋娉?
+  // NOTE: cleaned corrupted comment.
   const handleContentClick = (e) => {
     e.stopPropagation();
   };

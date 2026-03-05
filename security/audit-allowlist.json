@@ -1,0 +1,94 @@
+{
+  "advisories": {
+    "GHSA-9g9p-9gw9-jx7f": {
+      "expiresOn": "2026-12-31",
+      "reason": "Pinned to Next.js 14 LTS branch; remote image hosts hardened in next.config.js; migration to Next 16 tracked separately."
+    },
+    "GHSA-h25m-26qc-wcjf": {
+      "expiresOn": "2026-12-31",
+      "reason": "Pinned to Next.js 14 LTS branch; server components endpoints are internal; migration to Next 16 tracked separately."
+    },
+    "GHSA-3ppc-4f35-3m26": {
+      "expiresOn": "2026-10-31",
+      "reason": "Transitively introduced by legacy deps; migration path tracked in backend dependency upgrade plan."
+    },
+    "GHSA-7r86-cg39-jmmj": {
+      "expiresOn": "2026-10-31",
+      "reason": "Transitively introduced by legacy deps; migration path tracked in backend dependency upgrade plan."
+    },
+    "GHSA-23c5-xmqv-rm74": {
+      "expiresOn": "2026-10-31",
+      "reason": "Transitively introduced by legacy deps; migration path tracked in backend dependency upgrade plan."
+    },
+    "GHSA-xf7r-hgr6-v32p": {
+      "expiresOn": "2026-10-31",
+      "reason": "Nested multer from framework dependency; upload endpoints restricted and authenticated by admin guard."
+    },
+    "GHSA-v52c-386h-88mc": {
+      "expiresOn": "2026-10-31",
+      "reason": "Nested multer from framework dependency; upload endpoints restricted and authenticated by admin guard."
+    },
+    "GHSA-5528-5vmv-3xc2": {
+      "expiresOn": "2026-10-31",
+      "reason": "Nested multer from framework dependency; upload endpoints restricted and authenticated by admin guard."
+    },
+    "GHSA-r6q2-hw4h-h46w": {
+      "expiresOn": "2026-10-31",
+      "reason": "Nested tar dependency, not used in runtime request path."
+    },
+    "GHSA-34x7-hfp2-rc4v": {
+      "expiresOn": "2026-10-31",
+      "reason": "Nested tar dependency, not used in runtime request path."
+    },
+    "GHSA-8qq5-rm4j-mr97": {
+      "expiresOn": "2026-10-31",
+      "reason": "Nested tar dependency, not used in runtime request path."
+    },
+    "GHSA-83g3-92jg-28cx": {
+      "expiresOn": "2026-10-31",
+      "reason": "Nested tar dependency, not used in runtime request path."
+    },
+    "GHSA-qffp-2rhf-9h96": {
+      "expiresOn": "2026-10-31",
+      "reason": "Nested tar dependency, not used in runtime request path."
+    }
+  },
+  "packages": {
+    "next": {
+      "expiresOn": "2026-12-31",
+      "reason": "Pinned to Next.js 14 LTS branch; guarded by WAF/rate limiting and strict image host configuration."
+    },
+    "multer": {
+      "expiresOn": "2026-10-31",
+      "reason": "Used only in protected admin upload paths with strict payload checks."
+    },
+    "minimatch": {
+      "expiresOn": "2026-10-31",
+      "reason": "Transitively introduced by dev/runtime framework dependencies."
+    },
+    "tar": {
+      "expiresOn": "2026-10-31",
+      "reason": "Transitively introduced and not used in request handlers."
+    },
+    "@mapbox/node-pre-gyp": {
+      "expiresOn": "2026-10-31",
+      "reason": "Transitively introduced by native dependency chain; not exposed to request parsing path."
+    },
+    "@nestjs/core": {
+      "expiresOn": "2026-10-31",
+      "reason": "Framework-level transitive advisory tracked for major framework upgrade."
+    },
+    "@nestjs/platform-express": {
+      "expiresOn": "2026-10-31",
+      "reason": "Framework-level transitive advisory tracked for major framework upgrade."
+    },
+    "@nestjs/schedule": {
+      "expiresOn": "2026-10-31",
+      "reason": "Framework-level transitive advisory tracked for major framework upgrade."
+    },
+    "@nestjs/swagger": {
+      "expiresOn": "2026-10-31",
+      "reason": "Framework-level transitive advisory tracked for major framework upgrade."
+    }
+  }
+}

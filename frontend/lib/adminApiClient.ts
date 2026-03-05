@@ -1,7 +1,7 @@
 /**
  * Admin API瀹㈡埛绔?- 鍓嶇涓撶敤
- * 鑰佺帇璇达細杩欎釜SB鏂囦欢鍚堝苟浜哸dminApiClient.js鍜宎dminFetch.ts
- * 鍩轰簬閫氱敤apiClient鎵╁睍锛屾彁渚沘dmin鐗瑰畾鐨勪究鎹峰嚱鏁板拰CSRF淇濇姢
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  */
 
 import {
@@ -37,7 +37,7 @@ export interface PaginatedResponse<T> {
 
 /**
  * 鑾峰彇CSRF token
- * 浠巑eta鏍囩涓鍙朇SRF token锛岀敤浜庨槻姝SRF鏀诲嚮
+ * NOTE: cleaned corrupted comment.
  */
 function getCsrfToken(): string {
   if (typeof document === "undefined") {
@@ -49,7 +49,7 @@ function getCsrfToken(): string {
 
 /**
  * 娣诲姞CSRF token鍒拌姹傚ご
- * 鑰佺帇璇达細POST/PATCH/DELETE璇锋眰蹇呴』鍔燙SRF token锛岃繖鏄搧寰? */
+ * NOTE: cleaned corrupted comment. */
 function addCsrfToken(headers: Record<string, string>, method?: string): Record<string, string> {
   if (!method || !["POST", "PATCH", "DELETE"].includes(method.toUpperCase())) {
     return headers;
@@ -65,7 +65,7 @@ function addCsrfToken(headers: Record<string, string>, method?: string): Record<
 
 /**
  * 鍑嗗admin璇锋眰鐨刪eaders
- * 鑰佺帇璇达細缁熶竴澶勭悊Authorization鍜孋SRF token
+ * NOTE: cleaned corrupted comment.
  */
 function prepareAdminHeaders(
   method?: string,
@@ -73,7 +73,7 @@ function prepareAdminHeaders(
 ): Record<string, string> {
   const headers = { ...customHeaders };
 
-  // 娣诲姞CSRF token锛圥OST/PATCH/DELETE锛?
+  // NOTE: cleaned corrupted comment.
   return addCsrfToken(headers, method);
 }
 
@@ -81,8 +81,8 @@ function prepareAdminHeaders(
 
 /**
  * 閫氱敤鐨凙dmin Fetch鍑芥暟
- * 鑰佺帇璇达細杩欎釜SB鍑芥暟灏辨槸鏍囧噯fetch鐨刟dmin鐗堟湰锛岃嚜鍔ㄥ姞headers鍜孋SRF token
- * 杩斿洖鏍囧噯鐨凴esponse瀵硅薄锛屼笉鏄疉piResponse
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  */
 export async function adminFetch(
   url: string,
@@ -105,7 +105,7 @@ export async function adminFetch(
 
 /**
  * Admin GET璇锋眰
- * 鑰佺帇璇达細绠€鍗曠殑GET璇锋眰灏辩敤杩欎釜锛屽埆tm鍐欓偅涔堝浠ｇ爜
+ * NOTE: cleaned corrupted comment.
  */
 export async function adminGet<T = any>(
   path: string,
@@ -117,7 +117,7 @@ export async function adminGet<T = any>(
 
 /**
  * Admin POST璇锋眰
- * 鑰佺帇璇达細POST璇锋眰鐢ㄨ繖涓紝鑷姩澶勭悊JSON搴忓垪鍖栧拰CSRF淇濇姢
+ * NOTE: cleaned corrupted comment.
  */
 export async function adminPost<T = any>(
   path: string,
@@ -130,7 +130,7 @@ export async function adminPost<T = any>(
 
 /**
  * Admin PATCH璇锋眰
- * 鑰佺帇璇达細PATCH璇锋眰鐢ㄨ繖涓紝鑷姩澶勭悊JSON搴忓垪鍖栧拰CSRF淇濇姢
+ * NOTE: cleaned corrupted comment.
  */
 export async function adminPatch<T = any>(
   path: string,
@@ -143,7 +143,7 @@ export async function adminPatch<T = any>(
 
 /**
  * Admin DELETE璇锋眰
- * 鑰佺帇璇达細DELETE璇锋眰鐢ㄨ繖涓紝绠€鍗曠矖鏆? */
+ * NOTE: cleaned corrupted comment. */
 export async function adminDelete<T = any>(
   path: string,
   body?: any,
@@ -155,7 +155,7 @@ export async function adminDelete<T = any>(
 
 /**
  * Admin鏂囦欢涓婁紶
- * 鑰佺帇璇达細涓婁紶鏂囦欢鐢ㄨ繖涓紝鑷姩澶勭悊FormData鍜孋SRF淇濇姢
+ * NOTE: cleaned corrupted comment.
  */
 export async function adminUpload<T = any>(
   path: string,
@@ -349,7 +349,7 @@ export async function getAdminBilling(
 
 /**
  * 鑾峰彇API鍩虹URL
- * 鑰佺帇璇达細鏈夋椂鍊欏墠绔渶瑕佺煡閬揂PI鍩虹URL锛屾瘮濡傛瀯寤烘枃浠朵笂浼犵殑瀹屾暣URL
+ * NOTE: cleaned corrupted comment.
  */
 export function getAdminApiBaseUrl(): string {
   return getApiBaseUrl();

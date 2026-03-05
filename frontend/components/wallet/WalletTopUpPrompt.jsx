@@ -4,9 +4,9 @@ import { memo, useState, useEffect } from "react";
 import { Wallet, Sparkles, Zap, Gift, X } from "lucide-react";
 
 /**
- * 鑰佺帇娉ㄩ噴锛氶挶鍖呭厖鍊煎紩瀵肩粍浠?- iOS椋庢牸
- * 鍔熻兘锛氬紩瀵肩敤鎴峰厖鍊硷紝鎻愬崌鍏呭€艰浆鍖栫巼
- * 閬靛惊KISS鍘熷垯锛氱畝娲佺殑鍏呭€煎紩瀵? * 閬靛惊DRY鍘熷垯锛氬彲澶嶇敤鐨勫紩瀵肩粍浠? */
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment. */
 const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
   isOpen = false,
   onClose,
@@ -15,7 +15,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
 }) {
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // 鑰佺帇娉ㄩ噴锛氬厖鍊煎椁?
+  // NOTE: cleaned corrupted comment.
   const packages = [
     {
       id: "starter",
@@ -40,7 +40,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }
   ];
 
-  // 鑰佺帇娉ㄩ噴锛氭帶鍒跺姩鐢?
+  // NOTE: cleaned corrupted comment.
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => setIsAnimating(true), 50);
@@ -49,7 +49,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }
   }, [isOpen]);
 
-  // 鑰佺帇娉ㄩ噴锛氬鐞嗗叧闂?
+  // NOTE: cleaned corrupted comment.
   const handleClose = () => {
     setIsAnimating(false);
     setTimeout(() => {
@@ -57,7 +57,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }, 300);
   };
 
-  // 鑰佺帇娉ㄩ噴锛氬鐞嗗厖鍊?
+  // NOTE: cleaned corrupted comment.
   const handleSelectPackage = (pkg) => {
     handleClose();
     setTimeout(() => {
@@ -65,7 +65,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }, 300);
   };
 
-  // 鑰佺帇娉ㄩ噴锛氶樆姝㈢偣鍑讳簨浠跺啋娉?
+  // NOTE: cleaned corrupted comment.
   const handleContentClick = (e) => {
     e.stopPropagation();
   };

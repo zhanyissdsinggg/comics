@@ -4,9 +4,9 @@ import { memo, useState, useEffect } from "react";
 import { Sparkles, BookOpen, Gift, X } from "lucide-react";
 
 /**
- * 閼颁胶甯囧▔銊╁櫞閿涙碍鏌婇悽銊﹀煕濞嗐垼绻嬪Ο顏勭畽缂佸嫪娆?
- * 閸旂喕鍏橀敍姘穿鐎靛吋鏌婇悽銊﹀煕瀵偓婵妲勭拠浼欑礉閹绘劒绶佃箛顐︹偓鐔峰弳閸? * 闁潧鎯奒ISS閸樼喎鍨敍姘辩暆濞蹭焦妲戞禍鍡欐畱濞嗐垼绻嬫穱鈩冧紖
- * 闁潧鎯奃RY閸樼喎鍨敍姘辩埠娑撯偓閻ㄥ嫭瀵滈柦顔界壉瀵? */
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment. */
 const NewUserWelcome = memo(function NewUserWelcome({ starterItems, onStartReading, onBrowsePopular }) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -21,7 +21,7 @@ const NewUserWelcome = memo(function NewUserWelcome({ starterItems, onStartReadi
     }
   }, []);
 
-  // 閼颁胶甯囧▔銊╁櫞閿涙艾鍙ч梻顓熋獮?
+  // NOTE: cleaned corrupted comment.
   const handleDismiss = () => {
     setIsAnimating(false);
     setTimeout(() => {

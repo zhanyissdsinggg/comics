@@ -1,6 +1,6 @@
 /**
- * LRU缂撳瓨瀹炵幇
- * 鑹癸紒杩欎釜SB鏃犻檺缂撳瓨瀵艰嚧鍐呭瓨娉勬紡锛岀幇鍦ㄧ敤LRU闄愬埗缂撳瓨澶у皬
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  */
 
 export class LRUCache {
@@ -30,7 +30,7 @@ export class LRUCache {
     // 娣诲姞鏂扮殑key-value
     this.cache.set(key, value);
 
-    // 瓒呰繃澶у皬闄愬埗鏃跺垹闄ゆ渶鏃х殑锛堢涓€涓級
+    // NOTE: cleaned corrupted comment.
     if (this.cache.size > this.maxSize) {
       const firstKey = this.cache.keys().next().value;
       this.cache.delete(firstKey);

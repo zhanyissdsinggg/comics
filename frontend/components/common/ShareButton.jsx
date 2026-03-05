@@ -3,15 +3,15 @@
 import React, { useState, useCallback } from "react";
 
 /**
- * 鑰佺帇娉ㄩ噴锛氬垎浜寜閽粍浠? * 鍔熻兘锛氭敮鎸佸垎浜埌澶氫釜绀句氦濯掍綋骞冲彴
- * 閬靛惊KISS鍘熷垯锛氱畝娲佺殑寮圭獥璁捐
- * 閬靛惊DRY鍘熷垯锛氱粺涓€鐨勫垎浜€昏緫
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  */
 const ShareButton = React.memo(({ url, title, description, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // 鑰佺帇娉ㄩ噴锛氬垎浜钩鍙伴厤缃?
+  // NOTE: cleaned corrupted comment.
   const platforms = [
     {
       id: "facebook",
@@ -55,18 +55,18 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
     },
   ];
 
-  // 鑰佺帇娉ㄩ噴锛氭墦寮€鍒嗕韩寮圭獥
+  // NOTE: cleaned corrupted comment.
   const handleOpen = useCallback(() => {
     setIsOpen(true);
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氬叧闂垎浜脊绐?
+  // NOTE: cleaned corrupted comment.
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setCopied(false);
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氬垎浜埌绀句氦濯掍綋
+  // NOTE: cleaned corrupted comment.
   const handleShare = useCallback(
     (platform) => {
       const shareUrl = platform.getUrl(url, title);
@@ -75,7 +75,7 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
     [url, title]
   );
 
-  // 鑰佺帇娉ㄩ噴锛氬鍒堕摼鎺?
+  // NOTE: cleaned corrupted comment.
   const handleCopyLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(url);
@@ -86,7 +86,7 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
     }
   }, [url]);
 
-  // 鑰佺帇娉ㄩ噴锛氫娇鐢╓eb Share API锛堢Щ鍔ㄧ锛?
+  // NOTE: cleaned corrupted comment.
   const handleNativeShare = useCallback(async () => {
     if (navigator.share) {
       try {
@@ -96,7 +96,7 @@ const ShareButton = React.memo(({ url, title, description, className = "" }) => 
           url: url,
         });
       } catch (error) {
-        // 鑰佺帇娉ㄩ噴锛氱敤鎴峰彇娑堝垎浜紝涓嶉渶瑕佹姤閿?
+        // NOTE: cleaned corrupted comment.
         if (error.name !== "AbortError") {
           console.error("鑹癸紝鍒嗕韩澶辫触:", error);
         }

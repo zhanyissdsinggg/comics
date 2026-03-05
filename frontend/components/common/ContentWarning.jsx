@@ -1,5 +1,5 @@
 /**
- * 闁奸鑳剁敮鍥儍閸曨偄鏁堕悗鍦攰椤掔喖宕ㄦ繝鍕煁濞?- 婵炲柌鍛硶閻庣數鎳撻崬瀵糕偓鍦嚀閸ㄥ海鐥缁躲垽寮箛鏂垮Τ
+ * NOTE: cleaned corrupted comment.
  * 闁活潿鍔嬬花顒勫冀閸ヮ亶鍞堕柟瀛樺姃濮瑰宕橀崨顓у晣闁靛棔鐒﹀В姘跺礉濞戞牑鍋撴担瑙勬珱闁规壆鍠曢惁鑺ワ紣濡偐鎼?
  */
 "use client";
@@ -7,7 +7,7 @@
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
-// 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欒壘閸炲鈧湱顢婇鐔煎川婵犲嫯顫﹂柛?
+// NOTE: cleaned corrupted comment.
 const WARNING_TYPES = {
   adult: {
     label: "Adult Content",
@@ -34,7 +34,7 @@ export default function ContentWarning({ type = "adult", children, alwaysShow = 
   const warning = WARNING_TYPES[type] || WARNING_TYPES.adult;
   const Icon = warning.icon;
 
-  // 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欒壘椤┭囧几濠婂懏鏆忛柟瀵稿厴閳ь剙顦扮€氥劑寮伴崜褋浠涢柨娑樼灱濞插潡骞掗妷锔解枖缂佲偓閸濆嫬鏁堕悗?
+  // NOTE: cleaned corrupted comment.
   if (revealed) {
     return (
       <div className="relative">

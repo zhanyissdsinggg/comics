@@ -13,19 +13,19 @@ const ReaderSettingsContext = createContext(null);
 const STORAGE_KEY = "mn_reader_settings";
 
 const DEFAULT_SETTINGS = {
-  // 鑰佺帇娉ㄩ噴锛氫富棰樿缃?  theme: "light", // light, dark, sepia
+  // NOTE: cleaned corrupted comment.
   nightMode: false, // 鍏煎鏃х増鏈?
-  // 鑰佺帇娉ㄩ噴锛氬竷灞€璁剧疆
+  // NOTE: cleaned corrupted comment.
   layoutMode: "vertical", // vertical, horizontal
   readingMode: "scroll", // scroll, single, double
 
-  // 鑰佺帇娉ㄩ噴锛氬瓧浣撹缃?  fontSize: 16, // 12-24px
+  // NOTE: cleaned corrupted comment.
   lineHeight: 1.6, // 1.2-2.0
 
-  // 鑰佺帇娉ㄩ噴锛氭樉绀鸿缃?  brightness: 100, // 50-150%
+  // NOTE: cleaned corrupted comment.
   backgroundColor: "#ffffff",
 
-  // 鑰佺帇娉ㄩ噴锛氬叾浠栬缃?  fullscreen: false,
+  // NOTE: cleaned corrupted comment.
   autoScroll: false,
   autoScrollSpeed: 1, // 1-5
 };
@@ -84,7 +84,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氫富棰樿缃?
+  // NOTE: cleaned corrupted comment.
   const setTheme = useCallback((theme) => {
     setSettings((prev) => {
       const validThemes = ["light", "dark", "sepia"];
@@ -98,7 +98,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氶槄璇绘ā寮忚缃?
+  // NOTE: cleaned corrupted comment.
   const setReadingMode = useCallback((mode) => {
     setSettings((prev) => {
       const validModes = ["scroll", "single", "double"];
@@ -108,7 +108,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氬瓧浣撳ぇ灏忚缃?
+  // NOTE: cleaned corrupted comment.
   const setFontSize = useCallback((size) => {
     setSettings((prev) => {
       const fontSize = Math.max(12, Math.min(24, Number(size) || 16));
@@ -118,7 +118,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氳楂樿缃?
+  // NOTE: cleaned corrupted comment.
   const setLineHeight = useCallback((height) => {
     setSettings((prev) => {
       const lineHeight = Math.max(1.2, Math.min(2.0, Number(height) || 1.6));
@@ -128,7 +128,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氫寒搴﹁缃?
+  // NOTE: cleaned corrupted comment.
   const setBrightness = useCallback((brightness) => {
     setSettings((prev) => {
       const value = Math.max(50, Math.min(150, Number(brightness) || 100));
@@ -138,7 +138,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氳儗鏅壊璁剧疆
+  // NOTE: cleaned corrupted comment.
   const setBackgroundColor = useCallback((color) => {
     setSettings((prev) => {
       const next = { ...prev, backgroundColor: color || "#ffffff" };
@@ -147,7 +147,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氬叏灞忔ā寮忚缃?
+  // NOTE: cleaned corrupted comment.
   const setFullscreen = useCallback((value) => {
     setSettings((prev) => {
       const next = { ...prev, fullscreen: Boolean(value) };
@@ -164,7 +164,7 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氳嚜鍔ㄦ粴鍔ㄨ缃?
+  // NOTE: cleaned corrupted comment.
   const setAutoScroll = useCallback((value) => {
     setSettings((prev) => {
       const next = { ...prev, autoScroll: Boolean(value) };
@@ -184,9 +184,9 @@ export function ReaderSettingsProvider({ children }) {
 
   const value = useMemo(
     () => ({
-      // 鑰佺帇娉ㄩ噴锛氭墍鏈夎缃€?      ...settings,
+      // NOTE: cleaned corrupted comment.
 
-      // 鑰佺帇娉ㄩ噴锛氭墍鏈夎缃柟娉?      setNightMode,
+      // NOTE: cleaned corrupted comment.
       toggleNightMode,
       setLayoutMode,
       setTheme,

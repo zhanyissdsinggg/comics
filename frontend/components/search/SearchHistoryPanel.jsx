@@ -6,13 +6,13 @@ const SEARCH_HISTORY_KEY = "mn_search_history";
 const MAX_HISTORY_ITEMS = 10;
 
 /**
- * 鑰佺帇娉ㄩ噴锛氭悳绱㈠巻鍙插拰寤鸿缁勪欢
- * 鏄剧ず鏈€杩戞悳绱㈠巻鍙插拰鐑棬鎼滅储寤鸿
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  */
 const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywords = [] }) {
   const [history, setHistory] = useState([]);
 
-  // 鑰佺帇娉ㄩ噴锛氫粠localStorage鍔犺浇鎼滅储鍘嗗彶
+  // NOTE: cleaned corrupted comment.
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem(SEARCH_HISTORY_KEY);
@@ -27,7 +27,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   }, []);
 
-  // 鑰佺帇娉ㄩ噴锛氭坊鍔犳悳绱㈠巻鍙?
+  // NOTE: cleaned corrupted comment.
   const addToHistory = (keyword) => {
     if (!keyword || !keyword.trim()) {
       return;
@@ -46,7 +46,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   };
 
-  // 鑰佺帇娉ㄩ噴锛氬垹闄ゅ崟涓巻鍙茶褰?
+  // NOTE: cleaned corrupted comment.
   const removeFromHistory = (keyword) => {
     const newHistory = history.filter((item) => item !== keyword);
     setHistory(newHistory);
@@ -56,7 +56,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   };
 
-  // 鑰佺帇娉ㄩ噴锛氭竻绌烘墍鏈夊巻鍙?
+  // NOTE: cleaned corrupted comment.
   const clearHistory = () => {
     setHistory([]);
     if (typeof window !== "undefined") {
@@ -64,7 +64,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   };
 
-  // 鑰佺帇娉ㄩ噴锛氬鐞嗘悳绱㈢偣鍑?
+  // NOTE: cleaned corrupted comment.
   const handleSearch = (keyword) => {
     addToHistory(keyword);
     if (onSearch) {

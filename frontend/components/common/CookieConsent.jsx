@@ -1,6 +1,6 @@
 ﻿/**
  * Cookie Consent Banner Component
- * 鑰佺帇閲嶆瀯锛氱Щ闄ext-intl渚濊禆锛岀洿鎺ョ敤鑻辨枃鏂囨湰
+ * NOTE: cleaned corrupted comment.
  * 绗﹀悎 GDPR/CCPA 瑕佹眰鐨?Cookie 鍚屾剰妯箙
  */
 "use client";
@@ -13,10 +13,10 @@ export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    // 鑰佺帇娉ㄩ噴锛氭鏌ョ敤鎴锋槸鍚﹀凡缁忓仛鍑洪€夋嫨
+    // NOTE: cleaned corrupted comment.
     const consent = localStorage.getItem("cookie_consent");
     if (!consent) {
-      // 鑰佺帇娉ㄩ噴锛氬欢杩?1 绉掓樉绀猴紝閬垮厤鎵撴壈鐢ㄦ埛
+      // NOTE: cleaned corrupted comment.
       const timer = setTimeout(() => {
         setShowBanner(true);
       }, 1000);
@@ -25,7 +25,7 @@ export default function CookieConsent() {
   }, []);
 
   const handleAccept = () => {
-    // 鑰佺帇娉ㄩ噴锛氱敤鎴锋帴鍙?Cookie
+    // NOTE: cleaned corrupted comment.
     localStorage.setItem("cookie_consent", "accepted");
     setShowBanner(false);
   };

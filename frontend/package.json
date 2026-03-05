@@ -13,6 +13,8 @@
     "lint": "next lint",
     "perf:budget": "node scripts/check-performance-budget.mjs",
     "smoke:routes": "node scripts/smoke-routes.mjs",
+    "test:e2e:browser": "playwright test",
+    "test:e2e:browser:headed": "playwright test --headed",
     "analyze": "cross-env ANALYZE=true next build",
     "analyze:server": "cross-env BUNDLE_ANALYZE=server next build",
     "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build"
@@ -29,6 +31,7 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "@next/bundle-analyzer": "^14.2.35",
     "autoprefixer": "^10.4.20",
     "cross-env": "^7.0.3",

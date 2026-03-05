@@ -1,5 +1,5 @@
 /**
- * 鑰佺帇娉ㄩ噴锛氬皝闈㈢粍浠讹紝鏀寔娓愯繘寮忓姞杞藉拰blur-up鏁堟灉
+ * NOTE: cleaned corrupted comment.
  */
 import { useState } from "react";
 import Image from "next/image";
@@ -14,9 +14,9 @@ const toneMap = {
 };
 
 /**
- * 鑰佺帇娉ㄩ噴锛氬皢 placehold.co 鐨?SVG URL 杞负 PNG 鏍煎紡
- * Next.js Image Optimization 涓嶆敮鎸?SVG锛宲lacehold.co 榛樿杩斿洖 SVG
- * 瑙ｅ喅鏂规锛氬湪 URL 鐨勮矾寰勯儴鍒嗗姞涓?.png 鎵╁睍鍚? * 渚嬶細https://placehold.co/400x600/ff0000/fff?text=Hello
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  *  鈫?https://placehold.co/400x600/ff0000/fff.png?text=Hello
  */
 function normalizeCoverUrl(url) {
@@ -28,7 +28,7 @@ function normalizeCoverUrl(url) {
       return parsed.toString();
     }
   } catch {
-    // 濡傛灉 URL 瑙ｆ瀽澶辫触锛岃繑鍥炲師濮?URL
+    // NOTE: cleaned corrupted comment.
   }
   return url;
 }
@@ -39,7 +39,7 @@ export default function Cover({ tone = "default", coverUrl, className = "", styl
   const background = toneMap[tone] || toneMap.default;
   const resolvedUrl = normalizeCoverUrl(coverUrl);
 
-  // 鑰佺帇娉ㄩ噴锛氬鏋滄湁coverUrl锛屾樉绀哄浘鐗?
+  // NOTE: cleaned corrupted comment.
   if (resolvedUrl) {
     return (
       <div className={`relative ${className}`.trim()} style={style} aria-hidden="true">
@@ -78,7 +78,7 @@ export default function Cover({ tone = "default", coverUrl, className = "", styl
     );
   }
 
-  // 鑰佺帇娉ㄩ噴锛氭病鏈塩overUrl鏃讹紝鏄剧ず娓愬彉鑳屾櫙
+  // NOTE: cleaned corrupted comment.
   return (
     <div
       className={`cover ${className}`.trim()}

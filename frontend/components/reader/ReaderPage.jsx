@@ -110,9 +110,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const { bookmarksBySeries, addBookmark, removeBookmark } = useBookmarkStore();
   const reportedRef = useRef(false);
 
-  // 闂佸憡鍑归崹鎶藉极閵堝鈷撻柛娑㈠亰閸ゃ垽寮堕埡鍌溾槈閻庤濞婇幊娑㈩敂閸曨倣妤€菐閸ャ劎绠撻柣?
+  // NOTE: cleaned corrupted comment.
   const { restoreProgress } = useAutoSaveProgress(seriesId, episodeId, {
-    enabled: isSignedIn, // 闂佸憡鐟禍娆戞嫻閻斿吋鍎岄悹鍥皺缁夊潡鏌ｉ～顒€濡介柛鈺傜⊕缁屽崬鈹戦崱娆愭喖闁哄鏅滅粙鎴犫偓?
+    enabled: isSignedIn, // NOTE: cleaned corrupted comment.
   });
 
   const entitlement = bySeriesId[seriesId] || { unlockedEpisodeIds: [] };
@@ -262,7 +262,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     setLoading(false);
   }, [adultState.isAdultMode, episodeId, seriesId]);
 
-  // 闂佽鍘归崹褰捤囬弻銉︹挀闁告盯鍋婇崵銏ゅ级閳哄倻鈽夐悗?
+  // NOTE: cleaned corrupted comment.
   useEffect(() => {
     if (!loading && episodeData && isSignedIn) {
       restoreProgress();
@@ -921,7 +921,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         onAddBookmark={handleAddBookmark}
         onToggleNight={toggleNightMode}
         onToggleLayout={handleToggleLayout}
-        onOpenSettings={() => setSettingsPanelOpen(true)} // 闂佸ジ顣﹂懗鍓佹暜閸パ€鏋栭柕濞炬櫅濞呯偤鏌ㄥ☉娆戭暡濠⒀嶇畱椤曪綁鍩€椤掑倹濯奸柛鎾楀懏鐎梻鍌氱墑閸ㄥ搫顭?
+        onOpenSettings={() => setSettingsPanelOpen(true)} // NOTE: cleaned corrupted comment.
         onToggleAutoScroll={() => {
           setAutoScroll((prev) => {
             const next = !prev;

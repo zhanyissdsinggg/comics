@@ -6,8 +6,8 @@ import { User } from "lucide-react";
 
 /**
  * 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欘儖vatar濠㈣埖娼欓崕姘辩磼閸曨亝顐?- iOS濡炲瀛╅悧?
- * 闁告梻鍠曢崗姗€鏁嶅顓熲枖缂佲偓閾忚鏆忛柟鏉戝槻閵囨棃宕撹箛銉х闁衡偓椤栨稑鐦柛銉ュ⒔婢ф牠濡存担瑙勭€悗娑欍仠閳ь兛绀佸ù姗€寮? * 闂侇剟娼ч幆濂扞SS闁告鍠庨崹顖炴晬濮樿京鏆嗘繛韫兌濞堟垶寰勯弶鎴濆壖閻忕偞娲滈妵?
- * 闂侇剟娼ч幆濂僐Y闁告鍠庨崹顖炴晬濮橆剙璁插璺虹Ф閺併倝鎯冮崙妾漚tar缂備礁瀚▎?
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  */
 
 export const Avatar = memo(function Avatar({
@@ -43,7 +43,7 @@ export const Avatar = memo(function Avatar({
     busy: "bg-red-500"
   };
 
-  // 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欎亢楠炲繘宕ｉ弽褎鍊抽悗娑欘殘濞堟垶锛冮弽褏鎽熸慨?
+  // NOTE: cleaned corrupted comment.
   const getInitials = (name) => {
     if (!name) return "";
     const parts = name.trim().split(" ");
@@ -132,7 +132,7 @@ export const AvatarGroup = memo(function AvatarGroup({
   );
 });
 
-// 閻㈩垽绠戦幃鏇犫偓娑欘殘濞堟垶寰勯弶鎴濆壖
+// NOTE: cleaned corrupted comment.
 export const AvatarWithName = memo(function AvatarWithName({
   src,
   name,

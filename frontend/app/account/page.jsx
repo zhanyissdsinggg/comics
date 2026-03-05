@@ -167,7 +167,7 @@ export default function AccountPage() {
     }
   };
 
-  // 鑰佺帇娉ㄩ噴锛氬鐞嗗瘑鐮侀噸缃?
+  // NOTE: cleaned corrupted comment.
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setResetStatus("");

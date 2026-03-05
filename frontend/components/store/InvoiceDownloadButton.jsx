@@ -3,8 +3,8 @@
 import React, { useState, useCallback } from "react";
 
 /**
- * 閼颁胶甯囧▔銊╁櫞閿涙艾褰傜粊銊ょ瑓鏉炶姤瀵滈柦顔剧矋娴? * 閸旂喕鍏橀敍姘暜閹镐椒绗呮潪绲嘍F閸滃瓔SV閺嶇厧绱￠惃鍕絺缁? * 闁潧鎯奒ISS閸樼喎鍨敍姘辩暆濞蹭胶娈戞稉瀣祰濞翠胶鈻?
- * 闁潧鎯奃RY閸樼喎鍨敍姘辩埠娑撯偓閻ㄥ嫪绗呮潪浠嬧偓鏄忕帆
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  */
 const InvoiceDownloadButton = React.memo(({ order, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,7 +13,7 @@ const InvoiceDownloadButton = React.memo(({ order, className = "" }) => {
 
   // 閼颁胶甯囧▔銊╁櫞閿涙氨鏁撻幋鎬璂F閸欐垹銈?
   const generatePDF = useCallback((order) => {
-    // 閼颁胶甯囧▔銊╁櫞閿涙艾鐤勯梽鍛淬€嶉惄顔昏厬鎼存棁顕氱拫鍐暏閸氬海顏珹PI閻㈢喐鍨歅DF
+    // NOTE: cleaned corrupted comment.
     const content = `
 INVOICE
 Order ID: ${order.id}
@@ -32,7 +32,7 @@ Total: $${order.amount}
 
   // 閼颁胶甯囧▔銊╁櫞閿涙氨鏁撻幋鎬孲V閸欐垹銈?
   const generateCSV = useCallback((order) => {
-    // 閼颁胶甯囧▔銊╁櫞閿涙艾鐤勯梽鍛淬€嶉惄顔昏厬鎼存棁顕氱拫鍐暏閸氬海顏珹PI閻㈢喐鍨欳SV
+    // NOTE: cleaned corrupted comment.
     const headers = "Order ID,Date,Item,Price,Total\n";
     const rows =
       order.items

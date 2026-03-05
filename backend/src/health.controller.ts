@@ -32,4 +32,35 @@ export class HealthController {
       retryPending,
     };
   }
+
+  @Get("live")
+  live() {
+    return {
+      ok: true,
+      uptimeSec: Math.round(process.uptime()),
+      time: new Date().toISOString(),
+    };
+  }
+
+  @Get("ready")
+  async ready() {
+    let dbOk = true;
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+    } catch {
+      dbOk = false;
+    }
+
+    const memory = process.memoryUsage();
+    return {
+      ok: dbOk,
+      dbOk,
+      uptimeSec: Math.round(process.uptime()),
+      memoryMB: {
+        rss: Math.round(memory.rss / 1024 / 1024),
+        heapUsed: Math.round(memory.heapUsed / 1024 / 1024),
+      },
+      time: new Date().toISOString(),
+    };
+  }
 }

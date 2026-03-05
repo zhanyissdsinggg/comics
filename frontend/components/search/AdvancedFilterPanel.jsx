@@ -3,7 +3,7 @@
 import { memo, useState } from "react";
 
 /**
- * 鑰佺帇娉ㄩ噴锛氶珮绾х瓫閫夐潰鏉跨粍浠? * 鎻愪緵绫诲瀷銆佹爣绛俱€佷綔鑰呫€佺姸鎬佺瓑澶氱淮搴︾瓫閫夊姛鑳? */
+ * NOTE: cleaned corrupted comment. */
 const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose, onApply, initialFilters = {} }) {
   const [filters, setFilters] = useState({
     types: initialFilters.types || [],
@@ -13,7 +13,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     author: initialFilters.author || "",
   });
 
-  // 鑰佺帇娉ㄩ噴锛氬彲鐢ㄧ殑绛涢€夐€夐」
+  // NOTE: cleaned corrupted comment.
   const TYPE_OPTIONS = [
     { value: "comic", label: "Comic", icon: "馃摎" },
     { value: "novel", label: "Novel", icon: "馃摉" },
@@ -49,7 +49,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     { value: "alphabetical", label: "A-Z" },
   ];
 
-  // 鑰佺帇娉ㄩ噴锛氬垏鎹㈢被鍨嬮€夋嫨
+  // NOTE: cleaned corrupted comment.
   const toggleType = (type) => {
     setFilters((prev) => ({
       ...prev,
@@ -59,7 +59,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     }));
   };
 
-  // 鑰佺帇娉ㄩ噴锛氬垏鎹㈡爣绛鹃€夋嫨
+  // NOTE: cleaned corrupted comment.
   const toggleTag = (tag) => {
     setFilters((prev) => ({
       ...prev,
@@ -69,7 +69,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     }));
   };
 
-  // 鑰佺帇娉ㄩ噴锛氶噸缃墍鏈夌瓫閫?
+  // NOTE: cleaned corrupted comment.
   const handleReset = () => {
     setFilters({
       types: [],
@@ -80,7 +80,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
     });
   };
 
-  // 鑰佺帇娉ㄩ噴锛氬簲鐢ㄧ瓫閫?
+  // NOTE: cleaned corrupted comment.
   const handleApply = () => {
     if (onApply) {
       onApply(filters);

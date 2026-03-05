@@ -13,7 +13,7 @@ function getBackendBaseUrl(requestUrl) {
     const reqUrl = new URL(requestUrl);
     const baseUrl = new URL(normalizedBase);
     if (baseUrl.protocol === reqUrl.protocol && baseUrl.host === reqUrl.host) {
-      // 閬垮厤 Next API route 鍐嶆杞彂鍒拌嚜韬紝瀵艰嚧閫掑綊浠ｇ悊銆?
+      // NOTE: cleaned corrupted comment.
       return null;
     }
   } catch {

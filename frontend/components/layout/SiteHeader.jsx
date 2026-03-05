@@ -17,8 +17,8 @@ const HeaderSearch = dynamic(() => import("./HeaderSearch"), {
 });
 
 /**
- * SiteHeader - 鍙傝€?Webtoon/Tapas 鐨勫鑸爮璁捐
- * - 鍗曡甯冨眬锛歀ogo | Nav | SearchBar | Actions
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  * - 婊氬姩鏃跺崐閫忔槑姣涚幓鐠冩晥鏋? * - 鍝佺墝鑹蹭笅鍒掔嚎瀵艰埅
  */
 export default function SiteHeader({ onSearch }) {

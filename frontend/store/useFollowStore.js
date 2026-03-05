@@ -22,10 +22,10 @@ const DEFAULT_COLLECTIONS = [
 
 export function FollowProvider({ children }) {
   const [followedSeriesIds, setFollowedSeriesIds] = useState([]);
-  // 閼颁胶甯囧▔銊╁櫞閿涙碍鏁归挊蹇撱仚閸掓銆?
+  // NOTE: cleaned corrupted comment.
   const [collections, setCollections] = useState(DEFAULT_COLLECTIONS);
 
-  // 閼颁胶甯囧▔銊╁櫞閿涙矮绮爈ocalStorage閸旂姾娴囬弨鎯版婢?
+  // NOTE: cleaned corrupted comment.
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -75,7 +75,7 @@ export function FollowProvider({ children }) {
     [updateFollow]
   );
 
-  // 閼颁胶甯囧▔銊╁櫞閿涙艾鍨卞鐑樻煀閺€鎯版婢?
+  // NOTE: cleaned corrupted comment.
   const createCollection = useCallback(
     (name) => {
       const newCollection = {
@@ -94,7 +94,7 @@ export function FollowProvider({ children }) {
   // 閼颁胶甯囧▔銊╁櫞閿涙艾鍨归梽銈嗘暪閽樺繐銇?
   const deleteCollection = useCallback(
     (collectionId) => {
-      // 娑撳秴鍘戠拋绋垮灩闂勩倝绮拋銈嗘暪閽樺繐銇?
+      // NOTE: cleaned corrupted comment.
       if (["default", "reading", "completed", "wishlist"].includes(collectionId)) {
         return { ok: false, error: "Cannot delete default collection" };
       }
@@ -105,7 +105,7 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // 閼颁胶甯囧▔銊╁櫞閿涙岸鍣搁崨钘夋倳閺€鎯版婢?
+  // NOTE: cleaned corrupted comment.
   const renameCollection = useCallback(
     (collectionId, newName) => {
       const newCollections = collections.map((c) =>
@@ -136,7 +136,7 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // 閼颁胶甯囧▔銊╁櫞閿涙矮绮犻弨鎯版婢跺湱些闂勩倓缍旈崫?
+  // NOTE: cleaned corrupted comment.
   const removeFromCollection = useCallback(
     (collectionId, seriesId) => {
       const newCollections = collections.map((c) => {
@@ -151,7 +151,7 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // 閼颁胶甯囧▔銊╁櫞閿涙俺骞忛崣鏍︾稊閸濅焦澧嶉崷銊ф畱閺€鎯版婢?
+  // NOTE: cleaned corrupted comment.
   const getCollectionsForSeries = useCallback(
     (seriesId) => {
       return collections.filter((c) => c.seriesIds.includes(seriesId));

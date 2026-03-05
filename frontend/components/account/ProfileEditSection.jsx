@@ -5,7 +5,7 @@ import Image from "next/image";
 import { apiPost } from "../../lib/apiClient";
 
 /**
- * 鑰佺帇娉ㄩ噴锛氫釜浜鸿祫鏂欑紪杈戠粍浠? * 鍖呮嫭澶村儚涓婁紶銆佹樀绉般€佺敓鏃ャ€佺畝浠嬬瓑淇℃伅缂栬緫
+ * NOTE: cleaned corrupted comment.
  */
 const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) {
   const [avatar, setAvatar] = useState(user?.avatar || "");
@@ -16,20 +16,20 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  // 鑰佺帇娉ㄩ噴锛氬鐞嗗ご鍍忔枃浠朵笂浼?
+  // NOTE: cleaned corrupted comment.
   const handleAvatarUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
     }
 
-    // 鑰佺帇娉ㄩ噴锛氭鏌ユ枃浠跺ぇ灏忥紙鏈€澶?MB锛?
+    // NOTE: cleaned corrupted comment.
     if (file.size > 2 * 1024 * 1024) {
       setMessage("Avatar file too large (max 2MB)");
       return;
     }
 
-    // 鑰佺帇娉ㄩ噴锛氭鏌ユ枃浠剁被鍨?
+    // NOTE: cleaned corrupted comment.
     if (!file.type.startsWith("image/")) {
       setMessage("Please upload an image file");
       return;
@@ -39,12 +39,12 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
     setMessage("");
 
     try {
-      // 鑰佺帇娉ㄩ噴锛氬皢鍥剧墖杞崲涓篵ase64
+      // NOTE: cleaned corrupted comment.
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64 = reader.result;
 
-        // 鑰佺帇娉ㄩ噴锛氫笂浼犲埌鏈嶅姟鍣?
+        // NOTE: cleaned corrupted comment.
         const response = await apiPost("/api/auth/upload-avatar", {
           avatar: base64,
         });
@@ -73,7 +73,7 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
     }
   };
 
-  // 鑰佺帇娉ㄩ噴锛氫繚瀛樹釜浜鸿祫鏂?
+  // NOTE: cleaned corrupted comment.
   const handleSave = async () => {
     setSaving(true);
     setMessage("");

@@ -1,9 +1,9 @@
 ﻿/**
- * HomeRecommendations - 闂佽崵濮甸崝妤呭窗閺囥垺鍎楁俊銈呭暞婵ジ鏌ㄥ☉妯侯伀闁哄棭鍓熼弻娑橆煥閸愵亞浼囧銈嗘尰閹倿骞冮崼鏇炲耿婵炴垼椴哥粋鍐╀繆閻愵亜鈧洟鎮樺杈ㄦ殰鐟滅増甯楅崵鎺楁煙闁箑澧柡浣哥埣閹? *
- * 闂備胶鍘у畷顒勬儗娓氣偓閹苯螖閸涱喗娅? * - 闂佽崵濮崇欢銈囨閺囥垺鍋╁┑鐘宠壘缁犳娊鏌曟繛鍨缂佲偓閸嶇ils
- * - 缂傚倷鑳舵刊瀵告閺囥垹绠栧┑鐘叉搐閸屻劑鏌涢埄鍐炬當闁芥垵顦甸幃瑙勬媴鐟欏嫮鍑＄紓鍌氱Т閸氱けil
- * - 缂傚倷鑳舵刊瀵告閺囥垹绠栧┑鐘叉搐缁€鍌炴煣韫囷絽浜濋柡鍡楃墦閺岋繝宕惰閹界娀鏌＄仦绛嬫祩ail
- * - 缂傚倸鍊风粈浣衡偓姘煎灦钘熷┑鐘叉搐鐎氬鏌嶈閸撴稓妲愰幒妤€閱囬柕蹇ョ磿閺嗙嚰ctiveRails
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  */
 
 "use client";
@@ -18,7 +18,7 @@ import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { recommendRails } from "../../lib/reco/recommender";
 import { getRecommendations } from "../../lib/recommendation/engine";
 import { useHomeData } from "./HomeDataProvider";
-import { usePersonalizedRecommendations } from "../../hooks/useAIRecommendations"; // 闂備礁銈搁。锕傛嚄閸撲焦鏆滈柛銉仈鎼达絾瀚氶柟缁樺俯濞奸亶姊洪幐搴ｂ姇妞ゆ垵鈹夐梻浣筋潐娴滀粙宕濊箛鎾舵殾婵帞鍔噊k
+import { usePersonalizedRecommendations } from "../../hooks/useAIRecommendations"; // NOTE: cleaned corrupted comment.
 
 function parseLatestNumber(value) {
   if (!value) {
@@ -40,7 +40,7 @@ export function useHomeRecommendations() {
   const { behavior } = useBehaviorStore();
   const { isAdultMode } = useAdultGateStore();
 
-  // 闂備礁銈搁。锕傛嚄閸撲焦鏆滈柛銉仈鎼达絾瀚氶柟缁樺俯濞奸亶姊洪幐搴ｂ姇妞ゆ垵鈹夊┑鐐村灦閹尖晜绂嶅┑瀣劦妞ゆ埈鍓欓崯顐︻敋瑜旈弻鐔煎箒閹烘垵顫呴悗?
+  // NOTE: cleaned corrupted comment.
   const { data: aiRecommendations, loading: aiLoading } = usePersonalizedRecommendations(
     isSignedIn ? user?.id : null,
     10
@@ -241,7 +241,7 @@ export function useHomeRecommendations() {
       }
     }
 
-    // History rail (if user has history) - 闂備礁銈搁。锕傛嚄閸撲焦鏆滈柛銉戔偓閺嬫牠鏌曟繛鐐珔婵炲懐鍋ら弻銊モ槈濞嗗簼瀛╃紓浣虹帛閻楁绮欐径鎰垫晜闁告洦鍋夐澶愭⒑閻撳海鏋冩俊顐㈠楠炲繘鎯傞惇鏀弔inueRail闂傚倷鐒﹁ぐ鍐矓閹绢啟鍥蓟閵夛附娅栭柣蹇曞仩閸嬫劗绮欑拠鐫酣宕堕妸褏鐣奸梺鍝勬閸嬫挻绻涚€电袨闁稿酣娼у嵄缂備焦顭囬埢鏃堟煕閵夘垰顩い?
+    // NOTE: cleaned corrupted comment.
     if (historyRail.length > 0 && !reco?.continueRail?.length) {
       rails.push({
         id: "history",

@@ -177,11 +177,11 @@ export default function SeriesPage({ seriesId }) {
 
   useEffect(() => {
     if (data?.series?.id) {
-      // 鑰佺帇娉ㄩ噴锛氳繖浜涗笉闇€瑕佽璇侊紝鎵€鏈夌敤鎴烽兘鍙互璋冪敤
+      // NOTE: cleaned corrupted comment.
       trackEvent("view_series", { seriesId: data.series.id });
       viewSeries(data.series.id);
 
-      // 鑰佺帇娉ㄩ噴锛氳繖浜汚PI闇€瑕佽璇侊紝鍙湁鐧诲綍鐢ㄦ埛鎵嶈皟鐢紝閬垮厤401閿欒
+      // NOTE: cleaned corrupted comment.
       if (isSignedIn) {
         loadWallet();
         loadEntitlement(data.series.id);

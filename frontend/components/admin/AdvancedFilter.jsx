@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 /**
- * 鑰佺帇娉ㄩ噴锛氶珮绾ф悳绱㈣繃婊ょ粍浠?- 鏀寔澶氭潯浠舵悳绱€佹棩鏈熻寖鍥淬€佺姸鎬佽繃婊ょ瓑
- * 杩欎釜SB缁勪欢璁╃敤鎴疯兘蹇€熸壘鍒颁粬浠渶瑕佺殑鏁版嵁锛屾彁楂樺伐浣滄晥鐜? */
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment. */
 export function AdvancedFilter({
   onFilter = null,
   filters = [],
@@ -13,7 +13,7 @@ export function AdvancedFilter({
   const [filterValues, setFilterValues] = useState({});
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // 鑰佺帇璇达細澶勭悊杩囨护鍊煎彉鍖?
+  // NOTE: cleaned corrupted comment.
   const handleFilterChange = (filterId, value) => {
     const newValues = {
       ...filterValues,
@@ -22,14 +22,14 @@ export function AdvancedFilter({
     setFilterValues(newValues);
   };
 
-  // 鑰佺帇璇达細搴旂敤杩囨护
+  // NOTE: cleaned corrupted comment.
   const handleApplyFilter = () => {
     if (onFilter) {
       onFilter(filterValues);
     }
   };
 
-  // 鑰佺帇璇达細閲嶇疆杩囨护
+  // NOTE: cleaned corrupted comment.
   const handleResetFilter = () => {
     setFilterValues({});
     if (onFilter) {
@@ -37,7 +37,7 @@ export function AdvancedFilter({
     }
   };
 
-  // 鑰佺帇璇达細妫€鏌ユ槸鍚︽湁娲昏穬鐨勮繃婊?
+  // NOTE: cleaned corrupted comment.
   const hasActiveFilters = Object.values(filterValues).some((v) => v !== "" && v !== null);
 
   return (

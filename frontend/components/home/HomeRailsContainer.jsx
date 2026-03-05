@@ -1,9 +1,9 @@
 /**
- * HomeRailsContainer - 鐠愮喕鐭楀〒鍙夌厠閹碘偓閺堝娈戦崘鍛啇rails
+ * NOTE: cleaned corrupted comment.
  *
  * 閼卞矁鐭楅敍? * - 濞撳弶鐓嬮幒銊ㄥ礃rails
- * - 婢跺嫮鎮妑ail閻愮懓鍤禍瀣╂
- * - 鏉╁€熼嚋rail閺囨繂鍘? * - 閺勫墽銇氶崣瀣偨閻ㄥ嫮鈹栭悩鑸碘偓浣瑰絹缁€? * - 閼颁胶甯囧ǎ璇插閿涙碍鐗撮幑鐢tiveGenre鏉╁洦鎶ら崘鍛啇
+ * NOTE: cleaned corrupted comment.
+ * NOTE: cleaned corrupted comment.
  */
 
 "use client";
@@ -39,7 +39,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
       return activeRails;
     }
 
-    // 閼颁胶甯囧▔銊╁櫞閿涙俺绻冨銈嗙槨娑撶尯ail閻ㄥ埇tems閿涘苯褰ф穱婵堟殌閸栧懎鎯坅ctiveGenre閻ㄥ墕eries
+    // NOTE: cleaned corrupted comment.
     return activeRails
       .map((rail) => {
         const filteredItems = rail.items.filter((item) => {
@@ -60,7 +60,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
           items: filteredItems,
         };
       })
-      .filter((rail) => rail.items.length > 0); // 閼颁胶甯囧▔銊╁櫞閿涙氨些闂勩倗鈹栭惃鍓卆ils
+      .filter((rail) => rail.items.length > 0); // NOTE: cleaned corrupted comment.
   }, [activeRails, activeGenre, seriesGenresMap]);
 
   // Track rail impressions
@@ -86,7 +86,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
     router.push(`/series/${item.id}`);
   }, [router]);
 
-  // 閼颁胶甯囧ǎ璇插閿涙碍鐗撮幑鐣哸il缁鐎烽悽鐔稿灇閹恒劏宕橀悶鍡欐暠
+  // NOTE: cleaned corrupted comment.
   const getRailReason = useCallback((rail) => {
     const title = rail.title.toLowerCase();
     if (title.includes("trending") || title.includes("popular")) {

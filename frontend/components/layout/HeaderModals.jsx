@@ -9,7 +9,7 @@ import AgeGateModal from "./AgeGateModal";
 import WalletTopUpPrompt from "../wallet/WalletTopUpPrompt";
 
 /**
- * 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欑鑶╅柟顑跨劍椤㈠鈧湱鎳撳▍鎺旂磼閸曨亝顐?- 闁告瑯浜ｇ粈瀣嫻閿濆浂鍚€闁荤偛妫欐晶宥夊嫉婢跺瑔渚€骞€娴ｈ鏀遍柣銊ュ婵悂骞€娴ｅ憡瀚查梺顐ｆ缁? * 闁煎崬鐭侀惌妤呭础閺囨氨顏遍柨娑欒壘椤︹晠鎮堕崱娆愵仮鐟滅増娲忛埀顑跨閸曠偓螞閸曨垳宕ｉ悹鍥﹂檷閳ь兛绶氶幐鍫曞礌閸涱厼甯犻柛濠呭亹閻℃垵螣閳╁啠鍋撴担璇℃敱闁汇劌瀚Ο澶岀矆?闂傚懏鍔樺Λ宀勫椽鐏炶偐鐨戝ù鐘烘硾椤︹晠鎮? * 閺夆晜鐟ら柌婊呯磼閸曨亝顐介柟璺猴攻婢у秹寮垫径瀣嗕線骞€娴ｈ鏀遍梺顐ｆ缁额偊姊块崱鏇″幀闁革负鍔嬬粩瀵告導閸戙倗绀夐柡鍌炩偓娑氣敀缂備礁鐡ㄦ慨? */
+ * NOTE: cleaned corrupted comment. */
 export default function HeaderModals({
   activeModal,
   onModalClose,
@@ -39,7 +39,7 @@ export default function HeaderModals({
         const status = requestAdultToggle(true);
         if (status === "NEED_AGE_CONFIRM") {
           onModalClose("login");
-          onModalClose("age", true); // 闁瑰灚鎸哥槐鎴︾嵁閹绢喚绐炲Δ鐘茬焷閻﹀螣閳╁啠鍋撴担璇℃敱
+          onModalClose("age", true); // NOTE: cleaned corrupted comment.
           return;
         }
       }
@@ -72,7 +72,7 @@ export default function HeaderModals({
 
   const handleTopUp = (pkg) => {
     trackEvent("wallet_topup_selected", { package: pkg.id, points: pkg.points, price: pkg.price });
-    // 閻庝絻澹堥崺鍛村礆閻ㄥore濡炪倗鏁诲?
+    // NOTE: cleaned corrupted comment.
     if (typeof window !== "undefined") {
       window.location.href = "/store";
     }

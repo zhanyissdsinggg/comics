@@ -90,4 +90,36 @@ describe("API smoke (e2e)", () => {
       })
     );
   });
+
+  it("GET /api/health/live should include uptime", async () => {
+    const res = await request(app.getHttpServer())
+      .get("/api/health/live")
+      .expect(200);
+
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        ok: true,
+      })
+    );
+    expect(typeof res.body.uptimeSec).toBe("number");
+  });
+
+  it("GET /api/health/ready should include dependency status", async () => {
+    const res = await request(app.getHttpServer())
+      .get("/api/health/ready")
+      .expect(200);
+
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        ok: true,
+        dbOk: true,
+      })
+    );
+    expect(res.body.memoryMB).toEqual(
+      expect.objectContaining({
+        rss: expect.any(Number),
+        heapUsed: expect.any(Number),
+      })
+    );
+  });
 });

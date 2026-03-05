@@ -1,4 +1,4 @@
-// 鑰佺帇锛氱姸鎬佹秷鎭痟ook锛岀粺涓€绠＄悊鎴愬姛/閿欒鎻愮ず
+// NOTE: cleaned corrupted comment.
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
@@ -7,7 +7,7 @@ export function useStatusMessage(duration = 3000) {
   const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
   const timeoutRef = useRef(null);
 
-  // 鑰佺帇锛氭樉绀虹姸鎬佹秷鎭?
+  // NOTE: cleaned corrupted comment.
   const showStatus = useCallback((type, text) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -20,7 +20,7 @@ export function useStatusMessage(duration = 3000) {
     }, duration);
   }, [duration]);
 
-  // 鑰佺帇锛氭竻闄ょ姸鎬佹秷鎭?
+  // NOTE: cleaned corrupted comment.
   const clearStatus = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -28,7 +28,7 @@ export function useStatusMessage(duration = 3000) {
     setStatusMessage({ type: "", text: "" });
   }, []);
 
-  // 鑰佺帇锛氱粍浠跺嵏杞芥椂娓呯悊瀹氭椂鍣?
+  // NOTE: cleaned corrupted comment.
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {

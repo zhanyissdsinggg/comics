@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { trackEvent } from "../../lib/trackEvent";
 
-// 淇 placehold.co 杩斿洖 SVG 闂锛歂ext.js Image 涓嶆敮鎸?SVG锛岄渶瑕佸姞 .png 鍚庣紑
+// NOTE: cleaned corrupted comment.
 function normalizePageUrl(url) {
   if (!url) return url;
   try {

@@ -1,6 +1,6 @@
 /**
  * FilterBar - 绛涢€夊拰鎺掑簭缁勪欢
- * 鑰佺帇娉ㄩ噴锛氬弬鑰僕ebtoon鍜孧angaDex鐨勭瓫閫夋爮璁捐
+ * NOTE: cleaned corrupted comment.
  */
 
 "use client";
@@ -20,23 +20,23 @@ export default function FilterBar({
 }) {
   const [showAllGenres, setShowAllGenres] = useState(false);
 
-  // 鑰佺帇娉ㄩ噴锛氭帓搴忛€夐」 - 绠€鍖栦负2涓渶甯哥敤鐨?
+  // NOTE: cleaned corrupted comment.
   const sortOptions = [
     { id: "popular", label: "Popular", icon: "馃敟" },
     { id: "latest", label: "Latest", icon: "馃啎" },
   ];
 
-  // 鑰佺帇娉ㄩ噴锛氬畬缁撶姸鎬侀€夐」
+  // NOTE: cleaned corrupted comment.
   const statusOptions = [
     { id: "all", label: "All" },
     { id: "ongoing", label: "Ongoing" },
     { id: "completed", label: "Completed" },
   ];
 
-  // 鑰佺帇娉ㄩ噴锛氶粯璁ゆ樉绀哄墠4涓被鍨嬶紝鐐瑰嚮"More"鏄剧ず鍏ㄩ儴
+  // NOTE: cleaned corrupted comment.
   const displayedGenres = showAllGenres ? genres : genres.slice(0, 4);
 
-  // 鑰佺帇娉ㄩ噴锛氬畨鍏ㄧ殑鍥炶皟鍑芥暟璋冪敤
+  // NOTE: cleaned corrupted comment.
   const handleSortChange = (id) => {
     if (onSortChange) onSortChange(id);
   };

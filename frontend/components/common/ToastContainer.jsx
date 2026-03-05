@@ -3,7 +3,7 @@
 import { useToast } from "./ToastContext";
 
 /**
- * 鑰佺帇璇达細Toast瀹瑰櫒缁勪欢
+ * NOTE: cleaned corrupted comment.
  * 杩欎釜SB缁勪欢鏄剧ず鎵€鏈塗oast娑堟伅
  */
 export default function ToastContainer() {
@@ -25,7 +25,7 @@ export default function ToastContainer() {
 function ToastItem({ toast, onClose }) {
   const { type, message } = toast;
 
-  // 鑰佺帇璇达細鏍规嵁绫诲瀷閫夋嫨棰滆壊鍜屽浘鏍?
+  // NOTE: cleaned corrupted comment.
   const styles = {
     success: {
       bg: "bg-emerald-50 border-emerald-200",
