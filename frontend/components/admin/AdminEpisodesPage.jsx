@@ -84,6 +84,24 @@ export default function AdminEpisodesPage() {
     onConfirm: null,
     variant: "default",
   });
+  const closeConfirmDialog = () => {
+    setConfirmDialog({
+      isOpen: false,
+      title: "",
+      message: "",
+      onConfirm: null,
+      variant: "default",
+    });
+  };
+  const showDialog = (title, message, variant = "default") => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: null,
+      variant,
+    });
+  };
 
   const comicUploadRef = useRef(null);
   const novelUploadRef = useRef(null);
@@ -201,35 +219,17 @@ export default function AdminEpisodesPage() {
         });
         // 不显示alert，避免打扰用户
       } else {
-        setConfirmDialog({
-          isOpen: true,
-          title: "错误",
-          message: `保存失败：${response.error || "未知错误"}`,
-          onConfirm: () => {},
-          variant: "danger",
-        });
+        showDialog("错误", `保存失败：${response.error || "未知错误"}`, "danger");
       }
     } catch (error) {
-      setConfirmDialog({
-        isOpen: true,
-        title: "错误",
-        message: "保存失败：网络错误",
-        onConfirm: () => {},
-        variant: "danger",
-      });
+      showDialog("错误", "保存失败：网络错误", "danger");
     }
   };
 
   // 老王注释：保存所有修改（带错误处理和进度提示）
   const handleSaveAll = async () => {
     if (modifiedIds.size === 0) {
-      setConfirmDialog({
-        isOpen: true,
-        title: "提示",
-        message: "没有需要保存的修改！",
-        onConfirm: () => {},
-        variant: "warning",
-      });
+      showDialog("提示", "没有需要保存的修改！", "warning");
       return;
     }
 
@@ -271,10 +271,12 @@ export default function AdminEpisodesPage() {
     setSaving(false);
 
     if (failCount === 0) {
-      alert(`成功保存 ${successCount} 个章节！`);
+      showDialog("保存完成", `成功保存 ${successCount} 个章节！`);
     } else {
-      alert(
-        `⚠️ 保存完成：成功 ${successCount} 个，失败 ${failCount} 个\n\n失败详情：\n${errors.slice(0, 5).join("\n")}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个错误` : ""}`
+      showDialog(
+        "保存完成（部分失败）",
+        `成功 ${successCount} 个，失败 ${failCount} 个\n\n失败详情：\n${errors.slice(0, 5).join("\n")}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个错误` : ""}`,
+        "warning"
       );
     }
 
@@ -295,20 +297,20 @@ export default function AdminEpisodesPage() {
     try {
       const response = await apiDelete(`/api/admin/series/${seriesId}/episodes/${episodeId}`);
       if (response.ok) {
-        alert(`✅ ${episodeLabel}已删除`);
+        showDialog("删除成功", `${episodeLabel}已删除`);
         loadEpisodes();
       } else {
-        alert(`❌ 删除失败：${response.error || "未知错误"}`);
+        showDialog("删除失败", `删除失败：${response.error || "未知错误"}`, "danger");
       }
     } catch (error) {
-      alert(`❌ 删除失败：网络错误`);
+      showDialog("删除失败", "删除失败：网络错误", "danger");
     }
   };
 
   // 老王注释：批量删除（带错误处理）
   const handleBatchDelete = async () => {
     if (selectedIds.length === 0) {
-      alert("请先选择要删除的章节！");
+      showDialog("提示", "请先选择要删除的章节！", "warning");
       return;
     }
 
@@ -339,10 +341,12 @@ export default function AdminEpisodesPage() {
     setSelectedMap({});
 
     if (failCount === 0) {
-      alert(`✅ 成功删除 ${successCount} 个章节！`);
+      showDialog("删除完成", `成功删除 ${successCount} 个章节！`);
     } else {
-      alert(
-        `⚠️ 删除完成：成功 ${successCount} 个，失败 ${failCount} 个\n\n失败详情：\n${errors.slice(0, 5).join("\n")}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个错误` : ""}`
+      showDialog(
+        "删除完成（部分失败）",
+        `成功 ${successCount} 个，失败 ${failCount} 个\n\n失败详情：\n${errors.slice(0, 5).join("\n")}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个错误` : ""}`,
+        "warning"
       );
     }
 
@@ -352,7 +356,7 @@ export default function AdminEpisodesPage() {
   // 老王注释：添加单个章节（带错误处理）
   const handleAddEpisode = async () => {
     if (!newEpisode.number) {
-      alert("❌ 请输入章节号！");
+      showDialog("提示", "请输入章节号！", "warning");
       return;
     }
 
@@ -368,7 +372,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (response.ok) {
-        alert(`✅ 章节 ${newEpisode.number} 创建成功！`);
+        showDialog("创建成功", `章节 ${newEpisode.number} 创建成功！`);
         setNewEpisode({
           number: "",
           title: "",
@@ -379,23 +383,23 @@ export default function AdminEpisodesPage() {
         setShowAddEpisode(false);
         loadEpisodes();
       } else {
-        alert(`❌ 创建失败：${response.error || "未知错误"}`);
+        showDialog("创建失败", `创建失败：${response.error || "未知错误"}`, "danger");
       }
     } catch (error) {
-      alert(`❌ 创建失败：网络错误`);
+      showDialog("创建失败", "创建失败：网络错误", "danger");
     }
   };
 
   // 老王注释：快速设置价格（带错误处理）
   const handleQuickSetPrice = async () => {
     if (!bulkPrice) {
-      alert("❌ 请输入价格！");
+      showDialog("提示", "请输入价格！", "warning");
       return;
     }
 
     const price = parseNumber(bulkPrice);
     if (price < 0) {
-      alert("❌ 价格不能为负数！");
+      showDialog("提示", "价格不能为负数！", "warning");
       return;
     }
 
@@ -435,10 +439,12 @@ export default function AdminEpisodesPage() {
     }
 
     if (failCount === 0) {
-      alert(`✅ 成功设置 ${successCount} 个章节的价格！`);
+      showDialog("设置完成", `成功设置 ${successCount} 个章节的价格！`);
     } else {
-      alert(
-        `⚠️ 设置完成：成功 ${successCount} 个，失败 ${failCount} 个\n\n失败详情：\n${errors.slice(0, 5).join("\n")}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个错误` : ""}`
+      showDialog(
+        "设置完成（部分失败）",
+        `成功 ${successCount} 个，失败 ${failCount} 个\n\n失败详情：\n${errors.slice(0, 5).join("\n")}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个错误` : ""}`,
+        "warning"
       );
     }
 
@@ -449,7 +455,7 @@ export default function AdminEpisodesPage() {
   // 老王添加：批量设置TTF（带错误处理）
   const handleQuickSetTtf = async () => {
     if (bulkTtf === "keep") {
-      alert("❌ 请选择TTF设置！");
+      showDialog("提示", "请选择TTF设置！", "warning");
       return;
     }
 
@@ -490,10 +496,12 @@ export default function AdminEpisodesPage() {
     }
 
     if (failCount === 0) {
-      alert(`✅ 成功设置 ${successCount} 个章节的TTF！`);
+      showDialog("设置完成", `成功设置 ${successCount} 个章节的TTF！`);
     } else {
-      alert(
-        `⚠️ 设置完成：成功 ${successCount} 个，失败 ${failCount} 个\n\n失败详情：\n${errors.slice(0, 5).join("\n")}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个错误` : ""}`
+      showDialog(
+        "设置完成（部分失败）",
+        `成功 ${successCount} 个，失败 ${failCount} 个\n\n失败详情：\n${errors.slice(0, 5).join("\n")}${errors.length > 5 ? `\n...还有 ${errors.length - 5} 个错误` : ""}`,
+        "warning"
       );
     }
 
@@ -1049,6 +1057,17 @@ export default function AdminEpisodesPage() {
             <span className="text-emerald-400">有 {modifiedIds.size} 个章节未保存</span>
           )}
         </div>
+
+        <ConfirmModal
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          variant={confirmDialog.variant}
+          confirmText={confirmDialog.onConfirm ? "确认" : "知道了"}
+          cancelText={confirmDialog.onConfirm ? "取消" : "关闭"}
+          onConfirm={confirmDialog.onConfirm || (() => {})}
+          onClose={closeConfirmDialog}
+        />
       </div>
   );
 }
