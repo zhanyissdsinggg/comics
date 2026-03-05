@@ -1,10 +1,8 @@
-"use client";
+﻿"use client";
 
+import { RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
-/**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment. */
 export function AdvancedFilter({
   onFilter = null,
   filters = [],
@@ -13,7 +11,6 @@ export function AdvancedFilter({
   const [filterValues, setFilterValues] = useState({});
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // NOTE: cleaned corrupted comment.
   const handleFilterChange = (filterId, value) => {
     const newValues = {
       ...filterValues,
@@ -22,14 +19,12 @@ export function AdvancedFilter({
     setFilterValues(newValues);
   };
 
-  // NOTE: cleaned corrupted comment.
   const handleApplyFilter = () => {
     if (onFilter) {
       onFilter(filterValues);
     }
   };
 
-  // NOTE: cleaned corrupted comment.
   const handleResetFilter = () => {
     setFilterValues({});
     if (onFilter) {
@@ -37,86 +32,88 @@ export function AdvancedFilter({
     }
   };
 
-  // NOTE: cleaned corrupted comment.
-  const hasActiveFilters = Object.values(filterValues).some((v) => v !== "" && v !== null);
+  const hasActiveFilters = Object.values(filterValues).some((value) => {
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return value !== "" && value !== null && value !== undefined;
+  });
 
   return (
-    <div className="space-y-4 mb-6">
-      {/* 鑰佺帇璇达細绠€鍗曟悳绱㈡爮 */}
+    <div className="mb-6 space-y-4">
       <div className="flex gap-2">
-        <div className="flex-1 relative">
+        <div className="relative flex-1">
           <input
             type="text"
-            placeholder="鎼滅储..."
+            placeholder="Search..."
             value={filterValues.search || ""}
             onChange={(e) => handleFilterChange("search", e.target.value)}
-            onKeyPress={(e) => {
+            onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleApplyFilter();
               }
             }}
-            className="w-full px-4 py-2 rounded border border-white/10 bg-neutral-900/50 text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500/50"
+            className="w-full rounded border border-white/10 bg-neutral-900/50 px-4 py-2 text-white placeholder-neutral-500 focus:border-emerald-500/50 focus:outline-none"
           />
-          <span className="absolute right-3 top-2.5 text-neutral-500">馃攳</span>
+          <Search className="absolute right-3 top-2.5 h-4 w-4 text-neutral-500" />
         </div>
 
-        {/* 鑰佺帇璇达細楂樼骇杩囨护鎸夐挳 */}
         <button
+          type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="px-4 py-2 rounded border border-white/10 bg-neutral-900/50 text-neutral-300 hover:bg-white/5 transition-colors"
+          className="inline-flex items-center gap-2 rounded border border-white/10 bg-neutral-900/50 px-4 py-2 text-neutral-300 transition-colors hover:bg-white/5"
         >
-          鈿欙笍 楂樼骇
+          <SlidersHorizontal className="h-4 w-4" />
+          Advanced
         </button>
 
-        {/* 鑰佺帇璇达細搴旂敤杩囨护鎸夐挳 */}
         <button
+          type="button"
           onClick={handleApplyFilter}
           disabled={loading}
-          className="px-4 py-2 rounded bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded border border-emerald-500/30 bg-emerald-500/20 px-4 py-2 text-emerald-400 transition-colors hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "鎼滅储涓?.." : "鎼滅储"}
+          {loading ? "Searching..." : "Search"}
         </button>
 
-        {/* 鑰佺帇璇达細閲嶇疆鎸夐挳 */}
         {hasActiveFilters && (
           <button
+            type="button"
             onClick={handleResetFilter}
-            className="px-4 py-2 rounded border border-white/10 bg-neutral-900/50 text-neutral-300 hover:bg-white/5 transition-colors"
+            className="inline-flex items-center gap-2 rounded border border-white/10 bg-neutral-900/50 px-4 py-2 text-neutral-300 transition-colors hover:bg-white/5"
           >
-            鉁?閲嶇疆
+            <RotateCcw className="h-4 w-4" />
+            Reset
           </button>
         )}
       </div>
 
-      {/* 鑰佺帇璇达細楂樼骇杩囨护闈㈡澘 */}
       {showAdvanced && (
-        <div className="p-4 rounded border border-white/10 bg-neutral-900/30 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-4 rounded border border-white/10 bg-neutral-900/30 p-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filters.map((filter) => (
               <div key={filter.id} className="space-y-2">
                 <label className="text-sm font-medium text-neutral-300">
                   {filter.label}
                 </label>
 
-                {/* 鑰佺帇璇达細鏂囨湰杈撳叆 */}
                 {filter.type === "text" && (
                   <input
                     type="text"
                     placeholder={filter.placeholder}
                     value={filterValues[filter.id] || ""}
                     onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-                    className="w-full px-3 py-2 rounded border border-white/10 bg-neutral-900/50 text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500/50 text-sm"
+                    className="w-full rounded border border-white/10 bg-neutral-900/50 px-3 py-2 text-sm text-white placeholder-neutral-500 focus:border-emerald-500/50 focus:outline-none"
                   />
                 )}
 
-                {/* 鑰佺帇璇达細閫夋嫨妗?*/}
                 {filter.type === "select" && (
                   <select
                     value={filterValues[filter.id] || ""}
                     onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-                    className="w-full px-3 py-2 rounded border border-white/10 bg-neutral-900/50 text-white focus:outline-none focus:border-emerald-500/50 text-sm"
+                    className="w-full rounded border border-white/10 bg-neutral-900/50 px-3 py-2 text-sm text-white focus:border-emerald-500/50 focus:outline-none"
                   >
-                    <option value="">鍏ㄩ儴</option>
+                    <option value="">All</option>
                     {filter.options?.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -125,7 +122,6 @@ export function AdvancedFilter({
                   </select>
                 )}
 
-                {/* 鑰佺帇璇达細鏃ユ湡鑼冨洿 */}
                 {filter.type === "dateRange" && (
                   <div className="flex gap-2">
                     <input
@@ -134,7 +130,7 @@ export function AdvancedFilter({
                       onChange={(e) =>
                         handleFilterChange(`${filter.id}_start`, e.target.value)
                       }
-                      className="flex-1 px-3 py-2 rounded border border-white/10 bg-neutral-900/50 text-white focus:outline-none focus:border-emerald-500/50 text-sm"
+                      className="flex-1 rounded border border-white/10 bg-neutral-900/50 px-3 py-2 text-sm text-white focus:border-emerald-500/50 focus:outline-none"
                     />
                     <input
                       type="date"
@@ -142,21 +138,18 @@ export function AdvancedFilter({
                       onChange={(e) =>
                         handleFilterChange(`${filter.id}_end`, e.target.value)
                       }
-                      className="flex-1 px-3 py-2 rounded border border-white/10 bg-neutral-900/50 text-white focus:outline-none focus:border-emerald-500/50 text-sm"
+                      className="flex-1 rounded border border-white/10 bg-neutral-900/50 px-3 py-2 text-sm text-white focus:border-emerald-500/50 focus:outline-none"
                     />
                   </div>
                 )}
 
-                {/* 鑰佺帇璇达細澶嶉€夋 */}
                 {filter.type === "checkbox" && (
                   <div className="space-y-2">
                     {filter.options?.map((option) => (
                       <label key={option.value} className="flex items-center gap-2">
                         <input
                           type="checkbox"
-                          checked={
-                            (filterValues[filter.id] || []).includes(option.value)
-                          }
+                          checked={(filterValues[filter.id] || []).includes(option.value)}
                           onChange={(e) => {
                             const current = filterValues[filter.id] || [];
                             const updated = e.target.checked
@@ -175,32 +168,33 @@ export function AdvancedFilter({
             ))}
           </div>
 
-          {/* 鑰佺帇璇达細鎿嶄綔鎸夐挳 */}
-          <div className="flex gap-2 justify-end pt-4 border-t border-white/10">
+          <div className="flex justify-end gap-2 border-t border-white/10 pt-4">
             <button
+              type="button"
               onClick={() => setShowAdvanced(false)}
-              className="px-4 py-2 rounded border border-white/10 text-neutral-300 hover:bg-white/5 transition-colors text-sm"
+              className="rounded border border-white/10 px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-white/5"
             >
-              鍏抽棴
+              Close
             </button>
             <button
+              type="button"
               onClick={handleResetFilter}
-              className="px-4 py-2 rounded border border-white/10 text-neutral-300 hover:bg-white/5 transition-colors text-sm"
+              className="rounded border border-white/10 px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-white/5"
             >
-              閲嶇疆
+              Reset
             </button>
             <button
+              type="button"
               onClick={handleApplyFilter}
               disabled={loading}
-              className="px-4 py-2 rounded bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+              className="rounded border border-emerald-500/30 bg-emerald-500/20 px-4 py-2 text-sm text-emerald-400 transition-colors hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "鎼滅储涓?.." : "搴旂敤杩囨护"}
+              {loading ? "Searching..." : "Apply Filters"}
             </button>
           </div>
         </div>
       )}
 
-      {/* 鑰佺帇璇达細娲昏穬杩囨护鏍囩 */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2">
           {Object.entries(filterValues).map(([key, value]) => {
@@ -213,14 +207,16 @@ export function AdvancedFilter({
             return (
               <div
                 key={key}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-400"
+                className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-sm text-emerald-400"
               >
                 <span>{displayValue}</span>
                 <button
+                  type="button"
                   onClick={() => handleFilterChange(key, "")}
                   className="hover:text-emerald-300"
                 >
-                  鉁?                </button>
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
             );
           })}

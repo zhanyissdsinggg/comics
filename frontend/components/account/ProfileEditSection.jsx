@@ -119,8 +119,8 @@ const ProfileEditSection = memo(function ProfileEditSection({ user, onUpdate }) 
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-3xl text-neutral-600">
-                馃懁
+              <div className="flex h-full w-full items-center justify-center text-xs font-semibold tracking-wide text-neutral-600">
+                USER
               </div>
             )}
           </div>

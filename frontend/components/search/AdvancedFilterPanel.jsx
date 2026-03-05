@@ -15,10 +15,10 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
 
   // NOTE: cleaned corrupted comment.
   const TYPE_OPTIONS = [
-    { value: "comic", label: "Comic", icon: "馃摎" },
-    { value: "novel", label: "Novel", icon: "馃摉" },
-    { value: "webtoon", label: "Webtoon", icon: "馃摫" },
-    { value: "manga", label: "Manga", icon: "馃帉" },
+    { value: "comic", label: "Comic", icon: "CM" },
+    { value: "novel", label: "Novel", icon: "NV" },
+    { value: "webtoon", label: "Webtoon", icon: "WT" },
+    { value: "manga", label: "Manga", icon: "MG" },
   ];
 
   const TAG_OPTIONS = [
@@ -135,7 +135,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({ isOpen, onClose,
                       : "border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700 hover:text-neutral-300"
                   }`}
                 >
-                  <div className="text-xl md:text-2xl">{type.icon}</div>
+                  <div className="text-xs font-semibold tracking-wide md:text-sm">{type.icon}</div>
                   <div className="mt-1 text-xs md:text-sm">{type.label}</div>
                 </button>
               ))}

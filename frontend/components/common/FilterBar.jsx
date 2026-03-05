@@ -22,8 +22,8 @@ export default function FilterBar({
 
   // NOTE: cleaned corrupted comment.
   const sortOptions = [
-    { id: "popular", label: "Popular", icon: "馃敟" },
-    { id: "latest", label: "Latest", icon: "馃啎" },
+    { id: "popular", label: "Popular", icon: "HOT" },
+    { id: "latest", label: "Latest", icon: "NEW" },
   ];
 
   // NOTE: cleaned corrupted comment.
@@ -74,7 +74,7 @@ export default function FilterBar({
                     : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
                 }`}
               >
-                <span>{option.icon}</span>
+                <span className="text-[10px] font-semibold tracking-wide">{option.icon}</span>
                 <span>{option.label}</span>
               </button>
             ))}

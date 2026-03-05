@@ -87,11 +87,13 @@ const TipModal = React.memo(({ open, seriesId, seriesTitle, authorName, onClose 
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-lg font-bold text-white">Tip the Creator</h3>
           <button
+            type="button"
             onClick={onClose}
             className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
             aria-label="Close"
           >
-            鉁?          </button>
+            X
+          </button>
         </div>
 
         <div className="mb-6 rounded-xl border border-neutral-800 bg-neutral-950 p-4">
@@ -194,7 +196,7 @@ const TipModal = React.memo(({ open, seriesId, seriesTitle, authorName, onClose 
         </div>
 
         <div className="mt-4 rounded-xl border border-neutral-800 bg-neutral-950 p-3 text-xs text-neutral-400">
-          馃挕 Your tip directly supports the creator. Thank you for your generosity!
+          Your tip directly supports the creator. Thank you for your generosity.
         </div>
       </div>
     </div>
