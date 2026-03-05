@@ -12,6 +12,32 @@ function parseNumber(value) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+// 老王注释：并发控制，避免批量操作时串行等待太慢
+async function mapWithConcurrency(items, concurrency, mapper) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return [];
+  }
+
+  const safeConcurrency = Math.max(1, Math.min(concurrency, items.length));
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  const workers = Array.from({ length: safeConcurrency }, async () => {
+    while (true) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      if (currentIndex >= items.length) {
+        break;
+      }
+
+      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
+
 // 老王注释：按文件名排序（支持中文和数字）
 function sortFilesByName(files) {
   return [...files].sort((a, b) =>
@@ -314,23 +340,32 @@ export default function AdminEpisodesPage() {
 
   // 老王注释：批量删除（带错误处理）
   const executeBatchDelete = async (targetIds) => {
+    const episodeMap = new Map(episodes.map((episode) => [episode.id, episode]));
     let successCount = 0;
     let failCount = 0;
     const errors = [];
 
-    for (const id of targetIds) {
+    const results = await mapWithConcurrency(targetIds, 6, async (id) => {
       try {
         const response = await apiDelete(`/api/admin/series/${seriesId}/episodes/${id}`);
         if (response.ok) {
-          successCount++;
-        } else {
-          failCount++;
-          const episode = episodes.find((ep) => ep.id === id);
-          errors.push(`章节 ${episode?.number || id}: ${response.error || "删除失败"}`);
+          return { ok: true };
         }
+        const episode = episodeMap.get(id);
+        return { ok: false, message: `章节 ${episode?.number || id}: ${response.error || "删除失败"}` };
       } catch (error) {
-        failCount++;
-        errors.push(`章节 ${id}: 网络错误`);
+        return { ok: false, message: `章节 ${id}: 网络错误` };
+      }
+    });
+
+    for (const result of results) {
+      if (result?.ok) {
+        successCount += 1;
+      } else {
+        failCount += 1;
+        if (result?.message) {
+          errors.push(result.message);
+        }
       }
     }
 
@@ -405,31 +440,42 @@ export default function AdminEpisodesPage() {
 
   // 老王注释：快速设置价格（带错误处理）
   const executeQuickSetPrice = async (targetIds, price) => {
+    const episodeMap = new Map(episodes.map((episode) => [episode.id, episode]));
     let successCount = 0;
     let failCount = 0;
     const errors = [];
 
-    for (const id of targetIds) {
-      const episode = episodes.find((ep) => ep.id === id);
-      if (episode) {
-        try {
-          const response = await apiPatch(`/api/admin/series/${seriesId}/episodes/${id}`, {
-            key,
-            episode: {
-              ...episode,
-              pricePts: price,
-            },
-          });
+    const results = await mapWithConcurrency(targetIds, 6, async (id) => {
+      const episode = episodeMap.get(id);
+      if (!episode) {
+        return { ok: false, message: `章节 ${id}: 章节不存在` };
+      }
 
-          if (response.ok) {
-            successCount++;
-          } else {
-            failCount++;
-            errors.push(`章节 ${episode.number}: ${response.error || "设置失败"}`);
-          }
-        } catch (error) {
-          failCount++;
-          errors.push(`章节 ${episode.number}: 网络错误`);
+      try {
+        const response = await apiPatch(`/api/admin/series/${seriesId}/episodes/${id}`, {
+          key,
+          episode: {
+            ...episode,
+            pricePts: price,
+          },
+        });
+
+        if (response.ok) {
+          return { ok: true };
+        }
+        return { ok: false, message: `章节 ${episode.number}: ${response.error || "设置失败"}` };
+      } catch (error) {
+        return { ok: false, message: `章节 ${episode.number}: 网络错误` };
+      }
+    });
+
+    for (const result of results) {
+      if (result?.ok) {
+        successCount += 1;
+      } else {
+        failCount += 1;
+        if (result?.message) {
+          errors.push(result.message);
         }
       }
     }
@@ -473,31 +519,42 @@ export default function AdminEpisodesPage() {
 
   // 老王添加：批量设置TTF（带错误处理）
   const executeQuickSetTtf = async (targetIds, ttfEnabled) => {
+    const episodeMap = new Map(episodes.map((episode) => [episode.id, episode]));
     let successCount = 0;
     let failCount = 0;
     const errors = [];
 
-    for (const id of targetIds) {
-      const episode = episodes.find((ep) => ep.id === id);
-      if (episode) {
-        try {
-          const response = await apiPatch(`/api/admin/series/${seriesId}/episodes/${id}`, {
-            key,
-            episode: {
-              ...episode,
-              ttfEligible: ttfEnabled,
-            },
-          });
+    const results = await mapWithConcurrency(targetIds, 6, async (id) => {
+      const episode = episodeMap.get(id);
+      if (!episode) {
+        return { ok: false, message: `章节 ${id}: 章节不存在` };
+      }
 
-          if (response.ok) {
-            successCount++;
-          } else {
-            failCount++;
-            errors.push(`章节 ${episode.number}: ${response.error || "设置失败"}`);
-          }
-        } catch (error) {
-          failCount++;
-          errors.push(`章节 ${episode.number}: 网络错误`);
+      try {
+        const response = await apiPatch(`/api/admin/series/${seriesId}/episodes/${id}`, {
+          key,
+          episode: {
+            ...episode,
+            ttfEligible: ttfEnabled,
+          },
+        });
+
+        if (response.ok) {
+          return { ok: true };
+        }
+        return { ok: false, message: `章节 ${episode.number}: ${response.error || "设置失败"}` };
+      } catch (error) {
+        return { ok: false, message: `章节 ${episode.number}: 网络错误` };
+      }
+    });
+
+    for (const result of results) {
+      if (result?.ok) {
+        successCount += 1;
+      } else {
+        failCount += 1;
+        if (result?.message) {
+          errors.push(result.message);
         }
       }
     }
