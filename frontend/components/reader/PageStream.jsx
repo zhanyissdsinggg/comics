@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import NextImage from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { trackEvent } from "../../lib/trackEvent";
 
@@ -44,7 +44,8 @@ function pushPerfMetric(name, value) {
 function preloadImages(pages, startIndex, count = 3) {
   const next = pages.slice(startIndex, startIndex + count);
   next.forEach((page) => {
-    const img = new Image();
+    // Use the browser's Image constructor for preloading, not next/image component.
+    const img = new window.Image();
     img.src = normalizePageUrl(page.url);
   });
 }
@@ -279,7 +280,7 @@ export default function PageStream({
                       }}
                     />
                   ) : null}
-                  <Image
+                  <NextImage
                     src={
                       reloadKeys[index]
                         ? `${normalizePageUrl(page.url)}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
