@@ -1,18 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { CRITICAL_ROUTES } from "../../scripts/critical-routes.mjs";
 
-const ROUTES = [
-  "/",
-  "/search",
-  "/store",
-  "/rankings",
-  "/admin/login",
-  "/admin",
-  "/admin/users",
-  "/admin/support",
-  "/admin/orders",
-  "/admin/promotions",
-  "/admin/series",
-];
+const ROUTES = CRITICAL_ROUTES;
 
 test.describe("Critical route rendering", () => {
   for (const route of ROUTES) {

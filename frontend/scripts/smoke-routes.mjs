@@ -2,24 +2,13 @@ import { spawn } from "node:child_process";
 import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { CRITICAL_ROUTES } from "./critical-routes.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendRoot = path.resolve(__dirname, "..");
 
-const ROUTES = [
-  "/",
-  "/search",
-  "/store",
-  "/rankings",
-  "/admin/login",
-  "/admin",
-  "/admin/users",
-  "/admin/support",
-  "/admin/orders",
-  "/admin/promotions",
-  "/admin/series",
-];
+const ROUTES = CRITICAL_ROUTES;
 
 function getFreePort() {
   return new Promise((resolve, reject) => {
