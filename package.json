@@ -11,6 +11,7 @@
     "health-check": "npm --prefix frontend run lint && npm --prefix backend run build",
     "check:all": "npm --prefix frontend run check:all && npm --prefix backend run test -- --runInBand --passWithNoTests && npm --prefix backend run test:e2e && npm --prefix backend run test:integration && npm run security:check && npm run hygiene:check",
     "lint": "npm --prefix frontend run lint && npm --prefix backend run lint",
+    "frontend:guard": "node scripts/frontend-static-guard.mjs",
     "security:check": "node scripts/security-audit.mjs",
     "cleanup:comments": "node scripts/cleanup-mojibake-comments.mjs",
     "hygiene:check": "node scripts/check-comment-encoding.mjs",

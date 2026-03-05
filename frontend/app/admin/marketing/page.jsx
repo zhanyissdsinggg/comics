@@ -105,6 +105,10 @@ export default function AdminMarketingPage() {
   const stats = statsData?.stats;
   const segments = segmentData?.segments || [];
   const types = typeData?.types || [];
+  const budgetUsagePct =
+    stats && Number(stats.totalBudget) > 0
+      ? Math.min(100, Math.max(0, (Number(stats.totalSpent) / Number(stats.totalBudget)) * 100))
+      : 0;
 
   // 创建营销活动 mutation
   const createCampaignMutation = useMutation({
@@ -336,11 +340,11 @@ export default function AdminMarketingPage() {
                     <div className="w-full bg-neutral-700 rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${(stats.totalSpent / stats.totalBudget) * 100}%` }}
+                        style={{ width: `${budgetUsagePct}%` }}
                       />
                     </div>
                     <p className="text-xs text-neutral-400 mt-2">
-                      预算使用率: {((stats.totalSpent / stats.totalBudget) * 100).toFixed(2)}%
+                      预算使用率: {budgetUsagePct.toFixed(2)}%
                     </p>
                   </div>
                 </div>
