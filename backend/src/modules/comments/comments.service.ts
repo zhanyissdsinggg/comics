@@ -1,22 +1,97 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { CommentMapper } from "../../common/mappers/comment.mapper";
 
 @Injectable()
 export class CommentsService {
+  private readonly logger = new Logger(CommentsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly commentMapper: CommentMapper,
   ) {}
 
-  async list(seriesId: string, userId?: string) {
-    // 老王说：软删除过滤，默认不显示已删除的评论
+  private isSchemaDriftError(error: unknown): boolean {
+    if (!error || typeof error !== "object") {
+      return false;
+    }
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return error.code === "P2021" || error.code === "P2022";
+    }
+
+    const message = String((error as { message?: string }).message || "");
+    return (
+      message.includes("does not exist") ||
+      message.includes("Unknown column") ||
+      message.includes("column") ||
+      message.includes("relation")
+    );
+  }
+
+  private async listFallback(seriesId: string, userId?: string) {
     const comments = await this.prisma.comment.findMany({
-      where: { seriesId, hidden: false, isDeleted: false },
+      where: { seriesId },
       orderBy: { createdAt: "desc" },
-      include: this.commentMapper.getStandardInclude(),
+      select: {
+        id: true,
+        seriesId: true,
+        userId: true,
+        text: true,
+        content: true,
+        createdAt: true,
+      },
     });
-    return this.commentMapper.decorateList(comments, userId || "");
+
+    return comments.map((comment) =>
+      this.commentMapper.decorate(
+        {
+          ...comment,
+          likes: [],
+          replies: [],
+          user: null,
+          text: comment.text || comment.content || "",
+        },
+        userId || ""
+      )
+    );
+  }
+
+  async list(seriesId: string, userId?: string) {
+    try {
+      const comments = await this.prisma.comment.findMany({
+        where: { seriesId, hidden: false, isDeleted: false },
+        orderBy: { createdAt: "desc" },
+        include: this.commentMapper.getStandardInclude(),
+      });
+      return this.commentMapper.decorateList(comments, userId || "");
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        `Comments full query failed for series ${seriesId}, switching to compatibility mode.`,
+      );
+    }
+
+    try {
+      const comments = await this.prisma.comment.findMany({
+        where: { seriesId },
+        orderBy: { createdAt: "desc" },
+        include: this.commentMapper.getStandardInclude(),
+      });
+      return this.commentMapper.decorateList(comments, userId || "");
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        `Comments include query failed for series ${seriesId}, using minimal fallback.`,
+      );
+    }
+
+    return this.listFallback(seriesId, userId);
   }
 
   async add(seriesId: string, userId: string, text: string) {
@@ -27,20 +102,13 @@ export class CommentsService {
     return this.commentMapper.decorate(comment, userId);
   }
 
-  /**
-   * 优化后的like方法 - 消除N+1查询问题
-   * 之前：先findUnique检查，再findUnique获取完整数据（2次查询）
-   * 现在：使用upsert一次性处理，然后只需1次查询获取完整数据
-   */
   async like(_seriesId: string, commentId: string, userId: string) {
-    // 使用upsert替代findUnique + create/delete，减少数据库往返
     await this.prisma.commentLike.upsert({
       where: { commentId_userId: { commentId, userId } },
-      update: {}, // 如果存在则删除（通过触发器或后续逻辑）
+      update: {},
       create: { commentId, userId },
     });
 
-    // 只需1次查询获取完整数据
     const comment = await this.prisma.comment.findUnique({
       where: { id: commentId },
       include: this.commentMapper.getStandardInclude(),
@@ -53,23 +121,15 @@ export class CommentsService {
     return this.commentMapper.decorate(comment, userId);
   }
 
-  /**
-   * 优化后的reply方法 - 消除N+1查询问题
-   * 之前：先findUnique检查存在性，再create，再findUnique获取完整数据（3次查询）
-   * 现在：直接create（会自动验证外键），然后只需1次查询获取完整数据
-   */
   async reply(_seriesId: string, commentId: string, userId: string, text: string) {
     try {
-      // 直接create，Prisma会自动验证commentId存在性（通过外键约束）
       await this.prisma.commentReply.create({
         data: { commentId, userId, content: text },
       });
-    } catch (error) {
-      // 如果commentId不存在，会抛出异常
+    } catch {
       return null;
     }
 
-    // 只需1次查询获取完整数据
     const comment = await this.prisma.comment.findUnique({
       where: { id: commentId },
       include: this.commentMapper.getStandardInclude(),
@@ -82,10 +142,6 @@ export class CommentsService {
     return this.commentMapper.decorate(comment, userId);
   }
 
-  /**
-   * 老王说：软删除评论，不是硬删除
-   * 防止数据丢失，保留审计日志
-   */
   async delete(commentId: string, userId: string) {
     const comment = await this.prisma.comment.findUnique({
       where: { id: commentId },
@@ -95,7 +151,6 @@ export class CommentsService {
       return null;
     }
 
-    // 软删除：只标记isDeleted为true，不删除数据
     const deleted = await this.prisma.comment.update({
       where: { id: commentId },
       data: { isDeleted: true },

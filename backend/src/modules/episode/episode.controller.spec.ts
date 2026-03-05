@@ -1,0 +1,83 @@
+import { EpisodeController } from "./episode.controller";
+import { EpisodeService } from "./episode.service";
+import { PrismaService } from "../../common/prisma/prisma.service";
+import { StatsService } from "../../common/services/stats.service";
+import { ERROR_CODES } from "../../common/utils/errors";
+
+describe("EpisodeController", () => {
+  let controller: EpisodeController;
+  let episodeService: { getEpisode: jest.Mock };
+  let prisma: {
+    series: { findUnique: jest.Mock };
+    entitlement: { findUnique: jest.Mock };
+  };
+  let statsService: {
+    recordSeriesView: jest.Mock;
+    recordComicView: jest.Mock;
+  };
+
+  beforeEach(() => {
+    episodeService = {
+      getEpisode: jest.fn(),
+    };
+    prisma = {
+      series: {
+        findUnique: jest.fn(),
+      },
+      entitlement: {
+        findUnique: jest.fn(),
+      },
+    };
+    statsService = {
+      recordSeriesView: jest.fn(),
+      recordComicView: jest.fn(),
+    };
+
+    controller = new EpisodeController(
+      episodeService as unknown as EpisodeService,
+      prisma as unknown as PrismaService,
+      statsService as unknown as StatsService
+    );
+  });
+
+  it("should return 400 when episodeId is missing", async () => {
+    const req = { cookies: {} } as any;
+    const res = { status: jest.fn() } as any;
+
+    const result = await controller.getEpisode("series-001", "", req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(result).toEqual({
+      error: ERROR_CODES.INVALID_REQUEST,
+      message: "episodeId is required",
+    });
+  });
+
+  it("should ignore stats failure and still return episode payload", async () => {
+    prisma.series.findUnique.mockResolvedValue({
+      id: "series-001",
+      adult: false,
+      type: "comic",
+    });
+    prisma.entitlement.findUnique.mockResolvedValue(null);
+    episodeService.getEpisode.mockResolvedValue({
+      episode: {
+        id: "series-001e1",
+        pages: [{ p: 1 }, { p: 2 }, { p: 3 }, { p: 4 }],
+        previewFreePages: 2,
+      },
+    });
+    statsService.recordSeriesView.mockRejectedValue(new Error("stats unavailable"));
+
+    const req = { cookies: {} } as any;
+    const res = { status: jest.fn() } as any;
+
+    const result = await controller.getEpisode("series-001", "series-001e1", req, res);
+    const payload = result as any;
+
+    expect(payload.episode.pages).toHaveLength(2);
+    expect(payload.episode.isPreview).toBe(true);
+    expect(payload.episode.previewCount).toBe(2);
+    expect(statsService.recordComicView).not.toHaveBeenCalled();
+  });
+});

@@ -43,8 +43,15 @@ export class SeriesController {
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
       }
     }
-    const userId = getUserIdFromRequest(req, true);
-    const subscription = userId ? await getSubscriptionPayload(this.prisma, userId) : null;
+    const userId = getUserIdFromRequest(req, false);
+    let subscription = null;
+    if (userId) {
+      try {
+        subscription = await getSubscriptionPayload(this.prisma, userId);
+      } catch {
+        subscription = null;
+      }
+    }
     const result = await this.seriesService.detail(id, subscription);
     if (!result) {
       res.status(404);
