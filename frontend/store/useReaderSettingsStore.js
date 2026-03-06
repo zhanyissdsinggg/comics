@@ -184,9 +184,8 @@ export function ReaderSettingsProvider({ children }) {
 
   const value = useMemo(
     () => ({
-      // NOTE: cleaned corrupted comment.
-
-      // NOTE: cleaned corrupted comment.
+      ...settings,
+      setNightMode,
       toggleNightMode,
       setLayoutMode,
       setTheme,
