@@ -29,6 +29,9 @@ jobs:
       - name: Build
         run: npm run build --prefix backend
 
+      - name: OpenAPI Contract Check
+        run: npm run contract:check --prefix backend
+
       - name: Unit Tests
         run: npm run test --prefix backend -- --runInBand --passWithNoTests
 

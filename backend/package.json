@@ -11,6 +11,9 @@
   "scripts": {
     "build": "nest build -b swc",
     "prisma:generate": "prisma generate",
+    "contract:generate": "ts-node --transpile-only scripts/generate-openapi.ts",
+    "contract:check": "ts-node --transpile-only scripts/check-openapi-contract.ts",
+    "contract:update": "npm run contract:generate -- contracts/openapi.snapshot.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

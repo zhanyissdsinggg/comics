@@ -35,6 +35,14 @@ export class EmailService {
     }, RETRY_INTERVAL_MS);
   }
 
+  stopRetryLoop() {
+    if (!this.retryTimer) {
+      return;
+    }
+    clearInterval(this.retryTimer);
+    this.retryTimer = null;
+  }
+
   private async loadConfig() {
     const now = Date.now();
     if (this.cache && now - this.cache.loadedAt < CACHE_TTL_MS) {

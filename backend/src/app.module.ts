@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, OnModuleDestroy } from "@nestjs/common";
 import { AuthModule } from "./modules/auth/auth.module";
 import { SeriesModule } from "./modules/series/series.module";
 import { EpisodeModule } from "./modules/episode/episode.module";
@@ -72,8 +72,12 @@ import { StatsModule } from "./common/services/stats.module";
     RecommendationModule,
   ],
 })
-export class AppModule {
+export class AppModule implements OnModuleDestroy {
   constructor(private readonly emailService: EmailService) {
     this.emailService.startRetryLoop();
+  }
+
+  onModuleDestroy() {
+    this.emailService.stopRetryLoop();
   }
 }
