@@ -27,6 +27,13 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({ isOpen, onClose 
     setAutoScrollSpeed,
   } = useReaderSettingsStore();
 
+  const safeFontSize = Number(fontSize) || 16;
+  const safeLineHeight = Number(lineHeight) || 1.6;
+  const safeBrightness = Number(brightness) || 100;
+  const safeAutoScrollSpeed = Number(autoScrollSpeed) || 1;
+  const safeFullscreen = Boolean(fullscreen);
+  const safeAutoScroll = Boolean(autoScroll);
+
   if (!isOpen) {
     return null;
   }
@@ -107,20 +114,20 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({ isOpen, onClose 
           <div>
             <label className="mb-3 flex items-center justify-between text-sm font-medium text-neutral-300">
               <span>Font Size</span>
-              <span className="text-emerald-400">{fontSize}px</span>
+              <span className="text-emerald-400">{safeFontSize}px</span>
             </label>
             <input
               type="range"
               min="12"
               max="24"
               step="1"
-              value={fontSize}
+              value={safeFontSize}
               onChange={(e) => setFontSize(e.target.value)}
               className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-800"
               style={{
                 background: `linear-gradient(to right, rgb(52, 211, 153) 0%, rgb(52, 211, 153) ${
-                  ((fontSize - 12) / 12) * 100
-                }%, rgb(38, 38, 38) ${((fontSize - 12) / 12) * 100}%, rgb(38, 38, 38) 100%)`,
+                  ((safeFontSize - 12) / 12) * 100
+                }%, rgb(38, 38, 38) ${((safeFontSize - 12) / 12) * 100}%, rgb(38, 38, 38) 100%)`,
               }}
             />
             <div className="mt-2 flex justify-between text-xs text-neutral-500">
@@ -133,20 +140,20 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({ isOpen, onClose 
           <div>
             <label className="mb-3 flex items-center justify-between text-sm font-medium text-neutral-300">
               <span>Line Height</span>
-              <span className="text-emerald-400">{lineHeight.toFixed(1)}</span>
+              <span className="text-emerald-400">{safeLineHeight.toFixed(1)}</span>
             </label>
             <input
               type="range"
               min="1.2"
               max="2.0"
               step="0.1"
-              value={lineHeight}
+              value={safeLineHeight}
               onChange={(e) => setLineHeight(e.target.value)}
               className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-800"
               style={{
                 background: `linear-gradient(to right, rgb(52, 211, 153) 0%, rgb(52, 211, 153) ${
-                  ((lineHeight - 1.2) / 0.8) * 100
-                }%, rgb(38, 38, 38) ${((lineHeight - 1.2) / 0.8) * 100}%, rgb(38, 38, 38) 100%)`,
+                  ((safeLineHeight - 1.2) / 0.8) * 100
+                }%, rgb(38, 38, 38) ${((safeLineHeight - 1.2) / 0.8) * 100}%, rgb(38, 38, 38) 100%)`,
               }}
             />
           </div>
@@ -155,20 +162,20 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({ isOpen, onClose 
           <div>
             <label className="mb-3 flex items-center justify-between text-sm font-medium text-neutral-300">
               <span>Brightness</span>
-              <span className="text-emerald-400">{brightness}%</span>
+              <span className="text-emerald-400">{safeBrightness}%</span>
             </label>
             <input
               type="range"
               min="50"
               max="150"
               step="5"
-              value={brightness}
+              value={safeBrightness}
               onChange={(e) => setBrightness(e.target.value)}
               className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-800"
               style={{
                 background: `linear-gradient(to right, rgb(52, 211, 153) 0%, rgb(52, 211, 153) ${
-                  ((brightness - 50) / 100) * 100
-                }%, rgb(38, 38, 38) ${((brightness - 50) / 100) * 100}%, rgb(38, 38, 38) 100%)`,
+                  ((safeBrightness - 50) / 100) * 100
+                }%, rgb(38, 38, 38) ${((safeBrightness - 50) / 100) * 100}%, rgb(38, 38, 38) 100%)`,
               }}
             />
           </div>
@@ -183,12 +190,12 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({ isOpen, onClose 
               type="button"
               onClick={toggleFullscreen}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                fullscreen ? "bg-emerald-500" : "bg-neutral-700"
+                safeFullscreen ? "bg-emerald-500" : "bg-neutral-700"
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  fullscreen ? "translate-x-6" : "translate-x-1"
+                  safeFullscreen ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>
@@ -202,38 +209,38 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({ isOpen, onClose 
             </div>
             <button
               type="button"
-              onClick={() => setAutoScroll(!autoScroll)}
+              onClick={() => setAutoScroll(!safeAutoScroll)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                autoScroll ? "bg-emerald-500" : "bg-neutral-700"
+                safeAutoScroll ? "bg-emerald-500" : "bg-neutral-700"
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  autoScroll ? "translate-x-6" : "translate-x-1"
+                  safeAutoScroll ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>
           </div>
 
           {/* 老王注释：自动滚动速度（仅在开启自动滚动时显示） */}
-          {autoScroll ? (
+          {safeAutoScroll ? (
             <div>
               <label className="mb-3 flex items-center justify-between text-sm font-medium text-neutral-300">
                 <span>Scroll Speed</span>
-                <span className="text-emerald-400">{autoScrollSpeed}x</span>
+                <span className="text-emerald-400">{safeAutoScrollSpeed}x</span>
               </label>
               <input
                 type="range"
                 min="1"
                 max="5"
                 step="1"
-                value={autoScrollSpeed}
+                value={safeAutoScrollSpeed}
                 onChange={(e) => setAutoScrollSpeed(e.target.value)}
                 className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-800"
                 style={{
                   background: `linear-gradient(to right, rgb(52, 211, 153) 0%, rgb(52, 211, 153) ${
-                    ((autoScrollSpeed - 1) / 4) * 100
-                  }%, rgb(38, 38, 38) ${((autoScrollSpeed - 1) / 4) * 100}%, rgb(38, 38, 38) 100%)`,
+                    ((safeAutoScrollSpeed - 1) / 4) * 100
+                  }%, rgb(38, 38, 38) ${((safeAutoScrollSpeed - 1) / 4) * 100}%, rgb(38, 38, 38) 100%)`,
                 }}
               />
               <div className="mt-2 flex justify-between text-xs text-neutral-500">

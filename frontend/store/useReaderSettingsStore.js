@@ -13,17 +13,21 @@ const ReaderSettingsContext = createContext(null);
 const STORAGE_KEY = "mn_reader_settings";
 
 const DEFAULT_SETTINGS = {
+  theme: "light", // light, dark, sepia
   // NOTE: cleaned corrupted comment.
-  nightMode: false, // 鍏煎鏃х増鏈?
+  nightMode: false, // backward compatibility
   // NOTE: cleaned corrupted comment.
   layoutMode: "vertical", // vertical, horizontal
   readingMode: "scroll", // scroll, single, double
 
   // NOTE: cleaned corrupted comment.
+  fontSize: 16, // 12-24
   lineHeight: 1.6, // 1.2-2.0
+  brightness: 100, // 50-150
 
   // NOTE: cleaned corrupted comment.
   backgroundColor: "#ffffff",
+  fullscreen: false,
 
   // NOTE: cleaned corrupted comment.
   autoScroll: false,

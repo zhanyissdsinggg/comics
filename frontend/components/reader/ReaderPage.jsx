@@ -106,7 +106,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const { addHistory } = useHistoryStore();
   const { coupons, loadCoupons } = useCouponStore();
   const { signIn, isSignedIn } = useAuthStore();
-  const { nightMode, toggleNightMode, layoutMode, setLayoutMode } = useReaderSettingsStore();
+  const { nightMode, toggleNightMode, layoutMode, setLayoutMode, brightness } =
+    useReaderSettingsStore();
   const { bookmarksBySeries, addBookmark, removeBookmark } = useBookmarkStore();
   const reportedRef = useRef(false);
 
@@ -955,20 +956,22 @@ export default function ReaderPage({ seriesId, episodeId }) {
         Shortcuts: N = night mode, T = contents, B = bookmark, Left/Right = prev/next, A = auto scroll
       </div>
 
-      <PageStream
-        pages={episodeData?.pages || []}
-        paragraphs={episodeData?.paragraphs || []}
-        previewCount={previewCount}
-        previewParagraphs={previewParagraphs}
-        imageQuality={imageQuality}
-        imageSizes={imageSizes}
-        prefetchCount={prefetchCount}
-        layoutMode={layoutModeForView}
-        isNightMode={nightMode}
-        onActiveIndexChange={setActivePageIndex}
-        onPreviewEndRef={previewEndRef}
-        onEndRef={endRef}
-      />
+      <div style={{ filter: `brightness(${brightness || 100}%)` }}>
+        <PageStream
+          pages={episodeData?.pages || []}
+          paragraphs={episodeData?.paragraphs || []}
+          previewCount={previewCount}
+          previewParagraphs={previewParagraphs}
+          imageQuality={imageQuality}
+          imageSizes={imageSizes}
+          prefetchCount={prefetchCount}
+          layoutMode={layoutModeForView}
+          isNightMode={nightMode}
+          onActiveIndexChange={setActivePageIndex}
+          onPreviewEndRef={previewEndRef}
+          onEndRef={endRef}
+        />
+      </div>
 
       {showPaywall ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-4">
