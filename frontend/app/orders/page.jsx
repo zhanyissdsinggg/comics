@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import { apiGet, apiPost } from "../../lib/apiClient";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function OrdersPage() {
+  const router = useRouter();
+  const { isSignedIn } = useAuthStore();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [workingId, setWorkingId] = useState("");
@@ -12,7 +16,16 @@ export default function OrdersPage() {
 
   useEffect(() => {
     let mounted = true;
-    apiGet("/api/orders").then((response) => {
+
+    if (!isSignedIn) {
+      setOrders([]);
+      setLoading(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    apiGet("/api/orders", { suppressAuthModal: true }).then((response) => {
       if (!mounted) {
         return;
       }
@@ -24,7 +37,7 @@ export default function OrdersPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [isSignedIn]);
 
   return (
     <div className="min-h-screen bg-neutral-950">
@@ -43,6 +56,10 @@ export default function OrdersPage() {
           <button
             type="button"
             onClick={async () => {
+              if (!isSignedIn) {
+                router.push("/signin?returnTo=/orders");
+                return;
+              }
               setWorkingId("reconcile");
               const response = await apiPost("/api/orders/reconcile");
               if (response.ok) {
@@ -54,21 +71,33 @@ export default function OrdersPage() {
               setWorkingId("");
             }}
             className="rounded-full border border-neutral-800 px-4 py-2 text-xs"
-            disabled={workingId === "reconcile"}
+            disabled={!isSignedIn || workingId === "reconcile"}
           >
             Reconcile
           </button>
         </div>
         <div className="mt-6 space-y-3">
+          {!isSignedIn ? (
+            <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-300">
+              <p>Sign in to view and manage your order history.</p>
+              <button
+                type="button"
+                onClick={() => router.push("/signin?returnTo=/orders")}
+                className="mt-3 rounded-full border border-neutral-800 px-3 py-1 text-xs"
+              >
+                Sign in
+              </button>
+            </div>
+          ) : null}
           {loading ? (
             <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-400">
               Loading orders...
             </div>
-          ) : orders.length === 0 ? (
+          ) : isSignedIn && orders.length === 0 ? (
             <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-400">
               No orders yet.
             </div>
-          ) : (
+          ) : isSignedIn ? (
             orders.map((order) => (
               <div
                 key={order.orderId}
@@ -85,6 +114,10 @@ export default function OrdersPage() {
                   <button
                     type="button"
                     onClick={async () => {
+                      if (!isSignedIn) {
+                        router.push("/signin?returnTo=/orders");
+                        return;
+                      }
                       setWorkingId(order.orderId);
                       const response = await apiPost("/api/payments/refund", {
                         orderId: order.orderId,
@@ -109,7 +142,7 @@ export default function OrdersPage() {
                 ) : null}
               </div>
             ))
-          )}
+          ) : null}
         </div>
       </main>
     </div>
