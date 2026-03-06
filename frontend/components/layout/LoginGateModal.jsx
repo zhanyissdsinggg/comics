@@ -32,7 +32,6 @@ export default function LoginGateModal({
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+1");
   const [resetStatus, setResetStatus] = useState("");
-  const [resetToken, setResetToken] = useState("");
   const [socialError, setSocialError] = useState("");
   const { refresh } = useAuthStore();
   const { config } = useRegionStore();
@@ -50,7 +49,6 @@ export default function LoginGateModal({
       setPhone("");
       setCountryCode("+1");
       setResetStatus("");
-      setResetToken("");
       setSocialError("");
     }
   }, [open]);
@@ -137,11 +135,9 @@ export default function LoginGateModal({
     }
     const response = await apiPost("/api/auth/request-reset", { email });
     if (response.ok) {
-      setResetStatus("Reset link sent (dev: token shown below).");
-      setResetToken(response.data?.token || "");
+      setResetStatus("Reset link sent. Please check your email.");
     } else {
       setResetStatus(response.error || "Reset failed.");
-      setResetToken("");
     }
   };
 
@@ -328,11 +324,6 @@ export default function LoginGateModal({
       {resetStatus ? (
         <div className="mt-3 rounded-lg border border-brand-primary/30 bg-brand-primary/10 px-4 py-2 text-xs text-neutral-300">
           {resetStatus}
-          {resetToken ? (
-            <div className="mt-2 break-all rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-[11px] text-neutral-300">
-              {resetToken}
-            </div>
-          ) : null}
         </div>
       ) : null}
 

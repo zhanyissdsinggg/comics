@@ -11,6 +11,8 @@ function ResetPageContent() {
   const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const queryToken = searchParams.get("token") || "";
@@ -20,14 +22,29 @@ function ResetPageContent() {
   }, [searchParams]);
 
   const handleReset = async () => {
+    if (!token) {
+      setIsError(true);
+      setStatus("Missing reset token.");
+      return;
+    }
+    if (password.length < 6) {
+      setIsError(true);
+      setStatus("Password must be at least 6 characters.");
+      return;
+    }
+
+    setSubmitting(true);
+    setIsError(false);
     setStatus("");
     const response = await apiPost("/api/auth/reset", { token, password });
     if (response.ok) {
-      setStatus("Password updated.");
+      setStatus("Password updated. Redirecting to home...");
       setTimeout(() => router.push("/"), 800);
     } else {
+      setIsError(true);
       setStatus(response.error || "Reset failed.");
     }
+    setSubmitting(false);
   };
 
   return (
@@ -36,13 +53,21 @@ function ResetPageContent() {
       <div className="mx-auto max-w-md px-4 py-16">
         <div className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
           <h1 className="text-xl font-semibold">Reset password</h1>
-          <p className="text-sm text-neutral-400">Enter reset token and a new password.</p>
-          <input
-            value={token}
-            onChange={(event) => setToken(event.target.value)}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
-            placeholder="Reset token"
-          />
+          <p className="text-sm text-neutral-400">
+            Enter a new password for your account.
+          </p>
+          {!token ? (
+            <input
+              value={token}
+              onChange={(event) => setToken(event.target.value)}
+              className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
+              placeholder="Reset token"
+            />
+          ) : (
+            <div className="rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-xs text-neutral-400">
+              Reset token loaded from email link.
+            </div>
+          )}
           <input
             type="password"
             value={password}
@@ -50,13 +75,18 @@ function ResetPageContent() {
             className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
             placeholder="New password"
           />
-          {status ? <div className="text-xs text-emerald-300">{status}</div> : null}
+          {status ? (
+            <div className={`text-xs ${isError ? "text-red-300" : "text-emerald-300"}`}>
+              {status}
+            </div>
+          ) : null}
           <button
             type="button"
+            disabled={submitting || !token}
             onClick={handleReset}
-            className="w-full rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
+            className="w-full rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Reset
+            {submitting ? "Resetting..." : "Reset"}
           </button>
         </div>
       </div>

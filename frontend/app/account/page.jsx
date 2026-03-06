@@ -42,10 +42,7 @@ export default function AccountPage() {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [verifyStatus, setVerifyStatus] = useState("");
-  const [verifyToken, setVerifyToken] = useState("");
-  const [resetToken, setResetToken] = useState("");
-  const [resetPassword, setResetPassword] = useState("");
-  const [resetStatus, setResetStatus] = useState("");
+  const [securityStatus, setSecurityStatus] = useState("");
 
   useEffect(() => {
     const storedRegion = readStorage(REGION_KEY, "global");
@@ -62,17 +59,6 @@ export default function AccountPage() {
     setNotifyNew(storedNotifyNew);
     setNotifyTtf(storedNotifyTtf);
     setNotifyPromo(storedNotifyPromo);
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const verifyParam = params.get("verifyToken");
-      const resetParam = params.get("resetToken");
-      if (verifyParam) {
-        setVerifyToken(verifyParam);
-      }
-      if (resetParam) {
-        setResetToken(resetParam);
-      }
-    }
   }, []);
 
   useEffect(() => {
@@ -167,17 +153,19 @@ export default function AccountPage() {
     }
   };
 
-  // NOTE: cleaned corrupted comment.
-  const handlePasswordReset = async (e) => {
-    e.preventDefault();
-    setResetStatus("");
-    const response = await apiPost("/api/auth/reset", { token: resetToken, password: resetPassword });
+  const handleRequestPasswordReset = async () => {
+    setSecurityStatus("");
+    const email = user?.email || "";
+    if (!email) {
+      setSecurityStatus("Email not found. Please sign in again.");
+      return;
+    }
+
+    const response = await apiPost("/api/auth/request-reset", { email });
     if (response.ok) {
-      setResetStatus("Password reset.");
-      setResetToken("");
-      setResetPassword("");
+      setSecurityStatus("Password reset email sent.");
     } else {
-      setResetStatus(response.error || "Reset failed.");
+      setSecurityStatus(response.error || "Failed to send password reset email.");
     }
   };
 
@@ -240,80 +228,28 @@ export default function AccountPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
+                    disabled={Boolean(user?.emailVerified)}
                     onClick={() => {
                       setVerifyStatus("");
                       apiPost("/api/auth/request-verify", { email: user?.email || "" }).then(
                         (response) => {
                           if (response.ok) {
-                            setVerifyStatus("Verification sent (dev token below).");
-                            setVerifyToken(response.data?.token || "");
+                            setVerifyStatus("Verification email sent.");
                           } else {
                             setVerifyStatus(response.error || "Request failed.");
-                            setVerifyToken("");
                           }
                         }
                       );
                     }}
-                    className="rounded-full border border-neutral-700 px-3 py-1"
+                    className="rounded-full border border-neutral-700 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Send verification
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!verifyToken) {
-                        setVerifyStatus("Paste token first.");
-                        return;
-                      }
-                      apiPost("/api/auth/verify", { token: verifyToken }).then((response) => {
-                        if (response.ok) {
-                          setVerifyStatus("Verified.");
-                          setVerifyToken("");
-                        } else {
-                          setVerifyStatus(response.error || "Verify failed.");
-                        }
-                      });
-                    }}
-                    className="rounded-full bg-white px-3 py-1 text-neutral-900"
-                  >
-                    Verify now
-                  </button>
                 </div>
               </div>
-              {verifyToken ? (
-                <div className="mt-2 break-all rounded-lg border border-neutral-800 bg-neutral-950 px-2 py-1 text-[11px]">
-                  {verifyToken}
-                </div>
-              ) : null}
               {verifyStatus ? <div className="mt-2 text-[11px]">{verifyStatus}</div> : null}
             </div>
           ) : null}
-          {/* 鑰佺帇娉ㄩ噴锛氬瘑鐮侀噸缃〃鍗?- 鍖呭湪form鏍囩鍐呯鍚堟渶浣冲疄璺?*/}
-          <form onSubmit={handlePasswordReset} className="rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-xs text-neutral-300">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="text-xs text-neutral-400">Password reset</div>
-              <input
-                value={resetToken}
-                onChange={(event) => setResetToken(event.target.value)}
-                placeholder="Reset token"
-                className="w-full flex-1 rounded-lg border border-neutral-800 bg-neutral-950 px-2 py-1 text-xs"
-              />
-              <input
-                type="password"
-                value={resetPassword}
-                onChange={(event) => setResetPassword(event.target.value)}
-                placeholder="New password"
-                className="w-full flex-1 rounded-lg border border-neutral-800 bg-neutral-950 px-2 py-1 text-xs"
-              />
-              <button
-                type="submit"
-                className="rounded-full bg-white px-3 py-1 text-neutral-900"
-              >
-                Reset now
-              </button>
-            </div>
-            {resetStatus ? <div className="mt-2 text-[11px]">{resetStatus}</div> : null}
-          </form>
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
@@ -464,15 +400,19 @@ export default function AccountPage() {
         <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
           <h2 className="text-lg font-semibold">Security</h2>
           <p className="text-sm text-neutral-400">
-            Password updates are available in the next release.
+            Send a password reset link to your account email.
           </p>
           <button
             type="button"
-            onClick={() => setMessage("Password reset requested. (Mock)")}
-            className="rounded-full border border-neutral-800 px-4 py-2 text-xs"
+            disabled={!isSignedIn}
+            onClick={handleRequestPasswordReset}
+            className="rounded-full border border-neutral-800 px-4 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-50"
           >
             Request password reset
           </button>
+          {securityStatus ? (
+            <div className="text-xs text-neutral-300">{securityStatus}</div>
+          ) : null}
         </section>
 
         <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">

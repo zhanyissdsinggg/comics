@@ -58,6 +58,12 @@ type EphemeralPayload = {
   phone?: string;
 };
 
+type EphemeralRequestResult = {
+  success: true;
+  ok: true;
+  token?: string;
+};
+
 @Controller("auth")
 export class AuthController {
   constructor(
@@ -229,6 +235,25 @@ export class AuthController {
     const key = `${prefix}:${String(token || "").trim()}`;
     await this.prisma.idempotencyKey.delete({ where: { key } }).catch(() => undefined);
     return payload;
+  }
+
+  private shouldExposeDebugTokens(): boolean {
+    return process.env.AUTH_DEBUG_TOKENS === "1" && process.env.NODE_ENV !== "production";
+  }
+
+  private buildEphemeralRequestResult(token: string): EphemeralRequestResult {
+    if (this.shouldExposeDebugTokens()) {
+      return {
+        success: true,
+        ok: true,
+        token,
+      };
+    }
+
+    return {
+      success: true,
+      ok: true,
+    };
   }
 
   private async toUserResponse(user: { id: string; email: string; name: string | null }) {
@@ -487,11 +512,7 @@ export class AuthController {
     const token = await this.createEphemeralToken("verify", { email: user.email }, 24 * 60 * 60);
     await this.emailService.sendVerifyEmail(user.email, token);
 
-    return {
-      success: true,
-      ok: true,
-      token,
-    };
+    return this.buildEphemeralRequestResult(token);
   }
 
   @Post("verify")
@@ -538,11 +559,7 @@ export class AuthController {
     const token = await this.createEphemeralToken("reset", { email: user.email }, 30 * 60);
     await this.emailService.sendResetEmail(user.email, token);
 
-    return {
-      success: true,
-      ok: true,
-      token,
-    };
+    return this.buildEphemeralRequestResult(token);
   }
 
   @Post("reset")
