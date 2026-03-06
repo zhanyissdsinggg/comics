@@ -56,7 +56,8 @@ export default function AdminUsersPage() {
     {
       endpoint: 'users/block',
       method: 'PATCH',
-      bodyBuilder: () => ({ blocked: true }),
+      appendIdToPath: false,
+      bodyBuilder: (userId) => ({ userId, blocked: true }),
     },
     {
       onSuccess: () => {
@@ -75,7 +76,8 @@ export default function AdminUsersPage() {
     {
       endpoint: 'users/block',
       method: 'PATCH',
-      bodyBuilder: () => ({ blocked: false }),
+      appendIdToPath: false,
+      bodyBuilder: (userId) => ({ userId, blocked: false }),
     },
     {
       onSuccess: () => {
@@ -111,9 +113,9 @@ export default function AdminUsersPage() {
   // 老王说：用useMutation替代handleUserBlock async函数
   const userBlockMutation = useMutation({
     mutationFn: async ({ userId, blocked }) => {
-      const response = await adminFetch(`/api/admin/users/${userId}/block`, {
+      const response = await adminFetch('/api/admin/users/block', {
         method: 'PATCH',
-        body: JSON.stringify({ blocked }),
+        body: JSON.stringify({ userId, blocked }),
       });
 
       if (!response.ok) throw new Error('更新用户状态失败');

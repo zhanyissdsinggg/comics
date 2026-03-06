@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { listTopupPackages } from "../../../../common/config/topup";
@@ -9,6 +20,17 @@ import { getPlanCatalog } from "../../../../common/config/plans";
 @UseGuards(AdminAuthGuard)
 export class AdminBillingController {
   constructor(private readonly prisma: PrismaService) {}
+
+  @Get()
+  async listForLegacyPage() {
+    const packages = await listTopupPackages(this.prisma);
+    return {
+      data: packages.map((item: any) => ({
+        ...item,
+        points: Number(item.paidPts || 0) + Number(item.bonusPts || 0),
+      })),
+    };
+  }
 
   @Get("topups")
   async listTopups() {
@@ -78,5 +100,25 @@ export class AdminBillingController {
   async updatePlan(@Param("id") id: string, @Body() body: CreateTopupDto) {
     // 老王说：subscriptionPlan模型已删除，此方法已禁用
     throw new Error('This endpoint is no longer available');
+  }
+
+  @Delete(":id")
+  async removeTopup(@Param("id") id: string) {
+    if (!id) {
+      throw new BadRequestException("缺少packageId参数");
+    }
+    const existing = await this.prisma.topupPackage.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException("充值包不存在");
+    }
+    try {
+      await this.prisma.topupPackage.delete({ where: { id } });
+    } catch (error: any) {
+      if (error?.code === "P2003") {
+        throw new BadRequestException("该充值包已被订单引用，无法删除");
+      }
+      throw error;
+    }
+    return { ok: true };
   }
 }

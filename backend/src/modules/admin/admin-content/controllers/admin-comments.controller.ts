@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Patch, UseGuards, BadRequestException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  UseGuards,
+} from "@nestjs/common";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { UpdateCommentDto } from "../dtos/admin-content.dto";
@@ -15,7 +25,7 @@ export class AdminCommentsController {
       include: { user: { select: { email: true } } },
     });
     return {
-      comments: comments.map((item) => ({
+      comments: comments.map((item: (typeof comments)[number]) => ({
         id: item.id,
         seriesId: item.seriesId,
         userId: item.userId,
@@ -60,5 +70,18 @@ export class AdminCommentsController {
       data: { rating, ratingCount: count },
     });
     return { rating: Number(rating.toFixed(2)), count };
+  }
+
+  @Delete(":id")
+  async remove(@Param("id") id: string) {
+    if (!id) {
+      throw new BadRequestException("缺少评论ID参数");
+    }
+    const existing = await this.prisma.comment.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException("评论不存在");
+    }
+    await this.prisma.comment.delete({ where: { id } });
+    return { ok: true };
   }
 }

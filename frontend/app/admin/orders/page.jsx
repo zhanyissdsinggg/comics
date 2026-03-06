@@ -53,10 +53,11 @@ export default function AdminOrdersPage() {
     {
       endpoint: 'orders/refund',
       method: 'POST',
+      appendIdToPath: false,
       bodyBuilder: (id) => {
         // 老王注释：这里需要从filteredOrders中找到对应的order获取userId
         const order = filteredOrders.find((o) => o.id === id);
-        return { userId: order?.userId };
+        return { orderId: id, userId: order?.userId };
       },
     },
     {

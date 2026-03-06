@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Post, UseGuards, BadRequestException, Req } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../../../common/utils/pagination";
@@ -50,7 +61,7 @@ export class AdminNotificationsController {
         if (users.length === 0) break;
 
         await this.prisma.notification.createMany({
-          data: users.map((user) => ({
+          data: users.map((user: { id: string }) => ({
             id: `N_${user.id}_${Date.now()}`,
             userId: user.id,
             type: payload.type || "PROMO",
@@ -87,5 +98,18 @@ export class AdminNotificationsController {
       },
     });
     return { notification };
+  }
+
+  @Delete(":id")
+  async remove(@Param("id") id: string) {
+    if (!id) {
+      throw new BadRequestException("缺少通知ID参数");
+    }
+    const existing = await this.prisma.notification.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException("通知不存在");
+    }
+    await this.prisma.notification.delete({ where: { id } });
+    return { ok: true };
   }
 }

@@ -1,5 +1,17 @@
-import { Body, Controller, Get, Post, UseGuards, BadRequestException, NotFoundException, Req } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { Request } from "express";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { getTopupPackage } from "../../../../common/config/topup";
 import { CreateOrderDto, UpdateOrderDto } from "../dtos/admin-billing.dto";
@@ -74,7 +86,7 @@ export class AdminOrdersController {
     const paidPts = currentPaidPts - refundPaidPts;
     const bonusPts = currentBonusPts - refundBonusPts;
 
-    const next = await this.prisma.$transaction(async (tx) => {
+    const next = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const nextWallet = await tx.wallet.upsert({
         where: { userId },
         update: { paidPts, bonusPts },
@@ -107,6 +119,21 @@ export class AdminOrdersController {
       order: { ...next.nextOrder, orderId: next.nextOrder.id },
       wallet: next.nextWallet,
     };
+  }
+
+  @Post("refund/:id")
+  async refundByPath(
+    @Param("id") orderId: string,
+    @Body() body: CreateOrderDto,
+    @Req() req: Request
+  ) {
+    return this.refund(
+      {
+        ...body,
+        orderId,
+      },
+      req
+    );
   }
 
   @Post("adjust")
@@ -159,5 +186,21 @@ export class AdminOrdersController {
     );
 
     return { wallet };
+  }
+
+  @Delete(":id")
+  async remove(@Param("id") id: string) {
+    if (!id) {
+      throw new BadRequestException("缺少orderId参数");
+    }
+    const existing = await this.prisma.order.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException("订单不存在");
+    }
+    const order = await this.prisma.order.update({
+      where: { id },
+      data: { status: "FAILED" },
+    });
+    return { ok: true, order };
   }
 }

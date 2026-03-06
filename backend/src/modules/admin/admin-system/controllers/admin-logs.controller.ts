@@ -1,6 +1,16 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { PrismaService } from "../../../../common/prisma/prisma.service";
 
 /**
  * 老王说：管理员日志控制器
@@ -9,7 +19,10 @@ import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 @Controller("admin/logs")
 @UseGuards(AdminAuthGuard)
 export class AdminLogsController {
-  constructor(private readonly adminLogService: AdminLogService) {}
+  constructor(
+    private readonly adminLogService: AdminLogService,
+    private readonly prisma: PrismaService
+  ) {}
 
   /**
    * 老王说：查询操作日志
@@ -45,5 +58,18 @@ export class AdminLogsController {
     const result = await this.adminLogService.query(filters, page, pageSize);
 
     return result;
+  }
+
+  @Delete(":id")
+  async remove(@Param("id") id: string) {
+    if (!id) {
+      throw new BadRequestException("缺少日志ID参数");
+    }
+    const existing = await this.prisma.adminLog.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException("日志不存在");
+    }
+    await this.prisma.adminLog.delete({ where: { id } });
+    return { ok: true };
   }
 }

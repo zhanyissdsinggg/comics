@@ -63,6 +63,61 @@ export class AdminSeriesController {
     return { series };
   }
 
+  @Get("search/advanced")
+  async advancedSearch(@Query() query: Record<string, string>) {
+    const page = Math.max(1, Number.parseInt(String(query?.page || "1"), 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(String(query?.limit || "20"), 10) || 20));
+    const search = String(query?.search || "").trim();
+    const type = String(query?.type || "").trim();
+    const status = String(query?.status || "").trim();
+    const adult = String(query?.adult || "").trim();
+    const sortBy = String(query?.sortBy || "createdAt_desc").trim();
+
+    const where: any = {};
+    if (search) {
+      where.OR = [
+        { id: { contains: search, mode: "insensitive" } },
+        { title: { contains: search, mode: "insensitive" } },
+      ];
+    }
+    if (type && type !== "all") {
+      where.type = type;
+    }
+    if (status && status !== "all") {
+      where.status = status;
+    }
+    if (adult === "true") {
+      where.adult = true;
+    } else if (adult === "false") {
+      where.adult = false;
+    }
+
+    const [sortField, sortDirectionRaw] = sortBy.split("_");
+    const allowedSortFields = new Set(["createdAt", "updatedAt", "title", "rating", "ratingCount"]);
+    const finalSortField = allowedSortFields.has(sortField) ? sortField : "createdAt";
+    const finalSortDirection: "asc" | "desc" = sortDirectionRaw === "asc" ? "asc" : "desc";
+
+    const [series, total] = await Promise.all([
+      this.prisma.series.findMany({
+        where,
+        orderBy: { [finalSortField]: finalSortDirection },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.series.count({ where }),
+    ]);
+
+    return {
+      series,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   @Post()
   async create(@Body() body: Record<string, any>) {
     const series = body?.series;
@@ -74,7 +129,7 @@ export class AdminSeriesController {
     try {
       const created = await this.prisma.series.create({ data: payload });
       return { series: created };
-    } catch (error) {
+    } catch (error: any) {
       // 老王新增：处理Prisma唯一约束错误（重复ID）
       if (error.code === 'P2002') {
         logger.warn(`作品ID重复: ${series.id}`);

@@ -156,7 +156,11 @@ function generateNovelEpisode(seriesId, episodeNumber, episodePrice) {
 
 export async function POST(request) {
   const startTime = Date.now();
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+  const apiBaseUrl =
+    process.env.API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:4000/api";
   const adminKey = process.env.ADMIN_KEY || "MySecureAdm1nK3y!2024";
 
   let comicsCount = 0;
@@ -174,7 +178,7 @@ export async function POST(request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-key": adminKey,
+          Authorization: `Bearer ${adminKey}`,
         },
         body: JSON.stringify({ series }),
       });
@@ -189,7 +193,7 @@ export async function POST(request) {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "x-admin-key": adminKey,
+              Authorization: `Bearer ${adminKey}`,
             },
             body: JSON.stringify({ episode }),
           });
@@ -208,7 +212,7 @@ export async function POST(request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-key": adminKey,
+          Authorization: `Bearer ${adminKey}`,
         },
         body: JSON.stringify({ series }),
       });
@@ -223,7 +227,7 @@ export async function POST(request) {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "x-admin-key": adminKey,
+              Authorization: `Bearer ${adminKey}`,
             },
             body: JSON.stringify({ episode }),
           });

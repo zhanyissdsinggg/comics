@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Patch, UseGuards, BadRequestException, Req } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../../../common/utils/pagination";
@@ -58,5 +69,33 @@ export class AdminUsersController {
       data: { isBlocked: Boolean(body?.blocked) },
     });
     return { user };
+  }
+
+  @Patch(":id/block")
+  async blockByPath(@Param("id") userId: string, @Body() body: { blocked?: boolean }) {
+    if (!userId) {
+      throw new BadRequestException("缺少userId参数");
+    }
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { isBlocked: Boolean(body?.blocked) },
+    });
+    return { user };
+  }
+
+  @Delete(":id")
+  async deactivate(@Param("id") userId: string) {
+    if (!userId) {
+      throw new BadRequestException("缺少userId参数");
+    }
+    const existing = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!existing) {
+      throw new NotFoundException("用户不存在");
+    }
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { isBlocked: true },
+    });
+    return { ok: true, user, softDeleted: true };
   }
 }

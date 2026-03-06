@@ -15,6 +15,7 @@ export interface BulkMutationConfig {
   endpoint: string; // API端点
   method: 'DELETE' | 'PATCH' | 'POST'; // HTTP方法
   bodyBuilder?: (id: string) => any; // 构建请求体的函数（用于PATCH/POST）
+  appendIdToPath?: boolean; // 是否将id拼接到URL末尾，默认true
 }
 
 /**
@@ -48,7 +49,10 @@ export function useBulkMutation(
 
       // 老王注释：并行执行所有请求，提高效率
       const promises = ids.map((id) => {
-        let url = `/api/admin/${config.endpoint}/${id}`;
+        const appendIdToPath = config.appendIdToPath !== false;
+        const url = appendIdToPath
+          ? `/api/admin/${config.endpoint}/${id}`
+          : `/api/admin/${config.endpoint}`;
         let options: RequestInit = {
           method: config.method,
         };

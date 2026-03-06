@@ -1,0 +1,129 @@
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
+import { Request } from "express";
+import { PrismaService } from "../../../../common/prisma/prisma.service";
+import {
+  buildPaginationResult,
+  calculateOffset,
+  parsePaginationParams,
+} from "../../../../common/utils/pagination";
+import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+
+@Controller("admin/support")
+@UseGuards(AdminAuthGuard)
+export class AdminSupportController {
+  constructor(private readonly prisma: PrismaService) {}
+
+  @Get()
+  async list(@Req() req: Request) {
+    const { page, pageSize } = parsePaginationParams(req.query);
+    const offset = calculateOffset(page, pageSize);
+    const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+    const status = typeof req.query.status === "string" ? req.query.status.trim() : "";
+
+    const where: Record<string, any> = {};
+    if (search) {
+      where.OR = [
+        { id: { contains: search, mode: "insensitive" } },
+        { userId: { contains: search, mode: "insensitive" } },
+        { subject: { contains: search, mode: "insensitive" } },
+        { message: { contains: search, mode: "insensitive" } },
+      ];
+    }
+    if (status) {
+      where.status = status;
+    }
+
+    const [tickets, total] = await Promise.all([
+      this.prisma.supportTicket.findMany({
+        where,
+        include: {
+          user: {
+            select: { email: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        take: pageSize,
+        skip: offset,
+      }),
+      this.prisma.supportTicket.count({ where }),
+    ]);
+
+    const normalized = tickets.map((ticket: (typeof tickets)[number]) => ({
+      id: ticket.id,
+      userId: ticket.userId,
+      subject: ticket.subject,
+      message: ticket.message,
+      status: ticket.status,
+      userEmail: ticket.user?.email || null,
+      createdAt: ticket.createdAt,
+      updatedAt: ticket.updatedAt,
+    }));
+
+    return buildPaginationResult(normalized, total, page, pageSize);
+  }
+
+  @Post(":id/reply")
+  async reply(@Param("id") id: string, @Body() body: { message?: string }) {
+    const message = String(body?.message || "").trim();
+    if (!message) {
+      throw new BadRequestException("缺少回复内容");
+    }
+
+    const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
+    if (!ticket) {
+      throw new NotFoundException("工单不存在");
+    }
+
+    const nextStatus = ticket.status.toLowerCase() === "closed" ? "closed" : "in_progress";
+    const updated = await this.prisma.supportTicket.update({
+      where: { id },
+      data: { status: nextStatus },
+    });
+
+    return {
+      ok: true,
+      ticket: updated,
+      reply: {
+        message,
+        repliedAt: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Patch(":id/close")
+  async close(@Param("id") id: string) {
+    const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
+    if (!ticket) {
+      throw new NotFoundException("工单不存在");
+    }
+
+    const updated = await this.prisma.supportTicket.update({
+      where: { id },
+      data: { status: "closed" },
+    });
+
+    return { ok: true, ticket: updated };
+  }
+
+  @Delete(":id")
+  async remove(@Param("id") id: string) {
+    const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
+    if (!ticket) {
+      throw new NotFoundException("工单不存在");
+    }
+    await this.prisma.supportTicket.delete({ where: { id } });
+    return { ok: true };
+  }
+}

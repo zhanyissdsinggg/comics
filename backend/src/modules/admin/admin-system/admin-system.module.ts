@@ -13,6 +13,7 @@ import { AdminLogsController } from "./controllers/admin-logs.controller";
 import { AdminUploadController } from "./controllers/admin-upload.controller";
 import { AdminEmailController } from "./controllers/admin-email.controller";
 import { AdminEmailJobsController } from "./controllers/admin-email-jobs.controller";
+import { AdminSupportController } from "./controllers/admin-support.controller";
 
 @Module({
   imports: [AdminAuthModule, EmailModule],
@@ -26,6 +27,7 @@ import { AdminEmailJobsController } from "./controllers/admin-email-jobs.control
     AdminUploadController,
     AdminEmailController,
     AdminEmailJobsController,
+    AdminSupportController,
   ],
   providers: [AdminMarketingService, PrismaService, AdminLogService],
   exports: [AdminMarketingService, AdminLogService],
