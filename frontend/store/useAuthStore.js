@@ -15,30 +15,41 @@ import { applyPreferencesToStorage } from "../lib/preferencesClient";
 
 const AuthContext = createContext(null);
 
+function resolveAuthState(authResponse) {
+  if (!authResponse?.ok) {
+    return { isSignedIn: false, user: null };
+  }
+
+  const payload = authResponse.data || {};
+  const user = payload.user || null;
+  const isSignedIn =
+    typeof payload.isSignedIn === "boolean" ? payload.isSignedIn : Boolean(user);
+
+  return {
+    isSignedIn,
+    user: isSignedIn ? user : null,
+  };
+}
+
 export function AuthProvider({ children }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [user, setUser] = useState(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [, setHydrated] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
-    // 老王说：并行加载auth和preferences，别tm一个一个地等
+
     parallelRequests2(
       () => apiGet("/api/auth/me", { suppressAuthModal: true }),
       () => apiGet("/api/preferences")
     )
       .then(([authResponse, prefResponse]) => {
-        if (authResponse.ok) {
-          setIsSignedIn(true);
-          setUser(authResponse.data?.user || null);
-        } else {
-          setIsSignedIn(false);
-          setUser(null);
-        }
+        const authState = resolveAuthState(authResponse);
+        setIsSignedIn(authState.isSignedIn);
+        setUser(authState.user);
 
-        // 处理preferences响应
         if (prefResponse.ok && prefResponse.data?.preferences) {
           applyPreferencesToStorage(prefResponse.data.preferences);
         }
@@ -48,13 +59,9 @@ export function AuthProvider({ children }) {
 
   const refresh = useCallback(async () => {
     const response = await apiGet("/api/auth/me", { suppressAuthModal: true });
-    if (response.ok) {
-      setIsSignedIn(true);
-      setUser(response.data?.user || null);
-    } else {
-      setIsSignedIn(false);
-      setUser(null);
-    }
+    const authState = resolveAuthState(response);
+    setIsSignedIn(authState.isSignedIn);
+    setUser(authState.user);
     return response;
   }, []);
 

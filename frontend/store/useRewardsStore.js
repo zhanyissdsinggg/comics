@@ -9,6 +9,7 @@ import {
 } from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
 import { useWalletStore } from "./useWalletStore";
+import { useAuthStore } from "./useAuthStore";
 import { trackEvent } from "../lib/trackEvent";
 
 const RewardsContext = createContext(null);
@@ -32,20 +33,34 @@ function normalizeRewards(state, rewardPts) {
   };
 }
 
+function unauthenticatedResponse() {
+  return { ok: false, status: 401, error: "UNAUTHENTICATED" };
+}
+
 export function RewardsProvider({ children }) {
   const [rewards, setRewards] = useState(null);
   const [missions, setMissions] = useState({ daily: [], weekly: [] });
   const { setWallet } = useWalletStore();
+  const { isSignedIn } = useAuthStore();
 
   const loadRewards = useCallback(async () => {
+    if (!isSignedIn) {
+      return unauthenticatedResponse();
+    }
     const response = await apiGet("/api/rewards");
     if (response.ok) {
       setRewards(normalizeRewards(response.data, response.data?.rewardPts));
     }
     return response;
-  }, []);
+  }, [isSignedIn]);
 
   const checkIn = useCallback(async () => {
+    if (!isSignedIn) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("auth:open"));
+      }
+      return unauthenticatedResponse();
+    }
     trackEvent("checkin_click", {});
     const response = await apiPost("/api/rewards/checkin");
     if (response.ok) {
@@ -58,9 +73,15 @@ export function RewardsProvider({ children }) {
       trackEvent("checkin_fail", { status: response.status, errorCode: response.error });
     }
     return response;
-  }, [setWallet]);
+  }, [isSignedIn, setWallet]);
 
   const makeUp = useCallback(async () => {
+    if (!isSignedIn) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("auth:open"));
+      }
+      return unauthenticatedResponse();
+    }
     trackEvent("makeup_click", {});
     const response = await apiPost("/api/rewards/makeup");
     if (response.ok) {
@@ -73,9 +94,12 @@ export function RewardsProvider({ children }) {
       trackEvent("makeup_fail", { status: response.status, errorCode: response.error });
     }
     return response;
-  }, [setWallet]);
+  }, [isSignedIn, setWallet]);
 
   const loadMissions = useCallback(async () => {
+    if (!isSignedIn) {
+      return unauthenticatedResponse();
+    }
     const response = await apiGet("/api/missions");
     if (response.ok) {
       setMissions({
@@ -84,10 +108,16 @@ export function RewardsProvider({ children }) {
       });
     }
     return response;
-  }, []);
+  }, [isSignedIn]);
 
   const claimMission = useCallback(
     async (missionId) => {
+      if (!isSignedIn) {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("auth:open"));
+        }
+        return unauthenticatedResponse();
+      }
       trackEvent("mission_claim_click", { missionId });
       const response = await apiPost("/api/missions/claim", { missionId });
       if (response.ok) {
@@ -104,10 +134,13 @@ export function RewardsProvider({ children }) {
       }
       return response;
     },
-    [setWallet]
+    [isSignedIn, setWallet]
   );
 
   const report = useCallback(async (eventType) => {
+    if (!isSignedIn) {
+      return unauthenticatedResponse();
+    }
     trackEvent("mission_progress_event", { eventType });
     const response = await apiPost("/api/missions/report", { eventType });
     if (response.ok) {
@@ -117,7 +150,7 @@ export function RewardsProvider({ children }) {
       });
     }
     return response;
-  }, []);
+  }, [isSignedIn]);
 
   const value = useMemo(
     () => ({

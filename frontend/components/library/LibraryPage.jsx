@@ -17,6 +17,7 @@ import RewardToast from "./RewardToast";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useWalletStore } from "../../store/useWalletStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import ActionModal from "../series/ActionModal";
 import { useRouter } from "next/navigation";
 
@@ -41,6 +42,7 @@ function parseEpisodeNumber(value) {
 
 export default function LibraryPage() {
   const router = useRouter();
+  const { isSignedIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
   const { bySeriesId, loadProgress } = useProgressStore();
   const {
@@ -107,11 +109,13 @@ export default function LibraryPage() {
   }, []);
 
   useEffect(() => {
-    loadRewards();
-    loadMissions();
     loadProgress();
     loadHistory();
-  }, [loadMissions, loadRewards, loadProgress, loadHistory]);
+    if (isSignedIn) {
+      loadRewards();
+      loadMissions();
+    }
+  }, [isSignedIn, loadMissions, loadRewards, loadProgress, loadHistory]);
 
   useEffect(() => {
     const adultFlag = isAdultMode ? "1" : "0";
@@ -213,18 +217,33 @@ export default function LibraryPage() {
           </div>
         ) : (
           <>
-            <CheckInPanel
-              rewards={rewards}
-              onCheckIn={handleCheckIn}
-              onMakeUp={handleMakeUp}
-              working={checkinWorking}
-            />
+            {isSignedIn ? (
+              <>
+                <CheckInPanel
+                  rewards={rewards}
+                  onCheckIn={handleCheckIn}
+                  onMakeUp={handleMakeUp}
+                  working={checkinWorking}
+                />
 
-            <MissionsPanel
-              missions={missions}
-              onClaim={handleClaim}
-              workingId={workingId}
-            />
+                <MissionsPanel
+                  missions={missions}
+                  onClaim={handleClaim}
+                  workingId={workingId}
+                />
+              </>
+            ) : (
+              <section className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 text-sm text-neutral-300">
+                <p className="text-neutral-200">Sign in to unlock check-in rewards and missions.</p>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent("auth:open"))}
+                  className="mt-3 rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-100"
+                >
+                  Sign in
+                </button>
+              </section>
+            )}
 
             {/* 老王注释：收藏夹管理按钮 */}
             <div className="flex justify-end">
