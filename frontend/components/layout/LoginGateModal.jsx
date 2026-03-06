@@ -10,6 +10,7 @@ import { apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getCookie, setCookie } from "../../lib/cookies";
 import { useRegionStore } from "../../store/useRegionStore";
+import { isGoogleAuthEnabled } from "../../lib/socialAuthConfig";
 import SocialAuthButton from "../auth/SocialAuthButton";
 
 export default function LoginGateModal({
@@ -35,6 +36,7 @@ export default function LoginGateModal({
   const [socialError, setSocialError] = useState("");
   const { refresh } = useAuthStore();
   const { config } = useRegionStore();
+  const googleAuthEnabled = isGoogleAuthEnabled();
 
   useEffect(() => {
     if (open) {
@@ -245,7 +247,7 @@ export default function LoginGateModal({
           </>
         )}
 
-        {step !== "otp" ? (
+        {step !== "otp" && googleAuthEnabled ? (
           <div className="space-y-2">
             <div className="flex items-center gap-3 text-xs text-neutral-500">
               <div className="h-px flex-1 bg-neutral-800" />

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { trackEvent } from "../../lib/trackEvent";
+import { isGoogleAuthEnabled } from "../../lib/socialAuthConfig";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
@@ -9,6 +10,7 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
   const [loading, setLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
   const googleButtonRef = useRef(null);
+  const googleEnabled = isGoogleAuthEnabled();
 
   const handleGoogleCallback = useCallback(
     async (response) => {
@@ -54,7 +56,7 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
       return undefined;
     }
 
-    if (!GOOGLE_CLIENT_ID) {
+    if (!googleEnabled) {
       setGoogleReady(false);
       return undefined;
     }
@@ -112,7 +114,7 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
         window.clearTimeout(timeoutId);
       }
     };
-  }, [provider, handleGoogleCallback]);
+  }, [provider, handleGoogleCallback, googleEnabled]);
 
   const handleAppleCallback = useCallback(
     async (response) => {
@@ -181,14 +183,15 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
   }, [handleAppleCallback, onError]);
 
   if (provider === "google") {
+    if (!googleEnabled) {
+      return null;
+    }
+
     return (
       <div className="w-full space-y-2">
         <div className="flex min-h-[44px] w-full items-center justify-center overflow-hidden rounded-[12px] border border-white/10 bg-white px-2 py-1">
           <div ref={googleButtonRef} className="w-full max-w-[320px]" />
         </div>
-        {!GOOGLE_CLIENT_ID ? (
-          <p className="text-center text-xs text-red-300">Google Client ID 未配置</p>
-        ) : null}
         {GOOGLE_CLIENT_ID && !googleReady ? (
           <p className="text-center text-xs text-neutral-400">Google 登录组件加载中...</p>
         ) : null}
