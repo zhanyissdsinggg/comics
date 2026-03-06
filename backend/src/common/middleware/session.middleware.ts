@@ -20,6 +20,11 @@ export function createSessionMiddleware(prisma: PrismaService) {
         where: { token },
         include: { user: true },
       });
+      if (session && session.expiresAt.getTime() <= Date.now()) {
+        await prisma.session.delete({ where: { token } }).catch(() => undefined);
+        next();
+        return;
+      }
       if (session && !session.user?.isBlocked) {
         req.userId = session.userId;
         req.userEmail = session.user?.email || "";

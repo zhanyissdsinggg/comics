@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ModalBase from "../common/ModalBase";
 import {
   LOGIN_GATE_DESCRIPTION,
@@ -8,8 +8,9 @@ import {
 } from "../../lib/adultGateCopy";
 import { apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
-import { getCookie } from "../../lib/cookies";
+import { getCookie, setCookie } from "../../lib/cookies";
 import { useRegionStore } from "../../store/useRegionStore";
+import SocialAuthButton from "../auth/SocialAuthButton";
 
 export default function LoginGateModal({
   open,
@@ -31,6 +32,7 @@ export default function LoginGateModal({
   const [countryCode, setCountryCode] = useState("+1");
   const [resetStatus, setResetStatus] = useState("");
   const [resetToken, setResetToken] = useState("");
+  const [socialError, setSocialError] = useState("");
   const { refresh } = useAuthStore();
   const { config } = useRegionStore();
 
@@ -47,6 +49,7 @@ export default function LoginGateModal({
       setCountryCode("+1");
       setResetStatus("");
       setResetToken("");
+      setSocialError("");
     }
   }, [open]);
 
@@ -84,11 +87,11 @@ export default function LoginGateModal({
       }
       return;
     }
+
     const response = await onSubmit?.({ email, password, mode });
     if (response?.status === 202 || response?.data?.requiresOtp) {
       setStep("otp");
       setOtpStatus("We sent a code to your email.");
-      return;
     }
   };
 
@@ -118,12 +121,10 @@ export default function LoginGateModal({
     });
     if (response.ok) {
       setOtpStatus("Code resent.");
+    } else if (response.error === "INVALID_REQUEST") {
+      setOtpStatus("Invalid phone number.");
     } else {
-      if (response.error === "INVALID_REQUEST") {
-        setOtpStatus("Invalid phone number.");
-      } else {
-        setOtpStatus(response.error || "Resend failed.");
-      }
+      setOtpStatus(response.error || "Resend failed.");
     }
   };
 
@@ -142,17 +143,32 @@ export default function LoginGateModal({
     }
   };
 
+  const handleSocialSuccess = useCallback(async () => {
+    setSocialError("");
+    const response = await refresh();
+    if (response?.ok && (response.data?.isSignedIn || response.data?.user)) {
+      setCookie("mn_is_signed_in", "1");
+      onClose?.();
+      return;
+    }
+    setSocialError("Google 登录成功，但会话刷新失败，请重试。");
+  }, [onClose, refresh]);
+
+  const handleSocialError = useCallback((message) => {
+    setSocialError(message || "社交登录失败，请稍后重试。");
+  }, []);
+
   return (
     <ModalBase open={open} title={title} onClose={onClose}>
       <p className="text-neutral-400">{description}</p>
       <div className="mt-6 space-y-4">
-        {/* 老王注释：Email输入框 - 品牌色focus效果 + 发光阴影 */}
         <input
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="Email"
           className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white placeholder-neutral-500 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
         />
+
         {step === "otp" ? (
           <div className="flex items-center gap-3 text-xs">
             <button
@@ -179,6 +195,7 @@ export default function LoginGateModal({
             </button>
           </div>
         ) : null}
+
         {step !== "otp" ? (
           <input
             type="password"
@@ -227,24 +244,48 @@ export default function LoginGateModal({
             />
           </>
         )}
+
+        {step !== "otp" ? (
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 text-xs text-neutral-500">
+              <div className="h-px flex-1 bg-neutral-800" />
+              <span>or continue with</span>
+              <div className="h-px flex-1 bg-neutral-800" />
+            </div>
+            <SocialAuthButton
+              provider="google"
+              onSuccess={handleSocialSuccess}
+              onError={handleSocialError}
+            />
+          </div>
+        ) : null}
       </div>
+
       {errorMessage ? (
-        <p className="mt-4 rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-2 text-xs text-red-300">
+        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-300">
           {errorMessage}
         </p>
       ) : null}
+
+      {socialError ? (
+        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-300">
+          {socialError}
+        </p>
+      ) : null}
+
       {step === "otp" ? (
         <div className="mt-3 text-xs text-neutral-400">
           {otpStatus}
           <button
             type="button"
             onClick={handleResendOtp}
-            className="ml-2 font-semibold text-brand-primary hover:text-brand-secondary transition-colors duration-300"
+            className="ml-2 font-semibold text-brand-primary transition-colors duration-300 hover:text-brand-secondary"
           >
             Resend
           </button>
         </div>
       ) : null}
+
       {allowRegister ? (
         <div className="mt-6 flex items-center gap-3 text-xs">
           <button
@@ -271,28 +312,32 @@ export default function LoginGateModal({
           </button>
         </div>
       ) : null}
+
       <div className="mt-4 text-xs">
         <button
           type="button"
           onClick={handleReset}
-          className="font-semibold text-neutral-400 hover:text-brand-primary transition-colors duration-300"
+          className="font-semibold text-neutral-400 transition-colors duration-300 hover:text-brand-primary"
         >
           Forgot password?
         </button>
       </div>
+
       {resetStatus ? (
-        <div className="mt-3 rounded-lg bg-brand-primary/10 border border-brand-primary/30 px-4 py-2 text-xs text-neutral-300">
+        <div className="mt-3 rounded-lg border border-brand-primary/30 bg-brand-primary/10 px-4 py-2 text-xs text-neutral-300">
           {resetStatus}
           {resetToken ? (
-            <div className="mt-2 break-all rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-[11px] text-neutral-300 font-mono">
+            <div className="mt-2 break-all rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-[11px] text-neutral-300">
               {resetToken}
             </div>
           ) : null}
         </div>
       ) : null}
+
       <p className="mt-4 text-[11px] text-neutral-500">
         If sign in fails due to email not verified, please verify from the email link.
       </p>
+
       <div className="mt-6 flex justify-end gap-3">
         <button
           type="button"
@@ -304,7 +349,7 @@ export default function LoginGateModal({
         <button
           type="button"
           onClick={handleSubmit}
-          className="rounded-full bg-brand-gradient px-6 py-2.5 text-sm font-semibold text-white shadow-glow-sm transition-all duration-300 hover:shadow-glow-md hover:scale-105 active:scale-95"
+          className="rounded-full bg-brand-gradient px-6 py-2.5 text-sm font-semibold text-white shadow-glow-sm transition-all duration-300 hover:scale-105 hover:shadow-glow-md active:scale-95"
         >
           {mode === "register" ? "Register" : "Sign in"}
         </button>

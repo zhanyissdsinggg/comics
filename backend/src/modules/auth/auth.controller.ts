@@ -1,30 +1,49 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus, Req, UnauthorizedException } from "@nestjs/common";
+﻿import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  InternalServerErrorException,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { randomBytes } from "crypto";
+import { Request, Response } from "express";
+import { OAuth2Client } from "google-auth-library";
+import { PrismaService } from "../../common/prisma/prisma.service";
+import { buildCookieOptions } from "../../common/utils/cookies";
 import { AuthService } from "./auth.service";
-import { Request } from "express";
 
-/**
- * 老王说：认证控制器，提供登录、刷新token等接口
- * 这些SB接口是前端获取JWT token的唯一途径
- */
+const GOOGLE_OAUTH_CLIENT = new OAuth2Client();
+const SESSION_COOKIE_NAME = "mn_session";
+const SESSION_DURATION_SECONDS = 7 * 24 * 60 * 60;
+
+type AuthenticatedRequest = Request & {
+  userId?: string;
+  userEmail?: string;
+};
+
+type GooglePayload = {
+  email?: string;
+  email_verified?: boolean;
+  name?: string;
+};
+
 @Controller("auth")
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  /**
-   * 老王新增：获取当前用户信息
-   * GET /auth/me
-   * Headers: Authorization: Bearer <token>
-   * Returns: { user: { userId, email, ... } }
-   *
-   * 老王修复：未登录用户返回200状态码和null，避免401错误
-   */
   @Get("me")
-  async me(@Req() req: Request) {
-    // 老王说：从请求中获取用户信息（由middleware注入）
-    const user = (req as any).user;
-
-    // 老王修复：未登录用户返回200状态码和null，而不是抛出401错误
-    if (!user) {
+  async me(@Req() req: AuthenticatedRequest) {
+    const userId = req.userId;
+    if (!userId) {
       return {
         success: true,
         user: null,
@@ -32,80 +51,163 @@ export class AuthController {
       };
     }
 
-    // 老王说：返回用户信息（这里简化处理，实际应该从数据库查询）
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        isBlocked: true,
+      },
+    });
+
+    if (!user || user.isBlocked) {
+      return {
+        success: true,
+        user: null,
+        isSignedIn: false,
+      };
+    }
+
     return {
       success: true,
-      user: {
-        userId: user.userId || "guest",
-        email: user.email || null,
-        role: user.role || "user",
-      },
       isSignedIn: true,
+      user: {
+        id: user.id,
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        role: "user",
+        emailVerified: true,
+      },
     };
   }
 
-  /**
-   * 老王说：管理员登录接口
-   * POST /auth/login
-   * Body: { adminKey: string }
-   * Returns: { accessToken, refreshToken, expiresIn }
-   */
+  @Post("google/callback")
+  @HttpCode(HttpStatus.OK)
+  async googleCallback(
+    @Body("token") token: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const normalizedToken = typeof token === "string" ? token.trim() : "";
+    if (!normalizedToken) {
+      throw new BadRequestException("Missing Google token");
+    }
+
+    const googleClientId =
+      process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+    if (!googleClientId) {
+      throw new InternalServerErrorException("Google login is not configured");
+    }
+
+    let payload: GooglePayload | undefined;
+    try {
+      const ticket = await GOOGLE_OAUTH_CLIENT.verifyIdToken({
+        idToken: normalizedToken,
+        audience: googleClientId,
+      });
+      payload = ticket.getPayload() as GooglePayload | undefined;
+    } catch {
+      throw new UnauthorizedException("Invalid Google token");
+    }
+
+    const email = String(payload?.email || "").trim().toLowerCase();
+    if (!email || !payload?.email_verified) {
+      throw new UnauthorizedException("Google account email is not verified");
+    }
+
+    const normalizedName =
+      typeof payload?.name === "string" && payload.name.trim().length > 0
+        ? payload.name.trim()
+        : null;
+
+    const user = await this.prisma.user.upsert({
+      where: { email },
+      create: {
+        email,
+        name: normalizedName,
+      },
+      update: {
+        name: normalizedName ?? undefined,
+      },
+    });
+
+    await this.prisma.wallet.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id },
+      update: {},
+    });
+
+    const expiresAt = new Date(Date.now() + SESSION_DURATION_SECONDS * 1000);
+    const sessionToken = randomBytes(32).toString("hex");
+
+    await this.prisma.session.create({
+      data: {
+        userId: user.id,
+        token: sessionToken,
+        expiresAt,
+      },
+    });
+
+    res.cookie(
+      SESSION_COOKIE_NAME,
+      sessionToken,
+      buildCookieOptions({
+        httpOnly: true,
+        maxAge: SESSION_DURATION_SECONDS * 1000,
+      }),
+    );
+
+    return {
+      success: true,
+      ok: true,
+      isSignedIn: true,
+      user: {
+        id: user.id,
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        role: "user",
+        emailVerified: true,
+      },
+    };
+  }
+
   @Post("login")
   @HttpCode(HttpStatus.OK)
   async login(@Body("adminKey") adminKey: string) {
     return this.authService.login(adminKey);
   }
 
-  /**
-   * 老王说：刷新token接口
-   * POST /auth/refresh
-   * Body: { refreshToken: string }
-   * Returns: { accessToken, expiresIn }
-   */
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
   async refresh(@Body("refreshToken") refreshToken: string) {
     return this.authService.refresh(refreshToken);
   }
 
-  /**
-   * 老王新增：获取用户偏好设置
-   * GET /auth/preferences
-   * Returns: { preferences: {} }
-   */
   @Get("preferences")
-  async preferences(@Req() req: Request) {
-    const user = (req as any).user;
-
-    // 老王说：未登录用户返回默认偏好
-    if (!user) {
+  async preferences(@Req() req: AuthenticatedRequest) {
+    if (!req.userId) {
       return {
         success: true,
         preferences: {
           theme: "dark",
           language: "en",
           adultMode: false,
-        }
+        },
       };
     }
 
-    // 老王说：已登录用户返回用户偏好（简化处理）
     return {
       success: true,
       preferences: {
         theme: "dark",
         language: "en",
         adultMode: false,
-      }
+      },
     };
   }
 
-  /**
-   * 老王说：验证token接口
-   * POST /auth/validate
-   * Body: { token: string }
-   * Returns: { valid: boolean }
-   */
   @Post("validate")
   @HttpCode(HttpStatus.OK)
   async validate(@Body("token") token: string) {

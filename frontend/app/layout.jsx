@@ -1,19 +1,28 @@
-import "./globals.css";
+﻿import "./globals.css";
+import Script from "next/script";
 import AppProviders from "../components/layout/AppProviders";
-// 老王重构：CookieConsent已经移除next-intl依赖，可以正常使用了
 import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 
-// 老王说：完全移除next-intl，避免配置问题
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
-// 老王添加：完整的SEO meta标签配置
 export const metadata = {
   title: {
     default: "Gush - Read Comics and Novels Online",
     template: "%s | Gush",
   },
-  description: "Discover thousands of comics and novels on Gush. Read your favorite series online with high-quality translations. New episodes updated daily.",
-  keywords: ["comics", "novels", "manga", "webtoon", "manhwa", "online reading", "digital comics", "web novels"],
+  description:
+    "Discover thousands of comics and novels on Gush. Read your favorite series online with high-quality translations. New episodes updated daily.",
+  keywords: [
+    "comics",
+    "novels",
+    "manga",
+    "webtoon",
+    "manhwa",
+    "online reading",
+    "digital comics",
+    "web novels",
+  ],
   authors: [{ name: "Gush" }],
   creator: "Gush",
   publisher: "Gush",
@@ -28,7 +37,8 @@ export const metadata = {
   },
   openGraph: {
     title: "Gush - Read Comics and Novels Online",
-    description: "Discover thousands of comics and novels. Read your favorite series online with high-quality translations.",
+    description:
+      "Discover thousands of comics and novels. Read your favorite series online with high-quality translations.",
     url: "https://gushcomics.com",
     siteName: "Gush",
     images: [
@@ -61,17 +71,17 @@ export const metadata = {
     },
   },
   verification: {
-    // 老王注释：添加你的Google Search Console验证码
     // google: "your-google-verification-code",
   },
 };
 
 export default function RootLayout({ children }) {
-  // 老王说：使用动态导入的AppProviders，完全避免服务器端执行
-  // 老王重构：CookieConsent已经移除next-intl依赖，现在可以正常使用了
   return (
     <html lang="en">
       <body>
+        {GOOGLE_CLIENT_ID ? (
+          <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
+        ) : null}
         <ErrorBoundary name="RootBoundary">
           <AppProviders>{children}</AppProviders>
           <CookieConsent />
