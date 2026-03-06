@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
+import { useAuthStore } from "./useAuthStore";
 
 const ProgressContext = createContext(null);
 
@@ -33,6 +34,7 @@ function readProgress(seriesId) {
 }
 
 export function ProgressProvider({ children }) {
+  const { isSignedIn } = useAuthStore();
   const [bySeriesId, setBySeriesId] = useState({});
   const [loaded, setLoaded] = useState(false);
   const pendingRef = useRef({});
@@ -57,7 +59,12 @@ export function ProgressProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    apiGet("/api/progress").then((response) => {
+    if (!isSignedIn) {
+      setLoaded(true);
+      return undefined;
+    }
+
+    apiGet("/api/progress", { suppressAuthModal: true }).then((response) => {
       if (response.ok && response.data?.progress) {
         setBySeriesId(response.data.progress);
         if (typeof window !== "undefined") {
@@ -68,49 +75,63 @@ export function ProgressProvider({ children }) {
       }
       setLoaded(true);
     });
+
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
     };
-  }, []);
+  }, [isSignedIn]);
 
-  const setProgress = useCallback((seriesId, episodeId, percent) => {
-    const payload = {
-      lastEpisodeId: episodeId,
-      percent,
-      updatedAt: Date.now(),
-    };
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(getProgressKey(seriesId), JSON.stringify(payload));
-    }
-    setBySeriesId((prev) => ({ ...prev, [seriesId]: payload }));
-    pendingRef.current[seriesId] = payload;
-    if (timerRef.current) {
-      return;
-    }
-    timerRef.current = setTimeout(() => {
-      const batch = pendingRef.current;
-      pendingRef.current = {};
-      Object.entries(batch).forEach(([id, entry]) => {
-        apiPost("/api/progress/update", {
-          seriesId: id,
-          lastEpisodeId: entry.lastEpisodeId,
-          percent: entry.percent,
+  const setProgress = useCallback(
+    (seriesId, episodeId, percent) => {
+      const payload = {
+        lastEpisodeId: episodeId,
+        percent,
+        updatedAt: Date.now(),
+      };
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(getProgressKey(seriesId), JSON.stringify(payload));
+      }
+      setBySeriesId((prev) => ({ ...prev, [seriesId]: payload }));
+
+      if (!isSignedIn) {
+        return;
+      }
+
+      pendingRef.current[seriesId] = payload;
+      if (timerRef.current) {
+        return;
+      }
+      timerRef.current = setTimeout(() => {
+        const batch = pendingRef.current;
+        pendingRef.current = {};
+        Object.entries(batch).forEach(([id, entry]) => {
+          apiPost("/api/progress/update", {
+            seriesId: id,
+            lastEpisodeId: entry.lastEpisodeId,
+            percent: entry.percent,
+          });
         });
-      });
-      timerRef.current = null;
-    }, 2000);
-  }, []);
+        timerRef.current = null;
+      }, 2000);
+    },
+    [isSignedIn]
+  );
 
   const loadProgress = useCallback(async () => {
-    const response = await apiGet("/api/progress");
+    if (!isSignedIn) {
+      setLoaded(true);
+      return { ok: true, data: { progress: bySeriesId } };
+    }
+
+    const response = await apiGet("/api/progress", { suppressAuthModal: true });
     if (response.ok && response.data?.progress) {
       setBySeriesId(response.data.progress);
     }
     setLoaded(true);
     return response;
-  }, []);
+  }, [bySeriesId, isSignedIn]);
 
   const getProgress = useCallback(
     (seriesId) => bySeriesId[seriesId] || null,

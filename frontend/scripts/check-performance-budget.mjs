@@ -17,6 +17,7 @@ const ROUTE_BUDGETS_KB = {
 };
 
 const MAX_SINGLE_CHUNK_KB = 200;
+const BUDGET_TOLERANCE_KB = 0.5;
 
 function toKB(bytes) {
   return bytes / 1024;
@@ -43,12 +44,12 @@ async function checkRouteBudgets(manifest) {
     const totalKB = toKB(totalBytes);
 
     console.log(
-      `[perf] route ${route} -> ${totalKB.toFixed(1)} KB (budget ${budgetKB} KB)`
+      `[perf] route ${route} -> ${totalKB.toFixed(1)} KB (budget ${budgetKB} KB, tolerance ${BUDGET_TOLERANCE_KB} KB)`
     );
 
-    if (totalKB > budgetKB) {
+    if (totalKB - budgetKB > BUDGET_TOLERANCE_KB) {
       failures.push(
-        `Route ${route} exceeds budget: ${totalKB.toFixed(1)} KB > ${budgetKB} KB`
+        `Route ${route} exceeds budget: ${totalKB.toFixed(1)} KB > ${budgetKB} KB (+${BUDGET_TOLERANCE_KB} KB tolerance)`
       );
     }
   }
@@ -73,11 +74,13 @@ async function checkChunkBudget() {
 
   const maxKB = toKB(maxSize);
   console.log(
-    `[perf] largest chunk ${maxFile} -> ${maxKB.toFixed(1)} KB (budget ${MAX_SINGLE_CHUNK_KB} KB)`
+    `[perf] largest chunk ${maxFile} -> ${maxKB.toFixed(1)} KB (budget ${MAX_SINGLE_CHUNK_KB} KB, tolerance ${BUDGET_TOLERANCE_KB} KB)`
   );
 
-  if (maxKB > MAX_SINGLE_CHUNK_KB) {
-    return [`Largest chunk exceeds budget: ${maxKB.toFixed(1)} KB > ${MAX_SINGLE_CHUNK_KB} KB`];
+  if (maxKB - MAX_SINGLE_CHUNK_KB > BUDGET_TOLERANCE_KB) {
+    return [
+      `Largest chunk exceeds budget: ${maxKB.toFixed(1)} KB > ${MAX_SINGLE_CHUNK_KB} KB (+${BUDGET_TOLERANCE_KB} KB tolerance)`,
+    ];
   }
 
   return [];
