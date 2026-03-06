@@ -6,10 +6,10 @@
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["npm install --legacy-peer-deps"]
+cmds = ["npm install --legacy-peer-deps --include=dev"]
 
 [phases.build]
-cmds = ["npx prisma generate", "npm run build"]
+cmds = ["npm run prisma:generate", "npm run build"]
 
 [start]
-cmd = "node dist/src/main.js"
+cmd = "node dist/main.js"
