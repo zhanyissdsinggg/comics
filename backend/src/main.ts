@@ -33,6 +33,14 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix("api");
+  const expressApp = app.getHttpAdapter().getInstance();
+  // Railway fallback health endpoints (without global prefix)
+  expressApp.get("/", (_req: any, res: any) =>
+    res.status(200).json({ ok: true, service: "gush-backend", time: new Date().toISOString() })
+  );
+  expressApp.get("/health", (_req: any, res: any) =>
+    res.status(200).json({ ok: true, service: "gush-backend", time: new Date().toISOString() })
+  );
   const originEnv = process.env.FRONTEND_ORIGIN || "";
   const allowedOrigins = originEnv
     .split(",")
