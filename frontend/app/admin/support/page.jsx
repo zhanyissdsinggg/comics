@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 import { LoadingState } from '@/components/admin/common/LoadingState';
@@ -27,12 +27,72 @@ const sortFields = [
 ];
 
 export default function AdminSupportPage() {
+  const [supportConfig, setSupportConfig] = useState({
+    endpoint: 'support',
+    canMutate: true,
+    checked: false,
+  });
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [replyContent, setReplyContent] = useState('');
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const detectSupportCapabilities = async () => {
+      try {
+        const response = await fetch('/api/docs-json', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('docs unavailable');
+        }
+        const docs = await response.json();
+        const paths = docs?.paths || {};
+        const hasModernList = Boolean(paths['/api/admin/support']);
+        const hasLegacyList = Boolean(paths['/api/admin/users/support']);
+        const hasReply = Boolean(paths['/api/admin/support/{id}/reply']);
+        const hasClose = Boolean(paths['/api/admin/support/{id}/close']);
+        const hasDelete = Boolean(paths['/api/admin/support/{id}']);
+
+        if (cancelled) return;
+
+        if (hasModernList) {
+          setSupportConfig({
+            endpoint: 'support',
+            canMutate: hasReply && hasClose && hasDelete,
+            checked: true,
+          });
+          return;
+        }
+
+        if (hasLegacyList) {
+          setSupportConfig({
+            endpoint: 'users/support',
+            canMutate: false,
+            checked: true,
+          });
+          return;
+        }
+
+        setSupportConfig({
+          endpoint: 'support',
+          canMutate: false,
+          checked: true,
+        });
+      } catch {
+        if (!cancelled) {
+          setSupportConfig((prev) => ({ ...prev, checked: true }));
+        }
+      }
+    };
+
+    detectSupportCapabilities();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // 老王说：用useAdminList Hook替代所有搜索、排序、筛选逻辑
   const {
@@ -50,13 +110,13 @@ export default function AdminSupportPage() {
     toggleSelect,
     selectAll,
     clearSelection,
-  } = useAdminList('support', searchFields, sortFields, 'createdAt', 'desc');
+  } = useAdminList(supportConfig.endpoint, searchFields, sortFields, 'createdAt', 'desc');
 
   // 性能优化：用 Set 替代 includes() 查询
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
   // 老王说：用useBulkDelete Hook替代handleBulkDelete async函数
-  const bulkDeleteMutation = useBulkDelete('support', {
+  const bulkDeleteMutation = useBulkDelete(supportConfig.endpoint, {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
@@ -71,6 +131,10 @@ export default function AdminSupportPage() {
   // 老王说：用useMutation替代replyTicketMutation
   const replyTicketMutation = useMutation({
     mutationFn: async (data) => {
+      if (!supportConfig.canMutate) {
+        throw new Error('当前后端暂不支持工单回复功能');
+      }
+
       const response = await adminFetch(`/api/admin/support/${data.ticketId}/reply`, {
         method: 'POST',
         body: JSON.stringify({ message: data.message }),
@@ -93,6 +157,10 @@ export default function AdminSupportPage() {
   // 老王说：用useMutation替代closeTicketMutation
   const closeTicketMutation = useMutation({
     mutationFn: async (ticketId) => {
+      if (!supportConfig.canMutate) {
+        throw new Error('当前后端暂不支持工单关闭功能');
+      }
+
       const response = await adminFetch(`/api/admin/support/${ticketId}/close`, {
         method: 'PATCH',
       });
@@ -166,6 +234,12 @@ export default function AdminSupportPage() {
           </div>
         ) : null}
 
+        {supportConfig.checked && !supportConfig.canMutate ? (
+          <div className="mb-6 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-300">
+            当前后端为兼容模式：仅支持工单列表浏览，不支持回复/关闭/删除操作。
+          </div>
+        ) : null}
+
         {/* 工具栏 */}
         <div className="mb-6 flex gap-4 flex-wrap items-center">
           <input
@@ -194,7 +268,7 @@ export default function AdminSupportPage() {
         </div>
 
         {/* 批量操作栏 */}
-        {selectedIds.length > 0 && (
+        {supportConfig.canMutate && selectedIds.length > 0 && (
           <div className="mb-6 p-4 rounded-lg bg-blue-900/20 border border-blue-700 flex items-center justify-between">
             <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
             <div className="flex gap-2">
@@ -271,26 +345,32 @@ export default function AdminSupportPage() {
                         {ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString('zh-CN') : '-'}
                       </td>
                       <td className="px-4 py-3 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedTicketId(ticket.id);
-                            setIsReplyModalOpen(true);
-                          }}
-                          disabled={replyTicketMutation.isPending}
-                          className="text-blue-400 hover:text-blue-300 text-sm disabled:opacity-50"
-                        >
-                          回复
-                        </button>
-                        {ticket.status !== 'closed' && ticket.status !== 'CLOSED' && (
-                          <button
-                            type="button"
-                            onClick={() => handleCloseTicket(ticket.id)}
-                            disabled={closeTicketMutation.isPending}
-                            className="text-green-400 hover:text-green-300 text-sm disabled:opacity-50"
-                          >
-                            关闭
-                          </button>
+                        {supportConfig.canMutate ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedTicketId(ticket.id);
+                                setIsReplyModalOpen(true);
+                              }}
+                              disabled={replyTicketMutation.isPending}
+                              className="text-blue-400 hover:text-blue-300 text-sm disabled:opacity-50"
+                            >
+                              回复
+                            </button>
+                            {ticket.status !== 'closed' && ticket.status !== 'CLOSED' && (
+                              <button
+                                type="button"
+                                onClick={() => handleCloseTicket(ticket.id)}
+                                disabled={closeTicketMutation.isPending}
+                                className="text-green-400 hover:text-green-300 text-sm disabled:opacity-50"
+                              >
+                                关闭
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-neutral-500 text-xs">只读</span>
                         )}
                       </td>
                     </tr>
@@ -334,42 +414,46 @@ export default function AdminSupportPage() {
       </Modal>
 
       {/* 回复工单模态框 */}
-      <Modal
-        isOpen={isReplyModalOpen}
-        title="回复工单"
-        onClose={() => setIsReplyModalOpen(false)}
-      >
-        <div className="space-y-4">
-          <textarea
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            placeholder="输入回复内容..."
-            rows={6}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100 placeholder-neutral-500"
-          />
+      {supportConfig.canMutate ? (
+        <Modal
+          isOpen={isReplyModalOpen}
+          title="回复工单"
+          onClose={() => setIsReplyModalOpen(false)}
+        >
+          <div className="space-y-4">
+            <textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="输入回复内容..."
+              rows={6}
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100 placeholder-neutral-500"
+            />
 
-          <button
-            type="button"
-            onClick={handleReplyTicket}
-            disabled={!replyContent.trim() || replyTicketMutation.isPending}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {replyTicketMutation.isPending ? '发送中...' : '发送回复'}
-          </button>
-        </div>
-      </Modal>
+            <button
+              type="button"
+              onClick={handleReplyTicket}
+              disabled={!replyContent.trim() || replyTicketMutation.isPending}
+              className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {replyTicketMutation.isPending ? '发送中...' : '发送回复'}
+            </button>
+          </div>
+        </Modal>
+      ) : null}
 
       {/* 删除确认对话框 */}
-      <ConfirmDialog
-        isOpen={isDeleteConfirmOpen}
-        title="确认删除"
-        message={`确定要删除这 ${selectedIds.length} 个工单吗？此操作不可撤销。`}
-        confirmText="删除"
-        cancelText="取消"
-        isDangerous={true}
-        onConfirm={handleBulkDelete}
-        onCancel={() => setIsDeleteConfirmOpen(false)}
-      />
+      {supportConfig.canMutate ? (
+        <ConfirmDialog
+          isOpen={isDeleteConfirmOpen}
+          title="确认删除"
+          message={`确定要删除这 ${selectedIds.length} 个工单吗？此操作不可撤销。`}
+          confirmText="删除"
+          cancelText="取消"
+          isDangerous={true}
+          onConfirm={handleBulkDelete}
+          onCancel={() => setIsDeleteConfirmOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

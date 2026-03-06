@@ -55,9 +55,15 @@ function shouldRetryWithFallback(requestPathname, responseStatus) {
   return false;
 }
 
-async function forwardRequestToBackend(request, backendBase, requestBodyBuffer) {
+async function forwardRequestToBackend(
+  request,
+  backendBase,
+  requestBodyBuffer,
+  overridePathname,
+) {
   const url = new URL(request.url);
-  const targetUrl = new URL(`${url.pathname}${url.search}`, backendBase).toString();
+  const targetPathname = overridePathname || url.pathname;
+  const targetUrl = new URL(`${targetPathname}${url.search}`, backendBase).toString();
   const method = request.method || "GET";
   const headers = stripHopByHopHeaders(request.headers);
   headers.set(LOOP_GUARD_HEADER, "1");
@@ -94,6 +100,139 @@ function stripHopByHopHeaders(headers) {
   return next;
 }
 
+function parsePositiveInt(value, fallback) {
+  const parsed = Number.parseInt(String(value || ""), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function normalizeSeriesSearchPayload(payload, requestUrl) {
+  const url = new URL(requestUrl);
+  const params = url.searchParams;
+  const source = Array.isArray(payload?.series)
+    ? payload.series
+    : Array.isArray(payload?.data)
+      ? payload.data
+      : [];
+
+  const search = String(params.get("search") || "").trim().toLowerCase();
+  const type = String(params.get("type") || "").trim();
+  const status = String(params.get("status") || "").trim();
+  const adult = String(params.get("adult") || "").trim();
+  const sortBy = String(params.get("sortBy") || "createdAt_desc").trim();
+  const page = parsePositiveInt(params.get("page"), 1);
+  const limit = Math.min(100, parsePositiveInt(params.get("limit"), 20));
+
+  const filtered = source.filter((item) => {
+    if (!item || typeof item !== "object") {
+      return false;
+    }
+    if (search) {
+      const haystack = `${item.id || ""} ${item.title || ""}`.toLowerCase();
+      if (!haystack.includes(search)) {
+        return false;
+      }
+    }
+    if (type && type !== "all" && String(item.type || "") !== type) {
+      return false;
+    }
+    if (status && status !== "all" && String(item.status || "") !== status) {
+      return false;
+    }
+    if (adult === "true" && !item.adult) {
+      return false;
+    }
+    if (adult === "false" && item.adult) {
+      return false;
+    }
+    return true;
+  });
+
+  const [sortFieldRaw, sortOrderRaw] = sortBy.split("_");
+  const allowedSortFields = new Set(["createdAt", "updatedAt", "title", "rating", "ratingCount"]);
+  const sortField = allowedSortFields.has(sortFieldRaw) ? sortFieldRaw : "createdAt";
+  const sortOrder = sortOrderRaw === "asc" ? "asc" : "desc";
+
+  filtered.sort((a, b) => {
+    const left = a?.[sortField];
+    const right = b?.[sortField];
+    if (sortField === "title") {
+      const cmp = String(left || "").localeCompare(String(right || ""));
+      return sortOrder === "asc" ? cmp : -cmp;
+    }
+    const leftVal = Number(left || 0);
+    const rightVal = Number(right || 0);
+    const cmp = leftVal === rightVal ? 0 : leftVal > rightVal ? 1 : -1;
+    return sortOrder === "asc" ? cmp : -cmp;
+  });
+
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const start = (page - 1) * limit;
+  const paged = filtered.slice(start, start + limit);
+
+  return {
+    series: paged,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
+  };
+}
+
+async function parseJsonSafe(response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+async function tryCompatFallback({
+  request,
+  requestMethod,
+  requestPathname,
+  requestBodyBuffer,
+  backendBase,
+}) {
+  if (requestMethod !== "GET") {
+    return null;
+  }
+
+  if (requestPathname === "/api/admin/support") {
+    return forwardRequestToBackend(
+      request,
+      backendBase,
+      requestBodyBuffer,
+      "/api/admin/users/support",
+    );
+  }
+
+  if (requestPathname === "/api/admin/series/search/advanced") {
+    const fallback = await forwardRequestToBackend(
+      request,
+      backendBase,
+      requestBodyBuffer,
+      "/api/admin/series",
+    );
+    if (!fallback.ok) {
+      return fallback;
+    }
+
+    const payload = await parseJsonSafe(fallback);
+    const normalized = normalizeSeriesSearchPayload(payload, request.url);
+    return new Response(JSON.stringify(normalized), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  return null;
+}
+
 export async function handler(request) {
   if (request.headers.get(LOOP_GUARD_HEADER) === "1") {
     return new Response(
@@ -116,6 +255,7 @@ export async function handler(request) {
     ? undefined
     : await request.arrayBuffer();
   let response = null;
+  let responseBase = null;
   let lastError = null;
 
   for (let i = 0; i < backendCandidates.length; i += 1) {
@@ -123,6 +263,7 @@ export async function handler(request) {
     try {
       const next = await forwardRequestToBackend(request, base, requestBodyBuffer);
       response = next;
+      responseBase = base;
       if (!shouldRetryWithFallback(requestPathname, next.status) || i === backendCandidates.length - 1) {
         break;
       }
@@ -140,6 +281,19 @@ export async function handler(request) {
       JSON.stringify({ error: "UPSTREAM_UNAVAILABLE", message }),
       { status: 502, headers: { "Content-Type": "application/json" } },
     );
+  }
+
+  if (response.status === 404) {
+    const compat = await tryCompatFallback({
+      request,
+      requestMethod,
+      requestPathname,
+      requestBodyBuffer,
+      backendBase: responseBase || backendCandidates[0],
+    });
+    if (compat) {
+      response = compat;
+    }
   }
 
   return new Response(response.body, {

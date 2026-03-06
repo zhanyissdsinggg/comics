@@ -6,6 +6,226 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 
+const LEGACY_REVENUE_CACHE_TTL_MS = 60_000;
+const legacyRevenueCache = new Map();
+
+function getAdminAuthHeaders() {
+  return {
+    Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : ''}`,
+  };
+}
+
+async function fetchAdminJson(path) {
+  try {
+    const response = await fetch(path, {
+      headers: getAdminAuthHeaders(),
+      cache: 'no-store',
+    });
+    const data = await response.json().catch(() => ({}));
+    return {
+      ok: response.ok,
+      status: response.status,
+      data,
+    };
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      data: {},
+    };
+  }
+}
+
+function extractList(data, keys = []) {
+  if (Array.isArray(data)) return data;
+  for (const key of keys) {
+    if (Array.isArray(data?.[key])) {
+      return data[key];
+    }
+  }
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+}
+
+function normalizeOrderStatus(status) {
+  return String(status || '').toUpperCase();
+}
+
+function isPaidOrder(status) {
+  const normalized = normalizeOrderStatus(status);
+  return normalized === 'PAID' || normalized === 'COMPLETED';
+}
+
+function isRefundedOrder(status) {
+  return normalizeOrderStatus(status) === 'REFUNDED';
+}
+
+function toNumber(value) {
+  const parsed = Number(value || 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function dateKeyFromIso(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString().slice(0, 10);
+}
+
+async function getLegacyRevenueFallback(dateRange) {
+  const cacheKey = `${dateRange.startDate || ''}:${dateRange.endDate || ''}`;
+  const now = Date.now();
+  const cached = legacyRevenueCache.get(cacheKey);
+  if (cached && now - cached.ts < LEGACY_REVENUE_CACHE_TTL_MS) {
+    return cached.value;
+  }
+
+  const dateParams = new URLSearchParams({
+    from: dateRange.startDate || '',
+    to: dateRange.endDate || '',
+  });
+
+  const [dashboardRes, dailyStatsRes, promotionsRes, ordersRes] = await Promise.all([
+    fetchAdminJson(`/api/admin/stats/dashboard?${dateParams}`),
+    fetchAdminJson(`/api/admin/stats?${dateParams}`),
+    fetchAdminJson('/api/admin/promotions?page=1&pageSize=100'),
+    fetchAdminJson('/api/admin/orders?page=1&pageSize=100'),
+  ]);
+
+  const dashboard = dashboardRes?.data || {};
+  const dailyStats = extractList(dailyStatsRes?.data, ['stats']);
+  const promotions = extractList(promotionsRes?.data, ['promotions', 'data']);
+  const orders = extractList(ordersRes?.data, ['orders', 'data']);
+
+  let paidRevenue = 0;
+  let refundedRevenue = 0;
+  let paidCount = 0;
+  const orderStatus = {
+    pending: 0,
+    paid: 0,
+    failed: 0,
+    refunded: 0,
+  };
+
+  const channelMap = new Map();
+  const userSpendMap = new Map();
+  const trendMap = new Map();
+
+  for (const order of orders) {
+    const amount = toNumber(order?.amount);
+    const status = normalizeOrderStatus(order?.status);
+
+    if (status === 'PENDING') orderStatus.pending += 1;
+    else if (status === 'REFUNDED') orderStatus.refunded += 1;
+    else if (status === 'FAILED' || status === 'CHARGEBACK') orderStatus.failed += 1;
+    else if (isPaidOrder(status)) orderStatus.paid += 1;
+
+    if (isPaidOrder(status)) {
+      paidRevenue += amount;
+      paidCount += 1;
+      const userId = String(order?.userId || '');
+      if (userId) {
+        userSpendMap.set(userId, (userSpendMap.get(userId) || 0) + amount);
+      }
+    }
+    if (isRefundedOrder(status)) {
+      refundedRevenue += amount;
+    }
+
+    const provider = String(
+      order?.provider ||
+      order?.paymentChannel ||
+      order?.channel ||
+      order?.paymentMethod ||
+      'unknown'
+    ).toLowerCase();
+    const channelStats = channelMap.get(provider) || { orders: 0, revenue: 0 };
+    channelStats.orders += 1;
+    if (isPaidOrder(status)) {
+      channelStats.revenue += amount;
+    }
+    channelMap.set(provider, channelStats);
+
+    const dateKey = dateKeyFromIso(order?.createdAt);
+    if (dateKey) {
+      const current = trendMap.get(dateKey) || { revenue: 0, orders: 0 };
+      current.orders += 1;
+      if (isPaidOrder(status)) {
+        current.revenue += amount;
+      }
+      trendMap.set(dateKey, current);
+    }
+  }
+
+  const channels = Array.from(channelMap.entries())
+    .map(([channel, value]) => ({
+      channel,
+      orders: value.orders,
+      revenue: Number(value.revenue.toFixed(2)),
+      avgOrderValue: Number((value.orders ? value.revenue / value.orders : 0).toFixed(2)),
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
+
+  let highValue = 0;
+  let mediumValue = 0;
+  let lowValue = 0;
+  for (const spend of userSpendMap.values()) {
+    if (spend >= 100) highValue += 1;
+    else if (spend >= 20) mediumValue += 1;
+    else if (spend > 0) lowValue += 1;
+  }
+
+  const trendFromDailyStats = dailyStats
+    .map((item) => ({
+      date: item?.date || '',
+      revenue: 0,
+      orders: toNumber(item?.paidOrders),
+    }))
+    .filter((item) => item.date);
+
+  const trendFromOrders = Array.from(trendMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, value]) => ({
+      date,
+      revenue: Number(value.revenue.toFixed(2)),
+      orders: value.orders,
+    }));
+
+  const totalOrders = toNumber(dashboard?.orders?.total) || orders.length;
+  const totalRevenue = toNumber(dashboard?.revenue?.total) || paidRevenue;
+  const totalRefunded = refundedRevenue;
+
+  const value = {
+    stats: {
+      totalRevenue: Number(totalRevenue.toFixed(2)),
+      totalOrders,
+      avgOrderValue: Number((paidCount ? totalRevenue / paidCount : 0).toFixed(2)),
+      totalRefunded: Number(totalRefunded.toFixed(2)),
+      netRevenue: Number((totalRevenue - totalRefunded).toFixed(2)),
+    },
+    trend: trendFromDailyStats.length > 0 ? trendFromDailyStats : trendFromOrders,
+    channels,
+    promotions: promotions.map((item) => ({
+      promotionId: item?.id || item?.promotionId || '',
+      title: item?.title || '未命名活动',
+      orders: toNumber(item?.orders),
+      revenue: Number(toNumber(item?.revenue).toFixed(2)),
+      roi: toNumber(item?.roi),
+      active: Boolean(item?.active),
+    })),
+    distribution: {
+      highValue,
+      mediumValue,
+      lowValue,
+      noValue: 0,
+    },
+    orderStatus,
+  };
+
+  legacyRevenueCache.set(cacheKey, { ts: now, value });
+  return value;
+}
+
 const STAT_CARD_STYLES = {
   blue: {
     container: 'bg-blue-900/20 border-blue-700',
@@ -53,12 +273,15 @@ export default function AdminRevenuePageNew() {
     queryKey: ['admin', 'revenue', 'stats', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams(dateRange);
-      const response = await fetch(`/api/admin/revenue/stats?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const result = await fetchAdminJson(`/api/admin/revenue/stats?${params}`);
+      if (result.ok) {
+        return result.data;
+      }
+      if (result.status === 404) {
+        const fallback = await getLegacyRevenueFallback(dateRange);
+        return { stats: fallback.stats };
+      }
+      return result.data || { stats: null };
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -68,12 +291,15 @@ export default function AdminRevenuePageNew() {
     queryKey: ['admin', 'revenue', 'trend', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams({ ...dateRange, groupBy: 'day' });
-      const response = await fetch(`/api/admin/revenue/trend?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const result = await fetchAdminJson(`/api/admin/revenue/trend?${params}`);
+      if (result.ok) {
+        return result.data;
+      }
+      if (result.status === 404) {
+        const fallback = await getLegacyRevenueFallback(dateRange);
+        return { trend: fallback.trend };
+      }
+      return result.data || { trend: [] };
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -83,12 +309,15 @@ export default function AdminRevenuePageNew() {
     queryKey: ['admin', 'revenue', 'channels', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams(dateRange);
-      const response = await fetch(`/api/admin/revenue/channels?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const result = await fetchAdminJson(`/api/admin/revenue/channels?${params}`);
+      if (result.ok) {
+        return result.data;
+      }
+      if (result.status === 404) {
+        const fallback = await getLegacyRevenueFallback(dateRange);
+        return { channels: fallback.channels };
+      }
+      return result.data || { channels: [] };
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -98,12 +327,15 @@ export default function AdminRevenuePageNew() {
     queryKey: ['admin', 'revenue', 'promotions', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams(dateRange);
-      const response = await fetch(`/api/admin/revenue/promotions?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const result = await fetchAdminJson(`/api/admin/revenue/promotions?${params}`);
+      if (result.ok) {
+        return result.data;
+      }
+      if (result.status === 404) {
+        const fallback = await getLegacyRevenueFallback(dateRange);
+        return { promotions: fallback.promotions };
+      }
+      return result.data || { promotions: [] };
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -112,12 +344,15 @@ export default function AdminRevenuePageNew() {
   const { data: userValueData, isLoading: userValueLoading } = useQuery({
     queryKey: ['admin', 'revenue', 'user-value-distribution'],
     queryFn: async () => {
-      const response = await fetch(`/api/admin/revenue/user-value-distribution`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const result = await fetchAdminJson(`/api/admin/revenue/user-value-distribution`);
+      if (result.ok) {
+        return result.data;
+      }
+      if (result.status === 404) {
+        const fallback = await getLegacyRevenueFallback(dateRange);
+        return { distribution: fallback.distribution };
+      }
+      return result.data || { distribution: null };
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -127,12 +362,15 @@ export default function AdminRevenuePageNew() {
     queryKey: ['admin', 'revenue', 'order-status-distribution', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams(dateRange);
-      const response = await fetch(`/api/admin/revenue/order-status-distribution?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const result = await fetchAdminJson(`/api/admin/revenue/order-status-distribution?${params}`);
+      if (result.ok) {
+        return result.data;
+      }
+      if (result.status === 404) {
+        const fallback = await getLegacyRevenueFallback(dateRange);
+        return { distribution: fallback.orderStatus };
+      }
+      return result.data || { distribution: null };
     },
     staleTime: 5 * 60 * 1000,
   });
