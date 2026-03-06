@@ -18,11 +18,21 @@ let batchTimer = null;
 let retryCount = 0;
 let lastFailureTime = 0;
 let isProcessing = false;
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 let circuitBreakerState = "CLOSED"; // CLOSED, OPEN, HALF_OPEN
 let consecutiveFailures = 0;
 let consecutiveSuccesses = 0;
 let circuitBreakerOpenTime = 0;
+
+function log(level, ...args) {
+  if (IS_PRODUCTION) {
+    return;
+  }
+
+  const fn = console[level] || console.log;
+  fn(...args);
+}
 
 function getClientContext() {
   if (typeof window === "undefined") {
@@ -99,12 +109,12 @@ function checkCircuitBreaker() {
   switch (circuitBreakerState) {
     case "OPEN":
       if (now - circuitBreakerOpenTime >= CIRCUIT_BREAKER_TIMEOUT_MS) {
-        console.log("[analytics] Circuit breaker entering HALF_OPEN state");
+        log("log", "[analytics] Circuit breaker entering HALF_OPEN state");
         circuitBreakerState = "HALF_OPEN";
         consecutiveSuccesses = 0;
         return true;
       }
-      console.log("[analytics] Circuit breaker is OPEN, skipping request");
+      log("log", "[analytics] Circuit breaker is OPEN, skipping request");
       return false;
 
     case "HALF_OPEN":
@@ -123,7 +133,7 @@ function recordSuccess() {
   if (circuitBreakerState === "HALF_OPEN") {
     consecutiveSuccesses += 1;
     if (consecutiveSuccesses >= CIRCUIT_BREAKER_SUCCESS_THRESHOLD) {
-      console.log("[analytics] Circuit breaker closing after successful requests");
+      log("log", "[analytics] Circuit breaker closing after successful requests");
       circuitBreakerState = "CLOSED";
       consecutiveSuccesses = 0;
     }
@@ -136,7 +146,7 @@ function recordFailure() {
   lastFailureTime = Date.now();
 
   if (circuitBreakerState === "HALF_OPEN") {
-    console.warn("[analytics] Circuit breaker reopening after failure in HALF_OPEN state");
+    log("warn", "[analytics] Circuit breaker reopening after failure in HALF_OPEN state");
     circuitBreakerState = "OPEN";
     circuitBreakerOpenTime = Date.now();
     consecutiveSuccesses = 0;
@@ -144,7 +154,7 @@ function recordFailure() {
   }
 
   if (circuitBreakerState === "CLOSED" && consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
-    console.error(`[analytics] Circuit breaker opening after ${consecutiveFailures} consecutive failures`);
+    log("error", `[analytics] Circuit breaker opening after ${consecutiveFailures} consecutive failures`);
     circuitBreakerState = "OPEN";
     circuitBreakerOpenTime = Date.now();
   }
@@ -188,19 +198,19 @@ async function processBatch() {
 
   if (!checkCircuitBreaker()) {
     if (EVENT_QUEUE.length > 100) {
-      console.warn(`[analytics] Circuit breaker is OPEN, clearing ${EVENT_QUEUE.length} queued events`);
+      log("warn", `[analytics] Circuit breaker is OPEN, clearing ${EVENT_QUEUE.length} queued events`);
       EVENT_QUEUE.length = 0;
     }
     return;
   }
 
   if (shouldSkipDueToBackoff()) {
-    console.log("[analytics] Skipping batch due to backoff period");
+    log("log", "[analytics] Skipping batch due to backoff period");
     return;
   }
 
   if (!isAuthenticated()) {
-    console.log("[analytics] Skipping batch - user not authenticated");
+    log("log", "[analytics] Skipping batch - user not authenticated");
     EVENT_QUEUE.length = 0;
     return;
   }
@@ -213,7 +223,7 @@ async function processBatch() {
 
     if (response.ok) {
       recordSuccess();
-      console.log(`[analytics] Successfully sent ${eventsToSend.length} events`);
+      log("log", `[analytics] Successfully sent ${eventsToSend.length} events`);
       return;
     }
 
@@ -221,7 +231,7 @@ async function processBatch() {
     const is405Error = response.status === 405;
 
     if (is405Error) {
-      console.error("[analytics] 405 Method Not Allowed - backend does not support /api/events/batch, clearing queue");
+      log("error", "[analytics] 405 Method Not Allowed - backend does not support /api/events/batch, clearing queue");
       EVENT_QUEUE.length = 0;
       circuitBreakerState = "OPEN";
       circuitBreakerOpenTime = Date.now();
@@ -230,7 +240,8 @@ async function processBatch() {
     }
 
     if (isClientError) {
-      console.warn(
+      log(
+        "warn",
         `[analytics] Client error ${response.status}, dropping events without retry`,
         response.error
       );
@@ -238,7 +249,8 @@ async function processBatch() {
     }
 
     recordFailure();
-    console.warn(
+    log(
+      "warn",
       `[analytics] Failed to send events (attempt ${retryCount}/${MAX_RETRY_ATTEMPTS}, circuit: ${circuitBreakerState})`,
       response.error
     );
@@ -246,7 +258,7 @@ async function processBatch() {
     if (retryCount < MAX_RETRY_ATTEMPTS && circuitBreakerState !== "OPEN") {
       EVENT_QUEUE.unshift(...eventsToSend);
     } else {
-      console.error("[analytics] Max retry attempts reached or circuit breaker open, dropping events");
+      log("error", "[analytics] Max retry attempts reached or circuit breaker open, dropping events");
       if (retryCount >= MAX_RETRY_ATTEMPTS) {
         retryCount = 0;
       }
@@ -311,11 +323,11 @@ export function track(event, props = {}) {
   }
 
   if (typeof window !== "undefined" && !ANALYTICS_EVENT_SET.has(event)) {
-    console.warn("[track] Unknown event:", event);
+    log("warn", "[track] Unknown event:", event);
   }
 
   if (process.env.NODE_ENV === "development") {
-    console.log("[track]", payload);
+    log("log", "[track]", payload);
   }
 
   emitEvent({ event, props: { ...enrichedProps } });
