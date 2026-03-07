@@ -65,7 +65,8 @@ async function bootstrap() {
         return callback(null, true);
       }
 
-      return callback(new Error(`Blocked by CORS policy: ${requestOrigin}`), false);
+      logger.warn(`Blocked by CORS policy: ${requestOrigin}`);
+      return callback(null, false);
     },
     credentials: true,
   });
