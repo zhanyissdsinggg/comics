@@ -7,6 +7,7 @@ import { trackEvent } from "../../lib/trackEvent";
 import LoginGateModal from "./LoginGateModal";
 import AgeGateModal from "./AgeGateModal";
 import WalletTopUpPrompt from "../wallet/WalletTopUpPrompt";
+import { LOGIN_GATE_DESCRIPTION } from "../../lib/adultGateCopy";
 
 /**
  * NOTE: cleaned corrupted comment. */
@@ -89,7 +90,11 @@ export default function HeaderModals({
         }}
         allowRegister
         title="Sign in"
-        description="Enter your email and password."
+        description={
+          pendingAdultToggle
+            ? LOGIN_GATE_DESCRIPTION
+            : "Enter your email and password."
+        }
         errorMessage={authError}
         onSubmit={handleLogin}
       />

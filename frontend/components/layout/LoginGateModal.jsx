@@ -161,9 +161,11 @@ export default function LoginGateModal({
       <p className="text-neutral-400">{description}</p>
       <div className="mt-6 space-y-4">
         <input
+          type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="Email"
+          autoComplete="email"
           className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white placeholder-neutral-500 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
         />
 
@@ -200,6 +202,7 @@ export default function LoginGateModal({
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Password"
+            autoComplete={mode === "register" ? "new-password" : "current-password"}
             className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white placeholder-neutral-500 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
           />
         ) : (
@@ -230,6 +233,7 @@ export default function LoginGateModal({
                     setPhone(next);
                   }}
                   placeholder="Phone number"
+                  autoComplete="tel-national"
                   className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white placeholder-neutral-500 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
                 />
               </div>
@@ -238,6 +242,7 @@ export default function LoginGateModal({
               value={otpCode}
               onChange={(event) => setOtpCode(event.target.value)}
               placeholder="6-digit code"
+              autoComplete="one-time-code"
               className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white placeholder-neutral-500 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
             />
           </>

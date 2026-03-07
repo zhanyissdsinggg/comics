@@ -74,6 +74,7 @@ export default function AdminLoginPage() {
               type="password"
               value={adminKey}
               onChange={(e) => setAdminKey(e.target.value)}
+              autoComplete="current-password"
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none"
               placeholder="请输入管理员密钥"
               required

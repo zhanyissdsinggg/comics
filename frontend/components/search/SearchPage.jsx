@@ -82,7 +82,7 @@ export default function SearchPage() {
   const catalogStale = useStaleNotice(catalogResponse);
   const { shouldRetry } = useRetryPolicy();
 
-  const query = searchParams.get("q") || "";
+  const query = searchParams.get("q") || searchParams.get("query") || "";
   const type = searchParams.get("type") || "";
   const status = searchParams.get("status") || "";
   const genre = searchParams.get("genre") || "";
