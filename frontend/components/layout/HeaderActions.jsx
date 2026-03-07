@@ -26,12 +26,12 @@ export default function HeaderActions({
   const { unreadCount } = useNotificationsStore();
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex shrink-0 items-center gap-2 sm:gap-3">
       {/* 老王优化：iOS 26风格的钱包按钮 - 胶囊形状 + 毛玻璃 */}
       <button
         type="button"
         onClick={onWalletClick}
-        className="group relative flex items-center gap-2 min-h-[44px] rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-xl px-4 py-2 transition-all duration-300 hover:border-emerald-500/50 hover:bg-emerald-500/20 hover:scale-105 hover:shadow-ios-glow active:scale-95 md:hidden touch-manipulation"
+        className="group relative hidden items-center gap-2 min-h-[44px] rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-xl px-4 py-2 transition-all duration-300 hover:border-emerald-500/50 hover:bg-emerald-500/20 hover:scale-105 hover:shadow-ios-glow active:scale-95 sm:flex touch-manipulation"
         aria-label="Wallet"
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
@@ -122,13 +122,24 @@ export default function HeaderActions({
           <User size={20} className="text-emerald-400 transition-transform duration-300 group-hover:scale-110" />
         </button>
       ) : (
-        <button
-          type="button"
-          onClick={onLoginClick}
-          className="rounded-full border border-white/10 bg-white/5 backdrop-blur-xl px-5 py-2.5 text-sm font-bold text-neutral-200 transition-all duration-300 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-white hover:scale-105 hover:shadow-ios active:scale-95"
-        >
-          Sign in
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={onLoginClick}
+            className="hidden rounded-full border border-white/10 bg-white/5 backdrop-blur-xl px-5 py-2.5 text-sm font-bold text-neutral-200 transition-all duration-300 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-white hover:scale-105 hover:shadow-ios active:scale-95 sm:inline-flex"
+          >
+            Sign in
+          </button>
+          <button
+            type="button"
+            onClick={onLoginClick}
+            className="sm:hidden group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-300 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:scale-110 active:scale-95"
+            aria-label="Sign in"
+            title="Sign in"
+          >
+            <User size={18} className="text-neutral-200 transition-transform duration-300 group-hover:scale-110" />
+          </button>
+        </>
       )}
     </div>
   );

@@ -139,7 +139,7 @@ export default function SiteHeader({ onSearch }) {
         }`}
       >
         {/* 鑰佺帇浼樺寲锛歩OS 26椋庢牸鐨勫崟琛屽竷灞€ - 鏇村ぇ鐨勯珮搴﹀拰闂磋窛 */}
-        <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-6 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-3 sm:gap-6 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <HeaderLogo />
 
@@ -147,7 +147,7 @@ export default function SiteHeader({ onSearch }) {
           <HeaderNav />
 
           {/* 鑰佺帇浼樺寲锛氭悳绱㈡爮 - iOS 26椋庢牸鐨勫渾瑙?*/}
-          <div className="flex-1 md:max-w-xs lg:max-w-sm">
+          <div className="min-w-0 flex-1 md:max-w-xs lg:max-w-sm">
             <HeaderSearch onSearch={onSearch} />
           </div>
 
