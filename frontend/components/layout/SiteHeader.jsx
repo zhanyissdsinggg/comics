@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { getCookie } from "../../lib/cookies";
 import { trackEvent } from "../../lib/trackEvent";
 import HeaderLogo from "./HeaderLogo";
@@ -23,6 +24,7 @@ const HeaderSearch = dynamic(() => import("./HeaderSearch"), {
  */
 export default function SiteHeader({ onSearch }) {
   const { isAdultMode, requestAdultToggle } = useAdultGateStore();
+  const { isSignedIn } = useAuthStore();
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
@@ -101,7 +103,8 @@ export default function SiteHeader({ onSearch }) {
 
   const handleAdultToggle = () => {
     trackEvent("adult_toggle_attempt", { isAdultMode });
-    const status = requestAdultToggle(true);
+    const cookieSignedIn = getCookie("mn_is_signed_in") === "1";
+    const status = requestAdultToggle(isSignedIn || cookieSignedIn);
     if (status === "NEED_LOGIN") { setPendingAdultToggle(true); setActiveModal("login"); return; }
     if (status === "NEED_AGE_CONFIRM") { setActiveModal("age"); return; }
     if (!isAdultMode) { trackEvent("adult_gate_enabled", { source: "header" }); }
@@ -118,7 +121,13 @@ export default function SiteHeader({ onSearch }) {
   };
 
   const handleWalletClick = () => setActiveModal("topup");
-  const handleModalClose = (_, openNext = false) => { if (!openNext) setActiveModal(null); };
+  const handleModalClose = (nextModal = null, openNext = false) => {
+    if (openNext && nextModal) {
+      setActiveModal(nextModal);
+      return;
+    }
+    setActiveModal(null);
+  };
 
   return (
     <>

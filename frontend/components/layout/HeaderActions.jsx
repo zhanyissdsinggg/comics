@@ -89,18 +89,23 @@ export default function HeaderActions({
       <button
         type="button"
         onClick={onAdultToggleClick}
-        className={`hidden sm:flex items-center gap-2 min-h-[44px] rounded-full border px-5 py-2.5 text-xs font-bold transition-all duration-300 touch-manipulation hover:scale-105 active:scale-95 backdrop-blur-xl ${
+        className={`flex items-center gap-1 sm:gap-2 min-h-[44px] rounded-full border px-3 sm:px-5 py-2.5 text-[11px] sm:text-xs font-bold transition-all duration-300 touch-manipulation hover:scale-105 active:scale-95 backdrop-blur-xl ${
           isAdultMode
             ? "border-red-500/40 bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-300 shadow-lg shadow-red-500/30"
             : "border-white/10 bg-white/5 text-neutral-300 hover:border-red-500/30 hover:bg-red-500/10"
         }`}
         style={{ WebkitTapHighlightColor: "transparent" }}
         aria-label={`Adult content ${isAdultMode ? "on" : "off"}`}
+        data-testid="adult-toggle-button"
       >
         <span className={`transition-transform duration-300 ${isAdultMode ? "scale-110" : ""}`}>
           18+
         </span>
-        <span className={`text-[10px] font-bold ${isAdultMode ? "text-red-400" : "text-neutral-500"}`}>
+        <span
+          className={`hidden sm:inline text-[10px] font-bold ${
+            isAdultMode ? "text-red-400" : "text-neutral-500"
+          }`}
+        >
           {isAdultMode ? "ON" : "OFF"}
         </span>
       </button>

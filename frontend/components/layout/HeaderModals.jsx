@@ -18,13 +18,12 @@ export default function HeaderModals({
   pendingAdultToggle,
   onPendingAdultToggleChange,
 }) {
-  const { signIn, signOut } = useAuthStore();
+  const { signIn } = useAuthStore();
   const {
     requestAdultToggle,
     confirmAge,
     ageRuleKey,
     legalAge,
-    forceDisableAdultMode,
   } = useAdultGateStore();
   const { paidPts, bonusPts } = useWalletStore();
 
@@ -38,8 +37,8 @@ export default function HeaderModals({
       if (pendingAdultToggle) {
         const status = requestAdultToggle(true);
         if (status === "NEED_AGE_CONFIRM") {
-          onModalClose("login");
-          onModalClose("age", true); // NOTE: cleaned corrupted comment.
+          onPendingAdultToggleChange(false);
+          onModalClose("age", true);
           return;
         }
       }

@@ -10,6 +10,6 @@ test.describe("Login modal experience", () => {
     await promptSignIn.click();
 
     await expect(page.getByRole("heading", { name: "Sign in", exact: true })).toBeVisible();
-    await expect(page.getByText("Google Client ID 未配置")).toHaveCount(0);
+    await expect(page.getByText(/Google Client ID/i)).toHaveCount(0);
   });
 });
