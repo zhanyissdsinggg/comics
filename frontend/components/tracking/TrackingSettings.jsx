@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { apiGet, apiPost } from "../../lib/apiClient";
 
 const TRACKING_GROUPS = [
@@ -97,8 +96,6 @@ function normalizeValues(input, defaults) {
 }
 
 export default function TrackingSettings() {
-  const searchParams = useSearchParams();
-  const key = searchParams?.get("key") || "";
   const defaultValues = useMemo(() => createDefaults(), []);
   const [values, setValues] = useState(defaultValues);
   const [savedAt, setSavedAt] = useState("");
@@ -126,7 +123,7 @@ export default function TrackingSettings() {
 
   useEffect(() => {
     let mounted = true;
-    apiGet(`/api/admin/tracking?key=${encodeURIComponent(key)}`).then((response) => {
+    apiGet("/api/admin/tracking").then((response) => {
       if (!mounted) {
         return;
       }
@@ -143,7 +140,7 @@ export default function TrackingSettings() {
     return () => {
       mounted = false;
     };
-  }, [defaultValues, key]);
+  }, [defaultValues]);
 
   const handleChange = (groupId, fieldName, nextValue) => {
     setValues((prev) => ({
@@ -166,7 +163,7 @@ export default function TrackingSettings() {
     window.dispatchEvent(new Event("tracking:reload"));
     setSavedAt(timestamp);
 
-    const response = await apiPost("/api/admin/tracking", { key, values });
+    const response = await apiPost("/api/admin/tracking", { values });
     if (response.ok && response.data?.config?.updatedAt) {
       setSavedAt(response.data.config.updatedAt);
       setServerStatus("Saved to server.");

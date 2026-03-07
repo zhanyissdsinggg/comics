@@ -109,14 +109,6 @@ const BREADCRUMB_MAP = [
   { match: "/admin/settings", label: "系统设置" },
 ];
 
-function buildHref(href, key) {
-  if (!key) {
-    return href;
-  }
-  const joiner = href.includes("?") ? "&" : "?";
-  return `${href}${joiner}key=${key}`;
-}
-
 function getBreadcrumb(pathname) {
   const hit = BREADCRUMB_MAP.find((item) => {
     if (item.exact) {
@@ -130,7 +122,6 @@ function getBreadcrumb(pathname) {
 export default function AdminShell({ title, subtitle, children, actions }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const key = searchParams.get("key") || "";
   const breadcrumb = getBreadcrumb(pathname);
 
   // 老王添加：侧边栏折叠状态
@@ -254,7 +245,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                           </button>
                         ) : (
                           <Link
-                            href={buildHref(item.href, key)}
+                            href={item.href}
                             className={`group flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
                               isActive
                                 ? "bg-ios-green/20 text-ios-green shadow-ios-sm"
@@ -278,7 +269,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                               return (
                                 <Link
                                   key={child.label}
-                                  href={buildHref(child.href, key)}
+                                  href={child.href}
                                   className={`group flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-medium transition-all duration-300 ${
                                     childIsActive
                                       ? "bg-ios-green/20 text-ios-green"

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAdminAuth } from "./AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 /**
  * 老王说：管理员登录页面
@@ -14,6 +14,7 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAdminAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +24,12 @@ export default function AdminLoginPage() {
     const result = await login(adminKey);
 
     if (result.success) {
-      router.push("/admin");
+      const next = searchParams?.get("next") || "/admin";
+      if (next.startsWith("/admin")) {
+        router.push(next);
+      } else {
+        router.push("/admin");
+      }
     } else {
       setError(result.error || "登录失败");
     }

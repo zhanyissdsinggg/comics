@@ -33,6 +33,9 @@ export interface PaginatedResponse<T> {
   };
 }
 
+const ACCESS_TOKEN_KEY = "admin_token";
+const REFRESH_TOKEN_KEY = "admin_refresh_token";
+
 // ============ 宸ュ叿鍑芥暟 ============
 
 /**
@@ -63,18 +66,53 @@ function addCsrfToken(headers: Record<string, string>, method?: string): Record<
   return headers;
 }
 
+function getAdminAccessToken(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+  return localStorage.getItem(ACCESS_TOKEN_KEY) || "";
+}
+
+function clearAdminTokens(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
+function toHeaderRecord(headers?: HeadersInit): Record<string, string> {
+  if (!headers) {
+    return {};
+  }
+  if (headers instanceof Headers) {
+    return Object.fromEntries(headers.entries());
+  }
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+  return { ...headers };
+}
+
 /**
  * 鍑嗗admin璇锋眰鐨刪eaders
  * NOTE: cleaned corrupted comment.
  */
 function prepareAdminHeaders(
   method?: string,
-  customHeaders?: Record<string, string>
+  customHeaders?: HeadersInit
 ): Record<string, string> {
-  const headers = { ...customHeaders };
+  const headers = toHeaderRecord(customHeaders);
 
   // NOTE: cleaned corrupted comment.
-  return addCsrfToken(headers, method);
+  addCsrfToken(headers, method);
+
+  const accessToken = getAdminAccessToken();
+  if (accessToken && !headers.Authorization) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  return headers;
 }
 
 // ============ 瀵煎嚭鐨凙PI鍑芥暟 ============
@@ -89,18 +127,20 @@ export async function adminFetch(
   options: RequestInit = {}
 ): Promise<Response> {
   const method = options.method || "GET";
-  const headers = prepareAdminHeaders(method, options.headers as Record<string, string>);
+  const headers = prepareAdminHeaders(method, options.headers);
 
   // 鍚堝苟headers
   const finalOptions: RequestInit = {
     ...options,
-    headers: {
-      ...headers,
-      ...options.headers,
-    },
+    headers,
+    credentials: options.credentials || "include",
   };
 
-  return fetch(url, finalOptions);
+  const response = await fetch(url, finalOptions);
+  if (response.status === 401) {
+    clearAdminTokens();
+  }
+  return response;
 }
 
 /**
