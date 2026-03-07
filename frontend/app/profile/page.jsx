@@ -1,10 +1,10 @@
-import UserProfilePage from "../../components/account/UserProfilePage";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Profile",
-  description: "View your profile, reading history, and bookmarks.",
+  description: "Profile entry redirects to the account center.",
 };
 
 export default function Page() {
-  return <UserProfilePage />;
+  redirect("/account");
 }

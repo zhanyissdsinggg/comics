@@ -173,7 +173,7 @@ const PaymentMethodSelector = React.memo(
           success: true,
         });
       } catch (error) {
-        console.error("艹，支付失败:", error);
+        console.error("Payment failed:", error);
         setFeedback({ type: "error", message: "Payment failed. Please try again." });
       } finally {
         setProcessing(false);

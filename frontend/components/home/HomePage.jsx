@@ -11,7 +11,6 @@ import SiteHeader from "../layout/SiteHeader";
 import HeroCarousel from "./HeroCarousel";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import HomeRailsContainer from "./HomeRailsContainer";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -62,7 +61,6 @@ function HeroBannerSkeleton() {
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAdultMode } = useAdultGateStore();
   const { loadFollowed } = useFollowStore();
   const { branding } = useBrandingStore();
   const { loadHistory } = useHistoryStore();
@@ -107,7 +105,7 @@ function HomeContent() {
       .map((s) => ({
         id: `hero-${s.id}`,
         title: s.title,
-        description: s.description || `${s.genres?.join(" • ") || ""}`,
+        description: s.description || `${s.genres?.join(" | ") || ""}`,
         coverTone: s.coverTone || "default",
         coverUrl: s.coverUrl,
         bannerUrl: s.bannerUrl || null,

@@ -44,7 +44,7 @@ export function useBulkMutation(
   const mutation = useMutation<void, Error, string[]>({
     mutationFn: async (ids: string[]) => {
       if (!ids || ids.length === 0) {
-        throw new Error('没有选择任何项目');
+        throw new Error("No items selected");
       }
 
       // 老王注释：并行执行所有请求，提高效率
@@ -72,13 +72,13 @@ export function useBulkMutation(
       const failed = results.filter((r) => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.ok));
       if (failed.length > 0) {
         throw new Error(
-          `${failed.length}/${ids.length} 个操作失败，请重试`
+          `${failed.length}/${ids.length} operations failed. Please try again.`
         );
       }
     },
     onError: (error) => {
       // 老王注释：统一的错误处理
-      console.error('批量操作失败:', error);
+      console.error("Bulk operation failed:", error);
     },
     ...options,
   });

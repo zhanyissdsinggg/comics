@@ -97,9 +97,9 @@ export const Pagination = memo(function Pagination({
     <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}>
       {/* 老王注释：显示数据范围 */}
       <div className="text-sm text-neutral-400">
-        显示 <span className="font-medium text-neutral-200">{startItem}</span> 到{" "}
-        <span className="font-medium text-neutral-200">{endItem}</span> 条，共{" "}
-        <span className="font-medium text-neutral-200">{totalItems}</span> 条
+        Showing <span className="font-medium text-neutral-200">{startItem}</span> to{" "}
+        <span className="font-medium text-neutral-200">{endItem}</span> of{" "}
+        <span className="font-medium text-neutral-200">{totalItems}</span> items
       </div>
 
       {/* 老王注释：分页按钮 */}

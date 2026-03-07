@@ -193,7 +193,7 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
           <div ref={googleButtonRef} className="w-full max-w-[320px]" />
         </div>
         {GOOGLE_CLIENT_ID && !googleReady ? (
-          <p className="text-center text-xs text-neutral-400">Google 登录组件加载中...</p>
+          <p className="text-center text-xs text-neutral-400">Loading Google Sign-In...</p>
         ) : null}
         {loading || isLoading ? (
           <p className="text-center text-xs text-neutral-400">Signing in...</p>

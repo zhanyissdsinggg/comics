@@ -1,4 +1,5 @@
 import SiteHeader from "../../components/layout/SiteHeader";
+import { SUPPORT_EMAIL } from "../../lib/supportConfig";
 
 export const metadata = {
   title: "FAQ",
@@ -19,7 +20,7 @@ const FAQ = [
     a: "Open Account > View Orders to see your recent purchases.",
   },
   {
-    q: "Why can’t I see adult series?",
+    q: "Why can't I see adult series?",
     a: "Enable 18+ mode and confirm age in the gate flow.",
   },
 ];
@@ -28,7 +29,7 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <SiteHeader />
-      <main className="mx-auto max-w-5xl px-4 pb-12 pt-8 space-y-6">
+      <main className="mx-auto max-w-5xl space-y-6 px-4 pb-12 pt-8">
         <div>
           <h1 className="text-2xl font-semibold">Help & FAQ</h1>
           <p className="mt-2 text-sm text-neutral-400">
@@ -47,7 +48,7 @@ export default function Page() {
           ))}
         </div>
         <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-400">
-          Need more help? Email support@gush.local (mock).
+          Need more help? Email {SUPPORT_EMAIL}.
         </div>
       </main>
     </div>

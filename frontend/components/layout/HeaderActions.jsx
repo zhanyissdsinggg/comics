@@ -114,10 +114,10 @@ export default function HeaderActions({
       {isSignedIn ? (
         <button
           type="button"
-          onClick={() => router.push("/profile")}
+          onClick={() => router.push("/account")}
           className="group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 backdrop-blur-xl transition-all duration-300 hover:border-emerald-500/50 hover:bg-emerald-500/20 hover:scale-110 hover:shadow-ios-glow active:scale-95"
           aria-label="Profile"
-          title="View Profile"
+          title="Open Account"
         >
           <User size={20} className="text-emerald-400 transition-transform duration-300 group-hover:scale-110" />
         </button>

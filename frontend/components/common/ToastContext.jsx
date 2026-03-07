@@ -66,8 +66,7 @@ export function ToastProvider({ children }) {
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error("useToast必须在ToastProvider内部使用");
+    throw new Error("useToast must be used within a ToastProvider");
   }
   return context;
 }
-

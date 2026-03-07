@@ -41,17 +41,17 @@ export function useAdminApi() {
           localStorage.removeItem("admin_refresh_token");
           window.location.href = "/admin/login";
         }
-        throw new Error("认证失败，请重新登录");
+        throw new Error("Authentication failed. Please sign in again.");
       }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `请求失败: ${response.status}`);
+        throw new Error(errorData.message || `Request failed: ${response.status}`);
       }
 
       return await response.json();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "未知错误";
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(errorMessage);
       throw err;
     } finally {

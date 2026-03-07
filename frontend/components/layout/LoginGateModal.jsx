@@ -149,11 +149,11 @@ export default function LoginGateModal({
       onClose?.();
       return;
     }
-    setSocialError("Google 登录成功，但会话刷新失败，请重试。");
+    setSocialError("Google sign-in succeeded, but session refresh failed. Please try again.");
   }, [onClose, refresh]);
 
   const handleSocialError = useCallback((message) => {
-    setSocialError(message || "社交登录失败，请稍后重试。");
+    setSocialError(message || "Social sign-in failed. Please try again later.");
   }, []);
 
   return (

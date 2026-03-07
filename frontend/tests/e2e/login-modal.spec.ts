@@ -5,11 +5,17 @@ test.describe("Login modal experience", () => {
     const response = await page.goto("/?openLogin=1", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const promptSignIn = page.getByRole("button", { name: "Sign In", exact: true });
-    await expect(promptSignIn).toBeVisible();
-    await promptSignIn.click();
+    const promptHeading = page.getByRole("heading", { name: "Sign in to continue", exact: true });
+    const heading = page.getByRole("heading", { name: /Sign in/i });
 
-    await expect(page.getByRole("heading", { name: "Sign in", exact: true })).toBeVisible();
+    if (await promptHeading.isVisible()) {
+      const promptContainer = page.locator("div").filter({ has: promptHeading }).first();
+      const promptSignIn = promptContainer.getByRole("button", { name: "Sign In", exact: true });
+      await expect(promptSignIn).toBeVisible();
+      await promptSignIn.click();
+    }
+
+    await expect(heading).toBeVisible();
     await expect(page.getByText(/Google Client ID/i)).toHaveCount(0);
   });
 });

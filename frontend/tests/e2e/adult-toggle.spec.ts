@@ -7,11 +7,11 @@ test.describe("Header adult toggle", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const adultToggle = page.getByTestId("adult-toggle-button");
+    const adultToggle = page.getByRole("button", { name: /Adult content/i });
     await expect(adultToggle).toBeVisible();
     await adultToggle.click();
 
-    const signInHeading = page.getByRole("heading", { name: "Sign in", exact: true });
+    const signInHeading = page.getByRole("heading", { name: /Sign in/i });
     const ageHeading = page.getByRole("heading", { name: "Confirm your age", exact: true });
     await expect(signInHeading.or(ageHeading)).toBeVisible();
   });

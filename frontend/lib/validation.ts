@@ -21,25 +21,25 @@ export interface ValidationError {
  */
 export function validateField(value: any, rules: ValidationRule): string | null {
   if (rules.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
-    return '此字段为必填项';
+    return "This field is required";
   }
 
   if (value && typeof value === 'string') {
     if (rules.minLength && value.length < rules.minLength) {
-      return `最少需要${rules.minLength}个字符`;
+      return `Must be at least ${rules.minLength} characters`;
     }
     if (rules.maxLength && value.length > rules.maxLength) {
-      return `最多只能${rules.maxLength}个字符`;
+      return `Must be at most ${rules.maxLength} characters`;
     }
     if (rules.pattern && !rules.pattern.test(value)) {
-      return '格式不正确';
+      return "Invalid format";
     }
   }
 
   if (rules.custom) {
     const result = rules.custom(value);
     if (result !== true) {
-      return typeof result === 'string' ? result : '验证失败';
+      return typeof result === "string" ? result : "Validation failed";
     }
   }
 
