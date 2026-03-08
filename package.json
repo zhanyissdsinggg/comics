@@ -15,6 +15,8 @@
     "security:check": "node scripts/security-audit.mjs",
     "cleanup:comments": "node scripts/cleanup-mojibake-comments.mjs",
     "hygiene:check": "node scripts/check-comment-encoding.mjs",
+    "ops:post-deploy": "node scripts/ops/post-deploy-check.mjs",
+    "ops:load-smoke": "node scripts/ops/load-smoke.mjs",
     "analyze": "npm --prefix frontend run analyze",
     "analyze:server": "npm --prefix frontend run analyze:server",
     "analyze:browser": "npm --prefix frontend run analyze:browser"

@@ -1,0 +1,72 @@
+name: Post Deploy Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend_url:
+        description: "Backend base URL, example https://comics-production-07fa.up.railway.app"
+        required: true
+        default: "https://comics-production-07fa.up.railway.app"
+        type: string
+      frontend_url:
+        description: "Frontend base URL, example https://www.gushcomics.com"
+        required: true
+        default: "https://www.gushcomics.com"
+        type: string
+      expected_backend_commit:
+        description: "Expected backend commit SHA (optional, short SHA is supported)"
+        required: false
+        default: ""
+        type: string
+      rounds:
+        description: "How many rounds for post-deploy checks"
+        required: false
+        default: "3"
+        type: string
+      run_load_smoke:
+        description: "Run load smoke after post-deploy checks"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run post-deploy verification
+        env:
+          BACKEND_URL: ${{ inputs.backend_url }}
+          FRONTEND_URL: ${{ inputs.frontend_url }}
+          EXPECT_BACKEND_COMMIT: ${{ inputs.expected_backend_commit }}
+          OPS_ROUNDS: ${{ inputs.rounds }}
+          OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
+          OBS_REQUIRED: "0"
+        run: npm run ops:post-deploy
+
+  load-smoke:
+    runs-on: ubuntu-latest
+    needs: verify
+    if: ${{ inputs.run_load_smoke }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run backend load smoke
+        env:
+          LOAD_TARGETS: ${{ format('{0}/api/health,{0}/api/health/ready,{0}/api/meta/version', inputs.backend_url) }}
+          LOAD_DURATION_SEC: "20"
+          LOAD_CONCURRENCY: "15"
+          LOAD_MAX_ERROR_RATE_PCT: "1"
+          LOAD_MAX_P95_MS: "1800"
+        run: npm run ops:load-smoke

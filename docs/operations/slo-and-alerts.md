@@ -25,3 +25,4 @@
 ## Runbook Links
 - Rollback: `docs/operations/rollback-playbook.md`
 - Alert rules: `ops/alerts/prometheus.rules.yaml`
+- Deploy gate automation: `docs/operations/deploy-gate-automation.md`

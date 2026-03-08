@@ -29,3 +29,15 @@
 1. Open incident timeline doc.
 2. Add root cause + permanent fix ticket.
 3. Update alert thresholds/runbook if needed.
+
+## Scripted Verification (Recommended)
+After rollback deploy completes, run:
+
+```bash
+BACKEND_URL=https://comics-production-07fa.up.railway.app \
+FRONTEND_URL=https://www.gushcomics.com \
+EXPECT_BACKEND_COMMIT=<rollback-commit-sha> \
+npm run ops:post-deploy
+```
+
+If this command fails, rollback is not yet healthy and should not be considered complete.
