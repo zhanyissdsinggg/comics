@@ -49,6 +49,7 @@ async function bootstrap() {
   const allowedOriginSet = new Set(allowedOrigins);
   const isProd = process.env.NODE_ENV === "production";
   const localhostOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+  const trustedGushDomainPattern = /^https:\/\/([a-z0-9-]+\.)*gushcomics\.com$/i;
 
   app.enableCors({
     origin: (requestOrigin, callback) => {
@@ -62,6 +63,11 @@ async function bootstrap() {
       }
 
       if (!isProd && localhostOriginPattern.test(normalizedRequestOrigin)) {
+        return callback(null, true);
+      }
+
+      // Allow first-party domains such as gushcomics.com and www.gushcomics.com.
+      if (trustedGushDomainPattern.test(normalizedRequestOrigin)) {
         return callback(null, true);
       }
 
