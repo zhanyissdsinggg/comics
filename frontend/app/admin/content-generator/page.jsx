@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
+import { adminPost } from "../../../lib/adminApiClient";
 
 export default function ContentGeneratorPage() {
   const router = useRouter();
@@ -19,18 +20,12 @@ export default function ContentGeneratorPage() {
     setResult(null);
 
     try {
-      const response = await fetch("/api/admin/generate-content", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
+      const response = await adminPost("/api/admin/generate-content", {});
       if (!response.ok) {
-        throw new Error("生成失败");
+        throw new Error(response.error || "生成失败");
       }
 
-      const data = await response.json();
+      const data = response.data;
       setResult(data);
       setProgress("生成完成！");
     } catch (error) {

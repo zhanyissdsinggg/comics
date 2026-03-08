@@ -7,6 +7,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Image as ImageIcon } from "lucide-react";
 import { useAdminAuth } from "./AuthContext";
 import { useBrandingStore } from "../../store/useBrandingStore";
+import { adminGet, adminPost, adminUpload } from "../../lib/adminApiClient";
 
 const defaultDraft = {
   siteLogoUrl: "",
@@ -51,10 +52,11 @@ export default function AdminBrandingPage() {
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const response = await fetch("/api/admin/branding", {
-        credentials: "include",
-      });
-      const data = await response.json();
+      const response = await adminGet("/api/admin/branding");
+      if (!response.ok) {
+        throw new Error(response.error || "Failed to load branding.");
+      }
+      const data = response.data || {};
       if (data?.branding) {
         setDraft({
           siteLogoUrl: data.branding.siteLogoUrl || "",
@@ -78,18 +80,12 @@ export default function AdminBrandingPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("/api/admin/upload/image", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-
-      if (!response.ok) {
+      const response = await adminUpload("/api/admin/upload/image", formData);
+      if (!response.ok || !response.data?.url) {
         throw new Error("Upload failed.");
       }
 
-      const data = await response.json();
-      return { field, keyName, url: data.url };
+      return { field, keyName, url: response.data.url };
     },
     onSuccess: (data) => {
       setDraft((prev) => ({ ...prev, [data.field]: data.url }));
@@ -108,20 +104,12 @@ export default function AdminBrandingPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (payload) => {
-      const response = await fetch("/api/admin/branding", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
+      const response = await adminPost("/api/admin/branding", payload);
       if (!response.ok) {
         throw new Error("Save failed.");
       }
 
-      return response.json();
+      return response.data;
     },
     onSuccess: (data) => {
       if (data?.branding) {
