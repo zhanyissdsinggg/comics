@@ -4,7 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useAdminAuth } from "./AuthContext";
-import { apiDelete, apiGet, apiPost, apiPatch } from "../../lib/apiClient";
+import {
+  adminDelete as apiDelete,
+  adminGet as apiGet,
+  adminPost as apiPost,
+  adminPatch as apiPatch,
+} from "../../lib/adminApiClient";
 import { ConfirmModal } from "../common/Modal";
 import BulkActionsToolbar from "./BulkActionsToolbar";
 import AdvancedFilters from "./AdvancedFilters";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { apiGet, apiPost } from "../../lib/apiClient";
+import { adminGet as apiGet, adminPost as apiPost } from "../../lib/adminApiClient";
 
 const TRACKING_GROUPS = [
   {

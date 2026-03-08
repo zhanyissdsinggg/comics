@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import { apiGet, apiPost } from "../../lib/apiClient";
+import { adminGet as apiGet, adminPost as apiPost } from "../../lib/adminApiClient";
 
 export default function AdminRegionsPage() {
   const router = useRouter();
