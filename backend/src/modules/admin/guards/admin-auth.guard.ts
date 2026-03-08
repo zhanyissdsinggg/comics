@@ -110,8 +110,10 @@ export class AdminAuthGuard implements CanActivate {
     if (payload.jti) {
       const redis = getRedisClient();
       if (!redis) {
-        logger.error("Redis 客户端不可用，无法验证 token 黑名单");
-        throw new UnauthorizedException("认证系统暂不可用");
+        // Degrade gracefully when Redis is unavailable.
+        // This keeps admin APIs usable while temporarily skipping token blacklist checks.
+        logger.warn("Admin token blacklist check skipped: Redis unavailable");
+        return payload;
       }
 
       try {
@@ -125,8 +127,8 @@ export class AdminAuthGuard implements CanActivate {
         if (error instanceof UnauthorizedException) {
           throw error;
         }
-        logger.error("Redis 查询 token 黑名单失败", { error });
-        throw new UnauthorizedException("认证系统异常，请重新登录");
+        logger.error("Admin token blacklist lookup failed, skipping check", { error });
+        return payload;
       }
     }
 
