@@ -19,6 +19,7 @@ const ADMIN_ACCESS_COOKIE_NAME = "admin_access_token";
 const ADMIN_REFRESH_COOKIE_NAME = "admin_refresh_token";
 const ACCESS_TOKEN_EXPIRES_SECONDS = 24 * 60 * 60;
 const REFRESH_TOKEN_EXPIRES_SECONDS = 7 * 24 * 60 * 60;
+const REDIS_OPERATION_TIMEOUT_MS = 1500;
 
 type RequestLike = any;
 
@@ -38,7 +39,11 @@ export class AdminAuthController {
 
     if (redis) {
       const failKey = `admin:login:fail:${clientIp}`;
-      const failCount = await redis.get(failKey);
+      const failCount = await this.runRedisWithFallback(
+        () => redis.get(failKey),
+        null,
+        "login:fail-count:get",
+      );
       if (failCount && Number.parseInt(failCount, 10) >= 10) {
         logger.warn(`[admin-login] too many failures from ip=${clientIp}`);
         throw new HttpException(
@@ -59,9 +64,17 @@ export class AdminAuthController {
     if (adminKey !== correctAdminKey) {
       if (redis) {
         const failKey = `admin:login:fail:${clientIp}`;
-        const currentCount = await redis.incr(failKey);
+        const currentCount = await this.runRedisWithFallback(
+          () => redis.incr(failKey),
+          0,
+          "login:fail-count:incr",
+        );
         if (currentCount === 1) {
-          await redis.expire(failKey, 300);
+          await this.runRedisWithFallback(
+            () => redis.expire(failKey, 300),
+            0,
+            "login:fail-count:expire",
+          );
         }
         logger.warn(`[admin-login] invalid key from ip=${clientIp}, failCount=${currentCount}`);
       }
@@ -76,7 +89,11 @@ export class AdminAuthController {
 
     if (redis) {
       const failKey = `admin:login:fail:${clientIp}`;
-      await redis.del(failKey);
+      await this.runRedisWithFallback(
+        () => redis.del(failKey),
+        0,
+        "login:fail-count:clear",
+      );
     }
 
     const accessJti = randomUUID();
@@ -196,7 +213,11 @@ export class AdminAuthController {
         const redis = getRedisClient();
         if (redis) {
           const blacklistKey = `admin:token:blacklist:${payload.jti}`;
-          await redis.setex(blacklistKey, ACCESS_TOKEN_EXPIRES_SECONDS, "1");
+          await this.runRedisWithFallback(
+            () => redis.setex(blacklistKey, ACCESS_TOKEN_EXPIRES_SECONDS, "1"),
+            "SKIPPED",
+            "logout:blacklist:set",
+          );
           logger.info(`[admin-logout] token blacklisted jti=${payload.jti}`);
         } else {
           logger.warn("[admin-logout] redis unavailable, skip blacklist");
@@ -215,6 +236,35 @@ export class AdminAuthController {
     } catch {
       this.clearAuthCookies(req);
       throw new HttpException("Token 无效或已过期", HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  private async runRedisWithFallback<T>(
+    operation: () => Promise<T>,
+    fallback: T,
+    label: string,
+  ): Promise<T> {
+    let timeoutId: NodeJS.Timeout | null = null;
+    const timeoutPromise = new Promise<T>((resolve) => {
+      timeoutId = setTimeout(() => {
+        logger.warn(`[admin-auth] redis operation timed out: ${label}`);
+        resolve(fallback);
+      }, REDIS_OPERATION_TIMEOUT_MS);
+    });
+
+    const opPromise = operation().catch((error: any) => {
+      logger.warn(`[admin-auth] redis operation failed: ${label}`, {
+        message: error?.message || String(error),
+      });
+      return fallback;
+    });
+
+    try {
+      return await Promise.race([opPromise, timeoutPromise]);
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
   }
 
