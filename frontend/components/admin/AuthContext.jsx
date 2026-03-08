@@ -167,11 +167,18 @@ export function AdminAuthProvider({ children }) {
   const login = useCallback(async (adminKey, totpCode = "") => {
     try {
       const baseUrl = getApiBaseUrl();
+      const normalizedAdminKey = String(adminKey || "").trim();
+      const normalizedTotp = String(totpCode || "").trim();
+      const payload = { adminKey: normalizedAdminKey };
+      if (normalizedTotp) {
+        payload.totpCode = normalizedTotp;
+      }
+
       const response = await fetch(`${baseUrl}/api/admin/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ adminKey, totpCode }),
+        body: JSON.stringify(payload),
       });
 
       const raw = await response.json().catch(() => ({}));
