@@ -1,10 +1,43 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, ForbiddenException, Get, Req } from "@nestjs/common";
+import { timingSafeEqual } from "crypto";
+import { Request } from "express";
 import { getRedisClient } from "./common/redis/client";
 import { ObservabilityService } from "./common/observability/observability.service";
 
 @Controller("meta")
 export class MetaController {
   constructor(private readonly observability: ObservabilityService) {}
+
+  private safeEquals(left: string, right: string): boolean {
+    const leftBuffer = Buffer.from(left);
+    const rightBuffer = Buffer.from(right);
+    if (leftBuffer.length !== rightBuffer.length) {
+      return false;
+    }
+    return timingSafeEqual(leftBuffer, rightBuffer);
+  }
+
+  private canReadObservability(req: Request): boolean {
+    if (process.env.OBSERVABILITY_PUBLIC === "1") {
+      return true;
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      return true;
+    }
+
+    const configuredKey = String(process.env.OBSERVABILITY_KEY || "").trim();
+    if (!configuredKey) {
+      return false;
+    }
+
+    const requestKey = String(req.headers["x-observability-key"] || "").trim();
+    if (!requestKey) {
+      return false;
+    }
+
+    return this.safeEquals(configuredKey, requestKey);
+  }
 
   @Get("version")
   version() {
@@ -28,7 +61,11 @@ export class MetaController {
   }
 
   @Get("observability")
-  observabilitySnapshot() {
+  observabilitySnapshot(@Req() req: Request) {
+    if (!this.canReadObservability(req)) {
+      throw new ForbiddenException("Observability endpoint is restricted");
+    }
+
     const redis = getRedisClient();
     return {
       ...this.observability.getSnapshot(),

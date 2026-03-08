@@ -104,4 +104,13 @@ describe("AuthController", () => {
       BadRequestException,
     );
   });
+
+  it("login should reject adminKey on user auth endpoint", async () => {
+    await expect(
+      controller.login(
+        { adminKey: "legacy-admin-key" },
+        { cookie: jest.fn() } as any,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
 });

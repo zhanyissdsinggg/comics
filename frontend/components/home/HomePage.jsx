@@ -7,10 +7,7 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import SiteHeader from "../layout/SiteHeader";
-import HeroCarousel from "./HeroCarousel";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
-import HomeRailsContainer from "./HomeRailsContainer";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -57,6 +54,25 @@ function HeroBannerSkeleton() {
     <div className="aspect-[21/9] w-full animate-pulse rounded-2xl bg-neutral-800 sm:aspect-[21/8] md:aspect-[21/7]" />
   );
 }
+
+const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
+  ssr: false,
+  loading: () => <div className="sticky top-0 z-40 h-16 border-b border-white/5 bg-neutral-950/90" />,
+});
+
+const HeroCarousel = dynamic(() => import("./HeroCarousel"), {
+  loading: () => <HeroBannerSkeleton />,
+});
+
+const HomeRailsContainer = dynamic(() => import("./HomeRailsContainer"), {
+  loading: () => (
+    <div className="space-y-10">
+      <SkeletonRail />
+      <SkeletonRail />
+      <SkeletonRail />
+    </div>
+  ),
+});
 
 function HomeContent() {
   const router = useRouter();

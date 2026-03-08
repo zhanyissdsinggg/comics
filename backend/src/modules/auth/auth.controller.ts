@@ -4,6 +4,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  HttpException,
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
@@ -12,13 +13,15 @@ import {
   Res,
   UnauthorizedException,
 } from "@nestjs/common";
-import { randomBytes } from "crypto";
+import { randomBytes, randomInt } from "crypto";
 import { Request, Response } from "express";
 import { OAuth2Client } from "google-auth-library";
 import { EmailService } from "../email/email.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { buildCookieOptions } from "../../common/utils/cookies";
 import { AuthService } from "./auth.service";
+import { getRedisClient } from "../../common/redis/client";
+import { logger } from "../../common/logger/winston.init";
 
 type BcryptLike = {
   compare: (plainText: string, hashedText: string) => Promise<boolean>;
@@ -40,6 +43,9 @@ const AUTH_TAG_TYPE = "auth";
 const PASSWORD_HASH_TAG = "passwordHash";
 const EMAIL_VERIFIED_TAG = "emailVerified";
 const GOOGLE_SUB_TAG = "googleSub";
+const OTP_RATE_LIMIT_WINDOW_SECONDS = 10 * 60;
+const OTP_RATE_LIMIT_PER_IP = 10;
+const OTP_RATE_LIMIT_PER_EMAIL = 5;
 
 type AuthenticatedRequest = Request & {
   userId?: string;
@@ -66,8 +72,15 @@ type EphemeralRequestResult = {
   token?: string;
 };
 
+type LocalRateLimitState = {
+  count: number;
+  expiresAt: number;
+};
+
 @Controller("auth")
 export class AuthController {
+  private readonly otpRateLimitStore = new Map<string, LocalRateLimitState>();
+
   constructor(
     private readonly authService: AuthService,
     private readonly prisma: PrismaService,
@@ -305,6 +318,80 @@ export class AuthController {
       role: "user",
       emailVerified,
     };
+  }
+
+  private getClientIp(req: Request): string {
+    const forwarded = req.headers["x-forwarded-for"];
+    if (typeof forwarded === "string" && forwarded.trim()) {
+      return forwarded.split(",")[0].trim();
+    }
+    if (Array.isArray(forwarded) && forwarded.length > 0) {
+      return String(forwarded[0] || "").split(",")[0].trim() || "unknown";
+    }
+    return req.ip || req.socket?.remoteAddress || "unknown";
+  }
+
+  private bumpLocalRateLimit(key: string, windowSeconds: number): number {
+    const now = Date.now();
+    const current = this.otpRateLimitStore.get(key);
+    if (!current || current.expiresAt <= now) {
+      this.otpRateLimitStore.set(key, {
+        count: 1,
+        expiresAt: now + windowSeconds * 1000,
+      });
+      return 1;
+    }
+
+    current.count += 1;
+    this.otpRateLimitStore.set(key, current);
+    return current.count;
+  }
+
+  private async bumpRateLimit(
+    key: string,
+    limit: number,
+    windowSeconds: number,
+  ): Promise<void> {
+    const redis = getRedisClient();
+    let count = 0;
+
+    if (redis) {
+      try {
+        count = Number(await redis.incr(key));
+        if (count === 1) {
+          await redis.expire(key, windowSeconds);
+        }
+      } catch (error: unknown) {
+        logger.warn("[auth-otp] redis rate-limit fallback to local store", {
+          key,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        count = this.bumpLocalRateLimit(key, windowSeconds);
+      }
+    } else {
+      count = this.bumpLocalRateLimit(key, windowSeconds);
+    }
+
+    if (count > limit) {
+      throw new HttpException(
+        "Too many OTP requests. Please try again later.",
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+  }
+
+  private async enforceOtpRateLimit(req: Request, email: string): Promise<void> {
+    const ip = this.getClientIp(req);
+    await this.bumpRateLimit(
+      `auth:otp:request:ip:${ip}`,
+      OTP_RATE_LIMIT_PER_IP,
+      OTP_RATE_LIMIT_WINDOW_SECONDS,
+    );
+    await this.bumpRateLimit(
+      `auth:otp:request:email:${email}`,
+      OTP_RATE_LIMIT_PER_EMAIL,
+      OTP_RATE_LIMIT_WINDOW_SECONDS,
+    );
   }
 
   @Get("me")
@@ -611,7 +698,7 @@ export class AuthController {
   ) {
     const adminKey = String(body?.adminKey || "").trim();
     if (adminKey) {
-      return this.authService.login(adminKey);
+      throw new BadRequestException("Use /api/admin/auth/login for admin access");
     }
 
     const email = this.normalizeEmail(body?.email || "");
@@ -771,6 +858,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async requestOtp(
     @Body() body: { email?: string; channel?: string; phone?: string },
+    @Req() req: Request,
   ) {
     const email = this.normalizeEmail(body?.email || "");
     const channel = String(body?.channel || "email").toLowerCase() === "sms" ? "sms" : "email";
@@ -783,7 +871,9 @@ export class AuthController {
       throw new BadRequestException("INVALID_REQUEST");
     }
 
-    const code = String(Math.floor(100000 + Math.random() * 900000));
+    await this.enforceOtpRateLimit(req, email);
+
+    const code = String(randomInt(100000, 1000000));
     const key = `otp:${email}`;
     await this.prisma.idempotencyKey.upsert({
       where: { key },
