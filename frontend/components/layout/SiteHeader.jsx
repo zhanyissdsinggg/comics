@@ -9,10 +9,8 @@ import { trackEvent } from "../../lib/trackEvent";
 import HeaderLogo from "./HeaderLogo";
 import HeaderNav from "./HeaderNav";
 import MobileTabNav from "./MobileTabNav";
+import HeaderActions from "./HeaderActions";
 
-const HeaderActions = dynamic(() => import("./HeaderActions"), {
-  ssr: false,
-});
 const HeaderSearch = dynamic(() => import("./HeaderSearch"), {
   ssr: false,
 });
@@ -28,7 +26,6 @@ export default function SiteHeader({ onSearch }) {
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
-  const [actionsReady, setActionsReady] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [HeaderModalsComponent, setHeaderModalsComponent] = useState(null);
 
@@ -75,31 +72,6 @@ export default function SiteHeader({ onSearch }) {
       cancelled = true;
     };
   }, [activeModal, HeaderModalsComponent]);
-
-  useEffect(() => {
-    let cancelled = false;
-    let timeoutId = null;
-    let idleId = null;
-    const enable = () => {
-      if (!cancelled) {
-        setActionsReady(true);
-      }
-    };
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(enable, { timeout: 800 });
-    } else {
-      timeoutId = window.setTimeout(enable, 180);
-    }
-    return () => {
-      cancelled = true;
-      if (idleId && typeof window !== "undefined" && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-  }, []);
 
   const handleAdultToggle = () => {
     trackEvent("adult_toggle_attempt", { isAdultMode });
@@ -152,26 +124,12 @@ export default function SiteHeader({ onSearch }) {
           </div>
 
           {/* 鍙充晶鎿嶄綔鎸夐挳 */}
-          {actionsReady ? (
-            <HeaderActions
-              onWalletClick={handleWalletClick}
-              onAdultToggleClick={handleAdultToggle}
-              onLoginClick={handleLoginClick}
-              isAdultMode={isAdultMode}
-            />
-          ) : (
-            <div className="flex items-center gap-2">
-              <div className="h-10 w-10 animate-pulse rounded-full border border-white/10 bg-white/5" />
-              <div className="h-10 w-10 animate-pulse rounded-full border border-white/10 bg-white/5" />
-              <button
-                type="button"
-                onClick={handleLoginClick}
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-neutral-300"
-              >
-                Sign in
-              </button>
-            </div>
-          )}
+          <HeaderActions
+            onWalletClick={handleWalletClick}
+            onAdultToggleClick={handleAdultToggle}
+            onLoginClick={handleLoginClick}
+            isAdultMode={isAdultMode}
+          />
         </div>
       </header>
 

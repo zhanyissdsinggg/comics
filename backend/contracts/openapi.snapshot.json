@@ -1949,6 +1949,17 @@
         }
       }
     },
+    "/api/auth/google/unlink": {
+      "post": {
+        "operationId": "AuthController_unlinkGoogle",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/auth/login": {
       "post": {
         "operationId": "AuthController_login",
@@ -2015,9 +2026,9 @@
         }
       }
     },
-    "/api/auth/refresh": {
-      "post": {
-        "operationId": "AuthController_refresh",
+    "/api/auth/providers": {
+      "get": {
+        "operationId": "AuthController_providers",
         "parameters": [],
         "responses": {
           "200": {
@@ -2062,17 +2073,6 @@
     "/api/auth/reset": {
       "post": {
         "operationId": "AuthController_resetPassword",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/auth/validate": {
-      "post": {
-        "operationId": "AuthController_validate",
         "parameters": [],
         "responses": {
           "200": {
@@ -2424,6 +2424,17 @@
         "parameters": [],
         "responses": {
           "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/meta/observability": {
+      "get": {
+        "operationId": "MetaController_observabilitySnapshot",
+        "parameters": [],
+        "responses": {
+          "200": {
             "description": ""
           }
         }

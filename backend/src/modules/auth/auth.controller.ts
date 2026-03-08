@@ -19,7 +19,6 @@ import { OAuth2Client } from "google-auth-library";
 import { EmailService } from "../email/email.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { buildCookieOptions } from "../../common/utils/cookies";
-import { AuthService } from "./auth.service";
 import { getRedisClient } from "../../common/redis/client";
 import { logger } from "../../common/logger/winston.init";
 
@@ -82,7 +81,6 @@ export class AuthController {
   private readonly otpRateLimitStore = new Map<string, LocalRateLimitState>();
 
   constructor(
-    private readonly authService: AuthService,
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
   ) {}
@@ -967,12 +965,6 @@ export class AuthController {
     };
   }
 
-  @Post("refresh")
-  @HttpCode(HttpStatus.OK)
-  async refresh(@Body("refreshToken") refreshToken: string) {
-    return this.authService.refresh(refreshToken);
-  }
-
   @Get("preferences")
   async preferences(@Req() req: AuthenticatedRequest) {
     if (!req.userId) {
@@ -996,10 +988,4 @@ export class AuthController {
     };
   }
 
-  @Post("validate")
-  @HttpCode(HttpStatus.OK)
-  async validate(@Body("token") token: string) {
-    const valid = await this.authService.validateToken(token);
-    return { valid };
-  }
 }

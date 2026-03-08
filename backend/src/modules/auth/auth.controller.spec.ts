@@ -2,12 +2,6 @@ import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import { AuthController } from "./auth.controller";
 
 describe("AuthController", () => {
-  const authServiceMock = {
-    login: jest.fn(),
-    refresh: jest.fn(),
-    validateToken: jest.fn(),
-  };
-
   const prismaMock = {
     user: {
       findUnique: jest.fn(),
@@ -33,7 +27,6 @@ describe("AuthController", () => {
     envBackup = { ...process.env };
     jest.clearAllMocks();
     controller = new AuthController(
-      authServiceMock as any,
       prismaMock as any,
       emailServiceMock as any,
     );
