@@ -18,6 +18,7 @@ import { CreateOrderDto, UpdateOrderDto } from "../dtos/admin-billing.dto";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../../../common/utils/pagination";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { logger } from "../../../../common/logger/winston.init";
 
 @Controller("admin/orders")
 @UseGuards(AdminAuthGuard)
@@ -33,24 +34,41 @@ export class AdminOrdersController {
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
 
-    const [orders, total] = await Promise.all([
-      this.prisma.order.findMany({
-        orderBy: { createdAt: "desc" },
-        take: pageSize,
-        skip: offset,
-      }),
-      this.prisma.order.count(),
-    ]);
+    try {
+      const [orders, total] = await Promise.all([
+        this.prisma.order.findMany({
+          orderBy: { createdAt: "desc" },
+          take: pageSize,
+          skip: offset,
+        }),
+        this.prisma.order.count(),
+      ]);
 
-    return buildPaginationResult(
-      orders.map((order: any) => ({
+      return buildPaginationResult(
+        orders.map((order: any) => ({
+          ...order,
+          orderId: order.id,
+        })),
+        total,
+        page,
+        pageSize
+      );
+    } catch (error: any) {
+      logger.warn("[admin-orders] prisma query failed, fallback to raw sql", {
+        message: error?.message || String(error),
+      });
+
+      const [rawOrders, totalRows] = await Promise.all([
+        this.prisma.$queryRaw<any[]>`SELECT * FROM "orders" LIMIT ${pageSize} OFFSET ${offset}`,
+        this.prisma.$queryRaw<Array<{ count: number }>>`SELECT COUNT(*)::int AS count FROM "orders"`,
+      ]);
+      const total = Number(totalRows?.[0]?.count || 0);
+      const normalized = rawOrders.map((order: any) => ({
         ...order,
-        orderId: order.id,
-      })),
-      total,
-      page,
-      pageSize
-    );
+        orderId: order?.id || order?.orderId || order?.order_id || "",
+      }));
+      return buildPaginationResult(normalized, total, page, pageSize);
+    }
   }
 
   @Post("refund")

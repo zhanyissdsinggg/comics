@@ -12,6 +12,7 @@ import {
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { UpdateCommentDto } from "../dtos/admin-content.dto";
+import { logger } from "../../../../common/logger/winston.init";
 
 @Controller("admin/comments")
 @UseGuards(AdminAuthGuard)
@@ -20,21 +21,40 @@ export class AdminCommentsController {
 
   @Get()
   async list() {
-    const comments = await this.prisma.comment.findMany({
-      orderBy: { createdAt: "desc" },
-      include: { user: { select: { email: true } } },
-    });
-    return {
-      comments: comments.map((item: (typeof comments)[number]) => ({
-        id: item.id,
-        seriesId: item.seriesId,
-        userId: item.userId,
-        author: item.user?.email || "Guest",
-        text: item.text,
-        hidden: item.hidden,
-        createdAt: item.createdAt,
-      })),
-    };
+    try {
+      const comments = await this.prisma.comment.findMany({
+        orderBy: { createdAt: "desc" },
+        include: { user: { select: { email: true } } },
+      });
+      return {
+        comments: comments.map((item: (typeof comments)[number]) => ({
+          id: item.id,
+          seriesId: item.seriesId,
+          userId: item.userId,
+          author: item.user?.email || "Guest",
+          text: item.text,
+          hidden: item.hidden,
+          createdAt: item.createdAt,
+        })),
+      };
+    } catch (error: any) {
+      logger.warn("[admin-comments] prisma query failed, fallback to raw sql", {
+        message: error?.message || String(error),
+      });
+
+      const rawComments = await this.prisma.$queryRaw<any[]>`SELECT * FROM "comments" LIMIT 500`;
+      return {
+        comments: rawComments.map((item: any) => ({
+          id: item?.id || "",
+          seriesId: item?.seriesId || item?.series_id || "",
+          userId: item?.userId || item?.user_id || "",
+          author: item?.author || "Guest",
+          text: item?.text || item?.content || "",
+          hidden: Boolean(item?.hidden),
+          createdAt: item?.createdAt || item?.created_at || null,
+        })),
+      };
+    }
   }
 
   @Patch("hide")
