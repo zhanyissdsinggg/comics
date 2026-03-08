@@ -1,7 +1,11 @@
 import { Controller, Get } from "@nestjs/common";
+import { getRedisClient } from "./common/redis/client";
+import { ObservabilityService } from "./common/observability/observability.service";
 
 @Controller("meta")
 export class MetaController {
+  constructor(private readonly observability: ObservabilityService) {}
+
   @Get("version")
   version() {
     const commit =
@@ -20,6 +24,19 @@ export class MetaController {
       commit,
       deploymentId,
       time: new Date().toISOString(),
+    };
+  }
+
+  @Get("observability")
+  observabilitySnapshot() {
+    const redis = getRedisClient();
+    return {
+      ...this.observability.getSnapshot(),
+      redis: {
+        configured: Boolean(process.env.REDIS_URL),
+        connected: Boolean(redis && redis.status === "ready"),
+        status: redis?.status || "disconnected",
+      },
     };
   }
 }

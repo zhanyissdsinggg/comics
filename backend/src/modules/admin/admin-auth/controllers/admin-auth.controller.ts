@@ -13,6 +13,11 @@ import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { getRedisClient } from "../../../../common/redis/client";
 import { logger } from "../../../../common/logger/winston.init";
 import { ValidationPipe } from "../../../../common/pipes/validation.pipe";
+import {
+  getAdminKeysFromEnv,
+  isAdminTotpEnabled,
+  verifyAdminTotpCode,
+} from "../../../../common/utils/admin-security";
 import { AdminLoginDto, AdminRefreshTokenDto } from "../../dtos/admin-auth.dto";
 
 const ADMIN_ACCESS_COOKIE_NAME = "admin_access_token";
@@ -22,6 +27,7 @@ const REFRESH_TOKEN_EXPIRES_SECONDS = 7 * 24 * 60 * 60;
 const REDIS_OPERATION_TIMEOUT_MS = 1500;
 
 type RequestLike = any;
+type LoginFailureReason = "invalid_admin_key" | "invalid_two_factor_code";
 
 @Controller("admin/auth")
 export class AdminAuthController {
@@ -33,8 +39,8 @@ export class AdminAuthController {
   @Post("login")
   @UsePipes(new ValidationPipe())
   async login(@Body() dto: AdminLoginDto, @Req() req: RequestLike) {
-    const { adminKey } = dto;
-    const clientIp = req.ip || req.connection?.remoteAddress || "unknown";
+    const { adminKey, totpCode } = dto;
+    const clientIp = this.getClientIp(req);
     const redis = getRedisClient();
 
     if (redis) {
@@ -47,44 +53,39 @@ export class AdminAuthController {
       if (failCount && Number.parseInt(failCount, 10) >= 10) {
         logger.warn(`[admin-login] too many failures from ip=${clientIp}`);
         throw new HttpException(
-          "登录失败次数过多，请5分钟后重试",
+          "Too many failed attempts. Please retry after 5 minutes.",
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }
     }
 
-    const correctAdminKey = process.env.ADMIN_KEY;
-    if (!correctAdminKey) {
+    const adminKeys = getAdminKeysFromEnv();
+    if (!adminKeys.length) {
       throw new HttpException(
-        "服务器配置错误：ADMIN_KEY 未设置",
+        "Server misconfigured: missing ADMIN_KEY or ADMIN_KEYS",
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
-    if (adminKey !== correctAdminKey) {
-      if (redis) {
-        const failKey = `admin:login:fail:${clientIp}`;
-        const currentCount = await this.runRedisWithFallback(
-          () => redis.incr(failKey),
-          0,
-          "login:fail-count:incr",
-        );
-        if (currentCount === 1) {
-          await this.runRedisWithFallback(
-            () => redis.expire(failKey, 300),
-            0,
-            "login:fail-count:expire",
-          );
-        }
-        logger.warn(`[admin-login] invalid key from ip=${clientIp}, failCount=${currentCount}`);
-      }
+    const isKeyValid = adminKeys.includes(adminKey);
+    const requiresTotp = isAdminTotpEnabled();
+    const isTotpValid = !requiresTotp || verifyAdminTotpCode(totpCode || "");
 
-      await this.adminLogService.log("login_failed", "auth", "admin", {
-        reason: "Invalid admin key",
-        ip: clientIp,
+    if (!isKeyValid || !isTotpValid) {
+      const reason: LoginFailureReason = !isKeyValid
+        ? "invalid_admin_key"
+        : "invalid_two_factor_code";
+
+      await this.handleLoginFailure({
+        redis,
+        clientIp,
+        reason,
       });
 
-      throw new HttpException("管理员密钥错误", HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        reason === "invalid_two_factor_code" ? "Invalid two-factor code" : "Invalid admin key",
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     if (redis) {
@@ -111,6 +112,7 @@ export class AdminAuthController {
     await this.adminLogService.log("login_success", "auth", "admin", {
       message: "Admin logged in successfully",
       ip: clientIp,
+      twoFactorEnabled: requiresTotp,
     });
 
     this.setAuthCookies(req, accessToken, refreshToken);
@@ -130,13 +132,13 @@ export class AdminAuthController {
       dto?.refreshToken || this.getCookieToken(req, ADMIN_REFRESH_COOKIE_NAME);
 
     if (!refreshToken) {
-      throw new HttpException("缺少 refresh token", HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Missing refresh token", HttpStatus.UNAUTHORIZED);
     }
 
     try {
       const payload = this.jwtService.verify(refreshToken) as { type?: string };
       if (payload.type !== "refresh") {
-        throw new HttpException("无效的 refresh token", HttpStatus.UNAUTHORIZED);
+        throw new HttpException("Invalid refresh token", HttpStatus.UNAUTHORIZED);
       }
 
       const accessJti = randomUUID();
@@ -157,7 +159,7 @@ export class AdminAuthController {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new HttpException("Refresh token 无效或已过期", HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Refresh token is invalid or expired", HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -172,7 +174,7 @@ export class AdminAuthController {
       return {
         success: false,
         valid: false,
-        message: "缺少 token",
+        message: "Missing token",
       };
     }
 
@@ -187,7 +189,7 @@ export class AdminAuthController {
       return {
         success: false,
         valid: false,
-        message: "Token 无效或已过期",
+        message: "Token is invalid or expired",
       };
     }
   }
@@ -203,7 +205,7 @@ export class AdminAuthController {
       this.clearAuthCookies(req);
       return {
         success: true,
-        message: "已退出登录",
+        message: "Logged out",
       };
     }
 
@@ -231,12 +233,95 @@ export class AdminAuthController {
       this.clearAuthCookies(req);
       return {
         success: true,
-        message: "退出成功",
+        message: "Logged out",
       };
     } catch {
       this.clearAuthCookies(req);
-      throw new HttpException("Token 无效或已过期", HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Token is invalid or expired", HttpStatus.UNAUTHORIZED);
     }
+  }
+
+  private async handleLoginFailure(input: {
+    redis: ReturnType<typeof getRedisClient>;
+    clientIp: string;
+    reason: LoginFailureReason;
+  }): Promise<void> {
+    const { redis, clientIp, reason } = input;
+
+    if (redis) {
+      const failKey = `admin:login:fail:${clientIp}`;
+      const currentCount = await this.runRedisWithFallback(
+        () => redis.incr(failKey),
+        0,
+        "login:fail-count:incr",
+      );
+      if (currentCount === 1) {
+        await this.runRedisWithFallback(
+          () => redis.expire(failKey, 300),
+          0,
+          "login:fail-count:expire",
+        );
+      }
+      logger.warn(`[admin-login] ${reason} from ip=${clientIp}, failCount=${currentCount}`);
+    }
+
+    const reasonMessage = reason === "invalid_two_factor_code"
+      ? "Invalid two-factor code"
+      : "Invalid admin key";
+
+    await this.adminLogService.log("login_failed", "auth", "admin", {
+      reason: reasonMessage,
+      ip: clientIp,
+    });
+
+    await this.sendSecurityAlert({
+      ip: clientIp,
+      reason,
+    });
+  }
+
+  private async sendSecurityAlert(input: {
+    ip: string;
+    reason: LoginFailureReason;
+  }): Promise<void> {
+    const webhook = String(process.env.ALERT_WEBHOOK_URL || "").trim();
+    if (!webhook) {
+      return;
+    }
+
+    const payload = {
+      service: "gush-backend",
+      type: "admin-login-failure",
+      reason: input.reason,
+      ip: input.ip,
+      time: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+    };
+
+    try {
+      await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      logger.warn("[admin-login] failed to send security alert", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  private getClientIp(req: RequestLike): string {
+    const forwarded = req?.headers?.["x-forwarded-for"];
+    if (typeof forwarded === "string" && forwarded.trim()) {
+      return forwarded.split(",")[0].trim();
+    }
+
+    if (Array.isArray(forwarded) && forwarded.length > 0) {
+      return String(forwarded[0] || "").split(",")[0].trim() || "unknown";
+    }
+
+    return req?.ip || req?.connection?.remoteAddress || "unknown";
   }
 
   private async runRedisWithFallback<T>(

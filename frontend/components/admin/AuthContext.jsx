@@ -164,20 +164,20 @@ export function AdminAuthProvider({ children }) {
     return () => clearInterval(timer);
   }, [isAuthenticated, refreshToken, logout]);
 
-  const login = useCallback(async (adminKey) => {
+  const login = useCallback(async (adminKey, totpCode = "") => {
     try {
       const baseUrl = getApiBaseUrl();
       const response = await fetch(`${baseUrl}/api/admin/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ adminKey }),
+        body: JSON.stringify({ adminKey, totpCode }),
       });
 
       const raw = await response.json().catch(() => ({}));
       const data = unwrapPayload(raw);
       if (!response.ok || data.success === false) {
-        return { success: false, error: data?.message || "管理员密钥错误" };
+        return { success: false, error: data?.message || "Invalid admin key" };
       }
 
       if (typeof data.accessToken === "string" && data.accessToken) {
@@ -200,7 +200,7 @@ export function AdminAuthProvider({ children }) {
       return { success: true };
     } catch (error) {
       console.error("admin login failed:", error);
-      return { success: false, error: "登录失败，请重试" };
+      return { success: false, error: "Login failed, please try again." };
     }
   }, []);
 

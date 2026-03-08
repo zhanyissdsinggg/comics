@@ -34,9 +34,11 @@ import { RegionsModule } from "./modules/regions/regions.module";
 import { RecommendationModule } from "./modules/recommendation/recommendation.module";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { StatsModule } from "./common/services/stats.module";
+import { ObservabilityService } from "./common/observability/observability.service";
 
 @Module({
   controllers: [HealthController, MetaController],
+  providers: [ObservabilityService],
   imports: [
     PrismaModule,
     StatsModule,

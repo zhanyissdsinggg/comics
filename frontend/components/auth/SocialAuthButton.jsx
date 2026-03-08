@@ -6,7 +6,14 @@ import { isGoogleAuthEnabled } from "../../lib/socialAuthConfig";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
-export default function SocialAuthButton({ provider, onSuccess, onError, isLoading }) {
+export default function SocialAuthButton({
+  provider,
+  onSuccess,
+  onError,
+  isLoading,
+  requestPayload,
+  action = "login",
+}) {
   const [loading, setLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
   const googleButtonRef = useRef(null);
@@ -15,18 +22,21 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
   const handleGoogleCallback = useCallback(
     async (response) => {
       setLoading(true);
-      trackEvent("social_login_attempt", { provider: "google" });
+      trackEvent("social_login_attempt", { provider: "google", action });
 
       try {
         const result = await fetch("/api/auth/google/callback", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: response?.credential || "" }),
+          body: JSON.stringify({
+            token: response?.credential || "",
+            ...(requestPayload && typeof requestPayload === "object" ? requestPayload : {}),
+          }),
         });
 
         if (result.ok) {
           const data = await result.json();
-          trackEvent("social_login_success", { provider: "google" });
+          trackEvent("social_login_success", { provider: "google", action });
           onSuccess?.(data);
           return;
         }
@@ -42,13 +52,13 @@ export default function SocialAuthButton({ provider, onSuccess, onError, isLoadi
       } catch (error) {
         const message = error instanceof Error ? error.message : "Google callback error";
         console.error("Google callback error:", error);
-        trackEvent("social_login_error", { provider: "google", error: message });
+        trackEvent("social_login_error", { provider: "google", action, error: message });
         onError?.(message);
       } finally {
         setLoading(false);
       }
     },
-    [onError, onSuccess],
+    [action, onError, onSuccess, requestPayload],
   );
 
   useEffect(() => {

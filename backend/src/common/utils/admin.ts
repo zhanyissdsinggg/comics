@@ -1,57 +1,39 @@
 import { Request } from "express";
 import { logger } from "../logger/winston.init";
+import { getAdminKeysFromEnv, validateAdminKeyFormat } from "./admin-security";
 
-/**
- * 老王说：管理员密钥必须设置，不能用默认值
- * 安全要求：至少16个字符，包含大小写字母、数字、特殊字符
- */
-function validateAdminKey(key: string): boolean {
-  if (!key || key.length < 16) {
-    return false;
-  }
-  // 检查是否包含大写字母
-  const hasUpperCase = /[A-Z]/.test(key);
-  // 检查是否包含小写字母
-  const hasLowerCase = /[a-z]/.test(key);
-  // 检查是否包含数字
-  const hasNumber = /[0-9]/.test(key);
-  // 检查是否包含特殊字符
-  const hasSpecial = /[^A-Za-z0-9]/.test(key);
+const ADMIN_KEYS = getAdminKeysFromEnv();
 
-  return hasUpperCase && hasLowerCase && hasNumber && hasSpecial;
-}
-
-// 老王说：启动时检查ADMIN_KEY环境变量，不符合要求就拒绝启动
-const ADMIN_KEY = process.env.ADMIN_KEY || "";
-if (!ADMIN_KEY) {
-  logger.error("致命错误：未设置ADMIN_KEY环境变量");
-  logger.error("请在.env文件中设置ADMIN_KEY，至少16个字符，包含大小写字母、数字、特殊字符");
+if (!ADMIN_KEYS.length) {
+  logger.error("Fatal: ADMIN_KEY or ADMIN_KEYS is not configured.");
+  logger.error("Set at least one admin key. Example: ADMIN_KEYS=key1,key2");
   process.exit(1);
 }
 
-if (!validateAdminKey(ADMIN_KEY)) {
-  logger.error("致命错误：ADMIN_KEY不符合安全要求");
-  logger.error("要求：至少16个字符，必须包含大小写字母、数字、特殊字符");
-  logger.error("示例：MySecureAdm1nK3y!2024");
+const invalidKeys = ADMIN_KEYS.filter((key) => !validateAdminKeyFormat(key));
+if (invalidKeys.length) {
+  logger.error("Fatal: one or more admin keys do not meet security requirements.");
+  logger.error("Each key must be >=16 chars and include upper/lower case letters, digits, and symbols.");
   process.exit(1);
 }
 
-logger.info("管理员密钥验证通过");
+logger.info(`Admin key validation passed. Loaded ${ADMIN_KEYS.length} admin key(s).`);
 
-export function isAdminAuthorized(req: Request, body?: any) {
-  // 优先检查JWT认证（middleware设置的req.user）
+export function isAdminAuthorized(req: Request, _body?: any) {
   const user = (req as any).user;
   if (user && user.role === "admin") {
     return true;
   }
 
-  // 仅从Authorization header读取token（安全做法）
-  // 不允许从query参数或body传递admin key（防止日志泄露）
   const authHeader = req.headers.authorization;
   const bearer =
     typeof authHeader === "string" && authHeader.toLowerCase().startsWith("bearer ")
-      ? authHeader.slice(7)
+      ? authHeader.slice(7).trim()
       : "";
 
-  return bearer === ADMIN_KEY;
+  if (!bearer) {
+    return false;
+  }
+
+  return ADMIN_KEYS.includes(bearer);
 }

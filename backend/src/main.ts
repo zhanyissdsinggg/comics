@@ -11,36 +11,39 @@ import { PrismaService } from "./common/prisma/prisma.service";
 import { createSessionMiddleware } from "./common/middleware/session.middleware";
 import { requireAuthMiddleware } from "./common/middleware/require-auth.middleware";
 import { json } from "express";
-import * as Sentry from "@sentry/node";
 import { initSentry } from "./common/sentry/sentry.init";
 import { SentryMiddleware } from "./common/sentry/sentry.middleware";
-import { WinstonMiddleware } from "./common/logger/winston.middleware";
 import { logger } from "./common/logger/winston.init";
+import { ObservabilityService } from "./common/observability/observability.service";
+import { createObservabilityMiddleware } from "./common/observability/observability.middleware";
 
 const normalizeOrigin = (origin: string) => origin.trim().replace(/\/+$/, "");
 
 async function bootstrap() {
-  // 老王说：初始化Sentry错误追踪
   initSentry();
 
-  // 老王说：生产环境只输出错误和警告，避免日志爆炸
-  const logLevels: LogLevel[] = process.env.NODE_ENV === 'production'
-    ? ['error', 'warn']
-    : ['log', 'error', 'warn', 'debug', 'verbose'];
+  const logLevels: LogLevel[] =
+    process.env.NODE_ENV === "production"
+      ? ["error", "warn"]
+      : ["log", "error", "warn", "debug", "verbose"];
 
   const app = await NestFactory.create(AppModule, {
     logger: logLevels,
   });
 
+  const observability = app.get(ObservabilityService);
+
   app.setGlobalPrefix("api");
   const expressApp = app.getHttpAdapter().getInstance();
+
   // Railway fallback health endpoints (without global prefix)
   expressApp.get("/", (_req: any, res: any) =>
-    res.status(200).json({ ok: true, service: "gush-backend", time: new Date().toISOString() })
+    res.status(200).json({ ok: true, service: "gush-backend", time: new Date().toISOString() }),
   );
   expressApp.get("/health", (_req: any, res: any) =>
-    res.status(200).json({ ok: true, service: "gush-backend", time: new Date().toISOString() })
+    res.status(200).json({ ok: true, service: "gush-backend", time: new Date().toISOString() }),
   );
+
   const originEnv = process.env.FRONTEND_ORIGIN || "";
   const allowedOrigins = originEnv
     .split(",")
@@ -76,24 +79,24 @@ async function bootstrap() {
     },
     credentials: true,
   });
+
   app.use(
     json({
       verify: (req: any, _res, buf) => {
         req.rawBody = buf?.toString("utf8") || "";
       },
-    })
+    }),
   );
-  app.use(cookieParser());
 
-  // 老王说：集成Winston和Sentry中间件
-  app.use(new WinstonMiddleware().use.bind(new WinstonMiddleware()));
-  app.use(new SentryMiddleware().use.bind(new SentryMiddleware()));
+  app.use(cookieParser());
 
   const prisma = app.get(PrismaService);
   app.use(createSessionMiddleware(prisma));
   app.use(requireAuthMiddleware);
   app.use(requestIdMiddleware);
+  app.use(createObservabilityMiddleware(observability));
   app.use(loggerMiddleware);
+  app.use(new SentryMiddleware().use.bind(new SentryMiddleware()));
   app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());
   app.useGlobalInterceptors(new TimeoutInterceptor());
 
@@ -107,7 +110,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 4000;
   await app.listen(port);
-  logger.info(`应用已启动，监听端口: ${port}`);
+  logger.info(`Application started on port: ${port}`);
 }
 
 bootstrap();

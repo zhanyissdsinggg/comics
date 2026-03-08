@@ -39,6 +39,7 @@ const SESSION_DURATION_SECONDS = 7 * 24 * 60 * 60;
 const AUTH_TAG_TYPE = "auth";
 const PASSWORD_HASH_TAG = "passwordHash";
 const EMAIL_VERIFIED_TAG = "emailVerified";
+const GOOGLE_SUB_TAG = "googleSub";
 
 type AuthenticatedRequest = Request & {
   userId?: string;
@@ -46,6 +47,7 @@ type AuthenticatedRequest = Request & {
 };
 
 type GooglePayload = {
+  sub?: string;
   email?: string;
   email_verified?: boolean;
   name?: string;
@@ -126,6 +128,43 @@ export class AuthController {
         tagType: AUTH_TAG_TYPE,
         tag,
         tagValue: value,
+      },
+    });
+  }
+
+  private async deleteAuthTag(userId: string, tag: string): Promise<void> {
+    await this.prisma.userTag.deleteMany({
+      where: {
+        userId,
+        tagType: AUTH_TAG_TYPE,
+        tag,
+      },
+    });
+  }
+
+  private async findUserByGoogleSub(googleSub: string) {
+    const binding = await this.prisma.userTag.findFirst({
+      where: {
+        tagType: AUTH_TAG_TYPE,
+        tag: GOOGLE_SUB_TAG,
+        tagValue: googleSub,
+      },
+      select: {
+        userId: true,
+      },
+    });
+
+    if (!binding?.userId) {
+      return null;
+    }
+
+    return this.prisma.user.findUnique({
+      where: { id: binding.userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        isBlocked: true,
       },
     });
   }
@@ -365,9 +404,12 @@ export class AuthController {
   @Post("google/callback")
   @HttpCode(HttpStatus.OK)
   async googleCallback(
-    @Body("token") token: string,
+    @Body() body: { token?: string; mode?: "login" | "link" },
+    @Req() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
+    const mode = body?.mode === "link" ? "link" : "login";
+    const token = body?.token || "";
     const normalizedToken = typeof token === "string" ? token.trim() : "";
     if (!normalizedToken) {
       throw new BadRequestException("Missing Google token");
@@ -390,33 +432,104 @@ export class AuthController {
       throw new UnauthorizedException("Invalid Google token");
     }
 
+    const googleSub = String(payload?.sub || "").trim();
     const email = this.normalizeEmail(payload?.email || "");
+    if (!googleSub) {
+      throw new UnauthorizedException("Invalid Google account identity");
+    }
     if (!email || !payload?.email_verified) {
       throw new UnauthorizedException("Google account email is not verified");
     }
 
     const normalizedName = this.sanitizeName(payload?.name);
-    const user = await this.prisma.user.upsert({
-      where: { email },
-      create: {
-        email,
-        name: normalizedName,
-      },
-      update: {
-        name: normalizedName ?? undefined,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        isBlocked: true,
-      },
-    });
+    let user = await this.findUserByGoogleSub(googleSub);
+
+    if (mode === "link") {
+      if (!req.userId) {
+        throw new UnauthorizedException("Please sign in before linking Google");
+      }
+
+      const currentUser = await this.prisma.user.findUnique({
+        where: { id: req.userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          isBlocked: true,
+        },
+      });
+
+      if (!currentUser || currentUser.isBlocked) {
+        throw new UnauthorizedException("Account is blocked");
+      }
+
+      if (user && user.id !== currentUser.id) {
+        throw new ConflictException("This Google account is already linked to another user");
+      }
+
+      await this.setAuthTag(currentUser.id, GOOGLE_SUB_TAG, googleSub);
+      if (currentUser.email === email) {
+        await this.setAuthTag(currentUser.id, EMAIL_VERIFIED_TAG, "1");
+      }
+
+      return {
+        success: true,
+        ok: true,
+        linked: true,
+        user: await this.toUserResponse(currentUser),
+      };
+    }
+
+    if (!user) {
+      const emailUser = await this.prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          isBlocked: true,
+        },
+      });
+
+      if (emailUser) {
+        const existingGoogleSub = await this.getAuthTag(emailUser.id, GOOGLE_SUB_TAG);
+        if (existingGoogleSub && existingGoogleSub !== googleSub) {
+          throw new ConflictException("Email is already linked to another Google account");
+        }
+
+        user = await this.prisma.user.update({
+          where: { id: emailUser.id },
+          data: {
+            name: normalizedName ?? undefined,
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            isBlocked: true,
+          },
+        });
+      } else {
+        user = await this.prisma.user.create({
+          data: {
+            email,
+            name: normalizedName,
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            isBlocked: true,
+          },
+        });
+      }
+    }
 
     if (user.isBlocked) {
       throw new UnauthorizedException("Account is blocked");
     }
 
+    await this.setAuthTag(user.id, GOOGLE_SUB_TAG, googleSub);
     await this.setAuthTag(user.id, EMAIL_VERIFIED_TAG, "1");
     await this.ensureWallet(user.id);
     await this.createSession(user.id, res);
@@ -426,6 +539,67 @@ export class AuthController {
       ok: true,
       isSignedIn: true,
       user: await this.toUserResponse(user),
+    };
+  }
+
+  @Get("providers")
+  async providers(@Req() req: AuthenticatedRequest) {
+    if (!req.userId) {
+      return {
+        success: true,
+        isSignedIn: false,
+        providers: {
+          google: false,
+          password: false,
+        },
+      };
+    }
+
+    const [googleSub, passwordHash] = await Promise.all([
+      this.getAuthTag(req.userId, GOOGLE_SUB_TAG),
+      this.getAuthTag(req.userId, PASSWORD_HASH_TAG),
+    ]);
+
+    return {
+      success: true,
+      isSignedIn: true,
+      providers: {
+        google: Boolean(googleSub),
+        password: Boolean(passwordHash),
+      },
+    };
+  }
+
+  @Post("google/unlink")
+  @HttpCode(HttpStatus.OK)
+  async unlinkGoogle(@Req() req: AuthenticatedRequest) {
+    if (!req.userId) {
+      throw new UnauthorizedException("Please sign in first");
+    }
+
+    const [googleSub, passwordHash] = await Promise.all([
+      this.getAuthTag(req.userId, GOOGLE_SUB_TAG),
+      this.getAuthTag(req.userId, PASSWORD_HASH_TAG),
+    ]);
+
+    if (!googleSub) {
+      return {
+        success: true,
+        ok: true,
+        unlinked: false,
+      };
+    }
+
+    if (!passwordHash) {
+      throw new BadRequestException("Set a password before unlinking Google");
+    }
+
+    await this.deleteAuthTag(req.userId, GOOGLE_SUB_TAG);
+
+    return {
+      success: true,
+      ok: true,
+      unlinked: true,
     };
   }
 

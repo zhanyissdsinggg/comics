@@ -1,16 +1,28 @@
-import { IsString, IsNotEmpty, MinLength, MaxLength, IsOptional } from "class-validator";
+import {
+  IsString,
+  IsNotEmpty,
+  MinLength,
+  MaxLength,
+  IsOptional,
+  Matches,
+} from "class-validator";
 
 export class AdminLoginDto {
-  @IsString({ message: "adminKey 必须是字符串" })
-  @IsNotEmpty({ message: "adminKey 不能为空" })
-  @MinLength(1, { message: "adminKey 长度不能为空" })
-  @MaxLength(500, { message: "adminKey 长度不能超过500个字符" })
+  @IsString({ message: "adminKey must be a string" })
+  @IsNotEmpty({ message: "adminKey is required" })
+  @MinLength(1, { message: "adminKey cannot be empty" })
+  @MaxLength(500, { message: "adminKey is too long" })
   adminKey!: string;
+
+  @IsOptional()
+  @IsString({ message: "totpCode must be a string" })
+  @Matches(/^\d{6}$/, { message: "totpCode must be a 6-digit code" })
+  totpCode?: string;
 }
 
 export class AdminRefreshTokenDto {
   @IsOptional()
-  @IsString({ message: "refreshToken 必须是字符串" })
-  @IsNotEmpty({ message: "refreshToken 不能为空" })
+  @IsString({ message: "refreshToken must be a string" })
+  @IsNotEmpty({ message: "refreshToken cannot be empty" })
   refreshToken?: string;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import ReadingStats from "../../components/account/ReadingStats";
@@ -10,6 +10,8 @@ import { applyPreferencesToStorage } from "../../lib/preferencesClient";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { apiGet, apiPost } from "../../lib/apiClient";
+import SocialAuthButton from "../../components/auth/SocialAuthButton";
+import { isGoogleAuthEnabled } from "../../lib/socialAuthConfig";
 
 const REGION_KEY = "mn_region";
 const LANG_KEY = "mn_lang";
@@ -43,6 +45,11 @@ export default function AccountPage() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [verifyStatus, setVerifyStatus] = useState("");
   const [securityStatus, setSecurityStatus] = useState("");
+  const [providers, setProviders] = useState({ google: false, password: false });
+  const [providersLoading, setProvidersLoading] = useState(false);
+  const [providerStatus, setProviderStatus] = useState("");
+  const [providerBusy, setProviderBusy] = useState(false);
+  const googleAuthEnabled = isGoogleAuthEnabled();
 
   useEffect(() => {
     const storedRegion = readStorage(REGION_KEY, "global");
@@ -106,6 +113,29 @@ export default function AccountPage() {
       mounted = false;
     };
   }, [isSignedIn]);
+
+  const loadAuthProviders = useCallback(async () => {
+    if (!isSignedIn) {
+      setProviders({ google: false, password: false });
+      setProvidersLoading(false);
+      return;
+    }
+
+    setProvidersLoading(true);
+    const response = await apiGet("/api/auth/providers", { suppressAuthModal: true });
+    if (response.ok) {
+      const payload = response.data?.providers || {};
+      setProviders({
+        google: Boolean(payload.google),
+        password: Boolean(payload.password),
+      });
+    }
+    setProvidersLoading(false);
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    loadAuthProviders();
+  }, [loadAuthProviders]);
 
   const applySetting = (nextRegion, nextLang, nextHide, nextName, nextNotify) => {
     if (typeof window !== "undefined") {
@@ -402,6 +432,72 @@ export default function AccountPage() {
           <p className="text-sm text-neutral-400">
             Send a password reset link to your account email.
           </p>
+
+          {isSignedIn ? (
+            <div className="rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-xs text-neutral-300 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span>Password login</span>
+                <span className={providers.password ? "text-emerald-400" : "text-amber-300"}>
+                  {providers.password ? "Enabled" : "Not set"}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span>Google login</span>
+                <span className={providers.google ? "text-emerald-400" : "text-neutral-400"}>
+                  {providersLoading ? "Loading..." : providers.google ? "Connected" : "Not connected"}
+                </span>
+              </div>
+            </div>
+          ) : null}
+
+          {isSignedIn && googleAuthEnabled ? (
+            <div className="space-y-3">
+              {providers.google ? (
+                <button
+                  type="button"
+                  disabled={providerBusy}
+                  onClick={async () => {
+                    setProviderStatus("");
+                    setProviderBusy(true);
+                    const response = await apiPost("/api/auth/google/unlink");
+                    if (response.ok) {
+                      setProviderStatus("Google account disconnected.");
+                      await loadAuthProviders();
+                    } else {
+                      setProviderStatus(
+                        response.message || response.error || "Failed to disconnect Google.",
+                      );
+                    }
+                    setProviderBusy(false);
+                  }}
+                  className="rounded-full border border-neutral-800 px-4 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Disconnect Google
+                </button>
+              ) : (
+                <div className="max-w-sm">
+                  <SocialAuthButton
+                    provider="google"
+                    action="link"
+                    requestPayload={{ mode: "link" }}
+                    onSuccess={async () => {
+                      setProviderStatus("Google account connected.");
+                      await loadAuthProviders();
+                    }}
+                    onError={(message) => {
+                      setProviderStatus(message || "Failed to connect Google.");
+                    }}
+                    isLoading={providerBusy}
+                  />
+                </div>
+              )}
+            </div>
+          ) : null}
+
+          {isSignedIn && !googleAuthEnabled ? (
+            <div className="text-xs text-neutral-500">Google login is not configured.</div>
+          ) : null}
+
           <button
             type="button"
             disabled={!isSignedIn}
@@ -412,6 +508,9 @@ export default function AccountPage() {
           </button>
           {securityStatus ? (
             <div className="text-xs text-neutral-300">{securityStatus}</div>
+          ) : null}
+          {providerStatus ? (
+            <div className="text-xs text-neutral-300">{providerStatus}</div>
           ) : null}
         </section>
 
