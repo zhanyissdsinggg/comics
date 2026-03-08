@@ -161,13 +161,27 @@ export async function POST(request) {
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
     "http://localhost:4000/api";
-  const adminKey = process.env.ADMIN_KEY || "MySecureAdm1nK3y!2024";
+  const adminKeys = String(process.env.ADMIN_KEYS || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const adminKey = adminKeys[0] || String(process.env.ADMIN_KEY || "").trim();
 
   let comicsCount = 0;
   let novelsCount = 0;
   let totalEpisodes = 0;
 
   try {
+    if (!adminKey) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "ADMIN_KEY or ADMIN_KEYS must be configured for content generation.",
+        },
+        { status: 500 },
+      );
+    }
+
     // 生成漫画
     for (let i = 0; i < 20; i++) {
       const series = generateComicSeries(i);

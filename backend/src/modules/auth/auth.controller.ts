@@ -693,14 +693,9 @@ export class AuthController {
   @Post("login")
   @HttpCode(HttpStatus.OK)
   async login(
-    @Body() body: { adminKey?: string; email?: string; password?: string },
+    @Body() body: { email?: string; password?: string },
     @Res({ passthrough: true }) res: Response,
   ) {
-    const adminKey = String(body?.adminKey || "").trim();
-    if (adminKey) {
-      throw new BadRequestException("Use /api/admin/auth/login for admin access");
-    }
-
     const email = this.normalizeEmail(body?.email || "");
     const password = String(body?.password || "");
 

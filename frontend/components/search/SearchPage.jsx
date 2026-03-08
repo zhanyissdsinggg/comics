@@ -1,24 +1,31 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
-import SiteHeader from "../layout/SiteHeader";
 import Cover from "../common/Cover";
 import Pill from "../common/Pill";
-import SearchHistoryPanel from "./SearchHistoryPanel";
-import AdvancedFilterPanel from "./AdvancedFilterPanel";
 import { SkeletonCard } from "../common/Skeleton";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useProgressStore } from "../../store/useProgressStore";
 import { recommendRails } from "../../lib/reco/recommender";
-import PortraitCard from "../home/PortraitCard";
 import { trackEvent } from "../../lib/trackEvent";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useAuthStore } from "../../store/useAuthStore";
+
+const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
+  ssr: false,
+});
+
+const SearchHistoryPanel = dynamic(() => import("./SearchHistoryPanel"));
+const AdvancedFilterPanel = dynamic(() => import("./AdvancedFilterPanel"), {
+  ssr: false,
+});
+const PortraitCard = dynamic(() => import("../home/PortraitCard"));
 
 const STATUS_OPTIONS = ["Ongoing", "Completed"];
 const TYPE_OPTIONS = ["comic", "novel"];
@@ -101,6 +108,7 @@ export default function SearchPage() {
     params.set("pageSize", String(PAGE_SIZE));
     return params.toString();
   }, [query, type, status, genre, sort, page, isAdultMode]);
+  const shouldLoadRecoCatalog = !query || (!loading && results.length === 0);
 
   useEffect(() => {
     setLoading(true);
@@ -149,6 +157,10 @@ export default function SearchPage() {
   }, [isAdultMode, hotWindow]);
 
   useEffect(() => {
+    if (!shouldLoadRecoCatalog) {
+      return;
+    }
+
     const adultFlag = isAdultMode ? "1" : "0";
     apiGet(`/api/series?adult=${adultFlag}`).then((response) => {
       setCatalogResponse(response);
@@ -167,7 +179,7 @@ export default function SearchPage() {
         }
       }
     });
-  }, [isAdultMode, shouldRetry]);
+  }, [isAdultMode, shouldRetry, shouldLoadRecoCatalog]);
 
   useEffect(() => {
     if (!query) {

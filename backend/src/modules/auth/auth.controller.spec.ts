@@ -1,4 +1,4 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import { AuthController } from "./auth.controller";
 
 describe("AuthController", () => {
@@ -105,12 +105,12 @@ describe("AuthController", () => {
     );
   });
 
-  it("login should reject adminKey on user auth endpoint", async () => {
+  it("login should reject invalid payload on user auth endpoint", async () => {
     await expect(
       controller.login(
-        { adminKey: "legacy-admin-key" },
+        { email: "not-an-email", password: "" },
         { cookie: jest.fn() } as any,
       ),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });
