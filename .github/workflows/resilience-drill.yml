@@ -1,0 +1,69 @@
+name: Resilience Drill
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      backend_url:
+        description: "Backend base URL (optional, fallback to vars.PROD_BACKEND_URL)"
+        required: false
+        default: ""
+        type: string
+      frontend_url:
+        description: "Frontend base URL (optional, fallback to vars.PROD_FRONTEND_URL)"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  drill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci --prefix backend
+
+      - name: Run chaos drill
+        env:
+          DEFAULT_BACKEND_URL: https://comics-production-07fa.up.railway.app
+          DEFAULT_FRONTEND_URL: https://www.gushcomics.com
+          BACKEND_URL_FROM_VAR: ${{ vars.PROD_BACKEND_URL }}
+          FRONTEND_URL_FROM_VAR: ${{ vars.PROD_FRONTEND_URL }}
+          BACKEND_URL_FROM_INPUT: ${{ github.event.inputs.backend_url }}
+          FRONTEND_URL_FROM_INPUT: ${{ github.event.inputs.frontend_url }}
+          OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
+        run: |
+          BACKEND_URL="${BACKEND_URL_FROM_INPUT:-$BACKEND_URL_FROM_VAR}"
+          BACKEND_URL="${BACKEND_URL:-$DEFAULT_BACKEND_URL}"
+          FRONTEND_URL="${FRONTEND_URL_FROM_INPUT:-$FRONTEND_URL_FROM_VAR}"
+          FRONTEND_URL="${FRONTEND_URL:-$DEFAULT_FRONTEND_URL}"
+          export BACKEND_URL
+          export FRONTEND_URL
+          npm run ops:chaos-drill
+
+      - name: Run security baseline
+        env:
+          DEFAULT_BACKEND_URL: https://comics-production-07fa.up.railway.app
+          DEFAULT_FRONTEND_URL: https://www.gushcomics.com
+          BACKEND_URL_FROM_VAR: ${{ vars.PROD_BACKEND_URL }}
+          FRONTEND_URL_FROM_VAR: ${{ vars.PROD_FRONTEND_URL }}
+          BACKEND_URL_FROM_INPUT: ${{ github.event.inputs.backend_url }}
+          FRONTEND_URL_FROM_INPUT: ${{ github.event.inputs.frontend_url }}
+          SEC_EXPECT_OBS_PROTECTED: "1"
+        run: |
+          BACKEND_URL="${BACKEND_URL_FROM_INPUT:-$BACKEND_URL_FROM_VAR}"
+          BACKEND_URL="${BACKEND_URL:-$DEFAULT_BACKEND_URL}"
+          FRONTEND_URL="${FRONTEND_URL_FROM_INPUT:-$FRONTEND_URL_FROM_VAR}"
+          FRONTEND_URL="${FRONTEND_URL:-$DEFAULT_FRONTEND_URL}"
+          export BACKEND_URL
+          export FRONTEND_URL
+          npm run ops:security-baseline

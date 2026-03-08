@@ -1,0 +1,92 @@
+name: Oncall Watchdog
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      backend_url:
+        description: "Backend base URL (optional, fallback to vars.PROD_BACKEND_URL)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run oncall watchdog
+        id: watchdog
+        continue-on-error: true
+        env:
+          DEFAULT_BACKEND_URL: https://comics-production-07fa.up.railway.app
+          BACKEND_URL_FROM_VAR: ${{ vars.PROD_BACKEND_URL }}
+          BACKEND_URL_FROM_INPUT: ${{ github.event.inputs.backend_url }}
+          OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
+          WATCHDOG_REQUIRE_REDIS: "0"
+        run: |
+          BACKEND_URL="${BACKEND_URL_FROM_INPUT:-$BACKEND_URL_FROM_VAR}"
+          BACKEND_URL="${BACKEND_URL:-$DEFAULT_BACKEND_URL}"
+          export BACKEND_URL
+          node scripts/ops/oncall-watchdog.mjs
+
+      - name: Upload watchdog report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oncall-watchdog-report
+          path: |
+            ops-watchdog-report.md
+            ops-watchdog-report.json
+
+      - name: Create or update incident issue
+        if: steps.watchdog.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = "[OPS] Oncall watchdog alert";
+            const now = new Date().toISOString();
+            const report = fs.existsSync("ops-watchdog-report.md")
+              ? fs.readFileSync("ops-watchdog-report.md", "utf8")
+              : "Watchdog failed but report file was not generated.";
+            const body = `Automated watchdog triggered at ${now}\n\n${report}`;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: "open",
+              labels: "ops-incident",
+              per_page: 50,
+            });
+
+            const existing = issues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ["ops-incident"],
+              });
+            }

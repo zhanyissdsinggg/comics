@@ -59,3 +59,8 @@ Manual workflow is available:
 - Supports:
   - Post-deploy verification
   - Optional backend load smoke
+
+## 5) Continuous Operations
+
+- Oncall watchdog workflow: `.github/workflows/oncall-watchdog.yml`
+- Weekly resilience drill workflow: `.github/workflows/resilience-drill.yml`

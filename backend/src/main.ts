@@ -35,6 +35,21 @@ async function bootstrap() {
 
   app.setGlobalPrefix("api");
   const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.disable("x-powered-by");
+
+  app.use((req: any, res: any, next: any) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader(
+      "Permissions-Policy",
+      "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    );
+    if (process.env.NODE_ENV === "production") {
+      res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    }
+    next();
+  });
 
   // Railway fallback health endpoints (without global prefix)
   expressApp.get("/", (_req: any, res: any) =>

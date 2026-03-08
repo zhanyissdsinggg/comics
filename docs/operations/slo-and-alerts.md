@@ -26,3 +26,5 @@
 - Rollback: `docs/operations/rollback-playbook.md`
 - Alert rules: `ops/alerts/prometheus.rules.yaml`
 - Deploy gate automation: `docs/operations/deploy-gate-automation.md`
+- Oncall: `docs/operations/oncall-playbook.md`
+- Chaos + security drill: `docs/operations/chaos-and-security-drill.md`
