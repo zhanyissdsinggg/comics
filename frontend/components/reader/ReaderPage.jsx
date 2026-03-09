@@ -91,6 +91,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const previewEndRef = useRef(null);
   const endRef = useRef(null);
   const scrollRef = useRef(0);
+  const scrollRafRef = useRef(null);
+  const lastUiProgressRef = useRef(-1);
   const progressTimerRef = useRef(null);
   const resumeRef = useRef(false);
   const gateReportedRef = useRef(false);
@@ -460,11 +462,20 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   useEffect(() => {
     const onScroll = () => {
-      const total =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const percent = total > 0 ? window.scrollY / total : 0;
-      scrollRef.current = Math.min(1, Math.max(0, percent));
-      setScrollPercent(scrollRef.current);
+      if (scrollRafRef.current) {
+        return;
+      }
+      scrollRafRef.current = window.requestAnimationFrame(() => {
+        scrollRafRef.current = null;
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        const percent = total > 0 ? window.scrollY / total : 0;
+        const next = Math.min(1, Math.max(0, percent));
+        scrollRef.current = next;
+        if (Math.abs(next - lastUiProgressRef.current) >= 0.005) {
+          lastUiProgressRef.current = next;
+          setScrollPercent(next);
+        }
+      });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -473,6 +484,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
     }, 2000);
     return () => {
       window.removeEventListener("scroll", onScroll);
+      if (scrollRafRef.current) {
+        window.cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = null;
+      }
       if (progressTimerRef.current) {
         clearInterval(progressTimerRef.current);
       }
