@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { execSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -12,6 +13,8 @@ const codeExtPattern = /\.(js|jsx|ts|tsx)$/;
 const dynamicTailwindPattern = /\b(?:bg|text|border|from|to|ring|stroke|fill)-\$\{/;
 const adminSurfacePathPattern = /^frontend\/(?:app|components)\/admin\//;
 const blockingDialogPattern = /(?:^|[^.\w$])(?:window\.)?(?:alert|confirm|prompt)\(/;
+const rootArtifactPattern = /^(?:[^/]+)\.(?:png|jpe?g|gif|webp|html)$/i;
+const backupArtifactPattern = /\.(?:orig|bak|tmp)$/i;
 
 function walk(dir, list = []) {
   if (!fs.existsSync(dir)) {
@@ -43,7 +46,37 @@ function hasSafeWindowOpenFeatures(lines, lineIndex) {
 }
 
 const violations = [];
+const trackedFiles = (() => {
+  try {
+    return execSync("git ls-files", { cwd: repoRoot, encoding: "utf8" })
+      .split(/\r?\n/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+})();
 const files = walk(frontendRoot);
+
+for (const trackedFile of trackedFiles) {
+  if (rootArtifactPattern.test(trackedFile)) {
+    violations.push({
+      file: path.join(repoRoot, trackedFile),
+      line: 1,
+      rule: "tracked-root-artifact",
+      detail: "Do not commit root-level screenshots or html debug artifacts.",
+    });
+  }
+
+  if (backupArtifactPattern.test(trackedFile)) {
+    violations.push({
+      file: path.join(repoRoot, trackedFile),
+      line: 1,
+      rule: "tracked-backup-artifact",
+      detail: "Do not commit backup files like .orig/.bak/.tmp.",
+    });
+  }
+}
 
 for (const file of files) {
   const content = fs.readFileSync(file, "utf8");

@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminSeriesController } from './admin-series.controller';
@@ -84,6 +85,88 @@ describe('AdminSeriesController', () => {
       const body = { series: { title: 'Test' } };
 
       await expect(controller.create(body)).rejects.toThrow();
+    });
+
+    it('should throw conflict error when series id already exists', async () => {
+      const body = {
+        series: {
+          id: 'duplicate-series',
+          title: 'Duplicate Series',
+        },
+      };
+
+      jest.spyOn(prisma.series, 'create').mockRejectedValue({ code: 'P2002' });
+
+      await expect(controller.create(body)).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('update', () => {
+    it('should update an existing series', async () => {
+      const existingSeries = {
+        id: 'series-1',
+        title: 'Old Title',
+        type: 'comic',
+        adult: false,
+        genres: ['Action'],
+        badge: 'HOT',
+        badges: ['HOT'],
+        status: 'Ongoing',
+        rating: 4.5,
+        ratingCount: 100,
+        description: 'Old description',
+        episodePrice: 3,
+        ttfEnabled: true,
+        ttfIntervalHours: 24,
+        latestEpisodeId: 'ep-1',
+      };
+      const updatedSeries = {
+        ...existingSeries,
+        title: 'New Title',
+        adult: true,
+      };
+
+      jest.spyOn(prisma.series, 'findUnique').mockResolvedValue(existingSeries as any);
+      jest.spyOn(prisma.series, 'update').mockResolvedValue(updatedSeries as any);
+
+      const result = await controller.update(
+        { series: { title: 'New Title', adult: true } },
+        { params: { id: 'series-1' } } as any,
+      );
+
+      expect(result).toEqual({ series: updatedSeries });
+      expect(prisma.series.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'series-1' },
+          data: expect.objectContaining({
+            id: 'series-1',
+            title: 'New Title',
+            adult: true,
+            genres: ['Action'],
+          }),
+        }),
+      );
+    });
+
+    it('should throw not found when updating a missing series', async () => {
+      jest.spyOn(prisma.series, 'findUnique').mockResolvedValue(null as any);
+
+      await expect(
+        controller.update({ series: { title: 'Missing' } }, { params: { id: 'missing' } } as any),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('remove', () => {
+    it('should delete episodes before deleting the series', async () => {
+      jest.spyOn(prisma.episode, 'deleteMany').mockResolvedValue({ count: 3 } as any);
+      jest.spyOn(prisma.series, 'deleteMany').mockResolvedValue({ count: 1 } as any);
+
+      const result = await controller.remove({ params: { id: 'series-1' } } as any);
+
+      expect(result).toEqual({ ok: true });
+      expect(prisma.episode.deleteMany).toHaveBeenCalledWith({ where: { seriesId: 'series-1' } });
+      expect(prisma.series.deleteMany).toHaveBeenCalledWith({ where: { id: 'series-1' } });
     });
   });
 });

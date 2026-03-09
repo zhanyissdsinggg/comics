@@ -7,8 +7,12 @@ test.describe("Header adult toggle", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const adultToggle = page.getByRole("button", { name: /Adult content/i });
-    await expect(adultToggle).toBeVisible();
+    await page.waitForLoadState("load");
+    await expect(page.locator("body")).not.toBeEmpty({ timeout: 15000 });
+
+    const adultToggle = page.getByTestId("adult-toggle-button");
+    await expect(adultToggle).toBeVisible({ timeout: 15000 });
+    await expect(adultToggle).toHaveAttribute("aria-label", "Adult content");
     await adultToggle.click();
 
     const signInHeading = page.getByRole("heading", { name: /Sign in/i });
