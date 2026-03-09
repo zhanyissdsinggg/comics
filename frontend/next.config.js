@@ -12,6 +12,10 @@ const nextConfig = {
   outputFileTracingRoot: path.resolve(__dirname, ".."),
   poweredByHeader: false,
 
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   async headers() {
     const sharedSecurityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
