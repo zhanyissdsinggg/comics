@@ -95,6 +95,9 @@ export default function PageStream({
     return paragraphs;
   }, [paragraphs, previewParagraphs]);
 
+  const isHorizontal = layoutMode === "horizontal";
+  const isVerticalComicFlow = !isHorizontal && visiblePages.length > 0;
+
   useEffect(() => {
     if (visiblePages.length > 0) {
       preloadImages(visiblePages, 0, Math.max(1, prefetchCount));
@@ -231,9 +234,11 @@ export default function PageStream({
     <div
       ref={containerRef}
       className={`mx-auto w-full max-w-3xl px-3 pb-24 pt-5 sm:px-4 sm:pt-6 ${
-        layoutMode === "horizontal"
+        isHorizontal
           ? "flex gap-4 overflow-x-auto scroll-snap-x no-scrollbar"
-          : "flex flex-col gap-4"
+          : isVerticalComicFlow
+            ? "flex flex-col gap-0"
+            : "flex flex-col gap-4"
       }`}
     >
       {visiblePages.length === 0 && visibleParagraphs.length === 0 ? (
@@ -247,8 +252,10 @@ export default function PageStream({
         ? visiblePages.map((page, index) => (
             <div
               key={page.url}
-              className={`rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2 ${
-                layoutMode === "horizontal" ? "flex-none w-full scroll-snap-center" : ""
+              className={`${
+                isHorizontal
+                  ? "flex-none w-full scroll-snap-center rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2"
+                  : "rounded-none border-0 bg-transparent p-0"
               }`}
               style={{ contentVisibility: "auto", containIntrinsicSize: "1200px 800px" }}
               data-index={index}
@@ -289,7 +296,9 @@ export default function PageStream({
                     alt=""
                     width={page.w || 800}
                     height={page.h || 1200}
-                    className={`w-full rounded-xl ${isNightMode ? "brightness-90 contrast-105" : ""}`}
+                    className={`w-full ${
+                      isHorizontal ? "rounded-xl" : "block rounded-none"
+                    } ${isNightMode ? "brightness-90 contrast-105" : ""}`}
                     onError={() => handleError(index)}
                     onLoad={() => handleLoad(index)}
                     priority={index < 2}
