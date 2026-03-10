@@ -25,6 +25,7 @@
     "analyze:server": "npm --prefix frontend run analyze:server",
     "analyze:browser": "npm --prefix frontend run analyze:browser",
     "ops:admin-smoke": "node scripts/ops/admin-session-smoke.mjs",
-    "ops:deploy-gate": "npm run ops:post-deploy && npm run ops:admin-smoke"
+    "ops:deploy-gate": "npm run ops:post-deploy && npm run ops:admin-smoke",
+    "ops:admin-routes": "node scripts/ops/admin-route-inventory.mjs"
   }
 }

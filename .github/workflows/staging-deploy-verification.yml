@@ -1,0 +1,136 @@
+name: Staging Deploy Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend_url:
+        description: "Staging backend base URL (optional, fallback to vars.STAGING_BACKEND_URL)"
+        required: false
+        default: ""
+        type: string
+      frontend_url:
+        description: "Staging frontend base URL (optional, fallback to vars.STAGING_FRONTEND_URL)"
+        required: false
+        default: ""
+        type: string
+      expected_backend_commit:
+        description: "Expected staging backend commit SHA (optional, short SHA is supported)"
+        required: false
+        default: ""
+        type: string
+      rounds:
+        description: "How many rounds for post-deploy checks"
+        required: false
+        default: "3"
+        type: string
+      run_load_smoke:
+        description: "Run load smoke after staging gate"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Resolve staging targets
+        id: targets
+        env:
+          BACKEND_URL_FROM_VAR: ${{ vars.STAGING_BACKEND_URL }}
+          FRONTEND_URL_FROM_VAR: ${{ vars.STAGING_FRONTEND_URL }}
+          BACKEND_URL_FROM_INPUT: ${{ github.event.inputs.backend_url }}
+          FRONTEND_URL_FROM_INPUT: ${{ github.event.inputs.frontend_url }}
+        run: |
+          BACKEND_URL="${BACKEND_URL_FROM_INPUT:-$BACKEND_URL_FROM_VAR}"
+          FRONTEND_URL="${FRONTEND_URL_FROM_INPUT:-$FRONTEND_URL_FROM_VAR}"
+
+          if [ -z "$BACKEND_URL" ]; then
+            echo "Missing staging backend URL. Set workflow input or vars.STAGING_BACKEND_URL" >&2
+            exit 1
+          fi
+
+          if [ -z "$FRONTEND_URL" ]; then
+            echo "Missing staging frontend URL. Set workflow input or vars.STAGING_FRONTEND_URL" >&2
+            exit 1
+          fi
+
+          echo "backend_url=$BACKEND_URL" >> "$GITHUB_OUTPUT"
+          echo "frontend_url=$FRONTEND_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Export admin route inventory
+        env:
+          OPS_ADMIN_ROUTE_INVENTORY_OUT: ops-admin-route-inventory.md
+          OPS_ADMIN_ROUTE_INVENTORY_JSON_OUT: ops-admin-route-inventory.json
+        run: npm run ops:admin-routes
+
+      - name: Run staging deploy gate
+        env:
+          BACKEND_URL: ${{ steps.targets.outputs.backend_url }}
+          FRONTEND_URL: ${{ steps.targets.outputs.frontend_url }}
+          EXPECT_BACKEND_COMMIT: ${{ inputs.expected_backend_commit }}
+          OPS_ROUNDS: ${{ inputs.rounds }}
+          OPS_ADMIN_KEY: ${{ secrets.STAGING_ADMIN_KEY }}
+          OPS_ADMIN_REQUIRED: "0"
+          OBSERVABILITY_KEY: ${{ secrets.STAGING_OBSERVABILITY_KEY }}
+          OBS_REQUIRED: "0"
+        run: npm run ops:deploy-gate
+
+      - name: Upload staging verification artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-deploy-verification-artifacts
+          path: |
+            ops-admin-route-inventory.md
+            ops-admin-route-inventory.json
+            docs/operations/admin-route-inventory.md
+            docs/operations/admin-route-inventory.json
+            docs/operations/staging-admin-write-regression-checklist.md
+            docs/operations/staging-environment-blueprint.md
+          if-no-files-found: warn
+
+  load-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: verify
+    if: ${{ inputs.run_load_smoke == true }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Resolve staging backend
+        id: backend
+        env:
+          BACKEND_URL_FROM_VAR: ${{ vars.STAGING_BACKEND_URL }}
+          BACKEND_URL_FROM_INPUT: ${{ github.event.inputs.backend_url }}
+        run: |
+          BACKEND_URL="${BACKEND_URL_FROM_INPUT:-$BACKEND_URL_FROM_VAR}"
+          if [ -z "$BACKEND_URL" ]; then
+            echo "Missing staging backend URL. Set workflow input or vars.STAGING_BACKEND_URL" >&2
+            exit 1
+          fi
+          echo "backend_url=$BACKEND_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Run staging load smoke
+        env:
+          LOAD_TARGETS: ${{ format('{0}/api/health,{0}/api/health/ready,{0}/api/meta/version', steps.backend.outputs.backend_url) }}
+          LOAD_DURATION_SEC: "20"
+          LOAD_CONCURRENCY: "15"
+          LOAD_MAX_ERROR_RATE_PCT: "1"
+          LOAD_MAX_P95_MS: "1800"
+        run: npm run ops:load-smoke

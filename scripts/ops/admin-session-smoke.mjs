@@ -2,6 +2,12 @@ import process from "node:process";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_READ_PATH = "/api/admin/series?page=1&pageSize=1";
+const DEFAULT_READ_PATHS = [
+  "/api/admin/series?page=1&pageSize=1",
+  "/api/admin/users?page=1&pageSize=1",
+  "/api/admin/support?page=1&pageSize=1",
+  "/api/admin/orders?page=1&pageSize=1",
+];
 const LOGIN_PATH = "/api/admin/auth/login";
 const VERIFY_PATH = "/api/admin/auth/verify";
 const LOGOUT_PATH = "/api/admin/auth/logout";
@@ -41,6 +47,24 @@ function unwrapPayload(payload) {
 function readTimeout() {
   const parsed = Number(process.env.OPS_REQUEST_TIMEOUT_MS || DEFAULT_TIMEOUT_MS);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_TIMEOUT_MS;
+}
+
+function getReadPaths() {
+  const singlePath = String(process.env.OPS_ADMIN_READ_PATH || "").trim();
+  if (singlePath) {
+    return [ensureLeadingSlash(singlePath, DEFAULT_READ_PATH)];
+  }
+
+  const list = String(process.env.OPS_ADMIN_READ_PATHS || "")
+    .split(",")
+    .map((item) => ensureLeadingSlash(item, ""))
+    .filter(Boolean);
+
+  if (list.length > 0) {
+    return [...new Set(list)];
+  }
+
+  return DEFAULT_READ_PATHS;
 }
 
 async function requestJson(url, options = {}) {
@@ -91,11 +115,30 @@ function fail(message) {
   process.exit(1);
 }
 
+function assertPayloadPresent(result, label) {
+  const hasJson = result.payload !== null;
+  const hasText = String(result.text || "").trim().length > 0;
+  if (!hasJson && !hasText) {
+    fail(`${label} returned an empty response body`);
+  }
+}
+
+async function assertReadPaths(backendBaseUrl, readPaths, label, expectedStatuses, headers = {}) {
+  for (const readPath of readPaths) {
+    const result = await requestJson(`${backendBaseUrl}${readPath}`, { headers });
+    logStep(`GET ${readPath} (${label})`, result);
+    if (!expectedStatuses.includes(result.status)) {
+      fail(`expected ${label} admin read ${readPath} to return ${expectedStatuses.join("/")}, got ${result.status}`);
+    }
+    assertPayloadPresent(result, `${label} admin read ${readPath}`);
+  }
+}
+
 async function run() {
   const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
   const adminKey = String(process.env.OPS_ADMIN_KEY || process.env.ADMIN_KEY || "").trim();
   const adminRequired = process.env.OPS_ADMIN_REQUIRED === "1";
-  const readPath = ensureLeadingSlash(process.env.OPS_ADMIN_READ_PATH, DEFAULT_READ_PATH);
+  const readPaths = getReadPaths();
 
   if (!backendBaseUrl) {
     throw new Error("BACKEND_URL is required");
@@ -111,13 +154,9 @@ async function run() {
   }
 
   console.log(`[ops-admin] backend=${backendBaseUrl}`);
-  console.log(`[ops-admin] readPath=${readPath}`);
+  console.log(`[ops-admin] readPaths=${readPaths.join(",")}`);
 
-  const unauthorizedRead = await requestJson(`${backendBaseUrl}${readPath}`);
-  logStep(`GET ${readPath} (unauthorized)`, unauthorizedRead);
-  if (![401, 403].includes(unauthorizedRead.status)) {
-    fail(`expected unauthorized admin read to return 401/403, got ${unauthorizedRead.status}`);
-  }
+  await assertReadPaths(backendBaseUrl, readPaths, "unauthorized", [401, 403]);
 
   const login = await requestJson(`${backendBaseUrl}${LOGIN_PATH}`, {
     method: "POST",
@@ -136,11 +175,15 @@ async function run() {
     fail("admin login did not return both accessToken and refreshToken");
   }
 
+  const authHeaders = {
+    Authorization: `Bearer ${accessToken}`,
+  };
+
   const verify = await requestJson(`${backendBaseUrl}${VERIFY_PATH}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      ...authHeaders,
     },
     body: JSON.stringify({}),
   });
@@ -149,15 +192,7 @@ async function run() {
     fail("verify before logout did not return valid=true");
   }
 
-  const authorizedRead = await requestJson(`${backendBaseUrl}${readPath}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  logStep(`GET ${readPath} (authorized)`, authorizedRead);
-  if (authorizedRead.status !== 200) {
-    fail(`expected authorized admin read to return 200, got ${authorizedRead.status}`);
-  }
+  await assertReadPaths(backendBaseUrl, readPaths, "authorized", [200], authHeaders);
 
   const logout = await requestJson(`${backendBaseUrl}${LOGOUT_PATH}`, {
     method: "POST",
@@ -173,7 +208,7 @@ async function run() {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      ...authHeaders,
     },
     body: JSON.stringify({}),
   });
@@ -192,15 +227,7 @@ async function run() {
     fail(`expected refresh after logout to return 401/403, got ${refreshAfterLogout.status}`);
   }
 
-  const readAfterLogout = await requestJson(`${backendBaseUrl}${readPath}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  logStep(`GET ${readPath} (after logout)`, readAfterLogout);
-  if (![401, 403].includes(readAfterLogout.status)) {
-    fail(`expected admin read after logout to return 401/403, got ${readAfterLogout.status}`);
-  }
+  await assertReadPaths(backendBaseUrl, readPaths, "after logout", [401, 403], authHeaders);
 
   console.log("[ops-admin] admin session smoke passed");
 }

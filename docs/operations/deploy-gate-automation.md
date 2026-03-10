@@ -1,4 +1,4 @@
-# Deploy Gate Automation
+﻿# Deploy Gate Automation
 
 This project includes script-based deploy verification, production-safe admin session smoke checks, and lightweight load smoke checks.
 
@@ -60,7 +60,8 @@ npm run ops:admin-smoke
 Optional environment variables:
 
 - `OPS_ADMIN_REQUIRED=1`: fail if admin key is missing.
-- `OPS_ADMIN_READ_PATH`: override the read-only admin endpoint. Default is `/api/admin/series?page=1&pageSize=1`.
+- `OPS_ADMIN_READ_PATH`: override the read-only admin endpoint with a single path.
+- `OPS_ADMIN_READ_PATHS`: comma-separated read-only admin endpoints. Default is `/api/admin/series?page=1&pageSize=1,/api/admin/users?page=1&pageSize=1,/api/admin/support?page=1&pageSize=1,/api/admin/orders?page=1&pageSize=1`.
 - `OPS_REQUEST_TIMEOUT_MS`: request timeout in milliseconds.
 
 The script only performs:
@@ -68,7 +69,7 @@ The script only performs:
 - unauthorized read check
 - admin login
 - token verify
-- one read-only admin GET
+- multiple read-only admin GET checks (series/users/support/orders by default)
 - logout
 - verify/refresh/read rejection after logout
 
@@ -106,14 +107,34 @@ npm run ops:deploy-gate
 
 Manual workflow is available:
 
-- Workflow: `.github/workflows/post-deploy-verification.yml`
+- Production workflow: `.github/workflows/post-deploy-verification.yml`
+- Staging workflow: `.github/workflows/staging-deploy-verification.yml`
 - Trigger: `workflow_dispatch`
 - Supports:
   - post-deploy verification
-  - admin session smoke if `PROD_ADMIN_KEY` or `ADMIN_KEY` secret exists
+  - admin session smoke if the matching admin secret exists
   - optional backend load smoke
 
 ## 7) Continuous Operations
 
 - Oncall watchdog workflow: `.github/workflows/oncall-watchdog.yml`
 - Weekly resilience drill workflow: `.github/workflows/resilience-drill.yml`
+
+## 8) Route Inventory
+
+Use this to export the current admin route map directly from controller code:
+
+```bash
+npm run ops:admin-routes
+```
+
+Default outputs:
+
+- `docs/operations/admin-route-inventory.md`
+- `docs/operations/admin-route-inventory.json`
+
+Optional overrides:
+
+- `OPS_ADMIN_ROUTE_INVENTORY_OUT`
+- `OPS_ADMIN_ROUTE_INVENTORY_JSON_OUT`
+- `OPS_ADMIN_ROUTE_INVENTORY_STDOUT=1`

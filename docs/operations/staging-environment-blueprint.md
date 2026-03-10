@@ -1,4 +1,4 @@
-# Staging Environment Blueprint
+﻿# Staging Environment Blueprint
 
 This repository is ready for a two-environment deployment model:
 
@@ -54,11 +54,10 @@ At minimum, staging must not share these with production:
 
 1. Push to `main`
 2. Deploy to staging first
-3. Run `npm run ops:post-deploy` against staging
-4. Run `npm run ops:admin-smoke` against staging
-5. Perform any write-flow checks in staging
-6. Promote the same commit to production
-7. Run `npm run ops:deploy-gate` against production
+3. Run `.github/workflows/staging-deploy-verification.yml` or `npm run ops:deploy-gate` against staging
+4. Perform any write-flow checks in staging
+5. Promote the same commit to production
+6. Run `.github/workflows/post-deploy-verification.yml` or `npm run ops:deploy-gate` against production
 
 ## Suggested Secrets for CI
 
@@ -92,3 +91,23 @@ npm run ops:deploy-gate
 ```
 
 That does not replace staging, but it meaningfully reduces the chance of shipping broken admin auth or dead frontend routes.
+
+## GitHub Workflow
+
+A staging verification workflow is included:
+
+- `.github/workflows/staging-deploy-verification.yml`
+
+It resolves staging URLs from workflow inputs first, then falls back to:
+
+- `vars.STAGING_BACKEND_URL`
+- `vars.STAGING_FRONTEND_URL`
+- `secrets.STAGING_ADMIN_KEY`
+- `secrets.STAGING_OBSERVABILITY_KEY`
+
+## Write-flow Checklist
+
+For staging-only admin mutations, use:
+
+- [staging-admin-write-regression-checklist.md](./staging-admin-write-regression-checklist.md)
+- [admin-route-inventory.md](./admin-route-inventory.md) generated via `npm run ops:admin-routes`
