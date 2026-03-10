@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { HttpException, HttpStatus } from "@nestjs/common";
+import { HttpStatus } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { AdminAuthController } from "./admin-auth.controller";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
@@ -8,15 +8,19 @@ import {
   isAdminTotpEnabled,
   verifyAdminTotpCode,
 } from "../../../../common/utils/admin-security";
+import { getRedisClient } from "../../../../common/redis/client";
+import { resetAdminTokenRevocationStore } from "../../utils/admin-token-revocation";
+
+const mockRedis = {
+  get: jest.fn(),
+  incr: jest.fn(),
+  expire: jest.fn(),
+  del: jest.fn(),
+  setex: jest.fn(),
+};
 
 jest.mock("../../../../common/redis/client", () => ({
-  getRedisClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue(null),
-    incr: jest.fn().mockResolvedValue(1),
-    expire: jest.fn().mockResolvedValue(1),
-    del: jest.fn().mockResolvedValue(1),
-    setex: jest.fn().mockResolvedValue("OK"),
-  }),
+  getRedisClient: jest.fn(() => mockRedis),
 }));
 
 jest.mock("../../../../common/utils/admin-security", () => ({
@@ -28,8 +32,9 @@ jest.mock("../../../../common/utils/admin-security", () => ({
 
 describe("AdminAuthController", () => {
   let controller: AdminAuthController;
-  let jwtService: JwtService;
-  let adminLogService: AdminLogService;
+  let jwtService: { sign: jest.Mock; verify: jest.Mock };
+  let adminLogService: { log: jest.Mock };
+  const mockGetRedisClient = getRedisClient as jest.MockedFunction<typeof getRedisClient>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -38,8 +43,15 @@ describe("AdminAuthController", () => {
         {
           provide: JwtService,
           useValue: {
-            sign: jest.fn().mockReturnValue("mock-token"),
-            verify: jest.fn().mockReturnValue({ role: "admin", jti: "test-jti", type: "refresh" }),
+            sign: jest.fn((payload: { type?: string }) =>
+              payload?.type === "refresh" ? "mock-refresh-token" : "mock-access-token"
+            ),
+            verify: jest.fn((token: string) => {
+              if (token === "valid-refresh-token" || token === "mock-refresh-token") {
+                return { role: "admin", type: "refresh", jti: "refresh-jti" };
+              }
+              return { role: "admin", jti: "access-jti" };
+            }),
           },
         },
         {
@@ -52,8 +64,15 @@ describe("AdminAuthController", () => {
     }).compile();
 
     controller = module.get<AdminAuthController>(AdminAuthController);
-    jwtService = module.get<JwtService>(JwtService);
-    adminLogService = module.get<AdminLogService>(AdminLogService);
+    jwtService = module.get(JwtService);
+    adminLogService = module.get(AdminLogService);
+
+    mockRedis.get.mockResolvedValue(null);
+    mockRedis.incr.mockResolvedValue(1);
+    mockRedis.expire.mockResolvedValue(1);
+    mockRedis.del.mockResolvedValue(1);
+    mockRedis.setex.mockResolvedValue("OK");
+    mockGetRedisClient.mockReturnValue(mockRedis as any);
 
     (getAdminKeysFromEnv as jest.Mock).mockReturnValue(["test-admin-key"]);
     (isAdminTotpEnabled as jest.Mock).mockReturnValue(false);
@@ -62,6 +81,7 @@ describe("AdminAuthController", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    resetAdminTokenRevocationStore();
   });
 
   describe("login", () => {
@@ -78,8 +98,8 @@ describe("AdminAuthController", () => {
       expect(result).toEqual(
         expect.objectContaining({
           success: true,
-          accessToken: expect.any(String),
-          refreshToken: expect.any(String),
+          accessToken: "mock-access-token",
+          refreshToken: "mock-refresh-token",
           expiresIn: 86400,
         }),
       );
@@ -133,12 +153,30 @@ describe("AdminAuthController", () => {
       expect(result).toEqual(
         expect.objectContaining({
           success: true,
-          accessToken: expect.any(String),
+          accessToken: "mock-access-token",
           refreshToken: "valid-refresh-token",
           expiresIn: 86400,
         }),
       );
       expect(jwtService.verify).toHaveBeenCalledWith("valid-refresh-token");
+    });
+
+    it("should reject a revoked refresh token", async () => {
+      mockGetRedisClient.mockReturnValue(null);
+
+      await controller.logout(
+        { refreshToken: "valid-refresh-token" },
+        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
+      );
+
+      await expect(
+        controller.refresh(
+          { refreshToken: "valid-refresh-token" },
+          { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
+        ),
+      ).rejects.toMatchObject({
+        status: HttpStatus.UNAUTHORIZED,
+      });
     });
   });
 
@@ -152,12 +190,33 @@ describe("AdminAuthController", () => {
         }),
       );
     });
+
+    it("should return invalid after logout revokes the access token", async () => {
+      mockGetRedisClient.mockReturnValue(null);
+
+      await controller.logout(
+        { token: "valid-access-token" },
+        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
+      );
+
+      const result = await controller.verify(
+        { token: "valid-access-token" },
+        { headers: {}, cookies: {}, res: {} },
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          success: false,
+          valid: false,
+        }),
+      );
+    });
   });
 
   describe("logout", () => {
-    it("should logout successfully", async () => {
+    it("should logout successfully and revoke both token types", async () => {
       const result = await controller.logout(
-        { token: "valid-token" },
+        { token: "valid-access-token", refreshToken: "valid-refresh-token" },
         { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
       );
 
@@ -166,11 +225,16 @@ describe("AdminAuthController", () => {
           success: true,
         }),
       );
+      expect(mockRedis.setex).toHaveBeenCalledWith("admin:token:blacklist:access-jti", 86400, "1");
+      expect(mockRedis.setex).toHaveBeenCalledWith("admin:token:blacklist:refresh-jti", 604800, "1");
       expect(adminLogService.log).toHaveBeenCalledWith(
         "logout_success",
         "auth",
         "admin",
-        expect.any(Object),
+        expect.objectContaining({
+          jti: "access-jti",
+          refreshJti: "refresh-jti",
+        }),
       );
     });
   });

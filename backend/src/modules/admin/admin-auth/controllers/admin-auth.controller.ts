@@ -20,6 +20,10 @@ import {
   isAdminTotpEnabled,
   verifyAdminTotpCode,
 } from "../../../../common/utils/admin-security";
+import {
+  isAdminTokenJtiRevoked,
+  revokeAdminTokenJti,
+} from "../../utils/admin-token-revocation";
 import { AdminLoginDto, AdminRefreshTokenDto } from "../../dtos/admin-auth.dto";
 
 const ADMIN_ACCESS_COOKIE_NAME = "admin_access_token";
@@ -154,9 +158,14 @@ export class AdminAuthController {
     }
 
     try {
-      const payload = this.jwtService.verify(refreshToken) as { type?: string };
+      const payload = this.jwtService.verify(refreshToken) as { type?: string; jti?: string };
       if (payload.type !== "refresh") {
         throw new HttpException("Invalid refresh token", HttpStatus.UNAUTHORIZED);
+      }
+
+      const revoked = await isAdminTokenJtiRevoked(payload.jti, "refresh");
+      if (revoked) {
+        throw new HttpException("Refresh token is invalid or expired", HttpStatus.UNAUTHORIZED);
       }
 
       const accessJti = randomUUID();
@@ -198,7 +207,24 @@ export class AdminAuthController {
     }
 
     try {
-      const payload = this.jwtService.verify(token);
+      const payload = this.jwtService.verify(token) as { type?: string; jti?: string };
+      if (payload.type === "refresh") {
+        return {
+          success: false,
+          valid: false,
+          message: "Token is invalid or expired",
+        };
+      }
+
+      const revoked = await isAdminTokenJtiRevoked(payload.jti, "verify");
+      if (revoked) {
+        return {
+          success: false,
+          valid: false,
+          message: "Token is invalid or expired",
+        };
+      }
+
       return {
         success: true,
         valid: true,
@@ -215,50 +241,36 @@ export class AdminAuthController {
 
   @Post("logout")
   @HttpCode(200)
-  async logout(@Body() body: { token?: string }, @Req() req: RequestLike) {
+  async logout(@Body() body: { token?: string; refreshToken?: string }, @Req() req: RequestLike) {
     const token =
       body?.token ||
       this.getBearerToken(req) ||
       this.getCookieToken(req, ADMIN_ACCESS_COOKIE_NAME);
+    const refreshToken =
+      body?.refreshToken ||
+      this.getCookieToken(req, ADMIN_REFRESH_COOKIE_NAME);
 
-    if (!token) {
-      this.clearAuthCookies(req);
-      return {
-        success: true,
-        message: "Logged out",
-      };
-    }
+    const accessJti = await this.revokeSessionToken(token, {
+      ttlSeconds: ACCESS_TOKEN_EXPIRES_SECONDS,
+      expectedType: "access",
+      label: "logout:access",
+    });
+    const refreshJti = await this.revokeSessionToken(refreshToken, {
+      ttlSeconds: REFRESH_TOKEN_EXPIRES_SECONDS,
+      expectedType: "refresh",
+      label: "logout:refresh",
+    });
 
-    try {
-      const payload = this.jwtService.verify(token) as { jti?: string };
-      if (payload.jti) {
-        const redis = getRedisClient();
-        if (redis) {
-          const blacklistKey = `admin:token:blacklist:${payload.jti}`;
-          await this.runRedisWithFallback(
-            () => redis.setex(blacklistKey, ACCESS_TOKEN_EXPIRES_SECONDS, "1"),
-            "SKIPPED",
-            "logout:blacklist:set",
-          );
-          logger.info(`[admin-logout] token blacklisted jti=${payload.jti}`);
-        } else {
-          logger.warn("[admin-logout] redis unavailable, skip blacklist");
-        }
-      }
+    await this.adminLogService.log("logout_success", "auth", "admin", {
+      jti: accessJti,
+      refreshJti,
+    });
 
-      await this.adminLogService.log("logout_success", "auth", "admin", {
-        jti: payload.jti,
-      });
-
-      this.clearAuthCookies(req);
-      return {
-        success: true,
-        message: "Logged out",
-      };
-    } catch {
-      this.clearAuthCookies(req);
-      throw new HttpException("Token is invalid or expired", HttpStatus.UNAUTHORIZED);
-    }
+    this.clearAuthCookies(req);
+    return {
+      success: true,
+      message: "Logged out",
+    };
   }
 
   private async handleLoginFailure(input: {
@@ -370,6 +382,37 @@ export class AdminAuthController {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
+    }
+  }
+
+  private async revokeSessionToken(
+    token: string | null,
+    input: {
+      ttlSeconds: number;
+      expectedType: "access" | "refresh";
+      label: string;
+    },
+  ): Promise<string | null> {
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = this.jwtService.verify(token) as { type?: string; jti?: string };
+      if (input.expectedType === "refresh" && payload.type !== "refresh") {
+        return null;
+      }
+      if (input.expectedType === "access" && payload.type === "refresh") {
+        return null;
+      }
+
+      await revokeAdminTokenJti(payload.jti, input.ttlSeconds, input.label);
+      return payload.jti ? String(payload.jti) : null;
+    } catch (error) {
+      logger.warn(`[admin-auth] failed to revoke ${input.label}`, {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return null;
     }
   }
 

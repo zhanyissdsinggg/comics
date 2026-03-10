@@ -50,13 +50,22 @@ export function AdminAuthProvider({ children }) {
   const logout = useCallback(async () => {
     const baseUrl = getApiBaseUrl();
     const currentToken = getStoredToken(ACCESS_TOKEN_KEY);
+    const currentRefreshToken = getStoredToken(REFRESH_TOKEN_KEY);
 
     try {
+      const logoutPayload = {};
+      if (currentToken) {
+        logoutPayload.token = currentToken;
+      }
+      if (currentRefreshToken) {
+        logoutPayload.refreshToken = currentRefreshToken;
+      }
+
       await fetch(`${baseUrl}/api/admin/auth/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(currentToken ? { token: currentToken } : {}),
+        body: JSON.stringify(logoutPayload),
       });
     } catch (error) {
       console.error("admin logout failed:", error);

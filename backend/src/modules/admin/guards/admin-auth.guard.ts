@@ -6,9 +6,9 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { getRedisClient } from "../../../common/redis/client";
 import { logger } from "../../../common/logger/winston.init";
 import { isAdminAuthorized } from "../../../common/utils/admin";
+import { isAdminTokenJtiRevoked } from "../utils/admin-token-revocation";
 
 const ADMIN_ACCESS_COOKIE_NAME = "admin_access_token";
 
@@ -115,26 +115,10 @@ export class AdminAuthGuard implements CanActivate {
     }
 
     if (payload.jti) {
-      const redis = getRedisClient();
-      if (!redis) {
-        logger.warn("Admin token blacklist check skipped: Redis unavailable");
-        return payload;
-      }
-
-      try {
-        const blacklistKey = `admin:token:blacklist:${payload.jti}`;
-        const result = await redis.get(blacklistKey);
-        if (result) {
-          logger.warn("Admin JWT rejected: token is blacklisted", { jti: payload.jti });
-          throw new UnauthorizedException("认证失败");
-        }
-      } catch (error) {
-        if (error instanceof UnauthorizedException) {
-          throw error;
-        }
-        logger.warn("Admin token blacklist check failed, allowing request", {
-          message: error instanceof Error ? error.message : String(error),
-        });
+      const revoked = await isAdminTokenJtiRevoked(payload.jti, "guard");
+      if (revoked) {
+        logger.warn("Admin JWT rejected: token is blacklisted", { jti: payload.jti });
+        throw new UnauthorizedException("Authentication failed");
       }
     }
 
