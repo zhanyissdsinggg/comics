@@ -14,7 +14,7 @@ function normalizePageUrl(url) {
       return parsed.toString();
     }
   } catch {
-    // 瑙ｆ瀽澶辫触杩斿洖鍘熷 URL
+    // NOTE: fall back to the original URL when parsing fails.
   }
   return url;
 }
@@ -257,7 +257,7 @@ export default function PageStream({
                   ? "flex-none w-full scroll-snap-center rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2"
                   : "rounded-none border-0 bg-transparent p-0"
               }`}
-              style={{ contentVisibility: "auto", containIntrinsicSize: "1200px 800px" }}
+              style={isHorizontal ? { contentVisibility: "auto", containIntrinsicSize: "1200px 800px" } : undefined}
               data-index={index}
             >
               {errorPages[index] ? (
