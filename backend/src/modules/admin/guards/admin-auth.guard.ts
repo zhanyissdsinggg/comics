@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   CanActivate,
   ExecutionContext,
@@ -8,6 +8,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { logger } from "../../../common/logger/winston.init";
 import { isAdminAuthorized } from "../../../common/utils/admin";
+import { getAdminIdentityFromKey } from "../../../common/utils/admin-security";
 import { isAdminTokenJtiRevoked } from "../utils/admin-token-revocation";
 
 const ADMIN_ACCESS_COOKIE_NAME = "admin_access_token";
@@ -16,7 +17,9 @@ type TokenSource = "bearer" | "cookie";
 
 interface JwtPayload {
   role?: string;
+  type?: string;
   jti?: string;
+  adminId?: string;
 }
 
 function isLegacyBearerEnabled(): boolean {
@@ -50,15 +53,17 @@ export class AdminAuthGuard implements CanActivate {
       try {
         const payload = await this.verifyJwtToken(candidate.token);
         if (payload.role !== "admin") {
-          throw new ForbiddenException("权限不足");
+          throw new ForbiddenException("Permission denied");
         }
 
+        const adminId = String(payload.adminId || "admin");
         request.user = {
-          userId: "admin",
+          userId: adminId,
           role: payload.role,
           jti: payload.jti,
           authSource: candidate.source,
         };
+        request.userId = adminId;
         return true;
       } catch (error) {
         if (error instanceof ForbiddenException) {
@@ -69,11 +74,13 @@ export class AdminAuthGuard implements CanActivate {
     }
 
     if (isLegacyBearerEnabled() && isAdminAuthorized(request, request.body)) {
+      const adminId = getAdminIdentityFromKey(bearerToken || "") || "admin";
       request.user = {
-        userId: "admin",
+        userId: adminId,
         role: "admin",
         authSource: "legacy_admin_key",
       };
+      request.userId = adminId;
       return true;
     }
 
@@ -81,7 +88,7 @@ export class AdminAuthGuard implements CanActivate {
       throw lastJwtError;
     }
 
-    throw new ForbiddenException("认证失败");
+    throw new ForbiddenException("Authentication failed");
   }
 
   private getBearerToken(request: any): string | null {
@@ -110,8 +117,12 @@ export class AdminAuthGuard implements CanActivate {
     try {
       payload = this.jwtService.verify(token) as JwtPayload;
     } catch (error: any) {
-      logger.warn("Admin JWT 验证失败", { message: error?.message });
-      throw new UnauthorizedException("认证失败");
+      logger.warn("Admin JWT verification failed", { message: error?.message });
+      throw new UnauthorizedException("Authentication failed");
+    }
+
+    if (payload.type === "refresh") {
+      throw new UnauthorizedException("Authentication failed");
     }
 
     if (payload.jti) {

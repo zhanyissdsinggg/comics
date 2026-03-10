@@ -254,7 +254,7 @@ export default function PageStream({
               key={page.url}
               className={`${
                 isHorizontal
-                  ? "flex-none w-full scroll-snap-center rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2"
+                  ? "flex-none w-full scroll-snap-item rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2"
                   : "rounded-none border-0 bg-transparent p-0"
               }`}
               style={isHorizontal ? { contentVisibility: "auto", containIntrinsicSize: "1200px 800px" } : undefined}

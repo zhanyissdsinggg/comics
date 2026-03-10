@@ -12,6 +12,15 @@ function getThemeState() {
 }
 
 test.describe("Theme toggle behavior", () => {
+  test("mobile header should keep theme toggle visible", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const toggle = page.locator('button[aria-label^="Switch to "]').first();
+    await expect(toggle).toBeVisible();
+  });
+
   test("should switch html theme class and persist theme value", async ({ page }) => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();

@@ -38,7 +38,7 @@ export default function ReaderDrawer({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60">
-      <div className="w-full max-w-full border-l border-neutral-800 bg-neutral-950 px-4 py-5 sm:max-w-sm">
+      <div className="flex h-full w-full max-w-full flex-col border-l border-neutral-800 bg-neutral-950 px-4 py-5 sm:max-w-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
             <button
@@ -88,8 +88,9 @@ export default function ReaderDrawer({
           </div>
         ) : null}
 
-        {tab === "toc" ? (
-          <div className="mt-4 space-y-2">
+        <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
+          {tab === "toc" ? (
+            <div className="space-y-2 pb-6">
             {episodes.map((episode) => {
               const unlocked = unlockedIds.includes(episode.id);
               return (
@@ -117,9 +118,9 @@ export default function ReaderDrawer({
                 </button>
               );
             })}
-          </div>
-        ) : (
-          <div className="mt-4 space-y-2">
+            </div>
+          ) : (
+            <div className="space-y-2 pb-6">
             {bookmarks.length === 0 ? (
               <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4 text-sm text-neutral-400">
                 No bookmarks yet.
@@ -155,8 +156,9 @@ export default function ReaderDrawer({
                 </div>
               ))
             )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

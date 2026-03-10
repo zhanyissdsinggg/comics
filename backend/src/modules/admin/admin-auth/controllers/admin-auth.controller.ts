@@ -16,6 +16,7 @@ import { getRedisClient } from "../../../../common/redis/client";
 import { logger } from "../../../../common/logger/winston.init";
 import { ValidationPipe } from "../../../../common/pipes/validation.pipe";
 import {
+  getAdminIdentityFromKey,
   getAdminKeysFromEnv,
   isAdminTotpEnabled,
   verifyAdminTotpCode,
@@ -42,6 +43,12 @@ type RequestLike = {
     "x-forwarded-for"?: string | string[];
   };
   cookies?: Record<string, string | undefined>;
+  user?: {
+    userId?: string;
+    role?: string;
+    jti?: string;
+    authSource?: string;
+  };
   userId?: string;
   ip?: string;
   connection?: {
@@ -50,6 +57,12 @@ type RequestLike = {
   res?: ResponseLike;
 };
 type LoginFailureReason = "invalid_admin_key" | "invalid_two_factor_code";
+type SessionTokenPayload = {
+  role?: string;
+  type?: string;
+  jti?: string;
+  adminId?: string;
+};
 
 @Controller("admin/auth")
 export class AdminAuthController {
@@ -119,23 +132,27 @@ export class AdminAuthController {
       );
     }
 
+    const adminId = getAdminIdentityFromKey(adminKey) || "admin";
+    this.assignRequestIdentity(req, adminId, "login");
+
     const accessJti = randomUUID();
     const accessToken = this.jwtService.sign(
-      { role: "admin", timestamp: Date.now(), jti: accessJti },
+      { role: "admin", adminId, timestamp: Date.now(), jti: accessJti },
       { expiresIn: `${ACCESS_TOKEN_EXPIRES_SECONDS}s` },
     );
 
     const refreshJti = randomUUID();
     const refreshToken = this.jwtService.sign(
-      { role: "admin", type: "refresh", timestamp: Date.now(), jti: refreshJti },
+      { role: "admin", adminId, type: "refresh", timestamp: Date.now(), jti: refreshJti },
       { expiresIn: `${REFRESH_TOKEN_EXPIRES_SECONDS}s` },
     );
 
-    await this.adminLogService.log("login_success", "auth", "admin", {
+    await this.adminLogService.log("login_success", "auth", adminId, {
       message: "Admin logged in successfully",
       ip: clientIp,
       twoFactorEnabled: requiresTotp,
-    });
+      adminId,
+    }, req as any);
 
     this.setAuthCookies(req, accessToken, refreshToken);
 
@@ -158,7 +175,7 @@ export class AdminAuthController {
     }
 
     try {
-      const payload = this.jwtService.verify(refreshToken) as { type?: string; jti?: string };
+      const payload = this.jwtService.verify(refreshToken) as SessionTokenPayload;
       if (payload.type !== "refresh") {
         throw new HttpException("Invalid refresh token", HttpStatus.UNAUTHORIZED);
       }
@@ -168,9 +185,10 @@ export class AdminAuthController {
         throw new HttpException("Refresh token is invalid or expired", HttpStatus.UNAUTHORIZED);
       }
 
+      const adminId = payload.adminId || "admin";
       const accessJti = randomUUID();
       const newAccessToken = this.jwtService.sign(
-        { role: "admin", timestamp: Date.now(), jti: accessJti },
+        { role: "admin", adminId, timestamp: Date.now(), jti: accessJti },
         { expiresIn: `${ACCESS_TOKEN_EXPIRES_SECONDS}s` },
       );
 
@@ -207,7 +225,7 @@ export class AdminAuthController {
     }
 
     try {
-      const payload = this.jwtService.verify(token) as { type?: string; jti?: string };
+      const payload = this.jwtService.verify(token) as SessionTokenPayload;
       if (payload.type === "refresh") {
         return {
           success: false,
@@ -250,21 +268,25 @@ export class AdminAuthController {
       body?.refreshToken ||
       this.getCookieToken(req, ADMIN_REFRESH_COOKIE_NAME);
 
-    const accessJti = await this.revokeSessionToken(token, {
+    const accessSession = await this.revokeSessionToken(token, {
       ttlSeconds: ACCESS_TOKEN_EXPIRES_SECONDS,
       expectedType: "access",
       label: "logout:access",
     });
-    const refreshJti = await this.revokeSessionToken(refreshToken, {
+    const refreshSession = await this.revokeSessionToken(refreshToken, {
       ttlSeconds: REFRESH_TOKEN_EXPIRES_SECONDS,
       expectedType: "refresh",
       label: "logout:refresh",
     });
 
-    await this.adminLogService.log("logout_success", "auth", "admin", {
-      jti: accessJti,
-      refreshJti,
-    });
+    const adminId = accessSession?.adminId || refreshSession?.adminId || "admin";
+    this.assignRequestIdentity(req, adminId, "logout");
+
+    await this.adminLogService.log("logout_success", "auth", adminId, {
+      jti: accessSession?.jti || null,
+      refreshJti: refreshSession?.jti || null,
+      adminId,
+    }, req as any);
 
     this.clearAuthCookies(req);
     return {
@@ -343,6 +365,16 @@ export class AdminAuthController {
     }
   }
 
+  private assignRequestIdentity(req: RequestLike, adminId: string, authSource?: string): void {
+    req.userId = adminId;
+    req.user = {
+      ...(req.user || {}),
+      userId: adminId,
+      role: "admin",
+      authSource: authSource || req.user?.authSource,
+    };
+  }
+
   private getClientIp(req: RequestLike): string {
     const forwarded = req?.headers?.["x-forwarded-for"];
     if (typeof forwarded === "string" && forwarded.trim()) {
@@ -392,13 +424,13 @@ export class AdminAuthController {
       expectedType: "access" | "refresh";
       label: string;
     },
-  ): Promise<string | null> {
+  ): Promise<{ jti: string | null; adminId: string | null } | null> {
     if (!token) {
       return null;
     }
 
     try {
-      const payload = this.jwtService.verify(token) as { type?: string; jti?: string };
+      const payload = this.jwtService.verify(token) as SessionTokenPayload;
       if (input.expectedType === "refresh" && payload.type !== "refresh") {
         return null;
       }
@@ -407,7 +439,10 @@ export class AdminAuthController {
       }
 
       await revokeAdminTokenJti(payload.jti, input.ttlSeconds, input.label);
-      return payload.jti ? String(payload.jti) : null;
+      return {
+        jti: payload.jti ? String(payload.jti) : null,
+        adminId: payload.adminId ? String(payload.adminId) : null,
+      };
     } catch (error) {
       logger.warn(`[admin-auth] failed to revoke ${input.label}`, {
         message: error instanceof Error ? error.message : String(error),

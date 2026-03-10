@@ -1,25 +1,30 @@
-import { Body, Controller, Get, Post, Req, UseGuards, BadRequestException } from "@nestjs/common";
-import { Request } from "express";
+﻿import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import type { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
+import { encryptString, isEncrypted } from "../../../../common/utils/crypto";
 import { parseStoredJson, stringifyStoredJson } from "../../../../common/utils/stored-json";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import {
+  DEFAULT_EMAIL_CONFIG,
+  EmailConfigInput,
+  isMaskedSecret,
+  maskEmailConfigSecrets,
+  normalizeEmailConfig,
+} from "../../../email/email-config";
+import { EmailService } from "../../../email/email.service";
 import {
   TestEmailDto,
   TestEmailPayloadInput,
   UpdateEmailConfigDto,
 } from "../dtos/admin-system.dto";
-import { EmailService } from "../../../email/email.service";
-import {
-  DEFAULT_EMAIL_CONFIG,
-  EmailConfigInput,
-  maskEmailConfigSecrets,
-  normalizeEmailConfig,
-  isMaskedSecret,
-} from "../../../email/email-config";
-import { encryptString, isEncrypted } from "../../../../common/utils/crypto";
 
 type EmailConfigRequestBody = UpdateEmailConfigDto & EmailConfigInput;
 type TestEmailRequestBody = TestEmailDto & TestEmailPayloadInput;
+
+type SecretFieldInput = {
+  provided: boolean;
+  value: string;
+};
 
 function extractEmailConfigInput(body: EmailConfigRequestBody): EmailConfigInput {
   return body?.config || body;
@@ -27,6 +32,26 @@ function extractEmailConfigInput(body: EmailConfigRequestBody): EmailConfigInput
 
 function extractTestEmailInput(body: TestEmailRequestBody): TestEmailPayloadInput {
   return body?.email || body;
+}
+
+function readSecretInput(value: unknown): SecretFieldInput {
+  if (typeof value !== "string") {
+    return { provided: false, value: "" };
+  }
+  return { provided: true, value: value.trim() };
+}
+
+function resolveStoredSecret(currentValue: string, input: SecretFieldInput): string {
+  if (!input.provided || isMaskedSecret(input.value)) {
+    return currentValue;
+  }
+  if (!input.value) {
+    return "";
+  }
+  if (isEncrypted(input.value)) {
+    return input.value;
+  }
+  return encryptString(input.value);
 }
 
 @Controller("admin/email")
@@ -40,52 +65,32 @@ export class AdminEmailController {
   @Get()
   async getConfig() {
     const config = await this.prisma.emailConfig.findUnique({ where: { key: "default" } });
-    const payload = normalizeEmailConfig(
-      parseStoredJson(config?.payload, DEFAULT_EMAIL_CONFIG),
-    );
-
+    const payload = normalizeEmailConfig(parseStoredJson(config?.payload, DEFAULT_EMAIL_CONFIG));
     return { config: maskEmailConfigSecrets(payload) };
   }
 
   @Post()
   async save(@Body() body: EmailConfigRequestBody, @Req() req: Request) {
     const existing = await this.prisma.emailConfig.findUnique({ where: { key: "default" } });
-    const current = normalizeEmailConfig(
-      parseStoredJson(existing?.payload, DEFAULT_EMAIL_CONFIG),
-    );
+    const current = normalizeEmailConfig(parseStoredJson(existing?.payload, DEFAULT_EMAIL_CONFIG));
     const input = extractEmailConfigInput(body);
 
-    const nextResendKeyRaw = String(input.resendApiKey || "").trim();
-    const nextSendgridKeyRaw = String(input.sendgridApiKey || "").trim();
-    const nextSmsWebhookRaw = String(input.smsWebhookUrl || "").trim();
-    const shouldKeepResend = !nextResendKeyRaw || isMaskedSecret(nextResendKeyRaw);
-    const shouldKeepSendgrid = !nextSendgridKeyRaw || isMaskedSecret(nextSendgridKeyRaw);
-    const shouldKeepSms = !nextSmsWebhookRaw || isMaskedSecret(nextSmsWebhookRaw);
+    const resendApiKeyInput = readSecretInput(input.resendApiKey);
+    const sendgridApiKeyInput = readSecretInput(input.sendgridApiKey);
+    const smsWebhookUrlInput = readSecretInput(input.smsWebhookUrl);
 
     const payload = {
       ...current,
       provider: String(input.provider || current.provider || "console"),
       from: String(input.from || "").trim(),
       webhookUrl: String(input.webhookUrl || "").trim(),
-      resendApiKey: shouldKeepResend ? current.resendApiKey : encryptString(nextResendKeyRaw),
-      sendgridApiKey: shouldKeepSendgrid
-        ? current.sendgridApiKey
-        : encryptString(nextSendgridKeyRaw),
-      smsWebhookUrl: shouldKeepSms ? current.smsWebhookUrl : encryptString(nextSmsWebhookRaw),
+      resendApiKey: resolveStoredSecret(current.resendApiKey, resendApiKeyInput),
+      sendgridApiKey: resolveStoredSecret(current.sendgridApiKey, sendgridApiKeyInput),
+      smsWebhookUrl: resolveStoredSecret(current.smsWebhookUrl, smsWebhookUrlInput),
       adminNotifyEmail: String(input.adminNotifyEmail || "").trim(),
       testRecipient: String(input.testRecipient || "").trim(),
       updatedAt: new Date().toISOString(),
     };
-
-    if (payload.resendApiKey && !shouldKeepResend && !isEncrypted(payload.resendApiKey)) {
-      payload.resendApiKey = encryptString(payload.resendApiKey);
-    }
-    if (payload.sendgridApiKey && !shouldKeepSendgrid && !isEncrypted(payload.sendgridApiKey)) {
-      payload.sendgridApiKey = encryptString(payload.sendgridApiKey);
-    }
-    if (payload.smsWebhookUrl && !shouldKeepSms && !isEncrypted(payload.smsWebhookUrl)) {
-      payload.smsWebhookUrl = encryptString(payload.smsWebhookUrl);
-    }
 
     await this.prisma.emailConfig.upsert({
       where: { key: "default" },
@@ -93,10 +98,16 @@ export class AdminEmailController {
       create: { key: "default", payload: stringifyStoredJson(payload), value: "default" },
     });
 
+    const requestLike = req as Request & {
+      userId?: string;
+      user?: { userId?: string };
+    };
+    const adminId = requestLike.userId || requestLike.user?.userId || "admin";
+
     try {
       await this.prisma.auditLog.create({
         data: {
-          userId: req.userId || "admin",
+          userId: adminId,
           action: "admin_email_config_update",
           resource: "email_config",
           targetType: "email_config",

@@ -1,78 +1,171 @@
-import {
+﻿import {
+  BadRequestException,
   Controller,
   Post,
-  UploadedFile,
-  UseInterceptors,
-  UseGuards,
-  BadRequestException,
   Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import type { Request } from "express";
+import { memoryStorage } from "multer";
 import { extname, join } from "path";
-import { existsSync, mkdirSync } from "fs";
 import { buildPublicAssetUrl } from "../../../../common/utils/public-asset-url";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 
-// 老王注释：生成唯一文件名，避免重复
-function generateFilename(originalname: string) {
-  const timestamp = Date.now();
-  const randomStr = Math.random().toString(36).substring(2, 8);
-  const ext = extname(originalname);
-  return `${timestamp}-${randomStr}${ext}`;
-}
+type ImageKind = "jpeg" | "png" | "gif" | "webp";
 
-// 老王注释：确保uploads目录存在
+type UploadedImageFile = {
+  filename?: string;
+  originalname: string;
+  size: number;
+  mimetype?: string;
+  buffer?: Buffer;
+};
+
+const IMAGE_RULES: Record<ImageKind, { extensions: string[]; mimes: string[] }> = {
+  jpeg: { extensions: [".jpg", ".jpeg"], mimes: ["image/jpeg", "image/jpg"] },
+  png: { extensions: [".png"], mimes: ["image/png"] },
+  gif: { extensions: [".gif"], mimes: ["image/gif"] },
+  webp: { extensions: [".webp"], mimes: ["image/webp"] },
+};
+
 const uploadsDir = join(process.cwd(), "public", "uploads");
 if (!existsSync(uploadsDir)) {
   mkdirSync(uploadsDir, { recursive: true });
 }
 
+function generateFilename(extension: string) {
+  const timestamp = Date.now();
+  const randomStr = Math.random().toString(36).slice(2, 8);
+  return `${timestamp}-${randomStr}${extension}`;
+}
+
+function getOriginalExtension(originalname: string): string {
+  return extname(String(originalname || "")).toLowerCase();
+}
+
+function detectImageKind(buffer: Buffer): ImageKind | null {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "jpeg";
+  }
+
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  ) {
+    return "png";
+  }
+
+  if (buffer.length >= 6) {
+    const header = buffer.subarray(0, 6).toString("ascii");
+    if (header === "GIF87a" || header === "GIF89a") {
+      return "gif";
+    }
+  }
+
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WEBP"
+  ) {
+    return "webp";
+  }
+
+  return null;
+}
+
+function getStoredExtension(kind: ImageKind): string {
+  return kind === "jpeg" ? ".jpg" : `.${kind}`;
+}
+
+function isDeclaredImageFile(originalname: string, mimetype: string): boolean {
+  const normalizedExt = getOriginalExtension(originalname);
+  const normalizedMime = String(mimetype || "").toLowerCase();
+  return Object.values(IMAGE_RULES).some((rule) => {
+    return rule.extensions.includes(normalizedExt) && rule.mimes.includes(normalizedMime);
+  });
+}
+
+function validateUploadedImage(file: UploadedImageFile): ImageKind {
+  if (!file?.buffer?.length) {
+    throw new BadRequestException("Missing file payload");
+  }
+
+  if (!isDeclaredImageFile(file.originalname, file.mimetype || "")) {
+    throw new BadRequestException("Only JPG, PNG, GIF, and WEBP images are allowed.");
+  }
+
+  const detectedKind = detectImageKind(file.buffer);
+  if (!detectedKind) {
+    throw new BadRequestException("Unsupported or corrupted image file.");
+  }
+
+  const rule = IMAGE_RULES[detectedKind];
+  const normalizedExt = getOriginalExtension(file.originalname);
+  const normalizedMime = String(file.mimetype || "").toLowerCase();
+  if (!rule.extensions.includes(normalizedExt) || !rule.mimes.includes(normalizedMime)) {
+    throw new BadRequestException("File contents do not match the declared image type.");
+  }
+
+  return detectedKind;
+}
+
 @Controller("admin/upload")
 @UseGuards(AdminAuthGuard)
 export class AdminUploadController {
-  // 老王注释：上传单个图片文件
   @Post("image")
   @UseInterceptors(
     FileInterceptor("file", {
-      storage: diskStorage({
-        destination: uploadsDir,
-        filename: (req: any, file: any, callback: any) => {
-          const filename = generateFilename(file.originalname);
-          callback(null, filename);
-        },
-      }),
+      storage: memoryStorage(),
       limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB
+        fileSize: 10 * 1024 * 1024,
       },
-      fileFilter: (req: any, file: any, callback: any) => {
-        // 老王注释：只允许图片文件
-        const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
-        if (allowedMimes.includes(file.mimetype)) {
-          callback(null, true);
-        } else {
-          callback(new Error("只允许上传图片文件（jpg, png, gif, webp）"), false);
+      fileFilter: (_req: unknown, file: Express.Multer.File, callback: (error: Error | null, acceptFile: boolean) => void) => {
+        if (!isDeclaredImageFile(file.originalname, file.mimetype)) {
+          callback(new BadRequestException("Only JPG, PNG, GIF, and WEBP images are allowed."), false);
+          return;
         }
+        callback(null, true);
       },
-    })
+    }),
   )
-  async uploadImage(
-    @UploadedFile() file: any,
-    @Req() req: Request
-  ) {
+  async uploadImage(@UploadedFile() file: UploadedImageFile, @Req() req: Request) {
     if (!file) {
-      throw new BadRequestException("缺少文件");
+      throw new BadRequestException("Missing file");
     }
 
-    // 老王注释：返回图片URL
-    const imageUrl = buildPublicAssetUrl(req, `/uploads/${file.filename}`);
+    let filename = String(file.filename || "").trim();
+    let mimeType = String(file.mimetype || "").trim();
+
+    if (file.buffer?.length) {
+      const imageKind = validateUploadedImage(file);
+      filename = generateFilename(getStoredExtension(imageKind));
+      mimeType = IMAGE_RULES[imageKind].mimes[0];
+      writeFileSync(join(uploadsDir, filename), file.buffer);
+    }
+
+    if (!filename) {
+      throw new BadRequestException("Missing stored filename");
+    }
+
+    const imageUrl = buildPublicAssetUrl(req, `/uploads/${filename}`);
     return {
       success: true,
       url: imageUrl,
-      filename: file.filename,
+      filename,
       originalname: file.originalname,
       size: file.size,
+      mimeType,
     };
   }
 }

@@ -1,14 +1,15 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { HttpStatus } from "@nestjs/common";
+﻿import { HttpStatus } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { AdminAuthController } from "./admin-auth.controller";
+import { Test, TestingModule } from "@nestjs/testing";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import {
+  getAdminIdentityFromKey,
   getAdminKeysFromEnv,
   isAdminTotpEnabled,
   verifyAdminTotpCode,
 } from "../../../../common/utils/admin-security";
 import { getRedisClient } from "../../../../common/redis/client";
+import { AdminAuthController } from "./admin-auth.controller";
 import { resetAdminTokenRevocationStore } from "../../utils/admin-token-revocation";
 
 const mockRedis = {
@@ -24,6 +25,7 @@ jest.mock("../../../../common/redis/client", () => ({
 }));
 
 jest.mock("../../../../common/utils/admin-security", () => ({
+  getAdminIdentityFromKey: jest.fn(),
   getAdminKeysFromEnv: jest.fn(),
   validateAdminKeyFormat: jest.fn(() => true),
   isAdminTotpEnabled: jest.fn(),
@@ -44,13 +46,13 @@ describe("AdminAuthController", () => {
           provide: JwtService,
           useValue: {
             sign: jest.fn((payload: { type?: string }) =>
-              payload?.type === "refresh" ? "mock-refresh-token" : "mock-access-token"
+              payload?.type === "refresh" ? "mock-refresh-token" : "mock-access-token",
             ),
             verify: jest.fn((token: string) => {
               if (token === "valid-refresh-token" || token === "mock-refresh-token") {
-                return { role: "admin", type: "refresh", jti: "refresh-jti" };
+                return { role: "admin", adminId: "admin-1-test", type: "refresh", jti: "refresh-jti" };
               }
-              return { role: "admin", jti: "access-jti" };
+              return { role: "admin", adminId: "admin-1-test", jti: "access-jti" };
             }),
           },
         },
@@ -75,6 +77,7 @@ describe("AdminAuthController", () => {
     mockGetRedisClient.mockReturnValue(mockRedis as any);
 
     (getAdminKeysFromEnv as jest.Mock).mockReturnValue(["test-admin-key"]);
+    (getAdminIdentityFromKey as jest.Mock).mockReturnValue("admin-1-test");
     (isAdminTotpEnabled as jest.Mock).mockReturnValue(false);
     (verifyAdminTotpCode as jest.Mock).mockReturnValue(true);
   });
@@ -106,8 +109,9 @@ describe("AdminAuthController", () => {
       expect(adminLogService.log).toHaveBeenCalledWith(
         "login_success",
         "auth",
-        "admin",
-        expect.any(Object),
+        "admin-1-test",
+        expect.objectContaining({ adminId: "admin-1-test" }),
+        expect.anything(),
       );
     });
 
@@ -230,11 +234,13 @@ describe("AdminAuthController", () => {
       expect(adminLogService.log).toHaveBeenCalledWith(
         "logout_success",
         "auth",
-        "admin",
+        "admin-1-test",
         expect.objectContaining({
           jti: "access-jti",
           refreshJti: "refresh-jti",
+          adminId: "admin-1-test",
         }),
+        expect.anything(),
       );
     });
   });

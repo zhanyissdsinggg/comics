@@ -109,6 +109,12 @@ test.describe("Reader layout", () => {
       });
     });
 
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth
+    );
+
+    expect(overflow).toBeLessThanOrEqual(1);
+
     expect(layout.length).toBeGreaterThanOrEqual(3);
 
     for (const item of layout) {

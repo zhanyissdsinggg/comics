@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "crypto";
+﻿import { createHash, createHmac, timingSafeEqual } from "crypto";
 
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const DEFAULT_TOTP_DIGITS = 6;
@@ -61,6 +61,11 @@ function safeCodeEquals(left: string, right: string): boolean {
   return timingSafeEqual(l, r);
 }
 
+function buildAdminIdentity(adminKey: string, index: number): string {
+  const digest = createHash("sha256").update(adminKey).digest("hex").slice(0, 12);
+  return `admin-${index + 1}-${digest}`;
+}
+
 export function validateAdminKeyFormat(key: string): boolean {
   const normalized = String(key || "");
   if (normalized.length < 16) {
@@ -84,6 +89,21 @@ export function getAdminKeysFromEnv(): string[] {
     keys.push(String(process.env.ADMIN_KEY).trim());
   }
   return [...new Set(keys.filter(Boolean))];
+}
+
+export function getAdminIdentityFromKey(adminKey: string): string | null {
+  const normalized = String(adminKey || "").trim();
+  if (!normalized) {
+    return null;
+  }
+
+  const keys = getAdminKeysFromEnv();
+  const index = keys.findIndex((candidate) => candidate === normalized);
+  if (index < 0) {
+    return null;
+  }
+
+  return buildAdminIdentity(keys[index], index);
 }
 
 export function isAdminTotpEnabled(): boolean {
@@ -120,4 +140,3 @@ export function verifyAdminTotpCode(code: string): boolean {
 
   return false;
 }
-

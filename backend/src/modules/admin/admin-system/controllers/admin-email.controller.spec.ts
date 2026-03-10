@@ -1,4 +1,4 @@
-import { Test, TestingModule } from "@nestjs/testing";
+﻿import { Test, TestingModule } from "@nestjs/testing";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { EmailService } from "../../../email/email.service";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
@@ -116,6 +116,32 @@ describe("AdminEmailController", () => {
         adminNotifyEmail: "alerts@gush.test",
       }),
     );
+  });
+
+  it("clears stored secrets when an empty value is submitted", async () => {
+    prisma.emailConfig.findUnique.mockResolvedValue({
+      key: "default",
+      payload: JSON.stringify({
+        provider: "resend",
+        from: "ops@gush.test",
+        resendApiKey: "stored-secret",
+        sendgridApiKey: "stored-sendgrid",
+        smsWebhookUrl: "stored-sms",
+        adminNotifyEmail: "alerts@gush.test",
+        testRecipient: "qa@gush.test",
+      }),
+    });
+
+    await controller.save(
+      {
+        resendApiKey: "",
+      },
+      { userId: "admin-1" } as never,
+    );
+
+    const savedPayload = JSON.parse(prisma.emailConfig.upsert.mock.calls[0][0].update.payload);
+    expect(savedPayload.resendApiKey).toBe("");
+    expect(savedPayload.sendgridApiKey).toBe("stored-sendgrid");
   });
 
   it("accepts flat test payloads", async () => {

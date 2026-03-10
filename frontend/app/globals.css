@@ -50,6 +50,10 @@ html.light iframe {
     padding-bottom: 60px;
   }
 
+  body.reader-page {
+    padding-bottom: 0;
+  }
+
   /* 老王注释：移动端字体稍大，提升可读性 */
   html {
     font-size: 16px;

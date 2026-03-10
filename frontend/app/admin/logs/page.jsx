@@ -1,314 +1,214 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { LoadingState } from '@/components/admin/common/LoadingState';
-import { Modal } from '@/components/admin/common/Modal';
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { EmptyState, ErrorState, LoadingState } from '@/components/admin/common/LoadingState';
+import { adminGet } from '@/lib/adminApiClient';
+
+function formatDateTime(value) {
+  if (!value) {
+    return '-';
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function summarizeDetails(value) {
+  if (!value) {
+    return '-';
+  }
+
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    const entries = Object.entries(parsed || {}).slice(0, 3);
+    if (!entries.length) {
+      return '-';
+    }
+    return entries.map(([key, item]) => `${key}: ${String(item)}`).join(' | ');
+  } catch {
+    return String(value).slice(0, 120);
+  }
+}
 
 export default function AdminLogsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('');
-  const [sortBy, setSortBy] = useState('timestamp');
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [adminFilter, setAdminFilter] = useState('');
 
-  // 获取日志列表
-  const { data: logsData, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'logs', { searchTerm, actionFilter, sortBy, sortOrder }],
+  const logsQuery = useQuery({
+    queryKey: ['admin', 'logs', 'readonly'],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      if (actionFilter) params.append('action', actionFilter);
-      params.append('sortBy', sortBy);
-      params.append('sortOrder', sortOrder);
-
-      const response = await fetch(`/api/admin/logs?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const response = await adminGet('/api/admin/logs?page=1&pageSize=200');
+      if (!response.ok) {
+        throw new Error(response.error || 'Failed to load audit logs.');
+      }
+      return response.data;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60_000,
   });
 
-  const logs = logsData?.logs || [];
+  const logs = logsQuery.data?.logs || [];
 
-  // 批量删除 mutation
-  const bulkDeleteMutation = useMutation({
-    mutationFn: async (ids) => {
-      const promises = ids.map((id) =>
-        fetch(`/api/admin/logs/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          },
-        })
-      );
-      await Promise.all(promises);
-    },
-    onSuccess: () => {
-      setSelectedIds([]);
-      setIsDeleteConfirmOpen(false);
-      refetch();
-    },
-  });
-
-  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
-
-  // 过滤和排序
   const filteredLogs = useMemo(() => {
-    let result = logs ? [...logs] : [];
+    const term = searchTerm.trim().toLowerCase();
+    return logs.filter((log) => {
+      const matchesSearch = !term || [
+        log.id,
+        log.action,
+        log.resource,
+        log.adminId,
+        log.userId,
+        log.resourceId,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(term));
 
-    // 搜索过滤
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (log) =>
-          log.id.toString().includes(term) ||
-          (log.action && log.action.toLowerCase().includes(term)) ||
-          (log.resource && log.resource.toLowerCase().includes(term)) ||
-          log.userId?.toString().includes(term)
-      );
-    }
-
-    // 排序
-    result.sort((a, b) => {
-      let aVal, bVal;
-      if (sortBy === 'timestamp') {
-        aVal = new Date(a.timestamp || a.createdAt || 0).getTime();
-        bVal = new Date(b.timestamp || b.createdAt || 0).getTime();
-      } else if (sortBy === 'action') {
-        aVal = a.action || '';
-        bVal = b.action || '';
-      } else if (sortBy === 'statusCode') {
-        aVal = Number(a.statusCode) || 0;
-        bVal = Number(b.statusCode) || 0;
-      } else if (sortBy === 'userId') {
-        aVal = a.userId || '';
-        bVal = b.userId || '';
-      }
-
-      if (sortOrder === 'asc') {
-        return aVal > bVal ? 1 : -1;
-      } else {
-        return aVal < bVal ? 1 : -1;
-      }
+      const matchesAction = !actionFilter || log.action === actionFilter;
+      const matchesAdmin = !adminFilter || log.adminId === adminFilter;
+      return matchesSearch && matchesAction && matchesAdmin;
     });
+  }, [actionFilter, adminFilter, logs, searchTerm]);
 
-    return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logs, searchTerm, actionFilter, sortBy, sortOrder]);
+  const actionOptions = useMemo(() => {
+    return [...new Set(logs.map((log) => log.action).filter(Boolean))].sort();
+  }, [logs]);
 
-  const getActionLabel = (action) => {
-    const actionMap = {
-      create: '创建',
-      update: '更新',
-      delete: '删除',
-      read: '查询',
-    };
-    return actionMap[action] || action || '-';
-  };
-
-  const getStatusColor = (statusCode) => {
-    if (!statusCode) return 'text-neutral-400';
-    if (statusCode >= 200 && statusCode < 300) return 'text-green-400';
-    if (statusCode >= 300 && statusCode < 400) return 'text-blue-400';
-    if (statusCode >= 400 && statusCode < 500) return 'text-yellow-400';
-    return 'text-red-400';
-  };
+  const adminOptions = useMemo(() => {
+    return [...new Set(logs.map((log) => log.adminId || log.userId).filter(Boolean))].sort();
+  }, [logs]);
 
   return (
-    <div className="min-h-screen bg-neutral-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* 页面标题 */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">操作日志</h1>
-          <p className="text-neutral-400 mt-2">审计日志检索和管理</p>
-        </div>
-
-        {/* 工具栏 */}
-        <div className="mb-6 flex gap-4 flex-wrap items-center">
-          <input
-            type="text"
-            placeholder="搜索日志..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-100 placeholder-neutral-500"
-          />
-
-          <button
-            onClick={() => setIsFilterModalOpen(true)}
-            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700"
-          >
-            🔍 高级筛选
-          </button>
-
-          <button
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-          >
-            {sortOrder === 'asc' ? '↑ 升序' : '↓ 降序'}
-          </button>
-        </div>
-
-        {/* 批量操作栏 */}
-        {selectedIds.length > 0 && (
-          <div className="mb-6 p-4 rounded-lg bg-blue-900/20 border border-blue-700 flex items-center justify-between">
-            <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsDeleteConfirmOpen(true)}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm"
-              >
-                删除
-              </button>
-              <button
-                onClick={() => setSelectedIds([])}
-                className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
-              >
-                取消
-              </button>
-            </div>
+    <div className="min-h-screen bg-neutral-900 p-6 text-neutral-100">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Audit Logs</h1>
+            <p className="mt-2 text-sm text-neutral-400">
+              Append-only admin activity feed. Deletion is intentionally disabled.
+            </p>
           </div>
-        )}
+          <button
+            type="button"
+            onClick={() => logsQuery.refetch()}
+            className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+          >
+            Refresh
+          </button>
+        </div>
 
-        {/* 日志列表 */}
-        {isLoading ? (
-          <LoadingState.Spinner size="md" />
-        ) : filteredLogs.length > 0 ? (
-          <div className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden">
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">Visible</div>
+            <div className="mt-3 text-3xl font-semibold text-white">{filteredLogs.length}</div>
+            <div className="mt-1 text-sm text-neutral-400">records in current view</div>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">Actions</div>
+            <div className="mt-3 text-3xl font-semibold text-white">{actionOptions.length}</div>
+            <div className="mt-1 text-sm text-neutral-400">distinct action types</div>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">Admins</div>
+            <div className="mt-3 text-3xl font-semibold text-white">{adminOptions.length}</div>
+            <div className="mt-1 text-sm text-neutral-400">distinct operator identities</div>
+          </div>
+        </div>
+
+        <div className="grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-4 lg:grid-cols-[minmax(0,1.5fr)_220px_220px]">
+          <input
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search id, action, resource, target, or admin"
+            className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400/50"
+          />
+          <select
+            value={actionFilter}
+            onChange={(event) => setActionFilter(event.target.value)}
+            className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50"
+          >
+            <option value="">All actions</option>
+            {actionOptions.map((action) => (
+              <option key={action} value={action}>
+                {action}
+              </option>
+            ))}
+          </select>
+          <select
+            value={adminFilter}
+            onChange={(event) => setAdminFilter(event.target.value)}
+            className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50"
+          >
+            <option value="">All admins</option>
+            {adminOptions.map((adminId) => (
+              <option key={adminId} value={adminId}>
+                {adminId}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {logsQuery.isLoading ? (
+          <LoadingState isLoading type="skeleton" count={8} height="h-16" />
+        ) : logsQuery.error ? (
+          <ErrorState
+            error={logsQuery.error.message}
+            onRetry={() => logsQuery.refetch()}
+          />
+        ) : filteredLogs.length === 0 ? (
+          <EmptyState
+            title="No audit logs found"
+            description="Try widening the filters or generate a fresh admin action."
+          />
+        ) : (
+          <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-neutral-700 bg-neutral-900">
-                    <th className="px-4 py-3 text-left">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.length === filteredLogs.length && filteredLogs.length > 0}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedIds(filteredLogs.map((l) => l.id));
-                          } else {
-                            setSelectedIds([]);
-                          }
-                        }}
-                        className="rounded"
-                      />
-                    </th>
-                    <th className="px-4 py-3 text-left text-neutral-400">ID</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">操作</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">资源</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">用户ID</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">状态码</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">时间</th>
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-white/5 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3">Time</th>
+                    <th className="px-4 py-3">Admin</th>
+                    <th className="px-4 py-3">Action</th>
+                    <th className="px-4 py-3">Resource</th>
+                    <th className="px-4 py-3">Target</th>
+                    <th className="px-4 py-3">Details</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredLogs.map((log) => (
-                    <tr key={log.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
-                      <td className="px-4 py-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.includes(log.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIds([...selectedIds, log.id]);
-                            } else {
-                              setSelectedIds(selectedIds.filter((id) => id !== log.id));
-                            }
-                          }}
-                          className="rounded"
-                        />
+                    <tr key={log.id} className="border-t border-white/5 align-top text-neutral-200">
+                      <td className="px-4 py-4 text-neutral-400">{formatDateTime(log.createdAt || log.timestamp)}</td>
+                      <td className="px-4 py-4">
+                        <div className="font-medium text-white">{log.adminId || log.userId || '-'}</div>
+                        <div className="mt-1 text-xs text-neutral-500">{log.ip || '-'}</div>
                       </td>
-                      <td className="px-4 py-3 text-neutral-300 font-medium">{log.id}</td>
-                      <td className="px-4 py-3">
-                        <span className="px-2 py-1 rounded text-xs bg-neutral-700 text-neutral-300">
-                          {getActionLabel(log.action)}
+                      <td className="px-4 py-4">
+                        <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                          {log.action || '-'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-neutral-300">{log.resource || '-'}</td>
-                      <td className="px-4 py-3 text-neutral-300">{log.userId || '-'}</td>
-                      <td className={`px-4 py-3 font-medium ${getStatusColor(log.statusCode)}`}>
-                        {log.statusCode ?? '-'}
-                      </td>
-                      <td className="px-4 py-3 text-neutral-400">
-                        {log.timestamp || log.createdAt
-                          ? new Date(log.timestamp || log.createdAt).toLocaleDateString('zh-CN')
-                          : '-'}
-                      </td>
+                      <td className="px-4 py-4 text-neutral-300">{log.resource || '-'}</td>
+                      <td className="px-4 py-4 text-neutral-300">{log.resourceId || '-'}</td>
+                      <td className="max-w-[320px] px-4 py-4 text-xs text-neutral-400">{summarizeDetails(log.details)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
-        ) : (
-          <LoadingState.EmptyState message="暂无日志" />
         )}
       </div>
-
-      {/* 高级筛选模态框 */}
-      <Modal
-        isOpen={isFilterModalOpen}
-        title="高级筛选"
-        onClose={() => setIsFilterModalOpen(false)}
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-neutral-400">操作类型</label>
-            <select
-              value={actionFilter}
-              onChange={(e) => setActionFilter(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="">全部</option>
-              <option value="create">创建</option>
-              <option value="update">更新</option>
-              <option value="delete">删除</option>
-              <option value="read">查询</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="text-sm text-neutral-400">排序字段</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="timestamp">时间</option>
-              <option value="action">操作</option>
-              <option value="statusCode">状态码</option>
-              <option value="userId">用户ID</option>
-            </select>
-          </div>
-
-          <button
-            onClick={() => setIsFilterModalOpen(false)}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            应用筛选
-          </button>
-        </div>
-      </Modal>
-
-      {/* 删除确认对话框 */}
-      <ConfirmDialog
-        isOpen={isDeleteConfirmOpen}
-        title="确认删除"
-        message={`确定要删除这 ${selectedIds.length} 条日志吗？此操作不可撤销。`}
-        confirmText="删除"
-        cancelText="取消"
-        isDangerous={true}
-        onConfirm={handleBulkDelete}
-        onCancel={() => setIsDeleteConfirmOpen(false)}
-      />
     </div>
   );
 }

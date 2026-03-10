@@ -1,39 +1,26 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+﻿import { Injectable } from "@nestjs/common";
+import type { Request } from "express";
 import { logger } from "../logger/winston.init";
-import { Request } from "express";
+import { PrismaService } from "../prisma/prisma.service";
 
-/**
- * 老王说：管理员操作日志服务
- * 这个SB服务负责记录所有管理员操作，方便审计和追踪
- */
 @Injectable()
 export class AdminLogService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * 老王说：记录管理员操作
-   * @param action 操作类型（refund、adjust、delete等）
-   * @param resource 资源类型（order、user、series等）
-   * @param resourceId 资源ID
-   * @param details 操作详情
-   * @param req 请求对象（用于获取IP和User Agent）
-   */
   async log(
     action: string,
     resource: string,
     resourceId: string,
     details: any,
-    req?: Request
+    req?: Request,
   ) {
     try {
-      // 老王说：从请求中提取管理员ID（目前从JWT payload或默认为"admin"）
-      const adminId = (req as any)?.user?.userId || "admin";
-
-      // 老王说：获取IP地址
+      const requestLike = req as Request & {
+        userId?: string;
+        user?: { userId?: string };
+      };
+      const adminId = requestLike?.userId || requestLike?.user?.userId || "admin";
       const ip = this.getClientIp(req);
-
-      // 老王说：获取User Agent
       const userAgent = req?.headers["user-agent"] || null;
 
       await this.prisma.adminLog.create({
@@ -49,16 +36,14 @@ export class AdminLogService {
         },
       });
     } catch (error) {
-      // 老王说：日志记录失败不应该影响主业务，只打印错误
-      logger.error("记录管理员操作日志失败", { error });
+      logger.error("Failed to record admin log", { error });
     }
   }
 
-  /**
-   * 老王说：获取客户端IP地址
-   */
   private getClientIp(req?: Request): string | null {
-    if (!req) return null;
+    if (!req) {
+      return null;
+    }
 
     const forwarded = req.headers["x-forwarded-for"];
     if (typeof forwarded === "string") {
@@ -73,12 +58,6 @@ export class AdminLogService {
     return req.socket?.remoteAddress || null;
   }
 
-  /**
-   * 老王说：查询操作日志
-   * @param filters 过滤条件
-   * @param page 页码
-   * @param pageSize 每页数量
-   */
   async query(
     filters: {
       action?: string;
@@ -88,7 +67,7 @@ export class AdminLogService {
       endDate?: Date;
     },
     page: number = 1,
-    pageSize: number = 50
+    pageSize: number = 50,
   ) {
     const where: any = {};
 

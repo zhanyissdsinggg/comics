@@ -1,282 +1,252 @@
-"use client";
+﻿"use client";
 
 import { memo } from "react";
-import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
 
-/**
- * 老王注释：阅读器设置面板组件
- * 提供完整的阅读器设置选项，包括主题、字体、亮度等
- */
-const ReaderSettingsPanel = memo(function ReaderSettingsPanel({ isOpen, onClose }) {
-  const {
-    theme,
-    readingMode,
-    fontSize,
-    lineHeight,
-    brightness,
-    fullscreen,
-    autoScroll,
-    autoScrollSpeed,
-    setTheme,
-    setReadingMode,
-    setFontSize,
-    setLineHeight,
-    setBrightness,
-    toggleFullscreen,
-    setAutoScroll,
-    setAutoScrollSpeed,
-  } = useReaderSettingsStore();
+function clamp(value, min, max, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+  return Math.min(max, Math.max(min, parsed));
+}
 
-  const safeFontSize = Number(fontSize) || 16;
-  const safeLineHeight = Number(lineHeight) || 1.6;
-  const safeBrightness = Number(brightness) || 100;
-  const safeAutoScrollSpeed = Number(autoScrollSpeed) || 1;
-  const safeFullscreen = Boolean(fullscreen);
-  const safeAutoScroll = Boolean(autoScroll);
+function ToggleRow({ label, description, enabled, onToggle }) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-white">{label}</div>
+        <div className="mt-1 text-xs text-neutral-400">{description}</div>
+      </div>
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${
+          enabled ? "bg-emerald-500" : "bg-neutral-700"
+        }`}
+        aria-pressed={enabled}
+      >
+        <span
+          className={`inline-block h-5 w-5 rounded-full bg-white transition-transform ${
+            enabled ? "translate-x-6" : "translate-x-1"
+          }`}
+        />
+      </button>
+    </div>
+  );
+}
+
+function ModeButton({ active, disabled, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+        active
+          ? "border-emerald-400/70 bg-emerald-500/15 text-emerald-200"
+          : disabled
+            ? "border-neutral-900 bg-neutral-950 text-neutral-600"
+            : "border-white/10 bg-white/5 text-neutral-200 hover:border-white/20 hover:bg-white/10"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
+  isOpen,
+  onClose,
+  nightMode = false,
+  onToggleNight,
+  layoutMode = "vertical",
+  onToggleLayout,
+  disableLayoutToggle = false,
+  brightness = 100,
+  onBrightnessChange,
+  autoScroll = false,
+  onToggleAutoScroll,
+  autoScrollSpeed = 1,
+  onAutoScrollSpeedChange,
+  fullscreen = false,
+  onToggleFullscreen,
+  showLayoutControls = true,
+}) {
+  const safeBrightness = clamp(brightness, 50, 150, 100);
+  const safeAutoScrollSpeed = clamp(autoScrollSpeed, 1, 5, 1);
 
   if (!isOpen) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div
-        className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-950 p-6 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
+      onClick={onClose}
+    >
+      <section
+        className="flex max-h-[min(92vh,42rem)] w-full max-w-lg flex-col overflow-hidden rounded-[28px] border border-white/10 bg-neutral-950 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
       >
-        {/* 老王注释：标题栏 */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Reader Settings</h2>
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Reader Settings</h2>
+            <p className="mt-1 text-xs text-neutral-400">Only live controls are shown here.</p>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-neutral-400 hover:bg-neutral-900 hover:text-white"
+            className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-neutral-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            Close
           </button>
         </div>
 
-        <div className="space-y-6">
-          {/* 老王注释：主题设置 */}
-          <div>
-            <label className="mb-3 block text-sm font-medium text-neutral-300">Theme</label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { value: "light", label: "Light", icon: "☀️" },
-                { value: "dark", label: "Dark", icon: "🌙" },
-                { value: "sepia", label: "Sepia", icon: "📜" },
-              ].map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  onClick={() => setTheme(item.value)}
-                  className={`rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
-                    theme === item.value
-                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                      : "border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700 hover:text-neutral-300"
-                  }`}
+        <div className="space-y-6 overflow-y-auto px-5 py-5">
+          <ToggleRow
+            label="Night Mode"
+            description="Reduce glare for long reading sessions."
+            enabled={nightMode}
+            onToggle={onToggleNight}
+          />
+
+          {showLayoutControls ? (
+            <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div>
+                <div className="text-sm font-semibold text-white">Layout</div>
+                <div className="mt-1 text-xs text-neutral-400">
+                  Switch between continuous scroll and side-by-side paging.
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <ModeButton
+                  active={layoutMode !== "horizontal"}
+                  disabled={disableLayoutToggle}
+                  onClick={() => {
+                    if (layoutMode === "horizontal") {
+                      onToggleLayout?.();
+                    }
+                  }}
                 >
-                  <div className="text-xl">{item.icon}</div>
-                  <div className="mt-1">{item.label}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 老王注释：阅读模式设置 */}
-          <div>
-            <label className="mb-3 block text-sm font-medium text-neutral-300">Reading Mode</label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { value: "scroll", label: "Scroll" },
-                { value: "single", label: "Single" },
-                { value: "double", label: "Double" },
-              ].map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  onClick={() => setReadingMode(item.value)}
-                  className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                    readingMode === item.value
-                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                      : "border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:border-neutral-700 hover:text-neutral-300"
-                  }`}
+                  Vertical
+                </ModeButton>
+                <ModeButton
+                  active={layoutMode === "horizontal"}
+                  disabled={disableLayoutToggle}
+                  onClick={() => {
+                    if (layoutMode !== "horizontal") {
+                      onToggleLayout?.();
+                    }
+                  }}
                 >
-                  {item.label}
-                </button>
-              ))}
+                  Horizontal
+                </ModeButton>
+              </div>
             </div>
-          </div>
+          ) : null}
 
-          {/* 老王注释：字体大小设置 */}
-          <div>
-            <label className="mb-3 flex items-center justify-between text-sm font-medium text-neutral-300">
-              <span>Font Size</span>
-              <span className="text-emerald-400">{safeFontSize}px</span>
-            </label>
-            <input
-              type="range"
-              min="12"
-              max="24"
-              step="1"
-              value={safeFontSize}
-              onChange={(e) => setFontSize(e.target.value)}
-              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-800"
-              style={{
-                background: `linear-gradient(to right, rgb(52, 211, 153) 0%, rgb(52, 211, 153) ${
-                  ((safeFontSize - 12) / 12) * 100
-                }%, rgb(38, 38, 38) ${((safeFontSize - 12) / 12) * 100}%, rgb(38, 38, 38) 100%)`,
-              }}
-            />
-            <div className="mt-2 flex justify-between text-xs text-neutral-500">
-              <span>Small</span>
-              <span>Large</span>
+          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold text-white">Brightness</div>
+                <div className="mt-1 text-xs text-neutral-400">
+                  Tune the page luminance without affecting site theme.
+                </div>
+              </div>
+              <span className="text-sm font-semibold text-emerald-300">{safeBrightness}%</span>
             </div>
-          </div>
-
-          {/* 老王注释：行高设置 */}
-          <div>
-            <label className="mb-3 flex items-center justify-between text-sm font-medium text-neutral-300">
-              <span>Line Height</span>
-              <span className="text-emerald-400">{safeLineHeight.toFixed(1)}</span>
-            </label>
-            <input
-              type="range"
-              min="1.2"
-              max="2.0"
-              step="0.1"
-              value={safeLineHeight}
-              onChange={(e) => setLineHeight(e.target.value)}
-              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-800"
-              style={{
-                background: `linear-gradient(to right, rgb(52, 211, 153) 0%, rgb(52, 211, 153) ${
-                  ((safeLineHeight - 1.2) / 0.8) * 100
-                }%, rgb(38, 38, 38) ${((safeLineHeight - 1.2) / 0.8) * 100}%, rgb(38, 38, 38) 100%)`,
-              }}
-            />
-          </div>
-
-          {/* 老王注释：亮度设置 */}
-          <div>
-            <label className="mb-3 flex items-center justify-between text-sm font-medium text-neutral-300">
-              <span>Brightness</span>
-              <span className="text-emerald-400">{safeBrightness}%</span>
-            </label>
             <input
               type="range"
               min="50"
               max="150"
               step="5"
               value={safeBrightness}
-              onChange={(e) => setBrightness(e.target.value)}
-              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-800"
+              onChange={(event) => onBrightnessChange?.(Number(event.target.value))}
+              className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-800"
               style={{
-                background: `linear-gradient(to right, rgb(52, 211, 153) 0%, rgb(52, 211, 153) ${
+                background: `linear-gradient(to right, rgb(16 185 129) 0%, rgb(16 185 129) ${
                   ((safeBrightness - 50) / 100) * 100
-                }%, rgb(38, 38, 38) ${((safeBrightness - 50) / 100) * 100}%, rgb(38, 38, 38) 100%)`,
+                }%, rgb(38 38 38) ${((safeBrightness - 50) / 100) * 100}%, rgb(38 38 38) 100%)`,
               }}
             />
           </div>
 
-          {/* 老王注释：全屏模式开关 */}
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium text-neutral-300">Fullscreen Mode</div>
-              <div className="mt-1 text-xs text-neutral-500">Immersive reading experience</div>
-            </div>
-            <button
-              type="button"
-              onClick={toggleFullscreen}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                safeFullscreen ? "bg-emerald-500" : "bg-neutral-700"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  safeFullscreen ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
-          </div>
+          <ToggleRow
+            label="Auto Scroll"
+            description="Keep the chapter moving hands-free."
+            enabled={autoScroll}
+            onToggle={onToggleAutoScroll}
+          />
 
-          {/* 老王注释：自动滚动开关 */}
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium text-neutral-300">Auto Scroll</div>
-              <div className="mt-1 text-xs text-neutral-500">Automatic page scrolling</div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setAutoScroll(!safeAutoScroll)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                safeAutoScroll ? "bg-emerald-500" : "bg-neutral-700"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  safeAutoScroll ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* 老王注释：自动滚动速度（仅在开启自动滚动时显示） */}
-          {safeAutoScroll ? (
-            <div>
-              <label className="mb-3 flex items-center justify-between text-sm font-medium text-neutral-300">
-                <span>Scroll Speed</span>
-                <span className="text-emerald-400">{safeAutoScrollSpeed}x</span>
-              </label>
+          {autoScroll ? (
+            <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-white">Auto Scroll Speed</div>
+                  <div className="mt-1 text-xs text-neutral-400">
+                    Increase speed when you want a faster glide.
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-emerald-300">{safeAutoScrollSpeed}x</span>
+              </div>
               <input
                 type="range"
                 min="1"
                 max="5"
                 step="1"
                 value={safeAutoScrollSpeed}
-                onChange={(e) => setAutoScrollSpeed(e.target.value)}
-                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-800"
+                onChange={(event) => onAutoScrollSpeedChange?.(Number(event.target.value))}
+                className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-800"
                 style={{
-                  background: `linear-gradient(to right, rgb(52, 211, 153) 0%, rgb(52, 211, 153) ${
+                  background: `linear-gradient(to right, rgb(16 185 129) 0%, rgb(16 185 129) ${
                     ((safeAutoScrollSpeed - 1) / 4) * 100
-                  }%, rgb(38, 38, 38) ${((safeAutoScrollSpeed - 1) / 4) * 100}%, rgb(38, 38, 38) 100%)`,
+                  }%, rgb(38 38 38) ${((safeAutoScrollSpeed - 1) / 4) * 100}%, rgb(38 38 38) 100%)`,
                 }}
               />
-              <div className="mt-2 flex justify-between text-xs text-neutral-500">
-                <span>Slow</span>
-                <span>Fast</span>
-              </div>
             </div>
           ) : null}
+
+          <ToggleRow
+            label="Fullscreen"
+            description="Hide browser chrome for an immersive pass."
+            enabled={fullscreen}
+            onToggle={onToggleFullscreen}
+          />
         </div>
 
-        {/* 老王注释：底部按钮 */}
-        <div className="mt-6 flex gap-3">
+        <div className="flex gap-3 border-t border-white/10 px-5 py-4">
           <button
             type="button"
             onClick={() => {
-              // 老王注释：重置为默认设置
-              setTheme("light");
-              setReadingMode("scroll");
-              setFontSize(16);
-              setLineHeight(1.6);
-              setBrightness(100);
-              setAutoScroll(false);
+              if (nightMode) {
+                onToggleNight?.();
+              }
+              if (showLayoutControls && layoutMode === "horizontal" && !disableLayoutToggle) {
+                onToggleLayout?.();
+              }
+              if (safeBrightness !== 100) {
+                onBrightnessChange?.(100);
+              }
+              if (autoScroll) {
+                onToggleAutoScroll?.();
+              }
+              if (safeAutoScrollSpeed !== 1) {
+                onAutoScrollSpeedChange?.(1);
+              }
             }}
-            className="flex-1 rounded-full border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-300 hover:bg-neutral-900"
+            className="flex-1 rounded-full border border-white/10 px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
           >
             Reset
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600"
+            className="flex-1 rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-400"
           >
             Done
           </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 });

@@ -63,7 +63,7 @@ export default function HeaderActions({
         ) : null}
       </button>
 
-      <div className="hidden sm:block">
+      <div className="flex">
         <ThemeToggle />
       </div>
 

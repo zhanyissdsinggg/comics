@@ -1,33 +1,23 @@
-import {
+﻿import {
   BadRequestException,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
-  NotFoundException,
   Param,
   Query,
+  Req,
   UseGuards,
 } from "@nestjs/common";
+import type { Request } from "express";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
-import { PrismaService } from "../../../../common/prisma/prisma.service";
 
-/**
- * 老王说：管理员日志控制器
- * 这个SB控制器提供日志查询接口
- */
 @Controller("admin/logs")
 @UseGuards(AdminAuthGuard)
 export class AdminLogsController {
-  constructor(
-    private readonly adminLogService: AdminLogService,
-    private readonly prisma: PrismaService
-  ) {}
+  constructor(private readonly adminLogService: AdminLogService) {}
 
-  /**
-   * 老王说：查询操作日志
-   * GET /admin/logs?action=refund&resource=order&page=1&pageSize=50
-   */
   @Get()
   async query(@Query() query: any) {
     const filters: any = {};
@@ -52,24 +42,26 @@ export class AdminLogsController {
       filters.endDate = new Date(query.endDate);
     }
 
-    const page = parseInt(query.page) || 1;
-    const pageSize = parseInt(query.pageSize) || 50;
+    const page = parseInt(query.page, 10) || 1;
+    const pageSize = parseInt(query.pageSize, 10) || 50;
 
-    const result = await this.adminLogService.query(filters, page, pageSize);
-
-    return result;
+    return this.adminLogService.query(filters, page, pageSize);
   }
 
   @Delete(":id")
-  async remove(@Param("id") id: string) {
+  async remove(@Param("id") id: string, @Req() req: Request) {
     if (!id) {
-      throw new BadRequestException("缺少日志ID参数");
+      throw new BadRequestException("Missing log ID");
     }
-    const existing = await this.prisma.adminLog.findUnique({ where: { id } });
-    if (!existing) {
-      throw new NotFoundException("日志不存在");
-    }
-    await this.prisma.adminLog.delete({ where: { id } });
-    return { ok: true };
+
+    await this.adminLogService.log(
+      "audit_log_delete_blocked",
+      "admin_log",
+      id,
+      { reason: "append_only" },
+      req,
+    );
+
+    throw new ForbiddenException("Audit logs are append-only and cannot be deleted.");
   }
 }

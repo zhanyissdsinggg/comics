@@ -79,7 +79,6 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const [prefetchCount, setPrefetchCount] = useState(3);
   const [resumeMessage, setResumeMessage] = useState("");
   const [uiToast, setUiToast] = useState("");
-  const [autoScroll, setAutoScroll] = useState(false);
   const [pendingResume, setPendingResume] = useState(null);
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [scrollPercent, setScrollPercent] = useState(0);
@@ -109,8 +108,20 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const { addHistory } = useHistoryStore();
   const { coupons, loadCoupons } = useCouponStore();
   const { signIn, isSignedIn } = useAuthStore();
-  const { nightMode, toggleNightMode, layoutMode, setLayoutMode, brightness } =
-    useReaderSettingsStore();
+  const {
+    nightMode,
+    toggleNightMode,
+    layoutMode,
+    setLayoutMode,
+    brightness,
+    autoScroll,
+    setAutoScroll,
+    autoScrollSpeed,
+    fullscreen,
+    setFullscreen,
+    setBrightness,
+    setAutoScrollSpeed,
+  } = useReaderSettingsStore();
   const { bookmarksBySeries, addBookmark, removeBookmark } = useBookmarkStore();
   const reportedRef = useRef(false);
 
@@ -317,6 +328,36 @@ export default function ReaderPage({ seriesId, episodeId }) {
     }
     return undefined;
   }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return undefined;
+    }
+    document.body.classList.add("reader-page");
+    return () => {
+      document.body.classList.remove("reader-page");
+      document.body.classList.remove("reader-page-fullscreen");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+    document.body.classList.toggle("reader-page-fullscreen", Boolean(fullscreen));
+  }, [fullscreen]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return undefined;
+    }
+    const syncFullscreenState = () => {
+      setFullscreen(Boolean(document.fullscreenElement));
+    };
+    syncFullscreenState();
+    document.addEventListener("fullscreenchange", syncFullscreenState);
+    return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
+  }, [setFullscreen]);
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -528,6 +569,36 @@ export default function ReaderPage({ seriesId, episodeId }) {
     });
   }, [addBookmark, episodeId, activePageIndex, seriesId]);
 
+  const handleToggleAutoScroll = useCallback(() => {
+    const next = !autoScroll;
+    setAutoScroll(next);
+    setUiToast(next ? "Auto scroll ON" : "Auto scroll OFF");
+  }, [autoScroll, setAutoScroll]);
+
+  const handleToggleFullscreen = useCallback(async () => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+        setUiToast("Fullscreen OFF");
+        return;
+      }
+
+      if (typeof document.documentElement.requestFullscreen !== "function") {
+        setUiToast("Fullscreen unavailable");
+        return;
+      }
+
+      await document.documentElement.requestFullscreen();
+      setUiToast("Fullscreen ON");
+    } catch {
+      setUiToast("Fullscreen unavailable");
+    }
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.defaultPrevented) {
@@ -556,11 +627,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         setUiToast("Bookmark saved");
       }
       if (key === "a") {
-        setAutoScroll((prev) => {
-          const next = !prev;
-          setUiToast(next ? "Auto scroll ON" : "Auto scroll OFF");
-          return next;
-        });
+        handleToggleAutoScroll();
       }
       if (event.key === "ArrowLeft" && prevEpisode) {
         router.push(`/read/${seriesId}/${prevEpisode.id}`);
@@ -580,6 +647,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [
     handleAddBookmark,
+    handleToggleAutoScroll,
     nextEpisode,
     nextUnlocked,
     prevEpisode,
@@ -590,14 +658,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
   ]);
 
   useEffect(() => {
-    if (!autoScroll) {
+    if (!autoScroll || typeof window === "undefined") {
       return;
     }
-    const timer = setInterval(() => {
-      window.scrollBy({ top: 120, behavior: "smooth" });
-    }, 100);
-    return () => clearInterval(timer);
-  }, [autoScroll]);
+    const step = Math.max(32, Number(autoScrollSpeed || 1) * 36);
+    const timer = window.setInterval(() => {
+      window.scrollBy({ top: step, behavior: "auto" });
+    }, 80);
+    return () => window.clearInterval(timer);
+  }, [autoScroll, autoScrollSpeed]);
 
   useEffect(() => {
     if (!uiToast) {
@@ -939,13 +1008,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         onToggleNight={toggleNightMode}
         onToggleLayout={handleToggleLayout}
         onOpenSettings={() => setSettingsPanelOpen(true)} // NOTE: cleaned corrupted comment.
-        onToggleAutoScroll={() => {
-          setAutoScroll((prev) => {
-            const next = !prev;
-            setUiToast(next ? "Auto scroll ON" : "Auto scroll OFF");
-            return next;
-          });
-        }}
+        onToggleAutoScroll={handleToggleAutoScroll}
         autoScroll={autoScroll}
         nightMode={nightMode}
         layoutMode={layoutModeForView}
@@ -1342,7 +1405,24 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
       {/* 闂佸ジ顣﹂懗鍓佹暜閸パ€鏋栭柕濞炬櫅濞呯偤鏌ㄥ☉娆忓摵婵℃彃瀚幏鐘垫嫚閸欏褰滈柣鐘辩婢т粙鎮块崱娑欘棃闁靛繆鍓濈欢?*/}
       {settingsPanelOpen ? (
-        <ReaderSettingsPanel isOpen onClose={() => setSettingsPanelOpen(false)} />
+        <ReaderSettingsPanel
+          isOpen
+          onClose={() => setSettingsPanelOpen(false)}
+          nightMode={nightMode}
+          onToggleNight={toggleNightMode}
+          layoutMode={layoutModeForView}
+          onToggleLayout={handleToggleLayout}
+          disableLayoutToggle={!isComic}
+          brightness={brightness}
+          onBrightnessChange={setBrightness}
+          autoScroll={autoScroll}
+          onToggleAutoScroll={handleToggleAutoScroll}
+          autoScrollSpeed={autoScrollSpeed}
+          onAutoScrollSpeedChange={setAutoScrollSpeed}
+          fullscreen={fullscreen}
+          onToggleFullscreen={handleToggleFullscreen}
+          showLayoutControls={isComic}
+        />
       ) : null}
     </main>
   );
