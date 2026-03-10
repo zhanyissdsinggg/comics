@@ -478,7 +478,7 @@ export default function SearchPage() {
                       {series.badge ? <Pill>{series.badge}</Pill> : null}
                     </div>
                     <p className="text-xs text-neutral-400">
-                      {series.type} 闂?{series.status} 闂?{series.rating}
+                      {series.type} | {series.status} | {series.rating}
                     </p>
                     <div className="flex flex-wrap gap-2 text-[10px] text-neutral-400">
                       {(series.genres || []).slice(0, 3).map((item) => (

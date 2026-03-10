@@ -72,7 +72,7 @@ export default function SiteFooter() {
         <div className="mt-8 border-t border-white/5 pt-6">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-neutral-500">
-              ? {currentYear} {siteConfig.companyName}. All rights reserved.
+              (c) {currentYear} {siteConfig.companyName}. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               {socialLinks.map((item) => (
