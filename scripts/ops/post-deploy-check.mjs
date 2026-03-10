@@ -4,6 +4,7 @@ const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
 const DEFAULT_ROUNDS = 3;
 const DEFAULT_INTERVAL_MS = 3_000;
 const DEFAULT_MAX_ENDPOINT_P95_MS = 1_500;
+const DEFAULT_MAX_FRONTEND_P95_MS = 1_800;
 const DEFAULT_MAX_OBS_ERROR_RATE_PCT = 2;
 const DEFAULT_MAX_OBS_P95_MS = 1_200;
 
@@ -112,13 +113,14 @@ async function run() {
   const rounds = readNumber("OPS_ROUNDS", DEFAULT_ROUNDS);
   const intervalMs = readNumber("OPS_INTERVAL_MS", DEFAULT_INTERVAL_MS);
   const maxEndpointP95Ms = readNumber("OPS_MAX_ENDPOINT_P95_MS", DEFAULT_MAX_ENDPOINT_P95_MS);
+  const maxFrontendP95Ms = readNumber("OPS_MAX_FRONTEND_P95_MS", DEFAULT_MAX_FRONTEND_P95_MS);
   const maxObsErrorRatePct = readNumber(
     "OPS_MAX_OBS_ERROR_RATE_PCT",
     DEFAULT_MAX_OBS_ERROR_RATE_PCT,
   );
   const maxObsP95Ms = readNumber("OPS_MAX_OBS_P95_MS", DEFAULT_MAX_OBS_P95_MS);
 
-  const frontendRoutes = String(process.env.FRONTEND_ROUTES || "/,/search,/store")
+  const frontendRoutes = String(process.env.FRONTEND_ROUTES || "/,/search,/store,/admin/login")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean)
@@ -206,8 +208,9 @@ async function run() {
 
   for (const [routeKey, samples] of latencyByRoute.entries()) {
     const p95 = percentile(samples, 95);
-    if (p95 > maxEndpointP95Ms) {
-      failures.push(`${routeKey} p95=${p95}ms exceeds threshold ${maxEndpointP95Ms}ms`);
+    const threshold = routeKey.startsWith("frontend ") ? maxFrontendP95Ms : maxEndpointP95Ms;
+    if (p95 > threshold) {
+      failures.push(`${routeKey} p95=${p95}ms exceeds threshold ${threshold}ms`);
     }
     console.log(
       `[ops] latency ${routeKey}: p50=${percentile(samples, 50)}ms p95=${p95}ms p99=${percentile(

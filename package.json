@@ -23,7 +23,8 @@
     "ops:load-smoke": "node scripts/ops/load-smoke.mjs",
     "analyze": "npm --prefix frontend run analyze",
     "analyze:server": "npm --prefix frontend run analyze:server",
-    "analyze:browser": "npm --prefix frontend run analyze:browser"
+    "analyze:browser": "npm --prefix frontend run analyze:browser",
+    "ops:admin-smoke": "node scripts/ops/admin-session-smoke.mjs",
+    "ops:deploy-gate": "npm run ops:post-deploy && npm run ops:admin-smoke"
   }
 }
-
