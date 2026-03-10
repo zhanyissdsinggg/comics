@@ -1,7 +1,9 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { AdminPromotionsController } from "./admin-promotions.controller";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
+import { AdminLogService } from "../../../../common/services/admin-log.service";
+import { AdminAuditInterceptor } from "../../interceptors/admin-audit.interceptor";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPromotionsController } from "./admin-promotions.controller";
 
 describe("AdminPromotionsController", () => {
   let controller: AdminPromotionsController;
@@ -36,7 +38,11 @@ describe("AdminPromotionsController", () => {
 
     const builder = Test.createTestingModule({
       controllers: [AdminPromotionsController],
-      providers: [{ provide: PrismaService, useValue: prisma }],
+      providers: [
+        { provide: PrismaService, useValue: prisma },
+        { provide: AdminLogService, useValue: { log: jest.fn().mockResolvedValue(undefined) } },
+        AdminAuditInterceptor,
+      ],
     });
 
     builder.overrideGuard(AdminAuthGuard).useValue({ canActivate: () => true });
@@ -58,7 +64,7 @@ describe("AdminPromotionsController", () => {
   it("returns stored defaults", async () => {
     prisma.promotionFallback.findUnique.mockResolvedValue({
       key: "default",
-      payload: { ctaType: "STORE", ctaTarget: "/store", ctaLabel: "Open store" },
+      payload: JSON.stringify({ ctaType: "STORE", ctaTarget: "/store", ctaLabel: "Open store" }),
     });
 
     const result = await controller.defaults();
@@ -79,26 +85,23 @@ describe("AdminPromotionsController", () => {
   });
 
   it("upserts defaults payload", async () => {
+    const defaultsPayload = { ctaType: "SUBSCRIBE", ctaTarget: "/subscribe", ctaLabel: "Subscribe now" };
     prisma.promotionFallback.upsert.mockResolvedValue({
       key: "default",
-      payload: { ctaType: "SUBSCRIBE", ctaTarget: "/subscribe", ctaLabel: "Subscribe now" },
+      payload: JSON.stringify(defaultsPayload),
     });
 
-    const result = await controller.updateDefaults({
-      defaults: { ctaType: "SUBSCRIBE", ctaTarget: "/subscribe", ctaLabel: "Subscribe now" },
-    });
+    const result = await controller.updateDefaults({ defaults: defaultsPayload });
 
     expect(prisma.promotionFallback.upsert).toHaveBeenCalledWith({
       where: { key: "default" },
-      update: { payload: { ctaType: "SUBSCRIBE", ctaTarget: "/subscribe", ctaLabel: "Subscribe now" } },
+      update: { payload: JSON.stringify(defaultsPayload) },
       create: {
         key: "default",
-        payload: { ctaType: "SUBSCRIBE", ctaTarget: "/subscribe", ctaLabel: "Subscribe now" },
+        payload: JSON.stringify(defaultsPayload),
       },
     });
-    expect(result).toEqual({
-      defaults: { ctaType: "SUBSCRIBE", ctaTarget: "/subscribe", ctaLabel: "Subscribe now" },
-    });
+    expect(result).toEqual({ defaults: defaultsPayload });
   });
 
   it("creates a promotion with normalized fields", async () => {
@@ -136,6 +139,26 @@ describe("AdminPromotionsController", () => {
     });
   });
 
+  it("parses string false values on create instead of treating them as truthy", async () => {
+    prisma.promotion.create.mockResolvedValue({ id: "promo-2", title: "Flag Test" });
+
+    await controller.create({
+      promotion: {
+        id: "promo-2",
+        title: "Flag Test",
+        active: "false",
+        autoGrant: "false",
+      },
+    } as never);
+
+    expect(prisma.promotion.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        active: false,
+        autoGrant: false,
+      }),
+    });
+  });
+
   it("rejects create when promotion id is missing", async () => {
     await expect(controller.create({ promotion: { title: "No Id" } })).rejects.toThrow();
   });
@@ -145,7 +168,7 @@ describe("AdminPromotionsController", () => {
 
     const result = await controller.update(
       { promotion: { title: "Updated", active: false, bonusMultiplier: "3" } },
-      { params: { id: "promo-1" } } as any,
+      { params: { id: "promo-1" } } as never,
     );
 
     expect(prisma.promotion.update).toHaveBeenCalledWith({
@@ -159,11 +182,28 @@ describe("AdminPromotionsController", () => {
     expect(result).toEqual({ promotion: { id: "promo-1", title: "Updated" } });
   });
 
+  it("parses string false values on update instead of treating them as truthy", async () => {
+    prisma.promotion.update.mockResolvedValue({ id: "promo-1", title: "Updated" });
+
+    await controller.update(
+      { promotion: { active: "false", autoGrant: "false" } } as never,
+      { params: { id: "promo-1" } } as never,
+    );
+
+    expect(prisma.promotion.update).toHaveBeenCalledWith({
+      where: { id: "promo-1" },
+      data: expect.objectContaining({
+        active: false,
+        autoGrant: false,
+      }),
+    });
+  });
+
   it("deletes an existing promotion", async () => {
     prisma.promotion.findUnique.mockResolvedValue({ id: "promo-1" });
     prisma.promotion.delete.mockResolvedValue({ id: "promo-1" });
 
-    const result = await controller.remove({ params: { id: "promo-1" } } as any);
+    const result = await controller.remove({ params: { id: "promo-1" } } as never);
 
     expect(prisma.promotion.findUnique).toHaveBeenCalledWith({ where: { id: "promo-1" } });
     expect(prisma.promotion.delete).toHaveBeenCalledWith({ where: { id: "promo-1" } });
@@ -173,6 +213,6 @@ describe("AdminPromotionsController", () => {
   it("rejects deleting a missing promotion", async () => {
     prisma.promotion.findUnique.mockResolvedValue(null);
 
-    await expect(controller.remove({ params: { id: "missing" } } as any)).rejects.toThrow();
+    await expect(controller.remove({ params: { id: "missing" } } as never)).rejects.toThrow();
   });
 });

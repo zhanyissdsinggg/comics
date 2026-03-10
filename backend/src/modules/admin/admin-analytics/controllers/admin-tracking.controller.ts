@@ -1,8 +1,19 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
+import { parseStoredJson, stringifyStoredJson } from "../../../../common/utils/stored-json";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { UpdateTrackingDto, TrackingValuesInput } from "../dtos/admin-analytics.dto";
 
-import { UpdateTrackingDto } from "../dtos/admin-analytics.dto";
+type TrackingConfig = {
+  values: TrackingValuesInput;
+  updatedAt: string | null;
+};
+
+const DEFAULT_TRACKING_CONFIG: TrackingConfig = {
+  values: {},
+  updatedAt: null,
+};
+
 @Controller("admin/tracking")
 @UseGuards(AdminAuthGuard)
 export class AdminTrackingController {
@@ -13,18 +24,20 @@ export class AdminTrackingController {
     const config = await this.prisma.trackingConfig.findUnique({
       where: { key: "default" },
     });
-    return { config: config?.payload ? JSON.parse(config.payload) : { values: {}, updatedAt: null } };
+
+    return { config: parseStoredJson(config?.payload, DEFAULT_TRACKING_CONFIG) };
   }
 
   @Post()
   async save(@Body() body: UpdateTrackingDto) {
-    const values = body?.values || {};
-    const payload = { values, updatedAt: new Date().toISOString() };
+    const values = body.values || body.tracking || {};
+    const payload: TrackingConfig = { values, updatedAt: new Date().toISOString() };
     const config = await this.prisma.trackingConfig.upsert({
       where: { key: "default" },
-      update: { payload: JSON.stringify(payload) },
-      create: { key: "default", value: "default", payload: JSON.stringify(payload) },
+      update: { payload: stringifyStoredJson(payload) },
+      create: { key: "default", value: "default", payload: stringifyStoredJson(payload) },
     });
-    return { config: JSON.parse(config.payload || "{}") };
+
+    return { config: parseStoredJson(config.payload, payload) };
   }
 }

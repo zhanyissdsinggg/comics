@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -8,6 +8,7 @@ import LoginGateModal from "./LoginGateModal";
 import AgeGateModal from "./AgeGateModal";
 import WalletTopUpPrompt from "../wallet/WalletTopUpPrompt";
 import { LOGIN_GATE_DESCRIPTION } from "../../lib/adultGateCopy";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 
 /**
  * NOTE: cleaned corrupted comment. */
@@ -72,15 +73,25 @@ export default function HeaderModals({
 
   const handleTopUp = (pkg) => {
     trackEvent("wallet_topup_selected", { package: pkg.id, points: pkg.points, price: pkg.price });
-    // NOTE: cleaned corrupted comment.
     if (typeof window !== "undefined") {
-      window.location.href = "/store";
+      const currentPath = `${window.location.pathname}${window.location.search || ""}`;
+      const target = buildPathWithAttribution(
+        "/store",
+        {
+          entryPoint: "HEADER_TOPUP",
+          offerId: pkg?.id ? `points_pack_${pkg.id}` : undefined,
+          sourcePath: currentPath,
+          returnTo: currentPath,
+        },
+        { focus: pkg?.id || "auto" }
+      );
+      window.location.href = target;
     }
   };
 
   return (
     <>
-      {/* 闁谎嗩嚙缂嶅秴螣閳╁啠鍋撴担璇℃敱 */}
+      {/* 閻ц缍嶅Ο鈩冣偓浣诡攱 */}
       <LoginGateModal
         open={activeModal === "login"}
         onClose={() => {
@@ -99,7 +110,7 @@ export default function HeaderModals({
         onSubmit={handleLogin}
       />
 
-      {/* 妤犵偞鎸崇欢鐐搭殽瀹€鍐婵☆垪鍓濋埀顑跨劍椤?*/}
+      {/* 楠炴挳绶炴宀冪槈濡剝鈧焦�?*/}
       <AgeGateModal
         open={activeModal === "age"}
         onClose={() => onModalClose("age")}
@@ -108,7 +119,7 @@ export default function HeaderModals({
         legalAge={legalAge}
       />
 
-      {/* 闂佽棄宕€垫﹢宕楅崨顓涘亾閸忕厧绲圭紒鈧?*/}
+      {/* 闁藉崬瀵橀崗鍛偓鍏煎絹缁�?*/}
       <WalletTopUpPrompt
         isOpen={activeModal === "topup"}
         onClose={() => onModalClose("topup")}
@@ -118,3 +129,5 @@ export default function HeaderModals({
     </>
   );
 }
+
+

@@ -4,7 +4,7 @@ import { useState } from "react";
 import SiteHeader from "../layout/SiteHeader";
 import { apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
-import { SUPPORT_EMAIL } from "../../lib/supportConfig";
+import { siteConfig } from "../../lib/siteConfig";
 
 export default function SupportPage() {
   const { isSignedIn } = useAuthStore();
@@ -107,9 +107,10 @@ export default function SupportPage() {
           </button>
         </section>
         <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-400">
-          Prefer email? {SUPPORT_EMAIL}
+          Prefer email? {siteConfig.supportEmail}
         </div>
       </main>
     </div>
   );
 }
+

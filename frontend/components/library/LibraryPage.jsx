@@ -20,6 +20,7 @@ import { useWalletStore } from "../../store/useWalletStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import ActionModal from "../series/ActionModal";
 import { useRouter } from "next/navigation";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 
 const continueItems = [
   { id: "l1", title: "Midnight Contract", subtitle: "Ep 12", coverTone: "warm", isAdult: false },
@@ -316,7 +317,18 @@ export default function LibraryPage() {
                 {
                   label: "Top up POINTS",
                   onClick: () => {
-                    router.push("/store?returnTo=/library&focus=auto");
+                    router.push(
+                      buildPathWithAttribution(
+                        "/store",
+                        {
+                          entryPoint: "LIBRARY_MAKEUP",
+                          offerId: "points_pack_starter",
+                          sourcePath: "/library",
+                          returnTo: "/library",
+                        },
+                        { focus: "auto" }
+                      )
+                    );
                     setMakeupModal(null);
                   },
                   variant: "secondary",
@@ -324,7 +336,14 @@ export default function LibraryPage() {
                 {
                   label: "Quick top up (Starter)",
                   onClick: async () => {
-                    const topupResponse = await topup("starter");
+                    const topupResponse = await topup("starter", {
+                      attribution: {
+                        entryPoint: "LIBRARY_MAKEUP",
+                        offerId: "points_pack_starter",
+                        sourcePath: "/library",
+                        returnTo: "/library",
+                      },
+                    });
                     if (topupResponse.ok) {
                       const retry = await makeUp();
                       if (retry.ok) {

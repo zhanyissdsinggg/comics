@@ -1,9 +1,10 @@
 import { INestApplication, Module } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import * as request from "supertest";
+import { ObservabilityService } from "../src/common/observability/observability.service";
+import { PrismaService } from "../src/common/prisma/prisma.service";
 import { HealthController } from "../src/health.controller";
 import { MetaController } from "../src/meta.controller";
-import { PrismaService } from "../src/common/prisma/prisma.service";
 
 const prismaMock = {
   $queryRaw: jest.fn().mockResolvedValue([{ ok: 1 }]),
@@ -18,6 +19,7 @@ const prismaMock = {
 @Module({
   controllers: [HealthController, MetaController],
   providers: [
+    ObservabilityService,
     {
       provide: PrismaService,
       useValue: prismaMock,
@@ -27,7 +29,7 @@ const prismaMock = {
 class TestAppModule {}
 
 describe("API smoke (e2e)", () => {
-  let app: INestApplication;
+  let app: INestApplication | undefined;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -40,7 +42,9 @@ describe("API smoke (e2e)", () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   beforeEach(() => {
@@ -48,34 +52,30 @@ describe("API smoke (e2e)", () => {
   });
 
   it("GET /api/health should return ok", async () => {
-    const res = await request(app.getHttpServer()).get("/api/health").expect(200);
+    const res = await request(app!.getHttpServer()).get("/api/health").expect(200);
 
     expect(res.body).toEqual(
       expect.objectContaining({
         ok: true,
-      })
+      }),
     );
     expect(typeof res.body.time).toBe("string");
   });
 
   it("GET /api/meta/version should return version payload", async () => {
-    const res = await request(app.getHttpServer())
-      .get("/api/meta/version")
-      .expect(200);
+    const res = await request(app!.getHttpServer()).get("/api/meta/version").expect(200);
 
     expect(res.body).toEqual(
       expect.objectContaining({
         name: "gush-backend",
         version: "0.1.0",
-      })
+      }),
     );
     expect(typeof res.body.time).toBe("string");
   });
 
   it("GET /api/health/detail should include db counters", async () => {
-    const res = await request(app.getHttpServer())
-      .get("/api/health/detail")
-      .expect(200);
+    const res = await request(app!.getHttpServer()).get("/api/health/detail").expect(200);
 
     expect(prismaMock.$queryRaw).toHaveBeenCalled();
     expect(prismaMock.paymentRetry.count).toHaveBeenCalled();
@@ -87,39 +87,35 @@ describe("API smoke (e2e)", () => {
         dbOk: true,
         pendingOrders: 0,
         retryPending: 0,
-      })
+      }),
     );
   });
 
   it("GET /api/health/live should include uptime", async () => {
-    const res = await request(app.getHttpServer())
-      .get("/api/health/live")
-      .expect(200);
+    const res = await request(app!.getHttpServer()).get("/api/health/live").expect(200);
 
     expect(res.body).toEqual(
       expect.objectContaining({
         ok: true,
-      })
+      }),
     );
     expect(typeof res.body.uptimeSec).toBe("number");
   });
 
   it("GET /api/health/ready should include dependency status", async () => {
-    const res = await request(app.getHttpServer())
-      .get("/api/health/ready")
-      .expect(200);
+    const res = await request(app!.getHttpServer()).get("/api/health/ready").expect(200);
 
     expect(res.body).toEqual(
       expect.objectContaining({
         ok: true,
         dbOk: true,
-      })
+      }),
     );
     expect(res.body.memoryMB).toEqual(
       expect.objectContaining({
         rss: expect.any(Number),
         heapUsed: expect.any(Number),
-      })
+      }),
     );
   });
 });

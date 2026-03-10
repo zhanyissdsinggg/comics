@@ -19,6 +19,14 @@ interface JwtPayload {
   jti?: string;
 }
 
+function isLegacyBearerEnabled(): boolean {
+  const flag = String(process.env.ADMIN_LEGACY_BEARER_ENABLED || "").trim();
+  if (flag) {
+    return flag === "1";
+  }
+  return process.env.NODE_ENV !== "production";
+}
+
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
@@ -60,8 +68,7 @@ export class AdminAuthGuard implements CanActivate {
       }
     }
 
-    // 兼容历史 ADMIN_KEY Bearer 方案
-    if (isAdminAuthorized(request, request.body)) {
+    if (isLegacyBearerEnabled() && isAdminAuthorized(request, request.body)) {
       request.user = {
         userId: "admin",
         role: "admin",
@@ -110,8 +117,6 @@ export class AdminAuthGuard implements CanActivate {
     if (payload.jti) {
       const redis = getRedisClient();
       if (!redis) {
-        // Degrade gracefully when Redis is unavailable.
-        // This keeps admin APIs usable while temporarily skipping token blacklist checks.
         logger.warn("Admin token blacklist check skipped: Redis unavailable");
         return payload;
       }
@@ -120,15 +125,16 @@ export class AdminAuthGuard implements CanActivate {
         const blacklistKey = `admin:token:blacklist:${payload.jti}`;
         const result = await redis.get(blacklistKey);
         if (result) {
-          logger.warn(`Admin token 已被吊销: ${payload.jti}`);
-          throw new UnauthorizedException("Token 已被吊销");
+          logger.warn("Admin JWT rejected: token is blacklisted", { jti: payload.jti });
+          throw new UnauthorizedException("认证失败");
         }
       } catch (error) {
         if (error instanceof UnauthorizedException) {
           throw error;
         }
-        logger.error("Admin token blacklist lookup failed, skipping check", { error });
-        return payload;
+        logger.warn("Admin token blacklist check failed, allowing request", {
+          message: error instanceof Error ? error.message : String(error),
+        });
       }
     }
 

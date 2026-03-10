@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import LoginGateModal from "../layout/LoginGateModal";
 import { subscribeAuthRequired } from "../../lib/authBus";
@@ -16,10 +16,10 @@ export default function AuthRequiredModal() {
       setErrorMessage("");
       return undefined;
     }
+
     return subscribeAuthRequired((payload) => {
       const source = payload?.source || "";
-      const allowAuto =
-        pathname?.startsWith("/series") || pathname?.startsWith("/read");
+      const allowAuto = pathname?.startsWith("/series") || pathname?.startsWith("/read");
       if (!allowAuto && source !== "event") {
         return;
       }
@@ -33,11 +33,21 @@ export default function AuthRequiredModal() {
       setErrorMessage("");
       return response;
     }
+
     if (response.ok) {
       setOpen(false);
       setErrorMessage("");
-      return;
+      if (typeof window !== "undefined") {
+        const returnTo = window.sessionStorage.getItem("mn_return_to");
+        if (returnTo) {
+          window.sessionStorage.removeItem("mn_return_to");
+          window.location.href = returnTo;
+          return response;
+        }
+      }
+      return response;
     }
+
     setErrorMessage("Invalid email or password.");
     return response;
   };

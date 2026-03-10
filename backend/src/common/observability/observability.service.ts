@@ -10,6 +10,29 @@ type RequestSnapshot = {
   timestamp: string;
 };
 
+export type FrontendErrorReportInput = {
+  message?: unknown;
+  boundaryName?: unknown;
+  errorBoundary?: unknown;
+  href?: unknown;
+  digest?: unknown;
+  userAgent?: unknown;
+  stack?: unknown;
+  componentStack?: unknown;
+  timestamp?: unknown;
+};
+
+type FrontendErrorSnapshot = {
+  message: string;
+  boundaryName: string;
+  href: string;
+  digest?: string;
+  userAgent?: string;
+  stackPreview?: string;
+  componentStackPreview?: string;
+  timestamp: string;
+};
+
 type RouteStats = {
   count: number;
   errors: number;
@@ -38,6 +61,14 @@ function percentile(sortedValues: number[], p: number): number {
   return sortedValues[index];
 }
 
+function sanitizeText(value: unknown, maxLength: number): string {
+  return String(value ?? "")
+    .replace(/[\u0000-\u001F\u007F]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
+
 @Injectable()
 export class ObservabilityService {
   private readonly startedAt = Date.now();
@@ -59,6 +90,7 @@ export class ObservabilityService {
   private totalRequests = 0;
   private totalErrors = 0;
   private totalSlowRequests = 0;
+  private totalFrontendErrors = 0;
   private readonly statusBuckets = {
     "2xx": 0,
     "3xx": 0,
@@ -69,6 +101,7 @@ export class ObservabilityService {
   private readonly latencySamples: number[] = [];
   private readonly recentErrors: RequestSnapshot[] = [];
   private readonly recentSlow: RequestSnapshot[] = [];
+  private readonly recentFrontendErrors: FrontendErrorSnapshot[] = [];
   private readonly routeStats = new Map<string, RouteStats>();
   private readonly lastAlertAt = new Map<string, number>();
 
@@ -147,6 +180,37 @@ export class ObservabilityService {
     }
   }
 
+  recordFrontendError(input: FrontendErrorReportInput): FrontendErrorSnapshot | null {
+    const message = sanitizeText(input.message, 400);
+    if (!message) {
+      return null;
+    }
+
+    const event: FrontendErrorSnapshot = {
+      message,
+      boundaryName:
+        sanitizeText(input.boundaryName || input.errorBoundary, 120) || "unknown-boundary",
+      href: sanitizeText(input.href, 400),
+      digest: sanitizeText(input.digest, 120) || undefined,
+      userAgent: sanitizeText(input.userAgent, 220) || undefined,
+      stackPreview: sanitizeText(input.stack, 800) || undefined,
+      componentStackPreview: sanitizeText(input.componentStack, 800) || undefined,
+      timestamp: sanitizeText(input.timestamp, 80) || new Date().toISOString(),
+    };
+
+    this.totalFrontendErrors += 1;
+    this.pushRecent(this.recentFrontendErrors, event);
+
+    logger.warn("[observability] frontend error captured", {
+      boundaryName: event.boundaryName,
+      href: event.href,
+      digest: event.digest,
+      message: event.message,
+    });
+
+    return event;
+  }
+
   getSnapshot() {
     const sortedLatencies = [...this.latencySamples].sort((a, b) => a - b);
     const total = this.totalRequests || 1;
@@ -179,6 +243,10 @@ export class ObservabilityService {
         slowRatePct: Number(((this.totalSlowRequests / total) * 100).toFixed(2)),
         statusBuckets: this.statusBuckets,
       },
+      frontendErrors: {
+        total: this.totalFrontendErrors,
+        recent: [...this.recentFrontendErrors],
+      },
       latencyMs: {
         p50: percentile(sortedLatencies, 50),
         p95: percentile(sortedLatencies, 95),
@@ -191,7 +259,7 @@ export class ObservabilityService {
     };
   }
 
-  private pushRecent(target: RequestSnapshot[], event: RequestSnapshot): void {
+  private pushRecent<T>(target: T[], event: T): void {
     target.push(event);
     if (target.length > MAX_RECENT_EVENTS) {
       target.shift();

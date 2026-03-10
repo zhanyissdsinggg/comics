@@ -2,6 +2,13 @@
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { apiDelete, apiGet, apiPost } from "../lib/apiClient";
+import {
+  clearPersistedPaymentAttribution,
+  loadPersistedPaymentAttribution,
+  mergePaymentAttribution,
+  persistPaymentAttribution,
+} from "../lib/paymentAttribution";
+import { getTopupPackage } from "../lib/topupCatalog";
 import { trackEvent } from "../lib/trackEvent";
 import { useAuthStore } from "./useAuthStore";
 
@@ -15,6 +22,67 @@ const defaultWallet = {
   subscriptionUsage: null,
   subscriptionVoucher: null,
 };
+
+function normalizePackageId(value) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value.replace(/^points_pack_/, "").trim();
+}
+
+function createIdempotencyKey(prefix) {
+  const suffix =
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+  return `${prefix}_${suffix}`;
+}
+
+function resolvePaymentOptions(input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      attribution: mergePaymentAttribution(loadPersistedPaymentAttribution(), input || null),
+      expectedAmount: undefined,
+      provider: undefined,
+      createIdempotencyKey: undefined,
+      confirmIdempotencyKey: undefined,
+    };
+  }
+
+  const hasOptionKeys = [
+    "attribution",
+    "expectedAmount",
+    "provider",
+    "createIdempotencyKey",
+    "confirmIdempotencyKey",
+  ].some((key) => Object.prototype.hasOwnProperty.call(input, key));
+
+  const options = hasOptionKeys ? input : { attribution: input };
+  const expectedAmount = Number(options.expectedAmount);
+
+  return {
+    attribution: mergePaymentAttribution(loadPersistedPaymentAttribution(), options.attribution),
+    expectedAmount: Number.isFinite(expectedAmount) && expectedAmount > 0 ? expectedAmount : undefined,
+    provider: typeof options.provider === "string" ? options.provider.trim() : undefined,
+    createIdempotencyKey:
+      typeof options.createIdempotencyKey === "string" && options.createIdempotencyKey.trim()
+        ? options.createIdempotencyKey.trim()
+        : undefined,
+    confirmIdempotencyKey:
+      typeof options.confirmIdempotencyKey === "string" && options.confirmIdempotencyKey.trim()
+        ? options.confirmIdempotencyKey.trim()
+        : undefined,
+  };
+}
+
+function openAuthModal() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(new CustomEvent("auth:open"));
+}
 
 export function WalletProvider({ children }) {
   const { isSignedIn } = useAuthStore();
@@ -32,18 +100,51 @@ export function WalletProvider({ children }) {
     return response;
   }, [isSignedIn]);
 
-  const subscribe = useCallback(async (planId) => {
-    trackEvent("subscribe_start", { planId });
-    const response = await apiPost("/api/subscription", { planId });
-    if (response.ok && response.data?.subscription) {
-      setWallet((prev) => ({ ...prev, subscription: response.data.subscription, plan: planId }));
-      loadWallet();
-      trackEvent("subscribe_success", { planId });
+  const subscribe = useCallback(
+    async (planId, options = null) => {
+      const { attribution } = resolvePaymentOptions(options);
+      if (attribution) {
+        persistPaymentAttribution(attribution);
+      }
+
+      if (!isSignedIn) {
+        openAuthModal();
+        return { ok: false, status: 401, error: "UNAUTHENTICATED" };
+      }
+
+      trackEvent("subscribe_start", {
+        planId,
+        entryPoint: attribution?.entryPoint,
+        promotionId: attribution?.promotionId,
+        offerId: attribution?.offerId,
+      });
+
+      const response = await apiPost("/api/subscription", { planId, attribution });
+      if (response.ok && response.data?.subscription) {
+        setWallet((prev) => ({ ...prev, subscription: response.data.subscription, plan: planId }));
+        loadWallet();
+        clearPersistedPaymentAttribution();
+        trackEvent("subscribe_success", {
+          planId,
+          entryPoint: attribution?.entryPoint,
+          promotionId: attribution?.promotionId,
+          offerId: attribution?.offerId,
+        });
+        return response;
+      }
+
+      trackEvent("subscribe_fail", {
+        planId,
+        status: response.status,
+        errorCode: response.error,
+        entryPoint: attribution?.entryPoint,
+        promotionId: attribution?.promotionId,
+        offerId: attribution?.offerId,
+      });
       return response;
-    }
-    trackEvent("subscribe_fail", { planId, status: response.status, errorCode: response.error });
-    return response;
-  }, [loadWallet]);
+    },
+    [isSignedIn, loadWallet]
+  );
 
   const cancelSubscription = useCallback(async () => {
     const response = await apiDelete("/api/subscription");
@@ -54,57 +155,121 @@ export function WalletProvider({ children }) {
     return response;
   }, []);
 
-  const topup = useCallback(async (packageId) => {
-    if (!isSignedIn) {
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("auth:open"));
-      }
-      return { ok: false, status: 401, error: "UNAUTHENTICATED" };
-    }
-    const key = `topup:${packageId}`;
-    if (inflightRef.current.has(key)) {
-      return inflightRef.current.get(key);
-    }
-    trackEvent("topup_start", { packageId });
-    const requestPromise = (async () => {
-      const created = await apiPost("/api/payments/create", { packageId, provider: "stripe" });
-      if (!created.ok) {
-        trackEvent("topup_fail", {
-          packageId,
-          status: created.status,
-          errorCode: created.error,
-          requestId: created.requestId,
-        });
-        return created;
-      }
-      const confirm = await apiPost("/api/payments/confirm", {
-        paymentId: created.data?.payment?.paymentId,
+  const topup = useCallback(
+    async (packageId, options = null) => {
+      const normalizedPackageId = normalizePackageId(packageId);
+      const requestOptions = resolvePaymentOptions(options);
+      const attribution = mergePaymentAttribution(requestOptions.attribution, {
+        offerId: requestOptions.attribution?.offerId || `points_pack_${normalizedPackageId}`,
       });
-      if (!confirm.ok) {
-        trackEvent("topup_fail", {
-          packageId,
-          status: confirm.status,
-          errorCode: confirm.error,
-          requestId: confirm.requestId,
+
+      if (attribution) {
+        persistPaymentAttribution(attribution);
+      }
+
+      if (!isSignedIn) {
+        openAuthModal();
+        return { ok: false, status: 401, error: "UNAUTHENTICATED" };
+      }
+
+      const key = `topup:${normalizedPackageId}`;
+      if (inflightRef.current.has(key)) {
+        return inflightRef.current.get(key);
+      }
+
+      const requestPromise = (async () => {
+        const pkg = await getTopupPackage(normalizedPackageId).catch(() => null);
+        const catalogAmount = Number(pkg?.price);
+        const expectedAmount = requestOptions.expectedAmount ?? (Number.isFinite(catalogAmount) ? catalogAmount : undefined);
+
+        if (!Number.isFinite(expectedAmount) || expectedAmount <= 0) {
+          trackEvent("topup_fail", {
+            packageId: normalizedPackageId,
+            errorCode: "INVALID_PACKAGE",
+            entryPoint: attribution?.entryPoint,
+            promotionId: attribution?.promotionId,
+            offerId: attribution?.offerId,
+          });
+          return { ok: false, status: 400, error: "INVALID_PACKAGE" };
+        }
+
+        const provider = requestOptions.provider || "stripe";
+        const createRequestKey =
+          requestOptions.createIdempotencyKey || createIdempotencyKey(`topup_create_${normalizedPackageId}`);
+        const confirmRequestKey =
+          requestOptions.confirmIdempotencyKey || createIdempotencyKey(`topup_confirm_${normalizedPackageId}`);
+
+        trackEvent("topup_start", {
+          packageId: normalizedPackageId,
+          entryPoint: attribution?.entryPoint,
+          promotionId: attribution?.promotionId,
+          offerId: attribution?.offerId,
+        });
+
+        const created = await apiPost("/api/payments/create", {
+          packageId: normalizedPackageId,
+          provider,
+          expectedAmount,
+          attribution,
+          idempotencyKey: createRequestKey,
+        });
+        if (!created.ok) {
+          trackEvent("topup_fail", {
+            packageId: normalizedPackageId,
+            status: created.status,
+            errorCode: created.error,
+            requestId: created.requestId,
+            entryPoint: attribution?.entryPoint,
+            promotionId: attribution?.promotionId,
+            offerId: attribution?.offerId,
+          });
+          return created;
+        }
+
+        const confirm = await apiPost("/api/payments/confirm", {
+          paymentId: created.data?.payment?.paymentId,
+          idempotencyKey: confirmRequestKey,
+        });
+        if (!confirm.ok) {
+          trackEvent("topup_fail", {
+            packageId: normalizedPackageId,
+            status: confirm.status,
+            errorCode: confirm.error,
+            requestId: confirm.requestId,
+            entryPoint: attribution?.entryPoint,
+            promotionId: attribution?.promotionId,
+            offerId: attribution?.offerId,
+          });
+          return confirm;
+        }
+
+        if (confirm.data?.wallet) {
+          setWallet(confirm.data.wallet);
+        }
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("mn_has_purchased", "1");
+        }
+
+        clearPersistedPaymentAttribution();
+        trackEvent("topup_success", {
+          packageId: normalizedPackageId,
+          orderId: confirm.data?.order?.orderId,
+          entryPoint: attribution?.entryPoint,
+          promotionId: attribution?.promotionId,
+          offerId: attribution?.offerId,
         });
         return confirm;
+      })();
+
+      inflightRef.current.set(key, requestPromise);
+      try {
+        return await requestPromise;
+      } finally {
+        inflightRef.current.delete(key);
       }
-      if (confirm.data?.wallet) {
-        setWallet(confirm.data.wallet);
-      }
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("mn_has_purchased", "1");
-      }
-      trackEvent("topup_success", { packageId });
-      return confirm;
-    })();
-    inflightRef.current.set(key, requestPromise);
-    try {
-      return await requestPromise;
-    } finally {
-      inflightRef.current.delete(key);
-    }
-  }, [isSignedIn]);
+    },
+    [isSignedIn]
+  );
 
   const value = useMemo(
     () => ({ ...wallet, loadWallet, topup, subscribe, cancelSubscription, setWallet }),

@@ -12,6 +12,7 @@ import SkeletonCard from "../common/SkeletonCard";
 import FilterBar from "../common/FilterBar";
 import EmptyState from "../common/EmptyState";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import { apiGet } from "../../lib/apiClient";
 
 // NOTE: cleaned corrupted comment.
 const PAGE_CONFIG = {
@@ -49,13 +50,13 @@ export default function SeriesPage({ type = "comic" }) {
     async function loadSeries() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/series?adult=${isAdultMode ? "1" : "0"}`);
+        const response = await apiGet(`/api/series?adult=${isAdultMode ? "1" : "0"}`, {
+          cacheMs: 300000,
+        });
         if (!response.ok) {
-          throw new Error(`Failed to load ${type}s`);
+          throw new Error(response.message || response.error || `Failed to load ${type}s`);
         }
-        const data = await response.json();
-        // NOTE: cleaned corrupted comment.
-        const filtered = (data.series || []).filter((s) => s.type === type);
+        const filtered = (response.data?.series || []).filter((s) => s.type === type);
         setSeries(filtered);
       } catch (error) {
         console.error(`Failed to load ${type}s:`, error);

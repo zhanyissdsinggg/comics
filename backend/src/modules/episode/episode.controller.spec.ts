@@ -1,8 +1,8 @@
-import { EpisodeController } from "./episode.controller";
-import { EpisodeService } from "./episode.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { StatsService } from "../../common/services/stats.service";
 import { ERROR_CODES } from "../../common/utils/errors";
+import { EpisodeController } from "./episode.controller";
+import { EpisodeService } from "./episode.service";
 
 describe("EpisodeController", () => {
   let controller: EpisodeController;
@@ -36,7 +36,7 @@ describe("EpisodeController", () => {
     controller = new EpisodeController(
       episodeService as unknown as EpisodeService,
       prisma as unknown as PrismaService,
-      statsService as unknown as StatsService
+      statsService as unknown as StatsService,
     );
   });
 
@@ -81,7 +81,33 @@ describe("EpisodeController", () => {
     expect(statsService.recordComicView).not.toHaveBeenCalled();
   });
 
-  it("should return fallback payload when episode service throws unexpected error", async () => {
+  it("preserves zero preview pages instead of forcing a default preview", async () => {
+    prisma.series.findUnique.mockResolvedValue({
+      id: "series-001",
+      adult: false,
+      type: "comic",
+    });
+    prisma.entitlement.findUnique.mockResolvedValue(null);
+    episodeService.getEpisode.mockResolvedValue({
+      episode: {
+        id: "series-001e1",
+        pages: [{ p: 1 }, { p: 2 }],
+        previewFreePages: 0,
+      },
+    });
+
+    const req = { cookies: {} } as any;
+    const res = { status: jest.fn() } as any;
+
+    const result = await controller.getEpisode("series-001", "series-001e1", req, res);
+    const payload = result as any;
+
+    expect(payload.episode.pages).toEqual([]);
+    expect(payload.episode.previewCount).toBe(0);
+    expect(payload.episode.isPreview).toBe(true);
+  });
+
+  it("returns an internal error instead of fake content when the episode service crashes", async () => {
     prisma.series.findUnique.mockResolvedValue({
       id: "series-001",
       adult: false,
@@ -94,12 +120,11 @@ describe("EpisodeController", () => {
     const res = { status: jest.fn() } as any;
 
     const result = await controller.getEpisode("series-001", "series-001e9", req, res);
-    const payload = result as any;
 
-    expect(payload.episode.id).toBe("series-001e9");
-    expect(payload.episode.seriesId).toBe("series-001");
-    expect(payload.episode.type).toBe("comic");
-    expect(Array.isArray(payload.episode.pages)).toBe(true);
-    expect(payload.episode.pages.length).toBeGreaterThan(0);
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(result).toEqual({
+      error: ERROR_CODES.INTERNAL,
+      message: "Failed to load episode.",
+    });
   });
 });

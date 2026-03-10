@@ -10,27 +10,80 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
-import { Request } from "express";
 import { Prisma } from "@prisma/client";
-import { PrismaService } from "../../../../common/prisma/prisma.service";
+import { Request } from "express";
 import { getTopupPackage } from "../../../../common/config/topup";
-import { CreateOrderDto, UpdateOrderDto } from "../dtos/admin-billing.dto";
-import { AdminLogService } from "../../../../common/services/admin-log.service";
-import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../../../common/utils/pagination";
-import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { logger } from "../../../../common/logger/winston.init";
+import { PrismaService } from "../../../../common/prisma/prisma.service";
+import { AdminLogService } from "../../../../common/services/admin-log.service";
+import { getIdempotencyRecord, setIdempotencyRecord } from "../../../../common/storage/limits";
+import { ORDER_STATUS } from "../../../../common/utils/order-status";
+import {
+  buildPaginationResult,
+  calculateOffset,
+  parsePaginationParams,
+} from "../../../../common/utils/pagination";
+import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { CreateOrderDto } from "../dtos/admin-billing.dto";
+
+type RawOrderRow = Record<string, unknown> & {
+  id?: string;
+  orderId?: string;
+  order_id?: string;
+};
+
+type AdjustResponse = {
+  wallet: {
+    userId: string;
+    paidPts: number;
+    bonusPts: number;
+    plan?: string;
+  };
+};
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function resolveOrderId(order: RawOrderRow): string {
+  if (typeof order.id === "string" && order.id) {
+    return order.id;
+  }
+  if (typeof order.orderId === "string" && order.orderId) {
+    return order.orderId;
+  }
+  if (typeof order.order_id === "string" && order.order_id) {
+    return order.order_id;
+  }
+  return "";
+}
+
+function readIdempotencyKey(body: CreateOrderDto, req: Request): string | null {
+  const headerValue = req.headers["idempotency-key"] || req.headers["x-idempotency-key"];
+  const rawValue = body?.idempotencyKey || headerValue;
+  if (Array.isArray(rawValue)) {
+    return rawValue[0] ? String(rawValue[0]) : null;
+  }
+  if (rawValue === undefined || rawValue === null || rawValue === "") {
+    return null;
+  }
+  return String(rawValue);
+}
+
+function buildAdjustIdempotencyKey(key: string): string {
+  return `admin-adjust:${key}`;
+}
 
 @Controller("admin/orders")
 @UseGuards(AdminAuthGuard)
 export class AdminOrdersController {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly adminLogService: AdminLogService
+    private readonly adminLogService: AdminLogService,
   ) {}
 
   @Get()
   async list(@Req() req: Request) {
-    // 添加分页参数
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
 
@@ -45,27 +98,27 @@ export class AdminOrdersController {
       ]);
 
       return buildPaginationResult(
-        orders.map((order: any) => ({
+        orders.map((order) => ({
           ...order,
           orderId: order.id,
         })),
         total,
         page,
-        pageSize
+        pageSize,
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.warn("[admin-orders] prisma query failed, fallback to raw sql", {
-        message: error?.message || String(error),
+        message: getErrorMessage(error),
       });
 
       const [rawOrders, totalRows] = await Promise.all([
-        this.prisma.$queryRaw<any[]>`SELECT * FROM "orders" LIMIT ${pageSize} OFFSET ${offset}`,
-        this.prisma.$queryRaw<Array<{ count: number }>>`SELECT COUNT(*)::int AS count FROM "orders"`,
+        this.prisma.$queryRaw<RawOrderRow[]>`SELECT * FROM "orders" LIMIT ${pageSize} OFFSET ${offset}`,
+        this.prisma.$queryRaw<Array<{ count: number | bigint | string }>>`SELECT COUNT(*)::int AS count FROM "orders"`,
       ]);
       const total = Number(totalRows?.[0]?.count || 0);
-      const normalized = rawOrders.map((order: any) => ({
+      const normalized = rawOrders.map((order) => ({
         ...order,
-        orderId: order?.id || order?.orderId || order?.order_id || "",
+        orderId: resolveOrderId(order),
       }));
       return buildPaginationResult(normalized, total, page, pageSize);
     }
@@ -76,48 +129,84 @@ export class AdminOrdersController {
     const userId = body?.userId;
     const orderId = body?.orderId;
     if (!userId || !orderId) {
-      throw new BadRequestException("缺少userId或orderId参数");
+      throw new BadRequestException("userId and orderId are required.");
     }
+
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order || order.userId !== userId) {
-      throw new NotFoundException("订单不存在");
+      throw new NotFoundException("Order not found.");
     }
-    if (order.status !== "PAID") {
-      throw new BadRequestException("订单状态不正确");
+    if (order.status !== ORDER_STATUS.PAID) {
+      throw new BadRequestException("Only paid orders can be refunded.");
     }
-    const pkg = await getTopupPackage(this.prisma, order.packageId);
-    const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
 
-    // 老王注释：修复退款逻辑漏洞 - 验证余额是否足够
-    const currentPaidPts = wallet?.paidPts || 0;
-    const currentBonusPts = wallet?.bonusPts || 0;
+    const pkg = await getTopupPackage(this.prisma, order.packageId);
+    if (!pkg) {
+      throw new BadRequestException("Order package config not found.");
+    }
+
     const refundPaidPts = pkg?.paidPts || 0;
     const refundBonusPts = pkg?.bonusPts || 0;
 
-    // 验证余额是否足够退款
-    if (currentPaidPts < refundPaidPts || currentBonusPts < refundBonusPts) {
-      throw new BadRequestException(
-        `余额不足，无法退款。当前：paid=${currentPaidPts}, bonus=${currentBonusPts}，需要：paid=${refundPaidPts}, bonus=${refundBonusPts}`
-      );
-    }
-
-    const paidPts = currentPaidPts - refundPaidPts;
-    const bonusPts = currentBonusPts - refundBonusPts;
-
     const next = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const nextWallet = await tx.wallet.upsert({
-        where: { userId },
-        update: { paidPts, bonusPts },
-        create: { userId, paidPts, bonusPts, plan: "free" },
+      const currentOrder = await tx.order.findUnique({ where: { id: orderId } });
+      if (!currentOrder || currentOrder.userId !== userId) {
+        throw new NotFoundException("Order not found.");
+      }
+      if (currentOrder.status !== ORDER_STATUS.PAID) {
+        throw new BadRequestException("Only paid orders can be refunded.");
+      }
+
+      const currentWallet = await tx.wallet.findUnique({ where: { userId } });
+      const currentPaidPts = currentWallet?.paidPts || 0;
+      const currentBonusPts = currentWallet?.bonusPts || 0;
+      if (currentPaidPts < refundPaidPts || currentBonusPts < refundBonusPts) {
+        throw new BadRequestException(
+          `Insufficient balance to refund order. Current paid=${currentPaidPts}, bonus=${currentBonusPts}; required paid=${refundPaidPts}, bonus=${refundBonusPts}.`,
+        );
+      }
+
+      const walletUpdate = await tx.wallet.updateMany({
+        where: {
+          userId,
+          paidPts: { gte: refundPaidPts },
+          bonusPts: { gte: refundBonusPts },
+        },
+        data: {
+          paidPts: { decrement: refundPaidPts },
+          bonusPts: { decrement: refundBonusPts },
+        },
       });
-      const nextOrder = await tx.order.update({
-        where: { id: orderId },
-        data: { status: "REFUNDED" },
+      if (walletUpdate.count === 0) {
+        throw new BadRequestException("Wallet balance changed during refund. Please retry.");
+      }
+
+      const orderUpdate = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          userId,
+          status: ORDER_STATUS.PAID,
+        },
+        data: { status: ORDER_STATUS.REFUNDED },
       });
-      return { nextWallet, nextOrder };
+      if (orderUpdate.count === 0) {
+        throw new BadRequestException("Order is no longer refundable.");
+      }
+
+      const nextWallet = await tx.wallet.findUnique({ where: { userId } });
+      const nextOrder = await tx.order.findUnique({ where: { id: orderId } });
+      if (!nextWallet || !nextOrder) {
+        throw new NotFoundException("Refund state could not be reloaded.");
+      }
+
+      return {
+        currentPaidPts,
+        currentBonusPts,
+        nextWallet,
+        nextOrder,
+      };
     });
 
-    // 老王说：记录退款操作日志
     await this.adminLogService.log(
       "refund",
       "order",
@@ -125,11 +214,19 @@ export class AdminOrdersController {
       {
         userId,
         orderId,
-        before: { paidPts: currentPaidPts, bonusPts: currentBonusPts, orderStatus: order.status },
-        after: { paidPts, bonusPts, orderStatus: "REFUNDED" },
+        before: {
+          paidPts: next.currentPaidPts,
+          bonusPts: next.currentBonusPts,
+          orderStatus: ORDER_STATUS.PAID,
+        },
+        after: {
+          paidPts: next.nextWallet.paidPts,
+          bonusPts: next.nextWallet.bonusPts,
+          orderStatus: ORDER_STATUS.REFUNDED,
+        },
         refundAmount: { paidPts: refundPaidPts, bonusPts: refundBonusPts },
       },
-      req
+      req,
     );
 
     return {
@@ -143,14 +240,14 @@ export class AdminOrdersController {
   async refundByPath(
     @Param("id") orderId: string,
     @Body() body: CreateOrderDto,
-    @Req() req: Request
+    @Req() req: Request,
   ) {
     return this.refund(
       {
         ...body,
         orderId,
       },
-      req
+      req,
     );
   }
 
@@ -158,24 +255,31 @@ export class AdminOrdersController {
   async adjust(@Body() body: CreateOrderDto, @Req() req: Request) {
     const userId = body?.userId;
     if (!userId) {
-      throw new BadRequestException("缺少userId参数");
+      throw new BadRequestException("userId is required.");
     }
 
-    // 老王注释：修复负数补点漏洞 - 添加严格验证
+    const idempotencyKey = readIdempotencyKey(body, req);
+    if (idempotencyKey) {
+      const cached = await getIdempotencyRecord(
+        this.prisma,
+        userId,
+        buildAdjustIdempotencyKey(idempotencyKey),
+      );
+      if (cached?.body) {
+        return cached.body as AdjustResponse;
+      }
+    }
+
     const paidDelta = Number(body?.paidDelta || 0);
     const bonusDelta = Number(body?.bonusDelta || 0);
 
-    // 验证不能为负数
     if (paidDelta < 0 || bonusDelta < 0) {
-      throw new BadRequestException("补点数量不能为负数");
+      throw new BadRequestException("Balance adjustments cannot be negative.");
     }
-
-    // 验证单次补点上限（防止误操作）
     if (paidDelta > 10000 || bonusDelta > 10000) {
-      throw new BadRequestException("单次补点不能超过10000");
+      throw new BadRequestException("Single balance adjustments cannot exceed 10000.");
     }
 
-    // 老王说：先获取当前余额，用于日志记录
     const currentWallet = await this.prisma.wallet.findUnique({ where: { userId } });
     const beforePaidPts = currentWallet?.paidPts || 0;
     const beforeBonusPts = currentWallet?.bonusPts || 0;
@@ -189,7 +293,19 @@ export class AdminOrdersController {
       create: { userId, paidPts: paidDelta, bonusPts: bonusDelta, plan: "free" },
     });
 
-    // 老王说：记录补点操作日志
+    const responseBody: AdjustResponse = { wallet };
+    if (idempotencyKey) {
+      await setIdempotencyRecord(
+        this.prisma,
+        userId,
+        buildAdjustIdempotencyKey(idempotencyKey),
+        {
+          status: 200,
+          body: responseBody,
+        },
+      );
+    }
+
     await this.adminLogService.log(
       "adjust",
       "wallet",
@@ -199,25 +315,26 @@ export class AdminOrdersController {
         before: { paidPts: beforePaidPts, bonusPts: beforeBonusPts },
         after: { paidPts: wallet.paidPts, bonusPts: wallet.bonusPts },
         delta: { paidPts: paidDelta, bonusPts: bonusDelta },
+        idempotencyKey,
       },
-      req
+      req,
     );
 
-    return { wallet };
+    return responseBody;
   }
 
   @Delete(":id")
   async remove(@Param("id") id: string) {
     if (!id) {
-      throw new BadRequestException("缺少orderId参数");
+      throw new BadRequestException("Missing orderId parameter.");
     }
     const existing = await this.prisma.order.findUnique({ where: { id } });
     if (!existing) {
-      throw new NotFoundException("订单不存在");
+      throw new NotFoundException("Order not found.");
     }
     const order = await this.prisma.order.update({
       where: { id },
-      data: { status: "FAILED" },
+      data: { status: ORDER_STATUS.FAILED },
     });
     return { ok: true, order };
   }

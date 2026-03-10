@@ -13,8 +13,28 @@ import {
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../../../common/utils/pagination";
+import { AdminAudit } from "../../decorators/admin-audit.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { BlockUserDto } from "../dtos/admin-system.dto";
+
+function readBooleanFlag(value: unknown, fallback: boolean): boolean {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["1", "true", "yes", "on"].includes(normalized)) {
+      return true;
+    }
+    if (["0", "false", "no", "off"].includes(normalized)) {
+      return false;
+    }
+  }
+  throw new BadRequestException("blocked must be a boolean.");
+}
 
 @Controller("admin/users")
 @UseGuards(AdminAuthGuard)
@@ -59,6 +79,7 @@ export class AdminUsersController {
   }
 
   @Patch("block")
+  @AdminAudit("update", "user")
   async block(@Body() body: BlockUserDto) {
     const userId = body?.userId;
     if (!userId) {
@@ -66,24 +87,26 @@ export class AdminUsersController {
     }
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: { isBlocked: Boolean(body?.blocked) },
+      data: { isBlocked: readBooleanFlag(body?.blocked, true) },
     });
     return { user };
   }
 
   @Patch(":id/block")
-  async blockByPath(@Param("id") userId: string, @Body() body: { blocked?: boolean }) {
+  @AdminAudit("update", "user")
+  async blockByPath(@Param("id") userId: string, @Body() body: { blocked?: boolean | string }) {
     if (!userId) {
       throw new BadRequestException("缺少userId参数");
     }
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: { isBlocked: Boolean(body?.blocked) },
+      data: { isBlocked: readBooleanFlag(body?.blocked, true) },
     });
     return { user };
   }
 
   @Delete(":id")
+  @AdminAudit("delete", "user")
   async deactivate(@Param("id") userId: string) {
     if (!userId) {
       throw new BadRequestException("缺少userId参数");

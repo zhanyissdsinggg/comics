@@ -1,25 +1,22 @@
 import {
+  BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Patch,
   Post,
   Query,
-  UseGuards,
-  BadRequestException,
-  NotFoundException,
-  ConflictException,
   Req,
+  UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
-import { PrismaService } from "../../../common/prisma/prisma.service";
 import { logger } from "../../../common/logger/winston.init";
+import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 
-/**
- * 作品管理Controller - 处理Series的CRUD操作
- */
 @Controller("admin/series")
 @UseGuards(AdminAuthGuard)
 export class AdminSeriesController {
@@ -34,6 +31,7 @@ export class AdminSeriesController {
       : input?.badge
         ? [input.badge]
         : existing?.badges || [];
+
     return {
       id: input.id || existing?.id,
       title: input.title ?? existing?.title ?? "",
@@ -48,11 +46,9 @@ export class AdminSeriesController {
       rating: input.rating ?? existing?.rating ?? 0,
       ratingCount: input.ratingCount ?? existing?.ratingCount ?? 0,
       description: input.description ?? existing?.description ?? "",
-      episodePrice:
-        input?.pricing?.episodePrice ?? input.episodePrice ?? existing?.episodePrice ?? 0,
+      episodePrice: pricing.episodePrice ?? input.episodePrice ?? existing?.episodePrice ?? 0,
       ttfEnabled: ttf.enabled ?? input.ttfEnabled ?? existing?.ttfEnabled ?? false,
-      ttfIntervalHours:
-        ttf.intervalHours ?? input.ttfIntervalHours ?? existing?.ttfIntervalHours ?? 24,
+      ttfIntervalHours: ttf.intervalHours ?? input.ttfIntervalHours ?? existing?.ttfIntervalHours ?? 24,
       latestEpisodeId: input.latestEpisodeId ?? existing?.latestEpisodeId ?? "",
     };
   }
@@ -73,7 +69,7 @@ export class AdminSeriesController {
     const adult = String(query?.adult || "").trim();
     const sortBy = String(query?.sortBy || "createdAt_desc").trim();
 
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     if (search) {
       where.OR = [
         { id: { contains: search, mode: "insensitive" } },
@@ -122,20 +118,19 @@ export class AdminSeriesController {
   async create(@Body() body: Record<string, any>) {
     const series = body?.series;
     if (!series?.id) {
-      throw new BadRequestException("缺少series.id参数");
+      throw new BadRequestException("series.id is required.");
     }
+
     const payload = this.toSeriesPayload(series);
 
     try {
       const created = await this.prisma.series.create({ data: payload });
       return { series: created };
     } catch (error: any) {
-      // 老王新增：处理Prisma唯一约束错误（重复ID）
-      if (error.code === 'P2002') {
-        logger.warn(`作品ID重复: ${series.id}`);
-        throw new ConflictException('作品ID已存在，请使用其他ID');
+      if (error?.code === "P2002") {
+        logger.warn(`series id already exists: ${series.id}`);
+        throw new ConflictException("Series id already exists.");
       }
-      // 其他错误继续抛出
       throw error;
     }
   }
@@ -145,7 +140,7 @@ export class AdminSeriesController {
     const seriesId = String(req.params.id || "");
     const series = await this.prisma.series.findUnique({ where: { id: seriesId } });
     if (!series) {
-      throw new NotFoundException("作品不存在");
+      throw new NotFoundException("Series not found.");
     }
     return { series };
   }
@@ -156,8 +151,9 @@ export class AdminSeriesController {
     const series = body?.series || {};
     const existing = await this.prisma.series.findUnique({ where: { id: seriesId } });
     if (!existing) {
-      throw new NotFoundException("作品不存在");
+      throw new NotFoundException("Series not found.");
     }
+
     const payload = this.toSeriesPayload({ ...series, id: seriesId }, existing);
     const updated = await this.prisma.series.update({
       where: { id: seriesId },
@@ -169,8 +165,13 @@ export class AdminSeriesController {
   @Delete(":id")
   async remove(@Req() req: Request) {
     const seriesId = String(req.params.id || "");
+    const existing = await this.prisma.series.findUnique({ where: { id: seriesId } });
+    if (!existing) {
+      throw new NotFoundException("Series not found.");
+    }
+
     await this.prisma.episode.deleteMany({ where: { seriesId } });
-    await this.prisma.series.deleteMany({ where: { id: seriesId } });
+    await this.prisma.series.delete({ where: { id: seriesId } });
     return { ok: true };
   }
 }

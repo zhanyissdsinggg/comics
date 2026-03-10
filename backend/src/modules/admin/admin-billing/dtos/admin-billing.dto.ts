@@ -1,8 +1,7 @@
-import { IsOptional, IsString, IsNumber, IsArray, IsObject, IsBoolean } from 'class-validator';
+import { IsBoolean, IsObject, IsOptional, IsString } from 'class-validator';
 
-/**
- * 老王说：Topup相关的DTO
- */
+type OrderPayload = Record<string, unknown>;
+
 export class CreateTopupDto {
   @IsOptional()
   @IsString()
@@ -81,13 +80,10 @@ export class UpdateTopupDto {
   tags?: string[] | string;
 }
 
-/**
- * 老王说：Orders相关的DTO
- */
 export class CreateOrderDto {
   @IsOptional()
   @IsObject()
-  values?: any;
+  values?: OrderPayload;
 
   @IsOptional()
   @IsString()
@@ -98,6 +94,10 @@ export class CreateOrderDto {
   orderId?: string;
 
   @IsOptional()
+  @IsString()
+  idempotencyKey?: string;
+
+  @IsOptional()
   paidDelta?: number | string;
 
   @IsOptional()
@@ -105,11 +105,11 @@ export class CreateOrderDto {
 
   @IsOptional()
   @IsObject()
-  order?: any;
+  order?: OrderPayload;
 }
 
 export class UpdateOrderDto {
   @IsOptional()
   @IsObject()
-  order?: any;
+  order?: OrderPayload;
 }

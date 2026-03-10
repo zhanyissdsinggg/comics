@@ -2,6 +2,19 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
+function normalizeParagraphs(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
+  }
+
+  return String(value || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
 @Injectable()
 export class EpisodeService {
   private readonly logger = new Logger(EpisodeService.name);
@@ -38,13 +51,11 @@ export class EpisodeService {
       if (!this.isSchemaDriftError(error)) {
         throw error;
       }
-      this.logger.warn(
-        `Series type query failed for ${seriesId}, switching to compatibility mode.`,
-      );
+      this.logger.warn(`Series type query failed for ${seriesId}, switching to compatibility mode.`);
     }
 
     try {
-      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, any>>>(
+      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
         `SELECT "id", "type" FROM "series" WHERE "id" = $1 LIMIT 1`,
         seriesId,
       );
@@ -76,6 +87,7 @@ export class EpisodeService {
           pages: true,
           paragraphs: true,
           text: true,
+          previewFreePages: true,
         },
       });
     } catch (error) {
@@ -100,7 +112,7 @@ export class EpisodeService {
       if (!this.isSchemaDriftError(error)) {
         throw error;
       }
-      this.logger.warn(`Episode compatibility query failed for ${episodeId}, using generated fallback.`);
+      this.logger.warn(`Episode compatibility query failed for ${episodeId}.`);
       return null;
     }
   }
@@ -110,68 +122,39 @@ export class EpisodeService {
     if (!series) {
       return null;
     }
+
     const stored = await this.findStoredEpisode(episodeId);
-    const hasPages = Array.isArray(stored?.pages) && stored.pages.length > 0;
-    const hasParagraphs = Array.isArray(stored?.paragraphs) && stored.paragraphs.length > 0;
-    if (hasPages || hasParagraphs || stored?.text) {
-      if (series.type === "novel") {
-        const paragraphs =
-          (Array.isArray(stored.paragraphs) ? stored.paragraphs : stored.paragraphs || []) ||
-          String(stored.text || "")
-            .split(/\r?\n/)
-            .map((line) => line.trim())
-            .filter(Boolean);
-        return {
-          episode: {
-            id: stored.id,
-            seriesId,
-            number: stored.number,
-            title: stored.title,
-            type: "novel",
-            paragraphs,
-            previewParagraphs: 3,
-          },
-        };
-      }
-      return {
-        episode: {
-          id: stored.id,
-          seriesId,
-          number: stored.number,
-          title: stored.title,
-          type: "comic",
-          pages: Array.isArray(stored.pages) ? stored.pages : stored.pages || [],
-        },
-      };
+    if (!stored) {
+      return null;
     }
-    const number = Number(episodeId.replace(`${seriesId}e`, "")) || 1;
+
+    const number = Number(stored.number) || Number(episodeId.replace(`${seriesId}e`, "")) || 1;
+    const title = String(stored.title || `Episode ${number}`);
+
     if (series.type === "novel") {
       return {
         episode: {
-          id: episodeId,
+          id: String(stored.id || episodeId),
           seriesId,
           number,
-          title: `Episode ${number}`,
+          title,
           type: "novel",
-          paragraphs: Array.from({ length: 16 }, (_, idx) =>
-            `(${seriesId}-${episodeId}) Paragraph ${idx + 1}. Lorem ipsum dolor sit amet.`
-          ),
+          paragraphs: normalizeParagraphs(stored.paragraphs ?? stored.text),
           previewParagraphs: 3,
         },
       };
     }
+
+    const previewFreePages = Number(stored.previewFreePages);
     return {
       episode: {
-        id: episodeId,
+        id: String(stored.id || episodeId),
         seriesId,
         number,
-        title: `Episode ${number}`,
+        title,
         type: "comic",
-        pages: Array.from({ length: 18 }, (_, idx) => ({
-          url: `https://placehold.co/800x1200?text=${seriesId}-${episodeId}-P${idx + 1}`,
-          w: 800,
-          h: 1200,
-        })),
+        pages: Array.isArray(stored.pages) ? stored.pages : [],
+        previewFreePages: Number.isFinite(previewFreePages) ? previewFreePages : undefined,
       },
     };
   }

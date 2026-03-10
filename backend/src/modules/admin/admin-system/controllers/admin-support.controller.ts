@@ -11,6 +11,7 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import {
@@ -32,7 +33,7 @@ export class AdminSupportController {
     const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
     const status = typeof req.query.status === "string" ? req.query.status.trim() : "";
 
-    const where: Record<string, any> = {};
+    const where: Prisma.SupportTicketWhereInput = {};
     if (search) {
       where.OR = [
         { id: { contains: search, mode: "insensitive" } },
@@ -78,12 +79,12 @@ export class AdminSupportController {
   async reply(@Param("id") id: string, @Body() body: { message?: string }) {
     const message = String(body?.message || "").trim();
     if (!message) {
-      throw new BadRequestException("缺少回复内容");
+      throw new BadRequestException("Missing reply message.");
     }
 
     const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
     if (!ticket) {
-      throw new NotFoundException("工单不存在");
+      throw new NotFoundException("Support ticket not found.");
     }
 
     const nextStatus = ticket.status.toLowerCase() === "closed" ? "closed" : "in_progress";
@@ -106,7 +107,7 @@ export class AdminSupportController {
   async close(@Param("id") id: string) {
     const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
     if (!ticket) {
-      throw new NotFoundException("工单不存在");
+      throw new NotFoundException("Support ticket not found.");
     }
 
     const updated = await this.prisma.supportTicket.update({
@@ -121,9 +122,11 @@ export class AdminSupportController {
   async remove(@Param("id") id: string) {
     const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
     if (!ticket) {
-      throw new NotFoundException("工单不存在");
+      throw new NotFoundException("Support ticket not found.");
     }
     await this.prisma.supportTicket.delete({ where: { id } });
     return { ok: true };
   }
 }
+
+

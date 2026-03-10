@@ -9,12 +9,30 @@ import {
   NotFoundException,
   Logger,
 } from "@nestjs/common";
-import { Request } from "express";
+import type { Request } from "express";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
-import AdmZip from "adm-zip";
+import AdmZip = require("adm-zip");
+import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { extname, join } from "path";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { buildPublicAssetUrl } from "../../../common/utils/public-asset-url";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
+import { readIntLike } from "../utils/param-parsing";
+
+const episodeUploadsDir = join(process.cwd(), "public", "uploads", "episodes");
+
+function ensureDirectory(directory: string) {
+  if (!existsSync(directory)) {
+    mkdirSync(directory, { recursive: true });
+  }
+}
+
+function sanitizePathSegment(value: string): string {
+  const normalized = value.trim().replace(/[^a-zA-Z0-9_-]+/g, "-");
+  const collapsed = normalized.replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return collapsed || "episode";
+}
 
 function extractNumber(name: string) {
   const match = name.match(/(\d+)/);
@@ -34,15 +52,25 @@ function toChapterTitle(filename: string) {
   return filename.replace(/\.zip$/i, "").trim();
 }
 
-/**
- * 剧集上传Controller - 处理批量文件上传和解析
- */
+function createEpisodeAssetPath(seriesId: string, chapterTitle: string, index: number, entryName: string): string {
+  const safeSeriesId = sanitizePathSegment(seriesId);
+  const safeChapter = sanitizePathSegment(chapterTitle || "episode");
+  const extension = extname(entryName).toLowerCase() || ".bin";
+  const randomSuffix = Math.random().toString(36).slice(2, 8);
+  const fileName = `${safeChapter}-${String(index + 1).padStart(2, "0")}-${Date.now()}-${randomSuffix}${extension}`;
+  const seriesDirectory = join(episodeUploadsDir, safeSeriesId);
+  ensureDirectory(seriesDirectory);
+  return join(seriesDirectory, fileName);
+}
+
 @Controller("admin/series/:id/episodes")
 @UseGuards(AdminAuthGuard)
 export class AdminEpisodesUploadController {
   private readonly logger = new Logger(AdminEpisodesUploadController.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {
+    ensureDirectory(episodeUploadsDir);
+  }
 
   private async syncLatest(seriesId: string) {
     const latest = await this.prisma.episode.findFirst({
@@ -63,12 +91,9 @@ export class AdminEpisodesUploadController {
     FilesInterceptor("files", 50, {
       storage: memoryStorage(),
       limits: { fileSize: 50 * 1024 * 1024 },
-    })
+    }),
   )
-  async uploadEpisodes(
-    @UploadedFiles() files: any[],
-    @Req() req: Request
-  ) {
+  async uploadEpisodes(@UploadedFiles() files: Array<{ originalname: string; buffer: Buffer }>, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
 
     this.logger.log(`Starting episode upload for series: ${seriesId}, files: ${files?.length || 0}`);
@@ -79,17 +104,20 @@ export class AdminEpisodesUploadController {
     }
 
     if (!Array.isArray(files) || files.length === 0) {
-      throw new BadRequestException("请上传至少一个文件");
+      throw new BadRequestException("请至少上传一个文件");
     }
 
     if (files.length > 50) {
-      throw new BadRequestException("单次最多上传50个文件");
+      throw new BadRequestException("单次最多上传 50 个文件");
     }
 
-    const type = req.body?.type || series.type || "comic";
-    const sortedFiles = [...files].sort((a, b) =>
-      sortByName(a.originalname, b.originalname)
-    );
+    const requestedType = String(req.body?.type ?? series.type ?? "comic").trim().toLowerCase();
+    if (requestedType !== "comic" && requestedType !== "novel") {
+      throw new BadRequestException("Invalid episode type.");
+    }
+
+    const type = requestedType;
+    const sortedFiles = [...files].sort((a, b) => sortByName(a.originalname, b.originalname));
 
     const existing = await this.prisma.episode.findMany({
       where: { seriesId },
@@ -97,10 +125,10 @@ export class AdminEpisodesUploadController {
       take: 1,
     });
 
-    const maxNumber = existing[0]?.number || 0;
-    const startNumber = Number(req.body?.startNumber || req.body?.episodeNumber || 0);
+    const maxNumber = existing[0]?.number ?? 0;
+    const startNumber = readIntLike(req.body?.startNumber ?? req.body?.episodeNumber, 0, 0);
     let currentNumber = startNumber > 0 ? startNumber - 1 : maxNumber;
-    const created = [];
+    const created: Array<{ id: string; number: number }> = [];
 
     for (const file of sortedFiles) {
       currentNumber += 1;
@@ -108,74 +136,95 @@ export class AdminEpisodesUploadController {
 
       try {
         const zip = new AdmZip(file.buffer);
-        const entries = zip.getEntries().filter((entry: any) => !entry.isDirectory);
-        entries.sort((a: any, b: any) => sortByName(a.entryName, b.entryName));
+        const entries = zip.getEntries().filter((entry) => !entry.isDirectory);
+        entries.sort((a, b) => sortByName(a.entryName, b.entryName));
 
         if (type === "novel") {
-          const textParts = entries
-            .filter((entry: any) => entry.entryName.toLowerCase().endsWith(".txt"))
-            .map((entry: any) => entry.getData().toString("utf8"));
-          const combined = textParts.join("\n");
+          const textEntries = entries.filter((entry) => entry.entryName.toLowerCase().endsWith(".txt"));
+          if (textEntries.length === 0) {
+            throw new BadRequestException(`No text files found in ${file.originalname}.`);
+          }
+
+          const textParts = textEntries.map((entry) => entry.getData().toString("utf8"));
+          const combined = textParts.join("\n").trim();
           const paragraphs = combined
             .split(/\r?\n/)
-            .map((line: any) => line.trim())
+            .map((line) => line.trim())
             .filter(Boolean);
 
+          if (paragraphs.length === 0) {
+            throw new BadRequestException(`No readable text content found in ${file.originalname}.`);
+          }
+
           const episode = {
             id: `${seriesId}e${currentNumber}`,
             seriesId,
             number: currentNumber,
             title: chapterTitle || `Episode ${currentNumber}`,
             releasedAt: new Date(),
-            pricePts: Number(series?.episodePrice || 0),
-            ttfEligible: Boolean(series?.ttfEnabled),
+            pricePts: Number(series.episodePrice ?? 0),
+            ttfEligible: Boolean(series.ttfEnabled),
             previewFreePages: 0,
             paragraphs,
+            text: combined,
           };
 
           await this.prisma.episode.upsert({
             where: { id: episode.id },
-            update: episode as any,
-            create: episode as any,
+            update: episode,
+            create: episode,
           });
 
-          created.push(episode);
+          created.push({ id: episode.id, number: episode.number });
           this.logger.log(`Created novel episode: ${episode.id}, paragraphs: ${paragraphs.length}`);
-        } else {
-          const imageEntries = entries.filter((entry: any) =>
-            /\.(png|jpe?g|webp)$/i.test(entry.entryName)
-          );
-          const pages = (imageEntries.length ? imageEntries : entries).map((entry: any, index: any) => ({
-            url: `https://placehold.co/800x1200?text=${encodeURIComponent(
-              `${chapterTitle || "Episode"}-${index + 1}`
-            )}`,
+          continue;
+        }
+
+        const imageEntries = entries.filter((entry) => /\.(png|jpe?g|webp|gif)$/i.test(entry.entryName));
+        if (imageEntries.length === 0) {
+          throw new BadRequestException(`No image files found in ${file.originalname}.`);
+        }
+
+        const pages = imageEntries.map((entry, index) => {
+          const absolutePath = createEpisodeAssetPath(seriesId, chapterTitle || `episode-${currentNumber}`, index, entry.entryName);
+          writeFileSync(absolutePath, entry.getData());
+
+          const relativePath = absolutePath
+            .replace(join(process.cwd(), "public"), "")
+            .replace(/\\/g, "/");
+
+          return {
+            url: buildPublicAssetUrl(req, relativePath),
             w: 800,
             h: 1200,
-          }));
-
-          const episode = {
-            id: `${seriesId}e${currentNumber}`,
-            seriesId,
-            number: currentNumber,
-            title: chapterTitle || `Episode ${currentNumber}`,
-            releasedAt: new Date(),
-            pricePts: Number(series?.episodePrice || 0),
-            ttfEligible: Boolean(series?.ttfEnabled),
-            previewFreePages: 0,
-            pages,
           };
+        });
 
-          await this.prisma.episode.upsert({
-            where: { id: episode.id },
-            update: episode as any,
-            create: episode as any,
-          });
+        const episode = {
+          id: `${seriesId}e${currentNumber}`,
+          seriesId,
+          number: currentNumber,
+          title: chapterTitle || `Episode ${currentNumber}`,
+          releasedAt: new Date(),
+          pricePts: Number(series.episodePrice ?? 0),
+          ttfEligible: Boolean(series.ttfEnabled),
+          previewFreePages: 0,
+          pages,
+        };
 
-          created.push(episode);
-          this.logger.log(`Created comic episode: ${episode.id}, pages: ${pages.length}`);
-        }
+        await this.prisma.episode.upsert({
+          where: { id: episode.id },
+          update: episode,
+          create: episode,
+        });
+
+        created.push({ id: episode.id, number: episode.number });
+        this.logger.log(`Created comic episode: ${episode.id}, pages: ${pages.length}`);
       } catch (error) {
-        this.logger.error(`Failed to process file ${file.originalname}:`, error);
+        this.logger.error(`Failed to process file ${file.originalname}:`, error as Error);
+        if (error instanceof BadRequestException) {
+          throw error;
+        }
         throw new BadRequestException(`处理文件失败: ${file.originalname}`);
       }
     }

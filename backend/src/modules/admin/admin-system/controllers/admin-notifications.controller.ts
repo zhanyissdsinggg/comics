@@ -12,9 +12,22 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
-import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../../../common/utils/pagination";
+import {
+  buildPaginationResult,
+  calculateOffset,
+  parsePaginationParams,
+} from "../../../../common/utils/pagination";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
-import { CreateNotificationDto } from "../dtos/admin-system.dto";
+import {
+  CreateNotificationDto,
+  NotificationPayloadInput,
+} from "../dtos/admin-system.dto";
+
+type NotificationRequestBody = CreateNotificationDto & NotificationPayloadInput;
+
+function extractNotificationPayload(body: NotificationRequestBody): NotificationPayloadInput {
+  return body?.notification || body;
+}
 
 @Controller("admin/notifications")
 @UseGuards(AdminAuthGuard)
@@ -23,7 +36,6 @@ export class AdminNotificationsController {
 
   @Get()
   async list(@Req() req: Request) {
-    // 添加分页参数
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
 
@@ -40,32 +52,34 @@ export class AdminNotificationsController {
   }
 
   @Post()
-  async create(@Body() body: CreateNotificationDto) {
-    const payload = body?.notification || body || {};
+  async create(@Body() body: NotificationRequestBody) {
+    const payload = extractNotificationPayload(body);
     if (!payload.title) {
-      throw new BadRequestException("缺少title参数");
+      throw new BadRequestException("Missing title");
     }
+
     if (payload.broadcast) {
-      // 艹！这个SB代码之前直接加载所有用户到内存，现在改成分页处理
-      const pageSize = 1000;
+      const batchSize = 1000;
       let skip = 0;
       let totalCreated = 0;
 
       while (true) {
         const users = await this.prisma.user.findMany({
           select: { id: true },
-          take: pageSize,
-          skip: skip,
+          take: batchSize,
+          skip,
         });
 
-        if (users.length === 0) break;
+        if (users.length === 0) {
+          break;
+        }
 
         await this.prisma.notification.createMany({
-          data: users.map((user: { id: string }) => ({
+          data: users.map((user) => ({
             id: `N_${user.id}_${Date.now()}`,
             userId: user.id,
             type: payload.type || "PROMO",
-            title: payload.title,
+            title: payload.title || "",
             message: payload.message || "",
             seriesId: payload.seriesId || null,
             episodeId: payload.episodeId || null,
@@ -75,15 +89,17 @@ export class AdminNotificationsController {
         });
 
         totalCreated += users.length;
-        skip += pageSize;
+        skip += batchSize;
       }
 
       return { ok: true, count: totalCreated };
     }
+
     const userId = payload.userId;
     if (!userId) {
-      throw new BadRequestException("缺少userId参数");
+      throw new BadRequestException("Missing userId");
     }
+
     const notification = await this.prisma.notification.create({
       data: {
         id: `N_${userId}_${Date.now()}`,
@@ -97,18 +113,21 @@ export class AdminNotificationsController {
         createdAt: new Date(),
       },
     });
+
     return { notification };
   }
 
   @Delete(":id")
   async remove(@Param("id") id: string) {
     if (!id) {
-      throw new BadRequestException("缺少通知ID参数");
+      throw new BadRequestException("Missing notification id");
     }
+
     const existing = await this.prisma.notification.findUnique({ where: { id } });
     if (!existing) {
-      throw new NotFoundException("通知不存在");
+      throw new NotFoundException("Notification not found");
     }
+
     await this.prisma.notification.delete({ where: { id } });
     return { ok: true };
   }

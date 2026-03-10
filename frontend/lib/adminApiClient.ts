@@ -1,8 +1,8 @@
 /**
- * Admin API瀹㈡埛绔?- 鍓嶇涓撶敤
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
+ * Admin API client helpers for the frontend admin console.
+ * Keeps auth headers and CSRF handling in one place.
  */
+
 
 import {
   apiGet,
@@ -15,11 +15,14 @@ import {
   ApiRequestOptions,
 } from "./apiClient";
 
-// ============ 绫诲瀷瀹氫箟 ============
+// ============ Shared types ============
 
 export interface AdminApiOptions extends ApiRequestOptions {
   skipCsrf?: boolean;
 }
+
+export type AdminApiRecord = Record<string, unknown>;
+export type AdminApiPayload = Record<string, unknown>;
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -36,12 +39,12 @@ export interface PaginatedResponse<T> {
 const ACCESS_TOKEN_KEY = "admin_token";
 const REFRESH_TOKEN_KEY = "admin_refresh_token";
 
-// ============ 宸ュ叿鍑芥暟 ============
+// ============ Auth and headers ============
 
 /**
- * 鑾峰彇CSRF token
- * NOTE: cleaned corrupted comment.
+ * Read the CSRF token from the document head.
  */
+
 function getCsrfToken(): string {
   if (typeof document === "undefined") {
     return "";
@@ -51,8 +54,8 @@ function getCsrfToken(): string {
 }
 
 /**
- * 娣诲姞CSRF token鍒拌姹傚ご
- * NOTE: cleaned corrupted comment. */
+ * Attach CSRF headers for unsafe HTTP methods.
+ */
 function addCsrfToken(headers: Record<string, string>, method?: string): Record<string, string> {
   if (!method || !["POST", "PATCH", "DELETE"].includes(method.toUpperCase())) {
     return headers;
@@ -95,16 +98,16 @@ function toHeaderRecord(headers?: HeadersInit): Record<string, string> {
 }
 
 /**
- * 鍑嗗admin璇锋眰鐨刪eaders
- * NOTE: cleaned corrupted comment.
+ * Build admin request headers with auth and CSRF protection.
  */
+
 function prepareAdminHeaders(
   method?: string,
   customHeaders?: HeadersInit
 ): Record<string, string> {
   const headers = toHeaderRecord(customHeaders);
 
-  // NOTE: cleaned corrupted comment.
+  // Add CSRF protection before sending write requests.
   addCsrfToken(headers, method);
 
   const accessToken = getAdminAccessToken();
@@ -115,13 +118,12 @@ function prepareAdminHeaders(
   return headers;
 }
 
-// ============ 瀵煎嚭鐨凙PI鍑芥暟 ============
+// ============ Request helpers ============
 
 /**
- * 閫氱敤鐨凙dmin Fetch鍑芥暟
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
+ * Low-level fetch helper used by admin API wrappers.
  */
+
 export async function adminFetch(
   url: string,
   options: RequestInit = {}
@@ -129,7 +131,7 @@ export async function adminFetch(
   const method = options.method || "GET";
   const headers = prepareAdminHeaders(method, options.headers);
 
-  // 鍚堝苟headers
+  // Reuse the prepared headers and always send cookies.
   const finalOptions: RequestInit = {
     ...options,
     headers,
@@ -144,10 +146,9 @@ export async function adminFetch(
 }
 
 /**
- * Admin GET璇锋眰
- * NOTE: cleaned corrupted comment.
+ * Admin GET request wrapper.
  */
-export async function adminGet<T = any>(
+export async function adminGet<T = unknown>(
   path: string,
   options: AdminApiOptions = {}
 ): Promise<ApiResponse<T>> {
@@ -156,12 +157,11 @@ export async function adminGet<T = any>(
 }
 
 /**
- * Admin POST璇锋眰
- * NOTE: cleaned corrupted comment.
+ * Admin POST request wrapper.
  */
-export async function adminPost<T = any>(
+export async function adminPost<T = unknown>(
   path: string,
-  body?: any,
+  body?: AdminApiPayload,
   options: AdminApiOptions = {}
 ): Promise<ApiResponse<T>> {
   const headers = prepareAdminHeaders("POST", options.headers);
@@ -169,24 +169,22 @@ export async function adminPost<T = any>(
 }
 
 /**
- * Admin PATCH璇锋眰
- * NOTE: cleaned corrupted comment.
+ * Admin PATCH request wrapper.
  */
-export async function adminPatch<T = any>(
+export async function adminPatch<T = unknown>(
   path: string,
-  body?: any,
+  body?: AdminApiPayload,
   options: AdminApiOptions = {}
 ): Promise<ApiResponse<T>> {
   const headers = prepareAdminHeaders("PATCH", options.headers);
   return apiPatch<T>(path, body, { ...options, headers });
 }
 
-/**
- * Admin DELETE璇锋眰
- * NOTE: cleaned corrupted comment. */
-export async function adminDelete<T = any>(
+/** Admin DELETE request wrapper. */
+
+export async function adminDelete<T = unknown>(
   path: string,
-  body?: any,
+  body?: AdminApiPayload,
   options: AdminApiOptions = {}
 ): Promise<ApiResponse<T>> {
   const headers = prepareAdminHeaders("DELETE", options.headers);
@@ -194,10 +192,10 @@ export async function adminDelete<T = any>(
 }
 
 /**
- * Admin鏂囦欢涓婁紶
- * NOTE: cleaned corrupted comment.
+ * Admin multipart upload wrapper.
  */
-export async function adminUpload<T = any>(
+
+export async function adminUpload<T = unknown>(
   path: string,
   formData: FormData,
   options: AdminApiOptions = {}
@@ -206,191 +204,178 @@ export async function adminUpload<T = any>(
   return apiUpload<T>(path, formData, { ...options, headers });
 }
 
-// ============ Admin鐗瑰畾鐨勪究鎹峰嚱鏁?============
+// ============ Admin resource helpers ============
 
-/**
- * 鑾峰彇admin鐢ㄦ埛鍒楄〃
- */
+/** Fetch admin users. */
+
 export async function getAdminUsers(
   page: number = 1,
   pageSize: number = 20,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<PaginatedResponse<any>>> {
+): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
   return adminGet(`/api/admin/users?page=${page}&pageSize=${pageSize}`, options);
 }
 
-/**
- * 鑾峰彇admin璁㈠崟鍒楄〃
- */
+/** Fetch admin orders. */
+
 export async function getAdminOrders(
   page: number = 1,
   pageSize: number = 20,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<PaginatedResponse<any>>> {
+): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
   return adminGet(`/api/admin/orders?page=${page}&pageSize=${pageSize}`, options);
 }
 
-/**
- * 鑾峰彇admin閫氱煡鍒楄〃
- */
+/** Fetch admin notifications. */
+
 export async function getAdminNotifications(
   page: number = 1,
   pageSize: number = 20,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<PaginatedResponse<any>>> {
+): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
   return adminGet(`/api/admin/notifications?page=${page}&pageSize=${pageSize}`, options);
 }
 
-/**
- * 鑾峰彇admin淇冮攢鍒楄〃
- */
+/** Fetch admin promotions. */
+
 export async function getAdminPromotions(
   page: number = 1,
   pageSize: number = 20,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<PaginatedResponse<any>>> {
+): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
   return adminGet(`/api/admin/promotions?page=${page}&pageSize=${pageSize}`, options);
 }
 
-/**
- * 鍒涘缓admin淇冮攢
- */
+/** Create an admin promotion. */
+
 export async function createAdminPromotion(
-  data: any,
+  data: AdminApiPayload,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<AdminApiRecord>> {
   return adminPost("/api/admin/promotions", data, options);
 }
 
-/**
- * 鏇存柊admin淇冮攢
- */
+/** Update an admin promotion. */
+
 export async function updateAdminPromotion(
   id: string,
-  data: any,
+  data: AdminApiPayload,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<AdminApiRecord>> {
   return adminPatch(`/api/admin/promotions/${id}`, data, options);
 }
 
-/**
- * 鍒犻櫎admin淇冮攢
- */
+/** Delete an admin promotion. */
+
 export async function deleteAdminPromotion(
   id: string,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<AdminApiRecord>> {
   return adminDelete(`/api/admin/promotions/${id}`, undefined, options);
 }
 
 /**
- * 鑾峰彇admin鍝佺墝璁剧疆
+ * Fetch admin branding settings.
  */
 export async function getAdminBranding(
   options: AdminApiOptions = {}
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<AdminApiRecord>> {
   return adminGet("/api/admin/branding", options);
 }
 
 /**
- * 鏇存柊admin鍝佺墝璁剧疆
+ * Update admin branding settings.
  */
 export async function updateAdminBranding(
-  data: any,
+  data: AdminApiPayload,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<AdminApiRecord>> {
   return adminPatch("/api/admin/branding", data, options);
 }
 
-/**
- * 鑾峰彇admin绯诲垪鍒楄〃
- */
+/** Fetch admin series. */
+
 export async function getAdminSeries(
   page: number = 1,
   pageSize: number = 20,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<PaginatedResponse<any>>> {
+): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
   return adminGet(`/api/admin/series?page=${page}&pageSize=${pageSize}`, options);
 }
 
-/**
- * 鍒涘缓admin绯诲垪
- */
+/** Create an admin series item. */
+
 export async function createAdminSeries(
-  data: any,
+  data: AdminApiPayload,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<AdminApiRecord>> {
   return adminPost("/api/admin/series", data, options);
 }
 
-/**
- * 鏇存柊admin绯诲垪
- */
+/** Update an admin series item. */
+
 export async function updateAdminSeries(
   id: string,
-  data: any,
+  data: AdminApiPayload,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<AdminApiRecord>> {
   return adminPatch(`/api/admin/series/${id}`, data, options);
 }
 
-/**
- * 鍒犻櫎admin绯诲垪
- */
+/** Delete an admin series item. */
+
 export async function deleteAdminSeries(
   id: string,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<AdminApiRecord>> {
   return adminDelete(`/api/admin/series/${id}`, undefined, options);
 }
 
-/**
- * 鑾峰彇admin璇勮鍒楄〃
- */
+/** Fetch admin comments. */
+
 export async function getAdminComments(
   page: number = 1,
   pageSize: number = 20,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<PaginatedResponse<any>>> {
+): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
   return adminGet(`/api/admin/comments?page=${page}&pageSize=${pageSize}`, options);
 }
 
-/**
- * 鍒犻櫎admin璇勮
- */
+/** Delete an admin comment. */
+
 export async function deleteAdminComment(
   id: string,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<any>> {
+): Promise<ApiResponse<AdminApiRecord>> {
   return adminDelete(`/api/admin/comments/${id}`, undefined, options);
 }
 
-/**
- * 鑾峰彇admin鏃ュ織鍒楄〃
- */
+/** Fetch admin logs. */
+
 export async function getAdminLogs(
   page: number = 1,
   pageSize: number = 20,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<PaginatedResponse<any>>> {
+): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
   return adminGet(`/api/admin/logs?page=${page}&pageSize=${pageSize}`, options);
 }
 
-/**
- * 鑾峰彇admin璐﹀崟鍒楄〃
- */
+/** Fetch admin billing entries. */
+
 export async function getAdminBilling(
   page: number = 1,
   pageSize: number = 20,
   options: AdminApiOptions = {}
-): Promise<ApiResponse<PaginatedResponse<any>>> {
+): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
   return adminGet(`/api/admin/billing?page=${page}&pageSize=${pageSize}`, options);
 }
 
 /**
- * 鑾峰彇API鍩虹URL
- * NOTE: cleaned corrupted comment.
+ * Get the shared API base URL for admin calls.
  */
+
 export function getAdminApiBaseUrl(): string {
   return getApiBaseUrl();
 }
+
+

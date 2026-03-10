@@ -1,21 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Zap, Gift, Clock, Star, Sparkles } from "lucide-react";
 import SiteHeader from "../layout/SiteHeader";
 import { SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
 import { getPlanCatalog, setPlanCatalog } from "../../lib/subscriptions";
 import { apiGet } from "../../lib/apiClient";
 import { useWalletStore } from "../../store/useWalletStore";
+import { loadPersistedPaymentAttribution, mergePaymentAttribution, persistPaymentAttribution, readPaymentAttributionFromSearchParams } from "../../lib/paymentAttribution";
+import { trackEvent } from "../../lib/trackEvent";
 
 export default function SubscribePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { subscription, subscribe, cancelSubscription } = useWalletStore();
   const [workingId, setWorkingId] = useState("");
   const [planCatalog, setPlanCatalogState] = useState(getPlanCatalog());
   const isActive = Boolean(subscription?.active);
   const baseUnlockPrice = 5;
+  const returnTo = searchParams.get("returnTo") || "/account";
+  const attribution = useMemo(
+    () =>
+      mergePaymentAttribution(loadPersistedPaymentAttribution(), readPaymentAttributionFromSearchParams(searchParams), {
+        entryPoint: readPaymentAttributionFromSearchParams(searchParams)?.entryPoint || "SUBSCRIBE_PAGE",
+        returnTo,
+      }),
+    [searchParams, returnTo]
+  );
 
   const bestPlanId = (() => {
     const entries = Object.entries(planCatalog || {});
@@ -48,10 +60,30 @@ export default function SubscribePage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (attribution) {
+      persistPaymentAttribution(attribution);
+    }
+  }, [attribution]);
+
   const handleSubscribe = async (planId) => {
     setWorkingId(planId);
-    await subscribe(planId);
+    trackEvent("subscribe_cta_click", {
+      planId,
+      entryPoint: attribution?.entryPoint,
+      promotionId: attribution?.promotionId,
+      offerId: attribution?.offerId || `subscribe_${planId}`,
+    });
+    const response = await subscribe(planId, {
+      attribution: {
+        ...attribution,
+        offerId: attribution?.offerId || `subscribe_${planId}`,
+      },
+    });
     setWorkingId("");
+    if (response.ok) {
+      router.replace(returnTo);
+    }
   };
 
   const handleCancel = async () => {

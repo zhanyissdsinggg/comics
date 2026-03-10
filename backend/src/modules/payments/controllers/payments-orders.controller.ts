@@ -11,6 +11,7 @@ import {
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { buildWalletSnapshot } from "../../../common/utils/subscription";
 import { StatsService } from "../../../common/services/stats.service";
+import { normalizePaymentAttribution } from "../../../common/utils/payment-attribution";
 
 /**
  * 订单支付Controller - 处理支付创建、确认、退款等订单相关操作
@@ -82,7 +83,14 @@ export class PaymentsOrdersController {
       }
       return body;
     }
-    const created = await this.paymentsService.create(userId, packageId, expectedAmount, provider);
+    const attribution = normalizePaymentAttribution(body?.attribution);
+    const created = await this.paymentsService.create(
+      userId,
+      packageId,
+      expectedAmount,
+      provider,
+      idempotencyKey ? String(idempotencyKey) : undefined
+    );
     if (!created) {
       res.status(400);
       const body = buildError(ERROR_CODES.INVALID_REQUEST);
@@ -100,7 +108,14 @@ export class PaymentsOrdersController {
     };
     await this.logAudit(
       "payment_create",
-      { userId, targetType: "order", targetId: created.order?.id || "", packageId },
+      {
+        userId,
+        targetType: "order",
+        targetId: created.order?.id || "",
+        packageId,
+        expectedAmount,
+        attribution,
+      },
       req
     );
     if (idempotencyKey) {

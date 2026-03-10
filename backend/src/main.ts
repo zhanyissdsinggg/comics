@@ -1,25 +1,33 @@
+import { LogLevel, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
-import { LogLevel } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { AppModule } from "./app.module";
 import cookieParser = require("cookie-parser");
-import { loggerMiddleware } from "./common/middleware/logger.middleware";
-import { requestIdMiddleware } from "./common/middleware/request-id.middleware";
-import { ResponseEnvelopeInterceptor } from "./common/interceptors/response-envelope.interceptor";
-import { TimeoutInterceptor } from "./common/interceptors/timeout.interceptor";
-import { PrismaService } from "./common/prisma/prisma.service";
-import { createSessionMiddleware } from "./common/middleware/session.middleware";
-import { requireAuthMiddleware } from "./common/middleware/require-auth.middleware";
-import { json } from "express";
-import { initSentry } from "./common/sentry/sentry.init";
-import { SentryMiddleware } from "./common/sentry/sentry.middleware";
-import { logger } from "./common/logger/winston.init";
+import {
+  json,
+  static as expressStatic,
+  type Express,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
+import { join } from "path";
+import { AppModule } from "./app.module";
 import { ObservabilityService } from "./common/observability/observability.service";
 import { createObservabilityMiddleware } from "./common/observability/observability.middleware";
+import { ResponseEnvelopeInterceptor } from "./common/interceptors/response-envelope.interceptor";
+import { TimeoutInterceptor } from "./common/interceptors/timeout.interceptor";
+import { logger } from "./common/logger/winston.init";
+import { loggerMiddleware } from "./common/middleware/logger.middleware";
+import { requestIdMiddleware } from "./common/middleware/request-id.middleware";
+import { requireAuthMiddleware } from "./common/middleware/require-auth.middleware";
+import { createSessionMiddleware } from "./common/middleware/session.middleware";
+import { PrismaService } from "./common/prisma/prisma.service";
+import { initSentry } from "./common/sentry/sentry.init";
+import { SentryMiddleware } from "./common/sentry/sentry.middleware";
 
 const normalizeOrigin = (origin: string) => origin.trim().replace(/\/+$/, "");
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   initSentry();
 
   const logLevels: LogLevel[] =
@@ -34,10 +42,10 @@ async function bootstrap() {
   const observability = app.get(ObservabilityService);
 
   app.setGlobalPrefix("api");
-  const expressApp = app.getHttpAdapter().getInstance();
+  const expressApp = app.getHttpAdapter().getInstance() as Express;
   expressApp.disable("x-powered-by");
 
-  app.use((req: any, res: any, next: any) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("X-Frame-Options", "DENY");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -51,21 +59,26 @@ async function bootstrap() {
     next();
   });
 
-  // Railway fallback health endpoints (without global prefix)
-  expressApp.get("/", (_req: any, res: any) =>
+  expressApp.get("/", (_req: Request, res: Response) =>
     res.status(200).json({ ok: true, service: "gush-backend", time: new Date().toISOString() }),
   );
-  expressApp.get("/health", (_req: any, res: any) =>
+  expressApp.get("/health", (_req: Request, res: Response) =>
     res.status(200).json({ ok: true, service: "gush-backend", time: new Date().toISOString() }),
   );
 
   const originEnv = process.env.FRONTEND_ORIGIN || "";
-  const allowedOrigins = originEnv
-    .split(",")
-    .map(normalizeOrigin)
-    .filter(Boolean);
+  const allowedOrigins = originEnv.split(",").map(normalizeOrigin).filter(Boolean);
   const allowedOriginSet = new Set(allowedOrigins);
   const isProd = process.env.NODE_ENV === "production";
+  const uploadsDir = join(process.cwd(), "public", "uploads");
+  expressApp.use(
+    "/uploads",
+    expressStatic(uploadsDir, {
+      fallthrough: true,
+      index: false,
+      maxAge: isProd ? "7d" : 0,
+    }),
+  );
   const localhostOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
   const trustedGushDomainPattern = /^https:\/\/([a-z0-9-]+\.)*gushcomics\.com$/i;
 
@@ -84,7 +97,6 @@ async function bootstrap() {
         return callback(null, true);
       }
 
-      // Allow first-party domains such as gushcomics.com and www.gushcomics.com.
       if (trustedGushDomainPattern.test(normalizedRequestOrigin)) {
         return callback(null, true);
       }
@@ -97,8 +109,8 @@ async function bootstrap() {
 
   app.use(
     json({
-      verify: (req: any, _res, buf) => {
-        req.rawBody = buf?.toString("utf8") || "";
+      verify: (req: Request, _res: Response, buf: Buffer) => {
+        req.rawBody = buf.toString("utf8");
       },
     }),
   );
@@ -106,12 +118,21 @@ async function bootstrap() {
   app.use(cookieParser());
 
   const prisma = app.get(PrismaService);
-  app.use(createSessionMiddleware(prisma));
-  app.use(requireAuthMiddleware);
   app.use(requestIdMiddleware);
   app.use(createObservabilityMiddleware(observability));
   app.use(loggerMiddleware);
-  app.use(new SentryMiddleware().use.bind(new SentryMiddleware()));
+  app.use(createSessionMiddleware(prisma));
+  app.use(requireAuthMiddleware);
+
+  const sentryMiddleware = new SentryMiddleware();
+  app.use(sentryMiddleware.use.bind(sentryMiddleware));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidUnknownValues: false,
+    }),
+  );
   app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());
   app.useGlobalInterceptors(new TimeoutInterceptor());
 
@@ -123,9 +144,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api/docs", app, document);
 
-  const port = process.env.PORT || 4000;
+  const port = Number(process.env.PORT || 4000);
   await app.listen(port);
   logger.info(`Application started on port: ${port}`);
 }
 
-bootstrap();
+void bootstrap();
+

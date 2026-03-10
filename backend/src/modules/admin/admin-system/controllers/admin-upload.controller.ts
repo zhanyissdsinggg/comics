@@ -5,11 +5,14 @@ import {
   UseInterceptors,
   UseGuards,
   BadRequestException,
+  Req,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
+import type { Request } from "express";
 import { extname, join } from "path";
 import { existsSync, mkdirSync } from "fs";
+import { buildPublicAssetUrl } from "../../../../common/utils/public-asset-url";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 
 // 老王注释：生成唯一文件名，避免重复
@@ -55,14 +58,15 @@ export class AdminUploadController {
     })
   )
   async uploadImage(
-    @UploadedFile() file: any
+    @UploadedFile() file: any,
+    @Req() req: Request
   ) {
     if (!file) {
       throw new BadRequestException("缺少文件");
     }
 
     // 老王注释：返回图片URL
-    const imageUrl = `/uploads/${file.filename}`;
+    const imageUrl = buildPublicAssetUrl(req, `/uploads/${file.filename}`);
     return {
       success: true,
       url: imageUrl,

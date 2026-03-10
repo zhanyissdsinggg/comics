@@ -34,7 +34,7 @@ const SORT_OPTIONS = [
   { id: "popular", label: "Popular" },
   { id: "rating", label: "Rating" },
   { id: "latest", label: "Latest" },
-  { id: "completed", label: "Completed" },
+  { id: "alphabetical", label: "A-Z" },
 ];
 
 const HISTORY_KEY = "mn_search_history";
@@ -271,18 +271,25 @@ export default function SearchPage() {
     }
   }, []);
 
-  const updateParam = (key, value) => {
+  const updateParams = useCallback((updates, options = {}) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-    if (key !== "page") {
+    Object.entries(updates).forEach(([key, value]) => {
+      const nextValue = typeof value === "string" ? value.trim() : value;
+      if (nextValue) {
+        params.set(key, String(nextValue));
+      } else {
+        params.delete(key);
+      }
+    });
+    if (options.resetPage !== false && !("page" in updates)) {
       params.set("page", "1");
     }
     router.replace(`/search?${params.toString()}`);
-  };
+  }, [router, searchParams]);
+
+  const updateParam = useCallback((key, value) => {
+    updateParams({ [key]: value }, { resetPage: key === "page" ? false : true });
+  }, [updateParams]);
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -471,7 +478,7 @@ export default function SearchPage() {
                       {series.badge ? <Pill>{series.badge}</Pill> : null}
                     </div>
                     <p className="text-xs text-neutral-400">
-                      {series.type} • {series.status} • {series.rating}
+                      {series.type} 闂?{series.status} 闂?{series.rating}
                     </p>
                     <div className="flex flex-wrap gap-2 text-[10px] text-neutral-400">
                       {(series.genres || []).slice(0, 3).map((item) => (
@@ -518,28 +525,21 @@ export default function SearchPage() {
         isOpen={showAdvancedFilters}
         onClose={() => setShowAdvancedFilters(false)}
         onApply={(filters) => {
-          if (filters.types.length > 0) {
-            updateParam("type", filters.types.join(","));
-          }
-          if (filters.status && filters.status !== "all") {
-            updateParam("status", filters.status);
-          }
-          if (filters.sortBy) {
-            updateParam("sort", filters.sortBy);
-          }
-          if (filters.author) {
-            updateParam("author", filters.author);
-          }
-          if (filters.tags.length > 0) {
-            updateParam("genre", filters.tags.join(","));
-          }
+          updateParams(
+            {
+              type: filters.types.join(","),
+              status: filters.status && filters.status !== "all" ? filters.status : "",
+              sort: filters.sortBy || "relevance",
+              genre: filters.tags.join(","),
+            },
+            { resetPage: true },
+          );
         }}
         initialFilters={{
           types: type ? type.split(",") : [],
           tags: genre ? genre.split(",") : [],
           status: status || "all",
-          sortBy: sort || "popular",
-          author: searchParams.get("author") || "",
+          sortBy: sort || "relevance",
         }}
       />
     </main>

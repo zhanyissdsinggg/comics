@@ -25,6 +25,7 @@ import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
 import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAutoSaveProgress } from "../../hooks/useAutoSaveProgress";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 
 const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
   ssr: false,
@@ -1033,7 +1034,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
               type="button"
               onClick={() => {
                 trackEvent("click_subscribe_from_paywall", { seriesId, episodeId });
-                router.push("/subscribe");
+                router.push(
+                  buildPathWithAttribution("/subscribe", {
+                    entryPoint: "READER_PAYWALL",
+                    sourcePath: `/read/${seriesId}/${episodeId}`,
+                    sourceSeriesId: seriesId,
+                    sourceEpisodeId: episodeId,
+                    returnTo: `/read/${seriesId}/${episodeId}`,
+                  })
+                );
               }}
               className="mt-3 w-full rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-100"
             >
@@ -1043,7 +1052,19 @@ export default function ReaderPage({ seriesId, episodeId }) {
               type="button"
               onClick={() => {
                 trackEvent("offer_click", { offerId: "store_entry", entry: "READER_PAYWALL" });
-                router.push(`/store?returnTo=/read/${seriesId}/${episodeId}&focus=auto`);
+                router.push(
+                  buildPathWithAttribution(
+                    "/store",
+                    {
+                      entryPoint: "READER_PAYWALL",
+                      sourcePath: `/read/${seriesId}/${episodeId}`,
+                      sourceSeriesId: seriesId,
+                      sourceEpisodeId: episodeId,
+                      returnTo: `/read/${seriesId}/${episodeId}`,
+                    },
+                    { returnTo: `/read/${seriesId}/${episodeId}`, focus: "auto" }
+                  )
+                );
               }}
               className="mt-2 w-full rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300"
             >
@@ -1071,7 +1092,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
               episodeId,
               nextEpisodeId: nextEpisode?.id || null,
             });
-            router.push("/subscribe");
+            router.push(
+              buildPathWithAttribution("/subscribe", {
+                entryPoint: "READER_END",
+                sourcePath: `/read/${seriesId}/${episodeId}`,
+                sourceSeriesId: seriesId,
+                sourceEpisodeId: episodeId,
+                returnTo: `/read/${seriesId}/${episodeId}`,
+              })
+            );
           }}
           onClaim={handleClaimNext}
           onOfferClick={(offerId) =>
@@ -1100,7 +1129,17 @@ export default function ReaderPage({ seriesId, episodeId }) {
           onSelectEpisode={handleSelectEpisode}
           onGoBookmark={handleGoBookmark}
           onRemoveBookmark={(id) => removeBookmark(seriesId, id)}
-          onSubscribe={() => router.push("/subscribe")}
+          onSubscribe={() =>
+            router.push(
+              buildPathWithAttribution("/subscribe", {
+                entryPoint: "READER_DRAWER",
+                sourcePath: `/read/${seriesId}/${episodeId}`,
+                sourceSeriesId: seriesId,
+                sourceEpisodeId: episodeId,
+                returnTo: `/read/${seriesId}/${episodeId}`,
+              })
+            )
+          }
         />
       ) : null}
 
@@ -1150,7 +1189,17 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     label: "Top up POINTS",
                     onClick: () => {
                       router.push(
-                        `/store?returnTo=/read/${seriesId}/${episodeId}&focus=auto`
+                        buildPathWithAttribution(
+                          "/store",
+                          {
+                            entryPoint: "READER_PAYWALL",
+                            sourcePath: `/read/${seriesId}/${episodeId}`,
+                            sourceSeriesId: seriesId,
+                            sourceEpisodeId: episodeId,
+                            returnTo: `/read/${seriesId}/${episodeId}`,
+                          },
+                          { returnTo: `/read/${seriesId}/${episodeId}`, focus: "auto" }
+                        )
                       );
                       trackEvent("offer_click", {
                         offerId: "store_entry",
@@ -1167,7 +1216,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
                         seriesId,
                         episodeId,
                       });
-                      router.push(`/subscribe?returnTo=/read/${seriesId}/${episodeId}`);
+                      router.push(
+                        buildPathWithAttribution("/subscribe", {
+                          entryPoint: "READER_PAYWALL",
+                          sourcePath: `/read/${seriesId}/${episodeId}`,
+                          sourceSeriesId: seriesId,
+                          sourceEpisodeId: modalState?.targetEpisodeId || episodeId,
+                          returnTo: `/read/${seriesId}/${episodeId}`,
+                        })
+                      );
                       setModalState(null);
                     },
                     variant: "secondary",
@@ -1180,12 +1237,20 @@ export default function ReaderPage({ seriesId, episodeId }) {
                           "points_pack_",
                           ""
                         ) || "starter";
-                      trackEvent("topup_start", { packageId, entry: "READER_PAYWALL" });
                       trackEvent("offer_click", {
                         offerId: offerDecision?.recommendedTopupOffer?.id,
                         entry: "READER_PAYWALL",
                       });
-                      const topupResponse = await topup(packageId);
+                      const topupResponse = await topup(packageId, {
+                        attribution: {
+                          entryPoint: "READER_PAYWALL",
+                          offerId: offerDecision?.recommendedTopupOffer?.id || `points_pack_${packageId}`,
+                          sourcePath: `/read/${seriesId}/${episodeId}`,
+                          sourceSeriesId: seriesId,
+                          sourceEpisodeId: episodeId,
+                          returnTo: `/read/${seriesId}/${episodeId}`,
+                        },
+                      });
                       if (topupResponse.ok) {
                         const retryId = modalState?.targetEpisodeId || episodeId;
                         const retry = await handleUnlock(retryId);

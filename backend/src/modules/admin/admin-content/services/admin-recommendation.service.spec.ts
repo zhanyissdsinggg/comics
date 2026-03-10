@@ -50,6 +50,18 @@ describe('AdminRecommendationService', () => {
                 ranking: 'updated-ranking',
                 config: JSON.stringify({ rankingType: 'rating', timeRange: 'week' }),
               }),
+              findUnique: jest.fn().mockResolvedValue({
+                id: 'ranking-1',
+                ranking: 'daily-ranking',
+                config: JSON.stringify({
+                  rankingType: 'views',
+                  timeRange: 'month',
+                  seriesType: 'comic',
+                  adult: true,
+                  maxItems: 50,
+                  active: true,
+                }),
+              }),
               delete: jest.fn().mockResolvedValue({ id: 'ranking-1' }),
             },
             recommendationAnalytics: {
@@ -252,6 +264,46 @@ describe('AdminRecommendationService', () => {
       });
 
       expect(prisma.rankingConfig.update).toHaveBeenCalled();
+    });
+    it('should preserve existing ranking config fields during partial updates', async () => {
+      const updateMock = prisma.rankingConfig.update as jest.Mock;
+      updateMock.mockResolvedValueOnce({
+        id: 'ranking-1',
+        ranking: 'daily-ranking',
+        config: JSON.stringify({
+          rankingType: 'views',
+          timeRange: 'month',
+          seriesType: 'comic',
+          adult: true,
+          maxItems: 50,
+          active: false,
+        }),
+      });
+
+      const result = await service.updateRankingConfig('ranking-1', { active: false });
+
+      expect(prisma.rankingConfig.findUnique).toHaveBeenCalledWith({
+        where: { id: 'ranking-1' },
+      });
+      expect(prisma.rankingConfig.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            config: JSON.stringify({
+              rankingType: 'views',
+              timeRange: 'month',
+              seriesType: 'comic',
+              adult: true,
+              maxItems: 50,
+              active: false,
+            }),
+          }),
+        })
+      );
+      expect(result.timeRange).toBe('month');
+      expect(result.seriesType).toBe('comic');
+      expect(result.adult).toBe(true);
+      expect(result.maxItems).toBe(50);
+      expect(result.active).toBe(false);
     });
   });
 

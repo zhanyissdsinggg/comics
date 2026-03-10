@@ -247,6 +247,29 @@ describe('AdminMarketingService', () => {
 
       expect(prisma.marketingBudget.upsert).not.toHaveBeenCalled();
     });
+    it('should persist spent when updating a campaign', async () => {
+      await service.updateCampaign('campaign-1', { spent: 700 });
+
+      expect(prisma.marketingCampaign.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'campaign-1' },
+          data: expect.objectContaining({ spent: 700 }),
+        })
+      );
+    });
+
+    it('should clear nullable schedule fields when null or empty string is provided', async () => {
+      await service.updateCampaign('campaign-1', { startDate: null, endDate: '' });
+
+      expect(prisma.marketingCampaign.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            startDate: null,
+            endDate: null,
+          }),
+        })
+      );
+    });
   });
 
   describe('deleteCampaign', () => {

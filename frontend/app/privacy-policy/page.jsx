@@ -1,218 +1,127 @@
-/* eslint-disable react/no-unescaped-entities */
-import SiteHeader from "../../components/layout/SiteHeader";
+import { createPageMetadata } from "../../lib/seo";
+import { siteConfig } from "../../lib/siteConfig";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Privacy Policy",
-  description: "Our commitment to protecting your privacy and personal information.",
-};
+  description: `Learn how ${siteConfig.siteName} collects, uses, and protects personal information.`,
+  path: "/privacy-policy",
+});
+
+const effectiveDate = "March 9, 2026";
+
+function ContactCard() {
+  return (
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4 text-sm text-neutral-300">
+      <p>
+        <strong>Email:</strong> {siteConfig.privacyEmail}
+      </p>
+      {siteConfig.companyAddress ? (
+        <p className="mt-2">
+          <strong>Address:</strong> {siteConfig.companyAddress}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <SiteHeader />
-      <main className="mx-auto max-w-4xl px-4 pb-12 pt-8">
-        <div className="space-y-8">
-          {/* Header */}
-          <div>
-            <h1 className="text-3xl font-bold">Privacy Policy</h1>
-            <p className="mt-2 text-sm text-neutral-400">
-              Last Updated: February 10, 2026
+    <main className="min-h-screen bg-neutral-950 px-4 py-16 text-white">
+      <div className="mx-auto max-w-4xl space-y-8">
+        <header className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-8">
+          <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">Legal</p>
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Privacy Policy</h1>
+          <p className="max-w-3xl text-sm leading-7 text-neutral-300 sm:text-base">
+            This policy explains what data {siteConfig.companyName} collects, why we collect it, how we protect it, and
+            what choices you have.
+          </p>
+          <p className="text-sm text-neutral-500">Effective date: {effectiveDate}</p>
+        </header>
+
+        <section className="space-y-6 rounded-3xl border border-white/10 bg-neutral-900/80 p-8 text-neutral-300">
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-white">1. Information we collect</h2>
+            <ul className="list-disc space-y-2 pl-5">
+              <li>Account details such as email address, login identifiers, and profile preferences.</li>
+              <li>Transactional data related to purchases, subscriptions, refunds, and promotional redemptions.</li>
+              <li>Usage data such as pages visited, reading progress, device type, and basic diagnostic information.</li>
+              <li>Messages you send to support, feedback forms, or other direct communications with us.</li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-white">2. How we use information</h2>
+            <ul className="list-disc space-y-2 pl-5">
+              <li>Operate the service, authenticate users, and process payments.</li>
+              <li>Improve stability, fix bugs, monitor abuse, and maintain security.</li>
+              <li>Personalize recommendations, reading features, and product messaging.</li>
+              <li>Meet legal obligations, enforce our Terms, and respond to valid requests from authorities.</li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-white">3. Legal bases and sharing</h2>
+            <p>
+              We process information when it is necessary to perform our contract with you, comply with law, protect the
+              service, or pursue legitimate business interests such as fraud prevention and service improvement. We may
+              share data with infrastructure providers, payment processors, analytics vendors, customer support tools,
+              or rights holders when needed to operate the platform.
             </p>
           </div>
 
-          {/* Introduction */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">1. Introduction</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              Welcome to Gush ("we," "our," or "us"). We are committed to protecting your privacy and personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-white">4. Retention and security</h2>
+            <p>
+              We retain data only as long as it is needed for the purposes described here, including compliance,
+              accounting, dispute resolution, and service integrity. We use administrative, technical, and organizational
+              safeguards designed to protect personal information, but no system is perfectly secure.
             </p>
-            <p className="text-neutral-300 leading-relaxed">
-              By using our services, you agree to the collection and use of information in accordance with this policy. If you do not agree with our policies and practices, please do not use our services.
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-white">5. International transfers</h2>
+            <p>
+              Your information may be processed in countries other than where you live. When that happens, we use
+              reasonable safeguards appropriate for the type of data involved and the legal requirements that apply.
             </p>
-          </section>
+          </div>
 
-          {/* Information We Collect */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">2. Information We Collect</h2>
-
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-neutral-200">2.1 Personal Information</h3>
-              <p className="text-neutral-300 leading-relaxed">
-                We may collect personal information that you voluntarily provide to us when you:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-neutral-300 ml-4">
-                <li>Register for an account</li>
-                <li>Make a purchase</li>
-                <li>Subscribe to our newsletter</li>
-                <li>Contact customer support</li>
-                <li>Participate in surveys or promotions</li>
-              </ul>
-              <p className="text-neutral-300 leading-relaxed">
-                This information may include: name, email address, username, password, payment information, and any other information you choose to provide.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-neutral-200">2.2 Automatically Collected Information</h3>
-              <p className="text-neutral-300 leading-relaxed">
-                When you access our services, we automatically collect certain information, including:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-neutral-300 ml-4">
-                <li>Device information (IP address, browser type, operating system)</li>
-                <li>Usage data (pages visited, time spent, click patterns)</li>
-                <li>Cookies and similar tracking technologies</li>
-                <li>Location data (with your permission)</li>
-              </ul>
-            </div>
-          </section>
-
-          {/* How We Use Your Information */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">3. How We Use Your Information</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              We use the information we collect for various purposes, including:
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-white">6. Your rights</h2>
+            <p>
+              Depending on where you live, you may have the right to access, correct, delete, restrict, object to, or
+              port certain personal information. You may also have the right to withdraw consent where processing depends
+              on consent.
             </p>
-            <ul className="list-disc list-inside space-y-2 text-neutral-300 ml-4">
-              <li>Providing and maintaining our services</li>
-              <li>Processing transactions and sending related information</li>
-              <li>Sending administrative information, updates, and security alerts</li>
-              <li>Responding to your comments, questions, and customer service requests</li>
-              <li>Personalizing your experience and delivering targeted content</li>
-              <li>Monitoring and analyzing usage patterns and trends</li>
-              <li>Detecting, preventing, and addressing technical issues and fraud</li>
-              <li>Complying with legal obligations</li>
-            </ul>
-          </section>
-
-          {/* Cookies and Tracking */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">4. Cookies and Tracking Technologies</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              We use cookies and similar tracking technologies to track activity on our service and store certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our service.
+            <p>
+              To make a privacy request, contact us at {siteConfig.privacyEmail}. We may need to verify your identity
+              before completing the request.
             </p>
-            <p className="text-neutral-300 leading-relaxed">
-              Types of cookies we use:
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-white">7. Children</h2>
+            <p>
+              The service is not directed to children under the age required by applicable law in their jurisdiction.
+              If you believe a child provided personal information without proper consent, contact us so we can review it.
             </p>
-            <ul className="list-disc list-inside space-y-2 text-neutral-300 ml-4">
-              <li><strong>Essential Cookies:</strong> Required for the website to function properly</li>
-              <li><strong>Analytics Cookies:</strong> Help us understand how visitors interact with our website</li>
-              <li><strong>Preference Cookies:</strong> Remember your settings and preferences</li>
-              <li><strong>Marketing Cookies:</strong> Track your browsing habits to show relevant ads</li>
-            </ul>
-          </section>
+          </div>
 
-          {/* Data Sharing */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">5. How We Share Your Information</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              We may share your information in the following situations:
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-white">8. Policy updates</h2>
+            <p>
+              We may update this policy when our practices, product features, or legal obligations change. When we make
+              material updates, we will post the new version on this page and update the effective date above.
             </p>
-            <ul className="list-disc list-inside space-y-2 text-neutral-300 ml-4">
-              <li><strong>Service Providers:</strong> With third-party vendors who perform services on our behalf</li>
-              <li><strong>Business Transfers:</strong> In connection with a merger, sale, or acquisition</li>
-              <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
-              <li><strong>With Your Consent:</strong> When you have given us explicit permission</li>
-            </ul>
-            <p className="text-neutral-300 leading-relaxed">
-              We do not sell your personal information to third parties.
-            </p>
-          </section>
+          </div>
 
-          {/* Data Security */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">6. Data Security</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              We implement appropriate technical and organizational security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your information, we cannot guarantee its absolute security.
-            </p>
-          </section>
-
-          {/* Your Rights (CCPA/GDPR) */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">7. Your Privacy Rights</h2>
-
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-neutral-200">7.1 California Residents (CCPA)</h3>
-              <p className="text-neutral-300 leading-relaxed">
-                If you are a California resident, you have the right to:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-neutral-300 ml-4">
-                <li>Know what personal information we collect, use, and disclose</li>
-                <li>Request deletion of your personal information</li>
-                <li>Opt-out of the sale of your personal information (we do not sell your data)</li>
-                <li>Non-discrimination for exercising your privacy rights</li>
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-neutral-200">7.2 European Residents (GDPR)</h3>
-              <p className="text-neutral-300 leading-relaxed">
-                If you are in the European Economic Area (EEA), you have the right to:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-neutral-300 ml-4">
-                <li>Access your personal data</li>
-                <li>Rectify inaccurate personal data</li>
-                <li>Request erasure of your personal data</li>
-                <li>Restrict processing of your personal data</li>
-                <li>Data portability</li>
-                <li>Object to processing of your personal data</li>
-                <li>Withdraw consent at any time</li>
-              </ul>
-            </div>
-
-            <p className="text-neutral-300 leading-relaxed">
-              To exercise any of these rights, please contact us at privacy@gush.com
-            </p>
-          </section>
-
-          {/* Data Retention */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">8. Data Retention</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              We retain your personal information only for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required or permitted by law.
-            </p>
-          </section>
-
-          {/* Children's Privacy */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">9. Children's Privacy</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              Our services are not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us.
-            </p>
-          </section>
-
-          {/* International Transfers */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">10. International Data Transfers</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              Your information may be transferred to and maintained on computers located outside of your state, province, country, or other governmental jurisdiction where data protection laws may differ. We will take all steps reasonably necessary to ensure that your data is treated securely and in accordance with this Privacy Policy.
-            </p>
-          </section>
-
-          {/* Changes to Policy */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">11. Changes to This Privacy Policy</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date. You are advised to review this Privacy Policy periodically for any changes.
-            </p>
-          </section>
-
-          {/* Contact */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">12. Contact Us</h2>
-            <p className="text-neutral-300 leading-relaxed">
-              If you have any questions about this Privacy Policy, please contact us:
-            </p>
-            <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4 space-y-2">
-              <p className="text-neutral-300">
-                <strong>Email:</strong> privacy@gush.com
-              </p>
-              <p className="text-neutral-300">
-                <strong>Address:</strong> [Your Company Address]
-              </p>
-            </div>
-          </section>
-        </div>
-      </main>
-    </div>
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-white">9. Contact</h2>
+            <p>If you have privacy questions or data rights requests, contact us here:</p>
+            <ContactCard />
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }

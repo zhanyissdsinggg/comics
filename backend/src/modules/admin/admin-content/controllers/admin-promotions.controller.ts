@@ -1,8 +1,94 @@
-import { Body, Controller, Delete, Get, Patch, Post, UseGuards, BadRequestException, NotFoundException, Req } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
+import { parseStoredJson, stringifyStoredJson } from "../../../../common/utils/stored-json";
+import { AdminAudit } from "../../decorators/admin-audit.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
-import { UpdatePromotionDto, CreatePromotionDto } from "../dtos/admin-content.dto";
+import { CreatePromotionDto, UpdatePromotionDto } from "../dtos/admin-content.dto";
+
+type PromotionInput = Record<string, unknown>;
+
+type PromotionDefaults = {
+  ctaType: string;
+  ctaTarget: string;
+  ctaLabel: string;
+};
+
+const DEFAULT_PROMOTION_DEFAULTS: PromotionDefaults = {
+  ctaType: "STORE",
+  ctaTarget: "",
+  ctaLabel: "View offer",
+};
+
+function asRecord(value: unknown): PromotionInput {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as PromotionInput)
+    : {};
+}
+
+function readString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (value === undefined || value === null) {
+    return fallback;
+  }
+  return String(value);
+}
+
+function readNumber(value: unknown, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function readBoolean(value: unknown, fallback = false): boolean {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["1", "true", "yes", "on"].includes(normalized)) {
+      return true;
+    }
+    if (["0", "false", "no", "off"].includes(normalized)) {
+      return false;
+    }
+  }
+  if (typeof value === "number") {
+    if (value === 1) return true;
+    if (value === 0) return false;
+  }
+  throw new BadRequestException("Promotion boolean fields must be true/false.");
+}
+
+function readDate(value: unknown): Date | null {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+  const date = new Date(readString(value));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function readOptionalDate(value: unknown): Date | null | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return readDate(value);
+}
 
 @Controller("admin/promotions")
 @UseGuards(AdminAuthGuard)
@@ -20,66 +106,77 @@ export class AdminPromotionsController {
     const fallback = await this.prisma.promotionFallback.findUnique({
       where: { key: "default" },
     });
-    return { defaults: fallback?.payload || { ctaType: "STORE", ctaTarget: "", ctaLabel: "View offer" } };
+    return {
+      defaults: parseStoredJson(fallback?.payload, DEFAULT_PROMOTION_DEFAULTS),
+    };
   }
 
   @Patch("defaults")
+  @AdminAudit("update", "promotion_defaults")
   async updateDefaults(@Body() body: UpdatePromotionDto) {
-    const payload = body?.defaults || {};
+    const payload = asRecord(body?.defaults);
+    const serialized = stringifyStoredJson(payload);
     const defaults = await this.prisma.promotionFallback.upsert({
       where: { key: "default" },
-      update: { payload },
-      create: { key: "default", payload },
+      update: { payload: serialized },
+      create: { key: "default", payload: serialized },
     });
-    return { defaults: defaults.payload };
+    return { defaults: parseStoredJson(defaults.payload, DEFAULT_PROMOTION_DEFAULTS) };
   }
 
   @Post()
+  @AdminAudit("create", "promotion")
   async create(@Body() body: CreatePromotionDto) {
-    const promo = body?.promotion;
-    if (!promo?.id) {
-      throw new BadRequestException("缺少promotion.id参数");
+    const promo = asRecord(body?.promotion);
+    const promoId = readString(promo.id).trim();
+    if (!promoId) {
+      throw new BadRequestException("promotion.id is required.");
     }
+
     const payload = {
-      id: String(promo.id),
-      title: String(promo.title || "Untitled Promotion"),
-      description: String(promo.description || ""),
-      type: String(promo.type || "GENERIC"),
-      segment: String(promo.segment || "ALL"),
-      active: Boolean(promo.active),
-      startAt: promo.startAt ? new Date(promo.startAt) : null,
-      endAt: promo.endAt ? new Date(promo.endAt) : null,
-      bonusMultiplier: Number(promo.bonusMultiplier || 0),
-      returningAfterDays: Number(promo.returningAfterDays || 7),
-      autoGrant: Boolean(promo.autoGrant),
-      ctaType: String(promo.ctaType || "STORE"),
-      ctaTarget: String(promo.ctaTarget || ""),
-      ctaLabel: String(promo.ctaLabel || ""),
+      id: promoId,
+      title: readString(promo.title, "Untitled Promotion"),
+      description: readString(promo.description),
+      type: readString(promo.type, "GENERIC"),
+      segment: readString(promo.segment, "ALL"),
+      active: readBoolean(promo.active, false),
+      startAt: readDate(promo.startAt),
+      endAt: readDate(promo.endAt),
+      bonusMultiplier: readNumber(promo.bonusMultiplier, 0),
+      returningAfterDays: readNumber(promo.returningAfterDays, 7),
+      autoGrant: readBoolean(promo.autoGrant, false),
+      ctaType: readString(promo.ctaType, "STORE"),
+      ctaTarget: readString(promo.ctaTarget),
+      ctaLabel: readString(promo.ctaLabel),
     };
+
     const created = await this.prisma.promotion.create({ data: payload });
     return { promotion: created };
   }
 
   @Patch(":id")
+  @AdminAudit("update", "promotion")
   async update(@Body() body: UpdatePromotionDto, @Req() req: Request) {
     const promoId = String(req.params.id || "");
-    const promo = body?.promotion || {};
+    const promo = asRecord(body?.promotion);
     const payload = {
-      title: promo.title !== undefined ? String(promo.title || "") : undefined,
-      description: promo.description !== undefined ? String(promo.description || "") : undefined,
-      type: promo.type !== undefined ? String(promo.type || "") : undefined,
-      segment: promo.segment !== undefined ? String(promo.segment || "") : undefined,
-      active: promo.active !== undefined ? Boolean(promo.active) : undefined,
-      startAt: promo.startAt !== undefined ? (promo.startAt ? new Date(promo.startAt) : null) : undefined,
-      endAt: promo.endAt !== undefined ? (promo.endAt ? new Date(promo.endAt) : null) : undefined,
-      bonusMultiplier: promo.bonusMultiplier !== undefined ? Number(promo.bonusMultiplier || 0) : undefined,
+      title: promo.title !== undefined ? readString(promo.title) : undefined,
+      description: promo.description !== undefined ? readString(promo.description) : undefined,
+      type: promo.type !== undefined ? readString(promo.type) : undefined,
+      segment: promo.segment !== undefined ? readString(promo.segment) : undefined,
+      active: promo.active !== undefined ? readBoolean(promo.active) : undefined,
+      startAt: readOptionalDate(promo.startAt),
+      endAt: readOptionalDate(promo.endAt),
+      bonusMultiplier:
+        promo.bonusMultiplier !== undefined ? readNumber(promo.bonusMultiplier, 0) : undefined,
       returningAfterDays:
-        promo.returningAfterDays !== undefined ? Number(promo.returningAfterDays || 7) : undefined,
-      autoGrant: promo.autoGrant !== undefined ? Boolean(promo.autoGrant) : undefined,
-      ctaType: promo.ctaType !== undefined ? String(promo.ctaType || "") : undefined,
-      ctaTarget: promo.ctaTarget !== undefined ? String(promo.ctaTarget || "") : undefined,
-      ctaLabel: promo.ctaLabel !== undefined ? String(promo.ctaLabel || "") : undefined,
+        promo.returningAfterDays !== undefined ? readNumber(promo.returningAfterDays, 7) : undefined,
+      autoGrant: promo.autoGrant !== undefined ? readBoolean(promo.autoGrant) : undefined,
+      ctaType: promo.ctaType !== undefined ? readString(promo.ctaType) : undefined,
+      ctaTarget: promo.ctaTarget !== undefined ? readString(promo.ctaTarget) : undefined,
+      ctaLabel: promo.ctaLabel !== undefined ? readString(promo.ctaLabel) : undefined,
     };
+
     const updated = await this.prisma.promotion.update({
       where: { id: promoId },
       data: payload,
@@ -88,11 +185,12 @@ export class AdminPromotionsController {
   }
 
   @Delete(":id")
+  @AdminAudit("delete", "promotion")
   async remove(@Req() req: Request) {
     const promoId = String(req.params.id || "");
     const existing = await this.prisma.promotion.findUnique({ where: { id: promoId } });
     if (!existing) {
-      throw new NotFoundException("促销活动不存在");
+      throw new NotFoundException("Promotion not found.");
     }
     await this.prisma.promotion.delete({ where: { id: promoId } });
     return { ok: true };

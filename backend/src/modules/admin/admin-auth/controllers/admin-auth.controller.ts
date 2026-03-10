@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpCode,
   HttpException,
   HttpStatus,
   Post,
@@ -9,6 +10,7 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { randomUUID } from "crypto";
+import { IncomingHttpHeaders } from "http";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { getRedisClient } from "../../../../common/redis/client";
 import { logger } from "../../../../common/logger/winston.init";
@@ -26,7 +28,23 @@ const ACCESS_TOKEN_EXPIRES_SECONDS = 24 * 60 * 60;
 const REFRESH_TOKEN_EXPIRES_SECONDS = 7 * 24 * 60 * 60;
 const REDIS_OPERATION_TIMEOUT_MS = 1500;
 
-type RequestLike = any;
+type ResponseLike = {
+  setHeader?: (name: string, value: string[]) => void;
+};
+
+type RequestLike = {
+  headers?: IncomingHttpHeaders & {
+    authorization?: string;
+    "x-forwarded-for"?: string | string[];
+  };
+  cookies?: Record<string, string | undefined>;
+  userId?: string;
+  ip?: string;
+  connection?: {
+    remoteAddress?: string | null;
+  };
+  res?: ResponseLike;
+};
 type LoginFailureReason = "invalid_admin_key" | "invalid_two_factor_code";
 
 @Controller("admin/auth")
@@ -124,8 +142,8 @@ export class AdminAuthController {
       expiresIn: ACCESS_TOKEN_EXPIRES_SECONDS,
     };
   }
-
   @Post("refresh")
+  @HttpCode(200)
   @UsePipes(new ValidationPipe())
   async refresh(@Body() dto: AdminRefreshTokenDto, @Req() req: RequestLike) {
     const refreshToken =
@@ -164,6 +182,7 @@ export class AdminAuthController {
   }
 
   @Post("verify")
+  @HttpCode(200)
   async verify(@Body() body: { token?: string }, @Req() req: RequestLike) {
     const token =
       body?.token ||
@@ -195,6 +214,7 @@ export class AdminAuthController {
   }
 
   @Post("logout")
+  @HttpCode(200)
   async logout(@Body() body: { token?: string }, @Req() req: RequestLike) {
     const token =
       body?.token ||
@@ -337,9 +357,9 @@ export class AdminAuthController {
       }, REDIS_OPERATION_TIMEOUT_MS);
     });
 
-    const opPromise = operation().catch((error: any) => {
+    const opPromise = operation().catch((error: unknown) => {
       logger.warn(`[admin-auth] redis operation failed: ${label}`, {
-        message: error?.message || String(error),
+        message: error instanceof Error ? error.message : String(error),
       });
       return fallback;
     });
@@ -434,3 +454,5 @@ export class AdminAuthController {
     return process.env.NODE_ENV === "production";
   }
 }
+
+

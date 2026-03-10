@@ -6,14 +6,25 @@ import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { AdminAuditInterceptor } from "../interceptors/admin-audit.interceptor";
 
-/**
- * 老王说：管理员认证模块 - 处理JWT登录和token刷新
- * 这个模块专门负责管理员的身份验证和授权
- */
+const TEST_JWT_SECRET = "gush-jwt-test-secret";
+
+function resolveJwtSecret(): string {
+  const secret = String(process.env.JWT_SECRET || "").trim();
+  if (secret) {
+    return secret;
+  }
+
+  if (process.env.NODE_ENV === "test") {
+    return TEST_JWT_SECRET;
+  }
+
+  throw new Error("JWT_SECRET must be configured for admin auth outside test environments.");
+}
+
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET || "gush-jwt-secret-change-me",
+      secret: resolveJwtSecret(),
       signOptions: { expiresIn: "1h" },
     }),
   ],

@@ -16,9 +16,7 @@ const HeaderSearch = dynamic(() => import("./HeaderSearch"), {
 });
 
 /**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
- * - 婊氬姩鏃跺崐閫忔槑姣涚幓鐠冩晥鏋? * - 鍝佺墝鑹蹭笅鍒掔嚎瀵艰埅
+ * Header state and modal orchestration for the public site shell.
  */
 export default function SiteHeader({ onSearch }) {
   const { isAdultMode, requestAdultToggle } = useAdultGateStore();
@@ -46,6 +44,7 @@ export default function SiteHeader({ onSearch }) {
 
   useEffect(() => {
     const handler = (event) => {
+      event.__mnAuthHandled = true;
       const returnTo = event?.detail?.returnTo || null;
       if (returnTo && typeof window !== "undefined") {
         window.sessionStorage.setItem("mn_return_to", returnTo);
@@ -53,8 +52,27 @@ export default function SiteHeader({ onSearch }) {
       setActiveModal("login");
       setAuthError("");
     };
-    window.addEventListener("auth:open", handler);
-    return () => window.removeEventListener("auth:open", handler);
+    window.addEventListener("auth:open", handler, true);
+    return () => window.removeEventListener("auth:open", handler, true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const shouldOpenLogin = params.get("openLogin") === "1" || window.sessionStorage.getItem("mn_open_login") === "1";
+    if (!shouldOpenLogin) {
+      return;
+    }
+
+    const returnTo = window.sessionStorage.getItem("mn_return_to") || params.get("returnTo") || "/";
+    window.sessionStorage.removeItem("mn_open_login");
+    window.sessionStorage.setItem("mn_return_to", returnTo);
+    setPendingAdultToggle(false);
+    setActiveModal("login");
+    setAuthError("");
   }, []);
 
   useEffect(() => {
@@ -110,20 +128,20 @@ export default function SiteHeader({ onSearch }) {
             : "border-b border-white/5 bg-neutral-950/90 backdrop-blur-xl"
         }`}
       >
-        {/* 鑰佺帇浼樺寲锛歩OS 26椋庢牸鐨勫崟琛屽竷灞€ - 鏇村ぇ鐨勯珮搴﹀拰闂磋窛 */}
+        {/* 闂佸ジ顣﹂懗鍓佹暜閸ャ劌顕辨俊顖氭惈椤曆囨煥濞戞瑯鍔塐S 26婵＄偛顑呯€涒晠鎮ч幖浣瑰剭闁告洦鍋勭粈瀣偠濞戞瀚扮紒鏃堫棑娴狅箓鍩€?- 闂佸搫娲﹀娆撳Φ閸ヮ剚鍎嶉柛鏇ㄥ灣瑜邦垶骞栨潏鍓х暠闁硅渹鍗冲鑽ゅ鐎ｎ剛宕?*/}
         <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-3 sm:gap-6 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <HeaderLogo />
 
-          {/* 妗岄潰瀵艰埅 */}
+          {/* 濠碘剝顨呴惌鍌氼焽閹殿喒鍋撴担鍐棈闁?*/}
           <HeaderNav />
 
-          {/* 鑰佺帇浼樺寲锛氭悳绱㈡爮 - iOS 26椋庢牸鐨勫渾瑙?*/}
+          {/* 闂佸ジ顣﹂懗鍓佹暜閸ャ劌顕辨俊顖氭惈椤曆囨煥濞戞瑧顣查柟顔肩－濡叉劙濮€閿涘嫬鐒?- iOS 26婵＄偛顑呯€涒晠鎮ч幖浣瑰剭闁告洦鍋呮俊鍥偡?*/}
           <div className="min-w-0 flex-1 md:max-w-xs lg:max-w-sm">
             <HeaderSearch onSearch={onSearch} />
           </div>
 
-          {/* 鍙充晶鎿嶄綔鎸夐挳 */}
+          {/* 闂佸憡鐟ラ崢鏍疾閸洖绠肩€广儱瀚粙濠囨煙缁嬫妯€闁?*/}
           <HeaderActions
             onWalletClick={handleWalletClick}
             onAdultToggleClick={handleAdultToggle}
@@ -133,10 +151,10 @@ export default function SiteHeader({ onSearch }) {
         </div>
       </header>
 
-      {/* 绉诲姩绔簳閮ㄥ鑸?*/}
+      {/* 缂備礁顦抽褎鎱ㄩ埡鍐崥妞ゆ牗姘ㄦ穱娲⒑椤斿搫濡兼い鏇憾閹?*/}
       <MobileTabNav />
 
-      {/* 妯℃€佹 */}
+      {/* 濠碘槅鍨崜婵嬪焵椤戣法鍔嶆い?*/}
       {activeModal && HeaderModalsComponent ? (
         <HeaderModalsComponent
           activeModal={activeModal}

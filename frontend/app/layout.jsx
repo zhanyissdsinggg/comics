@@ -1,18 +1,20 @@
-﻿import "./globals.css";
+import "./globals.css";
 import Script from "next/script";
 import AppProviders from "../components/layout/AppProviders";
 import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
+import { defaultSocialImage } from "../lib/seo";
+import { siteConfig } from "../lib/siteConfig";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+const defaultTitle = `${siteConfig.siteName} - Read Comics and Novels Online`;
 
 export const metadata = {
   title: {
-    default: "Gush - Read Comics and Novels Online",
-    template: "%s | Gush",
+    default: defaultTitle,
+    template: `%s | ${siteConfig.siteName}`,
   },
-  description:
-    "Discover thousands of comics and novels on Gush. Read your favorite series online with high-quality translations. New episodes updated daily.",
+  description: siteConfig.defaultDescription,
   keywords: [
     "comics",
     "novels",
@@ -23,41 +25,33 @@ export const metadata = {
     "digital comics",
     "web novels",
   ],
-  authors: [{ name: "Gush" }],
-  creator: "Gush",
-  publisher: "Gush",
+  authors: [{ name: siteConfig.companyName }],
+  creator: siteConfig.companyName,
+  publisher: siteConfig.companyName,
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://gushcomics.com"),
+  metadataBase: new URL(siteConfig.siteUrl),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Gush - Read Comics and Novels Online",
-    description:
-      "Discover thousands of comics and novels. Read your favorite series online with high-quality translations.",
-    url: "https://gushcomics.com",
-    siteName: "Gush",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Gush - Read Comics and Novels Online",
-      },
-    ],
+    title: defaultTitle,
+    description: siteConfig.defaultDescription,
+    url: siteConfig.siteUrl,
+    siteName: siteConfig.companyName,
+    images: [defaultSocialImage],
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Gush - Read Comics and Novels Online",
-    description: "Discover thousands of comics and novels. Read your favorite series online.",
-    images: ["/twitter-image.jpg"],
-    creator: "@gush",
+    title: defaultTitle,
+    description: siteConfig.defaultDescription,
+    images: [defaultSocialImage.url],
+    creator: siteConfig.twitterHandle || undefined,
   },
   robots: {
     index: true,
@@ -69,9 +63,6 @@ export const metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
-  },
-  verification: {
-    // google: "your-google-verification-code",
   },
 };
 

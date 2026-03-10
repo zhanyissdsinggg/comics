@@ -1,5 +1,9 @@
 const LOOP_GUARD_HEADER = "x-gush-api-proxy-hop";
-const DEFAULT_BACKEND_FALLBACKS = ["https://comics-production-07fa.up.railway.app"];
+
+function isSafeRetryMethod(method) {
+  const normalized = String(method || "GET").toUpperCase();
+  return normalized === "GET" || normalized === "HEAD" || normalized === "OPTIONS";
+}
 
 function normalizeBaseUrl(value) {
   return String(value || "").trim().replace(/\/$/, "");
@@ -35,7 +39,7 @@ function getBackendCandidates(requestUrl) {
     .map((item) => normalizeBaseUrl(item))
     .filter(Boolean);
 
-  const candidates = [primary, ...configuredFallbacks, ...DEFAULT_BACKEND_FALLBACKS]
+  const candidates = [primary, ...configuredFallbacks]
     .map((item) => normalizeBaseUrl(item))
     .filter(Boolean)
     .filter((item, index, arr) => arr.indexOf(item) === index)
@@ -44,7 +48,11 @@ function getBackendCandidates(requestUrl) {
   return candidates;
 }
 
-function shouldRetryWithFallback(requestPathname, responseStatus) {
+function shouldRetryWithFallback(requestMethod, requestPathname, responseStatus) {
+  if (!isSafeRetryMethod(requestMethod)) {
+    return false;
+  }
+
   if (responseStatus >= 500) {
     return true;
   }
@@ -264,12 +272,12 @@ export async function handler(request) {
       const next = await forwardRequestToBackend(request, base, requestBodyBuffer);
       response = next;
       responseBase = base;
-      if (!shouldRetryWithFallback(requestPathname, next.status) || i === backendCandidates.length - 1) {
+      if (!shouldRetryWithFallback(requestMethod, requestPathname, next.status) || i === backendCandidates.length - 1) {
         break;
       }
     } catch (error) {
       lastError = error;
-      if (i === backendCandidates.length - 1) {
+      if (!isSafeRetryMethod(requestMethod) || i === backendCandidates.length - 1) {
         break;
       }
     }

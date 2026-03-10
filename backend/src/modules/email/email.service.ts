@@ -1,15 +1,21 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../../common/prisma/prisma.service";
-import { decryptString } from "../../common/utils/crypto";
 import { logger } from "../../common/logger/winston.init";
+import { PrismaService } from "../../common/prisma/prisma.service";
 import {
   addEmailJob,
-  updateEmailJob,
   getEmailJob,
   listFailedEmailJobs,
+  updateEmailJob,
 } from "../../common/storage/mock-store";
+import { decryptString } from "../../common/utils/crypto";
+import { parseStoredJson } from "../../common/utils/stored-json";
+import {
+  DEFAULT_EMAIL_CONFIG,
+  EmailConfigPayload,
+  normalizeEmailConfig,
+} from "./email-config";
 
-function getFrontendOrigin() {
+function getFrontendOrigin(): string {
   return process.env.FRONTEND_ORIGIN?.split(",")[0]?.trim() || "http://localhost:3000";
 }
 
@@ -19,56 +25,73 @@ const MAX_RETRIES = 5;
 
 type SendResult = { ok: boolean; status?: number; error?: string };
 
+type EmailMessagePayload = {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+};
+
+type EmailPriority = "high" | "normal" | string;
+
 @Injectable()
 export class EmailService {
-  private cache: { value: any; loadedAt: number } | null = null;
+  private cache: { value: EmailConfigPayload; loadedAt: number } | null = null;
   private retryTimer: NodeJS.Timeout | null = null;
 
   constructor(private readonly prisma: PrismaService) {}
 
-  startRetryLoop() {
+  startRetryLoop(): void {
     if (this.retryTimer) {
       return;
     }
+
     this.retryTimer = setInterval(() => {
       this.retryFailedJobs().catch(() => undefined);
     }, RETRY_INTERVAL_MS);
   }
 
-  stopRetryLoop() {
+  stopRetryLoop(): void {
     if (!this.retryTimer) {
       return;
     }
+
     clearInterval(this.retryTimer);
     this.retryTimer = null;
   }
 
-  private async loadConfig() {
+  private async loadConfig(): Promise<EmailConfigPayload> {
     const now = Date.now();
     if (this.cache && now - this.cache.loadedAt < CACHE_TTL_MS) {
       return this.cache.value;
     }
+
     const config = await this.prisma.emailConfig.findUnique({
       where: { key: "default" },
     });
-    const payload = (config?.payload || {}) as Record<string, any>;
-    if (payload.resendApiKey) {
-      payload.resendApiKey = decryptString(payload.resendApiKey);
-    }
-    if (payload.sendgridApiKey) {
-      payload.sendgridApiKey = decryptString(payload.sendgridApiKey);
-    }
-    if (payload.smsWebhookUrl) {
-      payload.smsWebhookUrl = decryptString(payload.smsWebhookUrl);
-    }
+    const stored = normalizeEmailConfig(
+      parseStoredJson(config?.payload, DEFAULT_EMAIL_CONFIG),
+    );
+    const payload: EmailConfigPayload = {
+      ...stored,
+      resendApiKey: decryptString(stored.resendApiKey),
+      sendgridApiKey: decryptString(stored.sendgridApiKey),
+      smsWebhookUrl: decryptString(stored.smsWebhookUrl),
+    };
+
     this.cache = { value: payload, loadedAt: now };
     return payload;
   }
 
-  private async sendViaWebhook(payload: any, webhookUrl: string): Promise<SendResult> {
+  private async sendViaWebhook(
+    payload: EmailMessagePayload,
+    webhookUrl: string,
+  ): Promise<SendResult> {
     if (!webhookUrl) {
       return { ok: false, error: "NO_WEBHOOK" };
     }
+
     try {
       const response = await fetch(webhookUrl, {
         method: "POST",
@@ -81,10 +104,14 @@ export class EmailService {
     }
   }
 
-  private async sendViaResend(payload: any, apiKey: string): Promise<SendResult> {
+  private async sendViaResend(
+    payload: EmailMessagePayload,
+    apiKey: string,
+  ): Promise<SendResult> {
     if (!apiKey) {
       return { ok: false, error: "NO_RESEND_KEY" };
     }
+
     try {
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -106,10 +133,14 @@ export class EmailService {
     }
   }
 
-  private async sendViaSendgrid(payload: any, apiKey: string): Promise<SendResult> {
+  private async sendViaSendgrid(
+    payload: EmailMessagePayload,
+    apiKey: string,
+  ): Promise<SendResult> {
     if (!apiKey) {
       return { ok: false, error: "NO_SENDGRID_KEY" };
     }
+
     try {
       const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
         method: "POST",
@@ -136,11 +167,12 @@ export class EmailService {
   private async sendViaSmsWebhook(
     to: string,
     message: string,
-    webhookUrl: string
+    webhookUrl: string,
   ): Promise<SendResult> {
     if (!webhookUrl) {
       return { ok: false, error: "NO_SMS_WEBHOOK" };
     }
+
     try {
       const response = await fetch(webhookUrl, {
         method: "POST",
@@ -153,7 +185,11 @@ export class EmailService {
     }
   }
 
-  private async attemptSend(payload: any, provider: string, config: any): Promise<SendResult> {
+  private async attemptSend(
+    payload: EmailMessagePayload,
+    provider: string,
+    config: EmailConfigPayload,
+  ): Promise<SendResult> {
     if (provider === "webhook") {
       return this.sendViaWebhook(payload, config.webhookUrl || "");
     }
@@ -163,15 +199,16 @@ export class EmailService {
     if (provider === "sendgrid") {
       return this.sendViaSendgrid(payload, config.sendgridApiKey || "");
     }
-    logger.info("邮件发送", { payload });
+
+    logger.info("Email sent via console provider", { payload });
     return { ok: true };
   }
 
   private async attemptSendWithPriority(
-    payload: any,
+    payload: EmailMessagePayload,
     provider: string,
-    config: any,
-    priority: string
+    config: EmailConfigPayload,
+    priority: EmailPriority,
   ): Promise<SendResult> {
     const result = await this.attemptSend(payload, provider, config);
     if (!result.ok && priority === "high") {
@@ -180,14 +217,19 @@ export class EmailService {
     return result;
   }
 
-  private async notifyAdminFailure(config: any, payload: any, error: string) {
+  private async notifyAdminFailure(
+    config: EmailConfigPayload,
+    payload: EmailMessagePayload,
+    error: string,
+  ): Promise<void> {
     const adminEmail = config.adminNotifyEmail || process.env.ADMIN_NOTIFY_EMAIL || "";
     if (!adminEmail) {
       return;
     }
+
     const message = `Email send failed for ${payload.to}. Subject: ${payload.subject}. Error: ${error}`;
     const provider = config.provider || process.env.EMAIL_PROVIDER || "console";
-    const alertPayload = {
+    const alertPayload: EmailMessagePayload = {
       from: config.from || process.env.EMAIL_FROM || "no-reply@gush.local",
       to: adminEmail,
       subject: "[Alert] Email delivery failed",
@@ -197,11 +239,17 @@ export class EmailService {
     await this.attemptSend(alertPayload, provider, config);
   }
 
-  async sendEmail(to: string, subject: string, html: string, text: string, options: { priority?: string } = {}) {
+  async sendEmail(
+    to: string,
+    subject: string,
+    html: string,
+    text: string,
+    options: { priority?: EmailPriority } = {},
+  ): Promise<{ ok: boolean }> {
     const config = await this.loadConfig();
     const provider = config.provider || process.env.EMAIL_PROVIDER || "console";
     const from = config.from || process.env.EMAIL_FROM || "no-reply@gush.local";
-    const payload = { from, to, subject, html, text };
+    const payload: EmailMessagePayload = { from, to, subject, html, text };
     const priority = options.priority || "normal";
 
     const job = addEmailJob({
@@ -230,6 +278,7 @@ export class EmailService {
       }
       return { ok: retry.ok };
     }
+
     updateEmailJob(job.id, {
       status: "SENT",
       error: "",
@@ -238,13 +287,14 @@ export class EmailService {
     return { ok: true };
   }
 
-  async retryJobById(jobId: string) {
+  async retryJobById(jobId: string): Promise<{ ok: boolean; error?: string }> {
     const job = getEmailJob(jobId);
     if (!job || !job.payload) {
       return { ok: false, error: "JOB_NOT_FOUND" };
     }
+
     const config = await this.loadConfig();
-    const payload = job.payload;
+    const payload = job.payload as EmailMessagePayload;
     const provider = job.provider || "console";
     const result = await this.attemptSend(payload, provider, config);
     updateEmailJob(jobId, {
@@ -259,7 +309,7 @@ export class EmailService {
     return { ok: result.ok };
   }
 
-  async retryFailedJobs() {
+  async retryFailedJobs(): Promise<void> {
     const config = await this.loadConfig();
     const failed = listFailedEmailJobs(20);
     for (const job of failed) {
@@ -270,7 +320,8 @@ export class EmailService {
       if ((full.retries || 0) >= MAX_RETRIES) {
         continue;
       }
-      const payload = full.payload;
+
+      const payload = full.payload as EmailMessagePayload;
       const provider = full.provider || "console";
       const result = await this.attemptSend(payload, provider, config);
       updateEmailJob(job.id, {
@@ -285,7 +336,7 @@ export class EmailService {
     }
   }
 
-  async sendVerifyEmail(email: string, token: string) {
+  async sendVerifyEmail(email: string, token: string): Promise<{ ok: boolean }> {
     const origin = getFrontendOrigin();
     const link = `${origin}/auth/verify?token=${token}`;
     const subject = "Verify your email";
@@ -294,7 +345,7 @@ export class EmailService {
     return this.sendEmail(email, subject, html, text, { priority: "high" });
   }
 
-  async sendResetEmail(email: string, token: string) {
+  async sendResetEmail(email: string, token: string): Promise<{ ok: boolean }> {
     const origin = getFrontendOrigin();
     const link = `${origin}/auth/reset?token=${token}`;
     const subject = "Reset your password";
@@ -303,7 +354,7 @@ export class EmailService {
     return this.sendEmail(email, subject, html, text, { priority: "high" });
   }
 
-  async sendSmsOtp(phone: string, code: string) {
+  async sendSmsOtp(phone: string, code: string): Promise<SendResult> {
     const config = await this.loadConfig();
     const webhookUrl = config.smsWebhookUrl || process.env.SMS_WEBHOOK_URL || "";
     return this.sendViaSmsWebhook(phone, `Your login code is ${code}`, webhookUrl);

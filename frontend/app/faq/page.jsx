@@ -1,5 +1,5 @@
 import SiteHeader from "../../components/layout/SiteHeader";
-import { SUPPORT_EMAIL } from "../../lib/supportConfig";
+import { siteConfig } from "../../lib/siteConfig";
 
 export const metadata = {
   title: "FAQ",
@@ -48,9 +48,10 @@ export default function Page() {
           ))}
         </div>
         <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-400">
-          Need more help? Email {SUPPORT_EMAIL}.
+          Need more help? Email {siteConfig.supportEmail}.
         </div>
       </main>
     </div>
   );
 }
+

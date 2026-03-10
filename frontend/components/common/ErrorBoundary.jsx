@@ -1,12 +1,8 @@
-/**
- * React错误边界组件
- * 用于捕获子组件树中的JavaScript错误，记录错误并显示降级UI
- */
-
 "use client";
 
-import { Component } from 'react';
-import { trackEvent } from '../../lib/trackEvent';
+import { Component } from "react";
+import { trackEvent } from "../../lib/trackEvent";
+import { reportClientError } from "../../lib/reportClientError";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -18,29 +14,31 @@ class ErrorBoundary extends Component {
     };
   }
 
-  static getDerivedStateFromError(error) {
-    // 更新state，下次渲染将显示降级UI
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // 记录错误到错误追踪服务
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("ErrorBoundary caught an error:", error, errorInfo);
+    }
 
-    // 追踪错误
-    trackEvent('error_boundary_triggered', {
-      error: error.toString(),
-      componentStack: errorInfo.componentStack,
-      errorBoundary: this.props.name || 'unnamed',
-    });
+    const payload = {
+      boundaryName: this.props.name || "unnamed",
+      message: error?.message || error?.toString?.() || "Unknown client error",
+      stack: error?.stack || "",
+      componentStack: errorInfo?.componentStack || "",
+      digest: error?.digest || "",
+    };
 
-    // 更新state
+    trackEvent("error_boundary_triggered", payload);
+    void reportClientError(payload);
+
     this.setState({
       error,
       errorInfo,
     });
 
-    // 如果提供了onError回调，调用它
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
@@ -53,7 +51,6 @@ class ErrorBoundary extends Component {
       errorInfo: null,
     });
 
-    // 如果提供了onReset回调，调用它
     if (this.props.onReset) {
       this.props.onReset();
     }
@@ -61,7 +58,6 @@ class ErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
-      // 如果提供了自定义fallback，使用它
       if (this.props.fallback) {
         return this.props.fallback({
           error: this.state.error,
@@ -70,10 +66,9 @@ class ErrorBoundary extends Component {
         });
       }
 
-      // 默认降级UI
       return (
-        <div className="min-h-screen flex items-center justify-center bg-neutral-950 p-4">
-          <div className="max-w-md w-full">
+        <div className="flex min-h-screen items-center justify-center bg-neutral-950 p-4">
+          <div className="w-full max-w-md">
             <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-6">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0">
@@ -93,25 +88,25 @@ class ErrorBoundary extends Component {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-200">
-                    {this.props.title || 'Something went wrong'}
+                    {this.props.title || "Something went wrong"}
                   </h3>
                   <p className="mt-2 text-sm text-red-300">
                     {this.props.message ||
-                      'An unexpected error occurred. Please try again.'}
+                      "An unexpected error occurred. Please try again."}
                   </p>
 
-                  {process.env.NODE_ENV === 'development' && this.state.error && (
+                  {process.env.NODE_ENV === "development" && this.state.error ? (
                     <details className="mt-4">
                       <summary className="cursor-pointer text-xs text-red-400 hover:text-red-300">
                         Error details (dev only)
                       </summary>
                       <pre className="mt-2 overflow-auto rounded bg-neutral-900 p-2 text-[10px] text-red-300">
                         {this.state.error.toString()}
-                        {'\n\n'}
+                        {"\n\n"}
                         {this.state.errorInfo?.componentStack}
                       </pre>
                     </details>
-                  )}
+                  ) : null}
 
                   <div className="mt-4 flex gap-2">
                     <button
@@ -140,47 +135,3 @@ class ErrorBoundary extends Component {
 }
 
 export default ErrorBoundary;
-
-/**
- * 使用示例：
- *
- * // 基础用法
- * <ErrorBoundary>
- *   <YourComponent />
- * </ErrorBoundary>
- *
- * // 自定义标题和消息
- * <ErrorBoundary
- *   title="Failed to load reader"
- *   message="We couldn't load the reader. Please try again."
- * >
- *   <ReaderPage />
- * </ErrorBoundary>
- *
- * // 自定义fallback UI
- * <ErrorBoundary
- *   fallback={({ error, reset }) => (
- *     <div>
- *       <h1>Custom error UI</h1>
- *       <button onClick={reset}>Reset</button>
- *     </div>
- *   )}
- * >
- *   <YourComponent />
- * </ErrorBoundary>
- *
- * // 带错误回调
- * <ErrorBoundary
- *   name="ReaderBoundary"
- *   onError={(error, errorInfo) => {
- *     // 发送到错误追踪服务
- *     console.error('Reader error:', error);
- *   }}
- *   onReset={() => {
- *     // 重置时的清理逻辑
- *     console.log('Error boundary reset');
- *   }}
- * >
- *   <ReaderPage />
- * </ErrorBoundary>
- */

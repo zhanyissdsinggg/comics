@@ -1,33 +1,34 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import PackageCard from "./PackageCard";
-import PromoBanner from "./PromoBanner";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useCouponStore } from "../../store/useCouponStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { trackEvent } from "../../lib/trackEvent";
 import { POINTS_PACKS, OFFERS } from "../../lib/offers/catalog";
-import { decideOffers } from "../../lib/offers/decide";
-import { getBucket, getOrCreateUserId, trackExposure } from "../../lib/experiments/ab";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { getRegionConfig } from "../../lib/region/config";
 import { getCookie } from "../../lib/cookies";
 import { apiGet } from "../../lib/apiClient";
+import { fetchTopupCatalog } from "../../lib/topupCatalog";
+import {
+  buildPathWithAttribution,
+  mergePaymentAttribution,
+  readPaymentAttributionFromSearchParams,
+} from "../../lib/paymentAttribution";
 import { getPlanCatalog } from "../../lib/subscriptions";
+
+const PromoBanner = dynamic(() => import("./PromoBanner"));
 
 export default function StorePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { topup } = useWalletStore();
-  const { paidPts, bonusPts, subscription } = useWalletStore();
+  const { topup, paidPts, bonusPts, subscription } = useWalletStore();
   const { coupons, loadCoupons, claimCoupon } = useCouponStore();
   const { isSignedIn } = useAuthStore();
-  const { isAdultMode } = useAdultGateStore();
-  const returnTo = searchParams.get("returnTo") || "/";
-  const focus = searchParams.get("focus") || "";
   const [busyId, setBusyId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [region, setRegion] = useState("global");
@@ -35,24 +36,33 @@ export default function StorePage() {
   const [couponMessage, setCouponMessage] = useState("");
   const [promotions, setPromotions] = useState([]);
   const [topupCatalog, setTopupCatalog] = useState([]);
+
+  const returnTo = searchParams.get("returnTo") || "/";
+  const focus = searchParams.get("focus") || "";
+  const routeAttribution = useMemo(
+    () => readPaymentAttributionFromSearchParams(searchParams),
+    [searchParams]
+  );
+  const promotionId = routeAttribution?.promotionId || "";
+  const campaignId = routeAttribution?.campaignId || "";
+  const sourceEntry = routeAttribution?.entryPoint || "STORE_ENTRY";
+  const sourceSeriesId = routeAttribution?.sourceSeriesId || "";
+  const sourceEpisodeId = routeAttribution?.sourceEpisodeId || "";
+  const sourcePath = routeAttribution?.sourcePath || returnTo || "/store";
   const isSubscriber = Boolean(subscription?.active);
   const isNewPayer =
     typeof window !== "undefined"
       ? window.localStorage.getItem("mn_has_purchased") !== "1"
       : true;
-  const userId = typeof window !== "undefined" ? getOrCreateUserId() : "guest";
-  const bucketMap = useMemo(
-    () => ({
-      unlock_offer_v1: getBucket(userId, "unlock_offer_v1"),
-      topup_offer_v1: getBucket(userId, "topup_offer_v1"),
-      subscribe_upsell_v1: getBucket(userId, "subscribe_upsell_v1"),
-    }),
-    [userId]
-  );
 
   useEffect(() => {
-    trackEvent("store_view", { focus });
-  }, [focus]);
+    trackEvent("store_view", {
+      focus,
+      entry: sourceEntry,
+      promotionId: promotionId || undefined,
+      campaignId: campaignId || undefined,
+    });
+  }, [campaignId, focus, promotionId, sourceEntry]);
 
   useEffect(() => {
     const stored =
@@ -63,27 +73,22 @@ export default function StorePage() {
     setRegion(stored || cookieRegion || "global");
   }, []);
 
-  // Only signed-in users can load coupons to avoid 401 noise.
   useEffect(() => {
     if (isSignedIn) {
       loadCoupons();
     }
-  }, [loadCoupons, isSignedIn]);
+  }, [isSignedIn, loadCoupons]);
 
   useEffect(() => {
     let mounted = true;
     apiGet("/api/promotions").then((response) => {
-      if (!mounted) {
+      if (!mounted || !response.ok) {
         return;
       }
-      if (response.ok) {
-        const list = response.data?.promotions || [];
-        setPromotions(
-          list.filter((promo) =>
-            ["FIRST_PURCHASE", "HOLIDAY", "RETURNING"].includes(promo.type)
-          )
-        );
-      }
+      const list = Array.isArray(response.data?.promotions) ? response.data.promotions : [];
+      setPromotions(
+        list.filter((promo) => ["FIRST_PURCHASE", "HOLIDAY", "RETURNING"].includes(promo.type))
+      );
     });
     return () => {
       mounted = false;
@@ -92,59 +97,36 @@ export default function StorePage() {
 
   useEffect(() => {
     let mounted = true;
-    apiGet("/api/billing/topups").then((response) => {
-      if (!mounted) {
-        return;
-      }
-      if (response.ok && Array.isArray(response.data?.packages)) {
-        setTopupCatalog(response.data.packages);
-      }
-    });
+    fetchTopupCatalog()
+      .then((packages) => {
+        if (mounted) {
+          setTopupCatalog(packages);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setTopupCatalog([]);
+        }
+      });
     return () => {
       mounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    Object.entries(bucketMap).forEach(([experimentId, bucket]) => {
-      trackExposure(experimentId, bucket);
-    });
-  }, [bucketMap]);
-
-  const offerDecision = useMemo(
-    () =>
-      decideOffers({
-        user: {
-          isSubscriber,
-          paidPts,
-          bonusPts,
-          isNewPayer,
-          region: "global",
-          isAdultMode,
-        },
-        content: {},
-        entry: "STORE_ENTRY",
-        experiments: { bucketMap },
-      }),
-    [isSubscriber, paidPts, bonusPts, isNewPayer, isAdultMode, bucketMap]
-  );
 
   const subscriptionStats = useMemo(() => {
     const plans = Object.values(getPlanCatalog() || {});
     if (!plans.length) {
       return null;
     }
-    const maxDiscount = plans.reduce((max, plan) => Math.max(max, plan.discountPct || 0), 0);
-    const maxDailyFree = plans.reduce((max, plan) => Math.max(max, plan.dailyFreeUnlocks || 0), 0);
-    const bestTtf = plans.reduce(
-      (best, plan) =>
-        plan.ttfMultiplier && plan.ttfMultiplier < best ? plan.ttfMultiplier : best,
-      1
-    );
+
     return {
-      maxDiscount,
-      maxDailyFree,
-      bestTtf,
+      maxDiscount: plans.reduce((max, plan) => Math.max(max, plan.discountPct || 0), 0),
+      maxDailyFree: plans.reduce((max, plan) => Math.max(max, plan.dailyFreeUnlocks || 0), 0),
+      bestTtf: plans.reduce(
+        (best, plan) =>
+          plan.ttfMultiplier && plan.ttfMultiplier < best ? plan.ttfMultiplier : best,
+        1,
+      ),
     };
   }, []);
 
@@ -152,9 +134,8 @@ export default function StorePage() {
     if (focus && focus !== "auto") {
       return focus;
     }
-    const recommended = offerDecision?.recommendedTopupPackageId;
-    return recommended?.replace("points_pack_", "") || "";
-  }, [focus, offerDecision?.recommendedTopupPackageId]);
+    return "starter";
+  }, [focus]);
 
   useEffect(() => {
     if (!focusId) {
@@ -162,9 +143,10 @@ export default function StorePage() {
     }
     trackEvent("offer_impression", {
       offerId: `points_pack_${focusId}`,
-      entry: "STORE_ENTRY",
+      entry: sourceEntry,
+      promotionId: promotionId || undefined,
     });
-  }, [focusId, focus, region]);
+  }, [focusId, promotionId, sourceEntry]);
 
   const orderedPackages = useMemo(() => {
     const packageMap = {};
@@ -174,6 +156,7 @@ export default function StorePage() {
         packageMap[key] = pkg;
       }
     });
+
     const packages = POINTS_PACKS.map((item) => {
       const id = item.id.replace("points_pack_", "");
       const backend = packageMap[item.id] || packageMap[id] || null;
@@ -185,47 +168,65 @@ export default function StorePage() {
         paidPts: backend?.paidPts ?? item.paidPts,
         bonusPts: backend?.bonusPts ?? item.bonusPts,
         tag: backend?.tags?.[0] || item.tag,
+        price,
         priceLabel:
           price !== null && price !== undefined
             ? `${currency} ${Number(price).toFixed(2)}`
             : getRegionConfig(region).pointsPackages?.[id]?.priceLabel || "",
       };
     });
+
     if (!focusId) {
       return packages;
     }
+
     const selected = packages.find((pkg) => pkg.id === focusId);
     if (!selected) {
       return packages;
     }
+
     return [selected, ...packages.filter((pkg) => pkg.id !== focusId)];
   }, [focusId, region, topupCatalog]);
 
   const handleBuy = async (packageId) => {
+    const selectedPackage = orderedPackages.find((item) => item.id === packageId);
+    const attribution = mergePaymentAttribution(routeAttribution, {
+      promotionId: promotionId || undefined,
+      offerId: `points_pack_${packageId}`,
+      entryPoint: sourceEntry,
+      campaignId: campaignId || undefined,
+      sourcePath,
+      sourceSeriesId: sourceSeriesId || undefined,
+      sourceEpisodeId: sourceEpisodeId || undefined,
+      returnTo,
+    });
+
     setBusyId(packageId);
-    trackEvent("topup_start", { packageId });
-    trackEvent("package_click", { packageId });
-    trackEvent("offer_click", { offerId: `points_pack_${packageId}`, entry: "STORE_ENTRY" });
-    const response = await topup(packageId);
+    trackEvent("package_click", { packageId, entry: sourceEntry });
+    trackEvent("offer_click", {
+      offerId: `points_pack_${packageId}`,
+      entry: sourceEntry,
+      promotionId: promotionId || undefined,
+    });
+
+    const response = await topup(packageId, {
+      expectedAmount: selectedPackage?.price,
+      attribution,
+    });
+
     setBusyId(null);
     if (response.ok) {
       trackEvent("offer_purchase_success", {
         offerId: `points_pack_${packageId}`,
-        entry: "STORE_ENTRY",
+        entry: sourceEntry,
         orderId: response.data?.order?.orderId,
       });
-      trackEvent("topup_success", { packageId, orderId: response.data?.order?.orderId });
       router.replace(returnTo);
       setErrorMessage("");
       return;
     }
+
     if (response.status === 401) {
-      trackEvent("topup_fail", {
-        packageId,
-        status: response.status,
-        errorCode: response.error,
-        requestId: response.requestId,
-      });
       setErrorMessage("Please sign in to purchase POINTS.");
       if (typeof window !== "undefined") {
         const current = `${window.location.pathname}${window.location.search || ""}`;
@@ -233,12 +234,7 @@ export default function StorePage() {
       }
       return;
     }
-    trackEvent("topup_fail", {
-      packageId,
-      status: response.status,
-      errorCode: response.error,
-      requestId: response.requestId,
-    });
+
     setErrorMessage(response.error || "Top up failed. Please try again.");
   };
 
@@ -247,6 +243,7 @@ export default function StorePage() {
     if (!code) {
       return;
     }
+
     const response = await claimCoupon(code);
     if (response.ok) {
       trackEvent("coupon_claim", { code });
@@ -254,6 +251,7 @@ export default function StorePage() {
       setCouponCode("");
       return;
     }
+
     trackEvent("coupon_claim_fail", { code, status: response.status, errorCode: response.error });
     setCouponMessage(response.data?.message || response.error || "Invalid coupon.");
   };
@@ -264,9 +262,7 @@ export default function StorePage() {
       <main className="mx-auto max-w-6xl px-4 pb-12 pt-8 space-y-8">
         <div>
           <h1 className="text-2xl font-semibold">Store</h1>
-          <p className="mt-2 text-sm text-neutral-400">
-            Buy POINTS to unlock episodes.
-          </p>
+          <p className="mt-2 text-sm text-neutral-400">Buy POINTS to unlock episodes.</p>
         </div>
 
         {errorMessage ? (
@@ -276,9 +272,7 @@ export default function StorePage() {
         ) : null}
 
         {promotions.length > 0
-          ? promotions.map((promo) => (
-              <PromoBanner key={promo.id} promotion={promo} />
-            ))
+          ? promotions.map((promo) => <PromoBanner key={promo.id} promotion={promo} />)
           : isNewPayer
             ? <PromoBanner offer={OFFERS.first_purchase_bonus} />
             : null}
@@ -286,17 +280,30 @@ export default function StorePage() {
         <div className="rounded-2xl border border-neutral-900 bg-neutral-900/40 p-4 text-xs text-neutral-400">
           {getRegionConfig(region).taxHint}
         </div>
+
         {subscriptionStats ? (
           <div className="rounded-2xl border border-neutral-900 bg-neutral-900/40 p-4 text-xs text-neutral-300">
             <div className="text-sm font-semibold text-white">Subscriber savings</div>
             <div className="mt-2 text-xs text-neutral-400">
-              Save up to {subscriptionStats.maxDiscount}% on unlocks | Daily free up to{" "}
-              {subscriptionStats.maxDailyFree} | TTF as fast as{" "}
+              Save up to {subscriptionStats.maxDiscount}% on unlocks | Daily free up to {" "}
+              {subscriptionStats.maxDailyFree} | TTF as fast as {" "}
               {Math.round(subscriptionStats.bestTtf * 100)}%
             </div>
             <button
               type="button"
-              onClick={() => router.push(`/subscribe?returnTo=${returnTo}`)}
+              onClick={() =>
+                router.push(
+                  buildPathWithAttribution("/subscribe", {
+                    promotionId: promotionId || undefined,
+                    campaignId: campaignId || undefined,
+                    entryPoint: "STORE_UPSELL",
+                    sourcePath,
+                    sourceSeriesId: sourceSeriesId || undefined,
+                    sourceEpisodeId: sourceEpisodeId || undefined,
+                    returnTo,
+                  })
+                )
+              }
               className="mt-3 rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
             >
               Compare subscription
@@ -324,16 +331,11 @@ export default function StorePage() {
               Redeem
             </button>
           </div>
-          {couponMessage ? (
-            <p className="text-xs text-neutral-400">{couponMessage}</p>
-          ) : null}
+          {couponMessage ? <p className="text-xs text-neutral-400">{couponMessage}</p> : null}
           {coupons.length > 0 ? (
             <div className="flex flex-wrap gap-2 text-[10px] text-neutral-300">
               {coupons.map((coupon) => (
-                <span
-                  key={coupon.id}
-                  className="rounded-full border border-neutral-800 px-3 py-1"
-                >
+                <span key={coupon.id} className="rounded-full border border-neutral-800 px-3 py-1">
                   {coupon.label || coupon.code}
                 </span>
               ))}
@@ -344,11 +346,7 @@ export default function StorePage() {
         <div className="grid gap-4 md:grid-cols-2">
           {orderedPackages.map((pkg) => (
             <div key={pkg.id} className={busyId === pkg.id ? "opacity-70" : ""}>
-              <PackageCard
-                pkg={pkg}
-                highlighted={pkg.id === focusId}
-                onSelect={handleBuy}
-              />
+              <PackageCard pkg={pkg} highlighted={pkg.id === focusId} onSelect={handleBuy} />
             </div>
           ))}
         </div>
@@ -356,4 +354,3 @@ export default function StorePage() {
     </div>
   );
 }
-

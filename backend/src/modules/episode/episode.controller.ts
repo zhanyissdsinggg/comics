@@ -1,12 +1,12 @@
 import { Controller, Get, Logger, Query, Req, Res } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
-import { EpisodeService } from "./episode.service";
 import { Request, Response } from "express";
+import { getUserIdFromRequest } from "../../common/utils/auth";
 import { checkAdultGate } from "../../common/utils/adult-gate";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
-import { getUserIdFromRequest } from "../../common/utils/auth";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { StatsService } from "../../common/services/stats.service";
+import { EpisodeService } from "./episode.service";
 
 @Controller("episode")
 export class EpisodeController {
@@ -15,50 +15,8 @@ export class EpisodeController {
   constructor(
     private readonly episodeService: EpisodeService,
     private readonly prisma: PrismaService,
-    private readonly statsService: StatsService
+    private readonly statsService: StatsService,
   ) {}
-
-  private buildFallbackEpisodePayload(
-    seriesId: string,
-    episodeId: string,
-    seriesType: string,
-  ) {
-    const normalizedSeriesType = String(seriesType || "comic").toLowerCase();
-    const number = Number(episodeId.replace(`${seriesId}e`, "")) || 1;
-    if (normalizedSeriesType === "novel") {
-      return {
-        episode: {
-          id: episodeId,
-          seriesId,
-          number,
-          title: `Episode ${number}`,
-          type: "novel",
-          paragraphs: Array.from({ length: 12 }, (_, idx) =>
-            `(${seriesId}-${episodeId}) Paragraph ${idx + 1}.`,
-          ),
-          previewParagraphs: 3,
-        },
-      };
-    }
-
-    return {
-      episode: {
-        id: episodeId,
-        seriesId,
-        number,
-        title: `Episode ${number}`,
-        type: "comic",
-        pages: Array.from({ length: 12 }, (_, idx) => ({
-          url: `https://placehold.co/800x1200?text=${seriesId}-${episodeId}-P${idx + 1}`,
-          w: 800,
-          h: 1200,
-        })),
-        isPreview: true,
-        previewCount: 3,
-        previewFreePages: 3,
-      },
-    };
-  }
 
   private isSchemaDriftError(error: unknown): boolean {
     if (!error || typeof error !== "object") {
@@ -85,13 +43,11 @@ export class EpisodeController {
       if (!this.isSchemaDriftError(error)) {
         throw error;
       }
-      this.logger.warn(
-        `Series lite query failed for ${seriesId}, switching to compatibility mode.`,
-      );
+      this.logger.warn(`Series lite query failed for ${seriesId}, switching to compatibility mode.`);
     }
 
     try {
-      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, any>>>(
+      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
         `SELECT "id", "type", "adult" FROM "series" WHERE "id" = $1 LIMIT 1`,
         seriesId,
       );
@@ -110,7 +66,7 @@ export class EpisodeController {
     }
 
     try {
-      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, any>>>(
+      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
         `SELECT "id", "type" FROM "series" WHERE "id" = $1 LIMIT 1`,
         seriesId,
       );
@@ -136,7 +92,7 @@ export class EpisodeController {
     @Query("seriesId") seriesId: string,
     @Query("episodeId") episodeId: string,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ) {
     const normalizedSeriesId = String(seriesId || "").trim();
     const normalizedEpisodeId = String(episodeId || "").trim();
@@ -151,15 +107,12 @@ export class EpisodeController {
       return buildError(ERROR_CODES.INVALID_REQUEST, { message: "episodeId is required" });
     }
 
-    let seriesType = "comic";
     try {
       const series = await this.findSeriesLite(normalizedSeriesId);
       if (!series) {
         res.status(404);
         return buildError(ERROR_CODES.NOT_FOUND);
       }
-
-      seriesType = String(series.type || "comic");
 
       if (series.adult) {
         const gate = checkAdultGate(req.cookies || {});
@@ -184,9 +137,7 @@ export class EpisodeController {
           });
           hasAccess = !!entitlement;
         } catch (error) {
-          this.logger.warn(
-            `Entitlement lookup failed for user ${userId}, episode ${normalizedEpisodeId}.`
-          );
+          this.logger.warn(`Entitlement lookup failed for user ${userId}, episode ${normalizedEpisodeId}.`);
           if (error instanceof Error) {
             this.logger.debug(error.message);
           }
@@ -199,11 +150,12 @@ export class EpisodeController {
         return buildError(ERROR_CODES.NOT_FOUND);
       }
 
-      if (!hasAccess && payload.episode?.pages && Array.isArray(payload.episode.pages)) {
-        const previewCount = Number((payload.episode as any)?.previewFreePages || 3) || 3;
+      if (!hasAccess && Array.isArray(payload.episode?.pages)) {
+        const previewCountValue = Number((payload.episode as { previewFreePages?: number }).previewFreePages ?? 3);
+        const previewCount = Number.isFinite(previewCountValue) ? Math.max(0, previewCountValue) : 3;
         payload.episode.pages = payload.episode.pages.slice(0, previewCount);
-        (payload.episode as any).isPreview = true;
-        (payload.episode as any).previewCount = previewCount;
+        (payload.episode as { isPreview?: boolean }).isPreview = true;
+        (payload.episode as { previewCount?: number }).previewCount = previewCount;
       }
 
       try {
@@ -222,10 +174,11 @@ export class EpisodeController {
     } catch (error) {
       const stack = error instanceof Error ? error.stack || error.message : String(error);
       this.logger.error(
-        `Episode endpoint degraded for series ${normalizedSeriesId}, episode ${normalizedEpisodeId}.`,
+        `Episode endpoint failed for series ${normalizedSeriesId}, episode ${normalizedEpisodeId}.`,
         stack,
       );
-      return this.buildFallbackEpisodePayload(normalizedSeriesId, normalizedEpisodeId, seriesType);
+      res.status(503);
+      return buildError(ERROR_CODES.INTERNAL, { message: "Failed to load episode." });
     }
   }
 }

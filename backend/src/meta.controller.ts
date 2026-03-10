@@ -1,8 +1,24 @@
-import { Controller, ForbiddenException, Get, Req } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, HttpCode, Post, Req } from "@nestjs/common";
 import { timingSafeEqual } from "crypto";
 import { Request } from "express";
+import { ObservabilityService, FrontendErrorReportInput } from "./common/observability/observability.service";
 import { getRedisClient } from "./common/redis/client";
-import { ObservabilityService } from "./common/observability/observability.service";
+
+type VersionSnapshot = {
+  name: string;
+  version: string;
+  commit: string;
+  deploymentId: string;
+  time: string;
+};
+
+type ObservabilityResponse = ReturnType<ObservabilityService["getSnapshot"]> & {
+  redis: {
+    configured: boolean;
+    connected: boolean;
+    status: string;
+  };
+};
 
 @Controller("meta")
 export class MetaController {
@@ -40,7 +56,7 @@ export class MetaController {
   }
 
   @Get("version")
-  version() {
+  version(): VersionSnapshot {
     const commit =
       process.env.RAILWAY_GIT_COMMIT_SHA ||
       process.env.VERCEL_GIT_COMMIT_SHA ||
@@ -60,8 +76,15 @@ export class MetaController {
     };
   }
 
+  @Post("frontend-error")
+  @HttpCode(202)
+  recordFrontendError(@Body() body: FrontendErrorReportInput = {}): { ok: true } {
+    this.observability.recordFrontendError(body);
+    return { ok: true };
+  }
+
   @Get("observability")
-  observabilitySnapshot(@Req() req: Request) {
+  observabilitySnapshot(@Req() req: Request): ObservabilityResponse {
     if (!this.canReadObservability(req)) {
       throw new ForbiddenException("Observability endpoint is restricted");
     }

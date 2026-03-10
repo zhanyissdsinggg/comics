@@ -7,6 +7,7 @@ import NotificationList from "../../components/notifications/NotificationList";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { trackEvent } from "../../lib/trackEvent";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 
 export default function NotificationsPage() {
   const router = useRouter();
@@ -66,8 +67,17 @@ export default function NotificationsPage() {
                 if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
                   const ctaType = item.ctaType || "STORE";
                   const target = item.ctaTarget || "";
+                  const promotionId = item.type === "PROMO" && typeof item.id === "string" && item.id.startsWith("PROMO_")
+                    ? item.id.replace(/^PROMO_/, "")
+                    : undefined;
+                  const attribution = {
+                    promotionId,
+                    entryPoint: item.type === "PROMO" ? "NOTIFICATION_PROMO" : "NOTIFICATION_SUB_VOUCHER",
+                    sourcePath: "/notifications",
+                    returnTo: "/notifications",
+                  };
                   if (ctaType === "SUBSCRIBE") {
-                    router.push("/subscribe");
+                    router.push(buildPathWithAttribution("/subscribe", attribution));
                     return;
                   }
                   if (ctaType === "SERIES" && target) {
@@ -85,7 +95,13 @@ export default function NotificationsPage() {
                     window.location.href = target;
                     return;
                   }
-                  router.push("/store?returnTo=/notifications&focus=auto");
+                  router.push(
+                    buildPathWithAttribution(
+                      "/store",
+                      attribution,
+                      { focus: "auto" }
+                    )
+                  );
                 }
               }}
               workingId={workingId}
@@ -96,3 +112,4 @@ export default function NotificationsPage() {
     </main>
   );
 }
+

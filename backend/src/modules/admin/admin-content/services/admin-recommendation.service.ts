@@ -1,142 +1,338 @@
 import { Injectable } from '@nestjs/common';
+import type { Prisma, RankingConfig, RecommendationAnalytics, RecommendationSlot, Series } from '@prisma/client';
 import { PrismaService } from '../../../../common/prisma/prisma.service';
+import type {
+  CreateRankingConfigInput,
+  CreateRecommendationSlotInput,
+  PopularSeriesFilters,
+  RankingConfigPayload,
+  RecommendationAnalyticsFilters,
+  RecommendationPaginationFilters,
+  RecommendationPerformanceFilters,
+  SaveRecommendationAnalyticsInput,
+  UpdateRankingConfigInput,
+  UpdateRecommendationSlotInput,
+} from '../dtos/admin-recommendation.dto';
+import { hasText, readBooleanLike, readDateLike, readIntLike, readStringArray } from '../../utils/param-parsing';
 
-/**
- * 老王说：推荐和排行榜管理服务
- * 这个SB服务处理所有推荐位和排行榜相关的业务逻辑
- * 包括推荐位配置、排行榜规则、效果分析等
- */
+const DEFAULT_RANKING_CONFIG: Required<RankingConfigPayload> = {
+  rankingType: 'views',
+  timeRange: 'day',
+  seriesType: 'all',
+  adult: false,
+  maxItems: 20,
+  active: true,
+};
+
+export interface RecommendationSlotView extends RecommendationSlot {
+  name: string;
+  slotType: string;
+  algorithm: string;
+  active: boolean;
+}
+
+export interface RankingConfigView extends RankingConfig {
+  name: string;
+  rankingType: string;
+  timeRange: string;
+  seriesType: string;
+  adult: boolean;
+  active: boolean;
+  maxItems: number;
+  parsedConfig: Required<RankingConfigPayload>;
+}
+
+export interface RecommendationAnalyticsView extends RecommendationAnalytics {
+  slotId: string;
+  ctr: number;
+  conversionRate: number;
+}
+
+export interface RecommendationSlotListResult {
+  slots: RecommendationSlotView[];
+  total: number;
+}
+
+export interface RankingConfigListResult {
+  configs: RankingConfigView[];
+  total: number;
+}
+
+export interface RecommendationAnalyticsListResult {
+  analytics: RecommendationAnalyticsView[];
+  total: number;
+}
+
+export interface RecommendationPerformanceResult {
+  totalImpressions: number;
+  totalClicks: number;
+  totalConversions: number;
+  avgCtr: string;
+  avgConversionRate: string;
+}
+
+function mapSlot(slot: RecommendationSlot): RecommendationSlotView {
+  return {
+    ...slot,
+    name: slot.slot,
+    slotType: 'manual',
+    algorithm: 'manual',
+    active: true,
+  };
+}
+
+function parseRankingConfig(
+  raw: string,
+  fallback: Required<RankingConfigPayload> = DEFAULT_RANKING_CONFIG,
+): Required<RankingConfigPayload> {
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return {
+      rankingType: hasText(parsed.rankingType) ? parsed.rankingType : fallback.rankingType,
+      timeRange: hasText(parsed.timeRange) ? parsed.timeRange : fallback.timeRange,
+      seriesType: hasText(parsed.seriesType) ? parsed.seriesType : fallback.seriesType,
+      adult: readBooleanLike(parsed.adult as boolean | string | undefined, fallback.adult),
+      maxItems: readIntLike(parsed.maxItems as number | string | undefined, fallback.maxItems, 1, 200),
+      active: readBooleanLike(parsed.active as boolean | string | undefined, fallback.active),
+    };
+  } catch {
+    return { ...fallback };
+  }
+}
+
+function buildRankingConfigPayload(
+  input: CreateRankingConfigInput | UpdateRankingConfigInput,
+  fallback: Required<RankingConfigPayload> = DEFAULT_RANKING_CONFIG,
+): Required<RankingConfigPayload> {
+  if (typeof input.config === 'string') {
+    return parseRankingConfig(input.config, fallback);
+  }
+
+  if (input.config && typeof input.config === 'object') {
+    return {
+      rankingType: hasText(input.config.rankingType) ? input.config.rankingType : fallback.rankingType,
+      timeRange: hasText(input.config.timeRange) ? input.config.timeRange : fallback.timeRange,
+      seriesType: hasText(input.config.seriesType) ? input.config.seriesType : fallback.seriesType,
+      adult: input.config.adult ?? fallback.adult,
+      maxItems: input.config.maxItems ?? fallback.maxItems,
+      active: input.config.active ?? fallback.active,
+    };
+  }
+
+  return {
+    rankingType: hasText(input.rankingType) ? input.rankingType : fallback.rankingType,
+    timeRange: hasText(input.timeRange) ? input.timeRange : fallback.timeRange,
+    seriesType: hasText(input.seriesType) ? input.seriesType : fallback.seriesType,
+    adult: input.adult !== undefined ? readBooleanLike(input.adult, fallback.adult) : fallback.adult,
+    maxItems: input.maxItems !== undefined ? readIntLike(input.maxItems, fallback.maxItems, 1, 200) : fallback.maxItems,
+    active: input.active !== undefined ? readBooleanLike(input.active, fallback.active) : fallback.active,
+  };
+}
+
+function mapRankingConfig(config: RankingConfig): RankingConfigView {
+  const parsedConfig = parseRankingConfig(config.config);
+  return {
+    ...config,
+    name: config.ranking,
+    rankingType: parsedConfig.rankingType,
+    timeRange: parsedConfig.timeRange,
+    seriesType: parsedConfig.seriesType,
+    adult: parsedConfig.adult,
+    active: parsedConfig.active,
+    maxItems: parsedConfig.maxItems,
+    parsedConfig,
+  };
+}
+
+function buildRecommendationAnalyticsWhere(
+  filters: RecommendationAnalyticsFilters | RecommendationPerformanceFilters,
+  slot?: string,
+): Prisma.RecommendationAnalyticsWhereInput {
+  const where: Prisma.RecommendationAnalyticsWhereInput = {};
+
+  if (slot) {
+    where.slot = slot;
+  }
+  if ('slot' in filters && hasText(filters.slot)) {
+    where.slot = filters.slot;
+  }
+  if ('seriesId' in filters && hasText(filters.seriesId)) {
+    where.seriesId = filters.seriesId;
+  }
+
+  const startDate = readDateLike(filters.startDate);
+  const endDate = readDateLike(filters.endDate);
+  if (startDate && endDate) {
+    where.date = {
+      gte: startDate,
+      lte: endDate,
+    };
+  }
+
+  return where;
+}
+
+function mapRecommendationAnalytics(item: RecommendationAnalytics): RecommendationAnalyticsView {
+  const ctr = item.impressions > 0 ? (item.clicks / item.impressions) * 100 : 0;
+  const conversionRate = item.clicks > 0 ? (item.conversions / item.clicks) * 100 : 0;
+  return {
+    ...item,
+    slotId: item.slot,
+    ctr,
+    conversionRate,
+  };
+}
+
+function summarizePerformance(items: RecommendationAnalytics[]): RecommendationPerformanceResult {
+  const totalImpressions = items.reduce((sum, item) => sum + item.impressions, 0);
+  const totalClicks = items.reduce((sum, item) => sum + item.clicks, 0);
+  const totalConversions = items.reduce((sum, item) => sum + item.conversions, 0);
+  const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+  const avgConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
+
+  return {
+    totalImpressions,
+    totalClicks,
+    totalConversions,
+    avgCtr: avgCtr.toFixed(2),
+    avgConversionRate: avgConversionRate.toFixed(2),
+  };
+}
+
 @Injectable()
 export class AdminRecommendationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * 获取所有推荐位
-   */
-  async getRecommendationSlots(filters: any = {}) {
-    const { limit = 100, offset = 0 } = filters;
-
-    const where: any = {};
+  async getRecommendationSlots(
+    filters: RecommendationPaginationFilters = {},
+  ): Promise<RecommendationSlotListResult> {
+    const limit = readIntLike(filters.limit, 100, 1, 500);
+    const offset = readIntLike(filters.offset, 0, 0);
 
     const slots = await this.prisma.recommendationSlot.findMany({
-      where,
+      where: {},
       orderBy: { createdAt: 'asc' },
       take: limit,
       skip: offset,
     });
 
-    const total = await this.prisma.recommendationSlot.count({ where });
+    const total = await this.prisma.recommendationSlot.count({ where: {} });
 
-    return { slots, total };
+    return {
+      slots: slots.map(mapSlot),
+      total,
+    };
   }
 
-  /**
-   * 创建推荐位
-   */
-  async createRecommendationSlot(data: any) {
-    return this.prisma.recommendationSlot.create({
+  async createRecommendationSlot(input: CreateRecommendationSlotInput): Promise<RecommendationSlotView> {
+    const slot = await this.prisma.recommendationSlot.create({
       data: {
-        slot: data.slot || data.name || `slot-${Date.now()}`,
-        seriesIds: Array.isArray(data.seriesIds) ? data.seriesIds : [],
+        slot: input.slot || input.name || `slot-${Date.now()}`,
+        seriesIds: readStringArray(input.seriesIds),
       },
     });
+
+    return mapSlot(slot);
   }
 
-  /**
-   * 更新推荐位
-   */
-  async updateRecommendationSlot(id: string, data: any) {
-    const updateData: any = {};
-    if (data.slot) updateData.slot = data.slot;
-    if (Array.isArray(data.seriesIds)) updateData.seriesIds = data.seriesIds;
-    return this.prisma.recommendationSlot.update({
+  async updateRecommendationSlot(id: string, input: UpdateRecommendationSlotInput): Promise<RecommendationSlotView> {
+    const updateData: Prisma.RecommendationSlotUpdateInput = {};
+
+    if (input.slot !== undefined || input.name !== undefined) {
+      updateData.slot = input.slot ?? input.name;
+    }
+    if (input.seriesIds !== undefined) {
+      updateData.seriesIds = readStringArray(input.seriesIds);
+    }
+
+    const slot = await this.prisma.recommendationSlot.update({
       where: { id },
       data: updateData,
     });
+
+    return mapSlot(slot);
   }
 
-  /**
-   * 删除推荐位
-   */
-  async deleteRecommendationSlot(id: string) {
+  async deleteRecommendationSlot(id: string): Promise<RecommendationSlot> {
     return this.prisma.recommendationSlot.delete({
       where: { id },
     });
   }
 
-  /**
-   * 获取所有排行榜配置
-   */
-  async getRankingConfigs(filters: any = {}) {
-    const { limit = 100, offset = 0 } = filters;
-
-    const where: any = {};
+  async getRankingConfigs(filters: RecommendationPaginationFilters = {}): Promise<RankingConfigListResult> {
+    const limit = readIntLike(filters.limit, 100, 1, 500);
+    const offset = readIntLike(filters.offset, 0, 0);
 
     const configs = await this.prisma.rankingConfig.findMany({
-      where,
+      where: {},
       orderBy: { createdAt: 'asc' },
       take: limit,
       skip: offset,
     });
 
-    const total = await this.prisma.rankingConfig.count({ where });
+    const total = await this.prisma.rankingConfig.count({ where: {} });
 
-    return { configs, total };
+    return {
+      configs: configs.map(mapRankingConfig),
+      total,
+    };
   }
 
-  /**
-   * 创建排行榜配置
-   */
-  async createRankingConfig(data: any) {
-    return this.prisma.rankingConfig.create({
+  async createRankingConfig(input: CreateRankingConfigInput): Promise<RankingConfigView> {
+    const config = await this.prisma.rankingConfig.create({
       data: {
-        ranking: data.ranking || data.name || `ranking-${Date.now()}`,
-        config: data.config ? JSON.stringify(data.config) : JSON.stringify({
-          rankingType: data.rankingType || 'views',
-          timeRange: data.timeRange || 'day',
-          seriesType: data.seriesType || 'all',
-          adult: data.adult || false,
-          maxItems: data.maxItems || 20,
-        }),
+        ranking: input.ranking || input.name || `ranking-${Date.now()}`,
+        config: JSON.stringify(buildRankingConfigPayload(input)),
       },
     });
+
+    return mapRankingConfig(config);
   }
 
-  /**
-   * 更新排行榜配置
-   */
-  async updateRankingConfig(id: string, data: any) {
-    const updateData: any = {};
-    if (data.ranking) updateData.ranking = data.ranking;
-    if (data.config) updateData.config = typeof data.config === 'string' ? data.config : JSON.stringify(data.config);
-    return this.prisma.rankingConfig.update({
+  async updateRankingConfig(id: string, input: UpdateRankingConfigInput): Promise<RankingConfigView> {
+    const updateData: Prisma.RankingConfigUpdateInput = {};
+
+    if (input.ranking !== undefined || input.name !== undefined) {
+      updateData.ranking = input.ranking ?? input.name;
+    }
+
+    const hasConfigUpdate =
+      input.config !== undefined ||
+      input.rankingType !== undefined ||
+      input.timeRange !== undefined ||
+      input.seriesType !== undefined ||
+      input.adult !== undefined ||
+      input.maxItems !== undefined ||
+      input.active !== undefined;
+
+    if (hasConfigUpdate) {
+      const existingConfig = await this.prisma.rankingConfig.findUnique({
+        where: { id },
+      });
+      const fallbackConfig = existingConfig ? parseRankingConfig(existingConfig.config) : DEFAULT_RANKING_CONFIG;
+      updateData.config = JSON.stringify(buildRankingConfigPayload(input, fallbackConfig));
+    }
+
+    const config = await this.prisma.rankingConfig.update({
       where: { id },
       data: updateData,
     });
+
+    return mapRankingConfig(config);
   }
 
-  /**
-   * 删除排行榜配置
-   */
-  async deleteRankingConfig(id: string) {
+  async deleteRankingConfig(id: string): Promise<RankingConfig> {
     return this.prisma.rankingConfig.delete({
       where: { id },
     });
   }
 
-  /**
-   * 获取推荐效果分析数据
-   */
-  async getRecommendationAnalytics(filters: any = {}) {
-    const { slot, seriesId, startDate, endDate, limit = 100, offset = 0 } = filters;
-
-    const where: any = {};
-    if (slot) {
-      where.slot = slot;
-    }
-    if (seriesId) {
-      where.seriesId = seriesId;
-    }
+  async getRecommendationAnalytics(
+    filters: RecommendationAnalyticsFilters = {},
+  ): Promise<RecommendationAnalyticsListResult> {
+    const limit = readIntLike(filters.limit, 100, 1, 500);
+    const offset = readIntLike(filters.offset, 0, 0);
+    const where = buildRecommendationAnalyticsWhere(filters);
 
     const analytics = await this.prisma.recommendationAnalytics.findMany({
       where,
@@ -147,94 +343,72 @@ export class AdminRecommendationService {
 
     const total = await this.prisma.recommendationAnalytics.count({ where });
 
-    return { analytics, total };
+    return {
+      analytics: analytics.map(mapRecommendationAnalytics),
+      total,
+    };
   }
 
-  /**
-   * 保存推荐效果分析数据
-   */
-  async saveRecommendationAnalytics(slot: string, seriesId: string, date: Date, data: any) {
-    return this.prisma.recommendationAnalytics.create({
+  async saveRecommendationAnalytics(
+    slot: string,
+    seriesId: string,
+    date: Date,
+    input: SaveRecommendationAnalyticsInput,
+  ): Promise<RecommendationAnalyticsView> {
+    const analytics = await this.prisma.recommendationAnalytics.create({
       data: {
         slot,
         seriesId,
-        date: date || new Date(),
-        clicks: data.clicks || 0,
-        views: data.views || 0,
-        impressions: data.impressions || 0,
-        conversions: data.conversions || 0,
+        date: readDateLike(date) ?? new Date(),
+        clicks: readIntLike(input.clicks, 0),
+        views: readIntLike(input.views, 0),
+        impressions: readIntLike(input.impressions, 0),
+        conversions: readIntLike(input.conversions, 0),
       },
     });
+
+    return mapRecommendationAnalytics(analytics);
   }
 
-  /**
-   * 获取推荐位的效果统计
-   */
-  async getSlotPerformance(slot: string, filters: any = {}) {
-    const where: any = { slot };
-
+  async getSlotPerformance(
+    slot: string,
+    filters: RecommendationPerformanceFilters = {},
+  ): Promise<RecommendationPerformanceResult> {
     const analytics = await this.prisma.recommendationAnalytics.findMany({
-      where,
+      where: buildRecommendationAnalyticsWhere(filters, slot),
     });
 
-    const totalImpressions = analytics.reduce((sum, item) => sum + item.impressions, 0);
-    const totalClicks = analytics.reduce((sum, item) => sum + item.clicks, 0);
-    const totalConversions = analytics.reduce((sum, item) => sum + item.conversions, 0);
-
-    const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
-    const avgConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
-
-    return {
-      totalImpressions,
-      totalClicks,
-      totalConversions,
-      avgCtr: avgCtr.toFixed(2),
-      avgConversionRate: avgConversionRate.toFixed(2),
-    };
+    return summarizePerformance(analytics);
   }
 
-  /**
-   * 获取排行榜的效果统计
-   */
-  async getRankingPerformance(ranking: string, filters: any = {}) {
+  async getRankingPerformance(
+    ranking: string,
+    filters: RecommendationPerformanceFilters = {},
+  ): Promise<RecommendationPerformanceResult & { ranking: string }> {
     const analytics = await this.prisma.recommendationAnalytics.findMany({
-      where: {},
+      where: buildRecommendationAnalyticsWhere(filters),
     });
-
-    const totalImpressions = analytics.reduce((sum, item) => sum + item.impressions, 0);
-    const totalClicks = analytics.reduce((sum, item) => sum + item.clicks, 0);
-    const totalConversions = analytics.reduce((sum, item) => sum + item.conversions, 0);
-
-    const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
-    const avgConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
 
     return {
       ranking,
-      totalImpressions,
-      totalClicks,
-      totalConversions,
-      avgCtr: avgCtr.toFixed(2),
-      avgConversionRate: avgConversionRate.toFixed(2),
+      ...summarizePerformance(analytics),
     };
   }
 
-  /**
-   * 获取热门作品（用于排行榜）
-   */
-  async getPopularSeries(filters: any = {}) {
-    const { rankingType = 'views', seriesType = 'all', adult = false, limit = 20 } = filters;
+  async getPopularSeries(filters: PopularSeriesFilters = {}): Promise<Series[]> {
+    const limit = readIntLike(filters.limit, 20, 1, 100);
+    const rankingType = hasText(filters.rankingType) ? filters.rankingType : 'views';
+    const seriesType = hasText(filters.seriesType) ? filters.seriesType : 'all';
+    const adult = readBooleanLike(filters.adult, false);
 
-    let orderBy: any = { rating: 'desc' };
-
+    let orderBy: Prisma.SeriesOrderByWithRelationInput = { ratingCount: 'desc' };
     if (rankingType === 'rating') {
       orderBy = { rating: 'desc' };
     } else if (rankingType === 'trending') {
       orderBy = { updatedAt: 'desc' };
-    } else {
-      orderBy = { ratingCount: 'desc' };
     }
 
-    const where: any = {};
+    const where: Prisma.SeriesWhereInput = {};
     if (!adult) {
       where.adult = false;
     }
@@ -242,12 +416,10 @@ export class AdminRecommendationService {
       where.type = seriesType;
     }
 
-    const series = await this.prisma.series.findMany({
+    return this.prisma.series.findMany({
       where,
       orderBy,
       take: limit,
     });
-
-    return series;
   }
 }

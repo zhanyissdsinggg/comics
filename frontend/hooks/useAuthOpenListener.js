@@ -9,9 +9,21 @@ export function useAuthOpenListener() {
       return;
     }
     initialized.current = true;
-    const handler = () => {
-      emitAuthRequired({ source: "event" });
+
+    const handler = (event) => {
+      const returnTo = event?.detail?.returnTo || null;
+      if (returnTo && typeof window !== "undefined") {
+        window.sessionStorage.setItem("mn_return_to", returnTo);
+      }
+      if (event?.__mnAuthHandled) {
+        return;
+      }
+      emitAuthRequired({
+        source: "event",
+        returnTo,
+      });
     };
+
     window.addEventListener("auth:open", handler);
     return () => {
       window.removeEventListener("auth:open", handler);

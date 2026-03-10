@@ -1,35 +1,48 @@
 import { Body, Controller, Post, Req, Res } from "@nestjs/common";
-import { PaymentsService } from "../payments.service";
+import { createHmac, timingSafeEqual } from "crypto";
 import { Request, Response } from "express";
-import { getUserIdFromRequest } from "../../../common/utils/auth";
-import { buildError, ERROR_CODES } from "../../../common/utils/errors";
+import { getTopupPackage } from "../../../common/config/topup";
 import { logger } from "../../../common/logger/winston.init";
+import { PrismaService } from "../../../common/prisma/prisma.service";
 import {
   checkRateLimitByIp,
   getIdempotencyRecord,
   setIdempotencyRecord,
 } from "../../../common/storage/limits";
-import { getTopupPackage } from "../../../common/config/topup";
-import { PrismaService } from "../../../common/prisma/prisma.service";
-import { ORDER_STATUS } from "../../../common/utils/order-status";
-import { createHmac, timingSafeEqual } from "crypto";
+import { getUserIdFromRequest } from "../../../common/utils/auth";
+import { buildError, ERROR_CODES } from "../../../common/utils/errors";
 import { getClientIp } from "../../../common/utils/ip";
+import { ORDER_STATUS } from "../../../common/utils/order-status";
+import { PaymentsService } from "../payments.service";
 
-/**
- * 支付Webhook Controller - 处理来自支付提供商的webhook回调
- */
+type AuditPayload = {
+  userId?: string | null;
+  targetType?: string;
+  targetId?: string;
+  eventType?: string;
+  [key: string]: unknown;
+};
+
+type WebhookBody = {
+  eventType?: string;
+  orderId?: string;
+  userId?: string | null;
+  eventId?: string;
+  [key: string]: unknown;
+};
+
 @Controller("payments")
 export class PaymentsWebhookController {
   constructor(
     private readonly paymentsService: PaymentsService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
-  private async logAudit(action: string, payload: Record<string, any>, req: Request) {
+  private async logAudit(action: string, payload: AuditPayload): Promise<void> {
     try {
       await this.prisma.auditLog.create({
         data: {
-          userId: payload.userId || null,
+          userId: payload.userId || "",
           action,
           resource: payload.targetType || "payment",
           targetType: payload.targetType || "payment",
@@ -42,50 +55,55 @@ export class PaymentsWebhookController {
     }
   }
 
-  /**
-   * 老王说：Webhook签名验证是防止伪造请求的关键
-   * 如果未设置WEBHOOK_SECRET，必须拒绝所有webhook请求
-   */
-  private verifyWebhookSignature(req: Request, body: any) {
+  private verifyWebhookSignature(req: Request, body: WebhookBody): boolean {
     const secret = process.env.WEBHOOK_SECRET || "";
-    // 老王说：没有secret就是裸奔，必须拒绝
     if (!secret) {
-      logger.error("致命错误：未设置WEBHOOK_SECRET环境变量，拒绝webhook请求");
+      logger.error("WEBHOOK_SECRET is missing; rejecting webhook request.");
       return false;
     }
+
     const signature = String(req.headers["x-webhook-signature"] || "");
     if (!signature) {
-      logger.warn("Webhook请求缺少签名header");
+      logger.warn("Webhook request is missing x-webhook-signature header.");
       return false;
     }
-    const rawBody = (req as any).rawBody || JSON.stringify(body || {});
+
+    const rawBody = req.rawBody || JSON.stringify(body || {});
     const digest = createHmac("sha256", secret).update(rawBody).digest("hex");
     try {
       const isValid = timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
       if (!isValid) {
-        logger.warn("Webhook签名验证失败");
+        logger.warn("Webhook signature validation failed.");
       }
       return isValid;
-    } catch (err) {
-      logger.error("Webhook签名验证异常", { error: err });
+    } catch (error) {
+      logger.error("Webhook signature validation threw an error.", { error });
       return false;
     }
   }
 
   @Post("webhook")
-  async webhook(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    // 老王说：记录所有webhook请求，方便排查问题
+  async webhook(
+    @Body() body: WebhookBody,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const ip = getClientIp(req);
-    logger.info(`收到Webhook请求`, { ip, eventType: body?.eventType, orderId: body?.orderId });
+    logger.info("Received webhook request", {
+      ip,
+      eventType: body.eventType,
+      orderId: body.orderId,
+    });
 
-    const eventType = body?.eventType;
-    const orderId = body?.orderId;
-    const userId = body?.userId || getUserIdFromRequest(req, false);
-    const eventId = body?.eventId || req.headers["idempotency-key"];
+    const eventType = body.eventType;
+    const orderId = body.orderId;
+    const userId = body.userId || getUserIdFromRequest(req, false);
+    const eventId = body.eventId || req.headers["idempotency-key"];
     if (!eventType || !orderId || !userId) {
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST);
     }
+
     const rate = await checkRateLimitByIp(this.prisma, ip, "webhook", 120, 60);
     if (!rate.ok) {
       res.status(429);
@@ -93,8 +111,11 @@ export class PaymentsWebhookController {
     }
     if (!this.verifyWebhookSignature(req, body)) {
       res.status(401);
-      return buildError(ERROR_CODES.UNAUTHENTICATED, { reason: "INVALID_WEBHOOK_SIGNATURE" });
+      return buildError(ERROR_CODES.UNAUTHENTICATED, {
+        reason: "INVALID_WEBHOOK_SIGNATURE",
+      });
     }
+
     if (eventId) {
       const cached = await getIdempotencyRecord(this.prisma, userId, String(eventId));
       if (cached) {
@@ -102,16 +123,20 @@ export class PaymentsWebhookController {
         return cached.body;
       }
     }
+
     if (eventType === "payment_failed" || eventType === "payment_timeout") {
       await this.prisma.order.updateMany({
         where: { id: orderId, userId },
-        data: { status: eventType === "payment_timeout" ? ORDER_STATUS.TIMEOUT : ORDER_STATUS.FAILED },
+        data: {
+          status: eventType === "payment_timeout" ? ORDER_STATUS.TIMEOUT : ORDER_STATUS.FAILED,
+        },
       });
-      await this.logAudit(
-        "payment_webhook_failed",
-        { userId, targetType: "order", targetId: orderId, eventType },
-        req
-      );
+      await this.logAudit("payment_webhook_failed", {
+        userId,
+        targetType: "order",
+        targetId: orderId,
+        eventType,
+      });
       if (eventType === "payment_timeout") {
         const payment = await this.prisma.paymentIntent.findFirst({
           where: { orderId },
@@ -119,6 +144,7 @@ export class PaymentsWebhookController {
         });
         await this.paymentsService.enqueueRetry(userId, orderId, payment?.id, "TIMEOUT");
       }
+
       const responseBody = { ok: true };
       if (eventId) {
         await setIdempotencyRecord(this.prisma, userId, String(eventId), {
@@ -128,6 +154,7 @@ export class PaymentsWebhookController {
       }
       return responseBody;
     }
+
     if (eventType === "payment_refunded") {
       const result = await this.paymentsService.refund(userId, orderId);
       if (!result.ok) {
@@ -141,29 +168,31 @@ export class PaymentsWebhookController {
         }
         return responseBody;
       }
+
       if (eventId) {
         await setIdempotencyRecord(this.prisma, userId, String(eventId), {
           status: 200,
           body: result,
         });
       }
-      await this.logAudit(
-        "payment_webhook_refund",
-        { userId, targetType: "order", targetId: orderId },
-        req
-      );
+      await this.logAudit("payment_webhook_refund", {
+        userId,
+        targetType: "order",
+        targetId: orderId,
+      });
       return result;
     }
+
     if (eventType === "payment_dispute") {
       await this.prisma.order.updateMany({
         where: { id: orderId, userId },
         data: { status: ORDER_STATUS.DISPUTED },
       });
-      await this.logAudit(
-        "payment_webhook_dispute",
-        { userId, targetType: "order", targetId: orderId },
-        req
-      );
+      await this.logAudit("payment_webhook_dispute", {
+        userId,
+        targetType: "order",
+        targetId: orderId,
+      });
       const responseBody = { ok: true };
       if (eventId) {
         await setIdempotencyRecord(this.prisma, userId, String(eventId), {
@@ -173,6 +202,7 @@ export class PaymentsWebhookController {
       }
       return responseBody;
     }
+
     if (eventType === "payment_chargeback") {
       const order = await this.prisma.order.findUnique({ where: { id: orderId } });
       if (!order || order.userId !== userId) {
@@ -182,26 +212,24 @@ export class PaymentsWebhookController {
       if (order.status === ORDER_STATUS.CHARGEBACK) {
         return { ok: true };
       }
+
       const pkg = await getTopupPackage(this.prisma, order.packageId);
       const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
 
-      // 老王说：拒付处理必须检查点数是否足够扣除，和退款逻辑一样
       const currentPaidPts = wallet?.paidPts || 0;
       const currentBonusPts = wallet?.bonusPts || 0;
       const chargebackPaidPts = pkg?.paidPts || 0;
       const chargebackBonusPts = pkg?.bonusPts || 0;
 
-      // 计算拒付后的点数不足量
       const paidShortfall = Math.max(0, chargebackPaidPts - currentPaidPts);
       const bonusShortfall = Math.max(0, chargebackBonusPts - currentBonusPts);
       const totalShortfall = paidShortfall + bonusShortfall;
 
-      // 老王说：如果点数不足，拒绝拒付处理
       if (totalShortfall > 0) {
-        logger.error(`拒付处理失败：用户点数不足`, {
+        logger.error("Chargeback failed: wallet balance is insufficient", {
           paidShortfall,
           bonusShortfall,
-          totalShortfall
+          totalShortfall,
         });
         res.status(400);
         return buildError(ERROR_CODES.INSUFFICIENT_POINTS, {
@@ -209,7 +237,6 @@ export class PaymentsWebhookController {
         });
       }
 
-      // 老王说：点数足够才能扣除，不使用Math.max防止负数
       const paidPts = currentPaidPts - chargebackPaidPts;
       const bonusPts = currentBonusPts - chargebackBonusPts;
 
@@ -225,17 +252,18 @@ export class PaymentsWebhookController {
         });
         return { nextWallet, nextOrder };
       });
+
       const responseBody = {
         ok: true,
         order: next.nextOrder,
         wallet: next.nextWallet,
         chargebackShortfall: 0,
       };
-      await this.logAudit(
-        "payment_webhook_chargeback",
-        { userId, targetType: "order", targetId: orderId },
-        req
-      );
+      await this.logAudit("payment_webhook_chargeback", {
+        userId,
+        targetType: "order",
+        targetId: orderId,
+      });
       if (eventId) {
         await setIdempotencyRecord(this.prisma, userId, String(eventId), {
           status: 200,
@@ -244,6 +272,7 @@ export class PaymentsWebhookController {
       }
       return responseBody;
     }
+
     res.status(400);
     const responseBody = buildError(ERROR_CODES.INVALID_REQUEST);
     if (eventId) {
@@ -255,3 +284,5 @@ export class PaymentsWebhookController {
     return responseBody;
   }
 }
+
+

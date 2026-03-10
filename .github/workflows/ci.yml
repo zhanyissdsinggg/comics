@@ -5,18 +5,27 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   backend:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
@@ -25,6 +34,9 @@ jobs:
 
       - name: Lint
         run: npm run lint --prefix backend
+
+      - name: Typecheck
+        run: npm run typecheck --prefix backend
 
       - name: Build
         run: npm run build --prefix backend
@@ -38,11 +50,9 @@ jobs:
       - name: E2E Smoke Tests
         run: npm run test:e2e --prefix backend
 
-      - name: Integration Tests (skip unless enabled)
-        run: npm run test:integration --prefix backend
-
   backend-integration:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16
@@ -68,12 +78,12 @@ jobs:
           --health-retries 10
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
@@ -89,14 +99,15 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
@@ -108,14 +119,15 @@ jobs:
 
   frontend-browser-e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
@@ -128,11 +140,22 @@ jobs:
       - name: Run browser E2E tests
         run: npm run test:e2e:browser --prefix frontend
 
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-playwright-artifacts
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          if-no-files-found: ignore
+
   security:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v2
@@ -140,9 +163,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
 
       - name: Install frontend dependencies
         run: npm ci --prefix frontend
@@ -155,3 +178,4 @@ jobs:
 
       - name: Comment encoding hygiene gate
         run: npm run hygiene:check
+

@@ -1,8 +1,37 @@
-import { IsOptional, IsString, IsBoolean, IsObject } from 'class-validator';
+import { IsBoolean, IsObject, IsOptional, IsString } from "class-validator";
+import type { BrandingConfig } from "../../../branding/branding.config";
+import type { EmailConfigInput } from "../../../email/email-config";
 
-/**
- * 老王说：Users相关的DTO
- */
+export type NotificationPayloadInput = {
+  userId?: string;
+  type?: string;
+  title?: string;
+  message?: string;
+  seriesId?: string | null;
+  episodeId?: string | null;
+  broadcast?: boolean;
+};
+
+export type RegionCodeInput = {
+  code?: string;
+  label?: string;
+};
+
+export type PhoneLengthRules = Record<string, number[]>;
+
+export type RegionConfigInput = {
+  countryCodes?: RegionCodeInput[];
+  lengthRules?: PhoneLengthRules;
+};
+
+export type TestEmailPayloadInput = {
+  to?: string;
+};
+
+export type BrandingPayloadInput = Partial<
+  Pick<BrandingConfig, "siteLogoUrl" | "faviconUrl" | "homeBannerUrl">
+>;
+
 export class BlockUserDto {
   @IsString()
   userId!: string;
@@ -12,64 +41,49 @@ export class BlockUserDto {
   blocked?: boolean;
 }
 
-/**
- * 老王说：Notifications相关的DTO
- */
 export class CreateNotificationDto {
   @IsOptional()
   @IsObject()
-  notification?: any;
+  notification?: NotificationPayloadInput;
 }
 
 export class UpdateNotificationDto {
   @IsOptional()
   @IsObject()
-  notification?: any;
+  notification?: NotificationPayloadInput;
 }
 
-/**
- * 老王说：Regions相关的DTO
- */
 export class CreateRegionDto {
   @IsOptional()
   @IsObject()
-  region?: any;
+  region?: RegionConfigInput;
 }
 
 export class UpdateRegionDto {
   @IsOptional()
   @IsObject()
-  region?: any;
+  region?: RegionConfigInput;
 }
 
-/**
- * 老王说：Email相关的DTO
- */
 export class UpdateEmailConfigDto {
   @IsOptional()
   @IsObject()
-  config?: any;
+  config?: EmailConfigInput;
 }
 
 export class TestEmailDto {
   @IsOptional()
   @IsObject()
-  email?: any;
+  email?: TestEmailPayloadInput;
 }
 
-/**
- * 老王说：Email Jobs相关的DTO
- */
 export class RetryEmailJobDto {
   @IsString()
   jobId!: string;
 }
 
-/**
- * 老王说：Branding相关的DTO
- */
 export class UpdateBrandingDto {
   @IsOptional()
   @IsObject()
-  branding?: any;
+  branding?: BrandingPayloadInput;
 }

@@ -8,6 +8,7 @@ import { AdminEpisodesUploadController } from "../controllers/admin-episodes-upl
 import { AdminRecommendationController } from "../controllers/admin-recommendation.controller";
 import { AdminCommentsController } from "./controllers/admin-comments.controller";
 import { AdminPromotionsController } from "./controllers/admin-promotions.controller";
+import { AdminContentGeneratorController } from "./controllers/admin-content-generator.controller";
 
 @Module({
   imports: [AdminAuthModule],
@@ -18,6 +19,7 @@ import { AdminPromotionsController } from "./controllers/admin-promotions.contro
     AdminRecommendationController,
     AdminCommentsController,
     AdminPromotionsController,
+    AdminContentGeneratorController,
   ],
   providers: [AdminRecommendationService, PrismaService],
   exports: [AdminRecommendationService],

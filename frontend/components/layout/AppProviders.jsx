@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import ErrorBoundary from "../common/ErrorBoundary";
 import ThemeProvider from "../common/ThemeProvider";
 import { AuthProvider } from "../../store/useAuthStore";
@@ -21,13 +22,11 @@ import { RegionProvider } from "../../store/useRegionStore";
 import { HistoryProvider } from "../../store/useHistoryStore";
 import { ToastProvider } from "../common/ToastContext";
 import ToastContainer from "../common/ToastContainer";
-import BackendHealthBanner from "../common/BackendHealthBanner";
 import { ApiBootGuard } from "../common/ApiBootGuard";
 import GlobalErrorToast from "../common/GlobalErrorToast";
 import BackendMetaBadge from "../common/BackendMetaBadge";
 import AuthRequiredModal from "../common/AuthRequiredModal";
 import PWAInstallPrompt from "../common/PWAInstallPrompt";
-import { usePathname } from "next/navigation";
 import { useAuthOpenListener } from "../../hooks/useAuthOpenListener";
 import OfflineNotice from "../common/OfflineNotice";
 import PerfMonitorBadge from "../common/PerfMonitorBadge";
@@ -41,12 +40,14 @@ function BrandingHeadSync() {
     if (typeof document === "undefined") {
       return;
     }
+
     const faviconUrl = branding?.faviconUrl || "";
     if (!faviconUrl) {
       return;
     }
+
     const ensureLink = (rel) => {
-      let link = document.querySelector(`link[rel=\"${rel}\"]`);
+      let link = document.querySelector(`link[rel="${rel}"]`);
       if (!link) {
         link = document.createElement("link");
         link.setAttribute("rel", rel);
@@ -54,6 +55,7 @@ function BrandingHeadSync() {
       }
       link.setAttribute("href", faviconUrl);
     };
+
     ensureLink("icon");
     ensureLink("apple-touch-icon");
   }, [branding?.faviconUrl]);
@@ -63,63 +65,65 @@ function BrandingHeadSync() {
 
 export default function AppProviders({ children }) {
   useAuthOpenListener();
+
   const pathname = usePathname();
-  const showAuthModal = !pathname?.startsWith("/admin");
+  const isAdminRoute = pathname?.startsWith("/admin");
+
   return (
-    <ErrorBoundary name="AppRoot" title="Application Error" message="Something went wrong with the application. Please reload the page.">
+    <ErrorBoundary
+      name="AppRoot"
+      title="Application Error"
+      message="Something went wrong with the application. Please reload the page."
+    >
       <ThemeProvider>
         <ToastProvider>
-        <AuthProvider>
-          <WalletProvider>
-            <AdultGateProvider>
-              <BrandingProvider>
-                <RegionProvider>
-                {/* 老王注释：ApiBootGuard已经处理后端离线提示，这里不再重复显示 */}
-                {/* <BackendHealthBanner /> */}
-                <OfflineNotice />
-                <GlobalErrorToast />
-                <BackendMetaBadge />
-                <PerfMonitorBadge />
-                <TrackingInjector />
-                <BrandingHeadSync />
-                <ToastContainer />
-              {/* 老王注释：禁用全局登录弹窗，让用户自由浏览 */}
-              {/* {showAuthModal ? <AuthRequiredModal /> : null} */}
-              <ApiBootGuard>
-                <RewardsProvider>
-                  <EntitlementProvider>
-                    <ProgressProvider>
-                      <HomeProvider>
-                        <FollowProvider>
-                          <NotificationsProvider>
-                            <CouponProvider>
-                              <BehaviorProvider>
-                                <ReaderSettingsProvider>
-                                  <HistoryProvider>
-                                    <BookmarkProvider>
-                                      {children}
-                                      {/* 老王说：暂时注释掉SiteFooter，它使用了next-intl */}
-                                      {/* <SiteFooter /> */}
-                                      <PWAInstallPrompt />
-                                    </BookmarkProvider>
-                                  </HistoryProvider>
-                                </ReaderSettingsProvider>
-                              </BehaviorProvider>
-                            </CouponProvider>
-                          </NotificationsProvider>
-                        </FollowProvider>
-                      </HomeProvider>
-                    </ProgressProvider>
-                  </EntitlementProvider>
-                </RewardsProvider>
-              </ApiBootGuard>
-              </RegionProvider>
-            </BrandingProvider>
-          </AdultGateProvider>
-        </WalletProvider>
-      </AuthProvider>
-    </ToastProvider>
-    </ThemeProvider>
+          <AuthProvider>
+            <WalletProvider>
+              <AdultGateProvider>
+                <BrandingProvider>
+                  <RegionProvider>
+                    <OfflineNotice />
+                    <GlobalErrorToast />
+                    <BackendMetaBadge />
+                    <PerfMonitorBadge />
+                    <TrackingInjector />
+                    <BrandingHeadSync />
+                    <ToastContainer />
+                    {!isAdminRoute ? <AuthRequiredModal /> : null}
+                    <ApiBootGuard>
+                      <RewardsProvider>
+                        <EntitlementProvider>
+                          <ProgressProvider>
+                            <HomeProvider>
+                              <FollowProvider>
+                                <NotificationsProvider>
+                                  <CouponProvider>
+                                    <BehaviorProvider>
+                                      <ReaderSettingsProvider>
+                                        <HistoryProvider>
+                                          <BookmarkProvider>
+                                            {children}
+                                            {!isAdminRoute ? <SiteFooter /> : null}
+                                            <PWAInstallPrompt />
+                                          </BookmarkProvider>
+                                        </HistoryProvider>
+                                      </ReaderSettingsProvider>
+                                    </BehaviorProvider>
+                                  </CouponProvider>
+                                </NotificationsProvider>
+                              </FollowProvider>
+                            </HomeProvider>
+                          </ProgressProvider>
+                        </EntitlementProvider>
+                      </RewardsProvider>
+                    </ApiBootGuard>
+                  </RegionProvider>
+                </BrandingProvider>
+              </AdultGateProvider>
+            </WalletProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

@@ -1,12 +1,11 @@
-import { IsOptional, IsString, IsNumber, IsArray, IsObject, IsBoolean } from 'class-validator';
+import { IsArray, IsBoolean, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
 
-/**
- * 老王说：Episode相关的DTO
- */
+type LooseObject = Record<string, unknown>;
+
 export class CreateEpisodeDto {
   @IsOptional()
   @IsObject()
-  episode?: any;
+  episode?: LooseObject;
 }
 
 export class BulkCreateEpisodesDto {
@@ -25,7 +24,7 @@ export class BulkUpdateEpisodesDto {
 
   @IsOptional()
   @IsObject()
-  updates?: any;
+  updates?: LooseObject;
 }
 
 export class BulkDeleteEpisodesDto {
@@ -47,31 +46,25 @@ export class UploadEpisodesDto {
 export class UpdateEpisodeDto {
   @IsOptional()
   @IsObject()
-  episode?: any;
+  episode?: LooseObject;
 }
 
-/**
- * 老王说：Promotions相关的DTO
- */
 export class CreatePromotionDto {
   @IsOptional()
   @IsObject()
-  promotion?: any;
+  promotion?: LooseObject;
 }
 
 export class UpdatePromotionDto {
   @IsOptional()
   @IsObject()
-  defaults?: any;
+  defaults?: LooseObject;
 
   @IsOptional()
   @IsObject()
-  promotion?: any;
+  promotion?: LooseObject;
 }
 
-/**
- * 老王说：Comments相关的DTO
- */
 export class UpdateCommentDto {
   @IsOptional()
   @IsString()
@@ -87,5 +80,5 @@ export class UpdateCommentDto {
 
   @IsOptional()
   @IsObject()
-  comment?: any;
+  comment?: LooseObject;
 }

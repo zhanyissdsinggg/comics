@@ -11,6 +11,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import SocialAuthButton from "../../components/auth/SocialAuthButton";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { isGoogleAuthEnabled } from "../../lib/socialAuthConfig";
 
 const REGION_KEY = "mn_region";
@@ -327,7 +328,15 @@ export default function AccountPage() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => router.push("/subscribe")}
+                onClick={() =>
+                  router.push(
+                    buildPathWithAttribution("/subscribe", {
+                      entryPoint: "ACCOUNT_SUBSCRIPTION",
+                      sourcePath: "/account",
+                      returnTo: "/account",
+                    })
+                  )
+                }
                 className="rounded-full border border-neutral-800 px-4 py-2 text-xs"
               >
                 Manage

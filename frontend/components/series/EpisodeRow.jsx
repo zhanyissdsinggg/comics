@@ -12,6 +12,7 @@ import { getBucket, getOrCreateUserId, trackExposure } from "../../lib/experimen
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { calculatePrice } from "../../lib/pricing";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 
 function createIdempotencyKey() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -422,7 +423,19 @@ function EpisodeRow({
                 {
                   label: "Top up POINTS",
                   onClick: () => {
-                    router.push(`/store?returnTo=/series/${seriesId}&focus=auto`);
+                    router.push(
+                      buildPathWithAttribution(
+                        "/store",
+                        {
+                          entryPoint: "UNLOCK_MODAL",
+                          sourcePath: `/series/${seriesId}`,
+                          sourceSeriesId: seriesId,
+                          sourceEpisodeId: episode?.id,
+                          returnTo: `/series/${seriesId}`,
+                        },
+                        { focus: "auto" }
+                      )
+                    );
                     trackEvent("offer_click", {
                       offerId: "store_entry",
                       entry: "UNLOCK_MODAL",
@@ -438,7 +451,15 @@ function EpisodeRow({
                       seriesId,
                       episodeId: episode?.id,
                     });
-                    router.push(`/subscribe?returnTo=/series/${seriesId}`);
+                    router.push(
+                      buildPathWithAttribution("/subscribe", {
+                        entryPoint: "UNLOCK_MODAL",
+                        sourcePath: `/series/${seriesId}`,
+                        sourceSeriesId: seriesId,
+                        sourceEpisodeId: episode?.id,
+                        returnTo: `/series/${seriesId}`,
+                      })
+                    );
                     setModalState(null);
                   },
                   variant: "secondary",
@@ -451,12 +472,20 @@ function EpisodeRow({
                     const packageId =
                       recommendedTopup?.id?.replace("points_pack_", "") ||
                       "starter";
-                    trackEvent("topup_start", { packageId, entry: "UNLOCK_MODAL" });
                     trackEvent("offer_click", {
                       offerId: recommendedTopup?.id || "points_pack_starter",
                       entry: "UNLOCK_MODAL",
                     });
-                    const topupResponse = await topup(packageId);
+                    const topupResponse = await topup(packageId, {
+                      attribution: {
+                        entryPoint: "UNLOCK_MODAL",
+                        offerId: recommendedTopup?.id || `points_pack_${packageId}`,
+                        sourcePath: `/series/${seriesId}`,
+                        sourceSeriesId: seriesId,
+                        sourceEpisodeId: episode?.id,
+                        returnTo: `/series/${seriesId}`,
+                      },
+                    });
                     if (topupResponse.ok) {
                       let retry;
                       try {

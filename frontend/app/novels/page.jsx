@@ -2,25 +2,14 @@ import { Suspense } from "react";
 import NovelsPage from "../../components/novels/NovelsPage";
 import Skeleton from "../../components/common/Skeleton";
 import ErrorBoundary from "../../components/common/ErrorBoundary";
+import { createPageMetadata } from "../../lib/seo";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Novels - Browse All Series",
-  description: "Discover trending web novels and light novels. Browse by genre and find your next favorite story.",
-  // 老王添加：Open Graph标签
-  openGraph: {
-    title: "Novels - Browse All Series | Gush Comics",
-    description: "Discover trending web novels and light novels. Browse by genre and find your next favorite story.",
-    url: "https://gushcomics.com/novels",
-    siteName: "Gush Comics",
-    type: "website",
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Novels - Browse All Series | Gush Comics",
-    description: "Discover trending web novels and light novels. Browse by genre and find your next favorite story.",
-  },
-};
+  description:
+    "Discover trending web novels and light novels. Browse by genre and find your next favorite story.",
+  path: "/novels",
+});
 
 export default function Page() {
   return (
@@ -31,7 +20,7 @@ export default function Page() {
       <Suspense
         fallback={
           <div className="min-h-screen bg-neutral-950">
-            <div className="mx-auto max-w-6xl px-4 py-10 space-y-4">
+            <div className="mx-auto max-w-6xl space-y-4 px-4 py-10">
               <Skeleton className="h-48 w-full rounded-3xl" />
               <Skeleton className="h-10 w-64 rounded-2xl" />
               <Skeleton className="h-48 w-full rounded-3xl" />

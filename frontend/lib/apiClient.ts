@@ -1,4 +1,4 @@
-﻿/**
+/**
  * NOTE: cleaned corrupted comment.
  * NOTE: cleaned corrupted comment. */
 
@@ -9,7 +9,7 @@ import { LRUCache } from "./lruCache";
 
 // NOTE: cleaned corrupted comment.
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   ok: boolean;
   status: number;
   data?: T;
@@ -26,6 +26,7 @@ export interface ApiRequestOptions {
   bust?: boolean;
   suppressAuthModal?: boolean;
   dedupeMs?: number; // NOTE: cleaned corrupted comment.
+  maxRetries?: number;
 }
 
 export interface CacheStats {
@@ -94,6 +95,18 @@ type TrackFn = (event: string, props?: Record<string, unknown>) => void;
 let analyticsTrack: TrackFn | null = null;
 let analyticsLoadPromise: Promise<void> | null = null;
 
+function isPayloadRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readPayloadString(payload: unknown, key: string): string | undefined {
+  if (!isPayloadRecord(payload)) {
+    return undefined;
+  }
+  const value = payload[key];
+  return typeof value === "string" ? value : undefined;
+}
+
 function trackEvent(event: string, props: Record<string, unknown> = {}): void {
   if (typeof window === "undefined") {
     return;
@@ -124,7 +137,7 @@ function trackEvent(event: string, props: Record<string, unknown> = {}): void {
   });
 }
 
-// ============ 闁诲氦顫夐幃鍫曞磿闁秴鐭楅柛褎顨呯粈鍕煠閹帒鍔滄繛?============
+// ============ Base URL helpers ============
 
 function getBaseUrl(): string {
   // NOTE: cleaned corrupted comment.
@@ -190,7 +203,7 @@ function getCircuitKey(path: string): string {
  * NOTE: cleaned corrupted comment.
  * NOTE: cleaned corrupted comment.
  */
-function getDedupeKey(path: string, method: string, body?: any): string {
+function getDedupeKey(path: string, method: string, body?: unknown): string {
   if (!body || method === "GET") {
     return `${method}:${path}`;
   }
@@ -377,7 +390,7 @@ function invalidateCacheForWrite(path: string): void {
   }
 }
 
-async function parseJson(response: Response): Promise<any> {
+async function parseJson(response: Response): Promise<unknown> {
   try {
     return await response.json();
   } catch (err) {
@@ -411,21 +424,22 @@ async function requestJson(
       });
       clearTimeout(timeoutId);
       const payload = await parseJson(response);
+      const payloadRecord = isPayloadRecord(payload) ? payload : null;
       if (!response.ok) {
-        if (payload?.error === "ADULT_GATED") {
+        if (readPayloadString(payloadRecord, "error") === "ADULT_GATED") {
           trackEvent("adult_gate_blocked", {
             path,
-            reason: payload?.reason,
+            reason: readPayloadString(payloadRecord, "reason"),
             status: response.status,
-            requestId: payload?.requestId,
+            requestId: readPayloadString(payloadRecord, "requestId"),
           });
         }
         const errorPayload: ApiResponse = {
           ok: false,
           status: response.status,
-          error: payload?.error || response.statusText,
-          requestId: payload?.requestId,
-          ...payload,
+          error: readPayloadString(payloadRecord, "error") || response.statusText,
+          requestId: readPayloadString(payloadRecord, "requestId"),
+          ...(payloadRecord || {}),
         };
         const friendly = getFriendlyMessage(errorPayload.error, errorPayload.message);
         // NOTE: cleaned corrupted comment.
@@ -447,12 +461,12 @@ async function requestJson(
             path,
             status: response.status,
             errorCode: errorPayload.error,
-            requestId: payload?.requestId,
+            requestId: readPayloadString(payloadRecord, "requestId"),
           });
         }
         if (response.status >= 500) {
           emitToast({
-            message: `${friendly} RequestId: ${payload?.requestId || "N/A"}`,
+            message: `${friendly} RequestId: ${readPayloadString(payloadRecord, "requestId") || "N/A"}`,
           });
         } else if (response.status >= 400) {
           emitToast({ message: friendly });
@@ -463,7 +477,7 @@ async function requestJson(
         ok: true,
         status: response.status,
         data: payload,
-        requestId: payload?.requestId,
+        requestId: readPayloadString(payloadRecord, "requestId"),
       };
     } catch (err) {
       // NOTE: cleaned corrupted comment.
@@ -507,7 +521,7 @@ export function getApiBaseUrl(): string {
   return getBaseUrl();
 }
 
-export async function apiGet<T = any>(
+export async function apiGet<T = unknown>(
   path: string,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
@@ -630,9 +644,9 @@ export async function apiGet<T = any>(
   }
 }
 
-export async function apiPost<T = any>(
+export async function apiPost<T = unknown>(
   path: string,
-  body?: any,
+  body?: unknown,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
   // NOTE: cleaned corrupted comment.
@@ -683,7 +697,7 @@ export async function apiPost<T = any>(
   return response as ApiResponse<T>;
 }
 
-export async function apiUpload<T = any>(
+export async function apiUpload<T = unknown>(
   path: string,
   formData: FormData,
   options: ApiRequestOptions = {}
@@ -736,9 +750,9 @@ export async function apiUpload<T = any>(
   return response as ApiResponse<T>;
 }
 
-export async function apiPatch<T = any>(
+export async function apiPatch<T = unknown>(
   path: string,
-  body?: any,
+  body?: unknown,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
   // NOTE: cleaned corrupted comment.
@@ -789,9 +803,9 @@ export async function apiPatch<T = any>(
   return response as ApiResponse<T>;
 }
 
-export async function apiDelete<T = any>(
+export async function apiDelete<T = unknown>(
   path: string,
-  body?: any,
+  body?: unknown,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
   // NOTE: cleaned corrupted comment.
@@ -862,3 +876,7 @@ export function resetCacheStats(): void {
 export function getCacheLog(): CacheLogEntry[] {
   return [...cacheLog];
 }
+
+
+
+

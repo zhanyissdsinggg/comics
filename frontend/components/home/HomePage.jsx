@@ -96,8 +96,21 @@ function HomeContent() {
   useEffect(() => {
     const reason = searchParams.get("reason");
     const openLogin = searchParams.get("openLogin");
-    if (reason === "NEED_LOGIN" || openLogin === "1") {
+    const returnTo = searchParams.get("returnTo") || "/";
+
+    if (openLogin === "1") {
+      window.sessionStorage.setItem("mn_open_login", "1");
+      window.sessionStorage.setItem("mn_return_to", returnTo);
+      window.setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("auth:open", {
+          detail: { returnTo },
+        }));
+      }, 0);
+    } else if (reason === "NEED_LOGIN") {
       setShowLoginPrompt(true);
+    }
+
+    if (reason === "NEED_LOGIN" || openLogin === "1") {
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete("reason");
       newUrl.searchParams.delete("returnTo");

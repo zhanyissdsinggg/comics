@@ -1,10 +1,9 @@
 import { Body, Controller, Get, Post, Query, Req, Res } from "@nestjs/common";
-import { SearchService } from "./search.service";
-import { Request } from "express";
-import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
-import { Response } from "express";
-import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../common/utils/auth";
+import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
+import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { SearchService } from "./search.service";
 
 @Controller("search")
 export class SearchController {
@@ -13,9 +12,15 @@ export class SearchController {
   @Get()
   async search(
     @Query("q") q: string,
+    @Query("type") type: string,
+    @Query("status") status: string,
+    @Query("genre") genre: string,
+    @Query("sort") sort: string,
+    @Query("page") page: string,
+    @Query("pageSize") pageSize: string,
     @Query("adult") adultParam: string,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
@@ -25,15 +30,24 @@ export class SearchController {
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
       }
     }
-    const results = await this.searchService.search(q || "", adult === true);
-    return { results };
+
+    return this.searchService.search({
+      q,
+      type,
+      status,
+      genre,
+      sort,
+      page,
+      pageSize,
+      adult: adult === true,
+    });
   }
 
   @Get("keywords")
   async keywords(
     @Query("adult") adultParam: string,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
@@ -52,7 +66,7 @@ export class SearchController {
     @Query("q") q: string,
     @Query("adult") adultParam: string,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
@@ -71,7 +85,7 @@ export class SearchController {
     @Query("adult") adultParam: string,
     @Query("window") windowParam: string,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {

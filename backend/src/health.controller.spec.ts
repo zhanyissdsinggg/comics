@@ -1,7 +1,18 @@
+import { PrismaService } from "./common/prisma/prisma.service";
 import { HealthController } from "./health.controller";
 
+type HealthPrismaMock = {
+  $queryRaw: jest.Mock;
+  paymentRetry: {
+    count: jest.Mock;
+  };
+  order: {
+    count: jest.Mock;
+  };
+};
+
 describe("HealthController", () => {
-  const prismaMock = {
+  const prismaMock: HealthPrismaMock = {
     $queryRaw: jest.fn(),
     paymentRetry: {
       count: jest.fn(),
@@ -18,7 +29,7 @@ describe("HealthController", () => {
     prismaMock.$queryRaw.mockResolvedValue([{ ok: 1 }]);
     prismaMock.paymentRetry.count.mockResolvedValue(2);
     prismaMock.order.count.mockResolvedValue(3);
-    controller = new HealthController(prismaMock as any);
+    controller = new HealthController(prismaMock as unknown as PrismaService);
   });
 
   it("detail should return dbOk=true when query succeeds", async () => {

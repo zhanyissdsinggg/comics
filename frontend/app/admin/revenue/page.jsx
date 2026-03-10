@@ -65,6 +65,18 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function toOptionalNumber(value) {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function formatPercentage(value) {
+  return value === null || value === undefined ? 'N/A' : `${value}%`;
+}
+
 function dateKeyFromIso(value) {
   if (!value) return '';
   const date = new Date(value);
@@ -207,12 +219,14 @@ async function getLegacyRevenueFallback(dateRange) {
     channels,
     promotions: promotions.map((item) => ({
       promotionId: item?.id || item?.promotionId || '',
-      title: item?.title || '未命名活动',
+      title: item?.title || 'Untitled promotion',
       orders: toNumber(item?.orders),
       revenue: Number(toNumber(item?.revenue).toFixed(2)),
-      roi: toNumber(item?.roi),
+      roi: toOptionalNumber(item?.roi),
       active: Boolean(item?.active),
     })),
+    attributionModel: 'unavailable',
+    roiAvailable: false,
     distribution: {
       highValue,
       mediumValue,
@@ -333,7 +347,11 @@ export default function AdminRevenuePageNew() {
       }
       if (result.status === 404) {
         const fallback = await getLegacyRevenueFallback(dateRange);
-        return { promotions: fallback.promotions };
+        return {
+          promotions: fallback.promotions,
+          attributionModel: fallback.attributionModel,
+          roiAvailable: fallback.roiAvailable,
+        };
       }
       return result.data || { promotions: [] };
     },
@@ -379,6 +397,14 @@ export default function AdminRevenuePageNew() {
   const trend = trendData?.trend;
   const channels = channelsData?.channels;
   const promotions = promotionsData?.promotions;
+  const promotionsAttributionModel = promotionsData?.attributionModel;
+  const promotionsRoiAvailable = promotionsData?.roiAvailable !== false;
+  const promotionsAttributionCopy =
+    promotionsAttributionModel === "order_audit"
+      ? "Revenue is attributed from payment-create audit metadata. ROI stays unavailable until spend attribution is wired."
+      : promotionsAttributionModel === "hybrid_order_audit_and_derived_rules"
+        ? "Revenue uses explicit payment-create audit metadata when present and derived promotion rules as fallback. ROI stays unavailable until spend attribution is wired."
+        : "Revenue is derived from promotion rules. ROI stays unavailable until spend attribution is wired.";
   const userValue = userValueData?.distribution;
   const orderStatus = orderStatusData?.distribution;
 
@@ -468,7 +494,8 @@ export default function AdminRevenuePageNew() {
                 {/* 用户价值分布 */}
                 {userValue && (
                   <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
-                    <h3 className="text-lg font-semibold text-neutral-100 mb-4">用户价值分布</h3>
+                    <h3 className="text-lg font-semibold text-neutral-100 mb-2">用户价值分布</h3>
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {renderStatCard('高价值用户', userValue.highValue, 'emerald')}
                       {renderStatCard('中价值用户', userValue.mediumValue, 'yellow')}
@@ -577,6 +604,12 @@ export default function AdminRevenuePageNew() {
             ) : promotions && promotions.length > 0 ? (
               <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
                 <h3 className="text-lg font-semibold text-neutral-100 mb-4">促销效果分析</h3>
+                {!promotionsRoiAvailable || promotionsAttributionModel ? (
+                  <p className="mb-4 text-xs text-neutral-400">
+                    {promotionsAttributionCopy}
+                  </p>
+                ) : null}
+                
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -594,7 +627,7 @@ export default function AdminRevenuePageNew() {
                           <td className="px-4 py-3 text-neutral-300">{item.title}</td>
                           <td className="px-4 py-3 text-neutral-300">{item.orders}</td>
                           <td className="px-4 py-3 text-emerald-400">${item.revenue.toFixed(2)}</td>
-                          <td className="px-4 py-3 text-blue-400">{item.roi}%</td>
+                          <td className={`px-4 py-3 ${item.roi == null ? 'text-neutral-500' : 'text-blue-400'}`}>{formatPercentage(item.roi)}</td>
                           <td className="px-4 py-3">
                             <span
                               className={`px-2 py-1 rounded text-xs font-medium ${

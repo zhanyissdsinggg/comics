@@ -23,6 +23,7 @@ import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useCouponStore } from "../../store/useCouponStore";
 import { useProgressStore } from "../../store/useProgressStore";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 
 const AdultLoginModal = dynamic(() => import("./AdultLoginModal"), {
   ssr: false,
@@ -296,7 +297,15 @@ export default function SeriesPage({ seriesId }) {
 
   const handleSubscribe = useCallback((seriesIdValue, episodeId) => {
     trackEvent("click_subscribe_from_ttf", { seriesId: seriesIdValue, episodeId });
-    router.push("/subscribe");
+    router.push(
+      buildPathWithAttribution("/subscribe", {
+        entryPoint: "SERIES_TTF",
+        sourcePath: `/series/${seriesIdValue}`,
+        sourceSeriesId: seriesIdValue,
+        sourceEpisodeId: episodeId || undefined,
+        returnTo: `/series/${seriesIdValue}`,
+      })
+    );
   }, [router]);
 
   const handleContinue = lastReadEpisodeId
