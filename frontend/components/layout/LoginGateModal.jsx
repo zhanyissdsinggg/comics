@@ -72,7 +72,8 @@ export default function LoginGateModal({
     setCountryCode(regionMap[region] || "+1");
   }, [open]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event) => {
+    event?.preventDefault?.();
     if (step === "otp") {
       setOtpStatus("");
       const response = await apiPost("/api/auth/otp/verify", {
@@ -158,8 +159,9 @@ export default function LoginGateModal({
 
   return (
     <ModalBase open={open} title={title} onClose={onClose}>
-      <p className="text-neutral-400">{description}</p>
-      <div className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit}>
+        <p className="text-neutral-400">{description}</p>
+        <div className="mt-6 space-y-4">
         <input
           type="email"
           value={email}
@@ -336,22 +338,24 @@ export default function LoginGateModal({
         If sign in fails due to email not verified, please verify from the email link.
       </p>
 
-      <div className="mt-6 flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-full border border-neutral-700 px-6 py-2.5 text-sm font-semibold text-neutral-300 transition-all duration-300 hover:border-neutral-600 hover:bg-neutral-800 active:scale-95"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className="rounded-full bg-brand-gradient px-6 py-2.5 text-sm font-semibold text-white shadow-glow-sm transition-all duration-300 hover:scale-105 hover:shadow-glow-md active:scale-95"
-        >
-          {mode === "register" ? "Register" : "Sign in"}
-        </button>
-      </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-neutral-700 px-6 py-2.5 text-sm font-semibold text-neutral-300 transition-all duration-300 hover:border-neutral-600 hover:bg-neutral-800 active:scale-95"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="rounded-full bg-brand-gradient px-6 py-2.5 text-sm font-semibold text-white shadow-glow-sm transition-all duration-300 hover:scale-105 hover:shadow-glow-md active:scale-95"
+          >
+            {mode === "register" ? "Register" : "Sign in"}
+          </button>
+        </div>
+      </form>
     </ModalBase>
   );
 }
+
+
