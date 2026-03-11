@@ -5,6 +5,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { adminFetchJson } from '@/lib/adminApiClient';
 
 interface UploadProgress {
   fileName: string;

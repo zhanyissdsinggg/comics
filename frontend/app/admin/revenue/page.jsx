@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { LoadingState } from '@/components/admin/common/LoadingState';
+import { AdminDataState } from '@/components/admin/common/AdminDataState';
 
 const LEGACY_REVENUE_CACHE_TTL_MS = 60_000;
 const legacyRevenueCache = new Map();
@@ -479,9 +479,13 @@ export default function AdminRevenuePageNew() {
         {/* 概览视图 */}
         {viewMode === 'overview' && (
           <div className="space-y-6">
-            {statsLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : stats ? (
+            <AdminDataState
+              isLoading={statsLoading}
+              hasData={Boolean(stats)}
+              emptyMessage="无数据"
+              wrap={false}
+            >
+              {() => (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {renderStatCard('总收入', stats.totalRevenue, 'emerald', '$')}
@@ -518,19 +522,19 @@ export default function AdminRevenuePageNew() {
                   </div>
                 )}
               </>
-            ) : (
-              <LoadingState.EmptyState message="无数据" />
-            )}
+              )}
+            </AdminDataState>
           </div>
         )}
 
         {/* 趋势视图 */}
         {viewMode === 'trend' && (
           <div className="space-y-6">
-            {trendLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : trend && trend.length > 0 ? (
-              <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
+            <AdminDataState
+              isLoading={trendLoading}
+              hasData={trend && trend.length > 0}
+              emptyMessage="无数据"
+            >
                 <h3 className="text-lg font-semibold text-neutral-100 mb-4">收入趋势</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -552,20 +556,18 @@ export default function AdminRevenuePageNew() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            ) : (
-              <LoadingState.EmptyState message="无数据" />
-            )}
+            </AdminDataState>
           </div>
         )}
 
         {/* 渠道视图 */}
         {viewMode === 'channels' && (
           <div className="space-y-6">
-            {channelsLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : channels && channels.length > 0 ? (
-              <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
+            <AdminDataState
+              isLoading={channelsLoading}
+              hasData={channels && channels.length > 0}
+              emptyMessage="无数据"
+            >
                 <h3 className="text-lg font-semibold text-neutral-100 mb-4">渠道分析</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -589,20 +591,18 @@ export default function AdminRevenuePageNew() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            ) : (
-              <LoadingState.EmptyState message="无数据" />
-            )}
+            </AdminDataState>
           </div>
         )}
 
         {/* 促销视图 */}
         {viewMode === 'promotions' && (
           <div className="space-y-6">
-            {promotionsLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : promotions && promotions.length > 0 ? (
-              <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
+            <AdminDataState
+              isLoading={promotionsLoading}
+              hasData={promotions && promotions.length > 0}
+              emptyMessage="无数据"
+            >
                 <h3 className="text-lg font-semibold text-neutral-100 mb-4">促销效果分析</h3>
                 {!promotionsRoiAvailable || promotionsAttributionModel ? (
                   <p className="mb-4 text-xs text-neutral-400">
@@ -644,10 +644,7 @@ export default function AdminRevenuePageNew() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            ) : (
-              <LoadingState.EmptyState message="无数据" />
-            )}
+            </AdminDataState>
           </div>
         )}
       </div>

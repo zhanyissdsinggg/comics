@@ -2,10 +2,10 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { LoadingState } from '@/components/admin/common/LoadingState';
+import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { BulkUploadModal } from '@/components/admin/episodes/BulkUploadModal';
@@ -50,7 +50,14 @@ export default function AdminEpisodesPage() {
   // 用 useAdminList Hook 替代所有搜索、排序、筛选逻辑
   const {
     items: episodes,
+    pagination,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
     isLoading,
+    isError,
+    error,
     refetch,
     searchTerm,
     setSearchTerm,
@@ -63,6 +70,8 @@ export default function AdminEpisodesPage() {
     selectAll,
     clearSelection,
   } = useAdminList(`series/${seriesId}/episodes`, searchFields, sortFields, 'number', 'asc');
+
+  const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
   // 添加剧集 mutation
   const addEpisodeMutation = useMutation({
@@ -295,11 +304,19 @@ export default function AdminEpisodesPage() {
         )}
 
         {/* 剧集列表 */}
-        {isLoading ? (
-          <LoadingState.Spinner size="md" />
-        ) : episodes.length > 0 ? (
-          <div className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden">
-            <div className="overflow-x-auto">
+        <AdminTableShell
+          isError={isError}
+          errorMessage={error?.message || '\u5267\u96c6\u52a0\u8f7d\u5931\u8d25\u3002'}
+          onRetry={refetch}
+          isLoading={isLoading}
+          hasItems={episodes.length > 0}
+          emptyMessage={'\u6682\u65e0\u5267\u96c6'}
+          pagination={pagination}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        >
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-neutral-700 bg-neutral-900">
@@ -331,7 +348,7 @@ export default function AdminEpisodesPage() {
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
-                          checked={selectedIds.includes(episode.id)}
+                          checked={selectedIdsSet.has(episode.id)}
                           onChange={() => toggleSelect(episode.id)}
                           className="rounded"
                         />
@@ -379,11 +396,7 @@ export default function AdminEpisodesPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        ) : (
-          <LoadingState.EmptyState message="暂无剧集" />
-        )}
+        </AdminTableShell>
       </div>
 
       {/* 添加剧集模态框 */}

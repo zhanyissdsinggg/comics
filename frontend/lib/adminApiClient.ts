@@ -145,6 +145,15 @@ export async function adminFetch(
   return response;
 }
 
+
+export async function adminFetchJson<T = unknown>(
+  url: string,
+  options: RequestInit = {}
+): Promise<{ response: Response; data: T }> {
+  const response = await adminFetch(url, options);
+  const data = await response.json().catch(() => ({} as T));
+  return { response, data };
+}
 /**
  * Admin GET request wrapper.
  */

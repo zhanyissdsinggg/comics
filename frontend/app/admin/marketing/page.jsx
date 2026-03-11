@@ -4,9 +4,10 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { LoadingState } from '@/components/admin/common/LoadingState';
+import { AdminDataState } from '@/components/admin/common/AdminDataState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { adminFetchJson } from '@/lib/adminApiClient';
 
 const STAT_CARD_STYLES = {
   blue: {
@@ -234,10 +235,11 @@ export default function AdminMarketingPage() {
               + 创建活动
             </button>
 
-            {campaignsLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : campaigns.length > 0 ? (
-              <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
+            <AdminDataState
+              isLoading={campaignsLoading}
+              hasData={campaigns.length > 0}
+              emptyMessage="暂无营销活动"
+            >
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -286,19 +288,20 @@ export default function AdminMarketingPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            ) : (
-              <LoadingState.EmptyState message="暂无营销活动" />
-            )}
+            </AdminDataState>
           </div>
         )}
 
         {/* 效果分析 */}
         {viewMode === 'analytics' && (
           <div className="space-y-6">
-            {statsLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : stats ? (
+            <AdminDataState
+              isLoading={statsLoading}
+              hasData={Boolean(stats)}
+              emptyMessage="无数据"
+              wrap={false}
+            >
+              {() => (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {renderStatCard('总活动数', stats.totalCampaigns, 'blue')}
@@ -309,18 +312,21 @@ export default function AdminMarketingPage() {
                   {renderStatCard('平均ROI', stats.avgRoi, 'blue', '%')}
                 </div>
               </>
-            ) : (
-              <LoadingState.EmptyState message="无数据" />
-            )}
+              )}
+            </AdminDataState>
           </div>
         )}
 
         {/* 预算管理 */}
         {viewMode === 'budget' && (
           <div className="space-y-6">
-            {statsLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : stats ? (
+            <AdminDataState
+              isLoading={statsLoading}
+              hasData={Boolean(stats)}
+              emptyMessage="无数据"
+              wrap={false}
+            >
+              {() => (
               <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
                 <h3 className="text-lg font-semibold text-neutral-100 mb-4">预算概览</h3>
                 <div className="space-y-4">
@@ -349,18 +355,20 @@ export default function AdminMarketingPage() {
                   </div>
                 </div>
               </div>
-            ) : (
-              <LoadingState.EmptyState message="无数据" />
-            )}
+              )}
+            </AdminDataState>
           </div>
         )}
 
         {/* 分群分析 */}
         {viewMode === 'segments' && (
           <div className="space-y-6">
-            {segmentLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : segments.length > 0 ? (
+            <AdminDataState
+              isLoading={segmentLoading}
+              hasData={segments.length > 0}
+              emptyMessage="无数据"
+              wrap={false}
+            >
               <>
                 <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
                   <h3 className="text-lg font-semibold text-neutral-100 mb-4">按目标受众分组</h3>
@@ -392,9 +400,12 @@ export default function AdminMarketingPage() {
                   </div>
                 </div>
 
-                {typeLoading ? (
-                  <LoadingState.Spinner size="md" />
-                ) : types.length > 0 ? (
+                <AdminDataState
+                  isLoading={typeLoading}
+                  hasData={types.length > 0}
+                  emptyMessage={null}
+                  wrap={false}
+                >
                   <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
                     <h3 className="text-lg font-semibold text-neutral-100 mb-4">按活动类型分组</h3>
                     <div className="overflow-x-auto">
@@ -424,11 +435,9 @@ export default function AdminMarketingPage() {
                       </table>
                     </div>
                   </div>
-                ) : null}
+                </AdminDataState>
               </>
-            ) : (
-              <LoadingState.EmptyState message="无数据" />
-            )}
+            </AdminDataState>
           </div>
         )}
       </div>

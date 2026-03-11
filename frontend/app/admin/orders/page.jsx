@@ -3,9 +3,12 @@
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useMemo } from 'react';
-import { LoadingState } from '@/components/admin/common/LoadingState';
-import { Modal } from '@/components/admin/common/Modal';
+import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
+import { AdminListToolbar } from '@/components/admin/common/AdminListToolbar';
+import { AdminSelectionBar } from '@/components/admin/common/AdminSelectionBar';
+import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
 
@@ -23,6 +26,12 @@ const sortFields = [
   { field: 'status', type: 'string' },
 ];
 
+const sortOptions = [
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'amount', label: '金额' },
+  { value: 'status', label: '状态' },
+];
+
 export default function AdminOrdersPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -31,7 +40,14 @@ export default function AdminOrdersPage() {
   // 用 useAdminList Hook 替代所有搜索、排序、筛选逻辑
   const {
     items: filteredOrders,
+    pagination,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
     isLoading,
+    isError,
+    error,
     refetch,
     searchTerm,
     setSearchTerm,
@@ -164,88 +180,61 @@ export default function AdminOrdersPage() {
           <p className="text-neutral-400 mt-2">管理所有订单、退款和交易</p>
         </div>
 
-        {feedback.message ? (
-          <div
-            className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
-              feedback.type === 'success'
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                : 'border-red-500/30 bg-red-500/10 text-red-300'
-            }`}
-          >
-            {feedback.message}
-          </div>
-        ) : null}
+        <AdminFeedbackBanner
+          feedback={feedback}
+          onDismiss={() => setFeedback({ type: '', message: '' })}
+          className="mb-6"
+        />
 
         {/* 工具栏 */}
-        <div className="mb-6 flex gap-4 flex-wrap items-center">
-          <input
-            type="text"
-            placeholder="搜索订单..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-100 placeholder-neutral-500"
-          />
+                        <AdminListToolbar
+          searchTerm={searchTerm}
+          onSearchTermChange={setSearchTerm}
+          searchPlaceholder="搜索订单..."
+          onOpenFilters={() => setIsFilterModalOpen(true)}
+          sortOrder={sortOrder}
+          onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+        />
 
+                <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
           <button
-            onClick={() => setIsFilterModalOpen(true)}
-            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700"
+            type="button"
+            onClick={handleBulkRefund}
+            disabled={bulkRefundMutation.isPending}
+            className="px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 text-sm disabled:opacity-50"
           >
-            🔍 高级筛选
+            {bulkRefundMutation.isPending ? '退款中...' : '退款'}
           </button>
-
           <button
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+            type="button"
+            onClick={handleExport}
+            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm"
           >
-            {sortOrder === 'asc' ? '↑ 升序' : '↓ 降序'}
+            导出
           </button>
-        </div>
+          <button
+            type="button"
+            onClick={() => setIsDeleteConfirmOpen(true)}
+            disabled={bulkDeleteMutation.isPending}
+            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
+          >
+            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
+          </button>
+        </AdminSelectionBar>
 
-        {/* 批量操作栏 */}
-        {selectedIds.length > 0 && (
-          <div className="mb-6 p-4 rounded-lg bg-blue-900/20 border border-blue-700 flex items-center justify-between">
-            <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleBulkRefund}
-                disabled={bulkRefundMutation.isPending}
-                className="px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 text-sm disabled:opacity-50"
-              >
-                {bulkRefundMutation.isPending ? '退款中...' : '退款'}
-              </button>
-              <button
-                type="button"
-                onClick={handleExport}
-                className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm"
-              >
-                导出
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsDeleteConfirmOpen(true)}
-                disabled={bulkDeleteMutation.isPending}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
-              >
-                {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
-              </button>
-              <button
-                type="button"
-                onClick={clearSelection}
-                className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* 订单列表 */}
-        {isLoading ? (
-          <LoadingState.Spinner size="md" />
-        ) : filteredOrders.length > 0 ? (
-          <div className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden">
-            <div className="overflow-x-auto">
+        <AdminTableShell
+          isError={isError}
+          errorMessage={error?.message || '\u8ba2\u5355\u52a0\u8f7d\u5931\u8d25\u3002'}
+          onRetry={refetch}
+          isLoading={isLoading}
+          hasItems={filteredOrders.length > 0}
+          emptyMessage={'\u6682\u65e0\u8ba2\u5355'}
+          pagination={pagination}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        >
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-neutral-700 bg-neutral-900">
@@ -311,42 +300,17 @@ export default function AdminOrdersPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        ) : (
-          <LoadingState.EmptyState message="暂无订单" />
-        )}
+        </AdminTableShell>
       </div>
 
       {/* 高级筛选模态框 */}
-      <Modal
+            <AdminSortModal
         isOpen={isFilterModalOpen}
-        title="高级筛选"
         onClose={() => setIsFilterModalOpen(false)}
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-neutral-400">排序字段</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="createdAt">创建时间</option>
-              <option value="amount">金额</option>
-              <option value="status">状态</option>
-            </select>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsFilterModalOpen(false)}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            应用筛选
-          </button>
-        </div>
-      </Modal>
+        sortBy={sortBy}
+        onSortByChange={setSortBy}
+        options={sortOptions}
+      />
 
       {/* 删除确认对话框 */}
       <ConfirmDialog

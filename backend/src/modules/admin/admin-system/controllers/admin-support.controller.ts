@@ -21,6 +21,20 @@ import {
 } from "../../../../common/utils/pagination";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 
+const SUPPORT_SORT_FIELDS = new Set(["createdAt", "updatedAt", "status"]);
+
+function parseSortOrder(value: unknown): Prisma.SortOrder {
+  return String(value || "desc").toLowerCase() === "asc" ? "asc" : "desc";
+}
+
+function parseSupportOrderBy(sortBy: unknown, sortOrder: Prisma.SortOrder): Prisma.SupportTicketOrderByWithRelationInput {
+  const field = String(sortBy || "createdAt");
+  if (!SUPPORT_SORT_FIELDS.has(field)) {
+    return { createdAt: sortOrder };
+  }
+  return { [field]: sortOrder } as Prisma.SupportTicketOrderByWithRelationInput;
+}
+
 @Controller("admin/support")
 @UseGuards(AdminAuthGuard)
 export class AdminSupportController {
@@ -32,6 +46,8 @@ export class AdminSupportController {
     const offset = calculateOffset(page, pageSize);
     const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
     const status = typeof req.query.status === "string" ? req.query.status.trim() : "";
+    const sortOrder = parseSortOrder(req.query.sortOrder);
+    const orderBy = parseSupportOrderBy(req.query.sortBy, sortOrder);
 
     const where: Prisma.SupportTicketWhereInput = {};
     if (search) {
@@ -40,6 +56,13 @@ export class AdminSupportController {
         { userId: { contains: search, mode: "insensitive" } },
         { subject: { contains: search, mode: "insensitive" } },
         { message: { contains: search, mode: "insensitive" } },
+        {
+          user: {
+            is: {
+              email: { contains: search, mode: "insensitive" },
+            },
+          },
+        },
       ];
     }
     if (status) {
@@ -54,7 +77,7 @@ export class AdminSupportController {
             select: { email: true },
           },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy,
         take: pageSize,
         skip: offset,
       }),
@@ -128,5 +151,3 @@ export class AdminSupportController {
     return { ok: true };
   }
 }
-
-

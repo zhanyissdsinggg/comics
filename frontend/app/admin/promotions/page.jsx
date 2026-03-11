@@ -5,9 +5,12 @@ export const dynamic = 'force-dynamic';
 import React, { useState, useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
-import { LoadingState } from '@/components/admin/common/LoadingState';
-import { Modal } from '@/components/admin/common/Modal';
+import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
+import { AdminListToolbar } from '@/components/admin/common/AdminListToolbar';
+import { AdminSelectionBar } from '@/components/admin/common/AdminSelectionBar';
+import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
 import { adminFetch } from '@/lib/adminApiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
@@ -26,6 +29,12 @@ const sortFields = [
   { field: 'active', type: 'boolean' },
 ];
 
+const sortOptions = [
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'title', label: '标题' },
+  { value: 'active', label: '状态' },
+];
+
 export default function AdminPromotionsPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -34,7 +43,14 @@ export default function AdminPromotionsPage() {
   // 老王说：用useAdminList Hook替代所有搜索、排序、筛选逻辑
   const {
     items: filteredPromotions,
+    pagination,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
     isLoading,
+    isError,
+    error,
     refetch,
     searchTerm,
     setSearchTerm,
@@ -103,75 +119,46 @@ export default function AdminPromotionsPage() {
           <p className="text-neutral-400 mt-2">管理所有促销活动和优惠</p>
         </div>
 
-        {feedback.message ? (
-          <div
-            className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
-              feedback.type === 'success'
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                : 'border-red-500/30 bg-red-500/10 text-red-300'
-            }`}
-          >
-            {feedback.message}
-          </div>
-        ) : null}
+        <AdminFeedbackBanner
+          feedback={feedback}
+          onDismiss={() => setFeedback({ type: '', message: '' })}
+          className="mb-6"
+        />
 
         {/* 工具栏 */}
-        <div className="mb-6 flex gap-4 flex-wrap items-center">
-          <input
-            type="text"
-            placeholder="搜索促销活动..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-neutral-700 bg-neutral-800 text-neutral-100 placeholder-neutral-500"
-          />
+                        <AdminListToolbar
+          searchTerm={searchTerm}
+          onSearchTermChange={setSearchTerm}
+          searchPlaceholder="搜索促销活动..."
+          onOpenFilters={() => setIsFilterModalOpen(true)}
+          sortOrder={sortOrder}
+          onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+        />
 
+                <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
           <button
             type="button"
-            onClick={() => setIsFilterModalOpen(true)}
-            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 border border-neutral-700"
+            onClick={() => setIsDeleteConfirmOpen(true)}
+            disabled={bulkDeleteMutation.isPending}
+            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
           >
-            🔍 高级筛选
+            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
           </button>
+        </AdminSelectionBar>
 
-          <button
-            type="button"
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-          >
-            {sortOrder === 'asc' ? '↑ 升序' : '↓ 降序'}
-          </button>
-        </div>
-
-        {/* 批量操作栏 */}
-        {selectedIds.length > 0 && (
-          <div className="mb-6 p-4 rounded-lg bg-blue-900/20 border border-blue-700 flex items-center justify-between">
-            <span className="text-blue-300">已选择 {selectedIds.length} 项</span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setIsDeleteConfirmOpen(true)}
-                disabled={bulkDeleteMutation.isPending}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
-              >
-                {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
-              </button>
-              <button
-                type="button"
-                onClick={clearSelection}
-                className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 text-sm"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* 促销活动列表 */}
-        {isLoading ? (
-          <LoadingState.Spinner size="md" />
-        ) : filteredPromotions.length > 0 ? (
-          <div className="rounded-lg bg-neutral-800 border border-neutral-700 overflow-hidden">
-            <div className="overflow-x-auto">
+        <AdminTableShell
+          isError={isError}
+          errorMessage={error?.message || '\u4fc3\u9500\u6d3b\u52a8\u52a0\u8f7d\u5931\u8d25\u3002'}
+          onRetry={refetch}
+          isLoading={isLoading}
+          hasItems={filteredPromotions.length > 0}
+          emptyMessage={'\u6682\u65e0\u4fc3\u9500\u6d3b\u52a8'}
+          pagination={pagination}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        >
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-neutral-700 bg-neutral-900">
@@ -241,42 +228,17 @@ export default function AdminPromotionsPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        ) : (
-          <LoadingState.EmptyState message="暂无促销活动" />
-        )}
+        </AdminTableShell>
       </div>
 
       {/* 高级筛选模态框 */}
-      <Modal
+            <AdminSortModal
         isOpen={isFilterModalOpen}
-        title="高级筛选"
         onClose={() => setIsFilterModalOpen(false)}
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-neutral-400">排序字段</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="createdAt">创建时间</option>
-              <option value="title">标题</option>
-              <option value="active">状态</option>
-            </select>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsFilterModalOpen(false)}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            应用筛选
-          </button>
-        </div>
-      </Modal>
+        sortBy={sortBy}
+        onSortByChange={setSortBy}
+        options={sortOptions}
+      />
 
       {/* 删除确认对话框 */}
       <ConfirmDialog

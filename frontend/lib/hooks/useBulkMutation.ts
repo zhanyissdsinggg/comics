@@ -1,4 +1,4 @@
-import { useMutation, UseMutationOptions } from '@tanstack/react-query';
+﻿import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 import { adminFetch } from '../adminApiClient';
 
 export type BulkMutationPayload = Record<string, unknown>;
@@ -17,6 +17,34 @@ export interface UseBulkMutationReturn {
   error: Error | null;
 }
 
+async function readResponseError(response: Response, fallbackMessage: string): Promise<string> {
+  try {
+    const payload = await response.json();
+    const message = payload?.message ?? payload?.error ?? payload?.details;
+
+    if (Array.isArray(message)) {
+      return message.find((item) => typeof item === 'string') || fallbackMessage;
+    }
+
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+  } catch {
+    // Ignore JSON parsing failures and fall through to text parsing.
+  }
+
+  try {
+    const text = await response.text();
+    if (text.trim()) {
+      return text.trim();
+    }
+  } catch {
+    // Ignore body parsing failures and use the fallback message.
+  }
+
+  return fallbackMessage;
+}
+
 export function useBulkMutation(
   config: BulkMutationConfig,
   options?: Omit<UseMutationOptions<void, Error, string[]>, 'mutationFn'>
@@ -27,7 +55,7 @@ export function useBulkMutation(
         throw new Error('No items selected');
       }
 
-      const requests = ids.map((id) => {
+      const requests = ids.map(async (id) => {
         const appendIdToPath = config.appendIdToPath !== false;
         const url = appendIdToPath
           ? `/api/admin/${config.endpoint}/${id}`
@@ -41,16 +69,26 @@ export function useBulkMutation(
           requestOptions.body = JSON.stringify(body);
         }
 
-        return adminFetch(url, requestOptions);
+        const response = await adminFetch(url, requestOptions);
+        if (!response.ok) {
+          throw new Error(
+            await readResponseError(response, `${config.method} ${config.endpoint} failed for ${id}.`)
+          );
+        }
       });
 
       const results = await Promise.allSettled(requests);
-      const failed = results.filter(
-        (result) => result.status === 'rejected' || (result.status === 'fulfilled' && !result.value.ok)
-      );
+      const failed = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');
 
       if (failed.length > 0) {
-        throw new Error(`${failed.length}/${ids.length} operations failed. Please try again.`);
+        const firstError = failed[0]?.reason;
+        const firstMessage = firstError instanceof Error ? firstError.message : String(firstError || 'Unknown error');
+
+        if (ids.length === 1) {
+          throw new Error(firstMessage);
+        }
+
+        throw new Error(`${failed.length}/${ids.length} operations failed. ${firstMessage}`);
       }
     },
     onError: (error) => {

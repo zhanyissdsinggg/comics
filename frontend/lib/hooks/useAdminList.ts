@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminFetch } from '../adminApiClient';
 
@@ -16,6 +16,15 @@ export interface SortFieldConfig {
 type FilterValue = string | number | boolean | null | undefined;
 type FilterState = Record<string, FilterValue>;
 type AdminListPayload<T> = Record<string, unknown> | T[];
+
+export interface AdminListPagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -43,6 +52,37 @@ function extractItems<T>(data: AdminListPayload<T> | undefined, endpoint: string
   return [];
 }
 
+function extractPagination<T>(
+  data: AdminListPayload<T> | undefined,
+  fallbackPage: number,
+  fallbackPageSize: number,
+  totalItems: number,
+): AdminListPagination {
+  if (isRecord(data) && isRecord(data.pagination)) {
+    const pagination = data.pagination;
+
+    return {
+      page: Number(pagination.page ?? fallbackPage),
+      pageSize: Number(pagination.pageSize ?? fallbackPageSize),
+      total: Number(pagination.total ?? totalItems),
+      totalPages: Number(pagination.totalPages ?? Math.max(1, Math.ceil(totalItems / fallbackPageSize))),
+      hasNextPage: Boolean(pagination.hasNextPage),
+      hasPrevPage: Boolean(pagination.hasPrevPage),
+    };
+  }
+
+  const totalPages = totalItems > 0 ? Math.ceil(totalItems / fallbackPageSize) : 1;
+
+  return {
+    page: fallbackPage,
+    pageSize: fallbackPageSize,
+    total: totalItems,
+    totalPages,
+    hasNextPage: fallbackPage < totalPages,
+    hasPrevPage: fallbackPage > 1,
+  };
+}
+
 function toSelectableId<T extends { id: string }>(item: T, idField: string): string {
   if (idField === 'id') {
     return item.id;
@@ -58,7 +98,14 @@ function toSelectableId<T extends { id: string }>(item: T, idField: string): str
 
 export interface UseAdminListReturn<T> {
   items: T[];
+  pagination: AdminListPagination;
+  page: number;
+  setPage: (page: number) => void;
+  pageSize: number;
+  setPageSize: (pageSize: number) => void;
   isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
   refetch: () => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
@@ -88,11 +135,13 @@ export function useAdminList<T extends { id: string }>(
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(defaultSortOrder);
   const [filters, setFilters] = useState<FilterState>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(100);
 
   const filtersKey = JSON.stringify(filters);
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['admin', endpoint, searchTerm, sortBy, sortOrder, filtersKey],
+  const { data, isLoading, refetch, error, isError } = useQuery<AdminListPayload<T>, Error>({
+    queryKey: ['admin', endpoint, searchTerm, sortBy, sortOrder, filtersKey, page, pageSize],
     queryFn: async ({ signal }) => {
       const params = new URLSearchParams();
 
@@ -102,6 +151,8 @@ export function useAdminList<T extends { id: string }>(
 
       params.append('sortBy', sortBy);
       params.append('sortOrder', sortOrder);
+      params.append('page', String(page));
+      params.append('pageSize', String(pageSize));
 
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
@@ -120,6 +171,10 @@ export function useAdminList<T extends { id: string }>(
   });
 
   const items = useMemo(() => extractItems<T>(data, endpoint), [data, endpoint]);
+  const pagination = useMemo(
+    () => extractPagination(data, page, pageSize, items.length),
+    [data, items.length, page, pageSize],
+  );
 
   const setFilter = (key: string, value: FilterValue) => {
     setFilters((prev) => ({
@@ -147,6 +202,14 @@ export function useAdminList<T extends { id: string }>(
   };
 
   useEffect(() => {
+    setPage(1);
+  }, [searchTerm, sortBy, sortOrder, filtersKey]);
+
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [page, pageSize]);
+
+  useEffect(() => {
     return () => {
       setSelectedIds([]);
       setFilters({});
@@ -155,7 +218,14 @@ export function useAdminList<T extends { id: string }>(
 
   return {
     items,
+    pagination,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
     isLoading,
+    isError,
+    error: error ?? null,
     refetch,
     searchTerm,
     setSearchTerm,

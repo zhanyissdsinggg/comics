@@ -1,399 +1,586 @@
-'use client';
+﻿'use client';
+
+/* eslint-disable @next/next/no-img-element */
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { LoadingState } from '@/components/admin/common/LoadingState';
-import { Modal } from '@/components/admin/common/Modal';
+import { adminFetchJson, adminUpload } from '@/lib/adminApiClient';
+
+const TYPE_OPTIONS = [
+  { value: 'comic', label: 'Comic' },
+  { value: 'novel', label: 'Novel' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'Ongoing', label: 'Ongoing' },
+  { value: 'Completed', label: 'Completed' },
+  { value: 'Hiatus', label: 'Hiatus' },
+  { value: 'Cancelled', label: 'Cancelled' },
+];
+
+const EMPTY_FEEDBACK = { type: '', message: '' };
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+function createEmptyForm() {
+  return {
+    title: '',
+    type: 'comic',
+    status: 'Ongoing',
+    adult: false,
+    description: '',
+    genres: '',
+    coverUrl: '',
+    coverTone: '',
+    badge: '',
+    episodePrice: '0',
+    ttfEnabled: false,
+    ttfIntervalHours: '24',
+  };
+}
+
+function buildFormState(series) {
+  return {
+    title: series?.title || '',
+    type: series?.type || 'comic',
+    status: series?.status || 'Ongoing',
+    adult: Boolean(series?.adult),
+    description: series?.description || '',
+    genres: Array.isArray(series?.genres) ? series.genres.join(', ') : '',
+    coverUrl: series?.coverUrl || '',
+    coverTone: series?.coverTone || '',
+    badge: series?.badge || '',
+    episodePrice: String(series?.episodePrice ?? 0),
+    ttfEnabled: Boolean(series?.ttfEnabled),
+    ttfIntervalHours: String(series?.ttfIntervalHours ?? 24),
+  };
+}
+
+function buildSeriesPayload(formData) {
+  const episodePrice = Number.parseInt(String(formData.episodePrice || '0'), 10);
+  const intervalHours = Number.parseInt(String(formData.ttfIntervalHours || '24'), 10);
+
+  return {
+    title: formData.title.trim(),
+    type: formData.type || 'comic',
+    status: formData.status || 'Ongoing',
+    adult: Boolean(formData.adult),
+    description: formData.description.trim(),
+    genres: String(formData.genres || '')
+      .split(',')
+      .map((genre) => genre.trim())
+      .filter(Boolean),
+    coverUrl: formData.coverUrl.trim(),
+    coverTone: formData.coverTone.trim(),
+    badge: formData.badge.trim(),
+    pricing: {
+      episodePrice: Number.isFinite(episodePrice) ? episodePrice : 0,
+    },
+    ttf: {
+      enabled: Boolean(formData.ttfEnabled),
+      intervalHours: Number.isFinite(intervalHours) && intervalHours > 0 ? intervalHours : 24,
+    },
+  };
+}
+
+function getErrorMessage(error, fallbackMessage) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallbackMessage;
+}
+
+function formatDateTime(value) {
+  if (!value) {
+    return 'Unavailable';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Unavailable';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+
+async function fetchSeriesDetail(seriesId) {
+  const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}`, { cache: 'no-store' });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.error || 'Failed to load series details.');
+  }
+
+  return data?.series || null;
+}
+
+function FormField({ label, children, helperText = '' }) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-sm font-medium text-neutral-300">{label}</span>
+      {children}
+      {helperText ? <span className="block text-xs text-neutral-500">{helperText}</span> : null}
+    </label>
+  );
+}
+
+function DetailRow({ label, value }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-neutral-800 py-3 last:border-b-0 last:pb-0">
+      <span className="text-sm text-neutral-500">{label}</span>
+      <span className="text-sm font-medium text-white">{value}</span>
+    </div>
+  );
+}
 
 export default function AdminSeriesDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const seriesId = params.id;
+  const seriesId = String(params?.id || '');
 
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(createEmptyForm());
   const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [feedback, setFeedback] = useState(EMPTY_FEEDBACK);
 
-  // 获取作品详情
-  const { data: seriesData, isLoading, refetch } = useQuery({
+  const seriesQuery = useQuery({
     queryKey: ['admin', 'series', seriesId],
-    queryFn: async () => {
-      const response = await fetch(`/api/admin/series/${seriesId}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
-    },
-    staleTime: 5 * 60 * 1000,
+    enabled: Boolean(seriesId),
+    staleTime: 60_000,
+    queryFn: () => fetchSeriesDetail(seriesId),
   });
 
-  const series = seriesData?.series;
+  useEffect(() => {
+    if (seriesQuery.data && !isEditing) {
+      setFormData(buildFormState(seriesQuery.data));
+    }
+  }, [isEditing, seriesQuery.data]);
 
-  // 保存作品信息 mutation
   const saveMutation = useMutation({
-    mutationFn: async (data) => {
-      const response = await fetch(`/api/admin/series/${seriesId}`, {
+    mutationFn: async (draft) => {
+      const payload = { series: buildSeriesPayload(draft) };
+      const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          title: data.title,
-          type: data.type,
-          status: data.status,
-          adult: data.adult,
-          description: data.description,
-          genres: data.genres.split(',').map((g) => g.trim()).filter(Boolean),
-          coverUrl: data.coverUrl,
-          coverTone: data.coverTone,
-          badge: data.badge,
-          episodePrice: parseInt(data.episodePrice) || 0,
-          ttfEnabled: data.ttfEnabled,
-          ttfIntervalHours: parseInt(data.ttfIntervalHours) || 24,
-        }),
+        body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error('保存失败');
-      return response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || data?.error || 'Failed to save series details.');
+      }
+
+      return data?.series || null;
     },
-    onSuccess: () => {
-      setSuccessMessage('保存成功！');
+    onSuccess: async (series) => {
+      if (series) {
+        setFormData(buildFormState(series));
+      }
       setIsEditing(false);
-      refetch();
-      setTimeout(() => setSuccessMessage(''), 3000);
+      setFeedback({ type: 'success', message: 'Series details were saved.' });
+      await seriesQuery.refetch();
     },
-    onError: () => {
-      setErrorMessage('保存失败，请重试');
+    onError: (error) => {
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to save series details.') });
     },
   });
 
-  // 上传封面 mutation
   const uploadMutation = useMutation({
     mutationFn: async (file) => {
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
+      const uploadPayload = new FormData();
+      uploadPayload.append('file', file);
 
-      const response = await fetch('/api/admin/upload/image', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-        body: formDataUpload,
-      });
-      if (!response.ok) throw new Error('上传失败');
-      return response.json();
+      const response = await adminUpload('/api/admin/upload/image', uploadPayload);
+      if (!response.ok || !response.data?.url) {
+        throw new Error(response.error || response.message || 'Failed to upload cover image.');
+      }
+
+      return response.data;
     },
     onSuccess: (data) => {
-      setFormData({ ...formData, coverUrl: data.url });
-      setSuccessMessage('封面上传成功！');
-      setTimeout(() => setSuccessMessage(''), 3000);
+      setFormData((current) => ({
+        ...current,
+        coverUrl: data.url,
+      }));
+      setFeedback({ type: 'success', message: 'Cover image uploaded.' });
     },
-    onError: () => {
-      setErrorMessage('上传失败，请重试');
+    onError: (error) => {
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to upload cover image.') });
     },
   });
 
-  // 初始化表单数据
-  React.useEffect(() => {
-    if (series && !isEditing) {
-      setFormData({
-        title: series.title || '',
-        type: series.type || 'comic',
-        status: series.status || 'Ongoing',
-        adult: series.adult || false,
-        description: series.description || '',
-        genres: (series.genres || []).join(', '),
-        coverUrl: series.coverUrl || '',
-        coverTone: series.coverTone || '',
-        badge: series.badge || '',
-        episodePrice: series.episodePrice || 0,
-        ttfEnabled: series.ttfEnabled || false,
-        ttfIntervalHours: series.ttfIntervalHours || 24,
-      });
-    }
-  }, [series, isEditing]);
+  const series = seriesQuery.data;
+
+  const handleFieldChange = (field) => (event) => {
+    const nextValue = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+    setFormData((current) => ({
+      ...current,
+      [field]: nextValue,
+    }));
+  };
+
+  const handleStartEditing = () => {
+    setFeedback(EMPTY_FEEDBACK);
+    setFormData(buildFormState(series));
+    setIsEditing(true);
+  };
+
+  const handleCancelEditing = () => {
+    setFeedback(EMPTY_FEEDBACK);
+    setFormData(buildFormState(series));
+    setIsEditing(false);
+  };
 
   const handleSave = () => {
-    if (!formData.title?.trim()) {
-      setErrorMessage('请输入作品标题');
+    setFeedback(EMPTY_FEEDBACK);
+
+    if (!formData.title.trim()) {
+      setFeedback({ type: 'error', message: 'Title is required.' });
       return;
     }
+
     saveMutation.mutate(formData);
   };
 
-  const handleCoverUpload = async (event) => {
+  const handleCoverUpload = (event) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    event.target.value = '';
 
-    if (!file.type.startsWith('image/')) {
-      setErrorMessage('请选择图片文件');
+    if (!file) {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setErrorMessage('图片文件不能超过10MB');
+    if (!file.type.startsWith('image/')) {
+      setFeedback({ type: 'error', message: 'Please upload a valid image file.' });
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setFeedback({ type: 'error', message: 'Cover images must be 10MB or smaller.' });
       return;
     }
 
     uploadMutation.mutate(file);
   };
 
-  if (isLoading) {
-    return <LoadingState.Spinner size="md" />;
+  if (seriesQuery.isLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-950 px-6 py-8">
+        <div className="mx-auto max-w-6xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
+          <LoadingState.Spinner size="md" />
+        </div>
+      </div>
+    );
+  }
+
+  if (seriesQuery.isError) {
+    return (
+      <div className="min-h-screen bg-neutral-950 px-6 py-8">
+        <div className="mx-auto max-w-6xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
+          <LoadingState.ErrorState
+            error={getErrorMessage(seriesQuery.error, 'Failed to load series details.')}
+            onRetry={() => seriesQuery.refetch()}
+          />
+        </div>
+      </div>
+    );
   }
 
   if (!series) {
-    return <LoadingState.EmptyState message="作品不存在" />;
+    return (
+      <div className="min-h-screen bg-neutral-950 px-6 py-8">
+        <div className="mx-auto max-w-6xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
+          <LoadingState.EmptyState
+            message="This series could not be found."
+            action={
+              <button
+                type="button"
+                onClick={() => router.push('/admin/series')}
+                className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
+              >
+                Back to series library
+              </button>
+            }
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-900 p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* 页面标题 */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-neutral-100">作品详情</h1>
-            <p className="text-neutral-400 mt-2">{series.title}</p>
-          </div>
-          <button
-            onClick={() => router.back()}
-            className="px-4 py-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-          >
-            返回
-          </button>
-        </div>
-
-        {/* 消息提示 */}
-        {successMessage && (
-          <div className="mb-6 p-4 rounded-lg bg-green-900/20 border border-green-700 text-green-400">
-            {successMessage}
-          </div>
-        )}
-        {errorMessage && (
-          <div className="mb-6 p-4 rounded-lg bg-red-900/20 border border-red-700 text-red-400">
-            {errorMessage}
-          </div>
-        )}
-
-        {/* 编辑按钮 */}
-        <div className="mb-6 flex gap-2">
-          {!isEditing ? (
-            <>
+    <div className="min-h-screen bg-neutral-950 px-6 py-8 text-white">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <header className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-3">
               <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                type="button"
+                onClick={() => router.push('/admin/series')}
+                className="inline-flex w-fit rounded-2xl border border-neutral-700 px-3 py-2 text-xs font-medium uppercase tracking-[0.2em] text-neutral-300 transition hover:border-neutral-500 hover:text-white"
               >
-                编辑
+                Back to library
               </button>
-              <a
-                href={`/admin/series/${seriesId}/episodes`}
-                className="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 text-center"
-              >
-                管理剧集
-              </a>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={handleSave}
-                disabled={saveMutation.isPending}
-                className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
-              >
-                {saveMutation.isPending ? '保存中...' : '保存'}
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600"
-              >
-                取消
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* 内容区域 */}
-        <div className="rounded-lg bg-neutral-800 border border-neutral-700 p-6 space-y-6">
-          {/* 基本信息 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm text-neutral-400">标题</label>
-              <input
-                type="text"
-                value={formData.title || ''}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                disabled={!isEditing}
-                className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 disabled:opacity-50"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm text-neutral-400">类型</label>
-              <select
-                value={formData.type || ''}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                disabled={!isEditing}
-                className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 disabled:opacity-50"
-              >
-                <option value="comic">漫画</option>
-                <option value="novel">小说</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-sm text-neutral-400">状态</label>
-              <select
-                value={formData.status || ''}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                disabled={!isEditing}
-                className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 disabled:opacity-50"
-              >
-                <option value="Ongoing">连载中</option>
-                <option value="Completed">已完结</option>
-                <option value="Hiatus">暂停</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-sm text-neutral-400">单集价格</label>
-              <input
-                type="number"
-                value={formData.episodePrice || 0}
-                onChange={(e) => setFormData({ ...formData, episodePrice: e.target.value })}
-                disabled={!isEditing}
-                className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 disabled:opacity-50"
-              />
-            </div>
-          </div>
-
-          {/* 描述 */}
-          <div>
-            <label className="text-sm text-neutral-400">描述</label>
-            <textarea
-              value={formData.description || ''}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              disabled={!isEditing}
-              rows={4}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 disabled:opacity-50"
-            />
-          </div>
-
-          {/* 分类 */}
-          <div>
-            <label className="text-sm text-neutral-400">分类（逗号分隔）</label>
-            <input
-              type="text"
-              value={formData.genres || ''}
-              onChange={(e) => setFormData({ ...formData, genres: e.target.value })}
-              disabled={!isEditing}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 disabled:opacity-50"
-            />
-          </div>
-
-          {/* 封面 */}
-          <div>
-            <label className="text-sm text-neutral-400">封面</label>
-            <div className="mt-2 flex gap-4">
-              {formData.coverUrl && (
-                <div className="w-32 h-48 rounded-lg overflow-hidden bg-neutral-900">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={formData.coverUrl}
-                    alt="封面"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              {isEditing && (
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverUpload}
-                  className="flex-1"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* TTF设置 */}
-          <div className="border-t border-neutral-700 pt-6">
-            <h3 className="text-lg font-semibold text-neutral-100 mb-4">TTF设置</h3>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="ttf-enabled"
-                  checked={formData.ttfEnabled || false}
-                  onChange={(e) => setFormData({ ...formData, ttfEnabled: e.target.checked })}
-                  disabled={!isEditing}
-                  className="rounded"
-                />
-                <label htmlFor="ttf-enabled" className="text-sm text-neutral-400">
-                  启用TTF（限时免费）
-                </label>
+              <div className="space-y-2">
+                <h1 className="text-3xl font-semibold tracking-tight text-white">{series.title || 'Untitled series'}</h1>
+                <p className="max-w-3xl text-sm text-neutral-400">
+                  Edit pricing, maturity rules, cover art, and free-ticket behavior from a single detail view.
+                </p>
               </div>
+            </div>
 
-              {formData.ttfEnabled && (
-                <div>
-                  <label className="text-sm text-neutral-400">刷新间隔（小时）</label>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => router.push(`/admin/series/${seriesId}/episodes`)}
+                className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
+              >
+                Manage episodes
+              </button>
+
+              {isEditing ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleCancelEditing}
+                    className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-900"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={saveMutation.isPending}
+                    className="rounded-2xl bg-cyan-500 px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {saveMutation.isPending ? 'Saving...' : 'Save changes'}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleStartEditing}
+                  className="rounded-2xl bg-white px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-neutral-200"
+                >
+                  Edit series
+                </button>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
+
+        <div className="grid gap-6 xl:grid-cols-[1.35fr,0.85fr]">
+          <section className="space-y-6 rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
+            <div className="grid gap-5 md:grid-cols-2">
+              <FormField label="Title">
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={handleFieldChange('title')}
+                  disabled={!isEditing}
+                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+              </FormField>
+
+              <FormField label="Type">
+                <select
+                  value={formData.type}
+                  onChange={handleFieldChange('type')}
+                  disabled={!isEditing}
+                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+
+              <FormField label="Status">
+                <select
+                  value={formData.status}
+                  onChange={handleFieldChange('status')}
+                  disabled={!isEditing}
+                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {STATUS_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+
+              <FormField label="Episode price" helperText="Stored as coin cost per episode.">
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.episodePrice}
+                  onChange={handleFieldChange('episodePrice')}
+                  disabled={!isEditing}
+                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+              </FormField>
+            </div>
+
+            <FormField label="Description">
+              <textarea
+                rows={7}
+                value={formData.description}
+                onChange={handleFieldChange('description')}
+                disabled={!isEditing}
+                className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+              />
+            </FormField>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <FormField label="Genres" helperText="Separate entries with commas.">
+                <input
+                  type="text"
+                  value={formData.genres}
+                  onChange={handleFieldChange('genres')}
+                  disabled={!isEditing}
+                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+              </FormField>
+
+              <FormField label="Badge" helperText="Optional label shown on the series card.">
+                <input
+                  type="text"
+                  value={formData.badge}
+                  onChange={handleFieldChange('badge')}
+                  disabled={!isEditing}
+                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+              </FormField>
+
+              <FormField label="Cover tone">
+                <input
+                  type="text"
+                  value={formData.coverTone}
+                  onChange={handleFieldChange('coverTone')}
+                  disabled={!isEditing}
+                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+              </FormField>
+
+              <FormField label="Cover URL" helperText="Updated automatically after an upload, or paste an external asset URL.">
+                <input
+                  type="url"
+                  value={formData.coverUrl}
+                  onChange={handleFieldChange('coverUrl')}
+                  disabled={!isEditing}
+                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+              </FormField>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 px-5 py-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <h2 className="text-base font-semibold text-white">Maturity gate</h2>
+                    <p className="text-sm text-neutral-500">Mark this title as adults only.</p>
+                  </div>
                   <input
-                    type="number"
-                    value={formData.ttfIntervalHours || 24}
-                    onChange={(e) => setFormData({ ...formData, ttfIntervalHours: e.target.value })}
+                    type="checkbox"
+                    checked={formData.adult}
+                    onChange={handleFieldChange('adult')}
                     disabled={!isEditing}
-                    className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 disabled:opacity-50"
+                    className="mt-1 h-5 w-5 rounded border-neutral-700 bg-neutral-900"
                   />
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          {/* 其他设置 */}
-          <div className="border-t border-neutral-700 pt-6">
-            <h3 className="text-lg font-semibold text-neutral-100 mb-4">其他设置</h3>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="adult"
-                  checked={formData.adult || false}
-                  onChange={(e) => setFormData({ ...formData, adult: e.target.checked })}
-                  disabled={!isEditing}
-                  className="rounded"
-                />
-                <label htmlFor="adult" className="text-sm text-neutral-400">
-                  成人内容
+              <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 px-5 py-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <h2 className="text-base font-semibold text-white">Free ticket flow</h2>
+                    <p className="text-sm text-neutral-500">Enable time-ticket access on this title.</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={formData.ttfEnabled}
+                    onChange={handleFieldChange('ttfEnabled')}
+                    disabled={!isEditing}
+                    className="mt-1 h-5 w-5 rounded border-neutral-700 bg-neutral-900"
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <FormField label="Refresh interval (hours)">
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.ttfIntervalHours}
+                      onChange={handleFieldChange('ttfIntervalHours')}
+                      disabled={!isEditing || !formData.ttfEnabled}
+                      className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    />
+                  </FormField>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside className="space-y-6">
+            <section className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Cover asset</p>
+              <div className="mt-5 overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-950">
+                {formData.coverUrl ? (
+                  <img src={formData.coverUrl} alt={`${formData.title || 'Series'} cover`} className="aspect-[2/3] w-full object-cover" />
+                ) : (
+                  <div className="flex aspect-[2/3] items-center justify-center px-6 text-center text-sm text-neutral-500">
+                    No cover asset uploaded yet.
+                  </div>
+                )}
+              </div>
+
+              {isEditing ? (
+                <label className="mt-4 block rounded-2xl border border-dashed border-neutral-700 px-4 py-4 text-sm text-neutral-300 transition hover:border-neutral-500 hover:bg-neutral-950">
+                  <span className="font-medium text-white">Upload a new cover</span>
+                  <span className="mt-1 block text-xs text-neutral-500">JPG, PNG, GIF, or WEBP up to 10MB.</span>
+                  <input type="file" accept="image/*" onChange={handleCoverUpload} className="mt-3 block w-full text-xs text-neutral-400" />
                 </label>
-              </div>
+              ) : null}
+            </section>
 
-              <div>
-                <label className="text-sm text-neutral-400">徽章</label>
-                <input
-                  type="text"
-                  value={formData.badge || ''}
-                  onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-                  disabled={!isEditing}
-                  className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 disabled:opacity-50"
-                />
+            <section className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Series metadata</p>
+              <div className="mt-4">
+                <DetailRow label="Series ID" value={series.id} />
+                <DetailRow label="Created" value={formatDateTime(series.createdAt)} />
+                <DetailRow label="Updated" value={formatDateTime(series.updatedAt)} />
+                <DetailRow label="Type" value={formData.type || 'comic'} />
+                <DetailRow label="Status" value={formData.status || 'Ongoing'} />
               </div>
+            </section>
 
-              <div>
-                <label className="text-sm text-neutral-400">封面色调</label>
-                <input
-                  type="text"
-                  value={formData.coverTone || ''}
-                  onChange={(e) => setFormData({ ...formData, coverTone: e.target.value })}
-                  disabled={!isEditing}
-                  className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 disabled:opacity-50"
-                />
+            <section className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Operational notes</p>
+              <div className="mt-4 space-y-3 text-sm leading-7 text-neutral-300">
+                <p>Episode pricing and time-ticket settings are pushed through the canonical admin series endpoint.</p>
+                <p>Cover uploads now use the shared admin upload client, so auth headers and CSRF handling stay consistent.</p>
+                <p>Saving from this page sends the payload in the shape expected by the backend controller.</p>
               </div>
-            </div>
-          </div>
+            </section>
+          </aside>
         </div>
       </div>
     </div>

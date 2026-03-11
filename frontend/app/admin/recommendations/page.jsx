@@ -4,9 +4,10 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { LoadingState } from '@/components/admin/common/LoadingState';
+import { AdminDataState } from '@/components/admin/common/AdminDataState';
 import { Modal } from '@/components/admin/common/Modal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { adminFetchJson } from '@/lib/adminApiClient';
 
 export default function AdminRecommendationsPage() {
   const [viewMode, setViewMode] = useState('slots'); // slots, rankings, analytics
@@ -189,10 +190,11 @@ export default function AdminRecommendationsPage() {
               + 创建推荐位
             </button>
 
-            {slotsLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : slots.length > 0 ? (
-              <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
+            <AdminDataState
+              isLoading={slotsLoading}
+              hasData={slots.length > 0}
+              emptyMessage="暂无推荐位"
+            >
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -237,10 +239,7 @@ export default function AdminRecommendationsPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            ) : (
-              <LoadingState.EmptyState message="暂无推荐位" />
-            )}
+            </AdminDataState>
           </div>
         )}
 
@@ -257,10 +256,11 @@ export default function AdminRecommendationsPage() {
               + 创建排行榜
             </button>
 
-            {rankingsLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : rankings.length > 0 ? (
-              <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
+            <AdminDataState
+              isLoading={rankingsLoading}
+              hasData={rankings.length > 0}
+              emptyMessage="暂无排行榜配置"
+            >
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -307,19 +307,19 @@ export default function AdminRecommendationsPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            ) : (
-              <LoadingState.EmptyState message="暂无排行榜配置" />
-            )}
+            </AdminDataState>
           </div>
         )}
 
         {/* 效果分析 */}
         {viewMode === 'analytics' && (
           <div className="space-y-6">
-            {analyticsLoading ? (
-              <LoadingState.Spinner size="md" />
-            ) : analytics.length > 0 ? (
+            <AdminDataState
+              isLoading={analyticsLoading}
+              hasData={analytics.length > 0}
+              emptyMessage="暂无分析数据"
+              wrap={false}
+            >
               <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -350,9 +350,7 @@ export default function AdminRecommendationsPage() {
                   </table>
                 </div>
               </div>
-            ) : (
-              <LoadingState.EmptyState message="暂无分析数据" />
-            )}
+            </AdminDataState>
           </div>
         )}
       </div>
