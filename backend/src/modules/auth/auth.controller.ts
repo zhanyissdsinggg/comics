@@ -193,7 +193,7 @@ export class AuthController {
     });
   }
 
-  private async createSession(userId: string, res: Response): Promise<void> {
+  private async createSession(userId: string, res: Response, request?: Request): Promise<void> {
     const expiresAt = new Date(Date.now() + SESSION_DURATION_SECONDS * 1000);
     const sessionToken = randomBytes(32).toString("hex");
 
@@ -208,21 +208,27 @@ export class AuthController {
     res.cookie(
       SESSION_COOKIE_NAME,
       sessionToken,
-      buildCookieOptions({
-        httpOnly: true,
-        maxAge: SESSION_DURATION_SECONDS * 1000,
-      }),
+      buildCookieOptions(
+        {
+          httpOnly: true,
+          maxAge: SESSION_DURATION_SECONDS * 1000,
+        },
+        request,
+      ),
     );
   }
 
-  private clearSessionCookie(res: Response): void {
+  private clearSessionCookie(res: Response, request?: Request): void {
     res.cookie(
       SESSION_COOKIE_NAME,
       "",
-      buildCookieOptions({
-        httpOnly: true,
-        maxAge: 0,
-      }),
+      buildCookieOptions(
+        {
+          httpOnly: true,
+          maxAge: 0,
+        },
+        request,
+      ),
     );
   }
 
@@ -432,6 +438,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async register(
     @Body() body: { email?: string; password?: string; name?: string },
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const email = this.normalizeEmail(body?.email || "");
@@ -476,7 +483,7 @@ export class AuthController {
     }
 
     await this.ensureWallet(user.id);
-    await this.createSession(user.id, res);
+    await this.createSession(user.id, res, req);
 
     return {
       success: true,
@@ -617,7 +624,7 @@ export class AuthController {
     await this.setAuthTag(user.id, GOOGLE_SUB_TAG, googleSub);
     await this.setAuthTag(user.id, EMAIL_VERIFIED_TAG, "1");
     await this.ensureWallet(user.id);
-    await this.createSession(user.id, res);
+    await this.createSession(user.id, res, req);
 
     return {
       success: true,
@@ -692,6 +699,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() body: { email?: string; password?: string },
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const email = this.normalizeEmail(body?.email || "");
@@ -721,7 +729,7 @@ export class AuthController {
     }
 
     await this.ensureWallet(user.id);
-    await this.createSession(user.id, res);
+    await this.createSession(user.id, res, req);
 
     return {
       success: true,
@@ -738,7 +746,7 @@ export class AuthController {
     if (token) {
       await this.prisma.session.deleteMany({ where: { token } });
     }
-    this.clearSessionCookie(res);
+    this.clearSessionCookie(res, req);
 
     return {
       success: true,
@@ -903,6 +911,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async verifyOtp(
     @Body() body: { email?: string; code?: string },
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const email = this.normalizeEmail(body?.email || "");
@@ -955,7 +964,7 @@ export class AuthController {
 
     await this.setAuthTag(user.id, EMAIL_VERIFIED_TAG, "1");
     await this.ensureWallet(user.id);
-    await this.createSession(user.id, res);
+    await this.createSession(user.id, res, req);
 
     return {
       success: true,
@@ -989,3 +998,5 @@ export class AuthController {
   }
 
 }
+
+

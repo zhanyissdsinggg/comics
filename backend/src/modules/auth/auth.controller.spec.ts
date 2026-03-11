@@ -102,8 +102,11 @@ describe("AuthController", () => {
     await expect(
       controller.login(
         { email: "not-an-email", password: "" },
+        {} as any,
         { cookie: jest.fn() } as any,
       ),
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });
+
+

@@ -101,11 +101,6 @@ function HomeContent() {
     if (openLogin === "1") {
       window.sessionStorage.setItem("mn_open_login", "1");
       window.sessionStorage.setItem("mn_return_to", returnTo);
-      window.setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("auth:open", {
-          detail: { returnTo },
-        }));
-      }, 0);
     } else if (reason === "NEED_LOGIN") {
       setShowLoginPrompt(true);
     }
@@ -207,3 +202,5 @@ export default function HomePage() {
     </HomeDataProvider>
   );
 }
+
+
