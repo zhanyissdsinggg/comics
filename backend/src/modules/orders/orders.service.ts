@@ -1,40 +1,126 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { logger } from "../../common/logger/winston.init";
 import { ORDER_STATUS } from "../../common/utils/order-status";
+
+type RawOrderRow = {
+  id?: string;
+  userId?: string;
+  packageId?: string;
+  amount?: number | string | bigint;
+  currency?: string;
+  status?: string;
+  priceSnapshot?: number | string | bigint | null;
+  idempotencyKey?: string | null;
+  paidAt?: Date | string | null;
+  createdAt?: Date | string | null;
+  updatedAt?: Date | string | null;
+};
+
+function toNumber(value: number | string | bigint | null | undefined): number {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : 0;
+  }
+  if (typeof value === "bigint") {
+    return Number(value);
+  }
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function toDate(value: Date | string | null | undefined): Date | null {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function normalizeRawOrder(order: RawOrderRow) {
+  return {
+    id: String(order.id || ""),
+    userId: String(order.userId || ""),
+    packageId: String(order.packageId || ""),
+    amount: toNumber(order.amount),
+    currency: String(order.currency || ""),
+    status: String(order.status || ""),
+    priceSnapshot: toNumber(order.priceSnapshot),
+    idempotencyKey: order.idempotencyKey ? String(order.idempotencyKey) : null,
+    paidAt: toDate(order.paidAt),
+    createdAt: toDate(order.createdAt) || new Date(0),
+    updatedAt: toDate(order.updatedAt) || new Date(0),
+  };
+}
 
 @Injectable()
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(userId: string) {
-    return this.prisma.order.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-    });
+  private async listWithFallback(userId: string) {
+    try {
+      return await this.prisma.order.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (error: unknown) {
+      logger.warn("[orders] prisma list failed, fallback to raw sql", {
+        userId,
+        message: error instanceof Error ? error.message : String(error),
+      });
+      const rows = await this.prisma.$queryRaw<RawOrderRow[]>`
+        SELECT *
+        FROM "orders"
+        WHERE "userId" = ${userId}
+        ORDER BY "createdAt" DESC
+      `;
+      return rows.map(normalizeRawOrder);
+    }
   }
 
-  /**
-   * 优化后的reconcile方法 - 消除循环中的数据库操作
-   * 之前：for循环中逐个创建auditLog和paymentRetry（N+1问题）
-   * 现在：使用批量操作替代循环，减少数据库往返
-   */
+  private async listPendingWithFallback(userId: string, cutoff: Date) {
+    try {
+      return await this.prisma.order.findMany({
+        where: { userId, status: ORDER_STATUS.PENDING, createdAt: { lt: cutoff } },
+      });
+    } catch (error: unknown) {
+      logger.warn("[orders] prisma pending query failed, fallback to raw sql", {
+        userId,
+        message: error instanceof Error ? error.message : String(error),
+      });
+      const rows = await this.prisma.$queryRaw<RawOrderRow[]>`
+        SELECT *
+        FROM "orders"
+        WHERE "userId" = ${userId}
+          AND "status" = ${ORDER_STATUS.PENDING}
+          AND "createdAt" < ${cutoff}
+      `;
+      return rows.map(normalizeRawOrder);
+    }
+  }
+
+  async list(userId: string) {
+    return this.listWithFallback(userId);
+  }
+
   async reconcile(userId: string) {
     const cutoff = new Date(Date.now() - 15 * 60 * 1000);
-    const pending = await this.prisma.order.findMany({
-      where: { userId, status: ORDER_STATUS.PENDING, createdAt: { lt: cutoff } },
-    });
+    const pending = await this.listPendingWithFallback(userId, cutoff);
 
     if (pending.length === 0) {
       return { updated: 0, orders: await this.list(userId) };
     }
 
-    // 第一步：批量更新订单状态
     await this.prisma.order.updateMany({
       where: { userId, status: ORDER_STATUS.PENDING, createdAt: { lt: cutoff } },
       data: { status: ORDER_STATUS.TIMEOUT },
     });
 
-    // 第二步：批量创建审计日志（替代for循环）
     const auditLogs = pending.map((order) => ({
       userId,
       action: "order_timeout",
@@ -44,21 +130,17 @@ export class OrdersService {
       payload: JSON.stringify({ reason: "RECONCILE_TIMEOUT" }),
     }));
 
-    await this.prisma.auditLog.createMany({
-      data: auditLogs,
-    });
+    await this.prisma.auditLog.createMany({ data: auditLogs });
 
-    // 第三步：获取所有订单对应的最新支付意图（一次查询）
     const paymentIntents = await this.prisma.paymentIntent.findMany({
-      where: { orderId: { in: pending.map((o) => o.id) } },
+      where: { orderId: { in: pending.map((order) => order.id) } },
       orderBy: { createdAt: "desc" },
-      distinct: ["orderId"], // 每个订单只取最新的一条
+      distinct: ["orderId"],
     });
 
-    // 第四步：构建paymentRetry数据
     const nextAttemptAt = new Date(Date.now() + 30_000);
     const paymentRetries = pending.map((order) => {
-      const payment = paymentIntents.find((p) => p.orderId === order.id);
+      const payment = paymentIntents.find((intent) => intent.orderId === order.id);
       return {
         userId,
         orderId: order.id,
@@ -69,15 +151,14 @@ export class OrdersService {
       };
     });
 
-    // 第五步：批量创建或更新paymentRetry（替代for循环中的upsert）
     await Promise.all(
       paymentRetries.map((retry) =>
         this.prisma.paymentRetry.upsert({
           where: { orderId: retry.orderId },
           update: retry,
           create: retry,
-        })
-      )
+        }),
+      ),
     );
 
     return { updated: pending.length, orders: await this.list(userId) };

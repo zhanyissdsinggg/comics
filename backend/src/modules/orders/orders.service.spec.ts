@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { ORDER_STATUS } from '../../common/utils/order-status';
@@ -19,6 +19,9 @@ describe('OrdersService', () => {
                 {
                   id: 'order-1',
                   userId: 'user-1',
+                  packageId: 'pkg-1',
+                  amount: 500,
+                  currency: 'USD',
                   status: ORDER_STATUS.PAID,
                   createdAt: new Date(),
                 },
@@ -43,6 +46,7 @@ describe('OrdersService', () => {
                 status: 'PENDING',
               }),
             },
+            $queryRaw: jest.fn().mockResolvedValue([]),
           },
         },
       ],
@@ -57,7 +61,7 @@ describe('OrdersService', () => {
   });
 
   describe('list', () => {
-    it('应该返回用户的所有订单', async () => {
+    it('returns the user orders sorted by createdAt desc', async () => {
       const result = await service.list('user-1');
 
       expect(result).toBeDefined();
@@ -68,7 +72,39 @@ describe('OrdersService', () => {
       });
     });
 
-    it('应该返回空数组当用户没有订单时', async () => {
+    it('falls back to raw sql when prisma list query fails', async () => {
+      jest.spyOn(prisma.order, 'findMany').mockRejectedValueOnce(new Error('column does not exist'));
+      (prisma.$queryRaw as jest.Mock).mockResolvedValueOnce([
+        {
+          id: 'order-raw-1',
+          userId: 'user-1',
+          packageId: 'pkg-raw-1',
+          amount: '900',
+          currency: 'USD',
+          status: ORDER_STATUS.PAID,
+          priceSnapshot: '900',
+          createdAt: new Date('2026-03-01T00:00:00.000Z'),
+          updatedAt: new Date('2026-03-01T00:00:00.000Z'),
+        },
+      ]);
+
+      const result = await service.list('user-1');
+
+      expect(prisma.$queryRaw).toHaveBeenCalled();
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: 'order-raw-1',
+          userId: 'user-1',
+          packageId: 'pkg-raw-1',
+          amount: 900,
+          currency: 'USD',
+          status: ORDER_STATUS.PAID,
+          priceSnapshot: 900,
+        }),
+      ]);
+    });
+
+    it('returns an empty array when the user has no orders', async () => {
       jest.spyOn(prisma.order, 'findMany').mockResolvedValueOnce([]);
 
       const result = await service.list('user-1');
@@ -76,7 +112,7 @@ describe('OrdersService', () => {
       expect(result).toEqual([]);
     });
 
-    it('应该按创建时间倒序返回订单', async () => {
+    it('preserves descending order from the datasource', async () => {
       const orders = [
         { id: 'order-3', createdAt: new Date('2024-01-03') },
         { id: 'order-2', createdAt: new Date('2024-01-02') },
@@ -92,7 +128,7 @@ describe('OrdersService', () => {
   });
 
   describe('reconcile', () => {
-    it('应该成功协调超时订单', async () => {
+    it('reconciles expired pending orders', async () => {
       jest.spyOn(prisma.order, 'findMany').mockResolvedValueOnce([
         {
           id: 'order-1',
@@ -109,7 +145,7 @@ describe('OrdersService', () => {
       expect(prisma.auditLog.createMany).toHaveBeenCalled();
     });
 
-    it('应该在没有超时订单时返回0', async () => {
+    it('returns zero when there is nothing to reconcile', async () => {
       jest.spyOn(prisma.order, 'findMany').mockResolvedValueOnce([]);
 
       const result = await service.reconcile('user-1');
@@ -118,7 +154,7 @@ describe('OrdersService', () => {
       expect(prisma.order.updateMany).not.toHaveBeenCalled();
     });
 
-    it('应该创建审计日志', async () => {
+    it('writes audit logs for timed out orders', async () => {
       jest.spyOn(prisma.order, 'findMany').mockResolvedValueOnce([
         {
           id: 'order-1',
@@ -138,11 +174,11 @@ describe('OrdersService', () => {
               resource: 'order',
             }),
           ]),
-        })
+        }),
       );
     });
 
-    it('应该创建支付重试记录', async () => {
+    it('creates payment retry records for timed out orders', async () => {
       jest.spyOn(prisma.order, 'findMany').mockResolvedValueOnce([
         {
           id: 'order-1',
@@ -157,7 +193,7 @@ describe('OrdersService', () => {
       expect(prisma.paymentRetry.upsert).toHaveBeenCalled();
     });
 
-    it('应该返回更新后的订单列表', async () => {
+    it('returns refreshed orders after reconcile finishes', async () => {
       jest.spyOn(prisma.order, 'findMany')
         .mockResolvedValueOnce([
           {
