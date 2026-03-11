@@ -1,4 +1,4 @@
-﻿# Deploy Gate Automation
+# Deploy Gate Automation
 
 This project includes script-based deploy verification, production-safe admin session smoke checks, and lightweight load smoke checks.
 
@@ -19,7 +19,7 @@ What it covers:
 - backend health and version endpoints
 - frontend critical routes (`/`, `/search`, `/store`, `/admin/login`)
 - optional observability thresholds
-- admin login -> verify -> read-only admin API -> logout -> token invalidation
+- admin login -> verify -> read-only admin API -> append-only audit delete probe -> logout -> token invalidation
 
 If `OPS_ADMIN_KEY` or `ADMIN_KEY` is not provided, the admin session smoke step is skipped by default.
 Set `OPS_ADMIN_REQUIRED=1` if you want missing admin credentials to fail the gate.
@@ -70,6 +70,7 @@ The script only performs:
 - admin login
 - token verify
 - multiple read-only admin GET checks (series/users/support/orders by default)
+- append-only audit log delete probe using DELETE /api/admin/logs/probe-log-id-for-deploy-check (must return 403)
 - logout
 - verify/refresh/read rejection after logout
 

@@ -12,6 +12,7 @@ const LOGIN_PATH = "/api/admin/auth/login";
 const VERIFY_PATH = "/api/admin/auth/verify";
 const LOGOUT_PATH = "/api/admin/auth/logout";
 const REFRESH_PATH = "/api/admin/auth/refresh";
+const AUDIT_LOG_DELETE_PROBE_PATH = "/api/admin/logs/probe-log-id-for-deploy-check";
 
 function normalizeBaseUrl(value) {
   const normalized = String(value || "").trim();
@@ -134,6 +135,20 @@ async function assertReadPaths(backendBaseUrl, readPaths, label, expectedStatuse
   }
 }
 
+async function assertAppendOnlyAuditDelete(backendBaseUrl, headers) {
+  const result = await requestJson(`${backendBaseUrl}${AUDIT_LOG_DELETE_PROBE_PATH}`, {
+    method: "DELETE",
+    headers,
+  });
+  logStep(`DELETE ${AUDIT_LOG_DELETE_PROBE_PATH} (append-only probe)`, result);
+  if (result.status !== 403) {
+    fail(
+      `expected append-only audit delete probe to return 403, got ${result.status}. Production is likely serving an older backend deployment.`,
+    );
+  }
+  assertPayloadPresent(result, "append-only audit delete probe");
+}
+
 async function run() {
   const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
   const adminKey = String(process.env.OPS_ADMIN_KEY || process.env.ADMIN_KEY || "").trim();
@@ -193,6 +208,7 @@ async function run() {
   }
 
   await assertReadPaths(backendBaseUrl, readPaths, "authorized", [200], authHeaders);
+  await assertAppendOnlyAuditDelete(backendBaseUrl, authHeaders);
 
   const logout = await requestJson(`${backendBaseUrl}${LOGOUT_PATH}`, {
     method: "POST",
