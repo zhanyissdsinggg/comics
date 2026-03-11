@@ -1,3 +1,5 @@
+import SiteHeader from "../../components/layout/SiteHeader";
+import InfoPageNav from "../../components/layout/InfoPageNav";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
 
@@ -26,8 +28,11 @@ function ContactCard() {
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-neutral-950 px-4 py-16 text-white">
-      <div className="mx-auto max-w-4xl space-y-8">
+    <div className="min-h-screen bg-neutral-950 text-white">
+      <SiteHeader />
+      <main className="px-4 py-10">
+        <div className="mx-auto max-w-5xl space-y-8">
+          <InfoPageNav current="privacy" />
         <header className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-8">
           <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">Legal</p>
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Privacy Policy</h1>
@@ -121,7 +126,8 @@ export default function PrivacyPolicyPage() {
             <ContactCard />
           </div>
         </section>
-      </div>
-    </main>
+        </div>
+      </main>
+    </div>
   );
 }

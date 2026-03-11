@@ -158,6 +158,19 @@ function HomeContent() {
         <div className="py-4 md:py-6">
           {loading ? <HeroBannerSkeleton /> : <HeroCarousel items={heroItems} />}
         </div>
+
+        <section className="mb-6 flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 px-5 py-5 backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300/90">Daily picks</p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-4xl">
+              Read premium comics and novels without the clutter.
+            </h1>
+          </div>
+          <p className="max-w-xl text-sm leading-6 text-neutral-300">
+            Discover fast-loading series pages, reliable 18+ controls, and a storefront built around straightforward reading.
+          </p>
+        </section>
+
         <div className="mb-8 flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {GENRE_CHIPS.map((chip) => (
             <button

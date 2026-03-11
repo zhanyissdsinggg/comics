@@ -1,10 +1,13 @@
 import SiteHeader from "../../components/layout/SiteHeader";
+import InfoPageNav from "../../components/layout/InfoPageNav";
+import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
 
-export const metadata = {
-  title: "FAQ",
-  description: "Frequently asked questions and support info.",
-};
+export const metadata = createPageMetadata({
+  title: "Help & FAQ",
+  description: "Common questions about purchases, subscriptions, adult content, and account support.",
+  path: "/faq",
+});
 
 const FAQ = [
   {
@@ -30,10 +33,11 @@ export default function Page() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <SiteHeader />
       <main className="mx-auto max-w-5xl space-y-6 px-4 pb-12 pt-8">
+        <InfoPageNav current="faq" />
         <div>
           <h1 className="text-2xl font-semibold">Help & FAQ</h1>
           <p className="mt-2 text-sm text-neutral-400">
-            Common questions and quick fixes.
+            Common questions, quick fixes, and direct support paths.
           </p>
         </div>
         <div className="space-y-4">
@@ -48,10 +52,9 @@ export default function Page() {
           ))}
         </div>
         <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-400">
-          Need more help? Email {siteConfig.supportEmail}.
+          Need more help? Email {siteConfig.supportEmail} or use the support form.
         </div>
       </main>
     </div>
   );
 }
-

@@ -3,6 +3,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Search, Trash2, TrendingUp, X } from "lucide-react";
+import { useSearchShortcutLabel } from "../../hooks/useSearchShortcutLabel";
 
 const HISTORY_KEY = "mn_search_history";
 const MAX_HISTORY_ITEMS = 5;
@@ -34,6 +35,7 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef(null);
   const containerRef = useRef(null);
+  const shortcutLabel = useSearchShortcutLabel();
 
   useEffect(() => {
     setSearchHistory(readHistory());
@@ -172,9 +174,11 @@ const SearchBar = memo(function SearchBar({ onSearch, placeholder = "Search seri
             <X size={14} className="transition-transform duration-300 group-hover:rotate-90" />
           </button>
         ) : null}
-        <kbd className="hidden rounded-[8px] border border-white/5 bg-white/5 px-2 py-1 text-[10px] text-neutral-400 md:block">
-          Ctrl+K
-        </kbd>
+        {shortcutLabel ? (
+          <kbd className="hidden rounded-[8px] border border-white/5 bg-white/5 px-2 py-1 text-[10px] text-neutral-400 md:block">
+            {shortcutLabel}
+          </kbd>
+        ) : null}
       </div>
 
       {showSuggestions && searchHistory.length > 0 ? (

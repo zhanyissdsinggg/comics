@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Bell, User } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -7,6 +7,21 @@ import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 
+function AuthSkeleton() {
+  return (
+    <>
+      <div
+        className="hidden h-11 w-24 animate-pulse rounded-full border border-white/5 bg-white/5 sm:block"
+        aria-hidden="true"
+      />
+      <div
+        className="h-11 w-11 animate-pulse rounded-full border border-white/5 bg-white/5 sm:hidden"
+        aria-hidden="true"
+      />
+    </>
+  );
+}
+
 export default function HeaderActions({
   onWalletClick,
   onAdultToggleClick,
@@ -14,7 +29,7 @@ export default function HeaderActions({
   isAdultMode,
 }) {
   const router = useRouter();
-  const { isSignedIn } = useAuthStore();
+  const { hydrated, isSignedIn } = useAuthStore();
   const { paidPts, bonusPts } = useWalletStore();
   const { unreadCount } = useNotificationsStore();
 
@@ -52,7 +67,10 @@ export default function HeaderActions({
         aria-label="Notifications"
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
-        <Bell size={18} className="transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
+        <Bell
+          size={18}
+          className="transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110"
+        />
         {unreadCount > 0 ? (
           <>
             <span className="absolute -right-1 -top-1 flex h-5 w-5 animate-ping rounded-full bg-red-500 opacity-75" />
@@ -93,7 +111,9 @@ export default function HeaderActions({
         </span>
       </button>
 
-      {isSignedIn ? (
+      {!hydrated ? (
+        <AuthSkeleton />
+      ) : isSignedIn ? (
         <button
           type="button"
           onClick={() => router.push("/account")}
@@ -101,7 +121,10 @@ export default function HeaderActions({
           aria-label="Profile"
           title="Open Account"
         >
-          <User size={20} className="text-emerald-400 transition-transform duration-300 group-hover:scale-110" />
+          <User
+            size={20}
+            className="text-emerald-400 transition-transform duration-300 group-hover:scale-110"
+          />
         </button>
       ) : (
         <>
@@ -119,7 +142,10 @@ export default function HeaderActions({
             aria-label="Sign in"
             title="Sign in"
           >
-            <User size={18} className="text-neutral-200 transition-transform duration-300 group-hover:scale-110" />
+            <User
+              size={18}
+              className="text-neutral-200 transition-transform duration-300 group-hover:scale-110"
+            />
           </button>
         </>
       )}

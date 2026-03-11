@@ -3,9 +3,9 @@ import HomePage from "../components/home/HomePage";
 import { createPageMetadata } from "../lib/seo";
 
 export const metadata = createPageMetadata({
-  title: "Read Comics & Novels Online",
+  title: "Read Comics, Manga & Novels Online",
   description:
-    "Discover thousands of comics and novels. Read your favorite series online with high-quality translations and daily updates.",
+    "Discover premium comics and novels with fast pages, mature-content controls that work, and daily reading updates.",
   path: "/",
 });
 

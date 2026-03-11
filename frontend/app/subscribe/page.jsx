@@ -1,11 +1,13 @@
 import { Suspense } from "react";
 import SubscribePage from "../../components/subscribe/SubscribePage";
 import Skeleton from "../../components/common/Skeleton";
+import { createPageMetadata } from "../../lib/seo";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Subscribe",
-  description: "Choose a subscription plan.",
-};
+  description: "Compare plans, keep bonus savings active, and unlock subscription benefits.",
+  path: "/subscribe",
+});
 
 export default function Page() {
   return (

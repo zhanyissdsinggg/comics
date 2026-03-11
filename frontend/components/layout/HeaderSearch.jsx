@@ -2,17 +2,15 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { useSearchShortcutLabel } from "../../hooks/useSearchShortcutLabel";
 
 const SearchBar = dynamic(() => import("../common/SearchBar"), {
   ssr: false,
 });
 
-/**
- * 老王注释：搜索栏组件 - 只负责搜索功能
- * 职责单一：显示搜索栏，处理搜索事件
- */
 export default function HeaderSearch({ onSearch }) {
   const [enabled, setEnabled] = useState(false);
+  const shortcutLabel = useSearchShortcutLabel();
 
   useEffect(() => {
     const onHotkey = (event) => {
@@ -36,9 +34,11 @@ export default function HeaderSearch({ onSearch }) {
         >
           <span className="text-base leading-none">S</span>
           <span>Search series</span>
-          <span className="ml-auto hidden rounded-[8px] border border-white/5 bg-white/5 px-2 py-1 text-[10px] text-neutral-500 md:inline-block">
-            Ctrl+K
-          </span>
+          {shortcutLabel ? (
+            <span className="ml-auto hidden rounded-[8px] border border-white/5 bg-white/5 px-2 py-1 text-[10px] text-neutral-500 md:inline-block">
+              {shortcutLabel}
+            </span>
+          ) : null}
         </button>
       </div>
     );
