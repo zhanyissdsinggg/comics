@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useAdminAuth } from "./AuthContext";
@@ -60,12 +60,23 @@ export default function AdminLoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <input
+            type="text"
+            name="username"
+            autoComplete="username"
+            value="admin"
+            readOnly
+            tabIndex={-1}
+            aria-hidden="true"
+            className="sr-only"
+          />
           <div>
             <label htmlFor="adminKey" className="block text-sm font-medium text-gray-700 mb-2">
               Admin Key
             </label>
             <input
               id="adminKey"
+              name="password"
               type="password"
               value={adminKey}
               onChange={(event) => setAdminKey(event.target.value)}
@@ -121,3 +132,5 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+
+
