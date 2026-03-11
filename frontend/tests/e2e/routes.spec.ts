@@ -1,15 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { CRITICAL_ROUTES } from "../../scripts/critical-routes.mjs";
+import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const ROUTES = CRITICAL_ROUTES;
 
 test.describe("Critical route rendering", () => {
   for (const route of ROUTES) {
     test(`should render ${route} without runtime crash`, async ({ page }) => {
-      const pageErrors = [];
-      page.on("pageerror", (error) => {
-        pageErrors.push(error);
-      });
+      const runtimeIssues = collectRuntimeIssues(page);
 
       const response = await page.goto(route, { waitUntil: "domcontentloaded" });
       expect(response?.ok()).toBeTruthy();
@@ -20,13 +18,14 @@ test.describe("Critical route rendering", () => {
         if (!body) {
           return false;
         }
-        return body.childElementCount > 0 || body.textContent.trim().length > 0;
+
+        return body.childElementCount > 0 || body.textContent?.trim().length > 0;
       });
       expect(hasRenderableContent).toBeTruthy();
 
       // Let hydration settle before checking runtime errors.
       await page.waitForTimeout(300);
-      expect(pageErrors, `${route} has runtime page errors`).toHaveLength(0);
+      await expectNoRuntimeIssues(route, runtimeIssues);
     });
   }
 });
