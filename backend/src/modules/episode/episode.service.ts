@@ -2,6 +2,30 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
+function normalizeEpisodePages(value: unknown): Array<Record<string, unknown>> {
+  if (Array.isArray(value)) {
+    return value.filter((item) => item && typeof item === "object") as Array<Record<string, unknown>>;
+  }
+
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  const raw = value.trim();
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter((item) => item && typeof item === "object") as Array<Record<string, unknown>>
+      : [];
+  } catch {
+    return [];
+  }
+}
+
 function normalizeParagraphs(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value
@@ -94,6 +118,63 @@ export class EpisodeService {
     }
   }
 
+  private normalizeCompatEpisode(row: Record<string, unknown>) {
+    return {
+      id: String(row.id || ""),
+      seriesId: String(row.seriesId || ""),
+      number: Number(row.number || 0),
+      title: String(row.title || ""),
+      pages: normalizeEpisodePages(row.pages),
+      paragraphs: normalizeParagraphs(row.paragraphs),
+      text: row.text == null ? null : String(row.text),
+      previewFreePages: Number(row.previewFreePages || 0),
+    };
+  }
+
+  private async findStoredEpisodeCompat(episodeId: string): Promise<any> {
+    const columns = await this.prisma.$queryRawUnsafe<Array<{ column_name: string }>>(
+      `SELECT column_name
+       FROM information_schema.columns
+       WHERE table_schema = 'public' AND table_name = 'episode'`,
+    );
+
+    const available = new Set(
+      columns
+        .map((item) => String(item?.column_name || "").trim())
+        .filter(Boolean),
+    );
+
+    const requested = [
+      "id",
+      "seriesId",
+      "number",
+      "title",
+      "pages",
+      "paragraphs",
+      "text",
+      "previewFreePages",
+    ].filter((column) => available.has(column));
+
+    if (!requested.includes("id")) {
+      requested.unshift("id");
+    }
+
+    const selectClause = requested
+      .map((column) => `"${column.replace(/"/g, "\"\"")}"`)
+      .join(", ");
+
+    const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
+      `SELECT ${selectClause} FROM "episode" WHERE "id" = $1 LIMIT 1`,
+      episodeId,
+    );
+
+    if (!rows.length) {
+      return null;
+    }
+
+    return this.normalizeCompatEpisode(rows[0]);
+  }
+
   private async findStoredEpisode(episodeId: string): Promise<any> {
     try {
       return await this.prisma.episode.findUnique({
@@ -110,10 +191,10 @@ export class EpisodeService {
         },
       });
     } catch (error) {
-      if (!this.isSchemaDriftError(error)) {
-        throw error;
-      }
       this.logger.warn(`Episode full query failed for ${episodeId}, switching to compatibility mode.`);
+      if (error instanceof Error) {
+        this.logger.debug(error.message);
+      }
     }
 
     try {
@@ -128,10 +209,19 @@ export class EpisodeService {
         },
       });
     } catch (error) {
+      this.logger.warn(`Episode compatibility query failed for ${episodeId}, switching to raw fallback.`);
+      if (error instanceof Error) {
+        this.logger.debug(error.message);
+      }
+    }
+
+    try {
+      return await this.findStoredEpisodeCompat(episodeId);
+    } catch (error) {
       if (!this.isSchemaDriftError(error)) {
         throw error;
       }
-      this.logger.warn(`Episode compatibility query failed for ${episodeId}.`);
+      this.logger.warn(`Episode raw compatibility query failed for ${episodeId}.`);
       return null;
     }
   }
