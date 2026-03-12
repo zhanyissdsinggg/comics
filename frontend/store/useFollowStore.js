@@ -9,6 +9,7 @@ import {
   useEffect,
 } from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
+import { emitAuthRequired } from "../lib/authBus";
 
 const FollowContext = createContext(null);
 
@@ -63,8 +64,8 @@ export function FollowProvider({ children }) {
       setFollowedSeriesIds(response.data?.followedSeriesIds || []);
       return response;
     }
-    if (response.status === 401 && typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("auth:open"));
+    if (response.status === 401) {
+      emitAuthRequired({ source: "event" });
     }
     return response;
   }, []);
