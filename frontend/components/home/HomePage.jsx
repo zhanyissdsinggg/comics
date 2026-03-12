@@ -128,6 +128,8 @@ function HomeContent() {
       .slice(0, 6)
       .map((s) => ({
         id: `hero-${s.id}`,
+        seriesId: s.id,
+        latestEpisodeId: s.latestEpisodeId || null,
         title: s.title,
         description: s.description || `${s.genres?.join(" | ") || ""}`,
         coverTone: s.coverTone || "default",
@@ -140,6 +142,8 @@ function HomeContent() {
     }
     return featured.length > 0 ? featured : seriesList.slice(0, 4).map((s) => ({
       id: `hero-${s.id}`,
+      seriesId: s.id,
+      latestEpisodeId: s.latestEpisodeId || null,
       title: s.title,
       description: s.description || "",
       coverTone: s.coverTone || "default",

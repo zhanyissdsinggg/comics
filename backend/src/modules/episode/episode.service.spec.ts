@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { EpisodeService } from "./episode.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
@@ -65,6 +66,42 @@ describe("EpisodeService", () => {
         type: "comic",
         pages: [],
         previewFreePages: 0,
+      },
+    });
+  });
+
+  it("falls back when raw series visibility query raises a missing-column error", async () => {
+    const rawMissingColumn = {
+      code: "P2010",
+      meta: { code: "42703", message: 'column "isPublished" does not exist' },
+    } as unknown as Prisma.PrismaClientKnownRequestError;
+
+    prisma.series.findUnique.mockRejectedValueOnce(rawMissingColumn);
+    prisma.$queryRawUnsafe
+      .mockRejectedValueOnce(rawMissingColumn)
+      .mockResolvedValueOnce([{ id: "series-001", type: "comic" }]);
+    prisma.episode.findUnique.mockResolvedValue({
+      id: "series-001e1",
+      seriesId: "series-001",
+      number: 1,
+      title: "Episode 1",
+      pages: [{ url: "page-1" }],
+      paragraphs: [],
+      text: null,
+      previewFreePages: 2,
+    });
+
+    const result = await service.getEpisode("series-001", "series-001e1");
+
+    expect(result).toEqual({
+      episode: {
+        id: "series-001e1",
+        seriesId: "series-001",
+        number: 1,
+        title: "Episode 1",
+        type: "comic",
+        pages: [{ url: "page-1" }],
+        previewFreePages: 2,
       },
     });
   });

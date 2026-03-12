@@ -20,7 +20,7 @@ const HeaderSearch = dynamic(() => import("./HeaderSearch"), {
  */
 export default function SiteHeader({ onSearch }) {
   const { isAdultMode, requestAdultToggle } = useAdultGateStore();
-  const { isSignedIn } = useAuthStore();
+  const { isSignedIn, hydrated } = useAuthStore();
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
@@ -94,7 +94,8 @@ export default function SiteHeader({ onSearch }) {
   const handleAdultToggle = () => {
     trackEvent("adult_toggle_attempt", { isAdultMode });
     const cookieSignedIn = getCookie("mn_is_signed_in") === "1";
-    const status = requestAdultToggle(isSignedIn || cookieSignedIn);
+    const signedInForAdult = hydrated ? isSignedIn : isSignedIn || cookieSignedIn;
+    const status = requestAdultToggle(signedInForAdult);
     if (status === "NEED_LOGIN") { setPendingAdultToggle(true); setActiveModal("login"); return; }
     if (status === "NEED_AGE_CONFIRM") { setActiveModal("age"); return; }
     if (!isAdultMode) { trackEvent("adult_gate_enabled", { source: "header" }); }

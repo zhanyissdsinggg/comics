@@ -1,13 +1,17 @@
 /**
- * HeroCarousel - 参考 Webtoon/Lezhin 的全宽 Hero Banner
- * 大图 + 左侧文字信息 + 右侧封面图（桌面端）
- * 支持触摸滑动 + 自动播放 + 圆点指示器
+ * HeroCarousel - ?? Webtoon/Lezhin ??? Hero Banner
+ * ?? + ?????? + ??????????
+ * ?????? + ???? + ?????
  */
 "use client";
 
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ensureArray } from "../../lib/validators";
+import { trackEvent } from "../../lib/trackEvent";
+import { useFollowStore } from "../../store/useFollowStore";
+import { useBehaviorStore } from "../../store/useBehaviorStore";
 
 function normalizeBannerUrl(url) {
   if (!url) return url;
@@ -17,7 +21,9 @@ function normalizeBannerUrl(url) {
       parsed.pathname = parsed.pathname + ".png";
       return parsed.toString();
     }
-  } catch { /* ignore */ }
+  } catch {
+    // ignore malformed urls from legacy content
+  }
   return url;
 }
 
@@ -31,6 +37,9 @@ const TONE_GRADIENTS = {
 };
 
 export default function HeroCarousel({ items }) {
+  const router = useRouter();
+  const { followedSeriesIds, follow, unfollow } = useFollowStore();
+  const { followSeries } = useBehaviorStore();
   const safeItems = useMemo(() => ensureArray(items), [items]);
   const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -42,29 +51,87 @@ export default function HeroCarousel({ items }) {
   const autoPlayTimeoutRef = useRef(null);
 
   const active = safeItems[index] || safeItems[0];
+  const activeSeriesId = String(active?.seriesId || "").trim();
+  const latestEpisodeId = String(active?.latestEpisodeId || "").trim();
+  const isFollowing = activeSeriesId ? followedSeriesIds.includes(activeSeriesId) : false;
   const rawBannerUrl = active?.bannerUrl || active?.coverUrl;
   const bannerUrl = normalizeBannerUrl(rawBannerUrl);
   const coverUrl = normalizeBannerUrl(active?.coverUrl);
   const gradient = TONE_GRADIENTS[active?.coverTone] || TONE_GRADIENTS.default;
 
-  const handlePrev = () => { setIndex((p) => (p - 1 + safeItems.length) % safeItems.length); setProgress(0); };
-  const handleNext = () => { setIndex((p) => (p + 1) % safeItems.length); setProgress(0); };
-  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; setIsPaused(true); };
-  const handleTouchMove = (e) => { touchEndX.current = e.touches[0].clientX; };
+  const handlePrev = useCallback(() => {
+    setIndex((prev) => (prev - 1 + safeItems.length) % safeItems.length);
+    setProgress(0);
+  }, [safeItems.length]);
+
+  const handleNext = useCallback(() => {
+    setIndex((prev) => (prev + 1) % safeItems.length);
+    setProgress(0);
+  }, [safeItems.length]);
+
+  const handleReadNow = useCallback(() => {
+    if (!activeSeriesId) {
+      return;
+    }
+    const target = latestEpisodeId
+      ? "/read/" + activeSeriesId + "/" + latestEpisodeId
+      : "/series/" + activeSeriesId;
+    trackEvent("hero_read_now", {
+      seriesId: activeSeriesId,
+      episodeId: latestEpisodeId || undefined,
+    });
+    router.push(target);
+  }, [activeSeriesId, latestEpisodeId, router]);
+
+  const handleFollowToggle = useCallback(async () => {
+    if (!activeSeriesId) {
+      return;
+    }
+    if (isFollowing) {
+      await unfollow(activeSeriesId);
+      trackEvent("hero_unfollow", { seriesId: activeSeriesId });
+      return;
+    }
+    const response = await follow(activeSeriesId);
+    if (response?.ok) {
+      followSeries(activeSeriesId);
+      trackEvent("hero_follow", { seriesId: activeSeriesId });
+    }
+  }, [activeSeriesId, follow, followSeries, isFollowing, unfollow]);
+
+  const handleTouchStart = (event) => {
+    touchStartX.current = event.touches[0].clientX;
+    setIsPaused(true);
+  };
+
+  const handleTouchMove = (event) => {
+    touchEndX.current = event.touches[0].clientX;
+  };
+
   const handleTouchEnd = () => {
-    const d = touchStartX.current - touchEndX.current;
-    if (d > 50) handleNext();
-    else if (d < -50) handlePrev();
-    touchStartX.current = 0; touchEndX.current = 0; setIsPaused(false);
+    const delta = touchStartX.current - touchEndX.current;
+    if (delta > 50) {
+      handleNext();
+    } else if (delta < -50) {
+      handlePrev();
+    }
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+    setIsPaused(false);
   };
 
   useEffect(() => {
-    if (safeItems.length <= 1 || isPaused) return;
+    if (safeItems.length <= 1 || isPaused) {
+      return undefined;
+    }
     progressIntervalRef.current = setInterval(() => {
-      setProgress((p) => { const n = p + (50 / AUTO_PLAY_INTERVAL) * 100; return n >= 100 ? 100 : n; });
+      setProgress((value) => {
+        const nextValue = value + (50 / AUTO_PLAY_INTERVAL) * 100;
+        return nextValue >= 100 ? 100 : nextValue;
+      });
     }, 50);
     autoPlayTimeoutRef.current = setTimeout(() => {
-      setIndex((p) => (p + 1) % safeItems.length);
+      setIndex((prev) => (prev + 1) % safeItems.length);
       setProgress(0);
     }, AUTO_PLAY_INTERVAL);
     return () => {
@@ -73,7 +140,9 @@ export default function HeroCarousel({ items }) {
     };
   }, [index, isPaused, safeItems.length]);
 
-  if (safeItems.length === 0) return null;
+  if (safeItems.length === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -84,72 +153,65 @@ export default function HeroCarousel({ items }) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* 背景大图（全宽） */}
       <div className="relative aspect-[21/9] w-full overflow-hidden sm:aspect-[21/8] md:aspect-[21/7]">
         {bannerUrl ? (
           <div
-            className="absolute inset-0 scale-105 bg-center bg-cover transition-transform duration-700"
-            style={{ backgroundImage: `url(${bannerUrl})` }}
+            className="absolute inset-0 scale-105 bg-cover bg-center transition-transform duration-700"
+            style={{ backgroundImage: "url(" + bannerUrl + ")" }}
             aria-hidden="true"
           />
         ) : (
-          /* 无图时用色调渐变背景 */
-          <div className={`absolute inset-0 bg-gradient-to-br ${gradient} to-neutral-950`} />
+          <div className={"absolute inset-0 bg-gradient-to-br " + gradient + " to-neutral-950"} />
         )}
 
-        {/* 深色渐变遮罩 - 左侧更深，右侧透明 */}
-        <div className={`absolute inset-0 bg-gradient-to-r ${gradient} to-transparent`} />
-        {/* 底部渐变 */}
+        <div className={"absolute inset-0 bg-gradient-to-r " + gradient + " to-transparent"} />
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-transparent to-transparent" />
 
-        {/* ===== 内容层 ===== */}
-        <div className="absolute inset-0 flex items-end p-5 md:items-center md:p-10">
+        <div className="absolute inset-0 z-20 flex items-end p-5 md:items-center md:p-10">
           <div className="flex w-full items-end justify-between gap-6 md:items-center">
-            {/* 左侧：文字信息 */}
             <div className="max-w-xs space-y-3 md:max-w-sm lg:max-w-md">
-              {/* 类别标签 */}
               <div className="flex items-center gap-2">
                 <span className="rounded-sm bg-emerald-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
                   Featured
                 </span>
-                {active?.badge && (
+                {active?.badge ? (
                   <span className="rounded-sm bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white/80 backdrop-blur-sm">
                     {active.badge}
                   </span>
-                )}
+                ) : null}
               </div>
 
-              {/* 标题 */}
               <h2 className="text-2xl font-black leading-tight tracking-tight text-white drop-shadow-lg md:text-4xl lg:text-5xl">
                 {active?.title}
               </h2>
 
-              {/* 描述 */}
-              {active?.description && (
+              {active?.description ? (
                 <p className="line-clamp-2 text-sm leading-relaxed text-white/70 md:text-base">
                   {active.description}
                 </p>
-              )}
+              ) : null}
 
-              {/* CTA 按钮 */}
               <div className="flex items-center gap-3 pt-1">
                 <button
                   type="button"
+                  onClick={handleReadNow}
                   className="rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-400 hover:shadow-emerald-400/40 active:scale-95"
                 >
                   Read Now
                 </button>
                 <button
                   type="button"
+                  onClick={() => {
+                    void handleFollowToggle();
+                  }}
                   className="rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20 active:scale-95"
                 >
-                  + Follow
+                  {isFollowing ? "Following" : "+ Follow"}
                 </button>
               </div>
             </div>
 
-            {/* 右侧：封面小图（桌面端显示） */}
-            {coverUrl && (
+            {coverUrl ? (
               <div className="hidden shrink-0 md:block">
                 <div className="relative h-48 w-32 overflow-hidden rounded-xl shadow-2xl shadow-black/60 ring-1 ring-white/10 lg:h-56 lg:w-40">
                   <Image
@@ -162,49 +224,58 @@ export default function HeroCarousel({ items }) {
                   />
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {/* 左右点击区域 */}
-        {safeItems.length > 1 && (
+        {safeItems.length > 1 ? (
           <>
-            <button type="button" onClick={handlePrev} aria-label="Previous"
-              className="absolute left-0 top-0 h-full w-1/4 cursor-w-resize" />
-            <button type="button" onClick={handleNext} aria-label="Next"
-              className="absolute right-0 top-0 h-full w-1/4 cursor-e-resize" />
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous"
+              className="absolute left-0 top-0 z-10 h-full w-14 cursor-w-resize md:w-20"
+            />
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next"
+              className="absolute right-0 top-0 z-10 h-full w-14 cursor-e-resize md:w-20"
+            />
           </>
-        )}
+        ) : null}
       </div>
 
-      {/* 底部：圆点指示器 + 进度条 */}
-      {safeItems.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1.5">
-          {safeItems.map((_, i) => (
+      {safeItems.length > 1 ? (
+        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5">
+          {safeItems.map((_, itemIndex) => (
             <button
-              key={i}
+              key={itemIndex}
               type="button"
-              onClick={() => { setIndex(i); setProgress(0); }}
-              aria-label={`Slide ${i + 1}`}
+              onClick={() => {
+                setIndex(itemIndex);
+                setProgress(0);
+              }}
+              aria-label={"Slide " + (itemIndex + 1)}
               className="relative overflow-hidden rounded-full transition-all duration-300"
               style={{
-                width: i === index ? "24px" : "6px",
+                width: itemIndex === index ? "24px" : "6px",
                 height: "6px",
-                background: i === index ? "transparent" : "rgba(255,255,255,0.3)",
+                background: itemIndex === index ? "transparent" : "rgba(255,255,255,0.3)",
               }}
             >
-              {i === index && (
+              {itemIndex === index ? (
                 <span className="absolute inset-0 rounded-full bg-white/30">
                   <span
                     className="absolute left-0 top-0 h-full rounded-full bg-white"
-                    style={{ width: `${progress}%`, transition: "width 50ms linear" }}
+                    style={{ width: progress + "%", transition: "width 50ms linear" }}
                   />
                 </span>
-              )}
+              ) : null}
             </button>
           ))}
         </div>
-      )}
+      ) : null}
     </section>
   );
 }

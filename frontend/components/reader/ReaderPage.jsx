@@ -19,7 +19,6 @@ import { OFFERS } from "../../lib/offers/catalog";
 import { useCouponStore } from "../../store/useCouponStore";
 import { calculatePrice } from "../../lib/pricing";
 import AdultGateBlockingPanel from "../series/AdultGateBlockingPanel";
-import { confirmAge, readAdultState, requestEnableAdult } from "../../lib/adultGate";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
 import { useBookmarkStore } from "../../store/useBookmarkStore";
@@ -87,7 +86,6 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const [gateStatus, setGateStatus] = useState("OK");
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
-  const [adultState, setAdultState] = useState(readAdultState());
   const previewEndRef = useRef(null);
   const endRef = useRef(null);
   const scrollRef = useRef(0);
@@ -101,13 +99,21 @@ export default function ReaderPage({ seriesId, episodeId }) {
     useEntitlementStore();
   const { loadWallet, topup } = useWalletStore();
   const { paidPts, bonusPts, subscription, subscriptionUsage } = useWalletStore();
-  const { isAdultMode } = useAdultGateStore();
+  const {
+    adultConfirmed,
+    ageRuleKey,
+    legalAge,
+    isAdultMode,
+    requestAdultToggle,
+    confirmAge: confirmAdultAge,
+    forceDisableAdultMode,
+  } = useAdultGateStore();
   const { setProgress, getProgress } = useProgressStore();
   const { report } = useRewardsStore();
   const { readEpisode, unlockEpisode: recordUnlock } = useBehaviorStore();
   const { addHistory } = useHistoryStore();
   const { coupons, loadCoupons } = useCouponStore();
-  const { signIn, isSignedIn } = useAuthStore();
+  const { signIn, isSignedIn, hydrated } = useAuthStore();
   const {
     nightMode,
     toggleNightMode,
@@ -218,7 +224,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const fetchEpisode = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const adultFlag = adultState.isAdultMode ? "1" : "0";
+    const adultFlag = isAdultMode ? "1" : "0";
     const [episodeResponse, seriesResponse] = await Promise.all([
       apiGet(`/api/episode?seriesId=${seriesId}&episodeId=${episodeId}`),
       apiGet(`/api/series/${seriesId}?adult=${adultFlag}`),
@@ -227,6 +233,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
     if (!episodeResponse.ok) {
       if (episodeResponse.status === 403 || episodeResponse.error === "ADULT_GATED") {
         setError("ADULT_GATED");
+        if (episodeResponse.reason === "NEED_LOGIN") {
+          forceDisableAdultMode();
+        }
         if (episodeResponse.reason) {
           setGateStatus(episodeResponse.reason);
         }
@@ -251,6 +260,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
     if (!seriesResponse.ok) {
       if (seriesResponse.status === 403 || seriesResponse.error === "ADULT_GATED") {
         setError("ADULT_GATED");
+        if (seriesResponse.reason === "NEED_LOGIN") {
+          forceDisableAdultMode();
+        }
         if (seriesResponse.reason) {
           setGateStatus(seriesResponse.reason);
         }
@@ -275,7 +287,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     setEpisodeData(episodeResponse.data?.episode);
     setSeriesData(seriesResponse.data);
     setLoading(false);
-  }, [adultState.isAdultMode, episodeId, seriesId]);
+  }, [forceDisableAdultMode, isAdultMode, episodeId, seriesId]);
 
   // NOTE: cleaned corrupted comment.
   useEffect(() => {
@@ -378,13 +390,29 @@ export default function ReaderPage({ seriesId, episodeId }) {
     if (error !== "ADULT_GATED") {
       return;
     }
-    if (gateStatus === "OK") {
-      setGateStatus(requestEnableAdult());
+    if (!hydrated) {
+      return;
     }
-  }, [error, gateStatus]);
+    if (!isSignedIn) {
+      setGateStatus("NEED_LOGIN");
+      return;
+    }
+    if (!adultConfirmed || !isAdultMode) {
+      setGateStatus("NEED_AGE_CONFIRM");
+      return;
+    }
+    if (gateStatus !== "OK") {
+      setGateStatus("OK");
+    }
+  }, [adultConfirmed, error, gateStatus, hydrated, isAdultMode, isSignedIn]);
 
   const openGateModal = () => {
-    const status = requestEnableAdult();
+    if (!hydrated) {
+      setGateStatus("NEED_LOGIN");
+      setActiveModal("login");
+      return;
+    }
+    const status = requestAdultToggle(isSignedIn);
     setGateStatus(status);
     if (status === "NEED_LOGIN") {
       setActiveModal("login");
@@ -408,16 +436,22 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setAuthError("Invalid email or password.");
       return;
     }
-    setAdultState(readAdultState());
-    setActiveModal(null);
     setAuthError("");
-    openGateModal();
+    const status = requestAdultToggle(true);
+    setGateStatus(status);
+    if (status === "NEED_AGE_CONFIRM") {
+      setActiveModal("age");
+      return response;
+    }
+    setActiveModal(null);
+    if (status === "OK") {
+      fetchEpisode();
+    }
     return response;
   };
 
   const handleAgeConfirm = () => {
-    confirmAge();
-    setAdultState(readAdultState());
+    confirmAdultAge(ageRuleKey);
     setActiveModal(null);
     setGateStatus("OK");
     fetchEpisode();
@@ -955,8 +989,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
             open
             onClose={() => setActiveModal(null)}
             onConfirm={handleAgeConfirm}
-            ageRuleKey={adultState.ageRuleKey}
-            legalAge={adultState.legalAge}
+            ageRuleKey={ageRuleKey}
+            legalAge={legalAge}
           />
         ) : null}
       </main>

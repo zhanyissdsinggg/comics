@@ -8,11 +8,7 @@ import EpisodeList from "./EpisodeList";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
 import SiteHeader from "../layout/SiteHeader";
 import Skeleton from "../common/Skeleton";
-import {
-  confirmAge,
-  readAdultState,
-  requestEnableAdult,
-} from "../../lib/adultGate";
+import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -57,7 +53,6 @@ export default function SeriesPage({ seriesId }) {
   const [error, setError] = useState(null);
   const [gateStatus, setGateStatus] = useState("OK");
   const [activeModal, setActiveModal] = useState(null);
-  const [adultState, setAdultState] = useState(readAdultState());
   const [showSecondarySections, setShowSecondarySections] = useState(false);
   const [authError, setAuthError] = useState("");
   const gateReportedRef = useRef(false);
@@ -70,8 +65,17 @@ export default function SeriesPage({ seriesId }) {
   const { report } = useRewardsStore();
   const { followedSeriesIds, loadFollowed, follow, unfollow } = useFollowStore();
   const { viewSeries, followSeries } = useBehaviorStore();
-  const { signIn, isSignedIn } = useAuthStore();
+  const { signIn, isSignedIn, hydrated } = useAuthStore();
   const { coupons, loadCoupons } = useCouponStore();
+  const {
+    adultConfirmed,
+    ageRuleKey,
+    legalAge,
+    isAdultMode,
+    requestAdultToggle,
+    confirmAge: confirmAdultAge,
+    forceDisableAdultMode,
+  } = useAdultGateStore();
   const { bySeriesId: progressBySeriesId, getProgress, loadProgress } = useProgressStore();
 
   const series = data?.series || {};
@@ -106,12 +110,15 @@ export default function SeriesPage({ seriesId }) {
   const fetchSeries = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const adultFlag = adultState.isAdultMode ? "1" : "0";
+    const adultFlag = isAdultMode ? "1" : "0";
     const response = await apiGet(`/api/series/${seriesId}?adult=${adultFlag}`);
 
     if (!response.ok) {
       if (response.status === 403 || response.error === "ADULT_GATED") {
         setError("ADULT_GATED");
+        if (response.reason === "NEED_LOGIN") {
+          forceDisableAdultMode();
+        }
         if (response.reason) {
           setGateStatus(response.reason);
         }
@@ -136,6 +143,9 @@ export default function SeriesPage({ seriesId }) {
 
     if (response.data?.error === "ADULT_GATED") {
       setError("ADULT_GATED");
+      if (response.data?.reason === "NEED_LOGIN") {
+        forceDisableAdultMode();
+      }
       if (response.data?.reason) {
         setGateStatus(response.data.reason);
       }
@@ -154,7 +164,7 @@ export default function SeriesPage({ seriesId }) {
 
     setData(response.data);
     setLoading(false);
-  }, [adultState.isAdultMode, seriesId]);
+  }, [forceDisableAdultMode, isAdultMode, seriesId]);
 
   useEffect(() => {
     fetchSeries();
@@ -178,11 +188,8 @@ export default function SeriesPage({ seriesId }) {
 
   useEffect(() => {
     if (data?.series?.id) {
-      // NOTE: cleaned corrupted comment.
       trackEvent("view_series", { seriesId: data.series.id });
       viewSeries(data.series.id);
-
-      // NOTE: cleaned corrupted comment.
       if (isSignedIn) {
         loadWallet();
         loadEntitlement(data.series.id);
@@ -193,25 +200,36 @@ export default function SeriesPage({ seriesId }) {
     }
   }, [
     data?.series?.id,
-    loadEntitlement,
-    loadWallet,
-    loadFollowed,
-    viewSeries,
-    loadCoupons,
-    loadProgress,
     isSignedIn,
+    loadCoupons,
+    loadEntitlement,
+    loadFollowed,
+    loadProgress,
+    loadWallet,
+    viewSeries,
   ]);
 
   useEffect(() => {
     if (error === "ADULT_GATED") {
       return;
     }
-    if (series?.adult) {
-      setGateStatus(requestEnableAdult());
+    if (!series?.adult) {
+      setGateStatus("OK");
+      return;
+    }
+    if (!hydrated) {
+      return;
+    }
+    if (!isSignedIn) {
+      setGateStatus("NEED_LOGIN");
+      return;
+    }
+    if (!adultConfirmed || !isAdultMode) {
+      setGateStatus("NEED_AGE_CONFIRM");
       return;
     }
     setGateStatus("OK");
-  }, [error, series?.adult, adultState.isAdultMode]);
+  }, [adultConfirmed, error, hydrated, isAdultMode, isSignedIn, series?.adult]);
 
   useEffect(() => {
     setShowSecondarySections(false);
@@ -240,7 +258,12 @@ export default function SeriesPage({ seriesId }) {
   }, [showSecondarySections, loading, error]);
 
   const openGateModal = () => {
-    const status = requestEnableAdult();
+    if (!hydrated) {
+      setGateStatus("NEED_LOGIN");
+      setActiveModal("login");
+      return;
+    }
+    const status = requestAdultToggle(isSignedIn);
     setGateStatus(status);
     if (status === "NEED_LOGIN") {
       setActiveModal("login");
@@ -264,16 +287,22 @@ export default function SeriesPage({ seriesId }) {
       setAuthError("Invalid email or password.");
       return;
     }
-    setAdultState(readAdultState());
-    setActiveModal(null);
     setAuthError("");
-    openGateModal();
+    const status = requestAdultToggle(true);
+    setGateStatus(status);
+    if (status === "NEED_AGE_CONFIRM") {
+      setActiveModal("age");
+      return response;
+    }
+    setActiveModal(null);
+    if (status === "OK") {
+      fetchSeries();
+    }
     return response;
   };
 
   const handleAgeConfirm = () => {
-    confirmAge();
-    setAdultState(readAdultState());
+    confirmAdultAge(ageRuleKey);
     setActiveModal(null);
     setGateStatus("OK");
     fetchSeries();
@@ -425,8 +454,8 @@ export default function SeriesPage({ seriesId }) {
             open
             onClose={() => setActiveModal(null)}
             onConfirm={handleAgeConfirm}
-            ageRuleKey={adultState.ageRuleKey}
-            legalAge={adultState.legalAge}
+            ageRuleKey={ageRuleKey}
+            legalAge={legalAge}
           />
         ) : null}
       </main>
@@ -496,8 +525,8 @@ export default function SeriesPage({ seriesId }) {
           open
           onClose={() => setActiveModal(null)}
           onConfirm={handleAgeConfirm}
-          ageRuleKey={adultState.ageRuleKey}
-          legalAge={adultState.legalAge}
+          ageRuleKey={ageRuleKey}
+          legalAge={legalAge}
         />
       ) : null}
     </main>

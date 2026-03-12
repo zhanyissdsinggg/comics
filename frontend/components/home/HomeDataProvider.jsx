@@ -28,7 +28,7 @@ export function useHomeData() {
 }
 
 export function HomeDataProvider({ children }) {
-  const { isAdultMode } = useAdultGateStore();
+  const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
   const { shouldRetry } = useRetryPolicy();
 
   const [seriesList, setSeriesList] = useState([]);
@@ -55,6 +55,9 @@ export function HomeDataProvider({ children }) {
         setSeriesResponse(seriesResponse);
         if (seriesResponse.ok) {
           setSeriesList(seriesResponse.data?.series || []);
+        } else if (seriesResponse.error === "ADULT_GATED") {
+          forceDisableAdultMode();
+          setSeriesList([]);
         } else if (seriesResponse.status === 0 || seriesResponse.status >= 500) {
           // Retry on network or server errors
           if (shouldRetry(`home_series_${adultFlag}`)) {
@@ -75,12 +78,15 @@ export function HomeDataProvider({ children }) {
         // 处理hotKeywords响应
         if (hotKeywordsResponse.ok) {
           setHotKeywords(hotKeywordsResponse.data?.keywords || []);
+        } else if (hotKeywordsResponse.error === "ADULT_GATED") {
+          forceDisableAdultMode();
+          setHotKeywords([]);
         }
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [isAdultMode, hotWindow, shouldRetry]);
+  }, [forceDisableAdultMode, isAdultMode, hotWindow, shouldRetry]);
 
   const value = {
     seriesList,

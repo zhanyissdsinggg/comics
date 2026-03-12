@@ -1,10 +1,10 @@
 import { Controller, Get, Logger, Query, Req, Res } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../common/utils/auth";
 import { checkAdultGate } from "../../common/utils/adult-gate";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { isPrismaSchemaDriftError } from "../../common/utils/prisma-schema-drift";
 import { StatsService } from "../../common/services/stats.service";
 import { EpisodeService } from "./episode.service";
 
@@ -19,14 +19,7 @@ export class EpisodeController {
   ) {}
 
   private isSchemaDriftError(error: unknown): boolean {
-    if (!error || typeof error !== "object") {
-      return false;
-    }
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return error.code === "P2021" || error.code === "P2022";
-    }
-    const message = String((error as { message?: string }).message || "");
-    return message.includes("does not exist") || message.includes("Unknown column");
+    return isPrismaSchemaDriftError(error);
   }
 
   private async findSeriesLite(seriesId: string) {

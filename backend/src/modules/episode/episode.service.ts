@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { isPrismaSchemaDriftError } from "../../common/utils/prisma-schema-drift";
 
 function normalizeEpisodePages(value: unknown): Array<Record<string, unknown>> {
   if (Array.isArray(value)) {
@@ -46,16 +46,7 @@ export class EpisodeService {
   constructor(private readonly prisma: PrismaService) {}
 
   private isSchemaDriftError(error: unknown): boolean {
-    if (!error || typeof error !== "object") {
-      return false;
-    }
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return error.code === "P2021" || error.code === "P2022";
-    }
-
-    const message = String((error as { message?: string }).message || "");
-    return message.includes("does not exist") || message.includes("Unknown column");
+    return isPrismaSchemaDriftError(error);
   }
 
   private async findSeriesType(seriesId: string): Promise<{ id: string; type: string } | null> {
