@@ -1,5 +1,6 @@
-import "./globals.css";
+﻿import "./globals.css";
 import Script from "next/script";
+import { Manrope, Space_Grotesk } from "next/font/google";
 import AppProviders from "../components/layout/AppProviders";
 import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
@@ -8,6 +9,18 @@ import { siteConfig } from "../lib/siteConfig";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const defaultTitle = `${siteConfig.siteName} - Read Comics and Novels Online`;
+
+const bodyFont = Manrope({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const displayFont = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
 
 export const metadata = {
   title: {
@@ -68,8 +81,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${bodyFont.variable} ${displayFont.variable}`}
+    >
+      <body className="min-h-screen bg-neutral-950 font-sans text-neutral-100 antialiased">
         {GOOGLE_CLIENT_ID ? (
           <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
         ) : null}

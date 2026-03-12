@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +41,10 @@ function summarizeDetails(value) {
   }
 }
 
+function getAdminIdentity(log) {
+  return log.adminId || log.userId || '';
+}
+
 export default function AdminLogsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('');
@@ -67,15 +71,14 @@ export default function AdminLogsPage() {
         log.id,
         log.action,
         log.resource,
-        log.adminId,
-        log.userId,
+        getAdminIdentity(log),
         log.resourceId,
       ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(term));
 
       const matchesAction = !actionFilter || log.action === actionFilter;
-      const matchesAdmin = !adminFilter || log.adminId === adminFilter;
+      const matchesAdmin = !adminFilter || getAdminIdentity(log) === adminFilter;
       return matchesSearch && matchesAction && matchesAdmin;
     });
   }, [actionFilter, adminFilter, logs, searchTerm]);
@@ -85,7 +88,7 @@ export default function AdminLogsPage() {
   }, [logs]);
 
   const adminOptions = useMemo(() => {
-    return [...new Set(logs.map((log) => log.adminId || log.userId).filter(Boolean))].sort();
+    return [...new Set(logs.map((log) => getAdminIdentity(log)).filter(Boolean))].sort();
   }, [logs]);
 
   return (
@@ -190,7 +193,7 @@ export default function AdminLogsPage() {
                     <tr key={log.id} className="border-t border-white/5 align-top text-neutral-200">
                       <td className="px-4 py-4 text-neutral-400">{formatDateTime(log.createdAt || log.timestamp)}</td>
                       <td className="px-4 py-4">
-                        <div className="font-medium text-white">{log.adminId || log.userId || '-'}</div>
+                        <div className="font-medium text-white">{getAdminIdentity(log) || '-'}</div>
                         <div className="mt-1 text-xs text-neutral-500">{log.ip || '-'}</div>
                       </td>
                       <td className="px-4 py-4">

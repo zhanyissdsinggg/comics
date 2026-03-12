@@ -1,14 +1,21 @@
 ﻿"use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { usePathname } from "next/navigation";
 
 const PWAInstallPrompt = React.memo(() => {
+  const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const isAdminRoute = pathname?.startsWith("/admin");
 
   useEffect(() => {
+    if (isAdminRoute) {
+      setShowPrompt(false);
+      return;
+    }
     if (
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true
@@ -48,7 +55,7 @@ const PWAInstallPrompt = React.memo(() => {
       );
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
-  }, []);
+  }, [isAdminRoute]);
 
   const handleInstall = useCallback(async () => {
     if (!deferredPrompt) {
@@ -67,7 +74,7 @@ const PWAInstallPrompt = React.memo(() => {
     localStorage.setItem("mn_pwa_prompt_dismissed", "true");
   }, []);
 
-  if (isInstalled || !showPrompt) {
+  if (isAdminRoute || isInstalled || !showPrompt) {
     return null;
   }
 

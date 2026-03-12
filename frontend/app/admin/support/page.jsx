@@ -11,7 +11,7 @@ import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBann
 import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
-import { adminFetch } from '@/lib/adminApiClient';
+import { adminFetch, readAdminResponseMessage } from '@/lib/adminApiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
 
@@ -38,6 +38,8 @@ const STATUS_OPTIONS = [
   { value: 'IN_PROGRESS', label: 'In progress (legacy)' },
   { value: 'CLOSED', label: 'Closed (legacy)' },
 ];
+
+const DEFAULT_PAGE_SIZE = 20;
 
 function formatDateTime(value) {
   if (!value) {
@@ -88,34 +90,6 @@ function getMessagePreview(message, limit = 120) {
   return normalized.length > limit ? `${normalized.slice(0, limit)}...` : normalized;
 }
 
-async function readResponseMessage(response, fallbackMessage) {
-  try {
-    const payload = await response.json();
-    const message = payload?.message ?? payload?.error ?? payload?.details;
-
-    if (Array.isArray(message)) {
-      return message.find((item) => typeof item === 'string') || fallbackMessage;
-    }
-
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-  } catch {
-    // Ignore JSON parsing failures and try plain text next.
-  }
-
-  try {
-    const text = await response.text();
-    if (text.trim()) {
-      return text.trim();
-    }
-  } catch {
-    // Ignore text parsing failures and use the fallback message.
-  }
-
-  return fallbackMessage;
-}
-
 export default function AdminSupportPage() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [replyContent, setReplyContent] = useState('');
@@ -150,6 +124,7 @@ export default function AdminSupportPage() {
   } = useAdminList('support', searchFields, sortFields, 'createdAt', 'desc');
 
   const statusFilter = typeof filters.status === 'string' ? filters.status : '';
+  const hasActiveFilters = Boolean(searchTerm.trim() || statusFilter);
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
   const bulkDeleteMutation = useBulkDelete('support', {
@@ -172,7 +147,7 @@ export default function AdminSupportPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readResponseMessage(response, 'Failed to send the reply.'));
+        throw new Error(await readAdminResponseMessage(response, 'Failed to send the reply.'));
       }
 
       return response.json();
@@ -196,7 +171,7 @@ export default function AdminSupportPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readResponseMessage(response, 'Failed to close the ticket.'));
+        throw new Error(await readAdminResponseMessage(response, 'Failed to close the ticket.'));
       }
 
       return response.json();
@@ -241,7 +216,7 @@ export default function AdminSupportPage() {
     setSortBy('createdAt');
     setSortOrder('desc');
     setPage(1);
-    setPageSize(100);
+    setPageSize(DEFAULT_PAGE_SIZE);
     clearSelection();
     setFeedback({ type: '', message: '' });
   };
@@ -336,7 +311,7 @@ export default function AdminSupportPage() {
         onRetry={refetch}
         isLoading={isLoading}
         hasItems={tickets.length > 0}
-        emptyMessage={'No tickets yet.'}
+        emptyMessage={hasActiveFilters ? 'No tickets match the current filters.' : 'No tickets yet.'}
         loadingFallback={<LoadingState isLoading={true} count={6} height="h-24" />}
         pagination={pagination}
         page={page}

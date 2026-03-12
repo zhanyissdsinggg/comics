@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { readAdminResponseMessage } from '@/lib/adminApiClient';
 
 interface UploadProgress {
   fileName: string;
@@ -13,34 +14,6 @@ interface BulkUploadModalProps {
   seriesId: string;
   onClose: () => void;
   onSuccess: () => void;
-}
-
-async function readResponseMessage(response: Response, fallbackMessage: string): Promise<string> {
-  try {
-    const payload = await response.json();
-    const message = payload?.message ?? payload?.error ?? payload?.details;
-
-    if (Array.isArray(message)) {
-      return message.find((item) => typeof item === 'string') || fallbackMessage;
-    }
-
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-  } catch {
-    // Ignore JSON parsing failures.
-  }
-
-  try {
-    const text = await response.text();
-    if (text.trim()) {
-      return text.trim();
-    }
-  } catch {
-    // Ignore text parsing failures.
-  }
-
-  return fallbackMessage;
 }
 
 export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUploadModalProps) {
@@ -82,7 +55,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
       });
 
       if (!response.ok) {
-        throw new Error(await readResponseMessage(response, 'Upload failed.'));
+        throw new Error(await readAdminResponseMessage(response, 'Upload failed.'));
       }
 
       return response.json();

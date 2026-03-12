@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AdminDataState } from '@/components/admin/common/AdminDataState';
 import { AdminListPagination } from '@/components/admin/common/AdminListPagination';
@@ -228,6 +228,11 @@ export default function AdminUserAnalyticsPage() {
   const user = analytics?.user;
   const ltv = analytics?.ltv;
   const userBehavior = user?.userBehavior;
+
+  useEffect(() => {
+    setPage(1);
+    setSelectedUserId('');
+  }, [selectedSegment]);
 
   return (
     <div className="min-h-screen bg-neutral-950 px-6 py-8 text-white">

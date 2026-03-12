@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AdminDataState } from '@/components/admin/common/AdminDataState';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
@@ -147,6 +147,26 @@ function StatCard({ label, value, hint }) {
   );
 }
 
+function getDeferredStatValue(query, isLoaded) {
+  if (!isLoaded) {
+    return 'Pending';
+  }
+
+  if (query.isLoading && !query.data) {
+    return 'Loading...';
+  }
+
+  if (query.isError) {
+    return 'Error';
+  }
+
+  return formatNumber(query.data?.total || 0);
+}
+
+function getDeferredStatHint(hint, isLoaded) {
+  return isLoaded ? hint : 'Open this tab to load';
+}
+
 function SectionHeader({ title, description, action }) {
   return (
     <div className="flex flex-col gap-4 border-b border-neutral-800/80 pb-5 lg:flex-row lg:items-end lg:justify-between">
@@ -200,24 +220,30 @@ function AnalyticsTable({ analytics }) {
 
 export default function AdminRecommendationsPage() {
   const [activeTab, setActiveTab] = useState('slots');
+  const [loadedTabs, setLoadedTabs] = useState({
+    slots: true,
+    rankings: false,
+    analytics: false,
+  });
   const [feedback, setFeedback] = useState(EMPTY_FEEDBACK);
-  const feedbackBannerRef = useRef(null);
   const [createTarget, setCreateTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [slotForm, setSlotForm] = useState(INITIAL_SLOT_FORM);
   const [rankingForm, setRankingForm] = useState(INITIAL_RANKING_FORM);
 
-  useEffect(() => {
-    if (!feedbackBannerRef.current) {
-      return;
-    }
+  const handleTabChange = (nextTab) => {
+    setActiveTab(nextTab);
+    setLoadedTabs((current) => {
+      if (current[nextTab]) {
+        return current;
+      }
 
-    const dismissButton = feedbackBannerRef.current.querySelector('button');
-    if (dismissButton) {
-      dismissButton.textContent = 'Dismiss';
-      dismissButton.setAttribute('aria-label', 'Dismiss feedback');
-    }
-  }, [feedback]);
+      return {
+        ...current,
+        [nextTab]: true,
+      };
+    });
+  };
 
   const slotsQuery = useQuery({
     queryKey: ['admin', 'recommendations', 'slots'],
@@ -238,6 +264,7 @@ export default function AdminRecommendationsPage() {
 
   const rankingsQuery = useQuery({
     queryKey: ['admin', 'recommendations', 'rankings'],
+    enabled: loadedTabs.rankings,
     staleTime: 60_000,
     queryFn: async () => {
       const { response, data } = await adminFetchJson('/api/admin/recommendations/rankings?limit=100');
@@ -255,6 +282,7 @@ export default function AdminRecommendationsPage() {
 
   const analyticsQuery = useQuery({
     queryKey: ['admin', 'recommendations', 'analytics'],
+    enabled: loadedTabs.analytics,
     staleTime: 60_000,
     queryFn: async () => {
       const { response, data } = await adminFetchJson('/api/admin/recommendations/analytics?limit=50');
@@ -617,16 +645,26 @@ export default function AdminRecommendationsPage() {
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 xl:min-w-[420px]">
-            <StatCard label="Slots" value={formatNumber(slotsQuery.data?.total || 0)} hint="Recommendation placements" />
-            <StatCard label="Rankings" value={formatNumber(rankingsQuery.data?.total || 0)} hint="Ranking config records" />
-            <StatCard label="Analytics rows" value={formatNumber(analyticsQuery.data?.total || 0)} hint="Latest loaded records" />
+            <StatCard label="Slots" value={getDeferredStatValue(slotsQuery, true)} hint="Recommendation placements" />
+            <StatCard
+              label="Rankings"
+              value={getDeferredStatValue(rankingsQuery, loadedTabs.rankings)}
+              hint={getDeferredStatHint('Ranking config records', loadedTabs.rankings)}
+            />
+            <StatCard
+              label="Analytics rows"
+              value={getDeferredStatValue(analyticsQuery, loadedTabs.analytics)}
+              hint={getDeferredStatHint('Latest loaded records', loadedTabs.analytics)}
+            />
           </div>
         </div>
       </header>
 
-      <div ref={feedbackBannerRef}>
-        <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
-      </div>
+      <AdminFeedbackBanner
+        feedback={feedback}
+        onDismiss={() => setFeedback(EMPTY_FEEDBACK)}
+        dismissAriaLabel="Dismiss feedback"
+      />
 
       <div className="flex flex-wrap gap-3">
         {VIEW_TABS.map((tab) => {
@@ -636,7 +674,7 @@ export default function AdminRecommendationsPage() {
             <button
               key={tab.key}
               type="button"
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => handleTabChange(tab.key)}
               className={[
                 'rounded-full border px-4 py-2 text-sm font-medium transition',
                 isActive

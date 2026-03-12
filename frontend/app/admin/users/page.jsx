@@ -11,7 +11,7 @@ import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBann
 import { AdminListToolbar } from '@/components/admin/common/AdminListToolbar';
 import { AdminSelectionBar } from '@/components/admin/common/AdminSelectionBar';
 import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
-import { adminFetch } from '@/lib/adminApiClient';
+import { adminFetch, readAdminResponseMessage } from '@/lib/adminApiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
 
@@ -29,32 +29,6 @@ const sortOptions = [
   { value: 'createdAt', label: 'Created date' },
   { value: 'email', label: 'Email' },
 ];
-
-async function readResponseMessage(response, fallbackMessage) {
-  try {
-    const payload = await response.json();
-    const message = payload?.message ?? payload?.error ?? payload?.details;
-    if (Array.isArray(message)) {
-      return message.find((item) => typeof item === 'string') || fallbackMessage;
-    }
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-  } catch {
-    // Ignore JSON parsing failures.
-  }
-
-  try {
-    const text = await response.text();
-    if (text.trim()) {
-      return text.trim();
-    }
-  } catch {
-    // Ignore text parsing failures.
-  }
-
-  return fallbackMessage;
-}
 
 function formatDate(value) {
   if (!value) {
@@ -167,7 +141,7 @@ export default function AdminUsersPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readResponseMessage(response, 'Failed to update the user status.'));
+        throw new Error(await readAdminResponseMessage(response, 'Failed to update the user status.'));
       }
 
       return response.json();

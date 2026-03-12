@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import { apiGet, apiPost } from "../../lib/apiClient";
+import { adminGet, adminPost } from "../../lib/adminApiClient";
 
 const defaultDraft = {
   provider: "console",
@@ -15,6 +15,14 @@ const defaultDraft = {
   adminNotifyEmail: "",
   testRecipient: "",
 };
+
+function normalizeDraft(config) {
+  return { ...defaultDraft, ...(config || {}) };
+}
+
+function serializeDraft(config) {
+  return JSON.stringify(normalizeDraft(config));
+}
 
 function Section({ title, description, children }) {
   return (
@@ -42,6 +50,7 @@ export default function AdminEmailSettingsPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAdminAuth();
   const [draft, setDraft] = useState(defaultDraft);
+  const [savedDraft, setSavedDraft] = useState(defaultDraft);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -54,17 +63,19 @@ export default function AdminEmailSettingsPage() {
   }, [isAuthenticated, isLoading, router]);
 
   const applyConfig = useCallback((config) => {
-    setDraft({ ...defaultDraft, ...(config || {}) });
+    const nextDraft = normalizeDraft(config);
+    setDraft(nextDraft);
+    setSavedDraft(nextDraft);
   }, []);
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const response = await apiGet("/api/admin/email");
+    const response = await adminGet("/api/admin/email");
     if (response.ok && response.data?.config) {
       applyConfig(response.data.config);
       setStatus({ type: "idle", message: "" });
     } else if (!response.ok) {
-      setStatus({ type: "error", message: response.error || "Failed to load email settings." });
+      setStatus({ type: "error", message: response.error || response.message || "Failed to load email settings." });
     }
     setLoading(false);
   }, [applyConfig]);
@@ -72,27 +83,32 @@ export default function AdminEmailSettingsPage() {
   useEffect(() => {
     if (isAuthenticated) {
       loadData();
-    } else {
+    } else if (!isLoading) {
       setLoading(false);
     }
-  }, [isAuthenticated, loadData]);
+  }, [isAuthenticated, isLoading, loadData]);
 
   const handleChange = (field, value) => {
-    setDraft((prev) => ({ ...prev, [field]: value }));
+    setDraft((current) => ({ ...current, [field]: value }));
   };
 
   const persist = useCallback(async (payload, successMessage) => {
     setSaving(true);
     setStatus({ type: "idle", message: "" });
-    const response = await apiPost("/api/admin/email", payload);
+
+    const response = await adminPost("/api/admin/email", payload);
     if (response.ok && response.data?.config) {
       applyConfig(response.data.config);
       setStatus({ type: "success", message: successMessage });
     } else if (response.ok) {
+      const nextDraft = normalizeDraft(payload);
+      setDraft(nextDraft);
+      setSavedDraft(nextDraft);
       setStatus({ type: "success", message: successMessage });
     } else {
-      setStatus({ type: "error", message: response.error || "Save failed." });
+      setStatus({ type: "error", message: response.error || response.message || "Save failed." });
     }
+
     setSaving(false);
     return response;
   }, [applyConfig]);
@@ -102,24 +118,42 @@ export default function AdminEmailSettingsPage() {
   };
 
   const handleClearSecret = async (field) => {
-    const payload = { ...draft, [field]: "" };
-    const response = await persist(payload, "Secret cleared.");
-    if (response.ok) {
-      await loadData();
-    }
+    await persist({ ...draft, [field]: "" }, "Secret cleared.");
   };
 
+  const hasUnsavedChanges = useMemo(() => {
+    return serializeDraft(draft) !== serializeDraft(savedDraft);
+  }, [draft, savedDraft]);
+
   const handleTest = async () => {
+    const recipient = String(draft.testRecipient || "").trim();
+    if (!recipient) {
+      return;
+    }
+
     setTesting(true);
     setStatus({ type: "idle", message: "" });
-    const response = await apiPost("/api/admin/email/test", {
-      to: draft.testRecipient,
-    });
-    if (response.ok) {
-      setStatus({ type: "success", message: "Test email sent." });
-    } else {
-      setStatus({ type: "error", message: response.error || "Unable to send test email." });
+
+    let savedBeforeTest = false;
+    if (hasUnsavedChanges) {
+      const saveResponse = await persist(draft, "Email settings saved.");
+      if (!saveResponse.ok) {
+        setTesting(false);
+        return;
+      }
+      savedBeforeTest = true;
     }
+
+    const response = await adminPost("/api/admin/email/test", { to: recipient });
+    if (response.ok) {
+      setStatus({
+        type: "success",
+        message: savedBeforeTest ? "Email settings saved and test email sent." : "Test email sent.",
+      });
+    } else {
+      setStatus({ type: "error", message: response.error || response.message || "Unable to send test email." });
+    }
+
     setTesting(false);
   };
 
@@ -132,6 +166,14 @@ export default function AdminEmailSettingsPage() {
     }
     return "border-slate-200 bg-slate-50 text-slate-600";
   }, [status.type]);
+
+  const testButtonLabel = testing
+    ? hasUnsavedChanges
+      ? "Saving & sending..."
+      : "Sending..."
+    : hasUnsavedChanges
+      ? "Save & send test"
+      : "Send test";
 
   const secretFields = [
     {
@@ -175,6 +217,11 @@ export default function AdminEmailSettingsPage() {
           <p className="mt-2 text-sm text-slate-500">
             Configure your delivery provider, sender identity, and masked secrets.
           </p>
+          {hasUnsavedChanges ? (
+            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">
+              Unsaved changes
+            </p>
+          ) : null}
         </div>
         <div className="flex gap-2">
           <button
@@ -183,12 +230,12 @@ export default function AdminEmailSettingsPage() {
             disabled={testing || saving || !draft.testRecipient}
             className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {testing ? "Sending..." : "Send test"}
+            {testButtonLabel}
           </button>
           <button
             type="button"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !hasUnsavedChanges}
             className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save settings"}
@@ -283,6 +330,11 @@ export default function AdminEmailSettingsPage() {
             placeholder="you@example.com"
           />
         </Field>
+        <p className="text-xs text-slate-500">
+          {hasUnsavedChanges
+            ? "The test action will save the current draft first so the email uses the latest provider settings."
+            : "The current saved provider settings will be used for the test email."}
+        </p>
       </Section>
     </div>
   );

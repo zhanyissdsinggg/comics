@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { parseStoredJson, stringifyStoredJson } from "../../../../common/utils/stored-json";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
@@ -15,28 +15,66 @@ const DEFAULT_REGION_CONFIG: SavedRegionConfig = {
   lengthRules: {},
 };
 
+function normalizeDialCode(value: unknown): string {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  const digits = trimmed.replace(/\D/g, "");
+  if (!digits) {
+    return trimmed;
+  }
+
+  return `+${digits}`;
+}
+
 function normalizeRegionCode(input: RegionCodeInput): { code: string; label: string } {
   return {
-    code: String(input.code || "").trim(),
+    code: normalizeDialCode(input.code),
     label: String(input.label || "").trim(),
   };
 }
 
-function normalizeLengthRules(input: RegionConfigInput["lengthRules"]): PhoneLengthRules {
+function buildCountryCodes(input: RegionCodeInput[]): Array<{ code: string; label: string }> {
+  const seen = new Set<string>();
+  const normalized = input
+    .map(normalizeRegionCode)
+    .filter((item) => item.code);
+
+  normalized.forEach((item) => {
+    if (seen.has(item.code)) {
+      throw new BadRequestException(`Duplicate country code: ${item.code}`);
+    }
+    seen.add(item.code);
+  });
+
+  return normalized;
+}
+
+function normalizeLengthRules(
+  input: RegionConfigInput["lengthRules"],
+  allowedCodes: Set<string>,
+): PhoneLengthRules {
   if (!input || typeof input !== "object") {
     return {};
   }
 
   const normalized: PhoneLengthRules = {};
   for (const [code, lengths] of Object.entries(input)) {
-    if (!Array.isArray(lengths)) {
+    const normalizedCode = normalizeDialCode(code);
+    if (!normalizedCode || !allowedCodes.has(normalizedCode) || !Array.isArray(lengths)) {
       continue;
     }
-    const values = lengths
-      .map((value) => Number(value))
-      .filter((value) => Number.isInteger(value) && value > 0);
+
+    const values = [...new Set(
+      lengths
+        .map((value) => Number(value))
+        .filter((value) => Number.isInteger(value) && value > 0)
+    )].sort((left, right) => left - right);
+
     if (values.length > 0) {
-      normalized[code] = values;
+      normalized[normalizedCode] = values;
     }
   }
   return normalized;
@@ -63,10 +101,10 @@ export class AdminRegionsController {
   @Post()
   async save(@Body() body: CreateRegionDto & RegionConfigInput) {
     const source = extractRegionPayload(body);
-    const countryCodes = Array.isArray(source.countryCodes) ? source.countryCodes : [];
+    const countryCodes = buildCountryCodes(Array.isArray(source.countryCodes) ? source.countryCodes : []);
     const payload: SavedRegionConfig = {
-      countryCodes: countryCodes.map(normalizeRegionCode).filter((item) => item.code),
-      lengthRules: normalizeLengthRules(source.lengthRules),
+      countryCodes,
+      lengthRules: normalizeLengthRules(source.lengthRules, new Set(countryCodes.map((item) => item.code))),
       updatedAt: new Date().toISOString(),
     };
     const config = await this.prisma.regionConfig.upsert({

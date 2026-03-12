@@ -4,6 +4,10 @@
 
 :root {
   color-scheme: dark;
+  --page-bg: #05070d;
+  --page-bg-secondary: #0a0d14;
+  --page-accent: rgba(16, 185, 129, 0.18);
+  --page-accent-secondary: rgba(34, 211, 238, 0.14);
 }
 
 html.dark {
@@ -14,16 +18,47 @@ html.light {
   color-scheme: light;
 }
 
+html {
+  background: var(--page-bg);
+}
+
 body {
   @apply bg-neutral-950 text-neutral-100;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
     "Helvetica Neue", Arial, sans-serif;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* 老王注释：移动端优化 - 禁用双击缩放，提升触摸体验 */
+  background:
+    radial-gradient(circle at top left, var(--page-accent), transparent 28%),
+    radial-gradient(circle at 85% 8%, var(--page-accent-secondary), transparent 24%),
+    linear-gradient(180deg, var(--page-bg-secondary) 0%, #090c13 36%, var(--page-bg) 100%);
+  min-height: 100vh;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 88%);
+}
+
+::selection {
+  background: rgba(16, 185, 129, 0.34);
+  color: #ffffff;
+}
+
+main {
+  position: relative;
+  z-index: 1;
 }
 
 /*
@@ -44,7 +79,6 @@ html.light iframe {
   filter: invert(1) hue-rotate(180deg);
 }
 
-/* 老王注释：移动端底部Tab导航预留空间，避免内容被遮挡 */
 @media (max-width: 767px) {
   body {
     padding-bottom: 60px;
@@ -54,7 +88,6 @@ html.light iframe {
     padding-bottom: 0;
   }
 
-  /* 老王注释：移动端字体稍大，提升可读性 */
   html {
     font-size: 16px;
   }
@@ -66,8 +99,13 @@ h3,
 h4,
 h5,
 h6 {
-  letter-spacing: -0.02em;
+  font-family: var(--font-display), var(--font-body), -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.03em;
   font-weight: 600;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 button,
@@ -76,7 +114,6 @@ select,
 textarea {
   font-family: inherit;
   letter-spacing: -0.005em;
-  /* 移除强制圆角：让各组件自己控制 border-radius */
 }
 
 button {

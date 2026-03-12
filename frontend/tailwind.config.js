@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+﻿/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
@@ -31,7 +31,6 @@ module.exports = {
           500: "#06b6d4",
           600: "#0891b2",
         },
-        // 老王添加：iOS 26风格的颜色
         ios: {
           blue: "#007AFF",
           green: "#34C759",
@@ -59,6 +58,7 @@ module.exports = {
       },
       fontFamily: {
         sans: [
+          "var(--font-body)",
           "-apple-system",
           "BlinkMacSystemFont",
           "SF Pro Text",
@@ -67,19 +67,24 @@ module.exports = {
           "Arial",
           "sans-serif",
         ],
+        display: [
+          "var(--font-display)",
+          "var(--font-body)",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "sans-serif",
+        ],
       },
       borderRadius: {
         "2xl": "1rem",
         "3xl": "1.5rem",
-        // 老王添加：iOS 26风格的圆角
         "4xl": "2rem",
         "5xl": "2.5rem",
         "6xl": "3rem",
       },
       boxShadow: {
-        // 老王添加：iOS 26风格的阴影
         "ios-sm": "0 2px 8px rgba(0, 0, 0, 0.12)",
-        "ios": "0 4px 16px rgba(0, 0, 0, 0.16)",
+        ios: "0 4px 16px rgba(0, 0, 0, 0.16)",
         "ios-lg": "0 8px 32px rgba(0, 0, 0, 0.20)",
         "ios-xl": "0 16px 48px rgba(0, 0, 0, 0.24)",
         "ios-glow": "0 0 20px rgba(16, 185, 129, 0.3)",
@@ -89,10 +94,9 @@ module.exports = {
         "fade-in": "fadeIn 0.3s ease-out",
         "slide-up": "slideUp 0.4s ease-out",
         shimmer: "shimmer 2s ease-in-out infinite",
-        // 老王添加：iOS 26风格的动画
         "bounce-subtle": "bounce-subtle 2s ease-in-out infinite",
         "scale-in": "scale-in 0.2s ease-out",
-        "float": "float 3s ease-in-out infinite",
+        float: "float 3s ease-in-out infinite",
       },
       keyframes: {
         "slide-in-right": {
@@ -111,7 +115,6 @@ module.exports = {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
-        // 老王添加：iOS 26风格的关键帧
         "bounce-subtle": {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-4px)" },
@@ -120,7 +123,7 @@ module.exports = {
           "0%": { transform: "scale(0.95)", opacity: 0 },
           "100%": { transform: "scale(1)", opacity: 1 },
         },
-        "float": {
+        float: {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-10px)" },
         },

@@ -117,6 +117,38 @@ function formatDateTime(value) {
   }).format(date);
 }
 
+function isNonNegativeIntegerString(value, { allowEmpty = false } = {}) {
+  const normalized = String(value ?? '').trim();
+
+  if (!normalized) {
+    return allowEmpty;
+  }
+
+  return /^\d+$/.test(normalized);
+}
+
+function validateSeriesDraft(formData) {
+  if (!formData.title.trim()) {
+    return 'Title is required.';
+  }
+
+  if (!isNonNegativeIntegerString(formData.episodePrice, { allowEmpty: true })) {
+    return 'Episode price must be a whole number of coins.';
+  }
+
+  if (formData.ttfEnabled) {
+    if (!isNonNegativeIntegerString(formData.ttfIntervalHours)) {
+      return 'Free ticket refresh interval must be a whole number of hours.';
+    }
+
+    if (Number(formData.ttfIntervalHours) < 1) {
+      return 'Free ticket refresh interval must be at least 1 hour.';
+    }
+  }
+
+  return '';
+}
+
 async function fetchSeriesDetail(seriesId) {
   const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}`, { cache: 'no-store' });
 
@@ -219,7 +251,7 @@ export default function AdminSeriesDetailPage() {
         ...current,
         coverUrl: data.url,
       }));
-      setFeedback({ type: 'success', message: 'Cover image uploaded.' });
+      setFeedback({ type: 'success', message: 'Cover image uploaded. Save changes to publish it.' });
     },
     onError: (error) => {
       setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to upload cover image.') });
@@ -251,8 +283,9 @@ export default function AdminSeriesDetailPage() {
   const handleSave = () => {
     setFeedback(EMPTY_FEEDBACK);
 
-    if (!formData.title.trim()) {
-      setFeedback({ type: 'error', message: 'Title is required.' });
+    const validationMessage = validateSeriesDraft(formData);
+    if (validationMessage) {
+      setFeedback({ type: 'error', message: validationMessage });
       return;
     }
 
@@ -359,17 +392,18 @@ export default function AdminSeriesDetailPage() {
                   <button
                     type="button"
                     onClick={handleCancelEditing}
-                    className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-900"
+                    disabled={uploadMutation.isPending || saveMutation.isPending}
+                    className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
                     onClick={handleSave}
-                    disabled={saveMutation.isPending}
+                    disabled={saveMutation.isPending || uploadMutation.isPending}
                     className="rounded-2xl bg-cyan-500 px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {saveMutation.isPending ? 'Saving...' : 'Save changes'}
+                    {saveMutation.isPending ? 'Saving...' : uploadMutation.isPending ? 'Uploading cover...' : 'Save changes'}
                   </button>
                 </>
               ) : (
@@ -576,7 +610,13 @@ export default function AdminSeriesDetailPage() {
                 <label className="mt-4 block rounded-2xl border border-dashed border-neutral-700 px-4 py-4 text-sm text-neutral-300 transition hover:border-neutral-500 hover:bg-neutral-950">
                   <span className="font-medium text-white">Upload a new cover</span>
                   <span className="mt-1 block text-xs text-neutral-500">JPG, PNG, GIF, or WEBP up to 10MB.</span>
-                  <input type="file" accept="image/*" onChange={handleCoverUpload} className="mt-3 block w-full text-xs text-neutral-400" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverUpload}
+                    disabled={uploadMutation.isPending}
+                    className="mt-3 block w-full text-xs text-neutral-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  />
                 </label>
               ) : null}
             </section>

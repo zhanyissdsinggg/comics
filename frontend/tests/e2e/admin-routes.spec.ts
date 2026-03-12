@@ -55,6 +55,10 @@ const ADMIN_ROUTE_CASES = [
     emptyStateMessage: "No recommendation slots have been created yet.",
   },
   {
+    route: "/admin/logs",
+    emptyStateMessage: "No audit logs found",
+  },
+  {
     route: "/admin/revenue",
     emptyStateMessage: "No revenue data available yet.",
   },
@@ -98,6 +102,7 @@ async function installAdminApiMocks(
     recommendationSlotsBody?: unknown;
     recommendationRankingsBody?: unknown;
     recommendationAnalyticsBody?: unknown;
+    logsBody?: unknown;
     revenueStatsBody?: unknown;
     revenueTrendBody?: unknown;
     revenueChannelsBody?: unknown;
@@ -220,6 +225,11 @@ async function installAdminApiMocks(
       return;
     }
 
+    if (pathname.endsWith("/api/admin/logs")) {
+      await fulfillJson(route, options.logsBody ?? { logs: [] });
+      return;
+    }
+
     if (pathname.includes("/api/admin/revenue/stats")) {
       await fulfillJson(route, options.revenueStatsBody ?? { stats: null });
       return;
@@ -272,6 +282,93 @@ test.describe("Admin route regression", () => {
       await expectNoRuntimeIssues(scenario.route, runtimeIssues);
     });
   }
+
+  test("should defer recommendation requests until each tab is opened", async ({ page }) => {
+    let slotsRequests = 0;
+    let rankingsRequests = 0;
+    let analyticsRequests = 0;
+
+    page.on("request", (request) => {
+      const pathname = new URL(request.url()).pathname;
+
+      if (pathname.endsWith("/api/admin/recommendations/slots")) {
+        slotsRequests += 1;
+      }
+
+      if (pathname.endsWith("/api/admin/recommendations/rankings")) {
+        rankingsRequests += 1;
+      }
+
+      if (pathname.endsWith("/api/admin/recommendations/analytics")) {
+        analyticsRequests += 1;
+      }
+    });
+
+    await primeAdminSession(page);
+    await installAdminApiMocks(page);
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "Recommendations" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("Open this tab to load", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect.poll(() => slotsRequests).toBe(1);
+    await expect.poll(() => rankingsRequests).toBe(0);
+    await expect.poll(() => analyticsRequests).toBe(0);
+
+    await page.getByRole("button", { name: "Rankings" }).click();
+    await expect.poll(() => rankingsRequests).toBe(1);
+
+    await page.getByRole("button", { name: "Analytics" }).click();
+    await expect.poll(() => analyticsRequests).toBe(1);
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
+  });
+
+  test("should filter logs by fallback user identity", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminApiMocks(page, {
+      logsBody: {
+        logs: [
+          {
+            id: "log-1",
+            action: "EXPORT",
+            resource: "orders",
+            resourceId: "order-1",
+            userId: "operator-fallback",
+            details: { scope: "orders" },
+            createdAt: "2026-03-12T10:00:00.000Z",
+          },
+          {
+            id: "log-2",
+            action: "DELETE",
+            resource: "series",
+            resourceId: "series-9",
+            adminId: "admin-primary",
+            details: { scope: "series" },
+            createdAt: "2026-03-12T09:30:00.000Z",
+          },
+        ],
+      },
+    });
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/logs", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "Audit Logs" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.locator("select").nth(1).selectOption("operator-fallback");
+
+    const rows = page.locator("tbody tr");
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first()).toContainText("operator-fallback");
+    await expect(rows.first()).not.toContainText("admin-primary");
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/logs", runtimeIssues);
+  });
 
   test("should render admin support data without requesting docs-json", async ({ page }) => {
     let docsJsonRequests = 0;

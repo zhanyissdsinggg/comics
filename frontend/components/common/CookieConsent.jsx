@@ -7,12 +7,19 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Cookie, X } from "lucide-react";
 
 export default function CookieConsent() {
+  const pathname = usePathname();
   const [showBanner, setShowBanner] = useState(false);
+  const isAdminRoute = pathname?.startsWith("/admin");
 
   useEffect(() => {
+    if (isAdminRoute) {
+      setShowBanner(false);
+      return;
+    }
     // NOTE: cleaned corrupted comment.
     const consent = localStorage.getItem("cookie_consent");
     if (!consent) {
@@ -22,7 +29,7 @@ export default function CookieConsent() {
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isAdminRoute]);
 
   const handleAccept = () => {
     // NOTE: cleaned corrupted comment.
@@ -35,7 +42,7 @@ export default function CookieConsent() {
     setShowBanner(false);
   };
 
-  if (!showBanner) return null;
+  if (isAdminRoute || !showBanner) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6">

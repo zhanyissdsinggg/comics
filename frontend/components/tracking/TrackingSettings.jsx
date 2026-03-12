@@ -95,6 +95,35 @@ function normalizeValues(input, defaults) {
   return next;
 }
 
+function parseTimestamp(value) {
+  const parsed = Date.parse(String(value || ""));
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function readLocalTrackingSnapshot(defaults) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    const savedAt = typeof parsed?.savedAt === "string" ? parsed.savedAt : "";
+
+    return {
+      values: normalizeValues(parsed?.values, defaults),
+      savedAt,
+      savedAtMs: parseTimestamp(savedAt),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default function TrackingSettings() {
   const defaultValues = useMemo(() => createDefaults(), []);
   const [values, setValues] = useState(defaultValues);
@@ -103,38 +132,47 @@ export default function TrackingSettings() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    const localSnapshot = readLocalTrackingSnapshot(defaultValues);
+    if (!localSnapshot) {
       return;
     }
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return;
-    }
-    try {
-      const parsed = JSON.parse(raw);
-      setValues(normalizeValues(parsed?.values, defaultValues));
-      if (typeof parsed?.savedAt === "string") {
-        setSavedAt(parsed.savedAt);
-      }
-    } catch {
-      // ignore parse errors
+
+    setValues(localSnapshot.values);
+    if (localSnapshot.savedAt) {
+      setSavedAt(localSnapshot.savedAt);
     }
   }, [defaultValues]);
 
   useEffect(() => {
     let mounted = true;
+    const localSnapshot = readLocalTrackingSnapshot(defaultValues);
+
     apiGet("/api/admin/tracking").then((response) => {
       if (!mounted) {
         return;
       }
       if (response.ok && response.data?.config?.values) {
+        const serverUpdatedAt = typeof response.data.config.updatedAt === "string" ? response.data.config.updatedAt : "";
+        const serverUpdatedAtMs = parseTimestamp(serverUpdatedAt);
+
+        if (localSnapshot?.savedAtMs && localSnapshot.savedAtMs > serverUpdatedAtMs) {
+          setValues(localSnapshot.values);
+          if (localSnapshot.savedAt) {
+            setSavedAt(localSnapshot.savedAt);
+          }
+          setServerStatus("Using newer local tracking draft. Save to sync it to the server.");
+          return;
+        }
+
         setValues(normalizeValues(response.data.config.values, defaultValues));
-        if (response.data.config.updatedAt) {
-          setSavedAt(response.data.config.updatedAt);
+        if (serverUpdatedAt) {
+          setSavedAt(serverUpdatedAt);
         }
         setServerStatus("Loaded tracking settings from server.");
       } else if (response.status === 403) {
         setServerStatus("You do not have permission to view server tracking settings.");
+      } else if (!response.ok) {
+        setServerStatus(response.error || "Failed to load server tracking settings.");
       }
     });
     return () => {

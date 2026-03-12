@@ -154,6 +154,48 @@ export async function adminFetchJson<T = unknown>(
   const data = await response.json().catch(() => ({} as T));
   return { response, data };
 }
+
+function extractAdminMessage(payload: unknown): string {
+  if (!payload || typeof payload !== "object") {
+    return "";
+  }
+
+  const candidate = (payload as Record<string, unknown>).message
+    ?? (payload as Record<string, unknown>).error
+    ?? (payload as Record<string, unknown>).details;
+
+  if (Array.isArray(candidate)) {
+    return candidate.find((item) => typeof item === "string" && item.trim()) || "";
+  }
+
+  return typeof candidate === "string" ? candidate.trim() : "";
+}
+
+export async function readAdminResponseMessage(
+  response: Response,
+  fallbackMessage: string
+): Promise<string> {
+  try {
+    const text = await response.text();
+    if (!text.trim()) {
+      return fallbackMessage;
+    }
+
+    try {
+      const parsed = JSON.parse(text);
+      const message = extractAdminMessage(parsed);
+      if (message) {
+        return message;
+      }
+    } catch {
+      // Ignore JSON parsing failures and fall back to the raw response body.
+    }
+
+    return text.trim();
+  } catch {
+    return fallbackMessage;
+  }
+}
 /**
  * Admin GET request wrapper.
  */

@@ -29,6 +29,32 @@ function PreviewBox({ value, alt, emptyText, className }) {
   );
 }
 
+function toDraft(payload) {
+  return {
+    siteLogoUrl: payload?.siteLogoUrl || "",
+    faviconUrl: payload?.faviconUrl || "",
+    homeBannerUrl: payload?.homeBannerUrl || "",
+  };
+}
+
+function ErrorState({ message, onRetry }) {
+  return (
+    <section className="space-y-4 rounded-2xl border border-red-200 bg-red-50 p-6">
+      <div>
+        <h2 className="text-lg font-semibold text-red-900">Branding failed to load</h2>
+        <p className="mt-2 text-sm text-red-700">{message}</p>
+      </div>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+      >
+        Retry
+      </button>
+    </section>
+  );
+}
+
 export default function AdminBrandingPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAdminAuth();
@@ -36,6 +62,7 @@ export default function AdminBrandingPage() {
 
   const [draft, setDraft] = useState(defaultDraft);
   const [status, setStatus] = useState("");
+  const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
 
   const logoFileRef = useRef(null);
   const faviconFileRef = useRef(null);
@@ -47,26 +74,25 @@ export default function AdminBrandingPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  useQuery({
+  const brandingQuery = useQuery({
     queryKey: ["admin", "branding"],
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const response = await adminGet("/api/admin/branding");
       if (!response.ok) {
-        throw new Error(response.error || "Failed to load branding.");
+        throw new Error(response.error || response.message || "Failed to load branding.");
       }
-      const data = response.data || {};
-      if (data?.branding) {
-        setDraft({
-          siteLogoUrl: data.branding.siteLogoUrl || "",
-          faviconUrl: data.branding.faviconUrl || "",
-          homeBannerUrl: data.branding.homeBannerUrl || "",
-        });
-      }
-      return data;
+      return toDraft(response.data?.branding);
     },
   });
+
+  useEffect(() => {
+    if (!hasHydratedDraft && brandingQuery.data) {
+      setDraft(brandingQuery.data);
+      setHasHydratedDraft(true);
+    }
+  }, [brandingQuery.data, hasHydratedDraft]);
 
   const uploadMutation = useMutation({
     mutationFn: async ({ field, file, keyName }) => {
@@ -82,7 +108,7 @@ export default function AdminBrandingPage() {
 
       const response = await adminUpload("/api/admin/upload/image", formData);
       if (!response.ok || !response.data?.url) {
-        throw new Error("Upload failed.");
+        throw new Error(response.error || response.message || "Upload failed.");
       }
 
       return { field, keyName, url: response.data.url };
@@ -106,19 +132,19 @@ export default function AdminBrandingPage() {
     mutationFn: async (payload) => {
       const response = await adminPost("/api/admin/branding", payload);
       if (!response.ok) {
-        throw new Error("Save failed.");
+        throw new Error(response.error || response.message || "Save failed.");
       }
 
-      return response.data;
+      return toDraft(response.data?.branding);
     },
-    onSuccess: (data) => {
-      if (data?.branding) {
-        setBranding(data.branding);
-      }
+    onSuccess: (nextDraft) => {
+      setDraft(nextDraft);
+      setBranding(nextDraft);
+      setHasHydratedDraft(true);
       setStatus("Branding saved.");
     },
-    onError: () => {
-      setStatus("Save failed.");
+    onError: (error) => {
+      setStatus(error.message || "Save failed.");
     },
   });
 
@@ -140,15 +166,38 @@ export default function AdminBrandingPage() {
   };
 
   const handleSave = () => {
+    if (!hasHydratedDraft) {
+      return;
+    }
+
     setStatus("");
     saveMutation.mutate({ ...draft });
   };
+
+  const formBusy = !hasHydratedDraft || brandingQuery.isLoading || uploadMutation.isPending || saveMutation.isPending;
 
   if (isLoading || !isAuthenticated) {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
         <p className="text-sm text-slate-500">Loading...</p>
       </section>
+    );
+  }
+
+  if (!hasHydratedDraft && brandingQuery.isLoading) {
+    return (
+      <section className="rounded-2xl border border-slate-200 bg-white p-6">
+        <p className="text-sm text-slate-500">Loading branding settings...</p>
+      </section>
+    );
+  }
+
+  if (!hasHydratedDraft && brandingQuery.isError) {
+    return (
+      <ErrorState
+        message={brandingQuery.error instanceof Error ? brandingQuery.error.message : "Failed to load branding."}
+        onRetry={() => brandingQuery.refetch()}
+      />
     );
   }
 
@@ -172,6 +221,7 @@ export default function AdminBrandingPage() {
               <input
                 value={draft.siteLogoUrl}
                 onChange={(event) => handleChange("siteLogoUrl", event.target.value)}
+                disabled={formBusy}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 placeholder="https://.../logo.png"
               />
@@ -179,7 +229,7 @@ export default function AdminBrandingPage() {
                 <button
                   type="button"
                   onClick={() => logoFileRef.current?.click()}
-                  disabled={uploadMutation.isPending}
+                  disabled={formBusy}
                   className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-all"
                 >
                   <ImageIcon className="h-3 w-3" />
@@ -200,6 +250,7 @@ export default function AdminBrandingPage() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload("siteLogoUrl", logoFileRef, "logo")}
+                  disabled={formBusy}
                   className="hidden"
                 />
               </div>
@@ -227,6 +278,7 @@ export default function AdminBrandingPage() {
               <input
                 value={draft.faviconUrl}
                 onChange={(event) => handleChange("faviconUrl", event.target.value)}
+                disabled={formBusy}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 placeholder="https://.../favicon.png"
               />
@@ -234,7 +286,7 @@ export default function AdminBrandingPage() {
                 <button
                   type="button"
                   onClick={() => faviconFileRef.current?.click()}
-                  disabled={uploadMutation.isPending}
+                  disabled={formBusy}
                   className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-all"
                 >
                   <ImageIcon className="h-3 w-3" />
@@ -245,6 +297,7 @@ export default function AdminBrandingPage() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload("faviconUrl", faviconFileRef, "favicon")}
+                  disabled={formBusy}
                   className="hidden"
                 />
               </div>
@@ -272,6 +325,7 @@ export default function AdminBrandingPage() {
               <input
                 value={draft.homeBannerUrl}
                 onChange={(event) => handleChange("homeBannerUrl", event.target.value)}
+                disabled={formBusy}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 placeholder="https://.../banner.jpg"
               />
@@ -279,7 +333,7 @@ export default function AdminBrandingPage() {
                 <button
                   type="button"
                   onClick={() => bannerFileRef.current?.click()}
-                  disabled={uploadMutation.isPending}
+                  disabled={formBusy}
                   className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-all"
                 >
                   <ImageIcon className="h-3 w-3" />
@@ -290,6 +344,7 @@ export default function AdminBrandingPage() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload("homeBannerUrl", bannerFileRef, "banner")}
+                  disabled={formBusy}
                   className="hidden"
                 />
               </div>
@@ -312,7 +367,7 @@ export default function AdminBrandingPage() {
         <button
           type="button"
           onClick={handleSave}
-          disabled={saveMutation.isPending}
+          disabled={formBusy}
           className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
         >
           {saveMutation.isPending ? "Saving..." : "Save Branding"}

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
 import { adminGet, adminPost } from "../../lib/adminApiClient";
@@ -70,6 +70,7 @@ export default function AdminEmailJobsPage() {
   const [view, setView] = useState("all");
   const [retryingId, setRetryingId] = useState("");
   const [status, setStatus] = useState({ tone: "success", message: "" });
+  const latestLoadIdRef = useRef(0);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -77,14 +78,27 @@ export default function AdminEmailJobsPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async ({ preserveStatus = false } = {}) => {
+    const loadId = latestLoadIdRef.current + 1;
+    latestLoadIdRef.current = loadId;
+
     setLoading(true);
+    if (!preserveStatus) {
+      setStatus({ tone: "success", message: "" });
+    }
 
     const endpoint = view === "failed" ? "/api/admin/email/jobs/failed" : "/api/admin/email/jobs";
     const response = await adminGet(endpoint);
 
+    if (loadId !== latestLoadIdRef.current) {
+      return;
+    }
+
     if (response.ok) {
       setJobs(normalizeJobs(response.data));
+      if (!preserveStatus) {
+        setStatus({ tone: "success", message: "" });
+      }
     } else {
       setJobs([]);
       setStatus({ tone: "error", message: response.error || "Failed to load email jobs." });
@@ -110,16 +124,18 @@ export default function AdminEmailJobsPage() {
     setRetryingId(String(jobId));
     setStatus({ tone: "success", message: "" });
 
-    const response = await adminPost("/api/admin/email/jobs/retry", { jobId });
+    try {
+      const response = await adminPost("/api/admin/email/jobs/retry", { jobId });
 
-    if (response.ok) {
-      setStatus({ tone: "success", message: "Retry queued successfully." });
-      await loadData();
-    } else {
-      setStatus({ tone: "error", message: response.error || "Retry failed." });
+      if (response.ok) {
+        setStatus({ tone: "success", message: "Retry queued successfully." });
+        await loadData({ preserveStatus: true });
+      } else {
+        setStatus({ tone: "error", message: response.error || "Retry failed." });
+      }
+    } finally {
+      setRetryingId("");
     }
-
-    setRetryingId("");
   };
 
   const handleExport = () => {

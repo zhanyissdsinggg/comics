@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useHomeStore } from "../../store/useHomeStore";
 
 const NAV_ITEMS = [
@@ -10,46 +11,38 @@ const NAV_ITEMS = [
   { id: "rankings", label: "Rankings", href: "/rankings" },
 ];
 
-/**
- * HeaderNav - 参考 Webtoon 的顶部导航
- * 激活项：品牌色下划线 + 白色文字
- * 非激活项：灰色文字 + hover时白色
- */
 export default function HeaderNav() {
-  const router = useRouter();
   const pathname = usePathname();
   const { setHomeTab } = useHomeStore();
 
-  const handleClick = (item) => {
-    if (item.id === "home") {
-      setHomeTab("home");
-    }
-    router.push(item.href);
-  };
-
   return (
-    <nav className="hidden flex-1 items-center gap-1 md:flex">
-      {NAV_ITEMS.map((item) => {
-        const isActive =
-          item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => handleClick(item)}
-            aria-label={`Go to ${item.label}`}
-            className={`relative px-3 py-2 text-sm font-semibold transition-colors duration-200 ${
-              isActive ? "text-white" : "text-neutral-400 hover:text-neutral-200"
-            }`}
-          >
-            {item.label}
-            {/* 下划线激活指示器 - 像 Webtoon */}
-            {isActive && (
-              <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-emerald-500" />
-            )}
-          </button>
-        );
-      })}
+    <nav className="hidden flex-1 justify-center md:flex">
+      <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-1 shadow-[0_18px_60px_rgba(0,0,0,0.16)] backdrop-blur-xl">
+        {NAV_ITEMS.map((item) => {
+          const isActive =
+            item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              onClick={() => {
+                if (item.id === "home") {
+                  setHomeTab("home");
+                }
+              }}
+              className={`relative rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 ${
+                isActive
+                  ? "bg-white text-neutral-950 shadow-[0_12px_40px_rgba(255,255,255,0.16)]"
+                  : "text-neutral-400 hover:bg-white/[0.06] hover:text-white"
+              }`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

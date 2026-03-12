@@ -1,9 +1,23 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
 import { adminGet, adminPost } from "../../lib/adminApiClient";
+
+function normalizeDialCode(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  const digits = trimmed.replace(/\D/g, "");
+  if (!digits) {
+    return trimmed;
+  }
+
+  return `+${digits}`;
+}
 
 function normalizeCountryCodes(items) {
   if (!Array.isArray(items)) {
@@ -11,7 +25,7 @@ function normalizeCountryCodes(items) {
   }
 
   return items.map((item) => ({
-    code: String(item?.code || "").trim(),
+    code: normalizeDialCode(item?.code),
     label: String(item?.label || "").trim(),
   }));
 }
@@ -26,19 +40,38 @@ function normalizeLengthValues(values) {
   )].sort((left, right) => left - right);
 }
 
+function findDuplicateCountryCodes(items) {
+  const duplicates = new Set();
+  const seen = new Set();
+
+  normalizeCountryCodes(items)
+    .filter((item) => item.code)
+    .forEach((item) => {
+      if (seen.has(item.code)) {
+        duplicates.add(item.code);
+        return;
+      }
+
+      seen.add(item.code);
+    });
+
+  return [...duplicates];
+}
+
 function buildPayload(countryCodes, lengthRules) {
   const normalizedCountryCodes = normalizeCountryCodes(countryCodes).filter((item) => item.code);
   const allowedCodes = new Set(normalizedCountryCodes.map((item) => item.code));
   const normalizedRules = {};
 
   Object.entries(lengthRules || {}).forEach(([code, values]) => {
-    if (!allowedCodes.has(code)) {
+    const normalizedCode = normalizeDialCode(code);
+    if (!normalizedCode || !allowedCodes.has(normalizedCode)) {
       return;
     }
 
     const normalizedValues = normalizeLengthValues(values);
     if (normalizedValues.length > 0) {
-      normalizedRules[code] = normalizedValues;
+      normalizedRules[normalizedCode] = normalizedValues;
     }
   });
 
@@ -46,6 +79,15 @@ function buildPayload(countryCodes, lengthRules) {
     countryCodes: normalizedCountryCodes,
     lengthRules: normalizedRules,
   };
+}
+
+function getRegionValidationError(countryCodes) {
+  const duplicates = findDuplicateCountryCodes(countryCodes);
+  if (duplicates.length > 0) {
+    return `Duplicate country codes are not allowed: ${duplicates.join(", ")}.`;
+  }
+
+  return "";
 }
 
 function StatusBanner({ state }) {
@@ -85,8 +127,9 @@ export default function AdminRegionsPage() {
       const payload = buildPayload(response.data?.config?.countryCodes, response.data?.config?.lengthRules);
       setCountryCodes(payload.countryCodes);
       setLengthRules(payload.lengthRules);
+      setStatus({ tone: "success", message: "" });
     } else {
-      setStatus({ tone: "error", message: response.error || "Failed to load region configuration." });
+      setStatus({ tone: "error", message: response.error || response.message || "Failed to load region configuration." });
     }
 
     setLoading(false);
@@ -104,22 +147,35 @@ export default function AdminRegionsPage() {
   }, [isAuthenticated, isLoading, loadData]);
 
   const updateCode = (index, field, value) => {
-    const previousCode = countryCodes[index]?.code || "";
+    const previousCode = normalizeDialCode(countryCodes[index]?.code || "");
 
     setCountryCodes((current) =>
-      current.map((item, itemIndex) => (itemIndex === index ? { ...item, [field]: value } : item))
+      current.map((item, itemIndex) => {
+        if (itemIndex !== index) {
+          return item;
+        }
+
+        if (field === "code") {
+          return { ...item, code: value };
+        }
+
+        return { ...item, [field]: value };
+      })
     );
 
-    if (field === "code" && previousCode !== value) {
-      setLengthRules((current) => {
-        const next = { ...current };
-        const previousValues = next[previousCode];
-        delete next[previousCode];
-        if (value && previousValues?.length) {
-          next[value] = previousValues;
-        }
-        return next;
-      });
+    if (field === "code") {
+      const nextCode = normalizeDialCode(value);
+      if (previousCode !== nextCode) {
+        setLengthRules((current) => {
+          const next = { ...current };
+          const previousValues = next[previousCode];
+          delete next[previousCode];
+          if (nextCode && previousValues?.length) {
+            next[nextCode] = previousValues;
+          }
+          return next;
+        });
+      }
     }
   };
 
@@ -128,7 +184,7 @@ export default function AdminRegionsPage() {
   };
 
   const removeCode = (index) => {
-    const code = countryCodes[index]?.code || "";
+    const code = normalizeDialCode(countryCodes[index]?.code || "");
     setCountryCodes((current) => current.filter((_, itemIndex) => itemIndex !== index));
     setLengthRules((current) => {
       if (!code) {
@@ -141,13 +197,24 @@ export default function AdminRegionsPage() {
   };
 
   const updateRule = (code, value) => {
+    const normalizedCode = normalizeDialCode(code);
+    if (!normalizedCode) {
+      return;
+    }
+
     setLengthRules((current) => ({
       ...current,
-      [code]: normalizeLengthValues(value),
+      [normalizedCode]: normalizeLengthValues(value),
     }));
   };
 
   const handleSave = async () => {
+    const validationError = getRegionValidationError(countryCodes);
+    if (validationError) {
+      setStatus({ tone: "error", message: validationError });
+      return;
+    }
+
     setSaving(true);
     setStatus({ tone: "success", message: "" });
 
@@ -160,7 +227,7 @@ export default function AdminRegionsPage() {
       setLengthRules(nextPayload.lengthRules);
       setStatus({ tone: "success", message: "Region configuration saved." });
     } else {
-      setStatus({ tone: "error", message: response.error || "Failed to save region configuration." });
+      setStatus({ tone: "error", message: response.error || response.message || "Failed to save region configuration." });
     }
 
     setSaving(false);
@@ -188,6 +255,12 @@ export default function AdminRegionsPage() {
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
+      const validationError = getRegionValidationError(parsed?.countryCodes);
+      if (validationError) {
+        setStatus({ tone: "error", message: validationError });
+        return;
+      }
+
       const payload = buildPayload(parsed?.countryCodes, parsed?.lengthRules);
       setCountryCodes(payload.countryCodes);
       setLengthRules(payload.lengthRules);
@@ -305,13 +378,14 @@ export default function AdminRegionsPage() {
             <p className="text-xs text-slate-500">Enter comma-separated values such as `10` or `9,10,11`.</p>
           </div>
 
-          {countryCodes.filter((item) => item.code).length === 0 ? (
+          {countryCodes.filter((item) => normalizeDialCode(item.code)).length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
               Add at least one country code before defining length rules.
             </div>
           ) : (
             <div className="mt-6 space-y-3">
               {countryCodes
+                .map((item) => ({ ...item, code: normalizeDialCode(item.code) }))
                 .filter((item) => item.code)
                 .map((item, index) => (
                   <label key={`${item.code}-${index}`} className="grid gap-2 md:grid-cols-[110px,1fr] md:items-center">

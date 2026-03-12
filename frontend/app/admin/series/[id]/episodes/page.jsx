@@ -16,7 +16,7 @@ import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { BulkUploadModal } from '@/components/admin/episodes/BulkUploadModal';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
-import { adminFetch } from '@/lib/adminApiClient';
+import { adminFetch, readAdminResponseMessage } from '@/lib/adminApiClient';
 
 const searchFields = [
   { field: 'number', type: 'number' },
@@ -50,34 +50,6 @@ function toInteger(value, fallback = 0) {
 
 function hasInput(value) {
   return String(value ?? '').trim() !== '';
-}
-
-async function readResponseMessage(response, fallbackMessage) {
-  try {
-    const payload = await response.json();
-    const message = payload?.message ?? payload?.error ?? payload?.details;
-
-    if (Array.isArray(message)) {
-      return message.find((item) => typeof item === 'string') || fallbackMessage;
-    }
-
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-  } catch {
-    // Ignore JSON parsing failures.
-  }
-
-  try {
-    const text = await response.text();
-    if (text.trim()) {
-      return text.trim();
-    }
-  } catch {
-    // Ignore text parsing failures.
-  }
-
-  return fallbackMessage;
 }
 
 export default function AdminEpisodesPage() {
@@ -138,7 +110,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readResponseMessage(response, 'Failed to add the episode.'));
+        throw new Error(await readAdminResponseMessage(response, 'Failed to add the episode.'));
       }
 
       return response.json();
@@ -230,7 +202,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readResponseMessage(response, 'Failed to update the episode.'));
+        throw new Error(await readAdminResponseMessage(response, 'Failed to update the episode.'));
       }
 
       return response.json();

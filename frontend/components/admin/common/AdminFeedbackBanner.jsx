@@ -5,6 +5,7 @@ export function AdminFeedbackBanner({
   onDismiss,
   className = '',
   dismissLabel = 'Dismiss',
+  dismissAriaLabel,
 }) {
   if (!feedback?.message) {
     return null;
@@ -21,6 +22,7 @@ export function AdminFeedbackBanner({
       <button
         type="button"
         onClick={onDismiss}
+        aria-label={dismissAriaLabel || dismissLabel}
         className="rounded-md px-2 py-1 text-xs font-medium text-current opacity-80 transition hover:opacity-100"
       >
         {dismissLabel}
