@@ -1,21 +1,36 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { findSeriesVisibilityCompat, isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
 
 @Injectable()
 export class RecommendationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getContentBasedRecommendations(seriesId: string, limit = 10, userId?: string) {
-    const currentSeries = await this.prisma.series.findUnique({
-      where: { id: seriesId },
-      select: {
-        id: true,
-        type: true,
-        genres: true,
-        adult: true,
-        isPublished: true,
-      },
-    });
+    let currentSeries;
+    try {
+      currentSeries = await this.prisma.series.findUnique({
+        where: { id: seriesId },
+        select: {
+          id: true,
+          type: true,
+          genres: true,
+          adult: true,
+          isPublished: true,
+        },
+      });
+    } catch (error) {
+      if (!isSeriesVisibilitySchemaDrift(error)) {
+        throw error;
+      }
+      currentSeries = await findSeriesVisibilityCompat(this.prisma, seriesId, [
+        "id",
+        "type",
+        "genres",
+        "adult",
+        "isPublished",
+      ]);
+    }
 
     if (!currentSeries || currentSeries.isPublished === false) {
       return [];
@@ -31,41 +46,76 @@ export class RecommendationService {
       readSeriesIds = readSeries.map((item) => item.seriesId);
     }
 
-    const similarSeries = await this.prisma.series.findMany({
-      where: {
-        AND: [
-          { id: { not: seriesId } },
-          { type: currentSeries.type },
-          { adult: currentSeries.adult },
-          { isPublished: true },
-          { status: { not: "draft" } },
-          ...(readSeriesIds.length > 0 ? [{ id: { notIn: readSeriesIds } }] : []),
-        ],
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        coverTone: true,
-        type: true,
-        genres: true,
-        rating: true,
-        ratingCount: true,
-        status: true,
-        badges: true,
-        adult: true,
-        isPublished: true,
-        episodePrice: true,
-        ttfEnabled: true,
-        _count: {
-          select: {
-            follows: true,
-            episodes: true,
-          },
+    let similarSeries;
+    try {
+      similarSeries = await this.prisma.series.findMany({
+        where: {
+          AND: [
+            { id: { not: seriesId } },
+            { type: currentSeries.type },
+            { adult: currentSeries.adult },
+            { isPublished: true },
+            { status: { not: "draft" } },
+            ...(readSeriesIds.length > 0 ? [{ id: { notIn: readSeriesIds } }] : []),
+          ],
         },
-      } as const,
-      take: limit * 3,
-    });
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          coverTone: true,
+          type: true,
+          genres: true,
+          rating: true,
+          ratingCount: true,
+          status: true,
+          badges: true,
+          adult: true,
+          isPublished: true,
+          episodePrice: true,
+          ttfEnabled: true,
+          _count: {
+            select: {
+              follows: true,
+              episodes: true,
+            },
+          },
+        } as const,
+        take: limit * 3,
+      });
+    } catch (error) {
+      if (!isSeriesVisibilitySchemaDrift(error)) {
+        throw error;
+      }
+      similarSeries = await querySeriesVisibilityCompat(this.prisma, {
+        adult: currentSeries.adult,
+        excludeIds: [seriesId, ...readSeriesIds],
+        limit: limit * 3,
+        onlyPublished: true,
+        orderBy: [
+          { field: "rating", direction: "desc" },
+          { field: "ratingCount", direction: "desc" },
+        ],
+        select: [
+          "id",
+          "title",
+          "description",
+          "coverTone",
+          "type",
+          "genres",
+          "rating",
+          "ratingCount",
+          "status",
+          "badges",
+          "adult",
+          "isPublished",
+          "episodePrice",
+          "ttfEnabled",
+        ],
+        statusNot: "draft",
+        type: currentSeries.type,
+      });
+    }
 
     return similarSeries
       .filter((series) => series.isPublished !== false)
@@ -78,7 +128,7 @@ export class RecommendationService {
           score += series.rating * 2;
         }
 
-        const followCount = series._count?.follows || 0;
+        const followCount = "_count" in (series as any) ? ((series as any)._count?.follows || 0) : 0;
         score += Math.log10(followCount + 1) * 2;
 
         return {
@@ -125,38 +175,69 @@ export class RecommendationService {
   }
 
   async getPopularSeries(limit = 10) {
-    const rows = await this.prisma.series.findMany({
-      where: {
-        status: { not: "draft" },
-        isPublished: true,
-      },
-      orderBy: [{ rating: "desc" }, { ratingCount: "desc" }],
-      take: limit,
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        coverTone: true,
-        type: true,
-        genres: true,
-        rating: true,
-        ratingCount: true,
-        status: true,
-        badges: true,
-        adult: true,
-        isPublished: true,
-        episodePrice: true,
-        ttfEnabled: true,
-        _count: {
-          select: {
-            follows: true,
-            episodes: true,
-          },
+    try {
+      const rows = await this.prisma.series.findMany({
+        where: {
+          status: { not: "draft" },
+          isPublished: true,
         },
-      } as const,
-    });
+        orderBy: [{ rating: "desc" }, { ratingCount: "desc" }],
+        take: limit,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          coverTone: true,
+          type: true,
+          genres: true,
+          rating: true,
+          ratingCount: true,
+          status: true,
+          badges: true,
+          adult: true,
+          isPublished: true,
+          episodePrice: true,
+          ttfEnabled: true,
+          _count: {
+            select: {
+              follows: true,
+              episodes: true,
+            },
+          },
+        } as const,
+      });
 
-    return rows.filter((series) => series.isPublished !== false);
+      return rows.filter((series) => series.isPublished !== false);
+    } catch (error) {
+      if (!isSeriesVisibilitySchemaDrift(error)) {
+        throw error;
+      }
+      return querySeriesVisibilityCompat(this.prisma, {
+        limit,
+        onlyPublished: true,
+        orderBy: [
+          { field: "rating", direction: "desc" },
+          { field: "ratingCount", direction: "desc" },
+        ],
+        select: [
+          "id",
+          "title",
+          "description",
+          "coverTone",
+          "type",
+          "genres",
+          "rating",
+          "ratingCount",
+          "status",
+          "badges",
+          "adult",
+          "isPublished",
+          "episodePrice",
+          "ttfEnabled",
+        ],
+        statusNot: "draft",
+      });
+    }
   }
 
   private countMatches(left: string[], right: string[]): number {

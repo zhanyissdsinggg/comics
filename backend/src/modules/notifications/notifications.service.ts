@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
 import { getSubscriptionPayload } from "../../common/utils/subscription";
 
 @Injectable()
@@ -50,8 +51,10 @@ export class NotificationsService {
     });
     const nextPayloads: any[] = [];
     const seriesIds = followed.map((row) => row.seriesId);
-    const seriesList = seriesIds.length
-      ? await this.prisma.series.findMany({
+    let seriesList: any[] = [];
+    if (seriesIds.length) {
+      try {
+        seriesList = await this.prisma.series.findMany({
           where: { id: { in: seriesIds }, isPublished: true },
           select: {
             id: true,
@@ -59,8 +62,18 @@ export class NotificationsService {
             ttfEnabled: true,
             ttfIntervalHours: true,
           },
-        })
-      : [];
+        });
+      } catch (error) {
+        if (!isSeriesVisibilitySchemaDrift(error)) {
+          throw error;
+        }
+        seriesList = await querySeriesVisibilityCompat(this.prisma, {
+          ids: seriesIds,
+          onlyPublished: true,
+          select: ["id", "title", "ttfEnabled", "ttfIntervalHours", "isPublished"],
+        });
+      }
+    }
     const subscription = await getSubscriptionPayload(this.prisma, userId);
     for (const series of seriesList) {
       const latestEpisode = await this.prisma.episode.findFirst({

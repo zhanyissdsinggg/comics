@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { CacheService } from "../../common/cache/cache.service";
 import { Cacheable, CacheEvict } from "../../common/cache/cache.decorator";
+import { isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
 
 type SeriesEpisodeRow = {
   id: string;
@@ -343,11 +344,25 @@ export class SeriesService {
   @Cacheable("series:list", 3600)
   async list(adult: boolean | null) {
     const where = adult === null ? { isPublished: true } : { adult, isPublished: true };
-    const list = await this.prisma.series.findMany({
-      where,
-      orderBy: { title: "asc" },
-    });
-    return list.map((item) => this.toSeriesView(item));
+
+    try {
+      const list = await this.prisma.series.findMany({
+        where,
+        orderBy: { title: "asc" },
+      });
+      return list.map((item) => this.toSeriesView(item));
+    } catch (error) {
+      if (!this.isSchemaDriftError(error) && !isSeriesVisibilitySchemaDrift(error)) {
+        throw error;
+      }
+      this.logger.warn("Series list query hit schema drift, switching to compatibility mode.");
+      const fallbackList = await querySeriesVisibilityCompat(this.prisma, {
+        adult,
+        onlyPublished: true,
+        orderBy: [{ field: "title", direction: "asc" }],
+      });
+      return fallbackList.map((item) => this.toSeriesView(item));
+    }
   }
 
   async detail(seriesId: string, subscription?: any) {

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
 
 type SearchSeries = {
   id: string;
@@ -168,27 +169,60 @@ export class SearchService {
   }
 
   private async loadSearchableSeries(adult: boolean): Promise<SearchSeries[]> {
-    return this.prisma.series.findMany({
-      where: adult ? { isPublished: true } : { adult: false, isPublished: true },
-      select: {
-        id: true,
-        title: true,
-        type: true,
-        description: true,
-        coverUrl: true,
-        coverTone: true,
-        badge: true,
-        badges: true,
-        adult: true,
-        isPublished: true,
-        genres: true,
-        status: true,
-        rating: true,
-        ratingCount: true,
-        updatedAt: true,
-        createdAt: true,
-      },
-    });
+    try {
+      return await this.prisma.series.findMany({
+        where: adult ? { isPublished: true } : { adult: false, isPublished: true },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          description: true,
+          coverUrl: true,
+          coverTone: true,
+          badge: true,
+          badges: true,
+          adult: true,
+          isPublished: true,
+          genres: true,
+          status: true,
+          rating: true,
+          ratingCount: true,
+          updatedAt: true,
+          createdAt: true,
+        },
+      });
+    } catch (error) {
+      if (!isSeriesVisibilitySchemaDrift(error)) {
+        throw error;
+      }
+      const fallbackRows = await querySeriesVisibilityCompat(this.prisma, {
+        adult: adult ? null : false,
+        onlyPublished: true,
+        select: [
+          "id",
+          "title",
+          "type",
+          "description",
+          "coverUrl",
+          "coverTone",
+          "badge",
+          "badges",
+          "adult",
+          "isPublished",
+          "genres",
+          "status",
+          "rating",
+          "ratingCount",
+          "updatedAt",
+          "createdAt",
+        ],
+      });
+      return fallbackRows.map((row) => ({
+        ...row,
+        createdAt: row.createdAt || new Date(0),
+        updatedAt: row.updatedAt || row.createdAt || new Date(0),
+      }));
+    }
   }
 
   async search(options: SearchOptions) {
