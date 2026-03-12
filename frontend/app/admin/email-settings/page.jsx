@@ -1,15 +1,14 @@
-"use client";
+'use client';
 
 export const dynamic = 'force-dynamic';
 
-
-import { Suspense } from "react";
-import { AdminLayout } from "../../../components/admin/AdminLayout";
-import AdminEmailSettingsPage from "../../../components/admin/AdminEmailSettingsPage";
+import { Suspense } from 'react';
+import { AdminLayout } from '../../../components/admin/AdminLayout';
+import AdminEmailSettingsPage from '../../../components/admin/AdminEmailSettingsPage';
 
 export default function EmailSettingsPage() {
   return (
-    <AdminLayout title="邮件配置">
+    <AdminLayout title="Email Settings">
       <Suspense fallback={<div>Loading...</div>}>
         <AdminEmailSettingsPage />
       </Suspense>

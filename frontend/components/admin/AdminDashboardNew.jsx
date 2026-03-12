@@ -61,11 +61,11 @@ const DEFAULT_RECENT_UPDATES = [
 ];
 
 const DEFAULT_ACTIVITIES = [
-  { id: 1, type: "order", user: "用户A", action: "购买了《Midnight Contract》", time: "5分钟前" },
-  { id: 2, type: "comment", user: "用户B", action: "评论了《Crimson Promise》", time: "10分钟前" },
-  { id: 3, type: "user", user: "用户C", action: "注册了新账号", time: "15分钟前" },
-  { id: 4, type: "order", user: "用户D", action: "购买了套餐", time: "20分钟前" },
-  { id: 5, type: "series", user: "管理员", action: "发布了新作品", time: "30分钟前" },
+  { id: 1, type: "order", user: "User A", action: "purchased Midnight Contract", time: "5 minutes ago" },
+  { id: 2, type: "comment", user: "User B", action: "commented on Crimson Promise", time: "10 minutes ago" },
+  { id: 3, type: "user", user: "User C", action: "created a new account", time: "15 minutes ago" },
+  { id: 4, type: "order", user: "User D", action: "purchased a points package", time: "20 minutes ago" },
+  { id: 5, type: "series", user: "Admin", action: "published a new series", time: "30 minutes ago" },
 ];
 
 function toArray(value, fallback) {
@@ -162,7 +162,7 @@ function normalizeRecentUpdates(list) {
 function getRelativeTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "刚刚";
+    return "Just now";
   }
 
   const diffMs = Date.now() - date.getTime();
@@ -170,10 +170,10 @@ function getRelativeTime(value) {
   const hours = Math.floor(diffMs / 3600000);
   const days = Math.floor(diffMs / 86400000);
 
-  if (minutes < 1) return "刚刚";
-  if (minutes < 60) return `${minutes}分钟前`;
-  if (hours < 24) return `${hours}小时前`;
-  return `${days}天前`;
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} minutes ago`;
+  if (hours < 24) return `${hours} hours ago`;
+  return `${days} days ago`;
 }
 
 function normalizeActivities(list) {
@@ -290,7 +290,7 @@ function StatCard({ icon: Icon, label, value, change, trend, color }) {
         </div>
         <div>
           <p className="mb-1 text-sm text-ios-gray-500 font-medium">{label}</p>
-          <p className="text-3xl font-bold text-neutral-100 tabular-nums">{safeValue.toLocaleString("zh-CN")}</p>
+          <p className="text-3xl font-bold text-neutral-100 tabular-nums">{safeValue.toLocaleString("en-US")}</p>
         </div>
       </div>
     </div>
@@ -358,13 +358,13 @@ function TopSeriesItem({ series, rank, metric }) {
         <div className="mb-1 flex items-center gap-2">
           <p className="truncate text-sm font-bold text-neutral-200">{series.title}</p>
           <span className={`flex-shrink-0 rounded-2xl bg-neutral-800/50 px-2.5 py-1 text-xs font-medium ${series.type === "comic" ? "text-ios-blue" : "text-ios-purple"}`}>
-            {series.type === "comic" ? "漫画" : "小说"}
+            {series.type === "comic" ? "Comic" : "Novel"}
           </span>
         </div>
         <p className="text-xs text-ios-gray-400 font-medium">
           {metric === "views"
-            ? `${toNumber(series.views).toLocaleString("zh-CN")} 次浏览`
-            : `¥${toNumber(series.revenue).toLocaleString("zh-CN")} 收入`}
+            ? `${toNumber(series.views).toLocaleString("en-US")} views`
+            : `$${toNumber(series.revenue).toLocaleString("en-US")} revenue`}
         </p>
       </div>
     </div>
@@ -382,11 +382,11 @@ function RecentUpdateItem({ series }) {
         <div className="mb-1 flex items-center gap-2">
           <p className="truncate text-sm font-bold text-neutral-200">{series.title}</p>
           <span className={`flex-shrink-0 rounded-2xl bg-neutral-800/50 px-2.5 py-1 text-xs font-medium ${series.type === "comic" ? "text-ios-blue" : "text-ios-purple"}`}>
-            {series.type === "comic" ? "漫画" : "小说"}
+            {series.type === "comic" ? "Comic" : "Novel"}
           </span>
         </div>
         <p className="text-xs text-ios-gray-400 font-medium">
-          {toNumber(series.episodeCount)} 章节 · {getRelativeTime(series.updatedAt)}
+          {toNumber(series.episodeCount)} episodes | {getRelativeTime(series.updatedAt)}
         </p>
       </div>
     </div>
@@ -468,7 +468,7 @@ export default function AdminDashboardNew() {
           setActivities(normalized.activities);
         }
       } catch (error) {
-        console.error("获取 dashboard 数据失败:", error);
+        console.error("Failed to load dashboard data:", error);
 
         if (!aborted) {
           setStats(DEFAULT_STATS);
@@ -490,7 +490,7 @@ export default function AdminDashboardNew() {
     };
   }, [queryString]);
 
-  // 老王添加：手动刷新数据
+  // Refresh dashboard data on demand.
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -520,25 +520,25 @@ export default function AdminDashboardNew() {
       setRecentUpdates(normalized.recentUpdates);
       setActivities(normalized.activities);
     } catch (error) {
-      console.error("刷新数据失败:", error);
+      console.error("Failed to refresh dashboard data:", error);
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  // 老王添加：导出数据为CSV
+  // Export the current metric snapshot as CSV.
   const handleExportData = () => {
     const csvData = [
-      ["指标", "数值", "变化率", "趋势"],
-      ["总用户数", stats.users.total, `${stats.users.change}%`, stats.users.trend],
-      ["作品数量", stats.series.total, `${stats.series.change}%`, stats.series.trend],
-      ["订单数量", stats.orders.total, `${stats.orders.change}%`, stats.orders.trend],
-      ["总收入", stats.revenue.total, `${stats.revenue.change}%`, stats.revenue.trend],
-      ["总浏览量", stats.views.total, `${stats.views.change}%`, stats.views.trend],
-      ["评论数量", stats.comments.total, `${stats.comments.change}%`, stats.comments.trend],
-      ["漫画作品", stats.seriesByType.comic.total, `${stats.seriesByType.comic.change}%`, stats.seriesByType.comic.trend],
-      ["小说作品", stats.seriesByType.novel.total, `${stats.seriesByType.novel.change}%`, stats.seriesByType.novel.trend],
-      ["总章节数", stats.episodes.total, `${stats.episodes.change}%`, stats.episodes.trend],
+      ["Metric", "Value", "Change", "Trend"],
+      ["Total users", stats.users.total, `${stats.users.change}%`, stats.users.trend],
+      ["Series", stats.series.total, `${stats.series.change}%`, stats.series.trend],
+      ["Orders", stats.orders.total, `${stats.orders.change}%`, stats.orders.trend],
+      ["Revenue", stats.revenue.total, `${stats.revenue.change}%`, stats.revenue.trend],
+      ["Views", stats.views.total, `${stats.views.change}%`, stats.views.trend],
+      ["Comments", stats.comments.total, `${stats.comments.change}%`, stats.comments.trend],
+      ["Comic series", stats.seriesByType.comic.total, `${stats.seriesByType.comic.change}%`, stats.seriesByType.comic.trend],
+      ["Novel series", stats.seriesByType.novel.total, `${stats.seriesByType.novel.change}%`, stats.seriesByType.novel.trend],
+      ["Episodes", stats.episodes.total, `${stats.episodes.change}%`, stats.episodes.trend],
     ];
 
     const csv = csvData.map((row) => row.join(",")).join("\n");
@@ -560,36 +560,36 @@ export default function AdminDashboardNew() {
           <div>
             <h2 className="mb-2 flex items-center gap-2 text-2xl font-bold text-neutral-100">
               <TrendingUp size={26} className="text-ios-green" />
-              后台数据看板
+              Operations dashboard
             </h2>
-            <p className="text-sm text-ios-gray-400 font-medium">实时监控内容运营、订单和用户增长表现</p>
+            <p className="text-sm text-ios-gray-400 font-medium">Monitor content performance, orders, and audience growth in real time.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {/* 老王添加：刷新按钮 */}
+            {/* Refresh button */}
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
               className="flex items-center gap-2 rounded-4xl border border-ios-green/20 bg-ios-green/5 px-4 py-2.5 text-xs text-ios-green font-bold transition-all duration-300 hover:bg-ios-green/10 hover:border-ios-green/30 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
-              <span className="hidden sm:inline">{isRefreshing ? "刷新中..." : "刷新"}</span>
+              <span className="hidden sm:inline">{isRefreshing ? "Refreshing..." : "Refresh"}</span>
             </button>
 
-            {/* 老王添加：导出按钮 */}
+            {/* Export button */}
             <button
               onClick={handleExportData}
               className="flex items-center gap-2 rounded-4xl border border-ios-blue/20 bg-ios-blue/5 px-4 py-2.5 text-xs text-ios-blue font-bold transition-all duration-300 hover:bg-ios-blue/10 hover:border-ios-blue/30 hover:scale-105 hover:shadow-ios-sm active:scale-95"
             >
               <Download size={14} />
-              <span className="hidden sm:inline">导出</span>
+              <span className="hidden sm:inline">Export</span>
             </button>
 
             {[
-              { value: "all", label: "全部" },
-              { value: "7days", label: "最近7天" },
-              { value: "30days", label: "最近30天" },
-              { value: "custom", label: "自定义" },
+              { value: "all", label: "All" },
+              { value: "7days", label: "Last 7 days" },
+              { value: "30days", label: "Last 30 days" },
+              { value: "custom", label: "Custom" },
             ].map((option) => (
               <button
                 key={option.value}
@@ -609,7 +609,7 @@ export default function AdminDashboardNew() {
         {dateRange === "custom" && (
           <div className="mt-4 flex flex-wrap items-center gap-3 animate-slide-in-right">
             <div className="flex items-center gap-2">
-              <label className="text-sm text-ios-gray-400 font-medium">从</label>
+              <label className="text-sm text-ios-gray-400 font-medium">From</label>
               <input
                 type="date"
                 value={customFrom}
@@ -618,7 +618,7 @@ export default function AdminDashboardNew() {
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm text-ios-gray-400 font-medium">到</label>
+              <label className="text-sm text-ios-gray-400 font-medium">To</label>
               <input
                 type="date"
                 value={customTo}
@@ -648,7 +648,7 @@ export default function AdminDashboardNew() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <StatCard
               icon={Users}
-              label="总用户数"
+              label="Total users"
               value={stats.users.total}
               change={stats.users.change}
               trend={stats.users.trend}
@@ -656,7 +656,7 @@ export default function AdminDashboardNew() {
             />
             <StatCard
               icon={BookOpen}
-              label="作品数量"
+              label="Series"
               value={stats.series.total}
               change={stats.series.change}
               trend={stats.series.trend}
@@ -664,7 +664,7 @@ export default function AdminDashboardNew() {
             />
             <StatCard
               icon={Receipt}
-              label="订单数量"
+              label="Orders"
               value={stats.orders.total}
               change={stats.orders.change}
               trend={stats.orders.trend}
@@ -672,7 +672,7 @@ export default function AdminDashboardNew() {
             />
             <StatCard
               icon={DollarSign}
-              label="总收入"
+              label="Revenue"
               value={stats.revenue.total}
               change={stats.revenue.change}
               trend={stats.revenue.trend}
@@ -680,7 +680,7 @@ export default function AdminDashboardNew() {
             />
             <StatCard
               icon={Eye}
-              label="总浏览量"
+              label="Views"
               value={stats.views.total}
               change={stats.views.change}
               trend={stats.views.trend}
@@ -688,7 +688,7 @@ export default function AdminDashboardNew() {
             />
             <StatCard
               icon={MessageSquare}
-              label="评论数量"
+              label="Comments"
               value={stats.comments.total}
               change={stats.comments.change}
               trend={stats.comments.trend}
@@ -699,7 +699,7 @@ export default function AdminDashboardNew() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <StatCard
               icon={FileText}
-              label="漫画作品"
+              label="Comic series"
               value={stats.seriesByType.comic.total}
               change={stats.seriesByType.comic.change}
               trend={stats.seriesByType.comic.trend}
@@ -707,7 +707,7 @@ export default function AdminDashboardNew() {
             />
             <StatCard
               icon={BookOpen}
-              label="小说作品"
+              label="Novel series"
               value={stats.seriesByType.novel.total}
               change={stats.seriesByType.novel.change}
               trend={stats.seriesByType.novel.trend}
@@ -715,7 +715,7 @@ export default function AdminDashboardNew() {
             />
             <StatCard
               icon={Layers}
-              label="总章节数"
+              label="Episodes"
               value={stats.episodes.total}
               change={stats.episodes.change}
               trend={stats.episodes.trend}
@@ -724,12 +724,12 @@ export default function AdminDashboardNew() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-lg font-bold text-neutral-100">快捷操作</h3>
+            <h3 className="mb-4 text-lg font-bold text-neutral-100">Quick actions</h3>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              <QuickAction icon={BookOpen} label="添加作品" href="/admin/series" color="from-blue-500 to-blue-600" />
-              <QuickAction icon={Megaphone} label="创建活动" href="/admin/promotions" color="from-orange-500 to-orange-600" />
-              <QuickAction icon={Users} label="用户管理" href="/admin/users" color="from-purple-500 to-purple-600" />
-              <QuickAction icon={Receipt} label="订单管理" href="/admin/orders" color="from-emerald-500 to-emerald-600" />
+              <QuickAction icon={BookOpen} label="Add series" href="/admin/series" color="from-blue-500 to-blue-600" />
+              <QuickAction icon={Megaphone} label="Create campaign" href="/admin/promotions" color="from-orange-500 to-orange-600" />
+              <QuickAction icon={Users} label="Manage users" href="/admin/users" color="from-purple-500 to-purple-600" />
+              <QuickAction icon={Receipt} label="Manage orders" href="/admin/orders" color="from-emerald-500 to-emerald-600" />
             </div>
           </div>
 
@@ -737,7 +737,7 @@ export default function AdminDashboardNew() {
             <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios animate-scale-in">
               <div className="mb-4 flex items-center gap-2">
                 <Award size={22} className="text-ios-green" />
-                <h3 className="text-lg font-bold text-neutral-100">热门作品（浏览量）</h3>
+                <h3 className="text-lg font-bold text-neutral-100">Top series by views</h3>
               </div>
               <div className="space-y-2">
                 {topSeries.byViews.length > 0 ? (
@@ -745,7 +745,7 @@ export default function AdminDashboardNew() {
                     <TopSeriesItem key={series.id} series={series} rank={index + 1} metric="views" />
                   ))
                 ) : (
-                  <EmptyBlock text="暂无热门作品数据" />
+                  <EmptyBlock text="No top-view series yet." />
                 )}
               </div>
             </div>
@@ -753,7 +753,7 @@ export default function AdminDashboardNew() {
             <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios animate-scale-in">
               <div className="mb-4 flex items-center gap-2">
                 <DollarSign size={22} className="text-ios-green" />
-                <h3 className="text-lg font-bold text-neutral-100">热门作品（收入）</h3>
+                <h3 className="text-lg font-bold text-neutral-100">Top series by revenue</h3>
               </div>
               <div className="space-y-2">
                 {topSeries.byRevenue.length > 0 ? (
@@ -761,7 +761,7 @@ export default function AdminDashboardNew() {
                     <TopSeriesItem key={series.id} series={series} rank={index + 1} metric="revenue" />
                   ))
                 ) : (
-                  <EmptyBlock text="暂无热门收入数据" />
+                  <EmptyBlock text="No revenue leaderboard yet." />
                 )}
               </div>
             </div>
@@ -771,29 +771,29 @@ export default function AdminDashboardNew() {
             <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios animate-scale-in">
               <div className="mb-4 flex items-center gap-2">
                 <Clock size={22} className="text-ios-green" />
-                <h3 className="text-lg font-bold text-neutral-100">最近更新</h3>
+                <h3 className="text-lg font-bold text-neutral-100">Recent updates</h3>
               </div>
               <div className="space-y-2">
                 {recentUpdates.length > 0 ? (
                   recentUpdates.map((series) => <RecentUpdateItem key={series.id} series={series} />)
                 ) : (
-                  <EmptyBlock text="暂无更新数据" />
+                  <EmptyBlock text="No recent updates." />
                 )}
               </div>
             </div>
 
             <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios animate-scale-in">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-neutral-100">最近活动</h3>
+                <h3 className="text-lg font-bold text-neutral-100">Recent activity</h3>
                 <a href="/admin/tracking" className="text-sm text-ios-green font-medium transition-all duration-300 hover:text-emerald-300 hover:scale-105">
-                  查看全部 →
+                  View all &gt;
                 </a>
               </div>
               <div className="space-y-2">
                 {activities.length > 0 ? (
                   activities.map((activity) => <ActivityItem key={activity.id} activity={activity} />)
                 ) : (
-                  <EmptyBlock text="暂无活动记录" />
+                  <EmptyBlock text="No activity yet." />
                 )}
               </div>
             </div>
@@ -803,3 +803,6 @@ export default function AdminDashboardNew() {
     </div>
   );
 }
+
+
+

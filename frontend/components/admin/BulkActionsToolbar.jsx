@@ -1,16 +1,7 @@
-/**
- * 老王打造：批量操作工具栏 - iOS 26风格
- * 功能：
- * - 批量选择
- * - 批量发布/下架
- * - 批量删除
- * - 进度条显示
- * - 撤销功能
- */
 "use client";
 
-import { Check, X, Trash2, Eye, EyeOff, Edit, RotateCcw } from "lucide-react";
 import { useState } from "react";
+import { Eye, EyeOff, RotateCcw, Trash2, X } from "lucide-react";
 
 export default function BulkActionsToolbar({
   selectedCount,
@@ -19,19 +10,15 @@ export default function BulkActionsToolbar({
   onDelete,
   onCancel,
 }) {
-  // 老王添加：操作进度状态
   const [operationState, setOperationState] = useState({
     isProcessing: false,
-    currentOperation: null, // 'publish', 'unpublish', 'delete'
-    progress: 0, // 0-100
+    currentOperation: null,
+    progress: 0,
     completed: 0,
     total: 0,
   });
-
-  // 老王添加：撤销历史
   const [undoHistory, setUndoHistory] = useState([]);
 
-  // 老王添加：包装操作函数，添加进度跟踪
   const wrapOperation = async (operation, operationType, total) => {
     setOperationState({
       isProcessing: true,
@@ -42,20 +29,16 @@ export default function BulkActionsToolbar({
     });
 
     try {
-      // 模拟进度更新
       const progressInterval = setInterval(() => {
-        setOperationState((prev) => {
-          const newProgress = Math.min(prev.progress + Math.random() * 30, 90);
-          return { ...prev, progress: newProgress };
-        });
+        setOperationState((current) => ({
+          ...current,
+          progress: Math.min(current.progress + Math.random() * 30, 90),
+        }));
       }, 200);
 
-      // 执行操作
       await operation();
-
       clearInterval(progressInterval);
 
-      // 完成操作
       setOperationState({
         isProcessing: false,
         currentOperation: null,
@@ -64,13 +47,8 @@ export default function BulkActionsToolbar({
         total,
       });
 
-      // 添加到撤销历史
-      setUndoHistory((prev) => [
-        ...prev,
-        { type: operationType, timestamp: Date.now(), count: total },
-      ]);
+      setUndoHistory((current) => [...current, { type: operationType, timestamp: Date.now(), count: total }]);
 
-      // 2秒后隐藏进度条
       setTimeout(() => {
         setOperationState({
           isProcessing: false,
@@ -81,7 +59,7 @@ export default function BulkActionsToolbar({
         });
       }, 2000);
     } catch (error) {
-      console.error("操作失败:", error);
+      console.error("Bulk action failed:", error);
       setOperationState({
         isProcessing: false,
         currentOperation: null,
@@ -92,125 +70,108 @@ export default function BulkActionsToolbar({
     }
   };
 
-  const handlePublish = async () => {
-    await wrapOperation(onPublish, "publish", selectedCount);
-  };
+  if (!selectedCount) {
+    return null;
+  }
 
-  const handleUnpublish = async () => {
-    await wrapOperation(onUnpublish, "unpublish", selectedCount);
-  };
-
-  const handleDelete = async () => {
-    await wrapOperation(onDelete, "delete", selectedCount);
-  };
-
-  if (selectedCount === 0) return null;
-
-  const progressPercent = operationState.progress;
   const isProcessing = operationState.isProcessing;
+  const progressLabel =
+    operationState.currentOperation === "publish"
+      ? "Publishing..."
+      : operationState.currentOperation === "unpublish"
+        ? "Unpublishing..."
+        : operationState.currentOperation === "delete"
+          ? "Deleting..."
+          : null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
-      <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/95 backdrop-blur-2xl shadow-ios-xl px-6 py-4">
-        {/* 老王添加：进度条 */}
-        {isProcessing && (
+    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-slide-up">
+      <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/95 px-6 py-4 shadow-ios-xl backdrop-blur-2xl">
+        {isProcessing ? (
           <div className="mb-4 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-ios-gray-400">
-                {operationState.currentOperation === "publish" && "发布中..."}
-                {operationState.currentOperation === "unpublish" && "下架中..."}
-                {operationState.currentOperation === "delete" && "删除中..."}
-              </span>
-              <span className="text-ios-blue font-semibold">
-                {Math.round(progressPercent)}%
-              </span>
+              <span className="text-ios-gray-400">{progressLabel}</span>
+              <span className="font-semibold text-ios-blue">{Math.round(operationState.progress)}%</span>
             </div>
-            <div className="h-2 rounded-full bg-ios-gray-800/50 overflow-hidden">
+            <div className="h-2 overflow-hidden rounded-full bg-ios-gray-800/50">
               <div
                 className="h-full bg-gradient-to-r from-ios-blue to-ios-purple transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
+                style={{ width: `${operationState.progress}%` }}
               />
             </div>
           </div>
-        )}
+        ) : null}
 
         <div className="flex items-center gap-4">
-          {/* 老王添加：选中数量显示 */}
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ios-green/20 text-ios-green font-bold text-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ios-green/20 text-sm font-bold text-ios-green">
               {selectedCount}
             </div>
-            <span className="text-sm text-neutral-200 font-medium">
-              已选中 {selectedCount} 项
-            </span>
+            <span className="text-sm font-medium text-neutral-200">{selectedCount} selected</span>
           </div>
 
-          {/* 老王添加：分隔线 */}
           <div className="h-8 w-px bg-ios-gray-700" />
 
-          {/* 老王添加：批量操作按钮 */}
           <div className="flex items-center gap-2">
             <button
-              onClick={handlePublish}
+              type="button"
+              onClick={() => wrapOperation(onPublish, "publish", selectedCount)}
               disabled={isProcessing}
-              className="flex items-center gap-2 rounded-3xl border border-ios-green/20 bg-ios-green/10 px-4 py-2 text-xs text-ios-green font-bold transition-all duration-300 hover:bg-ios-green/20 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="批量发布"
+              title="Publish selected"
+              className="flex items-center gap-2 rounded-3xl border border-ios-green/20 bg-ios-green/10 px-4 py-2 text-xs font-bold text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Eye size={14} />
-              <span>发布</span>
+              <span>Publish</span>
             </button>
 
             <button
-              onClick={handleUnpublish}
+              type="button"
+              onClick={() => wrapOperation(onUnpublish, "unpublish", selectedCount)}
               disabled={isProcessing}
-              className="flex items-center gap-2 rounded-3xl border border-ios-gray-600/20 bg-ios-gray-700/10 px-4 py-2 text-xs text-ios-gray-400 font-bold transition-all duration-300 hover:bg-ios-gray-700/20 hover:text-neutral-200 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="批量下架"
+              title="Unpublish selected"
+              className="flex items-center gap-2 rounded-3xl border border-ios-gray-600/20 bg-ios-gray-700/10 px-4 py-2 text-xs font-bold text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-700/20 hover:text-neutral-200 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <EyeOff size={14} />
-              <span>下架</span>
+              <span>Unpublish</span>
             </button>
 
             <button
-              onClick={handleDelete}
+              type="button"
+              onClick={() => wrapOperation(onDelete, "delete", selectedCount)}
               disabled={isProcessing}
-              className="flex items-center gap-2 rounded-3xl border border-ios-red/20 bg-ios-red/10 px-4 py-2 text-xs text-ios-red font-bold transition-all duration-300 hover:bg-ios-red/20 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="批量删除"
+              title="Delete selected"
+              className="flex items-center gap-2 rounded-3xl border border-ios-red/20 bg-ios-red/10 px-4 py-2 text-xs font-bold text-ios-red transition-all duration-300 hover:bg-ios-red/20 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Trash2 size={14} />
-              <span>删除</span>
+              <span>Delete</span>
             </button>
           </div>
 
-          {/* 老王添加：分隔线 */}
           <div className="h-8 w-px bg-ios-gray-700" />
 
-          {/* 老王添加：撤销按钮 */}
-          {undoHistory.length > 0 && (
+          {undoHistory.length > 0 ? (
             <button
-              onClick={() => {
-                // 撤销功能：移除最后一个操作
-                setUndoHistory((prev) => prev.slice(0, -1));
-              }}
-              className="flex items-center gap-2 rounded-3xl border border-ios-orange/20 bg-ios-orange/10 px-4 py-2 text-xs text-ios-orange font-bold transition-all duration-300 hover:bg-ios-orange/20 hover:scale-105 hover:shadow-ios-sm active:scale-95"
-              title={`撤销最后一个操作 (${undoHistory[undoHistory.length - 1].count}项)`}
+              type="button"
+              onClick={() => setUndoHistory((current) => current.slice(0, -1))}
+              title={`Undo last action (${undoHistory[undoHistory.length - 1].count} items)`}
+              className="flex items-center gap-2 rounded-3xl border border-ios-orange/20 bg-ios-orange/10 px-4 py-2 text-xs font-bold text-ios-orange transition-all duration-300 hover:bg-ios-orange/20 hover:scale-105 hover:shadow-ios-sm active:scale-95"
             >
               <RotateCcw size={14} />
-              <span>撤销</span>
+              <span>Undo</span>
             </button>
-          )}
+          ) : null}
 
-          {/* 老王添加：分隔线 */}
           <div className="h-8 w-px bg-ios-gray-700" />
 
-          {/* 老王添加：取消按钮 */}
           <button
+            type="button"
             onClick={onCancel}
             disabled={isProcessing}
-            className="flex items-center gap-2 rounded-3xl border border-ios-gray-600/20 bg-ios-gray-700/10 px-4 py-2 text-xs text-ios-gray-400 font-bold transition-all duration-300 hover:bg-ios-gray-700/20 hover:text-neutral-200 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="取消选择"
+            title="Clear selection"
+            className="flex items-center gap-2 rounded-3xl border border-ios-gray-600/20 bg-ios-gray-700/10 px-4 py-2 text-xs font-bold text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-700/20 hover:text-neutral-200 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <X size={14} />
-            <span>取消</span>
+            <span>Clear</span>
           </button>
         </div>
       </div>

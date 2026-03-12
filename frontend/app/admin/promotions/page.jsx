@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
@@ -15,14 +15,11 @@ import { adminFetch } from '@/lib/adminApiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
 
-
-// 老王注释：定义可搜索的字段
 const searchFields = [
   { field: 'id', type: 'string' },
   { field: 'title', type: 'string' },
 ];
 
-// 老王注释：定义可排序的字段
 const sortFields = [
   { field: 'createdAt', type: 'date' },
   { field: 'title', type: 'string' },
@@ -30,19 +27,63 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: '创建时间' },
-  { value: 'title', label: '标题' },
-  { value: 'active', label: '状态' },
+  { value: 'createdAt', label: 'Created date' },
+  { value: 'title', label: 'Title' },
+  { value: 'active', label: 'Status' },
 ];
 
+async function readResponseMessage(response, fallbackMessage) {
+  try {
+    const payload = await response.json();
+    const message = payload?.message ?? payload?.error ?? payload?.details;
+
+    if (Array.isArray(message)) {
+      return message.find((item) => typeof item === 'string') || fallbackMessage;
+    }
+
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+  } catch {
+    // Ignore JSON parsing failures.
+  }
+
+  try {
+    const text = await response.text();
+    if (text.trim()) {
+      return text.trim();
+    }
+  } catch {
+    // Ignore text parsing failures.
+  }
+
+  return fallbackMessage;
+}
+
+function formatDate(value) {
+  if (!value) {
+    return '-';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }).format(date);
+}
+
 export default function AdminPromotionsPage() {
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
 
-  // 老王说：用useAdminList Hook替代所有搜索、排序、筛选逻辑
   const {
-    items: filteredPromotions,
+    items: promotions,
     pagination,
     page,
     setPage,
@@ -59,29 +100,25 @@ export default function AdminPromotionsPage() {
     sortOrder,
     setSortOrder,
     selectedIds,
-    
     toggleSelect,
     selectAll,
     clearSelection,
   } = useAdminList('promotions', searchFields, sortFields, 'createdAt', 'desc');
 
-  // 性能优化：用 Set 替代 includes() 查询
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-  // 老王说：用useBulkDelete Hook替代handleBulkDelete async函数
   const bulkDeleteMutation = useBulkDelete('promotions', {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: '批量删除促销活动成功。' });
+      setFeedback({ type: 'success', message: 'Selected promotions were deleted.' });
       refetch();
     },
-    onError: (error) => {
-      setFeedback({ type: 'error', message: `删除失败: ${error.message}` });
+    onError: (mutationError) => {
+      setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
     },
   });
 
-  // 老王说：用useMutation替代handleToggleStatus async函数
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ promotionId, currentStatus }) => {
       const response = await adminFetch(`/api/admin/promotions/${promotionId}`, {
@@ -89,34 +126,32 @@ export default function AdminPromotionsPage() {
         body: JSON.stringify({ active: !currentStatus }),
       });
 
-      if (!response.ok) throw new Error('更新促销活动状态失败');
+      if (!response.ok) {
+        throw new Error(await readResponseMessage(response, 'Failed to update the promotion status.'));
+      }
+
       return response.json();
     },
     onSuccess: (_data, variables) => {
       setFeedback({
         type: 'success',
-        message: variables.currentStatus ? '促销活动已禁用。' : '促销活动已启用。',
+        message: variables.currentStatus ? 'Promotion was paused.' : 'Promotion was activated.',
       });
       refetch();
     },
-    onError: (error) => {
-      setFeedback({ type: 'error', message: `更新失败: ${error.message}` });
+    onError: (mutationError) => {
+      setFeedback({ type: 'error', message: `Status update failed: ${mutationError.message}` });
     },
   });
 
-  const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
-
-  const handleToggleStatus = (promotionId, currentStatus) => {
-    toggleStatusMutation.mutate({ promotionId, currentStatus });
-  };
-
   return (
     <div className="min-h-screen bg-neutral-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* 页面标题 */}
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">促销管理</h1>
-          <p className="text-neutral-400 mt-2">管理所有促销活动和优惠</p>
+          <h1 className="text-3xl font-bold text-neutral-100">Promotions</h1>
+          <p className="mt-2 text-neutral-400">
+            Manage promotional campaigns and control which offers are currently live.
+          </p>
         </div>
 
         <AdminFeedbackBanner
@@ -125,132 +160,138 @@ export default function AdminPromotionsPage() {
           className="mb-6"
         />
 
-        {/* 工具栏 */}
-                        <AdminListToolbar
+        <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="搜索促销活动..."
-          onOpenFilters={() => setIsFilterModalOpen(true)}
+          searchPlaceholder="Search promotion ID or title"
+          onOpenFilters={() => setIsSortModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
         />
 
-                <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+        <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
           <button
             type="button"
             onClick={() => setIsDeleteConfirmOpen(true)}
             disabled={bulkDeleteMutation.isPending}
-            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
+            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || '\u4fc3\u9500\u6d3b\u52a8\u52a0\u8f7d\u5931\u8d25\u3002'}
+          errorMessage={error?.message || 'Failed to load promotions.'}
           onRetry={refetch}
           isLoading={isLoading}
-          hasItems={filteredPromotions.length > 0}
-          emptyMessage={'\u6682\u65e0\u4fc3\u9500\u6d3b\u52a8'}
+          hasItems={promotions.length > 0}
+          emptyMessage="No promotions yet."
           pagination={pagination}
           page={page}
           pageSize={pageSize}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
         >
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-neutral-700 bg-neutral-900">
-                    <th className="px-4 py-3 text-left">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-neutral-700 bg-neutral-900">
+                <th className="px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.length === promotions.length && promotions.length > 0}
+                    onChange={(event) => {
+                      if (event.target.checked) {
+                        selectAll(promotions);
+                        return;
+                      }
+
+                      clearSelection();
+                    }}
+                    className="rounded"
+                    aria-label="Select all promotions"
+                  />
+                </th>
+                <th className="px-4 py-3 text-left text-neutral-400">ID</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Promotion</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Status</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Created date</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {promotions.map((promotion) => {
+                const isActive = promotion.active !== false;
+
+                return (
+                  <tr key={promotion.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
+                    <td className="px-4 py-3">
                       <input
                         type="checkbox"
-                        checked={selectedIds.length === filteredPromotions.length && filteredPromotions.length > 0}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            selectAll(filteredPromotions);
-                          } else {
-                            clearSelection();
-                          }
-                        }}
+                        checked={selectedIdsSet.has(promotion.id)}
+                        onChange={() => toggleSelect(promotion.id)}
                         className="rounded"
+                        aria-label={`Select promotion ${promotion.id}`}
                       />
-                    </th>
-                    <th className="px-4 py-3 text-left text-neutral-400">ID</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">标题</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">状态</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">创建时间</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">操作</th>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-neutral-300">{promotion.id}</td>
+                    <td className="px-4 py-3 text-neutral-300">{promotion.title || 'Untitled promotion'}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                          isActive
+                            ? 'bg-green-900/30 text-green-300'
+                            : 'bg-neutral-700 text-neutral-300'
+                        }`}
+                      >
+                        {isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-neutral-400">{formatDate(promotion.createdAt)}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => toggleStatusMutation.mutate({ promotionId: promotion.id, currentStatus: isActive })}
+                        disabled={toggleStatusMutation.isPending}
+                        className={`text-sm font-medium disabled:opacity-50 ${
+                          isActive
+                            ? 'text-red-400 hover:text-red-300'
+                            : 'text-green-400 hover:text-green-300'
+                        }`}
+                      >
+                        {isActive ? 'Pause' : 'Activate'}
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredPromotions.map((promo) => (
-                    <tr key={promo.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
-                      <td className="px-4 py-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedIdsSet.has(promo.id)}
-                          onChange={() => toggleSelect(promo.id)}
-                          className="rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-neutral-300 font-medium">{promo.id}</td>
-                      <td className="px-4 py-3 text-neutral-300">{promo.title}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-medium ${
-                            promo.active
-                              ? 'bg-green-900/30 text-green-400'
-                              : 'bg-neutral-700 text-neutral-400'
-                          }`}
-                        >
-                          {promo.active ? '启用' : '禁用'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-neutral-400">
-                        {promo.createdAt ? new Date(promo.createdAt).toLocaleDateString('zh-CN') : '-'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleStatus(promo.id, promo.active)}
-                          disabled={toggleStatusMutation.isPending}
-                          className={`text-sm disabled:opacity-50 ${
-                            promo.active
-                              ? 'text-red-400 hover:text-red-300'
-                              : 'text-green-400 hover:text-green-300'
-                          }`}
-                        >
-                          {promo.active ? '禁用' : '启用'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                );
+              })}
+            </tbody>
+          </table>
         </AdminTableShell>
+
+        <AdminSortModal
+          isOpen={isSortModalOpen}
+          onClose={() => setIsSortModalOpen(false)}
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          options={sortOptions}
+          title="Sort promotions"
+          label="Sort field"
+          actionLabel="Apply"
+        />
+
+        <ConfirmDialog
+          isOpen={isDeleteConfirmOpen}
+          title="Delete promotions"
+          message={`Delete ${selectedIds.length} selected promotion(s)? This cannot be undone.`}
+          confirmText={bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+          cancelText="Cancel"
+          isDangerous={true}
+          isLoading={bulkDeleteMutation.isPending}
+          onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}
+          onCancel={() => setIsDeleteConfirmOpen(false)}
+        />
       </div>
-
-      {/* 高级筛选模态框 */}
-            <AdminSortModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        sortBy={sortBy}
-        onSortByChange={setSortBy}
-        options={sortOptions}
-      />
-
-      {/* 删除确认对话框 */}
-      <ConfirmDialog
-        isOpen={isDeleteConfirmOpen}
-        title="确认删除"
-        message={`确定要删除这 ${selectedIds.length} 个促销活动吗？此操作不可撤销。`}
-        confirmText="删除"
-        cancelText="取消"
-        isDangerous={true}
-        onConfirm={handleBulkDelete}
-        onCancel={() => setIsDeleteConfirmOpen(false)}
-      />
     </div>
   );
 }

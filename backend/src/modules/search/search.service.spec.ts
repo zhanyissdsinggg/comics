@@ -20,6 +20,7 @@ describe("SearchService", () => {
       badge: null,
       badges: [],
       adult: false,
+      isPublished: true,
       genres: ["Romance", "Drama"],
       status: "Ongoing",
       rating: 4.8,
@@ -37,6 +38,7 @@ describe("SearchService", () => {
       badge: null,
       badges: [],
       adult: false,
+      isPublished: true,
       genres: ["Action"],
       status: "Completed",
       rating: 4.6,
@@ -54,6 +56,7 @@ describe("SearchService", () => {
       badge: null,
       badges: [],
       adult: false,
+      isPublished: true,
       genres: ["Romance"],
       status: "Completed",
       rating: 4.9,
@@ -71,12 +74,31 @@ describe("SearchService", () => {
       badge: null,
       badges: [],
       adult: true,
+      isPublished: true,
       genres: ["Romance"],
       status: "Completed",
       rating: 4.7,
       ratingCount: 80,
       updatedAt: new Date("2026-03-06T00:00:00.000Z"),
       createdAt: new Date("2026-01-06T00:00:00.000Z"),
+    },
+    {
+      id: "series-5",
+      title: "Romance Hidden",
+      type: "comic",
+      description: "Should never appear in public search",
+      coverUrl: null,
+      coverTone: null,
+      badge: null,
+      badges: [],
+      adult: false,
+      isPublished: false,
+      genres: ["Romance"],
+      status: "Ongoing",
+      rating: 4.95,
+      ratingCount: 999,
+      updatedAt: new Date("2026-03-08T00:00:00.000Z"),
+      createdAt: new Date("2026-01-08T00:00:00.000Z"),
     },
   ];
 
@@ -118,6 +140,23 @@ describe("SearchService", () => {
 
     expect(result.total).toBe(1);
     expect(result.results.map((item) => item.id)).toEqual(["series-1"]);
+  });
+
+  it("never returns unpublished titles even if the data source contains them", async () => {
+    const result = await service.search({
+      q: "romance",
+      adult: false,
+      sort: "latest",
+      page: 1,
+      pageSize: 12,
+    });
+
+    expect(result.results.map((item) => item.id)).not.toContain("series-5");
+    expect(prisma.series.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { adult: false, isPublished: true },
+      }),
+    );
   });
 
   it("supports pagination with alphabetical sorting", async () => {

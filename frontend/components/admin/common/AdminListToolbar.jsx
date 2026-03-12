@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 export function AdminListToolbar({
   searchTerm,
@@ -9,6 +9,9 @@ export function AdminListToolbar({
   onToggleSortOrder,
   extraActions = null,
   className = '',
+  filtersLabel = 'Filters',
+  ascendingLabel = 'Ascending',
+  descendingLabel = 'Descending',
 }) {
   return (
     <div className={`mb-6 flex flex-wrap items-center gap-4 ${className}`.trim()}>
@@ -25,7 +28,7 @@ export function AdminListToolbar({
         onClick={onOpenFilters}
         className="rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2 text-neutral-300 transition hover:bg-neutral-700"
       >
-        高级筛选
+        {filtersLabel}
       </button>
 
       <button
@@ -33,7 +36,7 @@ export function AdminListToolbar({
         onClick={onToggleSortOrder}
         className="rounded-lg bg-neutral-800 px-4 py-2 text-neutral-300 transition hover:bg-neutral-700"
       >
-        {sortOrder === 'asc' ? '↑ 升序' : '↓ 降序'}
+        {sortOrder === 'asc' ? `Sort: ${ascendingLabel}` : `Sort: ${descendingLabel}`}
       </button>
 
       {extraActions ? <div className="flex flex-wrap items-center gap-2">{extraActions}</div> : null}

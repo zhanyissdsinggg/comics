@@ -7,11 +7,12 @@ export class RankingsService {
 
   async list(type: string, adult: boolean) {
     const list = await this.prisma.series.findMany({
-      where: adult ? {} : { adult: false },
+      where: adult ? { isPublished: true } : { adult: false, isPublished: true },
     });
+    const publishedList = list.filter((series) => series.isPublished !== false);
     if (type === "new") {
-      return [...list].reverse();
+      return [...publishedList].reverse();
     }
-    return [...list].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    return [...publishedList].sort((a, b) => (b.rating || 0) - (a.rating || 0));
   }
 }

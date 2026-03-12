@@ -1,6 +1,5 @@
 /**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
+ * Small least-recently-used cache backed by Map insertion order.
  */
 
 export class LRUCache {
@@ -14,7 +13,6 @@ export class LRUCache {
       return null;
     }
 
-    // 绉诲埌鏈€鍚庯紙鏈€杩戜娇鐢級
     const value = this.cache.get(key);
     this.cache.delete(key);
     this.cache.set(key, value);
@@ -22,15 +20,12 @@ export class LRUCache {
   }
 
   set(key, value) {
-    // 濡傛灉key宸插瓨鍦紝鍏堝垹闄?
     if (this.cache.has(key)) {
       this.cache.delete(key);
     }
 
-    // 娣诲姞鏂扮殑key-value
     this.cache.set(key, value);
 
-    // NOTE: cleaned corrupted comment.
     if (this.cache.size > this.maxSize) {
       const firstKey = this.cache.keys().next().value;
       this.cache.delete(firstKey);

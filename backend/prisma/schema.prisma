@@ -60,6 +60,7 @@ model Series {
   badge            String?
   badges           String[] @default([])
   adult            Boolean  @default(false)
+  isPublished      Boolean  @default(true)
   latestEpisodeId  String?
   genres           String[] @default([])
   status           String   @default("Ongoing")

@@ -14,6 +14,17 @@ import {
 export class EntitlementsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private async findPublishedSeries(seriesId: string) {
+    const series = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+      select: { id: true, isPublished: true, ttfIntervalHours: true },
+    });
+    if (!series || series.isPublished === false) {
+      return null;
+    }
+    return series;
+  }
+
   private applyTtfAcceleration(episode: any, series: any, subscription: any) {
     if (!episode.ttfEligible || !episode.ttfReadyAt) {
       return episode.ttfReadyAt ? new Date(episode.ttfReadyAt).getTime() : null;
@@ -37,16 +48,18 @@ export class EntitlementsService {
   }
 
   async getEntitlement(userId: string, seriesId: string) {
-    // 老王说：优化查询，使用distinct避免N+1问题
     const rows = await this.prisma.entitlement.findMany({
       where: { userId, seriesId },
       select: { episodeId: true },
-      distinct: ['episodeId'], // 确保不重复
+      distinct: ["episodeId"],
     });
     return { seriesId, unlockedEpisodeIds: rows.map((row) => row.episodeId) };
   }
 
   async unlockWithWallet(userId: string, seriesId: string, episodeId: string) {
+    if (!(await this.findPublishedSeries(seriesId))) {
+      return { ok: false, status: 404, error: "NOT_FOUND" };
+    }
     const entitlement = await this.getEntitlement(userId, seriesId);
     if (entitlement.unlockedEpisodeIds.includes(episodeId)) {
       const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
@@ -99,6 +112,10 @@ export class EntitlementsService {
   }
 
   async unlockWithTtf(userId: string, seriesId: string, episodeId: string) {
+    const series = await this.findPublishedSeries(seriesId);
+    if (!series) {
+      return { ok: false, status: 404, error: "NOT_FOUND" };
+    }
     const entitlement = await this.getEntitlement(userId, seriesId);
     if (entitlement.unlockedEpisodeIds.includes(episodeId)) {
       return { ok: true, entitlement };
@@ -108,7 +125,6 @@ export class EntitlementsService {
     if (!episode || episode.seriesId !== seriesId) {
       return { ok: false, status: 404, error: "EPISODE_NOT_FOUND" };
     }
-    const series = await this.prisma.series.findUnique({ where: { id: seriesId } });
     const readyAt = episode.ttfReadyAt
       ? this.applyTtfAcceleration(episode, series, subscription)
       : null;
@@ -125,6 +141,9 @@ export class EntitlementsService {
   }
 
   async unlockPack(userId: string, seriesId: string, episodeIds: string[], offerId: string) {
+    if (!(await this.findPublishedSeries(seriesId))) {
+      return { ok: false, status: 404, error: "NOT_FOUND" };
+    }
     const entitlement = await this.getEntitlement(userId, seriesId);
     const episodes = await this.prisma.episode.findMany({
       where: { seriesId },

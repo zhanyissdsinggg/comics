@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Body,
   ConflictException,
@@ -37,6 +37,7 @@ export class AdminSeriesController {
       title: input.title ?? existing?.title ?? "",
       type: input.type ?? existing?.type ?? "comic",
       adult: input.adult ?? existing?.adult ?? false,
+      isPublished: input.isPublished ?? existing?.isPublished ?? true,
       genres,
       coverTone: input.coverTone ?? existing?.coverTone ?? "",
       coverUrl: input.coverUrl ?? existing?.coverUrl ?? "",
@@ -67,9 +68,11 @@ export class AdminSeriesController {
     const type = String(query?.type || "").trim();
     const status = String(query?.status || "").trim();
     const adult = String(query?.adult || "").trim();
+    const publishStatus = String(query?.publishStatus || "").trim();
     const sortBy = String(query?.sortBy || "createdAt_desc").trim();
 
     const where: Record<string, unknown> = {};
+
     if (search) {
       where.OR = [
         { id: { contains: search, mode: "insensitive" } },
@@ -86,6 +89,11 @@ export class AdminSeriesController {
       where.adult = true;
     } else if (adult === "false") {
       where.adult = false;
+    }
+    if (publishStatus === "published") {
+      where.isPublished = true;
+    } else if (publishStatus === "unpublished") {
+      where.isPublished = false;
     }
 
     const [sortField, sortDirectionRaw] = sortBy.split("_");
@@ -121,10 +129,8 @@ export class AdminSeriesController {
       throw new BadRequestException("series.id is required.");
     }
 
-    const payload = this.toSeriesPayload(series);
-
     try {
-      const created = await this.prisma.series.create({ data: payload });
+      const created = await this.prisma.series.create({ data: this.toSeriesPayload(series) });
       return { series: created };
     } catch (error: any) {
       if (error?.code === "P2002") {
@@ -154,10 +160,9 @@ export class AdminSeriesController {
       throw new NotFoundException("Series not found.");
     }
 
-    const payload = this.toSeriesPayload({ ...series, id: seriesId }, existing);
     const updated = await this.prisma.series.update({
       where: { id: seriesId },
-      data: payload,
+      data: this.toSeriesPayload({ ...series, id: seriesId }, existing),
     });
     return { series: updated };
   }

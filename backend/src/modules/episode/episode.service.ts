@@ -38,9 +38,9 @@ export class EpisodeService {
     try {
       const row = await this.prisma.series.findUnique({
         where: { id: seriesId },
-        select: { id: true, type: true },
+        select: { id: true, type: true, isPublished: true },
       });
-      if (!row) {
+      if (!row || row.isPublished === false) {
         return null;
       }
       return {
@@ -52,6 +52,25 @@ export class EpisodeService {
         throw error;
       }
       this.logger.warn(`Series type query failed for ${seriesId}, switching to compatibility mode.`);
+    }
+
+    try {
+      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
+        `SELECT "id", "type", "isPublished" FROM "series" WHERE "id" = $1 LIMIT 1`,
+        seriesId,
+      );
+      if (!rows.length || rows[0].isPublished === false) {
+        return null;
+      }
+      return {
+        id: String(rows[0].id || ""),
+        type: String(rows[0].type || "comic"),
+      };
+    } catch (error) {
+      if (!this.isSchemaDriftError(error)) {
+        throw error;
+      }
+      this.logger.warn(`Series compatibility query failed for ${seriesId}, retrying without publish state.`);
     }
 
     try {

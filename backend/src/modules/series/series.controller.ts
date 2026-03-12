@@ -133,9 +133,21 @@ export class SeriesController {
       try {
         const candidates = await this.seriesService.list(null);
         const matched = Array.isArray(candidates) ? candidates.find((item) => item?.id === id) : null;
-        return this.buildFallbackDetail(id, matched || undefined);
+        if (!matched) {
+          res.status(404);
+          return buildError(ERROR_CODES.NOT_FOUND);
+        }
+        if (matched.adult) {
+          const gate = checkAdultGate(req.cookies || {});
+          if (!gate.ok) {
+            res.status(403);
+            return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+          }
+        }
+        return this.buildFallbackDetail(id, matched);
       } catch {
-        return this.buildFallbackDetail(id);
+        res.status(404);
+        return buildError(ERROR_CODES.NOT_FOUND);
       }
     }
   }

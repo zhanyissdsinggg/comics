@@ -1,4 +1,4 @@
-﻿import { expect, test, type Page, type Route } from "@playwright/test";
+import { expect, test, type Page, type Route } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const ADMIN_ACCESS_TOKEN = "e2e-admin-access-token";
@@ -16,11 +16,11 @@ const EMPTY_PAGINATION = {
 const ADMIN_ROUTE_CASES = [
   {
     route: "/admin/users",
-    emptyStateMessage: "\u6682\u65e0\u7528\u6237",
+    emptyStateMessage: "No users yet.",
   },
   {
     route: "/admin/support",
-    emptyStateMessage: "\u6682\u65e0\u5de5\u5355",
+    emptyStateMessage: "No tickets yet.",
   },
   {
     route: "/admin/analytics",
@@ -28,31 +28,35 @@ const ADMIN_ROUTE_CASES = [
   },
   {
     route: "/admin/orders",
-    emptyStateMessage: "\u6682\u65e0\u8ba2\u5355",
+    emptyStateMessage: "No orders yet.",
   },
   {
     route: "/admin/comments",
-    emptyStateMessage: "\u6682\u65e0\u8bc4\u8bba",
+    emptyStateMessage: "No comments yet.",
   },
   {
     route: "/admin/notifications",
-    emptyStateMessage: "\u6682\u65e0\u901a\u77e5",
+    emptyStateMessage: "No notifications yet.",
+  },
+  {
+    route: "/admin/promotions",
+    emptyStateMessage: "No promotions yet.",
   },
   {
     route: "/admin/billing",
-    emptyStateMessage: "\u6682\u65e0\u5145\u503c\u5305",
+    emptyStateMessage: "No billing packages yet.",
   },
   {
     route: "/admin/marketing",
-    emptyStateMessage: "\u6682\u65e0\u8425\u9500\u6d3b\u52a8",
+    emptyStateMessage: "No campaigns yet.",
   },
   {
     route: "/admin/recommendations",
-    emptyStateMessage: "\u6682\u65e0\u63a8\u8350\u4f4d",
+    emptyStateMessage: "No recommendation slots have been created yet.",
   },
   {
     route: "/admin/revenue",
-    emptyStateMessage: "\u65e0\u6570\u636e",
+    emptyStateMessage: "No revenue data available yet.",
   },
 ] as const;
 
@@ -82,6 +86,7 @@ async function installAdminApiMocks(
     ordersBody?: unknown;
     commentsBody?: unknown;
     notificationsBody?: unknown;
+    promotionsBody?: unknown;
     billingBody?: unknown;
     analyticsStatsBody?: unknown;
     analyticsSegmentsBody?: unknown;
@@ -148,6 +153,11 @@ async function installAdminApiMocks(
       return;
     }
 
+    if (pathname.endsWith("/api/admin/promotions")) {
+      await fulfillJson(route, options.promotionsBody ?? { promotions: [], pagination: EMPTY_PAGINATION });
+      return;
+    }
+
     if (pathname.endsWith("/api/admin/billing")) {
       await fulfillJson(route, options.billingBody ?? { data: [], pagination: EMPTY_PAGINATION });
       return;
@@ -176,7 +186,7 @@ async function installAdminApiMocks(
     }
 
     if (pathname.endsWith("/api/admin/marketing/campaigns")) {
-      await fulfillJson(route, options.marketingCampaignsBody ?? { campaigns: [] });
+      await fulfillJson(route, options.marketingCampaignsBody ?? { campaigns: [], total: 0 });
       return;
     }
 
@@ -196,17 +206,17 @@ async function installAdminApiMocks(
     }
 
     if (pathname.endsWith("/api/admin/recommendations/slots")) {
-      await fulfillJson(route, options.recommendationSlotsBody ?? { slots: [] });
+      await fulfillJson(route, options.recommendationSlotsBody ?? { slots: [], total: 0 });
       return;
     }
 
     if (pathname.endsWith("/api/admin/recommendations/rankings")) {
-      await fulfillJson(route, options.recommendationRankingsBody ?? { rankings: [] });
+      await fulfillJson(route, options.recommendationRankingsBody ?? { configs: [], total: 0 });
       return;
     }
 
     if (pathname.endsWith("/api/admin/recommendations/analytics")) {
-      await fulfillJson(route, options.recommendationAnalyticsBody ?? { analytics: [] });
+      await fulfillJson(route, options.recommendationAnalyticsBody ?? { analytics: [], total: 0 });
       return;
     }
 
@@ -305,10 +315,12 @@ test.describe("Admin route regression", () => {
     await expect(page.getByRole("heading", { name: "Support Tickets" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("reader@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("I was charged twice and need a refund update.", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.locator("tbody span", { hasText: "\u5f85\u5904\u7406" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.locator("tbody span", { hasText: "Open" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/support", runtimeIssues);
     expect(docsJsonRequests).toBe(0);
   });
 });
+
+

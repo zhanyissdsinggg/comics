@@ -25,13 +25,30 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: '创建时间' },
-  { value: 'title', label: '标题' },
+  { value: 'createdAt', label: 'Created date' },
+  { value: 'title', label: 'Title' },
 ];
 
 function getContentPreview(content) {
   const text = String(content || '').trim();
   return text.length > 72 ? `${text.slice(0, 72)}...` : text || '-';
+}
+
+function formatDate(value) {
+  if (!value) {
+    return '-';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }).format(date);
 }
 
 export default function AdminNotificationsPage() {
@@ -68,11 +85,11 @@ export default function AdminNotificationsPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: '通知删除成功。' });
+      setFeedback({ type: 'success', message: 'Selected notifications were deleted.' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
+      setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
     },
   });
 
@@ -84,8 +101,8 @@ export default function AdminNotificationsPage() {
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">通知管理</h1>
-          <p className="mt-2 text-neutral-400">管理所有系统通知和站内消息，异常会直接反馈到页面。</p>
+          <h1 className="text-3xl font-bold text-neutral-100">Notifications</h1>
+          <p className="mt-2 text-neutral-400">Review queued messages and clean up outdated in-app notifications from one table.</p>
         </div>
 
         <AdminFeedbackBanner
@@ -94,105 +111,105 @@ export default function AdminNotificationsPage() {
           className="mb-6"
         />
 
-                        <AdminListToolbar
+        <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="搜索通知 ID、标题或内容..."
+          searchPlaceholder="Search notification ID, title, or content"
           onOpenFilters={() => setIsFilterModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
         />
 
-                <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+        <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
           <button
             type="button"
             onClick={() => setIsDeleteConfirmOpen(true)}
-            disabled={bulkDeleteMutation.isPending}
+            disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
             className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
+            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || '\u901a\u77e5\u52a0\u8f7d\u5931\u8d25\u3002'}
+          errorMessage={error?.message || 'Failed to load notifications.'}
           onRetry={refetch}
           isLoading={isLoading}
           hasItems={notifications.length > 0}
-          emptyMessage={'\u6682\u65e0\u901a\u77e5'}
+          emptyMessage="No notifications yet."
           pagination={pagination}
           page={page}
           pageSize={pageSize}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
         >
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-neutral-700 bg-neutral-900">
-                    <th className="px-4 py-3 text-left">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.length === notifications.length && notifications.length > 0}
-                        onChange={(event) => {
-                          if (event.target.checked) {
-                            selectAll(notifications);
-                            return;
-                          }
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-neutral-700 bg-neutral-900">
+                <th className="px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all notifications"
+                    checked={notifications.length > 0 && selectedIds.length === notifications.length}
+                    onChange={(event) => {
+                      if (event.target.checked) {
+                        selectAll(notifications);
+                        return;
+                      }
 
-                          clearSelection();
-                        }}
-                        className="rounded"
-                      />
-                    </th>
-                    <th className="px-4 py-3 text-left text-neutral-400">ID</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">{"\u6807\u9898"}</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">{"\u5185\u5bb9"}</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">{"\u521b\u5efa\u65f6\u95f4"}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {notifications.map((notification) => (
-                    <tr key={notification.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
-                      <td className="px-4 py-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedIdsSet.has(notification.id)}
-                          onChange={() => toggleSelect(notification.id)}
-                          className="rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-3 font-medium text-neutral-300">{notification.id}</td>
-                      <td className="px-4 py-3 text-neutral-300">{notification.title || '-'}</td>
-                      <td className="max-w-xs px-4 py-3 text-neutral-400">{getContentPreview(notification.content)}</td>
-                      <td className="px-4 py-3 text-neutral-400">
-                        {notification.createdAt ? new Date(notification.createdAt).toLocaleDateString('zh-CN') : '-'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      clearSelection();
+                    }}
+                    className="rounded"
+                  />
+                </th>
+                <th className="px-4 py-3 text-left text-neutral-400">ID</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Title</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Content</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {notifications.map((notification) => (
+                <tr key={notification.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      aria-label={`Select notification ${notification.id}`}
+                      checked={selectedIdsSet.has(notification.id)}
+                      onChange={() => toggleSelect(notification.id)}
+                      className="rounded"
+                    />
+                  </td>
+                  <td className="px-4 py-3 font-medium text-neutral-300">{notification.id}</td>
+                  <td className="px-4 py-3 text-neutral-300">{notification.title || '-'}</td>
+                  <td className="max-w-xs px-4 py-3 text-neutral-400">{getContentPreview(notification.content)}</td>
+                  <td className="px-4 py-3 text-neutral-400">{formatDate(notification.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </AdminTableShell>
 
-      <AdminSortModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        sortBy={sortBy}
-        onSortByChange={setSortBy}
-        options={sortOptions}
-      />
+        <AdminSortModal
+          isOpen={isFilterModalOpen}
+          onClose={() => setIsFilterModalOpen(false)}
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          options={sortOptions}
+        />
 
-      <ConfirmDialog
-        isOpen={isDeleteConfirmOpen}
-        title="确认删除"
-        message={`确定要删除这 ${selectedIds.length} 条通知吗？此操作不可撤销。`}
-        confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除'}
-        cancelText="取消"
-        isDangerous={true}
-        isLoading={bulkDeleteMutation.isPending}
-        onConfirm={handleBulkDelete}
-        onCancel={() => setIsDeleteConfirmOpen(false)}
-      />
+        <ConfirmDialog
+          isOpen={isDeleteConfirmOpen}
+          title="Delete selected notifications"
+          message={`Delete ${selectedIds.length} selected notification(s)? This action cannot be undone.`}
+          confirmText={bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+          cancelText="Cancel"
+          isDangerous={true}
+          isLoading={bulkDeleteMutation.isPending}
+          onConfirm={handleBulkDelete}
+          onCancel={() => setIsDeleteConfirmOpen(false)}
+        />
       </div>
     </div>
   );

@@ -32,6 +32,7 @@ function createEmptyForm() {
     type: 'comic',
     status: 'Ongoing',
     adult: false,
+    isPublished: true,
     description: '',
     genres: '',
     coverUrl: '',
@@ -49,6 +50,7 @@ function buildFormState(series) {
     type: series?.type || 'comic',
     status: series?.status || 'Ongoing',
     adult: Boolean(series?.adult),
+    isPublished: series?.isPublished !== undefined ? Boolean(series.isPublished) : true,
     description: series?.description || '',
     genres: Array.isArray(series?.genres) ? series.genres.join(', ') : '',
     coverUrl: series?.coverUrl || '',
@@ -69,6 +71,7 @@ function buildSeriesPayload(formData) {
     type: formData.type || 'comic',
     status: formData.status || 'Ongoing',
     adult: Boolean(formData.adult),
+    isPublished: Boolean(formData.isPublished),
     description: formData.description.trim(),
     genres: String(formData.genres || '')
       .split(',')
@@ -491,7 +494,24 @@ export default function AdminSeriesDetailPage() {
               </FormField>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-3">
+              <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 px-5 py-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <h2 className="text-base font-semibold text-white">Publication</h2>
+                    <p className="text-sm text-neutral-500">Control whether this title is visible on the public site.</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={formData.isPublished}
+                    onChange={handleFieldChange('isPublished')}
+                    disabled={!isEditing}
+                    className="mt-1 h-5 w-5 rounded border-neutral-700 bg-neutral-900"
+                  />
+                </div>
+                <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">{formData.isPublished ? 'Published' : 'Hidden'}</p>
+              </div>
+
               <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 px-5 py-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1">
@@ -569,6 +589,7 @@ export default function AdminSeriesDetailPage() {
                 <DetailRow label="Updated" value={formatDateTime(series.updatedAt)} />
                 <DetailRow label="Type" value={formData.type || 'comic'} />
                 <DetailRow label="Status" value={formData.status || 'Ongoing'} />
+                <DetailRow label="Publication" value={formData.isPublished ? 'Published' : 'Hidden'} />
               </div>
             </section>
 

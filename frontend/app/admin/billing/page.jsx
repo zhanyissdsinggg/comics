@@ -16,6 +16,7 @@ import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
 const searchFields = [
   { field: 'id', type: 'string' },
   { field: 'name', type: 'string' },
+  { field: 'label', type: 'string' },
 ];
 
 const sortFields = [
@@ -23,17 +24,52 @@ const sortFields = [
   { field: 'price', type: 'number' },
   { field: 'points', type: 'number' },
   { field: 'name', type: 'string' },
+  { field: 'active', type: 'boolean' },
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: '创建时间' },
-  { value: 'price', label: '价格' },
-  { value: 'points', label: '积分' },
-  { value: 'name', label: '名称' },
+  { value: 'createdAt', label: 'Created date' },
+  { value: 'price', label: 'Price' },
+  { value: 'points', label: 'Points' },
+  { value: 'name', label: 'Name' },
+  { value: 'active', label: 'Status' },
 ];
 
+function formatDate(value) {
+  if (!value) {
+    return '-';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }).format(date);
+}
+
+function formatCurrency(value, currency = 'USD') {
+  const amount = Number(value || 0);
+  const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
+
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: normalizedCurrency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `$${amount.toFixed(2)}`;
+  }
+}
+
 export default function AdminBillingPage() {
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
 
@@ -66,11 +102,11 @@ export default function AdminBillingPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: '充值包删除成功。' });
+      setFeedback({ type: 'success', message: 'Selected billing packages were deleted.' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
+      setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
     },
   });
 
@@ -82,8 +118,10 @@ export default function AdminBillingPage() {
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">账单管理</h1>
-          <p className="mt-2 text-neutral-400">管理充值包和定价项，批量删除的结果会直接反馈到页面。</p>
+          <h1 className="text-3xl font-bold text-neutral-100">Billing Packages</h1>
+          <p className="mt-2 text-neutral-400">
+            Manage top-up packages and pricing records used across the storefront.
+          </p>
         </div>
 
         <AdminFeedbackBanner
@@ -92,108 +130,134 @@ export default function AdminBillingPage() {
           className="mb-6"
         />
 
-                        <AdminListToolbar
+        <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="搜索充值包 ID 或名称..."
-          onOpenFilters={() => setIsFilterModalOpen(true)}
+          searchPlaceholder="Search package ID, name, or label"
+          onOpenFilters={() => setIsSortModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
         />
 
-                <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+        <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
           <button
             type="button"
             onClick={() => setIsDeleteConfirmOpen(true)}
             disabled={bulkDeleteMutation.isPending}
             className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
+            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || '\u5145\u503c\u5305\u52a0\u8f7d\u5931\u8d25\u3002'}
+          errorMessage={error?.message || 'Failed to load billing packages.'}
           onRetry={refetch}
           isLoading={isLoading}
           hasItems={packages.length > 0}
-          emptyMessage={'\u6682\u65e0\u5145\u503c\u5305'}
+          emptyMessage="No billing packages yet."
           pagination={pagination}
           page={page}
           pageSize={pageSize}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
         >
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-neutral-700 bg-neutral-900">
-                    <th className="px-4 py-3 text-left">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-neutral-700 bg-neutral-900">
+                <th className="px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.length === packages.length && packages.length > 0}
+                    onChange={(event) => {
+                      if (event.target.checked) {
+                        selectAll(packages);
+                        return;
+                      }
+
+                      clearSelection();
+                    }}
+                    className="rounded"
+                    aria-label="Select all billing packages"
+                  />
+                </th>
+                <th className="px-4 py-3 text-left text-neutral-400">ID</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Package</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Price</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Points</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Status</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Created date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {packages.map((pkg) => {
+                const isActive = pkg.active !== false;
+                const points = pkg.points != null ? Number(pkg.points) : Number(pkg.paidPts ?? 0) + Number(pkg.bonusPts ?? 0);
+
+                return (
+                  <tr key={pkg.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
+                    <td className="px-4 py-3">
                       <input
                         type="checkbox"
-                        checked={selectedIds.length === packages.length && packages.length > 0}
-                        onChange={(event) => {
-                          if (event.target.checked) {
-                            selectAll(packages);
-                            return;
-                          }
-
-                          clearSelection();
-                        }}
+                        checked={selectedIdsSet.has(pkg.id)}
+                        onChange={() => toggleSelect(pkg.id)}
                         className="rounded"
+                        aria-label={`Select package ${pkg.id}`}
                       />
-                    </th>
-                    <th className="px-4 py-3 text-left text-neutral-400">ID</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">{"\u540d\u79f0"}</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">{"\u4ef7\u683c"}</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">{"\u79ef\u5206"}</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">{"\u521b\u5efa\u65f6\u95f4"}</th>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-neutral-300">{pkg.id}</td>
+                    <td className="px-4 py-3 text-neutral-300">
+                      <div className="font-medium text-neutral-200">{pkg.name || 'Untitled package'}</div>
+                      {pkg.label ? <div className="mt-1 text-xs text-neutral-500">{pkg.label}</div> : null}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-emerald-400">
+                      {formatCurrency(pkg.price, pkg.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-blue-400">{points}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                          isActive
+                            ? 'bg-emerald-900/30 text-emerald-300'
+                            : 'bg-neutral-700 text-neutral-300'
+                        }`}
+                      >
+                        {isActive ? 'Active' : 'Archived'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-neutral-400">{formatDate(pkg.createdAt)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {packages.map((pkg) => (
-                    <tr key={pkg.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
-                      <td className="px-4 py-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedIdsSet.has(pkg.id)}
-                          onChange={() => toggleSelect(pkg.id)}
-                          className="rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-3 font-medium text-neutral-300">{pkg.id}</td>
-                      <td className="px-4 py-3 text-neutral-300">{pkg.name || '-'}</td>
-                      <td className="px-4 py-3 font-medium text-emerald-400">${Number(pkg.price || 0).toFixed(2)}</td>
-                      <td className="px-4 py-3 text-blue-400">{pkg.points ?? 0}</td>
-                      <td className="px-4 py-3 text-neutral-400">
-                        {pkg.createdAt ? new Date(pkg.createdAt).toLocaleDateString('zh-CN') : '-'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                );
+              })}
+            </tbody>
+          </table>
         </AdminTableShell>
 
-      <AdminSortModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        sortBy={sortBy}
-        onSortByChange={setSortBy}
-        options={sortOptions}
-      />
+        <AdminSortModal
+          isOpen={isSortModalOpen}
+          onClose={() => setIsSortModalOpen(false)}
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          options={sortOptions}
+          title="Sort billing packages"
+          label="Sort field"
+          actionLabel="Apply"
+        />
 
-      <ConfirmDialog
-        isOpen={isDeleteConfirmOpen}
-        title="确认删除"
-        message={`确定要删除这 ${selectedIds.length} 个充值包吗？此操作不可撤销。`}
-        confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除'}
-        cancelText="取消"
-        isDangerous={true}
-        isLoading={bulkDeleteMutation.isPending}
-        onConfirm={handleBulkDelete}
-        onCancel={() => setIsDeleteConfirmOpen(false)}
-      />
+        <ConfirmDialog
+          isOpen={isDeleteConfirmOpen}
+          title="Delete billing packages"
+          message={`Delete ${selectedIds.length} selected billing package(s)? This cannot be undone.`}
+          confirmText={bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+          cancelText="Cancel"
+          isDangerous={true}
+          isLoading={bulkDeleteMutation.isPending}
+          onConfirm={handleBulkDelete}
+          onCancel={() => setIsDeleteConfirmOpen(false)}
+        />
       </div>
     </div>
   );
 }
+

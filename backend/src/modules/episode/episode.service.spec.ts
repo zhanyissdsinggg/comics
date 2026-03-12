@@ -23,8 +23,17 @@ describe("EpisodeService", () => {
     jest.clearAllMocks();
   });
 
+  it("returns null for unpublished series", async () => {
+    prisma.series.findUnique.mockResolvedValue({ id: "series-001", type: "comic", isPublished: false });
+
+    const result = await service.getEpisode("series-001", "series-001e1");
+
+    expect(result).toBeNull();
+    expect(prisma.episode.findUnique).not.toHaveBeenCalled();
+  });
+
   it("returns null when the episode record does not exist", async () => {
-    prisma.series.findUnique.mockResolvedValue({ id: "series-001", type: "comic" });
+    prisma.series.findUnique.mockResolvedValue({ id: "series-001", type: "comic", isPublished: true });
     prisma.episode.findUnique.mockResolvedValue(null);
 
     const result = await service.getEpisode("series-001", "series-001e1");
@@ -33,7 +42,7 @@ describe("EpisodeService", () => {
   });
 
   it("returns stored comic payload without generating placeholder pages", async () => {
-    prisma.series.findUnique.mockResolvedValue({ id: "series-001", type: "comic" });
+    prisma.series.findUnique.mockResolvedValue({ id: "series-001", type: "comic", isPublished: true });
     prisma.episode.findUnique.mockResolvedValue({
       id: "series-001e1",
       seriesId: "series-001",

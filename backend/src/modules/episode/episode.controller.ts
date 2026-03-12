@@ -31,14 +31,19 @@ export class EpisodeController {
 
   private async findSeriesLite(seriesId: string) {
     try {
-      return await this.prisma.series.findUnique({
+      const row = await this.prisma.series.findUnique({
         where: { id: seriesId },
         select: {
           id: true,
           type: true,
           adult: true,
+          isPublished: true,
         },
       });
+      if (!row || row.isPublished === false) {
+        return null;
+      }
+      return row;
     } catch (error) {
       if (!this.isSchemaDriftError(error)) {
         throw error;
@@ -48,10 +53,10 @@ export class EpisodeController {
 
     try {
       const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
-        `SELECT "id", "type", "adult" FROM "series" WHERE "id" = $1 LIMIT 1`,
+        `SELECT "id", "type", "adult", "isPublished" FROM "series" WHERE "id" = $1 LIMIT 1`,
         seriesId,
       );
-      if (!rows.length) {
+      if (!rows.length || rows[0].isPublished === false) {
         return null;
       }
       return {
@@ -63,6 +68,7 @@ export class EpisodeController {
       if (!this.isSchemaDriftError(error)) {
         throw error;
       }
+      this.logger.warn(`Series lite compatibility query failed for ${seriesId}, retrying without publish state.`);
     }
 
     try {

@@ -1,6 +1,11 @@
-﻿import React from 'react';
+import React from 'react';
 
-export function AdminFeedbackBanner({ feedback, onDismiss, className = '' }) {
+export function AdminFeedbackBanner({
+  feedback,
+  onDismiss,
+  className = '',
+  dismissLabel = 'Dismiss',
+}) {
   if (!feedback?.message) {
     return null;
   }
@@ -18,7 +23,7 @@ export function AdminFeedbackBanner({ feedback, onDismiss, className = '' }) {
         onClick={onDismiss}
         className="rounded-md px-2 py-1 text-xs font-medium text-current opacity-80 transition hover:opacity-100"
       >
-        关闭
+        {dismissLabel}
       </button>
     </div>
   );

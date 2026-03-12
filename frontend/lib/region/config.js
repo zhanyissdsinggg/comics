@@ -1,4 +1,4 @@
-export const REGION_CONFIG = {
+﻿export const REGION_CONFIG = {
   global: {
     label: "Global",
     legalAge: 18,
@@ -14,12 +14,12 @@ export const REGION_CONFIG = {
   kr: {
     label: "Korea",
     legalAge: 19,
-    currencySymbol: "₩",
+    currencySymbol: "KRW",
     pointsPackages: {
-      starter: { priceLabel: "₩4,500" },
-      medium: { priceLabel: "₩9,900" },
-      value: { priceLabel: "₩19,900" },
-      mega: { priceLabel: "₩39,000" },
+      starter: { priceLabel: "KRW 4,500" },
+      medium: { priceLabel: "KRW 8,900" },
+      value: { priceLabel: "KRW 19,900" },
+      mega: { priceLabel: "KRW 39,000" },
     },
     taxHint: "VAT included where applicable.",
   },
@@ -40,9 +40,9 @@ export const REGION_CONFIG = {
 export const REGION_KEYS = Object.keys(REGION_CONFIG);
 
 export const LANGUAGE_OPTIONS = [
-  { id: "zh", label: "中文" },
+  { id: "zh", label: "Chinese" },
   { id: "en", label: "English" },
-  { id: "ko", label: "한국어" },
+  { id: "ko", label: "Korean" },
 ];
 
 export function getRegionConfig(region) {

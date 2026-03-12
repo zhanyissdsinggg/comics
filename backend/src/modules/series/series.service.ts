@@ -158,6 +158,7 @@ export class SeriesService {
       title: String(series.title || ""),
       type: String(series.type || "comic"),
       adult: Boolean(series.adult),
+      isPublished: series.isPublished !== false,
       coverTone: String(series.coverTone || ""),
       coverUrl: String(series.coverUrl || ""),
       badge: String(series.badge || ""),
@@ -203,6 +204,7 @@ export class SeriesService {
         "title",
         "type",
         "adult",
+        "isPublished",
         "coverTone",
         "coverUrl",
         "badge",
@@ -327,7 +329,7 @@ export class SeriesService {
 
   private async fetchSeriesWithEpisodes(seriesId: string) {
     const series = await this.fetchSeriesRecordWithFallback(seriesId);
-    if (!series) {
+    if (!series || series.isPublished === false) {
       return null;
     }
 
@@ -340,7 +342,7 @@ export class SeriesService {
 
   @Cacheable("series:list", 3600)
   async list(adult: boolean | null) {
-    const where = adult === null ? {} : { adult };
+    const where = adult === null ? { isPublished: true } : { adult, isPublished: true };
     const list = await this.prisma.series.findMany({
       where,
       orderBy: { title: "asc" },
@@ -351,7 +353,7 @@ export class SeriesService {
   async detail(seriesId: string, subscription?: any) {
     const data = await this.fetchSeriesWithEpisodes(seriesId);
 
-    if (!data) {
+    if (!data || data.isPublished === false) {
       return null;
     }
 

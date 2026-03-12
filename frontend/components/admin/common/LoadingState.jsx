@@ -1,12 +1,12 @@
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
 
-const DEFAULT_EMPTY_TITLE = '\u6682\u65e0\u6570\u636e';
-const DEFAULT_EMPTY_DESCRIPTION = '\u6ca1\u6709\u627e\u5230\u76f8\u5173\u6570\u636e';
-const DEFAULT_LOADING_TEXT = '\u52a0\u8f7d\u4e2d...';
-const DEFAULT_ERROR_TITLE = '\u52a0\u8f7d\u5931\u8d25';
-const DEFAULT_ERROR_MESSAGE = '\u53d1\u751f\u4e86\u4e00\u4e2a\u9519\u8bef';
-const RETRY_LABEL = '\u91cd\u8bd5';
+const DEFAULT_EMPTY_TITLE = 'No data yet';
+const DEFAULT_EMPTY_DESCRIPTION = 'No matching records were found.';
+const DEFAULT_LOADING_TEXT = 'Loading...';
+const DEFAULT_ERROR_TITLE = 'Unable to load data';
+const DEFAULT_ERROR_MESSAGE = 'Something went wrong while loading this view.';
+const RETRY_LABEL = 'Retry';
 
 export const SkeletonLoader = React.memo(function SkeletonLoader({ count = 5, height = 'h-12' }) {
   return (
@@ -94,6 +94,7 @@ export const ErrorState = React.memo(function ErrorState({ error, onRetry }) {
       </div>
       {onRetry ? (
         <button
+          type="button"
           onClick={onRetry}
           className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
         >

@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import AdminShell from "./AdminShell";
 
 /**
- * 向后兼容的后台布局组件。
- * 历史页面继续使用 AdminLayout，但实际统一渲染新版 AdminShell。
+ * Backward-compatible admin layout wrapper.
+ * Legacy pages still render through AdminLayout, but the shared AdminShell owns the UI.
  */
 export function AdminLayout({ children, title = "Dashboard", subtitle, actions }) {
   return (

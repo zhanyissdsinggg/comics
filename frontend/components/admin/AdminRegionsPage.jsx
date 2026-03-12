@@ -1,19 +1,76 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "./AuthContext";
-import { adminGet as apiGet, adminPost as apiPost } from "../../lib/adminApiClient";
+import { adminGet, adminPost } from "../../lib/adminApiClient";
+
+function normalizeCountryCodes(items) {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  return items.map((item) => ({
+    code: String(item?.code || "").trim(),
+    label: String(item?.label || "").trim(),
+  }));
+}
+
+function normalizeLengthValues(values) {
+  const source = Array.isArray(values) ? values : String(values || "").split(",");
+
+  return [...new Set(
+    source
+      .map((value) => Number(String(value).trim()))
+      .filter((value) => Number.isInteger(value) && value > 0)
+  )].sort((left, right) => left - right);
+}
+
+function buildPayload(countryCodes, lengthRules) {
+  const normalizedCountryCodes = normalizeCountryCodes(countryCodes).filter((item) => item.code);
+  const allowedCodes = new Set(normalizedCountryCodes.map((item) => item.code));
+  const normalizedRules = {};
+
+  Object.entries(lengthRules || {}).forEach(([code, values]) => {
+    if (!allowedCodes.has(code)) {
+      return;
+    }
+
+    const normalizedValues = normalizeLengthValues(values);
+    if (normalizedValues.length > 0) {
+      normalizedRules[code] = normalizedValues;
+    }
+  });
+
+  return {
+    countryCodes: normalizedCountryCodes,
+    lengthRules: normalizedRules,
+  };
+}
+
+function StatusBanner({ state }) {
+  if (!state?.message) {
+    return null;
+  }
+
+  const className =
+    state.tone === "error"
+      ? "border-red-200 bg-red-50 text-red-700"
+      : "border-emerald-200 bg-emerald-50 text-emerald-700";
+
+  return <div className={`rounded-2xl border px-4 py-3 text-sm ${className}`}>{state.message}</div>;
+}
 
 export default function AdminRegionsPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAdminAuth();
+
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [countryCodes, setCountryCodes] = useState([]);
   const [lengthRules, setLengthRules] = useState({});
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState({ tone: "success", message: "" });
 
-  // 老王说：检查认证状态，未登录则重定向
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/admin/login");
@@ -22,67 +79,103 @@ export default function AdminRegionsPage() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const response = await apiGet(`/api/admin/regions`);
-    if (response.ok && response.data?.config) {
-      setCountryCodes(response.data.config.countryCodes || []);
-      setLengthRules(response.data.config.lengthRules || {});
+
+    const response = await adminGet("/api/admin/regions");
+    if (response.ok) {
+      const payload = buildPayload(response.data?.config?.countryCodes, response.data?.config?.lengthRules);
+      setCountryCodes(payload.countryCodes);
+      setLengthRules(payload.lengthRules);
+    } else {
+      setStatus({ tone: "error", message: response.error || "Failed to load region configuration." });
     }
+
     setLoading(false);
   }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
       loadData();
-    } else {
+      return;
+    }
+
+    if (!isLoading) {
       setLoading(false);
     }
-  }, [isAuthenticated, loadData]);
+  }, [isAuthenticated, isLoading, loadData]);
 
   const updateCode = (index, field, value) => {
-    setCountryCodes((prev) =>
-      prev.map((item, idx) => (idx === index ? { ...item, [field]: value } : item))
+    const previousCode = countryCodes[index]?.code || "";
+
+    setCountryCodes((current) =>
+      current.map((item, itemIndex) => (itemIndex === index ? { ...item, [field]: value } : item))
     );
+
+    if (field === "code" && previousCode !== value) {
+      setLengthRules((current) => {
+        const next = { ...current };
+        const previousValues = next[previousCode];
+        delete next[previousCode];
+        if (value && previousValues?.length) {
+          next[value] = previousValues;
+        }
+        return next;
+      });
+    }
   };
 
   const addCode = () => {
-    setCountryCodes((prev) => [...prev, { code: "", label: "" }]);
+    setCountryCodes((current) => [...current, { code: "", label: "" }]);
   };
 
   const removeCode = (index) => {
-    setCountryCodes((prev) => prev.filter((_, idx) => idx !== index));
+    const code = countryCodes[index]?.code || "";
+    setCountryCodes((current) => current.filter((_, itemIndex) => itemIndex !== index));
+    setLengthRules((current) => {
+      if (!code) {
+        return current;
+      }
+      const next = { ...current };
+      delete next[code];
+      return next;
+    });
   };
 
   const updateRule = (code, value) => {
-    setLengthRules((prev) => ({
-      ...prev,
-      [code]: value
-        .split(",")
-        .map((item) => Number(item.trim()))
-        .filter((num) => Number.isFinite(num) && num > 0),
+    setLengthRules((current) => ({
+      ...current,
+      [code]: normalizeLengthValues(value),
     }));
   };
 
   const handleSave = async () => {
-    setStatus("");
-    const payload = { countryCodes, lengthRules };
-    const response = await apiPost("/api/admin/regions", payload);
+    setSaving(true);
+    setStatus({ tone: "success", message: "" });
+
+    const payload = buildPayload(countryCodes, lengthRules);
+    const response = await adminPost("/api/admin/regions", payload);
+
     if (response.ok) {
-      setStatus("已保存");
+      const nextPayload = buildPayload(response.data?.config?.countryCodes, response.data?.config?.lengthRules);
+      setCountryCodes(nextPayload.countryCodes);
+      setLengthRules(nextPayload.lengthRules);
+      setStatus({ tone: "success", message: "Region configuration saved." });
     } else {
-      setStatus(response.error || "保存失败");
+      setStatus({ tone: "error", message: response.error || "Failed to save region configuration." });
     }
+
+    setSaving(false);
   };
 
   const handleExport = () => {
-    const payload = { countryCodes, lengthRules };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {
-      type: "application/json;charset=utf-8;",
-    });
+    const payload = buildPayload(countryCodes, lengthRules);
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = "region-config.json";
+    document.body.appendChild(link);
     link.click();
+    link.remove();
     URL.revokeObjectURL(url);
   };
 
@@ -91,125 +184,150 @@ export default function AdminRegionsPage() {
     if (!file) {
       return;
     }
+
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      const nextCountryCodes = Array.isArray(parsed?.countryCodes) ? parsed.countryCodes : [];
-      const nextLengthRules = parsed?.lengthRules || {};
-      setCountryCodes(nextCountryCodes);
-      setLengthRules(nextLengthRules);
-      setStatus("已导入，请记得保存");
-    } catch (err) {
-      setStatus("导入失败，JSON格式不正确");
+      const payload = buildPayload(parsed?.countryCodes, parsed?.lengthRules);
+      setCountryCodes(payload.countryCodes);
+      setLengthRules(payload.lengthRules);
+      setStatus({ tone: "success", message: "Configuration imported. Save to persist changes." });
+    } catch {
+      setStatus({ tone: "error", message: "Import failed. Provide a valid JSON file." });
     } finally {
       event.target.value = "";
     }
   };
 
+  if (isLoading || loading) {
+    return (
+      <section className="rounded-2xl border border-slate-200 bg-white p-6">
+        <p className="text-sm text-slate-500">Loading region configuration...</p>
+      </section>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <section className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+        Admin access is required. Sign in again and reload this page.
+      </section>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-900">区号配置</h1>
-          <p className="text-sm text-slate-500">管理短信区号与号码长度规则</p>
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold text-slate-900">Region configuration</h2>
+          <p className="text-sm text-slate-500">
+            Manage phone country codes and accepted local number lengths for OTP and account flows.
+          </p>
         </div>
-        {isAuthenticated ? (
-          <div className="flex items-center gap-2">
-            <label className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-600">
-              导入JSON
-              <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
-            </label>
-            <button
-              type="button"
-              onClick={handleExport}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
-            >
-              导出JSON
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white"
-            >
-              保存配置
-            </button>
-          </div>
-        ) : null}
+
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+            Import JSON
+            <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
+          </label>
+          <button
+            type="button"
+            onClick={handleExport}
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+          >
+            Export JSON
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save changes"}
+          </button>
+        </div>
       </div>
 
-      {!isAuthenticated ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-          403 无权限，请在地址栏附加 ?key=ADMIN_KEY
-        </div>
-      ) : loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-slate-400">
-          加载中...
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-800">国家区号</h3>
-              <button
-                type="button"
-                onClick={addCode}
-                className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
-              >
-                新增
-              </button>
+      <StatusBanner state={status} />
+
+      <div className="grid gap-6 xl:grid-cols-[1.1fr,0.9fr]">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Country codes</h3>
+              <p className="text-xs text-slate-500">Define the dial code and display label used in the frontend picker.</p>
             </div>
-            {countryCodes.length === 0 ? (
-              <div className="text-xs text-slate-500">暂无区号</div>
-            ) : (
-              <div className="space-y-2">
-                {countryCodes.map((item, index) => (
-                  <div key={`${item.code}-${index}`} className="flex items-center gap-2">
-                    <input
-                      value={item.code}
-                      onChange={(event) => updateCode(index, "code", event.target.value)}
-                      className="w-28 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                      placeholder="+1"
-                    />
-                    <input
-                      value={item.label}
-                      onChange={(event) => updateCode(index, "label", event.target.value)}
-                      className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                      placeholder="US"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeCode(index)}
-                      className="rounded-lg border border-slate-200 px-3 py-2 text-xs"
-                    >
-                      删除
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={addCode}
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              Add entry
+            </button>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-800">号码长度规则</h3>
-            <p className="text-xs text-slate-400">格式：10 或 9,10,11</p>
-            <div className="space-y-2">
-              {countryCodes.map((item) => (
-                <div key={item.code} className="flex items-center gap-2">
-                  <div className="w-24 text-xs text-slate-500">{item.code}</div>
+          {countryCodes.length === 0 ? (
+            <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
+              No country codes configured yet.
+            </div>
+          ) : (
+            <div className="mt-6 space-y-3">
+              {countryCodes.map((item, index) => (
+                <div key={`${item.code || "new"}-${index}`} className="grid gap-3 rounded-2xl border border-slate-200 p-4 md:grid-cols-[120px,1fr,auto] md:items-center">
                   <input
-                    value={(lengthRules[item.code] || []).join(",")}
-                    onChange={(event) => updateRule(item.code, event.target.value)}
-                    className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                    placeholder="10"
+                    value={item.code}
+                    onChange={(event) => updateCode(index, "code", event.target.value)}
+                    className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
+                    placeholder="+1"
                   />
+                  <input
+                    value={item.label}
+                    onChange={(event) => updateCode(index, "label", event.target.value)}
+                    className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
+                    placeholder="United States"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCode(index)}
+                    className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    Remove
+                  </button>
                 </div>
               ))}
             </div>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-slate-900">Phone length rules</h3>
+            <p className="text-xs text-slate-500">Enter comma-separated values such as `10` or `9,10,11`.</p>
           </div>
 
-          {status ? <div className="text-xs text-emerald-600">{status}</div> : null}
-        </div>
-      )}
-    </div>
+          {countryCodes.filter((item) => item.code).length === 0 ? (
+            <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
+              Add at least one country code before defining length rules.
+            </div>
+          ) : (
+            <div className="mt-6 space-y-3">
+              {countryCodes
+                .filter((item) => item.code)
+                .map((item, index) => (
+                  <label key={`${item.code}-${index}`} className="grid gap-2 md:grid-cols-[110px,1fr] md:items-center">
+                    <span className="text-sm font-semibold text-slate-700">{item.code}</span>
+                    <input
+                      value={(lengthRules[item.code] || []).join(",")}
+                      onChange={(event) => updateRule(item.code, event.target.value)}
+                      className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
+                      placeholder="10"
+                    />
+                  </label>
+                ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </section>
   );
 }

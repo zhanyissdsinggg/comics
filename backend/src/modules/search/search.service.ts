@@ -11,6 +11,7 @@ type SearchSeries = {
   badge?: string | null;
   badges?: string[];
   adult: boolean;
+  isPublished?: boolean;
   genres: string[];
   status: string;
   rating: number;
@@ -168,7 +169,7 @@ export class SearchService {
 
   private async loadSearchableSeries(adult: boolean): Promise<SearchSeries[]> {
     return this.prisma.series.findMany({
-      where: adult ? {} : { adult: false },
+      where: adult ? { isPublished: true } : { adult: false, isPublished: true },
       select: {
         id: true,
         title: true,
@@ -179,6 +180,7 @@ export class SearchService {
         badge: true,
         badges: true,
         adult: true,
+        isPublished: true,
         genres: true,
         status: true,
         rating: true,
@@ -202,6 +204,9 @@ export class SearchService {
     const list = await this.loadSearchableSeries(adult);
     const filtered = list.filter((series) => {
       if (!adult && series.adult) {
+        return false;
+      }
+      if (series.isPublished === false) {
         return false;
       }
       if (requestedTypes.length > 0 && !requestedTypes.includes(normalizeText(series.type))) {
@@ -264,7 +269,7 @@ export class SearchService {
   async keywords(adult: boolean) {
     const list = await this.loadSearchableSeries(adult);
     const genres = new Map<string, number>();
-    list.forEach((series) => {
+    list.filter((series) => series.isPublished !== false).forEach((series) => {
       (series.genres || []).forEach((genre: string) => {
         genres.set(genre, (genres.get(genre) || 0) + 1);
       });
@@ -273,7 +278,7 @@ export class SearchService {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6)
       .map(([genre]) => genre);
-    const topTitles = [...list]
+    const topTitles = [...list].filter((series) => series.isPublished !== false)
       .sort((a, b) => b.ratingCount - a.ratingCount || compareByDateDesc(a, b))
       .slice(0, 4)
       .map((series) => series.title);
@@ -282,7 +287,7 @@ export class SearchService {
 
   async suggest(query: string, adult: boolean) {
     const list = await this.loadSearchableSeries(adult);
-    return this.buildSuggestions(query, list, 8);
+    return this.buildSuggestions(query, list.filter((series) => series.isPublished !== false), 8);
   }
 
   async hot(adult: boolean, windowParam?: string) {
@@ -305,7 +310,7 @@ export class SearchService {
       .slice(0, 8)
       .map(([keyword]) => keyword);
     const list = await this.loadSearchableSeries(adult);
-    const fallback = [...list]
+    const fallback = [...list].filter((series) => series.isPublished !== false)
       .sort((a, b) => b.ratingCount - a.ratingCount || compareByDateDesc(a, b))
       .slice(0, 4)
       .map((series) => series.title);

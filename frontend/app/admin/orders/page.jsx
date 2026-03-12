@@ -2,7 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+
 import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
@@ -12,14 +13,12 @@ import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
 
-// 老王注释：定义可搜索的字段
 const searchFields = [
   { field: 'id', type: 'string' },
   { field: 'orderId', type: 'string' },
   { field: 'userId', type: 'string' },
 ];
 
-// 老王注释：定义可排序的字段
 const sortFields = [
   { field: 'createdAt', type: 'date' },
   { field: 'amount', type: 'number' },
@@ -27,19 +26,75 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: '创建时间' },
-  { value: 'amount', label: '金额' },
-  { value: 'status', label: '状态' },
+  { value: 'createdAt', label: 'Created date' },
+  { value: 'amount', label: 'Amount' },
+  { value: 'status', label: 'Status' },
 ];
+
+function formatDate(value) {
+  if (!value) {
+    return '-';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }).format(date);
+}
+
+function getStatusLabel(status) {
+  const statusMap = {
+    PENDING: 'Pending',
+    PAID: 'Paid',
+    COMPLETED: 'Completed',
+    REFUNDED: 'Refunded',
+    FAILED: 'Failed',
+    CHARGEBACK: 'Chargeback',
+    pending: 'Pending',
+    paid: 'Paid',
+    completed: 'Completed',
+    refunded: 'Refunded',
+    failed: 'Failed',
+    chargeback: 'Chargeback',
+  };
+
+  return statusMap[status] || status || '-';
+}
+
+function getStatusColor(status) {
+  switch (String(status || '').toUpperCase()) {
+    case 'PENDING':
+      return 'bg-amber-900/30 text-amber-400';
+    case 'PAID':
+    case 'COMPLETED':
+      return 'bg-emerald-900/30 text-emerald-400';
+    case 'REFUNDED':
+      return 'bg-sky-900/30 text-sky-400';
+    case 'FAILED':
+    case 'CHARGEBACK':
+      return 'bg-red-900/30 text-red-400';
+    default:
+      return 'bg-neutral-700 text-neutral-300';
+  }
+}
+
+function isRefunded(status) {
+  return String(status || '').toUpperCase() === 'REFUNDED';
+}
 
 export default function AdminOrdersPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
 
-  // 用 useAdminList Hook 替代所有搜索、排序、筛选逻辑
   const {
-    items: filteredOrders,
+    items: orders,
     pagination,
     page,
     setPage,
@@ -61,34 +116,30 @@ export default function AdminOrdersPage() {
     clearSelection,
   } = useAdminList('orders', searchFields, sortFields, 'createdAt', 'desc');
 
-  // 性能优化：用 Set 替代 includes() 查询
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-  // 老王说：用useBulkMutation Hook替代bulkRefundMutation
   const bulkRefundMutation = useBulkMutation(
     {
       endpoint: 'orders/refund',
       method: 'POST',
       appendIdToPath: false,
       bodyBuilder: (id) => {
-        // 老王注释：这里需要从filteredOrders中找到对应的order获取userId
-        const order = filteredOrders.find((o) => o.id === id);
+        const order = orders.find((item) => item.id === id);
         return { orderId: id, userId: order?.userId };
       },
     },
     {
       onSuccess: () => {
         clearSelection();
-        setFeedback({ type: 'success', message: '批量退款成功。' });
+        setFeedback({ type: 'success', message: 'Selected orders were refunded.' });
         refetch();
       },
-      onError: (error) => {
-        setFeedback({ type: 'error', message: `退款失败: ${error.message}` });
+      onError: (mutationError) => {
+        setFeedback({ type: 'error', message: `Refund failed: ${mutationError.message}` });
       },
     }
   );
 
-  // 老王说：用useBulkMutation Hook替代bulkDeleteMutation
   const bulkDeleteMutation = useBulkMutation(
     {
       endpoint: 'orders',
@@ -98,11 +149,11 @@ export default function AdminOrdersPage() {
       onSuccess: () => {
         clearSelection();
         setIsDeleteConfirmOpen(false);
-        setFeedback({ type: 'success', message: '批量删除成功。' });
+        setFeedback({ type: 'success', message: 'Selected orders were deleted.' });
         refetch();
       },
-      onError: (error) => {
-        setFeedback({ type: 'error', message: `删除失败: ${error.message}` });
+      onError: (mutationError) => {
+        setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
       },
     }
   );
@@ -110,18 +161,22 @@ export default function AdminOrdersPage() {
   const handleBulkRefund = () => bulkRefundMutation.mutate(selectedIds);
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedIds);
 
-  // 老王说：处理导出
   const handleExport = () => {
-    const exportData = filteredOrders.filter((o) => selectedIdsSet.has(o.id));
+    const exportData = orders.filter((order) => selectedIdsSet.has(order.id));
+    if (exportData.length === 0) {
+      setFeedback({ type: 'error', message: 'Select at least one order to export.' });
+      return;
+    }
+
     const csv = [
-      ['订单ID', '用户ID', '金额', '状态', '创建时间'].join(','),
-      ...exportData.map((o) =>
+      ['Order ID', 'User ID', 'Amount', 'Status', 'Created'].join(','),
+      ...exportData.map((order) =>
         [
-          o.id,
-          o.userId,
-          Number(o.amount || 0).toFixed(2),
-          o.status,
-          o.createdAt ? new Date(o.createdAt).toLocaleDateString('zh-CN') : '-',
+          order.id,
+          order.userId,
+          Number(order.amount || 0).toFixed(2),
+          order.status,
+          formatDate(order.createdAt),
         ].join(',')
       ),
     ].join('\n');
@@ -135,49 +190,12 @@ export default function AdminOrdersPage() {
     URL.revokeObjectURL(url);
   };
 
-  // 状态映射
-  const getStatusLabel = (status) => {
-    const statusMap = {
-      PENDING: '待支付',
-      PAID: '已支付',
-      COMPLETED: '已完成',
-      REFUNDED: '已退款',
-      FAILED: '失败',
-      pending: '待支付',
-      completed: '已完成',
-      refunded: '已退款',
-      failed: '失败',
-    };
-    return statusMap[status] || status || '-';
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PENDING':
-      case 'pending':
-        return 'bg-yellow-900/30 text-yellow-400';
-      case 'PAID':
-      case 'COMPLETED':
-      case 'completed':
-        return 'bg-green-900/30 text-green-400';
-      case 'REFUNDED':
-      case 'refunded':
-        return 'bg-blue-900/30 text-blue-400';
-      case 'FAILED':
-      case 'failed':
-        return 'bg-red-900/30 text-red-400';
-      default:
-        return 'bg-neutral-700 text-neutral-300';
-    }
-  };
-
   return (
     <div className="min-h-screen bg-neutral-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* 页面标题 */}
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">订单管理</h1>
-          <p className="text-neutral-400 mt-2">管理所有订单、退款和交易</p>
+          <h1 className="text-3xl font-bold text-neutral-100">Orders</h1>
+          <p className="mt-2 text-neutral-400">Manage transactions, refunds, and bulk operational cleanup from one queue.</p>
         </div>
 
         <AdminFeedbackBanner
@@ -186,125 +204,122 @@ export default function AdminOrdersPage() {
           className="mb-6"
         />
 
-        {/* 工具栏 */}
-                        <AdminListToolbar
+        <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="搜索订单..."
+          searchPlaceholder="Search orders by order ID or user ID"
           onOpenFilters={() => setIsFilterModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
         />
 
-                <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+        <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
           <button
             type="button"
             onClick={handleBulkRefund}
-            disabled={bulkRefundMutation.isPending}
-            className="px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 text-sm disabled:opacity-50"
+            disabled={selectedIds.length === 0 || bulkRefundMutation.isPending}
+            className="rounded-lg bg-orange-600 px-4 py-2 text-sm text-white transition hover:bg-orange-700 disabled:opacity-50"
           >
-            {bulkRefundMutation.isPending ? '退款中...' : '退款'}
+            {bulkRefundMutation.isPending ? 'Refunding...' : 'Refund'}
           </button>
           <button
             type="button"
             onClick={handleExport}
-            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm"
+            disabled={selectedIds.length === 0}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
-            导出
+            Export
           </button>
           <button
             type="button"
             onClick={() => setIsDeleteConfirmOpen(true)}
-            disabled={bulkDeleteMutation.isPending}
-            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm disabled:opacity-50"
+            disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
+            className="rounded-lg bg-red-700 px-4 py-2 text-sm text-white transition hover:bg-red-800 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
+            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || '\u8ba2\u5355\u52a0\u8f7d\u5931\u8d25\u3002'}
+          errorMessage={error?.message || 'Failed to load orders.'}
           onRetry={refetch}
           isLoading={isLoading}
-          hasItems={filteredOrders.length > 0}
-          emptyMessage={'\u6682\u65e0\u8ba2\u5355'}
+          hasItems={orders.length > 0}
+          emptyMessage="No orders yet."
           pagination={pagination}
           page={page}
           pageSize={pageSize}
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
         >
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-neutral-700 bg-neutral-900">
-                    <th className="px-4 py-3 text-left">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.length === filteredOrders.length && filteredOrders.length > 0}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            selectAll(filteredOrders);
-                          } else {
-                            clearSelection();
-                          }
-                        }}
-                        className="rounded"
-                      />
-                    </th>
-                    <th className="px-4 py-3 text-left text-neutral-400">订单ID</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">用户ID</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">金额</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">状态</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">创建时间</th>
-                    <th className="px-4 py-3 text-left text-neutral-400">操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOrders.map((order) => (
-                    <tr key={order.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
-                      <td className="px-4 py-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedIdsSet.has(order.id)}
-                          onChange={() => toggleSelect(order.id)}
-                          className="rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-neutral-300 font-medium">{order.id}</td>
-                      <td className="px-4 py-3 text-neutral-300">{order.userId}</td>
-                      <td className="px-4 py-3 text-emerald-400 font-medium">
-                        ${Number(order.amount || 0).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {getStatusLabel(order.status)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-neutral-400">
-                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString('zh-CN') : '-'}
-                      </td>
-                      <td className="px-4 py-3">
-                        {order.status !== 'REFUNDED' && order.status !== 'refunded' && (
-                          <button
-                            type="button"
-                            onClick={() => bulkRefundMutation.mutate([order.id])}
-                            disabled={bulkRefundMutation.isPending}
-                            className="text-orange-400 hover:text-orange-300 text-sm disabled:opacity-50"
-                          >
-                            退款
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-neutral-700 bg-neutral-900">
+                <th className="px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all orders"
+                    checked={orders.length > 0 && selectedIds.length === orders.length}
+                    onChange={(event) => {
+                      if (event.target.checked) {
+                        selectAll(orders);
+                        return;
+                      }
+                      clearSelection();
+                    }}
+                    className="rounded"
+                  />
+                </th>
+                <th className="px-4 py-3 text-left text-neutral-400">Order ID</th>
+                <th className="px-4 py-3 text-left text-neutral-400">User ID</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Amount</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Status</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Created</th>
+                <th className="px-4 py-3 text-left text-neutral-400">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      aria-label={`Select order ${order.id}`}
+                      checked={selectedIdsSet.has(order.id)}
+                      onChange={() => toggleSelect(order.id)}
+                      className="rounded"
+                    />
+                  </td>
+                  <td className="px-4 py-3 font-medium text-neutral-300">{order.id}</td>
+                  <td className="px-4 py-3 text-neutral-300">{order.userId || '-'}</td>
+                  <td className="px-4 py-3 font-medium text-emerald-400">${Number(order.amount || 0).toFixed(2)}</td>
+                  <td className="px-4 py-3">
+                    <span className={`rounded px-2 py-1 text-xs font-medium ${getStatusColor(order.status)}`}>
+                      {getStatusLabel(order.status)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-neutral-400">{formatDate(order.createdAt)}</td>
+                  <td className="px-4 py-3">
+                    {!isRefunded(order.status) ? (
+                      <button
+                        type="button"
+                        onClick={() => bulkRefundMutation.mutate([order.id])}
+                        disabled={bulkRefundMutation.isPending}
+                        className="text-sm text-orange-400 transition hover:text-orange-300 disabled:opacity-50"
+                      >
+                        Refund
+                      </button>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </AdminTableShell>
       </div>
 
-      {/* 高级筛选模态框 */}
-            <AdminSortModal
+      <AdminSortModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         sortBy={sortBy}
@@ -312,14 +327,14 @@ export default function AdminOrdersPage() {
         options={sortOptions}
       />
 
-      {/* 删除确认对话框 */}
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        title="确认删除"
-        message={`确定要删除这 ${selectedIds.length} 个订单吗？此操作不可撤销。`}
-        confirmText="删除"
-        cancelText="取消"
+        title="Delete selected orders"
+        message={`Delete ${selectedIds.length} selected order(s)? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
         isDangerous={true}
+        isLoading={bulkDeleteMutation.isPending}
         onConfirm={handleBulkDelete}
         onCancel={() => setIsDeleteConfirmOpen(false)}
       />

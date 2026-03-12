@@ -52,7 +52,7 @@ export class NotificationsService {
     const seriesIds = followed.map((row) => row.seriesId);
     const seriesList = seriesIds.length
       ? await this.prisma.series.findMany({
-          where: { id: { in: seriesIds } },
+          where: { id: { in: seriesIds }, isPublished: true },
           select: {
             id: true,
             title: true,

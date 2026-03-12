@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Modal } from './Modal';
 
 export function AdminSortModal({
@@ -7,9 +7,9 @@ export function AdminSortModal({
   sortBy,
   onSortByChange,
   options,
-  title = '高级筛选',
-  label = '排序字段',
-  actionLabel = '应用筛选',
+  title = 'Filters',
+  label = 'Sort field',
+  actionLabel = 'Apply',
 }) {
   return (
     <Modal isOpen={isOpen} title={title} onClose={onClose}>

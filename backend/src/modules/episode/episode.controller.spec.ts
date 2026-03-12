@@ -40,7 +40,7 @@ describe("EpisodeController", () => {
     );
   });
 
-  it("should return 400 when episodeId is missing", async () => {
+  it("returns 400 when episodeId is missing", async () => {
     const req = { cookies: {} } as any;
     const res = { status: jest.fn() } as any;
 
@@ -53,11 +53,30 @@ describe("EpisodeController", () => {
     });
   });
 
-  it("should ignore stats failure and still return episode payload", async () => {
+  it("returns 404 for unpublished series", async () => {
     prisma.series.findUnique.mockResolvedValue({
       id: "series-001",
       adult: false,
       type: "comic",
+      isPublished: false,
+    });
+
+    const req = { cookies: {} } as any;
+    const res = { status: jest.fn() } as any;
+
+    const result = await controller.getEpisode("series-001", "series-001e1", req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(result).toEqual({ error: ERROR_CODES.NOT_FOUND });
+    expect(episodeService.getEpisode).not.toHaveBeenCalled();
+  });
+
+  it("ignores stats failure and still returns episode payload", async () => {
+    prisma.series.findUnique.mockResolvedValue({
+      id: "series-001",
+      adult: false,
+      type: "comic",
+      isPublished: true,
     });
     prisma.entitlement.findUnique.mockResolvedValue(null);
     episodeService.getEpisode.mockResolvedValue({
@@ -86,6 +105,7 @@ describe("EpisodeController", () => {
       id: "series-001",
       adult: false,
       type: "comic",
+      isPublished: true,
     });
     prisma.entitlement.findUnique.mockResolvedValue(null);
     episodeService.getEpisode.mockResolvedValue({
@@ -112,6 +132,7 @@ describe("EpisodeController", () => {
       id: "series-001",
       adult: false,
       type: "comic",
+      isPublished: true,
     });
     prisma.entitlement.findUnique.mockResolvedValue(null);
     episodeService.getEpisode.mockRejectedValue(new Error("unexpected db failure"));

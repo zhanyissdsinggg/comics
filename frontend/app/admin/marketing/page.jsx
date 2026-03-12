@@ -3,531 +3,652 @@
 export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AdminDataState } from '@/components/admin/common/AdminDataState';
+import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { Modal } from '@/components/admin/common/Modal';
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { adminFetchJson } from '@/lib/adminApiClient';
 
-const STAT_CARD_STYLES = {
-  blue: {
-    container: 'bg-blue-900/20 border-blue-700',
-    value: 'text-blue-400',
-  },
-  green: {
-    container: 'bg-green-900/20 border-green-700',
-    value: 'text-green-400',
-  },
-  purple: {
-    container: 'bg-purple-900/20 border-purple-700',
-    value: 'text-purple-400',
-  },
-  orange: {
-    container: 'bg-orange-900/20 border-orange-700',
-    value: 'text-orange-400',
-  },
-  emerald: {
-    container: 'bg-emerald-900/20 border-emerald-700',
-    value: 'text-emerald-400',
-  },
+const TABS = [
+  { key: 'campaigns', label: 'Campaigns' },
+  { key: 'stats', label: 'Stats' },
+  { key: 'by-segment', label: 'By segment' },
+  { key: 'by-type', label: 'By type' },
+];
+
+const INITIAL_FORM = {
+  name: '',
+  description: '',
+  type: 'email',
+  status: 'draft',
+  targetSegment: 'all',
+  budget: '',
+  startDate: '',
+  endDate: '',
 };
 
+const EMPTY_FEEDBACK = { type: '', message: '' };
+
+const TYPE_OPTIONS = ['email', 'push', 'banner', 'discount'];
+const STATUS_OPTIONS = ['draft', 'active', 'paused', 'completed'];
+const SEGMENT_OPTIONS = ['all', 'vip', 'new', 'at-risk', 'high-value'];
+
+function getErrorMessage(error, fallback) {
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
+}
+
+function formatCurrency(value) {
+  const amount = Number(value || 0);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(Number.isFinite(amount) ? amount : 0);
+}
+
+function formatNumber(value) {
+  const amount = Number(value || 0);
+  return new Intl.NumberFormat('en-US').format(Number.isFinite(amount) ? amount : 0);
+}
+
+function formatPercent(value) {
+  const amount = Number(value || 0);
+  return `${amount.toFixed(1)}%`;
+}
+
+function formatDate(value, fallback = 'Not scheduled') {
+  if (!value) return fallback;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Invalid date';
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }).format(date);
+}
+
+function getStatusTone(status) {
+  switch (String(status || '').toLowerCase()) {
+    case 'active':
+      return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
+    case 'paused':
+      return 'border-amber-500/30 bg-amber-500/10 text-amber-200';
+    case 'completed':
+      return 'border-sky-500/30 bg-sky-500/10 text-sky-200';
+    default:
+      return 'border-neutral-700 bg-neutral-900 text-neutral-300';
+  }
+}
+
+function getCampaignMetrics(campaign) {
+  const latest = Array.isArray(campaign?.analytics) ? campaign.analytics[0] : null;
+  return {
+    revenue: Number(latest?.revenue || 0),
+    converted: Number(latest?.converted || 0),
+    roi: Number(latest?.roi || 0),
+  };
+}
+
+async function requestPayload(path, init = {}) {
+  const { response, data } = await adminFetchJson(path, init);
+  if (!response.ok) {
+    throw new Error(data?.message || data?.error || `Request failed with status ${response.status}.`);
+  }
+  return data || {};
+}
+
+function buildDateQuery(dateRange) {
+  const params = new URLSearchParams();
+  if (dateRange.startDate) params.set('startDate', dateRange.startDate);
+  if (dateRange.endDate) params.set('endDate', dateRange.endDate);
+  const query = params.toString();
+  return query ? `?${query}` : '';
+}
+
+function buildCampaignPayload(formData) {
+  return {
+    name: formData.name.trim(),
+    description: formData.description.trim() || undefined,
+    type: formData.type || 'email',
+    status: formData.status || 'draft',
+    targetSegment: formData.targetSegment || 'all',
+    budget: formData.budget === '' ? undefined : Number(formData.budget),
+    startDate: formData.startDate || undefined,
+    endDate: formData.endDate || undefined,
+  };
+}
+
+function StatCard({ title, value, helperText }) {
+  return (
+    <div className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-5 py-5 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
+      <p className="text-sm text-neutral-400">{title}</p>
+      <p className="mt-3 text-3xl font-semibold text-white">{value}</p>
+      {helperText ? <p className="mt-2 text-xs text-neutral-500">{helperText}</p> : null}
+    </div>
+  );
+}
+
+function SectionHeader({ title, description, action = null }) {
+  return (
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold text-white">{title}</h2>
+        <p className="max-w-2xl text-sm text-neutral-400">{description}</p>
+      </div>
+      {action}
+    </div>
+  );
+}
+function LoadingPanel({ message }) {
+  return (
+    <div className="flex min-h-[220px] items-center justify-center rounded-3xl border border-neutral-800 bg-neutral-900/60 px-6 py-10">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
+        <p className="text-sm text-neutral-400">{message}</p>
+      </div>
+    </div>
+  );
+}
+
+function ErrorPanel({ title, message, onRetry }) {
+  return (
+    <div className="rounded-3xl border border-red-500/25 bg-red-500/10 px-5 py-5 text-red-100 shadow-[0_24px_80px_-36px_rgba(127,29,29,0.9)]">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-2">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-200">Error</p>
+          <h3 className="text-lg font-semibold text-white">{title}</h3>
+          <p className="max-w-2xl text-sm text-red-100/85">{message}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-2xl border border-red-400/30 bg-red-400/10 px-4 py-2 text-sm font-medium text-red-100 transition hover:bg-red-400/20"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children, hint = '' }) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">{label}</span>
+      {children}
+      {hint ? <p className="text-xs text-neutral-500">{hint}</p> : null}
+    </label>
+  );
+}
+
 export default function AdminMarketingPage() {
-  const [viewMode, setViewMode] = useState('campaigns'); // campaigns, analytics, budget, segments
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('campaigns');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
-  const [formData, setFormData] = useState({});
+  const [feedback, setFeedback] = useState(EMPTY_FEEDBACK);
+  const [formData, setFormData] = useState(INITIAL_FORM);
   const [dateRange, setDateRange] = useState({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0],
   });
 
-  // 获取营销活动列表
-  const { data: campaignsData, isLoading: campaignsLoading, refetch: refetchCampaigns } = useQuery({
+  const dateQuery = buildDateQuery(dateRange);
+
+  const campaignsQuery = useQuery({
     queryKey: ['admin', 'marketing', 'campaigns'],
+    staleTime: 60_000,
     queryFn: async () => {
-      const response = await fetch('/api/admin/marketing/campaigns', {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const data = await requestPayload('/api/admin/marketing/campaigns', { cache: 'no-store' });
+      return Array.isArray(data?.campaigns) ? data.campaigns : [];
     },
-    staleTime: 5 * 60 * 1000,
   });
 
-  // 获取营销统计数据
-  const { data: statsData, isLoading: statsLoading } = useQuery({
-    queryKey: ['admin', 'marketing', 'stats', dateRange],
+  const statsQuery = useQuery({
+    queryKey: ['admin', 'marketing', 'stats', dateQuery],
+    staleTime: 60_000,
     queryFn: async () => {
-      const params = new URLSearchParams(dateRange);
-      const response = await fetch(`/api/admin/marketing/stats?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const data = await requestPayload(`/api/admin/marketing/stats${dateQuery}`, { cache: 'no-store' });
+      return data?.stats || null;
     },
-    staleTime: 5 * 60 * 1000,
   });
 
-  // 获取按目标受众分组的统计
-  const { data: segmentData, isLoading: segmentLoading } = useQuery({
-    queryKey: ['admin', 'marketing', 'stats', 'by-segment', dateRange],
+  const segmentsQuery = useQuery({
+    queryKey: ['admin', 'marketing', 'segments', dateQuery],
+    staleTime: 60_000,
     queryFn: async () => {
-      const params = new URLSearchParams(dateRange);
-      const response = await fetch(`/api/admin/marketing/stats/by-segment?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const data = await requestPayload(`/api/admin/marketing/stats/by-segment${dateQuery}`, { cache: 'no-store' });
+      return Array.isArray(data?.segments) ? data.segments : [];
     },
-    staleTime: 5 * 60 * 1000,
   });
 
-  // 获取按活动类型分组的统计
-  const { data: typeData, isLoading: typeLoading } = useQuery({
-    queryKey: ['admin', 'marketing', 'stats', 'by-type', dateRange],
+  const typesQuery = useQuery({
+    queryKey: ['admin', 'marketing', 'types', dateQuery],
+    staleTime: 60_000,
     queryFn: async () => {
-      const params = new URLSearchParams(dateRange);
-      const response = await fetch(`/api/admin/marketing/stats/by-type?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') : ''}`,
-        },
-      });
-      return response.json();
+      const data = await requestPayload(`/api/admin/marketing/stats/by-type${dateQuery}`, { cache: 'no-store' });
+      return Array.isArray(data?.types) ? data.types : [];
     },
-    staleTime: 5 * 60 * 1000,
   });
 
-  const campaigns = campaignsData?.campaigns || [];
-  const stats = statsData?.stats;
-  const segments = segmentData?.segments || [];
-  const types = typeData?.types || [];
-  const budgetUsagePct =
-    stats && Number(stats.totalBudget) > 0
-      ? Math.min(100, Math.max(0, (Number(stats.totalSpent) / Number(stats.totalBudget)) * 100))
-      : 0;
+  const refreshAll = () =>
+    Promise.all([
+      campaignsQuery.refetch(),
+      statsQuery.refetch(),
+      segmentsQuery.refetch(),
+      typesQuery.refetch(),
+    ]);
 
-  // 创建营销活动 mutation
   const createCampaignMutation = useMutation({
-    mutationFn: async (data) => {
-      const response = await fetch('/api/admin/marketing/campaigns', {
+    mutationFn: async (draft) =>
+      requestPayload('/api/admin/marketing/campaigns', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('创建营销活动失败');
-      return response.json();
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildCampaignPayload(draft)),
+      }),
+    onSuccess: async () => {
+      setViewMode('campaigns');
+      setIsCreateModalOpen(false);
+      setFormData(INITIAL_FORM);
+      setFeedback({ type: 'success', message: 'Campaign created.' });
+      await refreshAll();
     },
-    onSuccess: () => {
-      setIsModalOpen(false);
-      setFormData({});
-      refetchCampaigns();
+    onError: (error) => {
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to create campaign.') });
     },
   });
 
-  // 删除营销活动 mutation
   const deleteCampaignMutation = useMutation({
-    mutationFn: async (id) => {
-      const response = await fetch(`/api/admin/marketing/campaigns/${id}`, {
+    mutationFn: async (campaignId) =>
+      requestPayload(`/api/admin/marketing/campaigns/${campaignId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('删除营销活动失败');
-      return response.json();
-    },
-    onSuccess: () => {
-      setIsDeleteConfirmOpen(false);
+      }),
+    onSuccess: async () => {
+      setIsDeleteModalOpen(false);
       setSelectedCampaign(null);
-      refetchCampaigns();
+      setFeedback({ type: 'success', message: 'Campaign deleted.' });
+      await refreshAll();
+    },
+    onError: (error) => {
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to delete campaign.') });
     },
   });
 
-  const handleCreateCampaign = () => createCampaignMutation.mutate(formData);
-  const handleDeleteCampaign = () => deleteCampaignMutation.mutate(selectedCampaign.id);
+  const campaigns = Array.isArray(campaignsQuery.data) ? campaignsQuery.data : [];
+  const stats = statsQuery.data;
+  const segments = Array.isArray(segmentsQuery.data) ? segmentsQuery.data : [];
+  const types = Array.isArray(typesQuery.data) ? typesQuery.data : [];
 
-  // 渲染统计卡片
-  const renderStatCard = (title, value, color = 'blue', unit = '') => {
-    const style = STAT_CARD_STYLES[color] || STAT_CARD_STYLES.blue;
+  const setFormValue = (key, value) => setFormData((current) => ({ ...current, [key]: value }));
+  const setRangeValue = (key, value) => setDateRange((current) => ({ ...current, [key]: value }));
 
-    return (
-      <div className={`rounded-lg border p-4 ${style.container}`}>
-        <p className="text-sm text-neutral-400">{title}</p>
-        <p className={`mt-2 text-2xl font-bold ${style.value}`}>
-          {typeof value === 'number' ? value.toFixed(2) : value}
-          {unit && <span className="text-sm ml-1">{unit}</span>}
-        </p>
-      </div>
-    );
+  const openCreateModal = () => {
+    setFeedback(EMPTY_FEEDBACK);
+    setFormData(INITIAL_FORM);
+    setIsCreateModalOpen(true);
   };
 
-  return (
-    <div className="min-h-screen bg-neutral-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* 页面标题 */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">营销活动管理</h1>
-          <p className="text-neutral-400 mt-2">管理营销活动、效果分析、预算管理</p>
-        </div>
+  const handleCreateCampaign = () => {
+    const budgetValue = formData.budget === '' ? null : Number(formData.budget);
 
-        {/* 日期范围选择 */}
-        <div className="mb-6 flex gap-4">
-          <div>
-            <label className="text-sm text-neutral-400">开始日期</label>
-            <input
-              type="date"
-              value={dateRange.startDate}
-              onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
-              className="mt-1 rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-neutral-400">结束日期</label>
-            <input
-              type="date"
-              value={dateRange.endDate}
-              onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
-              className="mt-1 rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            />
-          </div>
-        </div>
+    if (!formData.name.trim()) {
+      setFeedback({ type: 'error', message: 'Campaign name is required.' });
+      return;
+    }
 
-        {/* 视图切换 */}
-        <div className="flex gap-4 mb-6">
-          {[
-            { key: 'campaigns', label: '活动管理' },
-            { key: 'analytics', label: '效果分析' },
-            { key: 'budget', label: '预算管理' },
-            { key: 'segments', label: '分群分析' },
-          ].map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setViewMode(item.key)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                viewMode === item.key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+    if (budgetValue !== null && (!Number.isFinite(budgetValue) || budgetValue < 0)) {
+      setFeedback({ type: 'error', message: 'Budget must be a valid non-negative number.' });
+      return;
+    }
 
-        {/* 活动管理 */}
-        {viewMode === 'campaigns' && (
-          <div className="space-y-6">
-            <button
-              onClick={() => {
-                setFormData({});
-                setIsModalOpen(true);
-              }}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-            >
-              + 创建活动
-            </button>
+    if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
+      setFeedback({ type: 'error', message: 'End date must be on or after the start date.' });
+      return;
+    }
 
-            <AdminDataState
-              isLoading={campaignsLoading}
-              hasData={campaigns.length > 0}
-              emptyMessage="暂无营销活动"
-            >
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-neutral-700">
-                        <th className="px-4 py-3 text-left text-neutral-400">活动名称</th>
-                        <th className="px-4 py-3 text-left text-neutral-400">类型</th>
-                        <th className="px-4 py-3 text-left text-neutral-400">目标受众</th>
-                        <th className="px-4 py-3 text-left text-neutral-400">预算</th>
-                        <th className="px-4 py-3 text-left text-neutral-400">状态</th>
-                        <th className="px-4 py-3 text-left text-neutral-400">操作</th>
+    createCampaignMutation.mutate(formData);
+  };
+  const handleDeleteCampaign = () => {
+    if (!selectedCampaign?.id) {
+      setFeedback({ type: 'error', message: 'Unable to resolve the selected campaign.' });
+      setIsDeleteModalOpen(false);
+      return;
+    }
+    deleteCampaignMutation.mutate(selectedCampaign.id);
+  };
+
+  let content = null;
+
+  if (viewMode === 'campaigns') {
+    if (campaignsQuery.isLoading) {
+      content = <LoadingPanel message="Loading campaigns..." />;
+    } else if (campaignsQuery.isError) {
+      content = (
+        <ErrorPanel
+          title="Campaigns could not be loaded."
+          message={getErrorMessage(campaignsQuery.error, 'Failed to load campaigns.')}
+          onRetry={() => campaignsQuery.refetch()}
+        />
+      );
+    } else {
+      content = (
+        <AdminDataState isLoading={false} hasData={campaigns.length > 0} emptyMessage="No campaigns yet." wrap={false}>
+          <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900/70 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.85)]">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-neutral-800 text-sm">
+                <thead className="bg-neutral-950/60 text-left text-xs uppercase tracking-[0.18em] text-neutral-500">
+                  <tr>
+                    <th className="px-5 py-4 font-semibold">Campaign</th>
+                    <th className="px-5 py-4 font-semibold">Status</th>
+                    <th className="px-5 py-4 font-semibold">Audience</th>
+                    <th className="px-5 py-4 font-semibold">Schedule</th>
+                    <th className="px-5 py-4 font-semibold">Spend</th>
+                    <th className="px-5 py-4 font-semibold">Outcome</th>
+                    <th className="px-5 py-4 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-800/80">
+                  {campaigns.map((campaign) => {
+                    const metric = getCampaignMetrics(campaign);
+                    const schedule = campaign.startDate || campaign.endDate
+                      ? `${formatDate(campaign.startDate, 'Any time')} to ${formatDate(campaign.endDate, 'Open ended')}`
+                      : 'Not scheduled';
+
+                    return (
+                      <tr key={campaign.id || campaign.name} className="align-top transition hover:bg-neutral-900/90">
+                        <td className="px-5 py-4">
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="font-semibold text-white">{campaign.name || 'Untitled campaign'}</p>
+                              <span className="rounded-full border border-neutral-700 bg-neutral-900 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-neutral-400">
+                                {campaign.type || 'unknown'}
+                              </span>
+                            </div>
+                            {campaign.description ? <p className="max-w-md text-sm text-neutral-400">{campaign.description}</p> : null}
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${getStatusTone(campaign.status)}`}>
+                            {campaign.status || 'draft'}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-neutral-300">
+                          <div className="space-y-1">
+                            <p>{campaign.targetSegment || 'all'}</p>
+                            <p className="text-xs text-neutral-500">Created {formatDate(campaign.createdAt, 'Unknown')}</p>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-neutral-300">{schedule}</td>
+                        <td className="px-5 py-4 text-neutral-300">
+                          <div className="space-y-1">
+                            <p>Budget {formatCurrency(campaign.budget)}</p>
+                            <p className="text-xs text-neutral-500">Spent {formatCurrency(campaign.spent)}</p>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-neutral-300">
+                          <div className="space-y-1">
+                            <p>Revenue {formatCurrency(metric.revenue)}</p>
+                            <p className="text-xs text-neutral-500">{formatNumber(metric.converted)} conversions and {formatPercent(metric.roi)} ROI</p>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedCampaign(campaign);
+                              setIsDeleteModalOpen(true);
+                            }}
+                            disabled={deleteCampaignMutation.isPending}
+                            className="rounded-2xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {deleteCampaignMutation.isPending && selectedCampaign?.id === campaign.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {campaigns.map((campaign) => (
-                        <tr key={campaign.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
-                          <td className="px-4 py-3 text-neutral-300">{campaign.name}</td>
-                          <td className="px-4 py-3 text-neutral-300">{campaign.type}</td>
-                          <td className="px-4 py-3 text-neutral-300">{campaign.targetSegment}</td>
-                          <td className="px-4 py-3 text-emerald-400">${campaign.budget.toFixed(2)}</td>
-                          <td className="px-4 py-3">
-                            <span
-                              className={`px-2 py-1 rounded text-xs font-medium ${
-                                campaign.status === 'active'
-                                  ? 'bg-green-900/30 text-green-400'
-                                  : campaign.status === 'draft'
-                                  ? 'bg-yellow-900/30 text-yellow-400'
-                                  : 'bg-gray-900/30 text-gray-400'
-                              }`}
-                            >
-                              {campaign.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <button
-                              onClick={() => {
-                                setSelectedCampaign(campaign);
-                                setIsDeleteConfirmOpen(true);
-                              }}
-                              className="text-red-400 hover:text-red-300 text-sm"
-                            >
-                              删除
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-            </AdminDataState>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        )}
-
-        {/* 效果分析 */}
-        {viewMode === 'analytics' && (
-          <div className="space-y-6">
-            <AdminDataState
-              isLoading={statsLoading}
-              hasData={Boolean(stats)}
-              emptyMessage="无数据"
-              wrap={false}
-            >
-              {() => (
-              <>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {renderStatCard('总活动数', stats.totalCampaigns, 'blue')}
-                  {renderStatCard('活跃活动', stats.activeCampaigns, 'green')}
-                  {renderStatCard('总预算', stats.totalBudget, 'purple', '$')}
-                  {renderStatCard('已花费', stats.totalSpent, 'orange', '$')}
-                  {renderStatCard('总收入', stats.totalRevenue, 'emerald', '$')}
-                  {renderStatCard('平均ROI', stats.avgRoi, 'blue', '%')}
-                </div>
-              </>
-              )}
-            </AdminDataState>
+        </AdminDataState>
+      );
+    }
+  } else if (viewMode === 'stats') {
+    if (statsQuery.isLoading) {
+      content = <LoadingPanel message="Loading performance stats..." />;
+    } else if (statsQuery.isError) {
+      content = (
+        <ErrorPanel
+          title="Performance stats could not be loaded."
+          message={getErrorMessage(statsQuery.error, 'Failed to load performance stats.')}
+          onRetry={() => statsQuery.refetch()}
+        />
+      );
+    } else {
+      content = (
+        <AdminDataState isLoading={false} hasData={Boolean(stats)} emptyMessage="No performance data for this range." wrap={false}>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <StatCard title="Total campaigns" value={formatNumber(stats?.totalCampaigns)} helperText="All campaigns in range" />
+            <StatCard title="Active campaigns" value={formatNumber(stats?.activeCampaigns)} helperText="Currently active" />
+            <StatCard title="Total budget" value={formatCurrency(stats?.totalBudget)} helperText="Planned spend" />
+            <StatCard title="Total spent" value={formatCurrency(stats?.totalSpent)} helperText="Actual spend" />
+            <StatCard title="Total revenue" value={formatCurrency(stats?.totalRevenue)} helperText="Attributed revenue" />
+            <StatCard title="Average ROI" value={formatPercent(stats?.avgRoi)} helperText={`${formatNumber(stats?.totalConverted)} total conversions`} />
           </div>
-        )}
-
-        {/* 预算管理 */}
-        {viewMode === 'budget' && (
-          <div className="space-y-6">
-            <AdminDataState
-              isLoading={statsLoading}
-              hasData={Boolean(stats)}
-              emptyMessage="无数据"
-              wrap={false}
-            >
-              {() => (
-              <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
-                <h3 className="text-lg font-semibold text-neutral-100 mb-4">预算概览</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-400">总预算</span>
-                    <span className="text-emerald-400 font-semibold">${stats.totalBudget.toFixed(2)}</span>
+        </AdminDataState>
+      );
+    }
+  } else if (viewMode === 'by-segment') {
+    if (segmentsQuery.isLoading) {
+      content = <LoadingPanel message="Loading segment totals..." />;
+    } else if (segmentsQuery.isError) {
+      content = (
+        <ErrorPanel
+          title="Segment totals could not be loaded."
+          message={getErrorMessage(segmentsQuery.error, 'Failed to load segment totals.')}
+          onRetry={() => segmentsQuery.refetch()}
+        />
+      );
+    } else {
+      content = (
+        <AdminDataState isLoading={false} hasData={segments.length > 0} emptyMessage="No segment data for this range." wrap={false}>
+          <div className="grid gap-4 xl:grid-cols-2">
+            {segments.map((segment) => (
+              <div key={segment.segment || 'unknown'} className="rounded-3xl border border-neutral-800 bg-neutral-900/75 px-5 py-5 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Segment</p>
+                    <h3 className="mt-2 text-xl font-semibold text-white">{segment.segment || 'Unknown'}</h3>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-400">已花费</span>
-                    <span className="text-orange-400 font-semibold">${stats.totalSpent.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-400">剩余预算</span>
-                    <span className="text-blue-400 font-semibold">${(stats.totalBudget - stats.totalSpent).toFixed(2)}</span>
-                  </div>
-                  <div className="mt-4">
-                    <div className="w-full bg-neutral-700 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${budgetUsagePct}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-neutral-400 mt-2">
-                      预算使用率: {budgetUsagePct.toFixed(2)}%
-                    </p>
-                  </div>
+                  <span className="rounded-full border border-neutral-700 bg-neutral-950/70 px-3 py-1 text-xs text-neutral-300">
+                    {formatNumber(segment.count)} campaigns
+                  </span>
+                </div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <StatCard title="Budget" value={formatCurrency(segment.budget)} helperText="Planned" />
+                  <StatCard title="Spent" value={formatCurrency(segment.spent)} helperText="Actual" />
+                  <StatCard title="Revenue" value={formatCurrency(segment.revenue)} helperText="Attributed" />
+                  <StatCard title="Conversions" value={formatNumber(segment.converted)} helperText="Completed actions" />
                 </div>
               </div>
-              )}
-            </AdminDataState>
+            ))}
           </div>
-        )}
-
-        {/* 分群分析 */}
-        {viewMode === 'segments' && (
-          <div className="space-y-6">
-            <AdminDataState
-              isLoading={segmentLoading}
-              hasData={segments.length > 0}
-              emptyMessage="无数据"
-              wrap={false}
-            >
-              <>
-                <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
-                  <h3 className="text-lg font-semibold text-neutral-100 mb-4">按目标受众分组</h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-neutral-700">
-                          <th className="px-4 py-3 text-left text-neutral-400">目标受众</th>
-                          <th className="px-4 py-3 text-left text-neutral-400">活动数</th>
-                          <th className="px-4 py-3 text-left text-neutral-400">总预算</th>
-                          <th className="px-4 py-3 text-left text-neutral-400">已花费</th>
-                          <th className="px-4 py-3 text-left text-neutral-400">收入</th>
-                          <th className="px-4 py-3 text-left text-neutral-400">转化数</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {segments.map((segment) => (
-                          <tr key={segment.segment} className="border-b border-neutral-700 hover:bg-neutral-700/50">
-                            <td className="px-4 py-3 text-neutral-300">{segment.segment}</td>
-                            <td className="px-4 py-3 text-neutral-300">{segment.count}</td>
-                            <td className="px-4 py-3 text-emerald-400">${segment.budget.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-orange-400">${segment.spent.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-blue-400">${segment.revenue.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-neutral-300">{segment.converted}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <AdminDataState
-                  isLoading={typeLoading}
-                  hasData={types.length > 0}
-                  emptyMessage={null}
-                  wrap={false}
-                >
-                  <div className="rounded-lg bg-neutral-800 p-4 border border-neutral-700">
-                    <h3 className="text-lg font-semibold text-neutral-100 mb-4">按活动类型分组</h3>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-neutral-700">
-                            <th className="px-4 py-3 text-left text-neutral-400">活动类型</th>
-                            <th className="px-4 py-3 text-left text-neutral-400">活动数</th>
-                            <th className="px-4 py-3 text-left text-neutral-400">总预算</th>
-                            <th className="px-4 py-3 text-left text-neutral-400">已花费</th>
-                            <th className="px-4 py-3 text-left text-neutral-400">收入</th>
-                            <th className="px-4 py-3 text-left text-neutral-400">转化数</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {types.map((type) => (
-                            <tr key={type.type} className="border-b border-neutral-700 hover:bg-neutral-700/50">
-                              <td className="px-4 py-3 text-neutral-300">{type.type}</td>
-                              <td className="px-4 py-3 text-neutral-300">{type.count}</td>
-                              <td className="px-4 py-3 text-emerald-400">${type.budget.toFixed(2)}</td>
-                              <td className="px-4 py-3 text-orange-400">${type.spent.toFixed(2)}</td>
-                              <td className="px-4 py-3 text-blue-400">${type.revenue.toFixed(2)}</td>
-                              <td className="px-4 py-3 text-neutral-300">{type.converted}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </AdminDataState>
-              </>
-            </AdminDataState>
+        </AdminDataState>
+      );
+    }
+  } else if (typesQuery.isLoading) {
+    content = <LoadingPanel message="Loading campaign type totals..." />;
+  } else if (typesQuery.isError) {
+    content = (
+      <ErrorPanel
+        title="Campaign type totals could not be loaded."
+        message={getErrorMessage(typesQuery.error, 'Failed to load campaign type totals.')}
+        onRetry={() => typesQuery.refetch()}
+      />
+    );
+  } else {
+    content = (
+      <AdminDataState isLoading={false} hasData={types.length > 0} emptyMessage="No campaign type data for this range." wrap={false}>
+        <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900/70 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.85)]">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-neutral-800 text-sm">
+              <thead className="bg-neutral-950/60 text-left text-xs uppercase tracking-[0.18em] text-neutral-500">
+                <tr>
+                  <th className="px-5 py-4 font-semibold">Type</th>
+                  <th className="px-5 py-4 font-semibold">Campaigns</th>
+                  <th className="px-5 py-4 font-semibold">Budget</th>
+                  <th className="px-5 py-4 font-semibold">Spent</th>
+                  <th className="px-5 py-4 font-semibold">Revenue</th>
+                  <th className="px-5 py-4 font-semibold">Conversions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-800/80">
+                {types.map((typeRow) => (
+                  <tr key={typeRow.type || 'unknown'} className="transition hover:bg-neutral-900/90">
+                    <td className="px-5 py-4 font-medium text-white">{typeRow.type || 'unknown'}</td>
+                    <td className="px-5 py-4 text-neutral-300">{formatNumber(typeRow.count)}</td>
+                    <td className="px-5 py-4 text-neutral-300">{formatCurrency(typeRow.budget)}</td>
+                    <td className="px-5 py-4 text-neutral-300">{formatCurrency(typeRow.spent)}</td>
+                    <td className="px-5 py-4 text-neutral-300">{formatCurrency(typeRow.revenue)}</td>
+                    <td className="px-5 py-4 text-neutral-300">{formatNumber(typeRow.converted)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
+      </AdminDataState>
+    );
+  }
+  return (
+    <div className="space-y-6 p-6 text-neutral-100">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">Admin</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-white">Marketing</h1>
+          <p className="max-w-3xl text-sm text-neutral-400">
+            Review live campaigns, compare rollups by segment and type, and launch or remove campaigns from one stable console.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => refreshAll()}
+            className="rounded-2xl border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-800"
+          >
+            Refresh
+          </button>
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400"
+          >
+            New campaign
+          </button>
+        </div>
       </div>
 
-      {/* 创建营销活动模态框 */}
+      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard title="Campaigns" value={campaignsQuery.isLoading ? '...' : formatNumber(stats?.totalCampaigns ?? campaigns.length)} helperText="Current campaign count" />
+        <StatCard title="Active" value={statsQuery.isLoading ? '...' : statsQuery.isError ? '--' : formatNumber(stats?.activeCampaigns)} helperText="Campaigns running now" />
+        <StatCard title="Budget" value={statsQuery.isLoading ? '...' : statsQuery.isError ? '--' : formatCurrency(stats?.totalBudget)} helperText="Budget across the selected range" />
+        <StatCard title="Average ROI" value={statsQuery.isLoading ? '...' : statsQuery.isError ? '--' : formatPercent(stats?.avgRoi)} helperText="Latest aggregated ROI" />
+      </div>
+
+      <div className="rounded-3xl border border-neutral-800 bg-neutral-950/60 p-4 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.85)]">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div className="flex flex-wrap gap-2">
+            {TABS.map((tab) => {
+              const active = viewMode === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setViewMode(tab.key)}
+                  className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${active ? 'bg-white text-neutral-950' : 'border border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-600 hover:text-white'}`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:min-w-[340px]">
+            <Field label="Start date">
+              <input
+                type="date"
+                value={dateRange.startDate}
+                onChange={(event) => setRangeValue('startDate', event.target.value)}
+                max={dateRange.endDate || undefined}
+                className="w-full rounded-2xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white outline-none transition focus:border-emerald-400"
+              />
+            </Field>
+            <Field label="End date">
+              <input
+                type="date"
+                value={dateRange.endDate}
+                onChange={(event) => setRangeValue('endDate', event.target.value)}
+                min={dateRange.startDate || undefined}
+                className="w-full rounded-2xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white outline-none transition focus:border-emerald-400"
+              />
+            </Field>
+          </div>
+        </div>
+      </div>
+
+      <section className="space-y-4">
+        <SectionHeader
+          title={viewMode === 'campaigns' ? 'Campaign catalog' : viewMode === 'stats' ? 'Performance summary' : viewMode === 'by-segment' ? 'Performance by segment' : 'Performance by type'}
+          description={viewMode === 'campaigns' ? 'Each row shows the latest campaign configuration, spend, revenue, and conversion snapshot.' : viewMode === 'stats' ? 'This rollup aggregates budgets, spend, revenue, and conversions for the selected date range.' : viewMode === 'by-segment' ? 'Compare audience segment performance across budgets, spend, and revenue.' : 'Compare delivery types so you can spot stronger channels quickly.'}
+        />
+        {content}
+      </section>
+
       <Modal
-        isOpen={isModalOpen}
-        title="创建营销活动"
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isCreateModalOpen}
+        onClose={() => !createCampaignMutation.isPending && setIsCreateModalOpen(false)}
+        title="Create campaign"
+        subtitle="Set the campaign basics now. Analytics will populate after delivery starts."
+        size="xl"
       >
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm text-neutral-400">活动名称</label>
-            <input
-              type="text"
-              value={formData.name || ''}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            />
+        <div className="space-y-5">
+          {createCampaignMutation.isError ? <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">{getErrorMessage(createCampaignMutation.error, 'Failed to create campaign.')}</div> : null}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Campaign name"><input type="text" value={formData.name} onChange={(event) => setFormValue('name', event.target.value)} placeholder="Summer launch" className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400" /></Field>
+            <Field label="Budget" hint="Leave empty if the campaign does not have a fixed budget."><input type="number" min="0" step="0.01" value={formData.budget} onChange={(event) => setFormValue('budget', event.target.value)} placeholder="0.00" className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400" /></Field>
+            <Field label="Type"><select value={formData.type} onChange={(event) => setFormValue('type', event.target.value)} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400">{TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></Field>
+            <Field label="Status"><select value={formData.status} onChange={(event) => setFormValue('status', event.target.value)} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400">{STATUS_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></Field>
+            <Field label="Target segment"><select value={formData.targetSegment} onChange={(event) => setFormValue('targetSegment', event.target.value)} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400">{SEGMENT_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></Field>
+            <Field label="Start date"><input type="date" value={formData.startDate} onChange={(event) => setFormValue('startDate', event.target.value)} max={formData.endDate || undefined} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400" /></Field>
+            <Field label="End date"><input type="date" value={formData.endDate} onChange={(event) => setFormValue('endDate', event.target.value)} min={formData.startDate || undefined} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400" /></Field>
           </div>
-          <div>
-            <label className="text-sm text-neutral-400">活动描述</label>
-            <textarea
-              value={formData.description || ''}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-              rows={3}
-            />
+          <Field label="Description" hint="Optional internal context for operators."><textarea value={formData.description} onChange={(event) => setFormValue('description', event.target.value)} rows={4} placeholder="Short campaign summary" className="w-full rounded-3xl border border-neutral-800 bg-neutral-950 px-3 py-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400" /></Field>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button type="button" onClick={() => setIsCreateModalOpen(false)} disabled={createCampaignMutation.isPending} className="rounded-2xl border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60">Cancel</button>
+            <button type="button" onClick={handleCreateCampaign} disabled={createCampaignMutation.isPending} className="rounded-2xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60">{createCampaignMutation.isPending ? 'Creating...' : 'Create campaign'}</button>
           </div>
-          <div>
-            <label className="text-sm text-neutral-400">活动类型</label>
-            <select
-              value={formData.type || ''}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="">选择类型</option>
-              <option value="email">邮件</option>
-              <option value="push">推送</option>
-              <option value="banner">横幅</option>
-              <option value="discount">折扣</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm text-neutral-400">目标受众</label>
-            <select
-              value={formData.targetSegment || ''}
-              onChange={(e) => setFormData({ ...formData, targetSegment: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            >
-              <option value="">选择受众</option>
-              <option value="all">全部用户</option>
-              <option value="vip">VIP用户</option>
-              <option value="new">新用户</option>
-              <option value="at-risk">流失风险用户</option>
-              <option value="high-value">高价值用户</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm text-neutral-400">预算</label>
-            <input
-              type="number"
-              value={formData.budget || ''}
-              onChange={(e) => setFormData({ ...formData, budget: parseFloat(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-            />
-          </div>
-          <button
-            onClick={handleCreateCampaign}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            创建
-          </button>
         </div>
       </Modal>
 
-      {/* 删除确认对话框 */}
-      <ConfirmDialog
-        isOpen={isDeleteConfirmOpen}
-        title="确认删除"
-        message={`确定要删除 "${selectedCampaign?.name}" 吗？`}
-        confirmText="删除"
-        cancelText="取消"
-        isDangerous={true}
-        onConfirm={handleDeleteCampaign}
-        onCancel={() => {
-          setIsDeleteConfirmOpen(false);
-          setSelectedCampaign(null);
-        }}
-      />
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => !deleteCampaignMutation.isPending && setIsDeleteModalOpen(false)}
+        title="Delete campaign"
+        subtitle="This action cannot be undone."
+        size="md"
+      >
+        <div className="space-y-5">
+          <p className="text-sm text-neutral-300">{selectedCampaign?.name ? `Delete ${selectedCampaign.name}?` : 'Delete this campaign?'}</p>
+          {deleteCampaignMutation.isError ? <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">{getErrorMessage(deleteCampaignMutation.error, 'Failed to delete campaign.')}</div> : null}
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button type="button" onClick={() => { setIsDeleteModalOpen(false); setSelectedCampaign(null); }} disabled={deleteCampaignMutation.isPending} className="rounded-2xl border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60">Cancel</button>
+            <button type="button" onClick={handleDeleteCampaign} disabled={deleteCampaignMutation.isPending} className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60">{deleteCampaignMutation.isPending ? 'Deleting...' : 'Delete campaign'}</button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

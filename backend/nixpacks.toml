@@ -12,4 +12,4 @@ cmds = ["npm install --legacy-peer-deps --include=dev"]
 cmds = ["npm run prisma:generate", "npm run build"]
 
 [start]
-cmd = "node dist/main.js"
+cmd = "npm run prisma:deploy && node dist/main.js"
