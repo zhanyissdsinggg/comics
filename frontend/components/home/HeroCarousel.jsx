@@ -52,7 +52,6 @@ export default function HeroCarousel({ items }) {
 
   const active = safeItems[index] || safeItems[0];
   const activeSeriesId = String(active?.seriesId || "").trim();
-  const latestEpisodeId = String(active?.latestEpisodeId || "").trim();
   const isFollowing = activeSeriesId ? followedSeriesIds.includes(activeSeriesId) : false;
   const rawBannerUrl = active?.bannerUrl || active?.coverUrl;
   const bannerUrl = normalizeBannerUrl(rawBannerUrl);
@@ -73,15 +72,12 @@ export default function HeroCarousel({ items }) {
     if (!activeSeriesId) {
       return;
     }
-    const target = latestEpisodeId
-      ? "/read/" + activeSeriesId + "/" + latestEpisodeId
-      : "/series/" + activeSeriesId;
+    const target = "/series/" + activeSeriesId;
     trackEvent("hero_read_now", {
       seriesId: activeSeriesId,
-      episodeId: latestEpisodeId || undefined,
     });
     router.push(target);
-  }, [activeSeriesId, latestEpisodeId, router]);
+  }, [activeSeriesId, router]);
 
   const handleFollowToggle = useCallback(async () => {
     if (!activeSeriesId) {
