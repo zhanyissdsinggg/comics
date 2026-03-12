@@ -61,6 +61,10 @@ export function FollowProvider({ children }) {
     const response = await apiPost("/api/follow", { seriesId, action });
     if (response.ok) {
       setFollowedSeriesIds(response.data?.followedSeriesIds || []);
+      return response;
+    }
+    if (response.status === 401 && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("auth:open"));
     }
     return response;
   }, []);
