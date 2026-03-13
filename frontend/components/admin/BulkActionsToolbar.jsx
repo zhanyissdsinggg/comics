@@ -59,7 +59,7 @@ export default function BulkActionsToolbar({
         });
       }, 2000);
     } catch (error) {
-      console.error("Bulk action failed:", error);
+      console.error("批量操作失败:", error);
       setOperationState({
         isProcessing: false,
         currentOperation: null,
@@ -77,11 +77,11 @@ export default function BulkActionsToolbar({
   const isProcessing = operationState.isProcessing;
   const progressLabel =
     operationState.currentOperation === "publish"
-      ? "Publishing..."
+      ? "发布中..."
       : operationState.currentOperation === "unpublish"
-        ? "Unpublishing..."
+        ? "取消发布中..."
         : operationState.currentOperation === "delete"
-          ? "Deleting..."
+          ? "删除中..."
           : null;
 
   return (
@@ -107,7 +107,7 @@ export default function BulkActionsToolbar({
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ios-green/20 text-sm font-bold text-ios-green">
               {selectedCount}
             </div>
-            <span className="text-sm font-medium text-neutral-200">{selectedCount} selected</span>
+            <span className="text-sm font-medium text-neutral-200">已选择 {selectedCount} 项</span>
           </div>
 
           <div className="h-8 w-px bg-ios-gray-700" />
@@ -117,33 +117,33 @@ export default function BulkActionsToolbar({
               type="button"
               onClick={() => wrapOperation(onPublish, "publish", selectedCount)}
               disabled={isProcessing}
-              title="Publish selected"
+              title="发布所选项"
               className="flex items-center gap-2 rounded-3xl border border-ios-green/20 bg-ios-green/10 px-4 py-2 text-xs font-bold text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Eye size={14} />
-              <span>Publish</span>
+              <span>发布</span>
             </button>
 
             <button
               type="button"
               onClick={() => wrapOperation(onUnpublish, "unpublish", selectedCount)}
               disabled={isProcessing}
-              title="Unpublish selected"
+              title="取消发布所选项"
               className="flex items-center gap-2 rounded-3xl border border-ios-gray-600/20 bg-ios-gray-700/10 px-4 py-2 text-xs font-bold text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-700/20 hover:text-neutral-200 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <EyeOff size={14} />
-              <span>Unpublish</span>
+              <span>取消发布</span>
             </button>
 
             <button
               type="button"
               onClick={() => wrapOperation(onDelete, "delete", selectedCount)}
               disabled={isProcessing}
-              title="Delete selected"
+              title="删除所选项"
               className="flex items-center gap-2 rounded-3xl border border-ios-red/20 bg-ios-red/10 px-4 py-2 text-xs font-bold text-ios-red transition-all duration-300 hover:bg-ios-red/20 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Trash2 size={14} />
-              <span>Delete</span>
+              <span>删除</span>
             </button>
           </div>
 
@@ -153,11 +153,11 @@ export default function BulkActionsToolbar({
             <button
               type="button"
               onClick={() => setUndoHistory((current) => current.slice(0, -1))}
-              title={`Undo last action (${undoHistory[undoHistory.length - 1].count} items)`}
+              title={`撤销上一步操作（${undoHistory[undoHistory.length - 1].count} 项）`}
               className="flex items-center gap-2 rounded-3xl border border-ios-orange/20 bg-ios-orange/10 px-4 py-2 text-xs font-bold text-ios-orange transition-all duration-300 hover:bg-ios-orange/20 hover:scale-105 hover:shadow-ios-sm active:scale-95"
             >
               <RotateCcw size={14} />
-              <span>Undo</span>
+              <span>撤销</span>
             </button>
           ) : null}
 
@@ -167,11 +167,11 @@ export default function BulkActionsToolbar({
             type="button"
             onClick={onCancel}
             disabled={isProcessing}
-            title="Clear selection"
+            title="清空选择"
             className="flex items-center gap-2 rounded-3xl border border-ios-gray-600/20 bg-ios-gray-700/10 px-4 py-2 text-xs font-bold text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-700/20 hover:text-neutral-200 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <X size={14} />
-            <span>Clear</span>
+            <span>清空</span>
           </button>
         </div>
       </div>

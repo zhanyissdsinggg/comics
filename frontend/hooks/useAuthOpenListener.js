@@ -12,8 +12,14 @@ export function useAuthOpenListener() {
 
     const handler = (event) => {
       const returnTo = event?.detail?.returnTo || null;
-      if (returnTo && typeof window !== "undefined") {
-        window.sessionStorage.setItem("mn_return_to", returnTo);
+      if (typeof window !== "undefined") {
+        if (returnTo) {
+          window.sessionStorage.setItem("mn_return_to", returnTo);
+        }
+        const handledAt = Number(window.__mnAuthModalHandledAt || 0);
+        if (handledAt && Date.now() - handledAt < 250) {
+          return;
+        }
       }
       if (event?.__mnAuthHandled) {
         return;

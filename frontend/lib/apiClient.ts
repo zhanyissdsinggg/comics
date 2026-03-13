@@ -1,14 +1,11 @@
 /**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment. */
+ * 
+ *  */
 
 import { emitToast } from "./toastBus";
 import { emitAuthRequired } from "./authBus";
 import { getFriendlyMessage } from "./errorMessages";
 import { LRUCache } from "./lruCache";
-
-// NOTE: cleaned corrupted comment.
-
 export interface ApiResponse<T = unknown> {
   ok: boolean;
   status: number;
@@ -25,7 +22,7 @@ export interface ApiRequestOptions {
   cacheMs?: number;
   bust?: boolean;
   suppressAuthModal?: boolean;
-  dedupeMs?: number; // NOTE: cleaned corrupted comment.
+  dedupeMs?: number; // 
   maxRetries?: number;
 }
 
@@ -51,9 +48,6 @@ interface CacheEntry {
   response: ApiResponse;
   expiresAt: number;
 }
-
-// NOTE: cleaned corrupted comment.
-
 const CIRCUIT_THRESHOLD = 3;
 const CIRCUIT_OPEN_MS = 10_000;
 const DEFAULT_TIMEOUT_MS = 8000;
@@ -75,11 +69,7 @@ const SILENT_AUTH_PATH_PREFIXES = [
   "/api/preferences",
   "/api/branding",
 ];
-
-// NOTE: cleaned corrupted comment.
-
 const inflightGets = new Map<string, Promise<ApiResponse>>();
-// NOTE: cleaned corrupted comment.
 const inflightRequests = new Map<string, Promise<ApiResponse>>();
 const responseCache = new LRUCache<string, CacheEntry>(100);
 const circuitState = new Map<string, CircuitState>();
@@ -140,7 +130,10 @@ function trackEvent(event: string, props: Record<string, unknown> = {}): void {
 // ============ Base URL helpers ============
 
 function getBaseUrl(): string {
-  // NOTE: cleaned corrupted comment.
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
   const envBase =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_BASE_URL ||
@@ -150,12 +143,6 @@ function getBaseUrl(): string {
     return envBase.replace(/\/$/, "");
   }
 
-  // NOTE: cleaned corrupted comment.
-  if (typeof window !== "undefined" && !window.location.hostname.includes("localhost")) {
-    return window.location.origin;
-  }
-
-  // NOTE: cleaned corrupted comment.
   return "http://localhost:4000";
 }
 
@@ -199,16 +186,14 @@ function getCircuitKey(path: string): string {
 }
 
 /**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
+ * 
+ * 
+ * 
  */
 function getDedupeKey(path: string, method: string, body?: unknown): string {
   if (!body || method === "GET") {
     return `${method}:${path}`;
   }
-  // NOTE: cleaned corrupted comment.
-  // NOTE: cleaned corrupted comment.
   const bodyStr = typeof body === "string" ? body : JSON.stringify(body);
   return `${method}:${path}:${bodyStr}`;
 }
@@ -241,29 +226,43 @@ function recordSuccess(path: string): void {
 }
 
 function getDefaultCacheMs(path: string): number {
-  // NOTE: cleaned corrupted comment.
+  if (/^\/api\/branding(\?|$)/.test(path)) {
+    return 60_000;
+  }
+  if (/^\/api\/tracking(\?|$)/.test(path)) {
+    return 60_000;
+  }
+  if (/^\/api\/regions\/config(\?|$)/.test(path)) {
+    return 60_000;
+  }
+
   if (/^\/api\/series(\?|$)/.test(path)) {
     return 300_000;
   }
-  // NOTE: cleaned corrupted comment.
+
   if (/^\/api\/series\/[^/]+(\?|$)/.test(path)) {
     return 300_000;
   }
-  // NOTE: cleaned corrupted comment.
   if (/^\/api\/series\/[^/]+\/episodes\/[^/]+(\?|$)/.test(path)) {
     return 600_000;
   }
-  // NOTE: cleaned corrupted comment.
   if (/^\/api\/notifications(\?|$)/.test(path)) {
     return 5_000;
   }
-  // NOTE: cleaned corrupted comment.
   if (/^\/api\/rankings(\?|$)/.test(path)) {
     return 600_000;
   }
-  // NOTE: cleaned corrupted comment.
   if (/^\/api\/search(\?|$)/.test(path)) {
     return 120_000;
+  }
+  if (/^\/api\/search\/keywords(\?|$)/.test(path)) {
+    return 300_000;
+  }
+  if (/^\/api\/search\/hot(\?|$)/.test(path)) {
+    return 60_000;
+  }
+  if (/^\/api\/search\/suggest(\?|$)/.test(path)) {
+    return 30_000;
   }
   return 0;
 }
@@ -345,9 +344,47 @@ function invalidateCacheByPrefix(prefix: string): void {
       }
     }
   });
+
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    Object.keys(window.localStorage)
+      .filter((key) => key.startsWith(LOCAL_CACHE_PREFIX) && key.slice(LOCAL_CACHE_PREFIX.length).startsWith(prefix))
+      .forEach((key) => {
+        window.localStorage.removeItem(key);
+        cacheLog.push({
+          type: "invalidate",
+          path: key.slice(LOCAL_CACHE_PREFIX.length),
+          ts: Date.now(),
+        });
+        if (cacheLog.length > CACHE_LOG_LIMIT) {
+          cacheLog.shift();
+        }
+      });
+  } catch (err) {
+    // ignore storage errors
+  }
 }
 
 function invalidateCacheForWrite(path: string): void {
+  if (path.startsWith("/api/auth/")) {
+    [
+      "/api/auth",
+      "/api/preferences",
+      "/api/progress",
+      "/api/rewards",
+      "/api/missions",
+      "/api/notifications",
+      "/api/history",
+      "/api/bookmarks",
+      "/api/follow",
+      "/api/orders",
+      "/api/wallet",
+      "/api/coupons",
+    ].forEach((prefix) => invalidateCacheByPrefix(prefix));
+  }
   if (path.startsWith("/api/notifications")) {
     invalidateCacheByPrefix("/api/notifications");
   }
@@ -376,6 +413,9 @@ function invalidateCacheForWrite(path: string): void {
     invalidateCacheByPrefix("/api/branding");
   }
   if (path.startsWith("/api/admin/series")) {
+    invalidateCacheByPrefix("/api/series");
+  }
+  if (path.startsWith("/api/ratings")) {
     invalidateCacheByPrefix("/api/series");
   }
   if (path.startsWith("/api/payments")) {
@@ -411,13 +451,12 @@ async function requestJson(
       const controller = new AbortController();
       const timeoutMs = options?.timeoutMs || DEFAULT_TIMEOUT_MS;
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-      // NOTE: cleaned corrupted comment.
       const headers = { ...options?.headers };
       attachAdminAuthHeader(path, headers);
 
       const response = await fetch(`${baseUrl}${path}`, {
         ...options,
+        cache: options?.bust ? "no-store" : undefined,
         headers,
         credentials: "include",
         signal: controller.signal,
@@ -442,9 +481,7 @@ async function requestJson(
           ...(payloadRecord || {}),
         };
         const friendly = getFriendlyMessage(errorPayload.error, errorPayload.message);
-        // NOTE: cleaned corrupted comment.
         if (response.status === 401) {
-          // NOTE: cleaned corrupted comment.
           const suppressAuth =
             options?.suppressAuthModal ||
             path.startsWith("/api/admin") ||
@@ -452,10 +489,8 @@ async function requestJson(
           if (!suppressAuth) {
             // emitAuthRequired({ path });
           }
-          // NOTE: cleaned corrupted comment.
           return errorPayload;
         }
-        // NOTE: cleaned corrupted comment.
         if (!path.startsWith("/api/events")) {
           trackEvent("api_error", {
             path,
@@ -480,7 +515,6 @@ async function requestJson(
         requestId: readPayloadString(payloadRecord, "requestId"),
       };
     } catch (err) {
-      // NOTE: cleaned corrupted comment.
       const isSilentNetworkPath =
         path.startsWith("/api/health") ||
         path.startsWith("/api/tracking") ||
@@ -502,7 +536,6 @@ async function requestJson(
       if (!isSilentNetworkPath) {
         emitToast({ message: getFriendlyMessage("NETWORK_ERROR", "Network error. Check backend.") });
       }
-      // NOTE: cleaned corrupted comment.
       if (!path.startsWith("/api/events")) {
         trackEvent("api_error", { path, status: 0, errorCode: "NETWORK_ERROR" });
       }
@@ -514,9 +547,6 @@ async function requestJson(
     }
   }
 }
-
-// NOTE: cleaned corrupted comment.
-
 export function getApiBaseUrl(): string {
   return getBaseUrl();
 }
@@ -551,8 +581,6 @@ export async function apiGet<T = unknown>(
       cacheLog.shift();
     }
   }
-
-  // NOTE: cleaned corrupted comment.
   const dedupeMs = options.dedupeMs ?? 300;
   if (dedupeMs > 0) {
     const dedupeKey = getDedupeKey(path, "GET");
@@ -596,8 +624,6 @@ export async function apiGet<T = unknown>(
       setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
     }
   }
-
-  // NOTE: cleaned corrupted comment.
   if (inflightGets.has(path)) {
     return inflightGets.get(path) as Promise<ApiResponse<T>>;
   }
@@ -649,8 +675,7 @@ export async function apiPost<T = unknown>(
   body?: unknown,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
-  // NOTE: cleaned corrupted comment.
-  const dedupeMs = options.dedupeMs ?? 300; // NOTE: cleaned corrupted comment.
+  const dedupeMs = options.dedupeMs ?? 300; // 
   if (dedupeMs > 0) {
     const dedupeKey = getDedupeKey(path, "POST", body);
     if (inflightRequests.has(dedupeKey)) {
@@ -680,8 +705,6 @@ export async function apiPost<T = unknown>(
       setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
     }
   }
-
-  // NOTE: cleaned corrupted comment.
   const response = await requestJson(path, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...options.headers },
@@ -702,7 +725,6 @@ export async function apiUpload<T = unknown>(
   formData: FormData,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
-  // NOTE: cleaned corrupted comment.
   const dedupeMs = options.dedupeMs ?? 300;
   if (dedupeMs > 0) {
     const dedupeKey = `POST:${path}:upload`;
@@ -733,8 +755,6 @@ export async function apiUpload<T = unknown>(
       setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
     }
   }
-
-  // NOTE: cleaned corrupted comment.
   const response = await requestJson(path, {
     method: "POST",
     headers: options.headers,
@@ -755,8 +775,7 @@ export async function apiPatch<T = unknown>(
   body?: unknown,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
-  // NOTE: cleaned corrupted comment.
-  const dedupeMs = options.dedupeMs ?? 300; // NOTE: cleaned corrupted comment.
+  const dedupeMs = options.dedupeMs ?? 300; // 
   if (dedupeMs > 0) {
     const dedupeKey = getDedupeKey(path, "PATCH", body);
     if (inflightRequests.has(dedupeKey)) {
@@ -786,8 +805,6 @@ export async function apiPatch<T = unknown>(
       setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
     }
   }
-
-  // NOTE: cleaned corrupted comment.
   const response = await requestJson(path, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...options.headers },
@@ -808,8 +825,7 @@ export async function apiDelete<T = unknown>(
   body?: unknown,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
-  // NOTE: cleaned corrupted comment.
-  const dedupeMs = options.dedupeMs ?? 300; // NOTE: cleaned corrupted comment.
+  const dedupeMs = options.dedupeMs ?? 300; // 
   if (dedupeMs > 0) {
     const dedupeKey = getDedupeKey(path, "DELETE", body);
     if (inflightRequests.has(dedupeKey)) {
@@ -839,8 +855,6 @@ export async function apiDelete<T = unknown>(
       setTimeout(() => inflightRequests.delete(dedupeKey), dedupeMs);
     }
   }
-
-  // NOTE: cleaned corrupted comment.
   const response = await requestJson(path, {
     method: "DELETE",
     headers: { "Content-Type": "application/json", ...options.headers },
@@ -855,9 +869,6 @@ export async function apiDelete<T = unknown>(
   }
   return response as ApiResponse<T>;
 }
-
-// NOTE: cleaned corrupted comment.
-
 export function getCacheStats(): CacheStats {
   return {
     hits: cacheStats.hits,

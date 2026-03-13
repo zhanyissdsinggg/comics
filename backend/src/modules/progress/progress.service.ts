@@ -1,5 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import {
+  toClientReadingPercent,
+  toStoredReadingPercent,
+} from "../../common/utils/reading-percent";
 
 @Injectable()
 export class ProgressService {
@@ -12,7 +16,7 @@ export class ProgressService {
     return rows.reduce((acc, row) => {
       acc[row.seriesId] = {
         lastEpisodeId: row.lastEpisodeId,
-        percent: row.percent,
+        percent: toClientReadingPercent(row.percent),
         updatedAt: row.updatedAt?.getTime?.() || Date.now(),
       };
       return acc;
@@ -25,14 +29,14 @@ export class ProgressService {
       where: { userId_seriesId: { userId, seriesId } },
       update: {
         lastEpisodeId: payload.lastEpisodeId,
-        percent: payload.percent,
+        percent: toStoredReadingPercent(payload.percent),
         updatedAt,
       },
       create: {
         userId,
         seriesId,
         lastEpisodeId: payload.lastEpisodeId,
-        percent: payload.percent,
+        percent: toStoredReadingPercent(payload.percent),
         updatedAt,
       },
     });

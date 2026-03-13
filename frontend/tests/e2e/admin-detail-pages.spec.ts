@@ -121,17 +121,17 @@ test.describe("Admin detail page regressions", () => {
     const response = await page.goto("/admin/analytics", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await page.getByRole("button", { name: "Segments" }).click();
-    await expect(page.getByRole("heading", { name: "Audience segments" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: "用户分群" }).click();
+    await expect(page.getByRole("heading", { name: "用户分群" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("all-user-1@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
-    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "下一页" }).click();
     await expect(page.getByText("all-user-21@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Page 2 of 2, total 21 items", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("第 2 / 2 页，共 21 条", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
-    await page.getByRole("button", { name: "VIP users" }).click();
+    await page.getByRole("button", { name: "VIP 用户" }).click();
     await expect(page.getByText("vip-reader@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Page 1 of 1, total 1 items", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("第 1 / 1 页，共 1 条", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/analytics", runtimeIssues);
@@ -176,13 +176,13 @@ test.describe("Admin detail page regressions", () => {
     const response = await page.goto("/admin/series/series-qa-001", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("button", { name: "Edit series" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: "Edit series" }).click();
+    await expect(page.getByRole("button", { name: "编辑作品" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: "编辑作品" }).click();
 
-    await page.getByLabel("Episode price").fill("3.5");
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByLabel("章节价格").fill("3.5");
+    await page.getByRole("button", { name: "保存更改" }).click();
 
-    await expect(page.getByText("Episode price must be a whole number of coins.", { exact: true })).toBeVisible({
+    await expect(page.getByText("章节价格必须是整数金币。", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     expect(patchCalls).toBe(0);

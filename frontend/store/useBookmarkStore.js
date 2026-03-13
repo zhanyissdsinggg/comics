@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { apiDelete, apiGet, apiPost } from "../lib/apiClient";
+import { normalizeReadingPercent } from "../lib/readingPercent";
 import { useAuthStore } from "./useAuthStore";
 
 const BookmarkContext = createContext(null);
@@ -23,7 +24,7 @@ function readBookmarks() {
     return {};
   }
   try {
-    return JSON.parse(raw) || {};
+    return normalizeBookmarks(JSON.parse(raw) || {});
   } catch (err) {
     return {};
   }
@@ -40,6 +41,24 @@ function createBookmarkId() {
   return `bm_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
 }
 
+function normalizeBookmarks(source) {
+  if (!source || typeof source !== "object") {
+    return {};
+  }
+
+  return Object.entries(source).reduce((acc, [seriesId, entries]) => {
+    if (!Array.isArray(entries)) {
+      return acc;
+    }
+
+    acc[seriesId] = entries.map((entry) => ({
+      ...entry,
+      percent: normalizeReadingPercent(entry?.percent),
+    }));
+    return acc;
+  }, {});
+}
+
 export function BookmarkProvider({ children }) {
   const { isSignedIn } = useAuthStore();
   const [bookmarksBySeries, setBookmarksBySeries] = useState({});
@@ -54,19 +73,21 @@ export function BookmarkProvider({ children }) {
     }
     apiGet("/api/bookmarks").then((response) => {
       if (response.ok && response.data?.bookmarks) {
-        setBookmarksBySeries(response.data.bookmarks);
-        writeBookmarks(response.data.bookmarks);
+        const normalizedBookmarks = normalizeBookmarks(response.data.bookmarks);
+        setBookmarksBySeries(normalizedBookmarks);
+        writeBookmarks(normalizedBookmarks);
       }
     });
   }, [isSignedIn]);
 
   const addBookmark = useCallback(
     (seriesId, entry) => {
+    const normalizedPercent = normalizeReadingPercent(entry.percent);
     const bookmark = {
       id: createBookmarkId(),
       seriesId,
       episodeId: entry.episodeId,
-      percent: entry.percent || 0,
+      percent: normalizedPercent,
       pageIndex: entry.pageIndex || 0,
       label: entry.label || "Bookmark",
       createdAt: new Date().toISOString(),

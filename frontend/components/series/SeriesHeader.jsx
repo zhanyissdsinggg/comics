@@ -1,13 +1,31 @@
-"use client";
+﻿"use client";
 
-import { Heart } from "lucide-react";
+import { BookOpen, Heart, Star } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
+import SurfacePanel from "../common/SurfacePanel";
+
+function capitalize(value) {
+  if (!value) {
+    return "";
+  }
+  const text = String(value);
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function formatEpisodeNumber(value) {
+  if (!value) {
+    return "";
+  }
+  const match = String(value).match(/(\d+)/);
+  return match ? match[1] : String(value);
+}
 
 export default function SeriesHeader({
   series,
   previewHint,
   progress,
+  episodeCount = 0,
   onContinue,
   onStart,
   onFollowToggle,
@@ -17,155 +35,171 @@ export default function SeriesHeader({
   const badges = series.badges || [];
   const isAdult = Boolean(series.adult);
   const hasFreeEpisodes = series.hasFreeEpisodes || series.freeEpisodeCount > 0;
+  const ratingValue = series.rating ? Number(series.rating).toFixed(1) : "New";
+  const lastEpisodeLabel = formatEpisodeNumber(progress?.lastEpisodeId);
+  const primaryActionLabel = onContinue ? "Continue reading" : "Start reading";
+  const metadataCards = [
+    {
+      label: "Rating",
+      value: ratingValue,
+      hint: series.ratingCount ? `${series.ratingCount} ratings` : "Be the first to rate it",
+    },
+    {
+      label: "Episodes",
+      value: episodeCount ? String(episodeCount) : "--",
+      hint: hasFreeEpisodes
+        ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"}`
+        : "Unlock chapter access as you go",
+    },
+    {
+      label: "Status",
+      value: series.status || "Updating",
+      hint: series.type ? `${capitalize(series.type)} series` : "Catalog detail",
+    },
+    {
+      label: "Author",
+      value: series.author || "Studio",
+      hint: previewHint || "Series detail and reading controls",
+    },
+  ];
 
   return (
     <header className="py-4 sm:py-6">
-      {/* Always horizontal: small cover left, info right */}
-      <div className="flex gap-4 sm:gap-8">
-        {/* Cover + read button (desktop only) */}
-        <div className="flex-shrink-0 w-28 sm:w-48 md:w-56">
-          <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-neutral-800">
-            <Cover tone={series.coverTone} coverUrl={series.coverUrl} />
-          </div>
-          <div className="mt-3 hidden sm:block space-y-2">
-            {onContinue ? (
+      <SurfacePanel className="relative overflow-hidden p-0">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_34%),radial-gradient(circle_at_82%_16%,rgba(34,211,238,0.12),transparent_24%)]" />
+        <div className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
+          <div className="space-y-4">
+            <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+              <div className="aspect-[3/4] w-full overflow-hidden">
+                <Cover tone={series.coverTone} coverUrl={series.coverUrl} />
+              </div>
+            </div>
+
+            {onContinue || onStart ? (
               <button
                 type="button"
-                onClick={onContinue}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-500"
+                onClick={onContinue || onStart}
+                className="hidden w-full items-center justify-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/12 px-4 py-3 text-sm font-semibold text-emerald-100 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/18 sm:inline-flex"
               >
-                <span>▶</span>
-                <span>Continue Reading</span>
-              </button>
-            ) : onStart ? (
-              <button
-                type="button"
-                onClick={onStart}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-500"
-              >
-                <span>▶</span>
-                <span>Start Reading</span>
+                <BookOpen size={18} />
+                <span>{primaryActionLabel}</span>
               </button>
             ) : null}
           </div>
-        </div>
 
-        {/* Metadata */}
-        <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-bold text-emerald-400 sm:text-2xl md:text-3xl">
-            {series.title || "Series"}
-          </h1>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
+                Series detail
+              </span>
+              {isAdult ? (
+                <span className="rounded-full border border-red-400/30 bg-red-500/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-red-200">
+                  18+
+                </span>
+              ) : null}
+              {hasFreeEpisodes ? (
+                <span className="rounded-full border border-emerald-400/30 bg-emerald-400/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                  Free preview
+                </span>
+              ) : null}
+            </div>
 
-          {/* Metadata key-value pairs */}
-          <div className="mt-2 sm:mt-4 space-y-1.5 sm:space-y-2 text-sm">
-            {series.author && (
-              <div className="flex gap-3 sm:gap-4">
-                <span className="w-16 sm:w-20 flex-shrink-0 text-neutral-500 text-xs sm:text-sm">Author</span>
-                <span className="text-emerald-400 text-xs sm:text-sm">{series.author}</span>
-              </div>
-            )}
-            {series.type && (
-              <div className="flex gap-3 sm:gap-4">
-                <span className="w-16 sm:w-20 flex-shrink-0 text-neutral-500 text-xs sm:text-sm">Type</span>
-                <span className="text-neutral-200 text-xs sm:text-sm">{series.type.charAt(0).toUpperCase() + series.type.slice(1)}</span>
-              </div>
-            )}
-            {series.status && (
-              <div className="flex gap-3 sm:gap-4">
-                <span className="w-16 sm:w-20 flex-shrink-0 text-neutral-500 text-xs sm:text-sm">Status</span>
-                <span className="text-neutral-200 text-xs sm:text-sm">{series.status}</span>
-              </div>
-            )}
-          </div>
+            <h1 className="mt-4 font-display text-3xl font-semibold leading-[0.96] tracking-tight text-white sm:text-4xl lg:text-5xl">
+              {series.title || "Series"}
+            </h1>
 
-          {/* Tags */}
-          <div className="mt-2 sm:mt-4 flex flex-wrap gap-1.5 sm:gap-2">
-            {isAdult && (
-              <span className="rounded-full bg-red-600 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold text-white">18+</span>
-            )}
-            {hasFreeEpisodes && (
-              <span className="rounded-full bg-emerald-600 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold text-white">Free</span>
-            )}
-            {badges.map((badge) => (
-              <span key={badge} className="rounded-full border border-neutral-700 bg-neutral-800 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs text-neutral-300">{badge}</span>
-            ))}
-            {genres.map((genre) => (
-              <span key={genre} className="rounded-full border border-neutral-700 bg-neutral-800 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs text-neutral-300">{genre}</span>
-            ))}
-          </div>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-300 sm:text-base">
+              {series.description || "A premium reading lane with unlock controls, chapter history, and storefront-level polish."}
+            </p>
 
-          {/* Description - hidden on mobile to save space */}
-          <p className="mt-3 hidden sm:block text-sm leading-relaxed text-neutral-400">
-            {series.description || "No description available."}
-          </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {metadataCards.map((card) => (
+                <div
+                  key={card.label}
+                  className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 backdrop-blur-lg"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+                    {card.label}
+                  </p>
+                  <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+                    {card.value}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
+                </div>
+              ))}
+            </div>
 
-          {/* Action buttons - 老王优化：让收藏按钮更明显 */}
-          <div className="mt-3 sm:mt-5 flex items-center gap-2 sm:gap-3">
-            {onFollowToggle && (
-              <button
-                type="button"
-                onClick={onFollowToggle}
-                className={`group relative flex items-center gap-2 rounded-lg px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-semibold transition-all duration-200 ${
-                  isFollowing
-                    ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 hover:scale-105"
-                    : "border-2 border-pink-500/30 bg-pink-500/10 text-pink-400 hover:border-pink-500/50 hover:bg-pink-500/20 hover:scale-105"
-                }`}
-                aria-label={isFollowing ? "Unfollow series" : "Follow series"}
-              >
-                <Heart
-                  size={18}
-                  className={`transition-all duration-200 ${
-                    isFollowing ? "fill-current" : "group-hover:scale-110"
-                  }`}
-                />
-                <span>{isFollowing ? "Following" : "Follow"}</span>
-                {isFollowing && (
-                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+            {badges.length > 0 || genres.length > 0 ? (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {badges.map((badge) => (
+                  <span
+                    key={badge}
+                    className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold text-neutral-200"
+                  >
+                    {badge}
                   </span>
-                )}
-              </button>
-            )}
-            <ShareButton
-              url={typeof window !== "undefined" ? window.location.href : ""}
-              title={series.title || "Check out this series"}
-              description={series.description || ""}
-              className="rounded-lg border border-neutral-700 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-neutral-300 transition-colors hover:border-neutral-500"
-            />
+                ))}
+                {genres.map((genre) => (
+                  <span
+                    key={genre}
+                    className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-neutral-300"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
+            {previewHint || lastEpisodeLabel ? (
+              <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-neutral-300">
+                <div className="flex items-center gap-2 text-amber-200">
+                  <Star size={16} className="fill-current" />
+                  <span className="font-semibold">Reading note</span>
+                </div>
+                {lastEpisodeLabel ? <span>Last session reached Episode {lastEpisodeLabel}.</span> : null}
+                {previewHint ? <span>{previewHint}.</span> : null}
+              </div>
+            ) : null}
+
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              {onFollowToggle ? (
+                <button
+                  type="button"
+                  onClick={onFollowToggle}
+                  className={`group relative inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                    isFollowing
+                      ? "border border-pink-400/30 bg-pink-500/16 text-white shadow-[0_18px_50px_rgba(236,72,153,0.2)]"
+                      : "border border-white/10 bg-white/[0.05] text-neutral-200 hover:border-pink-400/30 hover:bg-pink-500/10"
+                  }`}
+                  aria-label={isFollowing ? "Unfollow series" : "Follow series"}
+                >
+                  <Heart size={18} className={isFollowing ? "fill-current" : "group-hover:scale-110"} />
+                  <span>{isFollowing ? "Following" : "Follow"}</span>
+                </button>
+              ) : null}
+              <ShareButton
+                url={typeof window !== "undefined" ? window.location.href : ""}
+                title={series.title || "Check out this series"}
+                description={series.description || ""}
+                className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-neutral-200 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Mobile read button - full width below the header */}
-      <div className="mt-3 sm:hidden">
-        {onContinue ? (
-          <button
-            type="button"
-            onClick={onContinue}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-500"
-          >
-            <span>▶</span>
-            <span>Continue Reading</span>
-          </button>
-        ) : onStart ? (
-          <button
-            type="button"
-            onClick={onStart}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-500"
-          >
-            <span>▶</span>
-            <span>Start Reading</span>
-          </button>
+        {onContinue || onStart ? (
+          <div className="px-5 pb-5 sm:hidden">
+            <button
+              type="button"
+              onClick={onContinue || onStart}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/12 px-4 py-3 text-sm font-semibold text-emerald-100 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/18"
+            >
+              <BookOpen size={18} />
+              <span>{primaryActionLabel}</span>
+            </button>
+          </div>
         ) : null}
-
-        {/* Mobile description */}
-        {series.description && (
-          <p className="mt-3 text-xs leading-relaxed text-neutral-500 line-clamp-2">
-            {series.description}
-          </p>
-        )}
-      </div>
+      </SurfacePanel>
     </header>
   );
 }

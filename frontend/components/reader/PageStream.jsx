@@ -4,7 +4,6 @@ import NextImage from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { trackEvent } from "../../lib/trackEvent";
 
-// NOTE: cleaned corrupted comment.
 function normalizePageUrl(url) {
   if (!url) return url;
   try {

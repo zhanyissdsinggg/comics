@@ -42,7 +42,7 @@ export const Modal = React.memo(function Modal({
               type="button"
               onClick={onClose}
               className="rounded-lg p-1 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-neutral-200"
-              aria-label="Close dialog"
+              aria-label="关闭弹窗"
             >
               <X className="h-5 w-5" />
             </button>

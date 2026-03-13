@@ -27,9 +27,9 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created date' },
-  { value: 'title', label: 'Title' },
-  { value: 'active', label: 'Status' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'title', label: '标题' },
+  { value: 'active', label: '状态' },
 ];
 
 function formatDate(value) {
@@ -42,7 +42,7 @@ function formatDate(value) {
     return '-';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -83,11 +83,11 @@ export default function AdminPromotionsPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: 'Selected promotions were deleted.' });
+      setFeedback({ type: 'success', message: '已删除所选活动。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
     },
   });
 
@@ -99,7 +99,7 @@ export default function AdminPromotionsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Failed to update the promotion status.'));
+        throw new Error(await readAdminResponseMessage(response, '更新活动状态失败。'));
       }
 
       return response.json();
@@ -107,12 +107,12 @@ export default function AdminPromotionsPage() {
     onSuccess: (_data, variables) => {
       setFeedback({
         type: 'success',
-        message: variables.currentStatus ? 'Promotion was paused.' : 'Promotion was activated.',
+        message: variables.currentStatus ? '活动已暂停。' : '活动已启用。',
       });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Status update failed: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `状态更新失败：${mutationError.message}` });
     },
   });
 
@@ -120,9 +120,9 @@ export default function AdminPromotionsPage() {
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">Promotions</h1>
+          <h1 className="text-3xl font-bold text-neutral-100">活动管理</h1>
           <p className="mt-2 text-neutral-400">
-            Manage promotional campaigns and control which offers are currently live.
+            管理营销活动，并控制当前生效的优惠内容。
           </p>
         </div>
 
@@ -135,7 +135,7 @@ export default function AdminPromotionsPage() {
         <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="Search promotion ID or title"
+          searchPlaceholder="搜索活动 ID 或标题"
           onOpenFilters={() => setIsSortModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -148,17 +148,17 @@ export default function AdminPromotionsPage() {
             disabled={bulkDeleteMutation.isPending}
             className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || 'Failed to load promotions.'}
+          errorMessage={error?.message || '活动加载失败。'}
           onRetry={refetch}
           isLoading={isLoading}
           hasItems={promotions.length > 0}
-          emptyMessage="No promotions yet."
+          emptyMessage="暂无活动。"
           pagination={pagination}
           page={page}
           pageSize={pageSize}
@@ -181,14 +181,14 @@ export default function AdminPromotionsPage() {
                       clearSelection();
                     }}
                     className="rounded"
-                    aria-label="Select all promotions"
+                    aria-label="选择全部活动"
                   />
                 </th>
                 <th className="px-4 py-3 text-left text-neutral-400">ID</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Promotion</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Status</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Created date</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Action</th>
+                <th className="px-4 py-3 text-left text-neutral-400">活动</th>
+                <th className="px-4 py-3 text-left text-neutral-400">状态</th>
+                <th className="px-4 py-3 text-left text-neutral-400">创建时间</th>
+                <th className="px-4 py-3 text-left text-neutral-400">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -203,11 +203,11 @@ export default function AdminPromotionsPage() {
                         checked={selectedIdsSet.has(promotion.id)}
                         onChange={() => toggleSelect(promotion.id)}
                         className="rounded"
-                        aria-label={`Select promotion ${promotion.id}`}
+                        aria-label={`选择活动 ${promotion.id}`}
                       />
                     </td>
                     <td className="px-4 py-3 font-medium text-neutral-300">{promotion.id}</td>
-                    <td className="px-4 py-3 text-neutral-300">{promotion.title || 'Untitled promotion'}</td>
+                    <td className="px-4 py-3 text-neutral-300">{promotion.title || '未命名活动'}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -216,7 +216,7 @@ export default function AdminPromotionsPage() {
                             : 'bg-neutral-700 text-neutral-300'
                         }`}
                       >
-                        {isActive ? 'Active' : 'Inactive'}
+                        {isActive ? '进行中' : '未启用'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-neutral-400">{formatDate(promotion.createdAt)}</td>
@@ -231,7 +231,7 @@ export default function AdminPromotionsPage() {
                             : 'text-green-400 hover:text-green-300'
                         }`}
                       >
-                        {isActive ? 'Pause' : 'Activate'}
+                        {isActive ? '暂停' : '启用'}
                       </button>
                     </td>
                   </tr>
@@ -247,17 +247,17 @@ export default function AdminPromotionsPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="Sort promotions"
-          label="Sort field"
-          actionLabel="Apply"
+          title="活动排序"
+          label="排序字段"
+          actionLabel="应用"
         />
 
         <ConfirmDialog
           isOpen={isDeleteConfirmOpen}
-          title="Delete promotions"
-          message={`Delete ${selectedIds.length} selected promotion(s)? This cannot be undone.`}
-          confirmText={bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
-          cancelText="Cancel"
+          title="删除活动"
+          message={`确定删除 ${selectedIds.length} 条选中活动吗？此操作无法撤销。`}
+          confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除'}
+          cancelText="取消"
           isDangerous={true}
           isLoading={bulkDeleteMutation.isPending}
           onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}

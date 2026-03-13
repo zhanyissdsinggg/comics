@@ -10,8 +10,8 @@ import TrackingSettings from "../../../components/tracking/TrackingSettings";
 export default function AdminTrackingPage() {
   return (
     <AdminLayout
-      title="Tracking Settings"
-      subtitle="Manage site tracking scripts and ad platform configuration."
+      title="追踪设置"
+      subtitle="管理站点追踪脚本与广告平台配置。"
     >
       <Suspense
         fallback={

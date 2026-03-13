@@ -1,6 +1,8 @@
 import { BadRequestException, Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { ApiBody } from "@nestjs/swagger";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { parseStoredJson, stringifyStoredJson } from "../../../../common/utils/stored-json";
+import { regionConfigCache } from "../../../regions/region-config.cache";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { CreateRegionDto, PhoneLengthRules, RegionConfigInput, RegionCodeInput } from "../dtos/admin-system.dto";
 
@@ -91,14 +93,16 @@ export class AdminRegionsController {
 
   @Get()
   async getConfig() {
-    const config = await this.prisma.regionConfig.findUnique({ where: { region: "default" } });
-
     return {
-      config: parseStoredJson(config?.payload, DEFAULT_REGION_CONFIG),
+      config: await regionConfigCache.getOrLoad(async () => {
+        const config = await this.prisma.regionConfig.findUnique({ where: { region: "default" } });
+        return parseStoredJson(config?.payload, DEFAULT_REGION_CONFIG);
+      }),
     };
   }
 
   @Post()
+  @ApiBody({ type: CreateRegionDto, required: false })
   async save(@Body() body: CreateRegionDto & RegionConfigInput) {
     const source = extractRegionPayload(body);
     const countryCodes = buildCountryCodes(Array.isArray(source.countryCodes) ? source.countryCodes : []);
@@ -112,7 +116,9 @@ export class AdminRegionsController {
       update: { payload: stringifyStoredJson(payload) },
       create: { region: "default", config: "default", payload: stringifyStoredJson(payload) },
     });
+    const parsed = parseStoredJson(config.payload, payload);
+    regionConfigCache.set(parsed);
 
-    return { config: parseStoredJson(config.payload, payload) };
+    return { config: parsed };
   }
 }

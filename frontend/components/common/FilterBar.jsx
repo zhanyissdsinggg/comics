@@ -1,6 +1,5 @@
 /**
- * FilterBar - 绛涢€夊拰鎺掑簭缁勪欢
- * NOTE: cleaned corrupted comment.
+ * FilterBar keeps series filters and sort controls together.
  */
 
 "use client";
@@ -20,23 +19,19 @@ export default function FilterBar({
 }) {
   const [showAllGenres, setShowAllGenres] = useState(false);
 
-  // NOTE: cleaned corrupted comment.
   const sortOptions = [
     { id: "popular", label: "Popular", icon: "HOT" },
     { id: "latest", label: "Latest", icon: "NEW" },
   ];
 
-  // NOTE: cleaned corrupted comment.
   const statusOptions = [
     { id: "all", label: "All" },
     { id: "ongoing", label: "Ongoing" },
     { id: "completed", label: "Completed" },
   ];
 
-  // NOTE: cleaned corrupted comment.
   const displayedGenres = showAllGenres ? genres : genres.slice(0, 4);
 
-  // NOTE: cleaned corrupted comment.
   const handleSortChange = (id) => {
     if (onSortChange) onSortChange(id);
   };
@@ -51,16 +46,13 @@ export default function FilterBar({
 
   return (
     <div className="space-y-3 rounded-2xl bg-neutral-900/50 p-4 backdrop-blur-md border border-white/5">
-      {/* 鑰佺帇娉ㄩ噴锛氱粺璁′俊鎭?*/}
       <div className="flex items-center justify-between">
         <p className="text-sm text-neutral-400">
           {totalCount > 0 ? `${totalCount} series found` : "Loading..."}
         </p>
       </div>
 
-      {/* 鑰佺帇娉ㄩ噴锛氭帓搴忓拰鐘舵€佸悎骞跺埌涓€琛?*/}
       <div className="flex flex-col md:flex-row md:items-start gap-4">
-        {/* 鎺掑簭閫夐」 */}
         <div className="flex-1">
           <p className="mb-2 text-xs font-semibold text-neutral-300">Sort</p>
           <div className="flex flex-wrap gap-2">
@@ -81,7 +73,6 @@ export default function FilterBar({
           </div>
         </div>
 
-        {/* 瀹岀粨鐘舵€佺瓫閫?*/}
         <div className="flex-1">
           <p className="mb-2 text-xs font-semibold text-neutral-300">Status</p>
           <div className="flex flex-wrap gap-2">
@@ -97,7 +88,6 @@ export default function FilterBar({
         </div>
       </div>
 
-      {/* 鑰佺帇娉ㄩ噴锛氱被鍨嬬瓫閫?*/}
       {genres.length > 0 && (
         <div>
           <p className="mb-2 text-xs font-semibold text-neutral-300">Genres</p>

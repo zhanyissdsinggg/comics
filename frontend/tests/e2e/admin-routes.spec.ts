@@ -311,16 +311,16 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Recommendations" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Open this tab to load", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "推荐管理" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("打开此页签后加载", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect.poll(() => slotsRequests).toBe(1);
     await expect.poll(() => rankingsRequests).toBe(0);
     await expect.poll(() => analyticsRequests).toBe(0);
 
-    await page.getByRole("button", { name: "Rankings" }).click();
+    await page.getByRole("button", { name: "榜单" }).click();
     await expect.poll(() => rankingsRequests).toBe(1);
 
-    await page.getByRole("button", { name: "Analytics" }).click();
+    await page.getByRole("button", { name: "分析" }).click();
     await expect.poll(() => analyticsRequests).toBe(1);
 
     await page.waitForTimeout(300);
@@ -358,7 +358,7 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/logs", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Audit Logs" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "审计日志" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await page.locator("select").nth(1).selectOption("operator-fallback");
 
     const rows = page.locator("tbody tr");
@@ -419,5 +419,4 @@ test.describe("Admin route regression", () => {
     expect(docsJsonRequests).toBe(0);
   });
 });
-
 

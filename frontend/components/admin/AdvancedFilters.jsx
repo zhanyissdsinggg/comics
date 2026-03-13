@@ -4,31 +4,31 @@ import { useState } from "react";
 import { ChevronDown, Filter, X } from "lucide-react";
 
 const STATUS_OPTIONS = [
-  { value: "all", label: "All statuses" },
-  { value: "Ongoing", label: "Ongoing" },
-  { value: "Completed", label: "Completed" },
-  { value: "Hiatus", label: "Hiatus" },
+  { value: "all", label: "全部状态" },
+  { value: "Ongoing", label: "连载中" },
+  { value: "Completed", label: "已完结" },
+  { value: "Hiatus", label: "暂停中" },
 ];
 
 const PUBLISH_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "published", label: "Published" },
-  { value: "unpublished", label: "Unpublished" },
+  { value: "all", label: "全部" },
+  { value: "published", label: "已发布" },
+  { value: "unpublished", label: "未发布" },
 ];
 
 const ADULT_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "adult", label: "Adult" },
-  { value: "general", label: "General" },
+  { value: "all", label: "全部" },
+  { value: "adult", label: "18+" },
+  { value: "general", label: "全年龄" },
 ];
 
 const SORT_OPTIONS = [
-  { value: "createdAt_desc", label: "Created date (newest first)" },
-  { value: "createdAt_asc", label: "Created date (oldest first)" },
-  { value: "updatedAt_desc", label: "Updated date (newest first)" },
-  { value: "updatedAt_asc", label: "Updated date (oldest first)" },
-  { value: "title_asc", label: "Title (A-Z)" },
-  { value: "title_desc", label: "Title (Z-A)" },
+  { value: "createdAt_desc", label: "创建时间（最新优先）" },
+  { value: "createdAt_asc", label: "创建时间（最早优先）" },
+  { value: "updatedAt_desc", label: "更新时间（最新优先）" },
+  { value: "updatedAt_asc", label: "更新时间（最早优先）" },
+  { value: "title_asc", label: "标题（A-Z）" },
+  { value: "title_desc", label: "标题（Z-A）" },
 ];
 
 const DEFAULT_FILTERS = {
@@ -77,7 +77,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
         }`}
       >
         <Filter size={14} />
-        <span>Filters</span>
+        <span>筛选</span>
         {activeFiltersCount > 0 ? (
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ios-green text-[10px] text-white">
             {activeFiltersCount}
@@ -92,7 +92,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
           <div className="absolute right-0 top-full z-50 mt-2 w-80 animate-scale-in">
             <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/95 p-6 shadow-ios-xl backdrop-blur-2xl">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-base font-bold text-neutral-100">Advanced Filters</h3>
+                <h3 className="text-base font-bold text-neutral-100">高级筛选</h3>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
@@ -105,7 +105,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
               <div className="space-y-4">
                 <div>
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ios-green/60">
-                    Status
+                    状态
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {STATUS_OPTIONS.map((option) => (
@@ -127,7 +127,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
 
                 <div>
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ios-green/60">
-                    Publish status
+                    发布状态
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {PUBLISH_OPTIONS.map((option) => (
@@ -149,7 +149,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
 
                 <div>
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ios-green/60">
-                    Content rating
+                    内容分级
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {ADULT_OPTIONS.map((option) => (
@@ -171,7 +171,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
 
                 <div>
                   <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ios-green/60">
-                    Sort order
+                    排序方式
                   </label>
                   <select
                     value={resolvedFilters.sortBy}
@@ -193,14 +193,14 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                   onClick={handleReset}
                   className="flex-1 rounded-3xl border border-ios-gray-700 bg-ios-gray-800/50 px-4 py-2.5 text-xs font-bold text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-800 hover:text-neutral-200 active:scale-95"
                 >
-                  Reset
+                  重置
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
                   className="flex-1 rounded-3xl border border-ios-green/20 bg-ios-green/10 px-4 py-2.5 text-xs font-bold text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-105 hover:shadow-ios-sm active:scale-95"
                 >
-                  Apply
+                  应用
                 </button>
               </div>
             </div>

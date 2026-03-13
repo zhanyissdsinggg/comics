@@ -9,9 +9,9 @@ export function AdminListToolbar({
   onToggleSortOrder,
   extraActions = null,
   className = '',
-  filtersLabel = 'Filters',
-  ascendingLabel = 'Ascending',
-  descendingLabel = 'Descending',
+  filtersLabel = '筛选',
+  ascendingLabel = '升序',
+  descendingLabel = '降序',
 }) {
   return (
     <div className={`mb-6 flex flex-wrap items-center gap-4 ${className}`.trim()}>
@@ -36,7 +36,7 @@ export function AdminListToolbar({
         onClick={onToggleSortOrder}
         className="rounded-lg bg-neutral-800 px-4 py-2 text-neutral-300 transition hover:bg-neutral-700"
       >
-        {sortOrder === 'asc' ? `Sort: ${ascendingLabel}` : `Sort: ${descendingLabel}`}
+        {sortOrder === 'asc' ? `排序：${ascendingLabel}` : `排序：${descendingLabel}`}
       </button>
 
       {extraActions ? <div className="flex flex-wrap items-center gap-2">{extraActions}</div> : null}

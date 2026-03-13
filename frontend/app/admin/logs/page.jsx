@@ -15,7 +15,7 @@ function formatDateTime(value) {
   if (Number.isNaN(date.getTime())) {
     return '-';
   }
-  return date.toLocaleString('en-US', {
+  return date.toLocaleString('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -55,7 +55,7 @@ export default function AdminLogsPage() {
     queryFn: async () => {
       const response = await adminGet('/api/admin/logs?page=1&pageSize=200');
       if (!response.ok) {
-        throw new Error(response.error || 'Failed to load audit logs.');
+        throw new Error(response.error || '审计日志加载失败。');
       }
       return response.data;
     },
@@ -96,9 +96,9 @@ export default function AdminLogsPage() {
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Audit Logs</h1>
+            <h1 className="text-3xl font-bold text-white">审计日志</h1>
             <p className="mt-2 text-sm text-neutral-400">
-              Append-only admin activity feed. Deletion is intentionally disabled.
+              仅追加的后台操作流水。此页默认不提供删除能力。
             </p>
           </div>
           <button
@@ -106,25 +106,25 @@ export default function AdminLogsPage() {
             onClick={() => logsQuery.refetch()}
             className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
           >
-            Refresh
+            刷新
           </button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">Visible</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">当前可见</div>
             <div className="mt-3 text-3xl font-semibold text-white">{filteredLogs.length}</div>
-            <div className="mt-1 text-sm text-neutral-400">records in current view</div>
+            <div className="mt-1 text-sm text-neutral-400">当前视图记录数</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">Actions</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">操作类型</div>
             <div className="mt-3 text-3xl font-semibold text-white">{actionOptions.length}</div>
-            <div className="mt-1 text-sm text-neutral-400">distinct action types</div>
+            <div className="mt-1 text-sm text-neutral-400">不同操作种类</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">Admins</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">操作员</div>
             <div className="mt-3 text-3xl font-semibold text-white">{adminOptions.length}</div>
-            <div className="mt-1 text-sm text-neutral-400">distinct operator identities</div>
+            <div className="mt-1 text-sm text-neutral-400">不同操作员身份</div>
           </div>
         </div>
 
@@ -133,7 +133,7 @@ export default function AdminLogsPage() {
             type="search"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search id, action, resource, target, or admin"
+            placeholder="搜索 ID、操作、资源、目标或操作员"
             className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400/50"
           />
           <select
@@ -141,7 +141,7 @@ export default function AdminLogsPage() {
             onChange={(event) => setActionFilter(event.target.value)}
             className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50"
           >
-            <option value="">All actions</option>
+            <option value="">全部操作</option>
             {actionOptions.map((action) => (
               <option key={action} value={action}>
                 {action}
@@ -153,7 +153,7 @@ export default function AdminLogsPage() {
             onChange={(event) => setAdminFilter(event.target.value)}
             className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50"
           >
-            <option value="">All admins</option>
+            <option value="">全部操作员</option>
             {adminOptions.map((adminId) => (
               <option key={adminId} value={adminId}>
                 {adminId}
@@ -171,8 +171,8 @@ export default function AdminLogsPage() {
           />
         ) : filteredLogs.length === 0 ? (
           <EmptyState
-            title="No audit logs found"
-            description="Try widening the filters or generate a fresh admin action."
+            title="未找到审计日志"
+            description="可以放宽筛选条件，或先执行一次新的后台操作。"
           />
         ) : (
           <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5">
@@ -180,12 +180,12 @@ export default function AdminLogsPage() {
               <table className="min-w-full text-left text-sm">
                 <thead className="bg-white/5 text-xs uppercase tracking-[0.2em] text-neutral-500">
                   <tr>
-                    <th className="px-4 py-3">Time</th>
-                    <th className="px-4 py-3">Admin</th>
-                    <th className="px-4 py-3">Action</th>
-                    <th className="px-4 py-3">Resource</th>
-                    <th className="px-4 py-3">Target</th>
-                    <th className="px-4 py-3">Details</th>
+                    <th className="px-4 py-3">时间</th>
+                    <th className="px-4 py-3">操作员</th>
+                    <th className="px-4 py-3">操作</th>
+                    <th className="px-4 py-3">资源</th>
+                    <th className="px-4 py-3">目标</th>
+                    <th className="px-4 py-3">详情</th>
                   </tr>
                 </thead>
                 <tbody>

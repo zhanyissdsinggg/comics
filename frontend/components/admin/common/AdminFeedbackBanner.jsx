@@ -4,7 +4,7 @@ export function AdminFeedbackBanner({
   feedback,
   onDismiss,
   className = '',
-  dismissLabel = 'Dismiss',
+  dismissLabel = '关闭',
   dismissAriaLabel,
 }) {
   if (!feedback?.message) {

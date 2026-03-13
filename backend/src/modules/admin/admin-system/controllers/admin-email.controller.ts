@@ -1,4 +1,5 @@
-﻿import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { ApiBody } from "@nestjs/swagger";
 import type { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { encryptString, isEncrypted } from "../../../../common/utils/crypto";
@@ -70,6 +71,7 @@ export class AdminEmailController {
   }
 
   @Post()
+  @ApiBody({ type: UpdateEmailConfigDto, required: false })
   async save(@Body() body: EmailConfigRequestBody, @Req() req: Request) {
     const existing = await this.prisma.emailConfig.findUnique({ where: { key: "default" } });
     const current = normalizeEmailConfig(parseStoredJson(existing?.payload, DEFAULT_EMAIL_CONFIG));
@@ -123,6 +125,7 @@ export class AdminEmailController {
   }
 
   @Post("test")
+  @ApiBody({ type: TestEmailDto, required: true })
   async test(@Body() body: TestEmailRequestBody) {
     const input = extractTestEmailInput(body);
     const to = String(input.to || "").trim();
@@ -140,3 +143,5 @@ export class AdminEmailController {
     return { ok: result.ok };
   }
 }
+
+

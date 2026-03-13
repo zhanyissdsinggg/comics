@@ -27,10 +27,22 @@ export function RegionProvider({ children }) {
   const [config, setConfig] = useState(defaultConfig);
 
   const loadConfig = useCallback(async () => {
-    const response = await apiGet("/api/regions/config");
+    const response = await apiGet("/api/regions/config", { cacheMs: 60000 });
     if (response.ok && response.data?.config) {
       setConfig({ ...defaultConfig, ...response.data.config });
+      if (response.stale) {
+        apiGet("/api/regions/config", {
+          cacheMs: 60000,
+          bust: true,
+          dedupeMs: 0,
+        }).then((freshResponse) => {
+          if (freshResponse.ok && freshResponse.data?.config) {
+            setConfig({ ...defaultConfig, ...freshResponse.data.config });
+          }
+        });
+      }
     }
+    return response;
   }, []);
 
   useEffect(() => {

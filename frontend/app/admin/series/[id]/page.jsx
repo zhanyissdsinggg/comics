@@ -12,15 +12,15 @@ import { LoadingState } from '@/components/admin/common/LoadingState';
 import { adminFetchJson, adminUpload } from '@/lib/adminApiClient';
 
 const TYPE_OPTIONS = [
-  { value: 'comic', label: 'Comic' },
-  { value: 'novel', label: 'Novel' },
+  { value: 'comic', label: '漫画' },
+  { value: 'novel', label: '小说' },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'Ongoing', label: 'Ongoing' },
-  { value: 'Completed', label: 'Completed' },
-  { value: 'Hiatus', label: 'Hiatus' },
-  { value: 'Cancelled', label: 'Cancelled' },
+  { value: 'Ongoing', label: '连载中' },
+  { value: 'Completed', label: '已完结' },
+  { value: 'Hiatus', label: '暂停中' },
+  { value: 'Cancelled', label: '已停更' },
 ];
 
 const EMPTY_FEEDBACK = { type: '', message: '' };
@@ -90,6 +90,14 @@ function buildSeriesPayload(formData) {
   };
 }
 
+function formatSeriesTypeLabel(value) {
+  return TYPE_OPTIONS.find((option) => option.value === value)?.label || '漫画';
+}
+
+function formatSeriesStatusLabel(value) {
+  return STATUS_OPTIONS.find((option) => option.value === value)?.label || '连载中';
+}
+
 function getErrorMessage(error, fallbackMessage) {
   if (error instanceof Error && error.message) {
     return error.message;
@@ -100,15 +108,15 @@ function getErrorMessage(error, fallbackMessage) {
 
 function formatDateTime(value) {
   if (!value) {
-    return 'Unavailable';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Unavailable';
+    return '暂无';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -129,20 +137,20 @@ function isNonNegativeIntegerString(value, { allowEmpty = false } = {}) {
 
 function validateSeriesDraft(formData) {
   if (!formData.title.trim()) {
-    return 'Title is required.';
+    return '标题不能为空。';
   }
 
   if (!isNonNegativeIntegerString(formData.episodePrice, { allowEmpty: true })) {
-    return 'Episode price must be a whole number of coins.';
+    return '章节价格必须是整数金币。';
   }
 
   if (formData.ttfEnabled) {
     if (!isNonNegativeIntegerString(formData.ttfIntervalHours)) {
-      return 'Free ticket refresh interval must be a whole number of hours.';
+      return '免费券刷新间隔必须是整数小时。';
     }
 
     if (Number(formData.ttfIntervalHours) < 1) {
-      return 'Free ticket refresh interval must be at least 1 hour.';
+      return '免费券刷新间隔至少为 1 小时。';
     }
   }
 
@@ -157,7 +165,7 @@ async function fetchSeriesDetail(seriesId) {
   }
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || 'Failed to load series details.');
+    throw new Error(data?.message || data?.error || '作品详情加载失败。');
   }
 
   return data?.series || null;
@@ -215,8 +223,8 @@ export default function AdminSeriesDetailPage() {
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Failed to save series details.');
+        if (!response.ok) {
+        throw new Error(data?.message || data?.error || '保存作品详情失败。');
       }
 
       return data?.series || null;
@@ -226,11 +234,11 @@ export default function AdminSeriesDetailPage() {
         setFormData(buildFormState(series));
       }
       setIsEditing(false);
-      setFeedback({ type: 'success', message: 'Series details were saved.' });
+      setFeedback({ type: 'success', message: '作品详情已保存。' });
       await seriesQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to save series details.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '保存作品详情失败。') });
     },
   });
 
@@ -241,7 +249,7 @@ export default function AdminSeriesDetailPage() {
 
       const response = await adminUpload('/api/admin/upload/image', uploadPayload);
       if (!response.ok || !response.data?.url) {
-        throw new Error(response.error || response.message || 'Failed to upload cover image.');
+        throw new Error(response.error || response.message || '上传封面失败。');
       }
 
       return response.data;
@@ -251,10 +259,10 @@ export default function AdminSeriesDetailPage() {
         ...current,
         coverUrl: data.url,
       }));
-      setFeedback({ type: 'success', message: 'Cover image uploaded. Save changes to publish it.' });
+      setFeedback({ type: 'success', message: '封面上传成功，保存后即可生效。' });
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to upload cover image.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '上传封面失败。') });
     },
   });
 
@@ -301,12 +309,12 @@ export default function AdminSeriesDetailPage() {
     }
 
     if (!file.type.startsWith('image/')) {
-      setFeedback({ type: 'error', message: 'Please upload a valid image file.' });
+      setFeedback({ type: 'error', message: '请上传有效的图片文件。' });
       return;
     }
 
     if (file.size > MAX_UPLOAD_BYTES) {
-      setFeedback({ type: 'error', message: 'Cover images must be 10MB or smaller.' });
+      setFeedback({ type: 'error', message: '封面图片大小不能超过 10MB。' });
       return;
     }
 
@@ -328,7 +336,7 @@ export default function AdminSeriesDetailPage() {
       <div className="min-h-screen bg-neutral-950 px-6 py-8">
         <div className="mx-auto max-w-6xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
           <LoadingState.ErrorState
-            error={getErrorMessage(seriesQuery.error, 'Failed to load series details.')}
+            error={getErrorMessage(seriesQuery.error, '作品详情加载失败。')}
             onRetry={() => seriesQuery.refetch()}
           />
         </div>
@@ -341,14 +349,14 @@ export default function AdminSeriesDetailPage() {
       <div className="min-h-screen bg-neutral-950 px-6 py-8">
         <div className="mx-auto max-w-6xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
           <LoadingState.EmptyState
-            message="This series could not be found."
+            message="未找到该作品。"
             action={
               <button
                 type="button"
                 onClick={() => router.push('/admin/series')}
                 className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
               >
-                Back to series library
+                返回作品库
               </button>
             }
           />
@@ -368,13 +376,13 @@ export default function AdminSeriesDetailPage() {
                 onClick={() => router.push('/admin/series')}
                 className="inline-flex w-fit rounded-2xl border border-neutral-700 px-3 py-2 text-xs font-medium uppercase tracking-[0.2em] text-neutral-300 transition hover:border-neutral-500 hover:text-white"
               >
-                Back to library
+                 返回作品库
               </button>
               <div className="space-y-2">
-                <h1 className="text-3xl font-semibold tracking-tight text-white">{series.title || 'Untitled series'}</h1>
-                <p className="max-w-3xl text-sm text-neutral-400">
-                  Edit pricing, maturity rules, cover art, and free-ticket behavior from a single detail view.
-                </p>
+                 <h1 className="text-3xl font-semibold tracking-tight text-white">{series.title || '未命名作品'}</h1>
+                 <p className="max-w-3xl text-sm text-neutral-400">
+                   在一个详情页中统一管理定价、年龄限制、封面和免费券规则。
+                 </p>
               </div>
             </div>
 
@@ -384,7 +392,7 @@ export default function AdminSeriesDetailPage() {
                 onClick={() => router.push(`/admin/series/${seriesId}/episodes`)}
                 className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
               >
-                Manage episodes
+                 管理章节
               </button>
 
               {isEditing ? (
@@ -395,7 +403,7 @@ export default function AdminSeriesDetailPage() {
                     disabled={uploadMutation.isPending || saveMutation.isPending}
                     className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Cancel
+                     取消
                   </button>
                   <button
                     type="button"
@@ -403,7 +411,7 @@ export default function AdminSeriesDetailPage() {
                     disabled={saveMutation.isPending || uploadMutation.isPending}
                     className="rounded-2xl bg-cyan-500 px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {saveMutation.isPending ? 'Saving...' : uploadMutation.isPending ? 'Uploading cover...' : 'Save changes'}
+                     {saveMutation.isPending ? '保存中...' : uploadMutation.isPending ? '上传封面中...' : '保存更改'}
                   </button>
                 </>
               ) : (
@@ -412,7 +420,7 @@ export default function AdminSeriesDetailPage() {
                   onClick={handleStartEditing}
                   className="rounded-2xl bg-white px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-neutral-200"
                 >
-                  Edit series
+                   编辑作品
                 </button>
               )}
             </div>
@@ -424,7 +432,7 @@ export default function AdminSeriesDetailPage() {
         <div className="grid gap-6 xl:grid-cols-[1.35fr,0.85fr]">
           <section className="space-y-6 rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
             <div className="grid gap-5 md:grid-cols-2">
-              <FormField label="Title">
+              <FormField label="标题">
                 <input
                   type="text"
                   value={formData.title}
@@ -434,7 +442,7 @@ export default function AdminSeriesDetailPage() {
                 />
               </FormField>
 
-              <FormField label="Type">
+              <FormField label="类型">
                 <select
                   value={formData.type}
                   onChange={handleFieldChange('type')}
@@ -449,7 +457,7 @@ export default function AdminSeriesDetailPage() {
                 </select>
               </FormField>
 
-              <FormField label="Status">
+              <FormField label="状态">
                 <select
                   value={formData.status}
                   onChange={handleFieldChange('status')}
@@ -464,7 +472,7 @@ export default function AdminSeriesDetailPage() {
                 </select>
               </FormField>
 
-              <FormField label="Episode price" helperText="Stored as coin cost per episode.">
+              <FormField label="章节价格" helperText="按单章金币价格保存。">
                 <input
                   type="number"
                   min="0"
@@ -476,7 +484,7 @@ export default function AdminSeriesDetailPage() {
               </FormField>
             </div>
 
-            <FormField label="Description">
+            <FormField label="简介">
               <textarea
                 rows={7}
                 value={formData.description}
@@ -487,7 +495,7 @@ export default function AdminSeriesDetailPage() {
             </FormField>
 
             <div className="grid gap-5 md:grid-cols-2">
-              <FormField label="Genres" helperText="Separate entries with commas.">
+              <FormField label="标签" helperText="多个标签请用逗号分隔。">
                 <input
                   type="text"
                   value={formData.genres}
@@ -497,7 +505,7 @@ export default function AdminSeriesDetailPage() {
                 />
               </FormField>
 
-              <FormField label="Badge" helperText="Optional label shown on the series card.">
+              <FormField label="角标" helperText="可选，会显示在作品卡片上。">
                 <input
                   type="text"
                   value={formData.badge}
@@ -507,7 +515,7 @@ export default function AdminSeriesDetailPage() {
                 />
               </FormField>
 
-              <FormField label="Cover tone">
+              <FormField label="封面色调">
                 <input
                   type="text"
                   value={formData.coverTone}
@@ -517,7 +525,7 @@ export default function AdminSeriesDetailPage() {
                 />
               </FormField>
 
-              <FormField label="Cover URL" helperText="Updated automatically after an upload, or paste an external asset URL.">
+              <FormField label="封面链接" helperText="上传后会自动更新，也可以手动粘贴外部资源链接。">
                 <input
                   type="url"
                   value={formData.coverUrl}
@@ -532,8 +540,8 @@ export default function AdminSeriesDetailPage() {
               <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 px-5 py-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <h2 className="text-base font-semibold text-white">Publication</h2>
-                    <p className="text-sm text-neutral-500">Control whether this title is visible on the public site.</p>
+                     <h2 className="text-base font-semibold text-white">发布状态</h2>
+                     <p className="text-sm text-neutral-500">控制该作品是否在前台站点可见。</p>
                   </div>
                   <input
                     type="checkbox"
@@ -543,14 +551,14 @@ export default function AdminSeriesDetailPage() {
                     className="mt-1 h-5 w-5 rounded border-neutral-700 bg-neutral-900"
                   />
                 </div>
-                <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">{formData.isPublished ? 'Published' : 'Hidden'}</p>
+                 <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">{formData.isPublished ? '已发布' : '已隐藏'}</p>
               </div>
 
               <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 px-5 py-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <h2 className="text-base font-semibold text-white">Maturity gate</h2>
-                    <p className="text-sm text-neutral-500">Mark this title as adults only.</p>
+                     <h2 className="text-base font-semibold text-white">年龄限制</h2>
+                     <p className="text-sm text-neutral-500">将该作品标记为仅限成人访问。</p>
                   </div>
                   <input
                     type="checkbox"
@@ -565,8 +573,8 @@ export default function AdminSeriesDetailPage() {
               <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 px-5 py-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <h2 className="text-base font-semibold text-white">Free ticket flow</h2>
-                    <p className="text-sm text-neutral-500">Enable time-ticket access on this title.</p>
+                     <h2 className="text-base font-semibold text-white">免费券规则</h2>
+                     <p className="text-sm text-neutral-500">控制该作品是否启用按时间恢复的免费券。</p>
                   </div>
                   <input
                     type="checkbox"
@@ -578,7 +586,7 @@ export default function AdminSeriesDetailPage() {
                 </div>
 
                 <div className="mt-4">
-                  <FormField label="Refresh interval (hours)">
+                   <FormField label="刷新间隔（小时）">
                     <input
                       type="number"
                       min="1"
@@ -595,21 +603,21 @@ export default function AdminSeriesDetailPage() {
 
           <aside className="space-y-6">
             <section className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Cover asset</p>
+               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">封面资源</p>
               <div className="mt-5 overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-950">
                 {formData.coverUrl ? (
-                  <img src={formData.coverUrl} alt={`${formData.title || 'Series'} cover`} className="aspect-[2/3] w-full object-cover" />
-                ) : (
-                  <div className="flex aspect-[2/3] items-center justify-center px-6 text-center text-sm text-neutral-500">
-                    No cover asset uploaded yet.
-                  </div>
-                )}
+                   <img src={formData.coverUrl} alt={`${formData.title || '作品'}封面`} className="aspect-[2/3] w-full object-cover" />
+                 ) : (
+                   <div className="flex aspect-[2/3] items-center justify-center px-6 text-center text-sm text-neutral-500">
+                     暂未上传封面资源。
+                   </div>
+                 )}
               </div>
 
               {isEditing ? (
                 <label className="mt-4 block rounded-2xl border border-dashed border-neutral-700 px-4 py-4 text-sm text-neutral-300 transition hover:border-neutral-500 hover:bg-neutral-950">
-                  <span className="font-medium text-white">Upload a new cover</span>
-                  <span className="mt-1 block text-xs text-neutral-500">JPG, PNG, GIF, or WEBP up to 10MB.</span>
+                   <span className="font-medium text-white">上传新封面</span>
+                   <span className="mt-1 block text-xs text-neutral-500">支持 JPG、PNG、GIF 或 WEBP，大小不超过 10MB。</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -622,25 +630,25 @@ export default function AdminSeriesDetailPage() {
             </section>
 
             <section className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Series metadata</p>
-              <div className="mt-4">
-                <DetailRow label="Series ID" value={series.id} />
-                <DetailRow label="Created" value={formatDateTime(series.createdAt)} />
-                <DetailRow label="Updated" value={formatDateTime(series.updatedAt)} />
-                <DetailRow label="Type" value={formData.type || 'comic'} />
-                <DetailRow label="Status" value={formData.status || 'Ongoing'} />
-                <DetailRow label="Publication" value={formData.isPublished ? 'Published' : 'Hidden'} />
-              </div>
-            </section>
+               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">作品信息</p>
+               <div className="mt-4">
+                 <DetailRow label="作品 ID" value={series.id} />
+                 <DetailRow label="创建时间" value={formatDateTime(series.createdAt)} />
+                 <DetailRow label="更新时间" value={formatDateTime(series.updatedAt)} />
+                 <DetailRow label="类型" value={formatSeriesTypeLabel(formData.type)} />
+                 <DetailRow label="状态" value={formatSeriesStatusLabel(formData.status)} />
+                 <DetailRow label="发布状态" value={formData.isPublished ? '已发布' : '已隐藏'} />
+               </div>
+             </section>
 
-            <section className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Operational notes</p>
-              <div className="mt-4 space-y-3 text-sm leading-7 text-neutral-300">
-                <p>Episode pricing and time-ticket settings are pushed through the canonical admin series endpoint.</p>
-                <p>Cover uploads now use the shared admin upload client, so auth headers and CSRF handling stay consistent.</p>
-                <p>Saving from this page sends the payload in the shape expected by the backend controller.</p>
-              </div>
-            </section>
+             <section className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
+               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">操作说明</p>
+               <div className="mt-4 space-y-3 text-sm leading-7 text-neutral-300">
+                 <p>章节价格和免费券设置会通过统一的后台作品接口写入。</p>
+                 <p>封面上传已经接入公共后台上传客户端，认证头和 CSRF 处理保持一致。</p>
+                 <p>从本页保存时，提交的数据结构与后端控制器要求保持一致。</p>
+               </div>
+             </section>
           </aside>
         </div>
       </div>

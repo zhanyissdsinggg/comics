@@ -14,22 +14,19 @@ const STORAGE_KEY = "mn_reader_settings";
 
 const DEFAULT_SETTINGS = {
   theme: "light", // light, dark, sepia
-  // NOTE: cleaned corrupted comment.
+
   nightMode: false, // backward compatibility
-  // NOTE: cleaned corrupted comment.
+
   layoutMode: "vertical", // vertical, horizontal
   readingMode: "scroll", // scroll, single, double
 
-  // NOTE: cleaned corrupted comment.
   fontSize: 16, // 12-24
   lineHeight: 1.6, // 1.2-2.0
   brightness: 100, // 50-150
 
-  // NOTE: cleaned corrupted comment.
   backgroundColor: "#ffffff",
   fullscreen: false,
 
-  // NOTE: cleaned corrupted comment.
   autoScroll: false,
   autoScrollSpeed: 1, // 1-5
 };
@@ -88,7 +85,6 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // NOTE: cleaned corrupted comment.
   const setTheme = useCallback((theme) => {
     setSettings((prev) => {
       const validThemes = ["light", "dark", "sepia"];
@@ -102,7 +98,6 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // NOTE: cleaned corrupted comment.
   const setReadingMode = useCallback((mode) => {
     setSettings((prev) => {
       const validModes = ["scroll", "single", "double"];
@@ -112,7 +107,6 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // NOTE: cleaned corrupted comment.
   const setFontSize = useCallback((size) => {
     setSettings((prev) => {
       const fontSize = Math.max(12, Math.min(24, Number(size) || 16));
@@ -122,7 +116,6 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // NOTE: cleaned corrupted comment.
   const setLineHeight = useCallback((height) => {
     setSettings((prev) => {
       const lineHeight = Math.max(1.2, Math.min(2.0, Number(height) || 1.6));
@@ -132,7 +125,6 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // NOTE: cleaned corrupted comment.
   const setBrightness = useCallback((brightness) => {
     setSettings((prev) => {
       const value = Math.max(50, Math.min(150, Number(brightness) || 100));
@@ -142,7 +134,6 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // NOTE: cleaned corrupted comment.
   const setBackgroundColor = useCallback((color) => {
     setSettings((prev) => {
       const next = { ...prev, backgroundColor: color || "#ffffff" };
@@ -151,7 +142,6 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // NOTE: cleaned corrupted comment.
   const setFullscreen = useCallback((value) => {
     setSettings((prev) => {
       const next = { ...prev, fullscreen: Boolean(value) };
@@ -168,7 +158,6 @@ export function ReaderSettingsProvider({ children }) {
     });
   }, []);
 
-  // NOTE: cleaned corrupted comment.
   const setAutoScroll = useCallback((value) => {
     setSettings((prev) => {
       const next = { ...prev, autoScroll: Boolean(value) };

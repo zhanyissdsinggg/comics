@@ -1,5 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import {
+  toClientReadingPercent,
+  toStoredReadingPercent,
+} from "../../common/utils/reading-percent";
 
 @Injectable()
 export class ReadingService {
@@ -16,7 +20,7 @@ export class ReadingService {
         id: row.id,
         seriesId: row.seriesId,
         episodeId: row.episodeId,
-        percent: row.percent,
+        percent: toClientReadingPercent(row.percent),
         pageIndex: row.pageIndex,
         label: row.label,
         createdAt: row.createdAt,
@@ -31,7 +35,7 @@ export class ReadingService {
         userId,
         seriesId,
         episodeId: entry.episodeId,
-        percent: entry.percent || 0,
+        percent: toStoredReadingPercent(entry.percent),
         pageIndex: entry.pageIndex || 0,
         label: entry.label || "Bookmark",
       },
@@ -56,7 +60,7 @@ export class ReadingService {
       seriesId: row.seriesId,
       episodeId: row.episodeId,
       title: row.title,
-      percent: row.percent,
+      percent: toClientReadingPercent(row.percent),
       createdAt: row.createdAt,
     }));
   }
@@ -68,7 +72,7 @@ export class ReadingService {
         seriesId: payload.seriesId,
         episodeId: payload.episodeId,
         title: payload.title || "",
-        percent: payload.percent || 0,
+        percent: toStoredReadingPercent(payload.percent),
       },
     });
     return this.getHistory(userId);

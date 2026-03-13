@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import SiteHeader from "../layout/SiteHeader";
 import InfoPageNav from "../layout/InfoPageNav";
+import EditorialHero from "../common/EditorialHero";
+import SurfacePanel from "../common/SurfacePanel";
 import { apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
 import { siteConfig } from "../../lib/siteConfig";
@@ -39,7 +41,33 @@ export default function SupportPage() {
   const trimmedEmail = email.trim();
   const supportBody = useMemo(
     () => buildSupportBody(message.trim(), trimmedEmail, orderId.trim()),
-    [message, trimmedEmail, orderId]
+    [message, trimmedEmail, orderId],
+  );
+
+  const supportStats = useMemo(
+    () => [
+      {
+        label: "Channel",
+        value: hydrated && isSignedIn ? "In-app" : "Email",
+        hint: hydrated && isSignedIn ? "Signed-in users can submit tickets directly." : "Guests fall back to their mail client.",
+      },
+      {
+        label: "Reply SLA",
+        value: "1-2 days",
+        hint: "Current support expectation for standard issues.",
+      },
+      {
+        label: "Contact",
+        value: siteConfig.supportEmail,
+        hint: "Direct email inbox for support escalation.",
+      },
+      {
+        label: "Order Ref",
+        value: orderId.trim() ? "Attached" : "Optional",
+        hint: "Adding a receipt reference speeds up billing triage.",
+      },
+    ],
+    [hydrated, isSignedIn, orderId],
   );
 
   const handleSubmit = async () => {
@@ -53,7 +81,10 @@ export default function SupportPage() {
     }
 
     if (!hydrated && !trimmedEmail) {
-      setFeedback({ type: "error", text: "Add a reply email so support can reach you if you are browsing as a guest." });
+      setFeedback({
+        type: "error",
+        text: "Add a reply email so support can reach you if you are browsing as a guest.",
+      });
       return;
     }
 
@@ -67,9 +98,7 @@ export default function SupportPage() {
 
     try {
       if (!hydrated || !isSignedIn) {
-        const mailto = `mailto:${siteConfig.supportEmail}?subject=${encodeURIComponent(
-          trimmedSubject
-        )}&body=${encodeURIComponent(buildSupportBody(trimmedMessage, trimmedEmail, trimmedOrderId))}`;
+        const mailto = `mailto:${siteConfig.supportEmail}?subject=${encodeURIComponent(trimmedSubject)}&body=${encodeURIComponent(buildSupportBody(trimmedMessage, trimmedEmail, trimmedOrderId))}`;
         if (typeof window !== "undefined") {
           window.location.href = mailto;
         }
@@ -105,26 +134,44 @@ export default function SupportPage() {
     }
   };
 
+  const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500";
+  const fieldClass =
+    "mt-2 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-neutral-100 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20";
+  const secondaryButtonClass =
+    "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10";
+
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-transparent text-neutral-100">
       <SiteHeader />
-      <main className="mx-auto max-w-5xl space-y-6 px-4 pb-12 pt-8">
+      <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <InfoPageNav current="support" />
-        <div>
-          <h1 className="text-2xl font-semibold">Support</h1>
-          <p className="mt-2 text-sm text-neutral-400">
-            Contact support, share account or billing context, and get a reply from a real person.
-          </p>
-        </div>
-        <section className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
-          <div className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
+        <EditorialHero
+          eyebrow="Support desk"
+          title="Send billing, account, and reading issues through a cleaner support console."
+          description="Support now sits inside the same visual system as the rest of the site while preserving direct email fallback for guests and in-app ticket submission for signed-in users."
+          secondary="Add reply context, include an order reference when needed, and keep the expectation window visible before you submit."
+          stats={supportStats}
+        />
+
+        <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <SurfacePanel className="space-y-5">
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                Ticket form
+              </p>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
+                Submit issue details
+              </h2>
+            </div>
+
             {feedback.text ? (
               <div
-                className={`rounded-xl border px-3 py-2 text-sm ${
+                className={[
+                  "rounded-[24px] border px-4 py-3 text-sm",
                   feedback.type === "success"
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                    : "border-red-500/30 bg-red-500/10 text-red-300"
-                }`}
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                    : "border-red-500/30 bg-red-500/10 text-red-200",
+                ].join(" ")}
               >
                 {feedback.text}
               </div>
@@ -132,14 +179,14 @@ export default function SupportPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="text-xs uppercase text-neutral-500">Reply email</label>
+                <label className={fieldLabelClass}>Reply email</label>
                 <input
                   id="support-email"
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="name@example.com"
-                  className="mt-2 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
+                  className={fieldClass}
                 />
                 <p className="mt-2 text-xs text-neutral-500">
                   {hydrated && isSignedIn
@@ -148,46 +195,48 @@ export default function SupportPage() {
                 </p>
               </div>
               <div>
-                <label className="text-xs uppercase text-neutral-500">Order ID (optional)</label>
+                <label className={fieldLabelClass}>Order ID</label>
                 <input
                   id="support-order-id"
                   type="text"
                   value={orderId}
                   onChange={(event) => setOrderId(event.target.value)}
                   placeholder="ord_12345"
-                  className="mt-2 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
+                  className={fieldClass}
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs uppercase text-neutral-500">Subject</label>
+              <label className={fieldLabelClass}>Subject</label>
               <input
                 id="support-subject"
                 type="text"
                 value={subject}
                 onChange={(event) => setSubject(event.target.value)}
                 placeholder="Billing issue / Account / Content"
-                className="mt-2 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
+                className={fieldClass}
               />
             </div>
+
             <div>
-              <label className="text-xs uppercase text-neutral-500">Message</label>
+              <label className={fieldLabelClass}>Message</label>
               <textarea
                 id="support-message"
-                rows={6}
+                rows={7}
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
-                placeholder="Describe the issue, what you expected to happen, and any steps you've already tried."
-                className="mt-2 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
+                placeholder="Describe the issue, what you expected to happen, and any steps you already tried."
+                className={fieldClass}
               />
             </div>
+
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? "Submitting..." : hydrated && isSignedIn ? "Submit Ticket" : "Email Support"}
               </button>
@@ -199,32 +248,37 @@ export default function SupportPage() {
                       window.dispatchEvent(new CustomEvent("auth:open"));
                     }
                   }}
-                  className="rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300"
+                  className={secondaryButtonClass}
                 >
                   Sign in for in-app tickets
                 </button>
               ) : null}
             </div>
-          </div>
+          </SurfacePanel>
 
-          <aside className="space-y-4">
-            <div className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-5">
-              <h2 className="text-sm font-semibold text-white">What to expect</h2>
-              <ul className="mt-3 space-y-2 text-sm text-neutral-400">
+          <div className="space-y-6">
+            <SurfacePanel className="space-y-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                What to expect
+              </p>
+              <ul className="space-y-3 text-sm leading-6 text-neutral-300">
                 <li>We usually reply within 1-2 business days.</li>
-                <li>Add an order ID for payment issues so we can trace the receipt faster.</li>
+                <li>Add an order ID for payment issues so the receipt can be traced faster.</li>
                 <li>Signed-in users can submit tickets directly without leaving the site.</li>
               </ul>
-            </div>
-            <div className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-5 text-sm text-neutral-400">
-              <h2 className="text-sm font-semibold text-white">Direct contact</h2>
-              <p className="mt-3">Email: {siteConfig.supportEmail}</p>
-              <p className="mt-2">
-                Include screenshots, browser/device details, and the page URL if the issue is visual.
+            </SurfacePanel>
+
+            <SurfacePanel className="space-y-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                Direct contact
               </p>
-            </div>
-          </aside>
-        </section>
+              <p className="text-sm text-neutral-300">Email: {siteConfig.supportEmail}</p>
+              <p className="text-sm leading-6 text-neutral-400">
+                Include screenshots, browser or device details, and the page URL when the issue is visual.
+              </p>
+            </SurfacePanel>
+          </div>
+        </div>
       </main>
     </div>
   );

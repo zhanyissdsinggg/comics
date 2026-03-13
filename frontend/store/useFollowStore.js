@@ -23,10 +23,9 @@ const DEFAULT_COLLECTIONS = [
 
 export function FollowProvider({ children }) {
   const [followedSeriesIds, setFollowedSeriesIds] = useState([]);
-  // NOTE: cleaned corrupted comment.
+
   const [collections, setCollections] = useState(DEFAULT_COLLECTIONS);
 
-  // NOTE: cleaned corrupted comment.
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -80,7 +79,6 @@ export function FollowProvider({ children }) {
     [updateFollow]
   );
 
-  // NOTE: cleaned corrupted comment.
   const createCollection = useCallback(
     (name) => {
       const newCollection = {
@@ -99,7 +97,7 @@ export function FollowProvider({ children }) {
   // 閼颁胶甯囧▔銊╁櫞閿涙艾鍨归梽銈嗘暪閽樺繐銇?
   const deleteCollection = useCallback(
     (collectionId) => {
-      // NOTE: cleaned corrupted comment.
+
       if (["default", "reading", "completed", "wishlist"].includes(collectionId)) {
         return { ok: false, error: "Cannot delete default collection" };
       }
@@ -110,7 +108,6 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // NOTE: cleaned corrupted comment.
   const renameCollection = useCallback(
     (collectionId, newName) => {
       const newCollections = collections.map((c) =>
@@ -141,7 +138,6 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // NOTE: cleaned corrupted comment.
   const removeFromCollection = useCallback(
     (collectionId, seriesId) => {
       const newCollections = collections.map((c) => {
@@ -156,7 +152,6 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // NOTE: cleaned corrupted comment.
   const getCollectionsForSeries = useCallback(
     (seriesId) => {
       return collections.filter((c) => c.seriesIds.includes(seriesId));

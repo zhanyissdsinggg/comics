@@ -1,9 +1,9 @@
 ﻿/**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
+ * 
+ * 
+ * 
+ * 
+ * 
  */
 
 "use client";
@@ -18,7 +18,7 @@ import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { recommendRails } from "../../lib/reco/recommender";
 import { getRecommendations } from "../../lib/recommendation/engine";
 import { useHomeData } from "./HomeDataProvider";
-import { usePersonalizedRecommendations } from "../../hooks/useAIRecommendations"; // NOTE: cleaned corrupted comment.
+import { usePersonalizedRecommendations } from "../../hooks/useAIRecommendations"; // 
 
 function parseLatestNumber(value) {
   if (!value) {
@@ -40,7 +40,6 @@ export function useHomeRecommendations() {
   const { behavior } = useBehaviorStore();
   const { isAdultMode } = useAdultGateStore();
 
-  // NOTE: cleaned corrupted comment.
   const { data: aiRecommendations, loading: aiLoading } = usePersonalizedRecommendations(
     isSignedIn ? user?.id : null,
     10
@@ -241,7 +240,6 @@ export function useHomeRecommendations() {
       }
     }
 
-    // NOTE: cleaned corrupted comment.
     if (historyRail.length > 0 && !reco?.continueRail?.length) {
       rails.push({
         id: "history",

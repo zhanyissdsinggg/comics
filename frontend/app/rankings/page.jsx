@@ -1,6 +1,13 @@
 import { Suspense } from "react";
 import RankingsPage from "../../components/rankings/RankingsPage";
 import Skeleton from "../../components/common/Skeleton";
+import { createPageMetadata } from "../../lib/seo";
+
+export const metadata = createPageMetadata({
+  title: "Rankings",
+  description: "Track popular, new, completed, and time-ticket-free charts across comics and novels.",
+  path: "/rankings",
+});
 
 export default function Page() {
   return (

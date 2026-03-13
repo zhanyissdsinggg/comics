@@ -1,9 +1,10 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoginGateModal from "../layout/LoginGateModal";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useAdultGateStore } from "../../store/useAdultGateStore";
 
 const STAR_VALUES = [1, 2, 3, 4, 5];
 
@@ -21,8 +22,36 @@ function formatDate(value) {
   }).format(new Date(parsed));
 }
 
+function getCommentAuthor(entry) {
+  return entry?.author || entry?.userEmail || "Guest";
+}
+
+function getCommentLikeCount(entry) {
+  if (typeof entry?.likeCount === "number") {
+    return entry.likeCount;
+  }
+  if (typeof entry?.likes === "number") {
+    return entry.likes;
+  }
+  if (Array.isArray(entry?.likes)) {
+    return entry.likes.length;
+  }
+  return 0;
+}
+
+function getCommentLikedByUser(entry) {
+  if (typeof entry?.likedByUser === "boolean") {
+    return entry.likedByUser;
+  }
+  if (typeof entry?.liked === "boolean") {
+    return entry.liked;
+  }
+  return false;
+}
+
 export default function CommentsSection({ seriesId, rating, ratingCount, onRatingUpdate }) {
   const { isSignedIn, signIn } = useAuthStore();
+  const { isAdultMode } = useAdultGateStore();
   const [comments, setComments] = useState([]);
   const [input, setInput] = useState("");
   const [replyDrafts, setReplyDrafts] = useState({});
@@ -30,7 +59,9 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
   const [activeModal, setActiveModal] = useState(false);
   const [working, setWorking] = useState(false);
   const [userRating, setUserRating] = useState(0);
+  const [ratingPending, setRatingPending] = useState(false);
   const [sortKey, setSortKey] = useState("latest");
+  const requestRef = useRef(0);
 
   const displayRating = useMemo(() => {
     if (!rating || !ratingCount) {
@@ -40,7 +71,12 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
   }, [rating, ratingCount]);
 
   const loadComments = useCallback(async () => {
+    const requestId = requestRef.current + 1;
+    requestRef.current = requestId;
     const response = await apiGet(`/api/comments?seriesId=${seriesId}`);
+    if (requestRef.current !== requestId) {
+      return;
+    }
     if (response.ok) {
       setComments(response.data?.comments || []);
     }
@@ -48,6 +84,7 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
 
   useEffect(() => {
     if (seriesId) {
+      setComments([]);
       loadComments();
     }
   }, [seriesId, loadComments]);
@@ -122,17 +159,29 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
       setActiveModal(true);
       return;
     }
-    setUserRating(value);
+    if (ratingPending) {
+      return;
+    }
+    setRatingPending(true);
     const response = await apiPost("/api/ratings", { seriesId, rating: value });
     if (response.ok) {
+      setUserRating(value);
       onRatingUpdate?.(response.data.rating, response.data.count);
+      void apiGet(`/api/series/${seriesId}?adult=${isAdultMode ? "1" : "0"}`, {
+        bust: true,
+        dedupeMs: 0,
+        suppressAuthModal: true,
+      });
     }
+    setRatingPending(false);
   };
 
   const sortedComments = useMemo(() => {
     const list = Array.isArray(comments) ? [...comments] : [];
     if (sortKey === "top") {
-      return list.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+      return list.sort(
+        (a, b) => getCommentLikeCount(b) - getCommentLikeCount(a)
+      );
     }
     return list.sort(
       (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
@@ -140,7 +189,7 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
   }, [comments, sortKey]);
 
   return (
-    <section data-comments-section className="mt-10 rounded-3xl border border-neutral-900 bg-neutral-900/40 p-6">
+    <section data-comments-section className="mt-8 rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-6 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold">Ratings & Comments</h3>
@@ -156,6 +205,7 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
               key={value}
               type="button"
               onClick={() => handleRating(value)}
+              disabled={ratingPending}
               className={`text-lg ${
                 value <= (userRating || rating) ? "text-yellow-400" : "text-neutral-600"
               }`}
@@ -173,7 +223,7 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
             type="button"
             onClick={() => setSortKey("latest")}
             className={`rounded-full border px-3 py-1 ${
-              sortKey === "latest" ? "border-neutral-600 text-neutral-200" : "border-neutral-800"
+              sortKey === "latest" ? "border-neutral-600 text-neutral-200" : "border-white/10"
             }`}
           >
             Latest
@@ -182,7 +232,7 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
             type="button"
             onClick={() => setSortKey("top")}
             className={`rounded-full border px-3 py-1 ${
-              sortKey === "top" ? "border-neutral-600 text-neutral-200" : "border-neutral-800"
+              sortKey === "top" ? "border-neutral-600 text-neutral-200" : "border-white/10"
             }`}
           >
             Top
@@ -204,7 +254,7 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
           value={input}
           onChange={(event) => setInput(event.target.value)}
           placeholder="Write a comment..."
-          className="flex-1 rounded-full border border-neutral-800 bg-neutral-950 px-4 py-2 text-sm"
+          className="flex-1 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm"
         />
         <button
           type="button"
@@ -218,17 +268,17 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
 
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
-          <div className="rounded-2xl border border-neutral-900 bg-neutral-950/50 p-4 text-sm text-neutral-500">
+          <div className="rounded-2xl border border-white/10 bg-black/50 p-4 text-sm text-neutral-500">
             Be the first to comment.
           </div>
         ) : (
           sortedComments.map((comment) => (
             <div
               key={comment.id}
-              className="rounded-2xl border border-neutral-900 bg-neutral-950/60 p-4"
+              className="rounded-2xl border border-white/10 bg-black/60 p-4"
             >
               <div className="flex items-center justify-between text-xs text-neutral-500">
-                <span>{comment.author}</span>
+                <span>{getCommentAuthor(comment)}</span>
                 <span>{formatDate(comment.createdAt)}</span>
               </div>
               <p className="mt-2 text-sm text-neutral-200">{comment.text}</p>
@@ -237,29 +287,29 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
                   type="button"
                   onClick={() => handleLike(comment.id)}
                   className={`rounded-full border px-3 py-1 ${
-                    comment.likedByUser
+                    getCommentLikedByUser(comment)
                       ? "border-yellow-500 text-yellow-300"
-                      : "border-neutral-800"
+                      : "border-white/10"
                   }`}
                 >
-                  Like {comment.likeCount || 0}
+                  Like {getCommentLikeCount(comment)}
                 </button>
                 <button
                   type="button"
                   onClick={() =>
                     setReplyOpenId((prev) => (prev === comment.id ? "" : comment.id))
                   }
-                  className="rounded-full border border-neutral-800 px-3 py-1"
+                  className="rounded-full border border-white/10 px-3 py-1"
                 >
                   Reply {Array.isArray(comment.replies) ? comment.replies.length : 0}
                 </button>
               </div>
               {Array.isArray(comment.replies) && comment.replies.length > 0 ? (
-                <div className="mt-3 space-y-2 border-l border-neutral-800 pl-4 text-xs text-neutral-300">
+                <div className="mt-3 space-y-2 border-l border-white/10 pl-4 text-xs text-neutral-300">
                   {comment.replies.map((reply) => (
                     <div key={reply.id}>
                       <div className="flex items-center justify-between text-[10px] text-neutral-500">
-                        <span>{reply.author}</span>
+                        <span>{getCommentAuthor(reply)}</span>
                         <span>{formatDate(reply.createdAt)}</span>
                       </div>
                       <p className="mt-1 text-xs text-neutral-200">{reply.text}</p>
@@ -278,7 +328,7 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
                       }))
                     }
                     placeholder="Write a reply..."
-                    className="flex-1 rounded-full border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs"
+                    className="flex-1 rounded-full border border-white/10 bg-black/20 px-3 py-2 text-xs"
                   />
                   <button
                     type="button"

@@ -29,72 +29,72 @@ import GlobalSearch from "./GlobalSearch";
 
 const NAV_GROUPS = [
   {
-    label: "Overview",
+    label: "总览",
     items: [
-      { label: "Dashboard", href: "/admin", icon: BarChart3, match: ["/admin"], exact: true },
+      { label: "仪表盘", href: "/admin", icon: BarChart3, match: ["/admin"], exact: true },
     ],
   },
   {
-    label: "Content",
+    label: "内容",
     items: [
       {
-        label: "Titles",
+        label: "作品",
         href: "/admin/series",
         icon: BookOpen,
         match: ["/admin/series"],
         children: [
-          { label: "Comics", href: "/admin/series?type=comic" },
-          { label: "Novels", href: "/admin/series?type=novel" },
+          { label: "漫画", href: "/admin/series?type=comic" },
+          { label: "小说", href: "/admin/series?type=novel" },
         ],
       },
-      { label: "Comments", href: "/admin/comments", icon: MessageSquare, match: ["/admin/comments"] },
+      { label: "评论", href: "/admin/comments", icon: MessageSquare, match: ["/admin/comments"] },
     ],
   },
   {
-    label: "Commerce",
+    label: "商业",
     items: [
-      { label: "Promotions", href: "/admin/promotions", icon: Megaphone, match: ["/admin/promotions"] },
-      { label: "Orders", href: "/admin/orders", icon: Receipt, match: ["/admin/orders"] },
-      { label: "Billing Packages", href: "/admin/billing", icon: CreditCard, match: ["/admin/billing"] },
-      { label: "Notifications", href: "/admin/notifications", icon: Bell, match: ["/admin/notifications"] },
+      { label: "活动", href: "/admin/promotions", icon: Megaphone, match: ["/admin/promotions"] },
+      { label: "订单", href: "/admin/orders", icon: Receipt, match: ["/admin/orders"] },
+      { label: "充值套餐", href: "/admin/billing", icon: CreditCard, match: ["/admin/billing"] },
+      { label: "通知", href: "/admin/notifications", icon: Bell, match: ["/admin/notifications"] },
     ],
   },
   {
-    label: "Customer Ops",
+    label: "用户运营",
     items: [
-      { label: "Users", href: "/admin/users", icon: Users, match: ["/admin/users"] },
-      { label: "Support", href: "/admin/support", icon: LifeBuoy, match: ["/admin/support"] },
+      { label: "用户", href: "/admin/users", icon: Users, match: ["/admin/users"] },
+      { label: "工单支持", href: "/admin/support", icon: LifeBuoy, match: ["/admin/support"] },
     ],
   },
   {
-    label: "System",
+    label: "系统",
     items: [
-      { label: "Brand Settings", href: "/admin/branding", icon: Image, match: ["/admin/branding"] },
-      { label: "Email Settings", href: "/admin/email-settings", icon: Mail, match: ["/admin/email-settings"] },
-      { label: "Email Jobs", href: "/admin/email-jobs", icon: MailCheck, match: ["/admin/email-jobs"] },
-      { label: "Tracking", href: "/admin/tracking", icon: Radar, match: ["/admin/tracking"] },
-      { label: "Regions", href: "/admin/regions", icon: Globe, match: ["/admin/regions"] },
-      { label: "System Settings", href: "/admin/settings", icon: Settings, match: ["/admin/settings"] },
+      { label: "品牌设置", href: "/admin/branding", icon: Image, match: ["/admin/branding"] },
+      { label: "邮件设置", href: "/admin/email-settings", icon: Mail, match: ["/admin/email-settings"] },
+      { label: "邮件任务", href: "/admin/email-jobs", icon: MailCheck, match: ["/admin/email-jobs"] },
+      { label: "追踪设置", href: "/admin/tracking", icon: Radar, match: ["/admin/tracking"] },
+      { label: "地区设置", href: "/admin/regions", icon: Globe, match: ["/admin/regions"] },
+      { label: "系统设置", href: "/admin/settings", icon: Settings, match: ["/admin/settings"] },
     ],
   },
 ];
 
 const BREADCRUMB_MAP = [
-  { match: "/admin", label: "Dashboard", exact: true },
-  { match: "/admin/series", label: "Titles" },
-  { match: "/admin/promotions", label: "Promotions" },
-  { match: "/admin/orders", label: "Orders" },
-  { match: "/admin/billing", label: "Billing Packages" },
-  { match: "/admin/branding", label: "Brand Settings" },
-  { match: "/admin/email-settings", label: "Email Settings" },
-  { match: "/admin/email-jobs", label: "Email Jobs" },
-  { match: "/admin/regions", label: "Regions" },
-  { match: "/admin/support", label: "Support" },
-  { match: "/admin/users", label: "Users" },
-  { match: "/admin/tracking", label: "Tracking" },
-  { match: "/admin/notifications", label: "Notifications" },
-  { match: "/admin/comments", label: "Comments" },
-  { match: "/admin/settings", label: "System Settings" },
+  { match: "/admin", label: "仪表盘", exact: true },
+  { match: "/admin/series", label: "作品" },
+  { match: "/admin/promotions", label: "活动" },
+  { match: "/admin/orders", label: "订单" },
+  { match: "/admin/billing", label: "充值套餐" },
+  { match: "/admin/branding", label: "品牌设置" },
+  { match: "/admin/email-settings", label: "邮件设置" },
+  { match: "/admin/email-jobs", label: "邮件任务" },
+  { match: "/admin/regions", label: "地区设置" },
+  { match: "/admin/support", label: "工单支持" },
+  { match: "/admin/users", label: "用户" },
+  { match: "/admin/tracking", label: "追踪设置" },
+  { match: "/admin/notifications", label: "通知" },
+  { match: "/admin/comments", label: "评论" },
+  { match: "/admin/settings", label: "系统设置" },
 ];
 
 function getBreadcrumb(pathname) {
@@ -106,7 +106,7 @@ function getBreadcrumb(pathname) {
     return pathname.startsWith(item.match);
   });
 
-  return hit ? hit.label : "Admin";
+  return hit ? hit.label : "后台";
 }
 
 function isChildLinkActive(pathname, searchParams, href) {
@@ -183,8 +183,8 @@ export default function AdminShell({ title, subtitle, children, actions }) {
               </div>
               {!isCollapsed ? (
                 <div className="animate-fade-in">
-                  <h1 className="text-base font-bold text-ios-green">Admin Console</h1>
-                  <p className="text-[10px] text-ios-gray-500">Operations workspace</p>
+                  <h1 className="text-base font-bold text-ios-green">后台控制台</h1>
+                  <p className="text-[10px] text-ios-gray-500">后台运营面板</p>
                 </div>
               ) : null}
             </div>
@@ -193,7 +193,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
               type="button"
               onClick={() => setIsCollapsed((current) => !current)}
               className="hidden h-9 w-9 items-center justify-center rounded-3xl bg-ios-green/10 text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-110 hover:shadow-ios-sm active:scale-95 lg:flex"
-              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
             >
               {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
             </button>
@@ -288,8 +288,8 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   A
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-neutral-200">Admin</p>
-                  <p className="truncate text-[10px] text-ios-gray-500">Administrator</p>
+                  <p className="truncate text-sm font-medium text-neutral-200">管理员</p>
+                  <p className="truncate text-[10px] text-ios-gray-500">后台账号</p>
                 </div>
               </div>
             </div>
@@ -311,7 +311,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   type="button"
                   onClick={() => setIsMobileMenuOpen((current) => !current)}
                   className="flex h-11 w-11 items-center justify-center rounded-3xl bg-ios-green/10 text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-110 hover:shadow-ios-sm active:scale-95 lg:hidden"
-                  aria-label="Open mobile menu"
+                  aria-label="打开移动端菜单"
                 >
                   <ChevronRight size={22} />
                 </button>
@@ -329,10 +329,10 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   className="hidden items-center gap-2 rounded-4xl border border-ios-green/20 bg-ios-green/5 px-5 py-2.5 text-xs text-ios-green transition-all duration-300 hover:border-ios-green/30 hover:bg-ios-green/10 hover:scale-105 hover:shadow-ios-sm active:scale-95 md:flex"
                 >
                   <Search size={16} />
-                  <span>Search</span>
-                  <kbd className="rounded-2xl border border-ios-green/20 bg-ios-green/10 px-2 py-1 text-[10px] font-medium shadow-ios-sm">
-                    Ctrl+K
-                  </kbd>
+                    <span>搜索</span>
+                    <kbd className="rounded-2xl border border-ios-green/20 bg-ios-green/10 px-2 py-1 text-[10px] font-medium shadow-ios-sm">
+                      Ctrl+K
+                    </kbd>
                 </button>
                 {actions ? <div className="flex items-center gap-2 animate-fade-in">{actions}</div> : null}
               </div>

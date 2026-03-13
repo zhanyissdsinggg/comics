@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import ReadingStats from "../../components/account/ReadingStats";
+import EditorialHero from "../../components/common/EditorialHero";
+import SurfacePanel from "../../components/common/SurfacePanel";
 import { LANGUAGE_OPTIONS, REGION_KEYS, getRegionConfig } from "../../lib/region/config";
 import { setCookie } from "../../lib/cookies";
 import { applyPreferencesToStorage } from "../../lib/preferencesClient";
@@ -224,124 +226,74 @@ export default function AccountPage() {
     return `${subscription.planId || plan} (active)`;
   }, [subscription, plan]);
 
+  const accountHeroStats = useMemo(
+    () => [
+      {
+        label: "Account",
+        value: !hydrated ? "Checking" : isSignedIn ? "Signed in" : "Guest",
+        hint: !hydrated
+          ? "Session status is still loading."
+          : isSignedIn
+            ? user?.emailVerified
+              ? "Email verified and ready for billing changes."
+              : "Verification is still pending."
+            : "Sign in to sync history, billing, and alerts.",
+      },
+      {
+        label: "Plan",
+        value: subscription?.active ? "Subscriber" : "Free",
+        hint: subscription?.renewAt
+          ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
+          : "Upgrade to unlock membership perks.",
+      },
+      {
+        label: "Region",
+        value: regionConfig.label,
+        hint: `${language.toUpperCase()} interface - ${regionConfig.legalAge}+ age gate`,
+      },
+      {
+        label: "Orders",
+        value: hydrated && isSignedIn ? orders.length.toLocaleString() : "0",
+        hint: ordersLoading
+          ? "Loading recent receipts."
+          : isSignedIn
+            ? "Review recent payments and refunds here."
+            : "Sign in to access purchase history.",
+      },
+    ],
+    [
+      hydrated,
+      isSignedIn,
+      language,
+      orders.length,
+      ordersLoading,
+      regionConfig.label,
+      regionConfig.legalAge,
+      subscription?.active,
+      subscription?.renewAt,
+      user?.emailVerified,
+    ],
+  );
+
+  const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500";
+  const fieldClass =
+    "mt-2 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-neutral-100 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20";
+  const secondaryButtonClass =
+    "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
+  const checkboxClass =
+    "h-4 w-4 rounded border-neutral-700 bg-neutral-950 text-emerald-400 focus:ring-emerald-400/30";
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100">
+    <main className="min-h-screen bg-transparent text-neutral-100">
       <SiteHeader />
-      <div className="mx-auto max-w-5xl px-4 py-10 space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Account</h1>
-          <p className="mt-2 text-sm text-neutral-400">
-            Manage profile, subscription, and preferences.
-          </p>
-        </div>
-
-        {message ? (
-          <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-3 text-xs text-neutral-300">
-            {message}
-          </div>
-        ) : null}
-
-        {/* 鑰佺帇娉ㄩ噴锛氶槄璇荤粺璁＄粍浠?*/}
-        {hydrated && isSignedIn ? <ReadingStats /> : null}
-
-        <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Profile</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="text-xs uppercase text-neutral-500">Display name</label>
-              <input
-                value={displayName}
-                onChange={(event) => setDisplayName(event.target.value)}
-                placeholder="Your name"
-                className="mt-2 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-xs uppercase text-neutral-500">Account</label>
-              <div className="mt-2 rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300">
-                {!hydrated ? "Checking session..." : isSignedIn ? user?.email || user?.id || "Signed in" : "Guest"}
-              </div>
-            </div>
-          </div>
-          {hydrated && isSignedIn ? (
-            <div className="rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-xs text-neutral-300">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  Email verification:{" "}
-                  <span className="text-white">
-                    {user?.emailVerified ? "Verified" : "Not verified"}
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={Boolean(user?.emailVerified)}
-                    onClick={() => {
-                      setVerifyStatus("");
-                      apiPost("/api/auth/request-verify", { email: user?.email || "" }).then(
-                        (response) => {
-                          if (response.ok) {
-                            setVerifyStatus("Verification email sent.");
-                          } else {
-                            setVerifyStatus(response.error || "Request failed.");
-                          }
-                        }
-                      );
-                    }}
-                    className="rounded-full border border-neutral-700 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Send verification
-                  </button>
-                </div>
-              </div>
-              {verifyStatus ? <div className="mt-2 text-[11px]">{verifyStatus}</div> : null}
-            </div>
-          ) : null}
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => router.push("/orders")}
-              className="rounded-full border border-neutral-800 px-4 py-2 text-xs"
-            >
-              View Orders
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/notifications")}
-              className="rounded-full border border-neutral-800 px-4 py-2 text-xs"
-            >
-              Notification Center
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/faq")}
-              className="rounded-full border border-neutral-800 px-4 py-2 text-xs"
-            >
-              Help & FAQ
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/support")}
-              className="rounded-full border border-neutral-800 px-4 py-2 text-xs"
-            >
-              Contact Support
-            </button>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Subscription</h2>
-          <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-neutral-400">
-            <div>
-              <div className="text-xs uppercase text-neutral-500">Plan</div>
-              <div className="mt-1 text-sm text-neutral-200">{subscriptionLabel}</div>
-              {subscription?.renewAt ? (
-                <div className="mt-1 text-xs text-neutral-500">
-                  Renews at {new Date(subscription.renewAt).toLocaleDateString()}
-                </div>
-              ) : null}
-            </div>
-            <div className="flex gap-2">
+      <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+        <EditorialHero
+          eyebrow="Account desk"
+          title="Control identity, billing, and reading preferences from one surface."
+          description="Tighten profile data, review order history, and keep the account state clear without bouncing through disconnected settings screens."
+          secondary="Everything below preserves the existing account logic, but the information hierarchy now reads like a single operator console instead of scattered forms."
+          stats={accountHeroStats}
+          actions={
+            <>
               <button
                 type="button"
                 onClick={() =>
@@ -353,234 +305,436 @@ export default function AccountPage() {
                     })
                   )
                 }
-                className="rounded-full border border-neutral-800 px-4 py-2 text-xs"
+                className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Manage
+                Manage Membership
               </button>
               <button
                 type="button"
-                disabled={!subscription?.active || working === "cancel"}
-                onClick={async () => {
-                  setWorking("cancel");
-                  const response = await cancelSubscription();
-                  if (response.ok) {
-                    setMessage("Subscription canceled.");
-                  } else {
-                    setMessage(response.error || "Cancel failed.");
-                  }
-                  setWorking("");
-                }}
-                className="rounded-full border border-neutral-800 px-4 py-2 text-xs"
+                onClick={() => router.push("/orders")}
+                className={secondaryButtonClass}
               >
-                Cancel
+                Review Orders
               </button>
-            </div>
-          </div>
-        </section>
+            </>
+          }
+        />
 
-        <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="text-xs uppercase text-neutral-500">Region</label>
-              <select
-                value={region}
-                onChange={(event) => setRegion(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
-              >
-                {REGION_KEYS.map((item) => (
-                  <option key={item} value={item}>
-                    {getRegionConfig(item).label}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-2 text-xs text-neutral-500">
-                Legal age: {regionConfig.legalAge}+
-              </p>
-            </div>
+        {message ? (
+          <SurfacePanel className="border border-white/10 bg-emerald-500/10">
+            <p className="text-sm text-neutral-100">{message}</p>
+          </SurfacePanel>
+        ) : null}
 
-            <div>
-              <label className="text-xs uppercase text-neutral-500">Language</label>
-              <select
-                value={language}
-                onChange={(event) => setLanguage(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm"
-              >
-                {LANGUAGE_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+        {hydrated && isSignedIn ? <ReadingStats /> : null}
 
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={hideAdultHistory}
-              onChange={(event) => setHideAdultHistory(event.target.checked)}
-            />
-            Hide adult history
-          </label>
-        </section>
-
-        <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Notification Preferences</h2>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={notifyNew}
-              onChange={(event) => setNotifyNew(event.target.checked)}
-            />
-            New episode alerts
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={notifyTtf}
-              onChange={(event) => setNotifyTtf(event.target.checked)}
-            />
-            TTF ready reminders
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={notifyPromo}
-              onChange={(event) => setNotifyPromo(event.target.checked)}
-            />
-            Promotions and offers
-          </label>
-        </section>
-
-        <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Security</h2>
-          <p className="text-sm text-neutral-400">
-            Send a password reset link to your account email.
-          </p>
-
-          {hydrated && isSignedIn ? (
-            <div className="rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-xs text-neutral-300 space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span>Password login</span>
-                <span className={providers.password ? "text-emerald-400" : "text-amber-300"}>
-                  {providers.password ? "Enabled" : "Not set"}
-                </span>
+        <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+          <div className="space-y-6">
+            <SurfacePanel className="space-y-5">
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  Profile
+                </p>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
+                  Identity and support routing
+                </h2>
+                <p className="text-sm leading-6 text-neutral-400">
+                  Keep the display name, session identity, verification state, and support shortcuts visible in one place.
+                </p>
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span>Google login</span>
-                <span className={providers.google ? "text-emerald-400" : "text-neutral-400"}>
-                  {providersLoading ? "Loading..." : providers.google ? "Connected" : "Not connected"}
-                </span>
-              </div>
-            </div>
-          ) : null}
 
-          {hydrated && isSignedIn && googleAuthEnabled ? (
-            <div className="space-y-3">
-              {providers.google ? (
-                <button
-                  type="button"
-                  disabled={providerBusy}
-                  onClick={async () => {
-                    setProviderStatus("");
-                    setProviderBusy(true);
-                    const response = await apiPost("/api/auth/google/unlink");
-                    if (response.ok) {
-                      setProviderStatus("Google account disconnected.");
-                      await loadAuthProviders();
-                    } else {
-                      setProviderStatus(
-                        response.message || response.error || "Failed to disconnect Google.",
-                      );
-                    }
-                    setProviderBusy(false);
-                  }}
-                  className="rounded-full border border-neutral-800 px-4 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Disconnect Google
-                </button>
-              ) : (
-                <div className="max-w-sm">
-                  <SocialAuthButton
-                    provider="google"
-                    action="link"
-                    requestPayload={{ mode: "link" }}
-                    onSuccess={async () => {
-                      setProviderStatus("Google account connected.");
-                      await loadAuthProviders();
-                    }}
-                    onError={(message) => {
-                      setProviderStatus(message || "Failed to connect Google.");
-                    }}
-                    isLoading={providerBusy}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className={fieldLabelClass}>Display name</label>
+                  <input
+                    value={displayName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    placeholder="Your name"
+                    className={fieldClass}
                   />
                 </div>
-              )}
-            </div>
-          ) : null}
-
-          {hydrated && isSignedIn && !googleAuthEnabled ? (
-            <div className="text-xs text-neutral-500">Google login is not configured.</div>
-          ) : null}
-
-          <button
-            type="button"
-            disabled={!hydrated || !isSignedIn}
-            onClick={handleRequestPasswordReset}
-            className="rounded-full border border-neutral-800 px-4 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Request password reset
-          </button>
-          {securityStatus ? (
-            <div className="text-xs text-neutral-300">{securityStatus}</div>
-          ) : null}
-          {providerStatus ? (
-            <div className="text-xs text-neutral-300">{providerStatus}</div>
-          ) : null}
-        </section>
-
-        <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Recent Orders</h2>
-          {!hydrated || ordersLoading ? (
-            <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-400">
-              Loading orders...
-            </div>
-          ) : !isSignedIn ? (
-            <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-300">
-              Sign in to review receipts, refunds, and your recent purchases.
-            </div>
-          ) : orders.length === 0 ? (
-            <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-400">
-              No orders yet.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {orders.slice(0, 5).map((order) => (
-                <div
-                  key={order.orderId}
-                  className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold">{order.packageId}</p>
-                    <p className="text-xs text-neutral-400">{order.status}</p>
-                  </div>
-                  <div className="mt-2 text-xs text-neutral-400">
-                    {order.amount} {order.currency} / {order.orderId}
+                <div>
+                  <label className={fieldLabelClass}>Account</label>
+                  <div className={`${fieldClass} text-neutral-300`}>
+                    {!hydrated
+                      ? "Checking session..."
+                      : isSignedIn
+                        ? user?.email || user?.id || "Signed in"
+                        : "Guest"}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
+              </div>
 
-        <button
-          type="button"
-          onClick={handleSave}
-          className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-neutral-900"
-        >
-          Save Preferences
-        </button>
+              {hydrated && isSignedIn ? (
+                <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-xs text-neutral-300">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      Email verification:{" "}
+                      <span className="text-white">
+                        {user?.emailVerified ? "Verified" : "Not verified"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={Boolean(user?.emailVerified)}
+                      onClick={() => {
+                        setVerifyStatus("");
+                        apiPost("/api/auth/request-verify", { email: user?.email || "" }).then(
+                          (response) => {
+                            if (response.ok) {
+                              setVerifyStatus("Verification email sent.");
+                            } else {
+                              setVerifyStatus(response.error || "Request failed.");
+                            }
+                          }
+                        );
+                      }}
+                      className={secondaryButtonClass}
+                    >
+                      Send verification
+                    </button>
+                  </div>
+                  {verifyStatus ? <div className="mt-2 text-[11px]">{verifyStatus}</div> : null}
+                </div>
+              ) : null}
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/orders")}
+                  className={secondaryButtonClass}
+                >
+                  View Orders
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/notifications")}
+                  className={secondaryButtonClass}
+                >
+                  Notification Center
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/faq")}
+                  className={secondaryButtonClass}
+                >
+                  Help & FAQ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/support")}
+                  className={secondaryButtonClass}
+                >
+                  Contact Support
+                </button>
+              </div>
+            </SurfacePanel>
+
+            <SurfacePanel className="space-y-5">
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  Preferences
+                </p>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
+                  Regional and catalog behavior
+                </h2>
+                <p className="text-sm leading-6 text-neutral-400">
+                  Region, language, and mature-history controls stay grouped so legal rules and browsing preferences remain easy to audit.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className={fieldLabelClass}>Region</label>
+                  <select
+                    value={region}
+                    onChange={(event) => setRegion(event.target.value)}
+                    className={fieldClass}
+                  >
+                    {REGION_KEYS.map((item) => (
+                      <option key={item} value={item}>
+                        {getRegionConfig(item).label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-2 text-xs text-neutral-500">Legal age: {regionConfig.legalAge}+</p>
+                </div>
+
+                <div>
+                  <label className={fieldLabelClass}>Language</label>
+                  <select
+                    value={language}
+                    onChange={(event) => setLanguage(event.target.value)}
+                    className={fieldClass}
+                  >
+                    {LANGUAGE_OPTIONS.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <label className="flex items-center gap-3 rounded-[24px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-neutral-200">
+                <input
+                  type="checkbox"
+                  checked={hideAdultHistory}
+                  onChange={(event) => setHideAdultHistory(event.target.checked)}
+                  className={checkboxClass}
+                />
+                Hide adult history
+              </label>
+            </SurfacePanel>
+
+            <SurfacePanel className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  Alerts
+                </p>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
+                  Notification preferences
+                </h2>
+              </div>
+
+              <label className="flex items-center gap-3 rounded-[24px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-neutral-200">
+                <input
+                  type="checkbox"
+                  checked={notifyNew}
+                  onChange={(event) => setNotifyNew(event.target.checked)}
+                  className={checkboxClass}
+                />
+                New episode alerts
+              </label>
+              <label className="flex items-center gap-3 rounded-[24px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-neutral-200">
+                <input
+                  type="checkbox"
+                  checked={notifyTtf}
+                  onChange={(event) => setNotifyTtf(event.target.checked)}
+                  className={checkboxClass}
+                />
+                TTF ready reminders
+              </label>
+              <label className="flex items-center gap-3 rounded-[24px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-neutral-200">
+                <input
+                  type="checkbox"
+                  checked={notifyPromo}
+                  onChange={(event) => setNotifyPromo(event.target.checked)}
+                  className={checkboxClass}
+                />
+                Promotions and offers
+              </label>
+            </SurfacePanel>
+          </div>
+
+          <div className="space-y-6">
+            <SurfacePanel className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  Billing
+                </p>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
+                  Subscription controls
+                </h2>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-neutral-400">
+                <div>
+                  <div className={fieldLabelClass}>Plan</div>
+                  <div className="mt-1 text-sm text-neutral-200">{subscriptionLabel}</div>
+                  {subscription?.renewAt ? (
+                    <div className="mt-1 text-xs text-neutral-500">
+                      Renews at {new Date(subscription.renewAt).toLocaleDateString()}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        buildPathWithAttribution("/subscribe", {
+                          entryPoint: "ACCOUNT_SUBSCRIPTION",
+                          sourcePath: "/account",
+                          returnTo: "/account",
+                        })
+                      )
+                    }
+                    className={secondaryButtonClass}
+                  >
+                    Manage
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!subscription?.active || working === "cancel"}
+                    onClick={async () => {
+                      setWorking("cancel");
+                      const response = await cancelSubscription();
+                      if (response.ok) {
+                        setMessage("Subscription canceled.");
+                      } else {
+                        setMessage(response.error || "Cancel failed.");
+                      }
+                      setWorking("");
+                    }}
+                    className={secondaryButtonClass}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </SurfacePanel>
+
+            <SurfacePanel className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  Security
+                </p>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
+                  Login providers and recovery
+                </h2>
+                <p className="text-sm leading-6 text-neutral-400">
+                  Audit which sign-in methods are connected and trigger password recovery without hunting through separate dialogs.
+                </p>
+              </div>
+
+              {hydrated && isSignedIn ? (
+                <div className="space-y-3 rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-xs text-neutral-300">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span>Password login</span>
+                    <span className={providers.password ? "text-emerald-400" : "text-amber-300"}>
+                      {providers.password ? "Enabled" : "Not set"}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span>Google login</span>
+                    <span className={providers.google ? "text-emerald-400" : "text-neutral-400"}>
+                      {providersLoading ? "Loading..." : providers.google ? "Connected" : "Not connected"}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+
+              {hydrated && isSignedIn && googleAuthEnabled ? (
+                <div className="space-y-3">
+                  {providers.google ? (
+                    <button
+                      type="button"
+                      disabled={providerBusy}
+                      onClick={async () => {
+                        setProviderStatus("");
+                        setProviderBusy(true);
+                        const response = await apiPost("/api/auth/google/unlink");
+                        if (response.ok) {
+                          setProviderStatus("Google account disconnected.");
+                          await loadAuthProviders();
+                        } else {
+                          setProviderStatus(response.message || response.error || "Failed to disconnect Google.");
+                        }
+                        setProviderBusy(false);
+                      }}
+                      className={secondaryButtonClass}
+                    >
+                      Disconnect Google
+                    </button>
+                  ) : (
+                    <div className="max-w-sm">
+                      <SocialAuthButton
+                        provider="google"
+                        action="link"
+                        requestPayload={{ mode: "link" }}
+                        onSuccess={async () => {
+                          setProviderStatus("Google account connected.");
+                          await loadAuthProviders();
+                        }}
+                        onError={(nextMessage) => {
+                          setProviderStatus(nextMessage || "Failed to connect Google.");
+                        }}
+                        isLoading={providerBusy}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {hydrated && isSignedIn && !googleAuthEnabled ? (
+                <div className="text-xs text-neutral-500">Google login is not configured.</div>
+              ) : null}
+
+              <button
+                type="button"
+                disabled={!hydrated || !isSignedIn}
+                onClick={handleRequestPasswordReset}
+                className={secondaryButtonClass}
+              >
+                Request password reset
+              </button>
+              {securityStatus ? <div className="text-xs text-neutral-300">{securityStatus}</div> : null}
+              {providerStatus ? <div className="text-xs text-neutral-300">{providerStatus}</div> : null}
+            </SurfacePanel>
+
+            <SurfacePanel className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  Orders
+                </p>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
+                  Recent receipts
+                </h2>
+              </div>
+              {!hydrated || ordersLoading ? (
+                <div className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-sm text-neutral-400">
+                  Loading orders...
+                </div>
+              ) : !isSignedIn ? (
+                <div className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-sm text-neutral-300">
+                  Sign in to review receipts, refunds, and your recent purchases.
+                </div>
+              ) : orders.length === 0 ? (
+                <div className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-sm text-neutral-400">
+                  No orders yet.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {orders.slice(0, 5).map((order) => (
+                    <div
+                      key={order.orderId}
+                      className="rounded-[24px] border border-white/10 bg-black/10 p-4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-white">{order.packageId}</p>
+                        <p className="text-xs text-neutral-400">{order.status}</p>
+                      </div>
+                      <div className="mt-2 text-xs text-neutral-400">
+                        {order.amount} {order.currency} / {order.orderId}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </SurfacePanel>
+
+            <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  Save queue
+                </p>
+                <p className="mt-2 text-sm leading-6 text-neutral-400">
+                  Persist the current device and account preferences to storage and, when signed in, to the backend profile record.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSave}
+                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+              >
+                Save Preferences
+              </button>
+            </SurfacePanel>
+          </div>
+        </div>
       </div>
     </main>
   );
 }
+
+

@@ -26,8 +26,8 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created date' },
-  { value: 'email', label: 'Email' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'email', label: '邮箱' },
 ];
 
 function formatDate(value) {
@@ -40,7 +40,7 @@ function formatDate(value) {
     return '-';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -87,11 +87,11 @@ export default function AdminUsersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setFeedback({ type: 'success', message: 'Selected users were blocked.' });
+        setFeedback({ type: 'success', message: '已封禁所选用户。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Block failed: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `封禁失败：${mutationError.message}` });
       },
     }
   );
@@ -106,11 +106,11 @@ export default function AdminUsersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setFeedback({ type: 'success', message: 'Selected users were unblocked.' });
+        setFeedback({ type: 'success', message: '已解除封禁所选用户。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Unblock failed: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `解除封禁失败：${mutationError.message}` });
       },
     }
   );
@@ -124,11 +124,11 @@ export default function AdminUsersPage() {
       onSuccess: () => {
         clearSelection();
         setIsDeleteConfirmOpen(false);
-        setFeedback({ type: 'success', message: 'Selected users were deleted.' });
+        setFeedback({ type: 'success', message: '已删除所选用户。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
       },
     }
   );
@@ -141,7 +141,7 @@ export default function AdminUsersPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Failed to update the user status.'));
+        throw new Error(await readAdminResponseMessage(response, '更新用户状态失败。'));
       }
 
       return response.json();
@@ -149,12 +149,12 @@ export default function AdminUsersPage() {
     onSuccess: (_data, variables) => {
       setFeedback({
         type: 'success',
-        message: variables.blocked ? 'User blocked.' : 'User unblocked.',
+        message: variables.blocked ? '用户已封禁。' : '用户已解除封禁。',
       });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Update failed: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `更新失败：${mutationError.message}` });
     },
   });
 
@@ -167,8 +167,8 @@ export default function AdminUsersPage() {
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">Users</h1>
-          <p className="mt-2 text-neutral-400">Manage user status, access, and wallet balances from one stable view.</p>
+          <h1 className="text-3xl font-bold text-neutral-100">用户管理</h1>
+          <p className="mt-2 text-neutral-400">在同一页面统一管理用户状态、访问权限与钱包余额。</p>
         </div>
 
         <AdminFeedbackBanner
@@ -180,7 +180,7 @@ export default function AdminUsersPage() {
         <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="Search users by ID or email"
+          searchPlaceholder="按用户 ID 或邮箱搜索"
           onOpenFilters={() => setIsFilterModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -193,7 +193,7 @@ export default function AdminUsersPage() {
             disabled={selectedIds.length === 0 || bulkBlockMutation.isPending}
             className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
           >
-            {bulkBlockMutation.isPending ? 'Blocking...' : 'Block'}
+            {bulkBlockMutation.isPending ? '封禁中...' : '封禁'}
           </button>
           <button
             type="button"
@@ -201,7 +201,7 @@ export default function AdminUsersPage() {
             disabled={selectedIds.length === 0 || bulkUnblockMutation.isPending}
             className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
-            {bulkUnblockMutation.isPending ? 'Unblocking...' : 'Unblock'}
+            {bulkUnblockMutation.isPending ? '解除封禁中...' : '解除封禁'}
           </button>
           <button
             type="button"
@@ -209,17 +209,17 @@ export default function AdminUsersPage() {
             disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
             className="rounded-lg bg-red-700 px-4 py-2 text-sm text-white transition hover:bg-red-800 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || 'Failed to load users.'}
+          errorMessage={error?.message || '用户加载失败。'}
           onRetry={refetch}
           isLoading={isLoading}
           hasItems={users.length > 0}
-          emptyMessage="No users yet."
+          emptyMessage="暂无用户。"
           pagination={pagination}
           page={page}
           pageSize={pageSize}
@@ -232,7 +232,7 @@ export default function AdminUsersPage() {
                 <th className="px-4 py-3 text-left">
                   <input
                     type="checkbox"
-                    aria-label="Select all users"
+                    aria-label="选择全部用户"
                     checked={users.length > 0 && selectedIds.length === users.length}
                     onChange={(event) => {
                       if (event.target.checked) {
@@ -244,12 +244,12 @@ export default function AdminUsersPage() {
                     className="rounded"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-neutral-400">User ID</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Email</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Joined</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Status</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Wallet</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Actions</th>
+                <th className="px-4 py-3 text-left text-neutral-400">用户 ID</th>
+                <th className="px-4 py-3 text-left text-neutral-400">邮箱</th>
+                <th className="px-4 py-3 text-left text-neutral-400">注册时间</th>
+                <th className="px-4 py-3 text-left text-neutral-400">状态</th>
+                <th className="px-4 py-3 text-left text-neutral-400">钱包</th>
+                <th className="px-4 py-3 text-left text-neutral-400">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -258,7 +258,7 @@ export default function AdminUsersPage() {
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"
-                      aria-label={`Select user ${user.id}`}
+                      aria-label={`选择用户 ${user.id}`}
                       checked={selectedIdsSet.has(user.id)}
                       onChange={() => toggleSelect(user.id)}
                       className="rounded"
@@ -274,13 +274,13 @@ export default function AdminUsersPage() {
                         user.isBlocked ? 'bg-red-900/30 text-red-400' : 'bg-emerald-900/30 text-emerald-400',
                       ].join(' ')}
                     >
-                      {user.isBlocked ? 'Blocked' : 'Active'}
+                      {user.isBlocked ? '已封禁' : '正常'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-neutral-300">
                     <div className="text-xs">
-                      <div>Paid: {user.wallet?.paidPts || 0}</div>
-                      <div>Bonus: {user.wallet?.bonusPts || 0}</div>
+                      <div>付费点数：{user.wallet?.paidPts || 0}</div>
+                      <div>赠送点数：{user.wallet?.bonusPts || 0}</div>
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -293,7 +293,7 @@ export default function AdminUsersPage() {
                         user.isBlocked ? 'text-emerald-400 hover:text-emerald-300' : 'text-red-400 hover:text-red-300',
                       ].join(' ')}
                     >
-                      {user.isBlocked ? 'Unblock' : 'Block'}
+                      {user.isBlocked ? '解除封禁' : '封禁'}
                     </button>
                   </td>
                 </tr>
@@ -313,10 +313,10 @@ export default function AdminUsersPage() {
 
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        title="Delete selected users"
-        message={`Delete ${selectedIds.length} selected user(s)? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title="删除所选用户"
+        message={`确定删除 ${selectedIds.length} 个选中用户吗？此操作无法撤销。`}
+        confirmText="删除"
+        cancelText="取消"
         isDangerous={true}
         isLoading={bulkDeleteMutation.isPending}
         onConfirm={handleBulkDelete}

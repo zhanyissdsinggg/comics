@@ -6,9 +6,12 @@ import { getApiBaseUrl } from "../../lib/apiClient";
 
 const ACCESS_TOKEN_KEY = "admin_token";
 const REFRESH_TOKEN_KEY = "admin_refresh_token";
+const AUTH_SNAPSHOT_KEY = "admin_auth_snapshot";
 const REFRESH_INTERVAL_MS = 50 * 60 * 1000;
+const VERIFY_CACHE_MS = 5 * 60 * 1000;
 
 const AdminAuthContext = createContext(null);
+let inflightVerifyPromise = null;
 
 function unwrapPayload(raw) {
   if (!raw || typeof raw !== "object") {
@@ -35,6 +38,69 @@ function setStoredToken(key, value) {
   localStorage.setItem(key, value);
 }
 
+function readAuthSnapshot() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const raw = localStorage.getItem(AUTH_SNAPSHOT_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return null;
+    }
+
+    return {
+      isAuthenticated: Boolean(parsed.isAuthenticated),
+      verifiedAt: Number(parsed.verifiedAt || 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeAuthSnapshot(isAuthenticated) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    localStorage.setItem(
+      AUTH_SNAPSHOT_KEY,
+      JSON.stringify({
+        isAuthenticated: Boolean(isAuthenticated),
+        verifiedAt: Date.now(),
+      }),
+    );
+  } catch {
+    // Ignore storage write failures.
+  }
+}
+
+function clearAuthSnapshot() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    localStorage.removeItem(AUTH_SNAPSHOT_KEY);
+  } catch {
+    // Ignore storage removal failures.
+  }
+}
+
+function hasFreshVerifiedSnapshot(snapshot) {
+  if (!snapshot?.isAuthenticated) {
+    return false;
+  }
+
+  return Date.now() - Number(snapshot.verifiedAt || 0) < VERIFY_CACHE_MS;
+}
+
 export function AdminAuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [refreshToken, setRefreshToken] = useState(null);
@@ -45,7 +111,50 @@ export function AdminAuthProvider({ children }) {
   const clearLocalTokens = useCallback(() => {
     setStoredToken(ACCESS_TOKEN_KEY, null);
     setStoredToken(REFRESH_TOKEN_KEY, null);
+    clearAuthSnapshot();
   }, []);
+
+  const verifySession = useCallback(async (accessToken, { silent = false } = {}) => {
+    if (inflightVerifyPromise) {
+      return inflightVerifyPromise;
+    }
+
+    const baseUrl = getApiBaseUrl();
+    inflightVerifyPromise = (async () => {
+      try {
+        const response = await fetch(`${baseUrl}/api/admin/auth/verify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(accessToken ? { token: accessToken } : {}),
+        });
+        const raw = await response.json().catch(() => ({}));
+        const data = unwrapPayload(raw);
+        const valid = Boolean(data.valid);
+
+        writeAuthSnapshot(valid);
+
+        setIsAuthenticated(valid);
+        if (!valid) {
+          setToken(null);
+          setRefreshToken(null);
+          clearLocalTokens();
+        }
+
+        return valid;
+      } catch {
+        const fallbackValid = Boolean(accessToken);
+        if (!silent) {
+          setIsAuthenticated(fallbackValid);
+        }
+        return fallbackValid;
+      } finally {
+        inflightVerifyPromise = null;
+      }
+    })();
+
+    return inflightVerifyPromise;
+  }, [clearLocalTokens]);
 
   const logout = useCallback(async () => {
     const baseUrl = getApiBaseUrl();
@@ -84,6 +193,7 @@ export function AdminAuthProvider({ children }) {
     async function initAuth() {
       const savedAccessToken = getStoredToken(ACCESS_TOKEN_KEY);
       const savedRefreshToken = getStoredToken(REFRESH_TOKEN_KEY);
+      const snapshot = readAuthSnapshot();
 
       if (savedAccessToken) {
         setToken(savedAccessToken);
@@ -92,34 +202,28 @@ export function AdminAuthProvider({ children }) {
         setRefreshToken(savedRefreshToken);
       }
 
-      const baseUrl = getApiBaseUrl();
-      try {
-        const response = await fetch(`${baseUrl}/api/admin/auth/verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(savedAccessToken ? { token: savedAccessToken } : {}),
-        });
-        const raw = await response.json().catch(() => ({}));
-        const data = unwrapPayload(raw);
-        const valid = Boolean(data.valid);
-
+      if (!savedAccessToken && !savedRefreshToken) {
         if (!cancelled) {
-          setIsAuthenticated(valid);
-          if (!valid) {
-            setToken(null);
-            setRefreshToken(null);
-            clearLocalTokens();
-          }
-        }
-      } catch {
-        if (!cancelled) {
-          setIsAuthenticated(Boolean(savedAccessToken));
-        }
-      } finally {
-        if (!cancelled) {
+          setIsAuthenticated(false);
           setIsLoading(false);
         }
+        return;
+      }
+
+      if (hasFreshVerifiedSnapshot(snapshot)) {
+        if (!cancelled) {
+          setIsAuthenticated(true);
+          setIsLoading(false);
+        }
+
+        void verifySession(savedAccessToken, { silent: true });
+        return;
+      }
+
+      const valid = await verifySession(savedAccessToken);
+      if (!cancelled) {
+        setIsAuthenticated(valid);
+        setIsLoading(false);
       }
     }
 
@@ -160,6 +264,7 @@ export function AdminAuthProvider({ children }) {
         if (typeof data.accessToken === "string" && data.accessToken) {
           setToken(data.accessToken);
           setStoredToken(ACCESS_TOKEN_KEY, data.accessToken);
+          writeAuthSnapshot(true);
         }
         if (typeof data.refreshToken === "string" && data.refreshToken) {
           setRefreshToken(data.refreshToken);
@@ -193,7 +298,7 @@ export function AdminAuthProvider({ children }) {
       const raw = await response.json().catch(() => ({}));
       const data = unwrapPayload(raw);
       if (!response.ok || data.success === false) {
-        return { success: false, error: data?.message || "Invalid admin key" };
+        return { success: false, error: data?.message || "后台密钥无效" };
       }
 
       if (typeof data.accessToken === "string" && data.accessToken) {
@@ -213,10 +318,12 @@ export function AdminAuthProvider({ children }) {
       }
 
       setIsAuthenticated(true);
+      setIsLoading(false);
+      writeAuthSnapshot(true);
       return { success: true };
     } catch (error) {
       console.error("admin login failed:", error);
-      return { success: false, error: "Login failed, please try again." };
+      return { success: false, error: "登录失败，请稍后再试。" };
     }
   }, []);
 

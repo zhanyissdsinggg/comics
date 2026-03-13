@@ -1,7 +1,6 @@
-﻿/**
+/**
  * Cookie Consent Banner Component
- * NOTE: cleaned corrupted comment.
- * 绗﹀悎 GDPR/CCPA 瑕佹眰鐨?Cookie 鍚屾剰妯箙
+ * Shows the banner on public routes only.
  */
 "use client";
 
@@ -20,10 +19,10 @@ export default function CookieConsent() {
       setShowBanner(false);
       return;
     }
-    // NOTE: cleaned corrupted comment.
+
     const consent = localStorage.getItem("cookie_consent");
     if (!consent) {
-      // NOTE: cleaned corrupted comment.
+
       const timer = setTimeout(() => {
         setShowBanner(true);
       }, 1000);
@@ -32,7 +31,7 @@ export default function CookieConsent() {
   }, [isAdminRoute]);
 
   const handleAccept = () => {
-    // NOTE: cleaned corrupted comment.
+
     localStorage.setItem("cookie_consent", "accepted");
     setShowBanner(false);
   };
@@ -48,7 +47,6 @@ export default function CookieConsent() {
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6">
       <div className="mx-auto max-w-6xl">
         <div className="relative rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 shadow-2xl p-6 md:p-8">
-          {/* 鍏抽棴鎸夐挳 */}
           <button
             onClick={handleDecline}
             className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-800 transition-colors"
@@ -58,14 +56,11 @@ export default function CookieConsent() {
           </button>
 
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            {/* Cookie鍥炬爣 */}
             <div className="flex-shrink-0">
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
                 <Cookie size={32} className="text-amber-400" />
               </div>
             </div>
-
-            {/* 鏂囨湰鍐呭 */}
             <div className="flex-1 space-y-2">
               <h3 className="text-lg font-semibold text-white">
                 We use cookies
@@ -82,8 +77,6 @@ export default function CookieConsent() {
                 </Link>
               </p>
             </div>
-
-            {/* 鎸夐挳缁?*/}
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <button
                 onClick={handleDecline}

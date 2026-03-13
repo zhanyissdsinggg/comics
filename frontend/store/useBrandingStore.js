@@ -20,6 +20,17 @@ export function BrandingProvider({ children }) {
     const response = await apiGet("/api/branding", { cacheMs: 60000 });
     if (response.ok && response.data?.branding) {
       setBranding({ ...defaultBranding, ...response.data.branding });
+      if (response.stale) {
+        apiGet("/api/branding", {
+          cacheMs: 60000,
+          bust: true,
+          dedupeMs: 0,
+        }).then((freshResponse) => {
+          if (freshResponse.ok && freshResponse.data?.branding) {
+            setBranding({ ...defaultBranding, ...freshResponse.data.branding });
+          }
+        });
+      }
     }
     setLoaded(true);
     return response;

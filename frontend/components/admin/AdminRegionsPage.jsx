@@ -84,7 +84,7 @@ function buildPayload(countryCodes, lengthRules) {
 function getRegionValidationError(countryCodes) {
   const duplicates = findDuplicateCountryCodes(countryCodes);
   if (duplicates.length > 0) {
-    return `Duplicate country codes are not allowed: ${duplicates.join(", ")}.`;
+    return `国家区号不能重复：${duplicates.join(", ")}。`;
   }
 
   return "";
@@ -129,7 +129,7 @@ export default function AdminRegionsPage() {
       setLengthRules(payload.lengthRules);
       setStatus({ tone: "success", message: "" });
     } else {
-      setStatus({ tone: "error", message: response.error || response.message || "Failed to load region configuration." });
+      setStatus({ tone: "error", message: response.error || response.message || "地区配置加载失败。" });
     }
 
     setLoading(false);
@@ -225,9 +225,9 @@ export default function AdminRegionsPage() {
       const nextPayload = buildPayload(response.data?.config?.countryCodes, response.data?.config?.lengthRules);
       setCountryCodes(nextPayload.countryCodes);
       setLengthRules(nextPayload.lengthRules);
-      setStatus({ tone: "success", message: "Region configuration saved." });
+      setStatus({ tone: "success", message: "地区配置已保存。" });
     } else {
-      setStatus({ tone: "error", message: response.error || response.message || "Failed to save region configuration." });
+      setStatus({ tone: "error", message: response.error || response.message || "地区配置保存失败。" });
     }
 
     setSaving(false);
@@ -264,9 +264,9 @@ export default function AdminRegionsPage() {
       const payload = buildPayload(parsed?.countryCodes, parsed?.lengthRules);
       setCountryCodes(payload.countryCodes);
       setLengthRules(payload.lengthRules);
-      setStatus({ tone: "success", message: "Configuration imported. Save to persist changes." });
+      setStatus({ tone: "success", message: "配置已导入，请保存后生效。" });
     } catch {
-      setStatus({ tone: "error", message: "Import failed. Provide a valid JSON file." });
+      setStatus({ tone: "error", message: "导入失败，请提供有效的 JSON 文件。" });
     } finally {
       event.target.value = "";
     }
@@ -275,7 +275,7 @@ export default function AdminRegionsPage() {
   if (isLoading || loading) {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
-        <p className="text-sm text-slate-500">Loading region configuration...</p>
+        <p className="text-sm text-slate-500">正在加载地区配置...</p>
       </section>
     );
   }
@@ -283,7 +283,7 @@ export default function AdminRegionsPage() {
   if (!isAuthenticated) {
     return (
       <section className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-        Admin access is required. Sign in again and reload this page.
+        需要管理员权限，请重新登录后刷新页面。
       </section>
     );
   }
@@ -292,15 +292,15 @@ export default function AdminRegionsPage() {
     <section className="space-y-6">
       <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-slate-900">Region configuration</h2>
+          <h2 className="text-lg font-semibold text-slate-900">地区配置</h2>
           <p className="text-sm text-slate-500">
-            Manage phone country codes and accepted local number lengths for OTP and account flows.
+            管理 OTP 与账号流程使用的手机号国家区号和本地号码长度规则。
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <label className="cursor-pointer rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-            Import JSON
+            导入 JSON
             <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
           </label>
           <button
@@ -308,7 +308,7 @@ export default function AdminRegionsPage() {
             onClick={handleExport}
             className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
           >
-            Export JSON
+            导出 JSON
           </button>
           <button
             type="button"
@@ -316,7 +316,7 @@ export default function AdminRegionsPage() {
             disabled={saving}
             className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save changes"}
+            {saving ? "保存中..." : "保存更改"}
           </button>
         </div>
       </div>
@@ -327,21 +327,21 @@ export default function AdminRegionsPage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">Country codes</h3>
-              <p className="text-xs text-slate-500">Define the dial code and display label used in the frontend picker.</p>
+              <h3 className="text-sm font-semibold text-slate-900">国家区号</h3>
+              <p className="text-xs text-slate-500">定义前台区号选择器使用的拨号前缀和展示名称。</p>
             </div>
             <button
               type="button"
               onClick={addCode}
               className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
             >
-              Add entry
+              新增条目
             </button>
           </div>
 
           {countryCodes.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-              No country codes configured yet.
+              还没有配置任何国家区号。
             </div>
           ) : (
             <div className="mt-6 space-y-3">
@@ -357,14 +357,14 @@ export default function AdminRegionsPage() {
                     value={item.label}
                     onChange={(event) => updateCode(index, "label", event.target.value)}
                     className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
-                    placeholder="United States"
+                    placeholder="美国"
                   />
                   <button
                     type="button"
                     onClick={() => removeCode(index)}
                     className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
                   >
-                    Remove
+                    移除
                   </button>
                 </div>
               ))}
@@ -374,13 +374,13 @@ export default function AdminRegionsPage() {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-slate-900">Phone length rules</h3>
-            <p className="text-xs text-slate-500">Enter comma-separated values such as `10` or `9,10,11`.</p>
+            <h3 className="text-sm font-semibold text-slate-900">手机号长度规则</h3>
+            <p className="text-xs text-slate-500">输入以逗号分隔的数字，例如 `10` 或 `9,10,11`。</p>
           </div>
 
           {countryCodes.filter((item) => normalizeDialCode(item.code)).length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-              Add at least one country code before defining length rules.
+              请先至少添加一个国家区号，再设置长度规则。
             </div>
           ) : (
             <div className="mt-6 space-y-3">

@@ -130,8 +130,8 @@ describe("AdminSeriesPageNew", () => {
     const [firstCheckbox] = screen.getAllByRole("checkbox");
     await user.click(firstCheckbox);
 
-    expect(screen.getByText("1 selected")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Publish" })).toBeInTheDocument();
+    expect(screen.getByText("已选择 1 项")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "发布" })).toBeInTheDocument();
   });
 
   it("publishes the selected series from the bulk toolbar", async () => {
@@ -142,7 +142,7 @@ describe("AdminSeriesPageNew", () => {
 
     const [firstCheckbox] = screen.getAllByRole("checkbox");
     await user.click(firstCheckbox);
-    await user.click(screen.getByRole("button", { name: "Publish" }));
+    await user.click(screen.getByRole("button", { name: "发布" }));
 
     await waitFor(() => {
       expect(adminPatch).toHaveBeenCalledWith(

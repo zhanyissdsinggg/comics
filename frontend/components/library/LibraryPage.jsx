@@ -1,9 +1,12 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
+import EditorialHero from "../common/EditorialHero";
+import SurfacePanel from "../common/SurfacePanel";
 import CollectionManager from "./CollectionManager";
 import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
@@ -11,6 +14,8 @@ import { apiGet } from "../../lib/apiClient";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
 import { useRewardsStore } from "../../store/useRewardsStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import { useBookmarkStore } from "../../store/useBookmarkStore";
+import { useFollowStore } from "../../store/useFollowStore";
 import CheckInPanel from "./CheckInPanel";
 import MissionsPanel from "./MissionsPanel";
 import RewardToast from "./RewardToast";
@@ -19,26 +24,41 @@ import { useHistoryStore } from "../../store/useHistoryStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import ActionModal from "../series/ActionModal";
-import { useRouter } from "next/navigation";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
-
-const continueItems = [
-  { id: "l1", title: "Midnight Contract", subtitle: "Ep 12", coverTone: "warm", isAdult: false },
-  { id: "l2", title: "Crimson Promise", subtitle: "Ep 4", coverTone: "dusk", isAdult: false },
-  { id: "l3", title: "Nova", subtitle: "Ep 9", coverTone: "cool", isAdult: false },
-];
-
-const libraryItems = [
-  { id: "lib1", title: "Bloom", subtitle: "Library", coverTone: "warm", isAdult: false },
-  { id: "lib2", title: "Echo", subtitle: "Library", coverTone: "neon", isAdult: false },
-];
 
 function parseEpisodeNumber(value) {
   if (!value) {
     return "";
   }
-  const match = String(value).match(/(\d+)/);
-  return match ? match[1] : "";
+
+  const raw = String(value).trim();
+  const explicitEpisodeMatch =
+    raw.match(/e(\d+)(?!.*\d)/i) || raw.match(/episode[-_\s]?(\d+)(?!.*\d)/i);
+
+  if (explicitEpisodeMatch) {
+    return String(Number(explicitEpisodeMatch[1]));
+  }
+
+  const matches = [...raw.matchAll(/(\d+)/g)];
+  if (matches.length === 0) {
+    return "";
+  }
+
+  return String(Number(matches[matches.length - 1][1]));
+}
+
+function formatEpisodeSubtitle(prefix, episodeId) {
+  const number = parseEpisodeNumber(episodeId);
+  return `${prefix} Ep ${number || "?"}`;
+}
+
+function toTimestamp(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  const parsed = Date.parse(value || "");
+  return Number.isNaN(parsed) ? 0 : parsed;
 }
 
 export default function LibraryPage() {
@@ -46,6 +66,8 @@ export default function LibraryPage() {
   const { isSignedIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
   const { bySeriesId, loadProgress } = useProgressStore();
+  const { bookmarksBySeries } = useBookmarkStore();
+  const { followedSeriesIds, loadFollowed } = useFollowStore();
   const {
     rewards,
     missions,
@@ -67,43 +89,67 @@ export default function LibraryPage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const showStale = useStaleNotice(seriesResponse);
   const { shouldRetry } = useRetryPolicy();
-  const progressEntries = Object.entries(bySeriesId);
-  const dynamicContinue = progressEntries
-    .map(([seriesId, progress]) => {
-      const series = seriesList.find((item) => item.id === seriesId);
-      if (!series) {
-        return null;
-      }
-      return {
-        id: `${seriesId}-${progress.lastEpisodeId}`,
-        title: series.title,
-        subtitle: `Continue Ep ${parseEpisodeNumber(progress.lastEpisodeId) || "?"}`,
-        coverTone: series.coverTone,
-        coverUrl: series.coverUrl,
-        isAdult: Boolean(series.adult),
-      };
-    })
-    .filter(Boolean);
-  const filteredContinue = isAdultMode
-    ? dynamicContinue.filter((item) => item.isAdult)
-    : dynamicContinue.filter((item) => !item.isAdult);
+  const seriesById = useMemo(
+    () => new Map(seriesList.map((series) => [series.id, series])),
+    [seriesList],
+  );
+  const followedSet = useMemo(() => new Set(followedSeriesIds), [followedSeriesIds]);
+  const progressEntries = useMemo(
+    () =>
+      Object.entries(bySeriesId).sort(
+        ([, left], [, right]) =>
+          toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
+      ),
+    [bySeriesId],
+  );
 
-  const historyRail = historyItems
-    .map((entry) => {
-      const series = seriesList.find((item) => item.id === entry.seriesId);
-      if (!series) {
-        return null;
-      }
-      return {
-        id: `history-${entry.seriesId}-${entry.episodeId}`,
-        title: series.title,
-        subtitle: `Last read ${entry.episodeId}`,
-        coverTone: series.coverTone,
-        coverUrl: series.coverUrl,
-        isAdult: Boolean(series.adult),
-      };
-    })
-    .filter(Boolean);
+  const continueRailItems = useMemo(
+    () =>
+      progressEntries
+        .map(([seriesId, progress]) => {
+          const series = seriesById.get(seriesId);
+          if (!series || !progress?.lastEpisodeId) {
+            return null;
+          }
+          return {
+            id: `continue-${seriesId}-${progress.lastEpisodeId}`,
+            seriesId,
+            episodeId: progress.lastEpisodeId,
+            title: series.title,
+            subtitle: formatEpisodeSubtitle("Continue", progress.lastEpisodeId),
+            coverTone: series.coverTone,
+            coverUrl: series.coverUrl,
+            isAdult: Boolean(series.adult),
+            updatedAt: toTimestamp(progress.updatedAt),
+          };
+        })
+        .filter(Boolean),
+    [progressEntries, seriesById],
+  );
+
+  const historyRail = useMemo(
+    () =>
+      historyItems
+        .map((entry) => {
+          const series = seriesById.get(entry.seriesId);
+          if (!series || !entry?.episodeId) {
+            return null;
+          }
+          return {
+            id: `history-${entry.id || `${entry.seriesId}-${entry.episodeId}`}`,
+            seriesId: entry.seriesId,
+            episodeId: entry.episodeId,
+            title: series.title,
+            subtitle: formatEpisodeSubtitle("Last read", entry.episodeId),
+            coverTone: series.coverTone,
+            coverUrl: series.coverUrl,
+            isAdult: Boolean(series.adult),
+            updatedAt: toTimestamp(entry.createdAt),
+          };
+        })
+        .filter(Boolean),
+    [historyItems, seriesById],
+  );
 
   useEffect(() => {
     trackEvent("view_library", {});
@@ -115,8 +161,9 @@ export default function LibraryPage() {
     if (isSignedIn) {
       loadRewards();
       loadMissions();
+      loadFollowed();
     }
-  }, [isSignedIn, loadMissions, loadRewards, loadProgress, loadHistory]);
+  }, [isSignedIn, loadFollowed, loadMissions, loadRewards, loadProgress, loadHistory]);
 
   useEffect(() => {
     const adultFlag = isAdultMode ? "1" : "0";
@@ -124,6 +171,18 @@ export default function LibraryPage() {
       setSeriesResponse(response);
       if (response.ok) {
         setSeriesList(response.data?.series || []);
+        if (response.stale) {
+          apiGet(`/api/series?adult=${adultFlag}`, {
+            cacheMs: 30000,
+            bust: true,
+            dedupeMs: 0,
+          }).then((freshResponse) => {
+            setSeriesResponse(freshResponse);
+            if (freshResponse.ok) {
+              setSeriesList(freshResponse.data?.series || []);
+            }
+          });
+        }
       } else if (response.status === 0 || response.status >= 500) {
         if (shouldRetry(`library_series_${adultFlag}`)) {
           setTimeout(() => {
@@ -133,7 +192,7 @@ export default function LibraryPage() {
                 if (retryResponse.ok) {
                   setSeriesList(retryResponse.data?.series || []);
                 }
-              }
+              },
             );
           }, 600);
         }
@@ -181,7 +240,7 @@ export default function LibraryPage() {
     const response = await claimMission(missionId);
     if (response.ok) {
       const reward = [...missions.daily, ...missions.weekly].find(
-        (mission) => mission.id === missionId
+        (mission) => mission.id === missionId,
       )?.reward;
       setToastMessage(`+${reward || 0} bonus POINTS`);
     } else if (response.error === "MISSION_ALREADY_CLAIMED") {
@@ -194,113 +253,289 @@ export default function LibraryPage() {
     setWorkingId(null);
   };
 
+  const visibleLibraryItems = useMemo(() => {
+    const candidateSeriesIds = new Set();
+
+    Object.entries(bookmarksBySeries || {}).forEach(([seriesId, entries]) => {
+      if (Array.isArray(entries) && entries.length > 0) {
+        candidateSeriesIds.add(seriesId);
+      }
+    });
+
+    followedSeriesIds.forEach((seriesId) => candidateSeriesIds.add(seriesId));
+    progressEntries.forEach(([seriesId]) => candidateSeriesIds.add(seriesId));
+
+    return Array.from(candidateSeriesIds)
+      .map((seriesId) => {
+        const series = seriesById.get(seriesId);
+        if (!series) {
+          return null;
+        }
+
+        const bookmarks = Array.isArray(bookmarksBySeries?.[seriesId])
+          ? bookmarksBySeries[seriesId]
+          : [];
+        const progress = bySeriesId[seriesId];
+        const isFollowed = followedSet.has(seriesId);
+        const latestBookmark = bookmarks[0];
+        const bookmarkCount = bookmarks.length;
+
+        let subtitle = series.status || "Series";
+        if (progress?.lastEpisodeId) {
+          subtitle = formatEpisodeSubtitle("Resume", progress.lastEpisodeId);
+        } else if (bookmarkCount > 0) {
+          subtitle = `${bookmarkCount} bookmark${bookmarkCount > 1 ? "s" : ""}`;
+        } else if (isFollowed) {
+          subtitle = "Following";
+        }
+
+        return {
+          id: `library-${seriesId}`,
+          seriesId,
+          title: series.title,
+          subtitle,
+          coverTone: series.coverTone,
+          coverUrl: series.coverUrl,
+          badge: isFollowed ? series.badge || "Saved" : series.badge,
+          isAdult: Boolean(series.adult),
+          updatedAt: Math.max(
+            toTimestamp(progress?.updatedAt),
+            toTimestamp(latestBookmark?.createdAt),
+          ),
+        };
+      })
+      .filter(Boolean)
+      .sort((left, right) => {
+        if (right.updatedAt !== left.updatedAt) {
+          return right.updatedAt - left.updatedAt;
+        }
+        return left.title.localeCompare(right.title);
+      });
+  }, [bookmarksBySeries, bySeriesId, followedSeriesIds, followedSet, progressEntries, seriesById]);
+
+  const recommendedItems = useMemo(
+    () =>
+      seriesList
+        .filter((series) => !visibleLibraryItems.some((item) => item.seriesId === series.id))
+        .slice(0, 8)
+        .map((series) => ({
+          id: series.id,
+          seriesId: series.id,
+          title: series.title,
+          subtitle: series.badge || series.status,
+          coverTone: series.coverTone,
+          coverUrl: series.coverUrl,
+          isAdult: Boolean(series.adult),
+        })),
+    [seriesList, visibleLibraryItems],
+  );
+  const libraryStats = useMemo(
+    () => [
+      {
+        label: "Continue",
+        value: continueRailItems.length.toLocaleString(),
+        hint: "Jump back to the last opened chapter",
+      },
+      {
+        label: "History",
+        value: historyRail.length.toLocaleString(),
+        hint: "Recently opened series and episodes",
+      },
+      {
+        label: "Saved",
+        value: visibleLibraryItems.length.toLocaleString(),
+        hint: "Pinned titles in the current mode",
+      },
+      {
+        label: "Mode",
+        value: isAdultMode ? "18+" : "Standard",
+        hint: isSignedIn ? "Account sync available" : "Sign in to unlock rewards",
+      },
+    ],
+    [continueRailItems.length, historyRail.length, isAdultMode, isSignedIn, visibleLibraryItems.length],
+  );
+
   return (
-    <div className="min-h-screen bg-neutral-950">
+    <div className="min-h-screen bg-transparent">
       <SiteHeader />
-      <main className="mx-auto max-w-6xl px-4 pb-12 pt-8 space-y-10">
-        <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6">
-          <h1 className="text-2xl font-semibold">Library</h1>
-          <p className="mt-2 text-sm text-neutral-400">
-            Continue where you left off and manage your saved series.
-          </p>
-        </section>
+      <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+        <EditorialHero
+          eyebrow="Library desk"
+          title="Your library, arranged for fast return visits."
+          description="Resume chapters, review history, and manage collection surfaces without digging through cluttered shelves."
+          secondary={
+            isSignedIn
+              ? "Rewards, missions, and reading history stay tied to the current account."
+              : "Sign in to unlock check-in rewards, mission payouts, and a library that follows you across sessions."
+          }
+          stats={libraryStats}
+          actions={
+            <button
+              type="button"
+              onClick={() => setShowCollectionManager((value) => !value)}
+              className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-semibold text-neutral-100 transition-colors hover:border-emerald-400/30 hover:bg-emerald-400/10"
+            >
+              {showCollectionManager ? "Close Collections" : "Manage Collections"}
+            </button>
+          }
+        />
+
         {showStale ? (
-          <section className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 p-4 text-sm text-yellow-200">
-            Showing cached data. Reconnect to refresh.
-          </section>
+          <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+            Showing cached data. Reconnect to refresh your latest shelves.
+          </div>
         ) : null}
 
         {initialLoading ? (
           <div className="space-y-6">
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-48 w-full" />
-            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-44 w-full rounded-[28px]" />
+            <Skeleton className="h-48 w-full rounded-[28px]" />
+            <Skeleton className="h-64 w-full rounded-[28px]" />
           </div>
         ) : (
           <>
-            {isSignedIn ? (
-              <>
-                <CheckInPanel
-                  rewards={rewards}
-                  onCheckIn={handleCheckIn}
-                  onMakeUp={handleMakeUp}
-                  working={checkinWorking}
-                />
+            <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+              <div className="grid gap-6">
+                {isSignedIn ? (
+                  <>
+                    <CheckInPanel
+                      rewards={rewards}
+                      onCheckIn={handleCheckIn}
+                      onMakeUp={handleMakeUp}
+                      working={checkinWorking}
+                    />
+                    <MissionsPanel
+                      missions={missions}
+                      onClaim={handleClaim}
+                      workingId={workingId}
+                    />
+                  </>
+                ) : (
+                  <SurfacePanel className="space-y-4">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                        Account sync
+                      </p>
+                      <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                        Turn this into a persistent library.
+                      </h2>
+                      <p className="mt-3 text-sm leading-7 text-neutral-400">
+                        Sign in to unlock daily check-ins, mission payouts, and reading progress that survives device changes.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent("auth:open"))}
+                      className="inline-flex rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                    >
+                      Sign in
+                    </button>
+                  </SurfacePanel>
+                )}
+              </div>
 
-                <MissionsPanel
-                  missions={missions}
-                  onClaim={handleClaim}
-                  workingId={workingId}
-                />
-              </>
-            ) : (
-              <section className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 text-sm text-neutral-300">
-                <p className="text-neutral-200">Sign in to unlock check-in rewards and missions.</p>
-                <button
-                  type="button"
-                  onClick={() => window.dispatchEvent(new CustomEvent("auth:open"))}
-                  className="mt-3 rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-100"
-                >
-                  Sign in
-                </button>
-              </section>
-            )}
-
-            {/* 老王注释：收藏夹管理按钮 */}
-            <div className="flex justify-end">
-              <button
-                onClick={() => setShowCollectionManager(!showCollectionManager)}
-                className="rounded-full border border-neutral-800 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:border-neutral-700 hover:bg-neutral-800"
-              >
-                {showCollectionManager ? "Close Collections" : "Manage Collections"}
-              </button>
+              <SurfacePanel className="space-y-4">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                    Library controls
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                    Keep the shelf clean and mode-aware.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-neutral-400">
+                    The library follows the current storefront mode and surfaces only the titles that belong in it.
+                  </p>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                  <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
+                      Catalog mode
+                    </p>
+                    <p className="mt-3 font-display text-2xl font-semibold text-white">
+                      {isAdultMode ? "18+ enabled" : "Standard mode"}
+                    </p>
+                    <p className="mt-2 text-sm text-neutral-400">
+                      Only titles allowed in the active storefront lane are shown below.
+                    </p>
+                  </div>
+                  <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
+                      Reading sync
+                    </p>
+                    <p className="mt-3 font-display text-2xl font-semibold text-white">
+                      {isSignedIn ? "Connected" : "Local only"}
+                    </p>
+                    <p className="mt-2 text-sm text-neutral-400">
+                      {isSignedIn
+                        ? "Progress, rewards, and mission activity are tied to your account."
+                        : "Progress is available locally, but rewards and deeper sync need sign-in."}
+                    </p>
+                  </div>
+                </div>
+              </SurfacePanel>
             </div>
 
-            {/* 老王注释：收藏夹管理面板 */}
-            {showCollectionManager && (
-              <div className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6">
+            {showCollectionManager ? (
+              <SurfacePanel>
                 <CollectionManager onClose={() => setShowCollectionManager(false)} />
-              </div>
-            )}
-
-            <Rail
-              title="Continue Reading"
-              items={filteredContinue.length > 0 ? filteredContinue : continueItems}
-              onItemClick={(item) => {
-                const seriesId = item.id?.split("-")[0];
-                if (seriesId) {
-                  router.push(`/series/${seriesId}`);
-                  return;
-                }
-                router.push("/series/c1");
-              }}
-            />
-
-            {historyRail.length > 0 ? (
-              <Rail title="Reading History" items={historyRail} />
+              </SurfacePanel>
             ) : null}
 
-            <Rail
-              title="Your Library"
-              items={
-                isAdultMode
-                  ? libraryItems.filter((item) => item.isAdult)
-                  : libraryItems.filter((item) => !item.isAdult)
-              }
-              onItemClick={(item) => router.push(`/series/${item.id?.replace("lib", "c") || "c1"}`)}
-            />
+            <div className="grid gap-6">
+              <SurfacePanel>
+                <Rail
+                  title="Continue Reading"
+                  items={continueRailItems}
+                  onItemClick={(item) => {
+                    if (item.seriesId && item.episodeId) {
+                      router.push(`/read/${item.seriesId}/${item.episodeId}`);
+                      return;
+                    }
+                    if (item.seriesId) {
+                      router.push(`/series/${item.seriesId}`);
+                    }
+                  }}
+                />
+              </SurfacePanel>
 
-            <Rail
-              title="Recommended for you"
-              items={seriesList.slice(0, 8).map((series) => ({
-                id: series.id,
-                title: series.title,
-                subtitle: series.badge || series.status,
-                coverTone: series.coverTone,
-                isAdult: Boolean(series.adult),
-              }))}
-              onItemClick={(item) => router.push(`/series/${item.id}`)}
-            />
+              {historyRail.length > 0 ? (
+                <SurfacePanel>
+                  <Rail
+                    title="Reading History"
+                    items={historyRail}
+                    onItemClick={(item) => {
+                      if (item.seriesId && item.episodeId) {
+                        router.push(`/read/${item.seriesId}/${item.episodeId}`);
+                        return;
+                      }
+                      if (item.seriesId) {
+                        router.push(`/series/${item.seriesId}`);
+                      }
+                    }}
+                  />
+                </SurfacePanel>
+              ) : null}
+
+              <SurfacePanel>
+                <Rail
+                  title="Your Library"
+                  items={visibleLibraryItems}
+                  onItemClick={(item) => {
+                    if (item.seriesId) {
+                      router.push(`/series/${item.seriesId}`);
+                    }
+                  }}
+                />
+              </SurfacePanel>
+
+              <SurfacePanel>
+                <Rail
+                  title="Recommended for you"
+                  items={recommendedItems}
+                  onItemClick={(item) => router.push(`/series/${item.id}`)}
+                />
+              </SurfacePanel>
+            </div>
           </>
         )}
       </main>
@@ -326,8 +561,8 @@ export default function LibraryPage() {
                           sourcePath: "/library",
                           returnTo: "/library",
                         },
-                        { focus: "auto" }
-                      )
+                        { focus: "auto" },
+                      ),
                     );
                     setMakeupModal(null);
                   },

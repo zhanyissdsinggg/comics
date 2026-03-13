@@ -2,14 +2,16 @@ function clean(value) {
   return String(value || "").trim();
 }
 
+const DEFAULT_SITE_URL = "https://www.gushcomics.com";
+
 function normalizeSiteUrl(value) {
-  const raw = clean(value) || "https://gushcomics.com";
+  const raw = clean(value) || DEFAULT_SITE_URL;
   const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 
   try {
     return new URL(candidate).toString().replace(/\/$/, "");
   } catch {
-    return "https://gushcomics.com";
+    return DEFAULT_SITE_URL;
   }
 }
 

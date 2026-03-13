@@ -1,6 +1,7 @@
 import { Controller, Get } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { parseStoredJson } from "../../common/utils/stored-json";
+import { regionConfigCache } from "./region-config.cache";
 
 type PhoneLengthRules = Record<string, number[]>;
 
@@ -32,10 +33,11 @@ export class RegionsController {
 
   @Get("config")
   async config() {
-    const config = await this.prisma.regionConfig.findUnique({ where: { region: "default" } });
-
     return {
-      config: parseStoredJson(config?.payload, DEFAULT_REGION_CONFIG),
+      config: await regionConfigCache.getOrLoad(async () => {
+        const config = await this.prisma.regionConfig.findUnique({ where: { region: "default" } });
+        return parseStoredJson(config?.payload, DEFAULT_REGION_CONFIG);
+      }),
     };
   }
 }

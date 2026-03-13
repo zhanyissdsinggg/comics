@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
         router.push("/admin");
       }
     } else {
-      setError(result.error || "Login failed");
+      setError(result.error || "登录失败");
     }
 
     setIsLoading(false);
@@ -54,9 +54,9 @@ export default function AdminLoginPage() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
-            Admin Login
+            后台登录
           </h1>
-          <p className="text-gray-600 mt-2">Enter admin key and two-factor code if enabled.</p>
+          <p className="text-gray-600 mt-2">请输入后台密钥，若启用二次验证请同步填写验证码。</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
           />
           <div>
             <label htmlFor="adminKey" className="block text-sm font-medium text-gray-700 mb-2">
-              Admin Key
+              后台密钥
             </label>
             <input
               id="adminKey"
@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
               onChange={(event) => setAdminKey(event.target.value)}
               autoComplete="current-password"
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none"
-              placeholder="Enter admin key"
+              placeholder="请输入后台密钥"
               required
               disabled={isLoading}
             />
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
 
           <div>
             <label htmlFor="totpCode" className="block text-sm font-medium text-gray-700 mb-2">
-              Two-Factor Code (Optional)
+              二次验证码（可选）
             </label>
             <input
               id="totpCode"
@@ -105,7 +105,7 @@ export default function AdminLoginPage() {
               }}
               autoComplete="one-time-code"
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all outline-none"
-              placeholder="6-digit code"
+              placeholder="6位验证码"
               disabled={isLoading}
             />
           </div>
@@ -121,12 +121,12 @@ export default function AdminLoginPage() {
             disabled={isLoading}
             className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-cyan-600 focus:ring-4 focus:ring-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Signing in..." : "Sign in"}
+            {isLoading ? "登录中..." : "登录"}
           </button>
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>JWT session with optional TOTP hardening.</p>
+          <p>采用 JWT 会话，可选启用 TOTP 二次验证。</p>
         </div>
       </div>
     </div>

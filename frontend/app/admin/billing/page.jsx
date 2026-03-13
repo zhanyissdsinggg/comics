@@ -28,11 +28,11 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created date' },
-  { value: 'price', label: 'Price' },
-  { value: 'points', label: 'Points' },
-  { value: 'name', label: 'Name' },
-  { value: 'active', label: 'Status' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'price', label: '价格' },
+  { value: 'points', label: '点数' },
+  { value: 'name', label: '名称' },
+  { value: 'active', label: '状态' },
 ];
 
 function formatDate(value) {
@@ -45,7 +45,7 @@ function formatDate(value) {
     return '-';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -57,7 +57,7 @@ function formatCurrency(value, currency = 'USD') {
   const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
 
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('zh-CN', {
       style: 'currency',
       currency: normalizedCurrency,
       minimumFractionDigits: 2,
@@ -102,11 +102,11 @@ export default function AdminBillingPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: 'Selected billing packages were deleted.' });
+        setFeedback({ type: 'success', message: '已删除所选充值套餐。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
     },
   });
 
@@ -118,9 +118,9 @@ export default function AdminBillingPage() {
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">Billing Packages</h1>
+          <h1 className="text-3xl font-bold text-neutral-100">充值套餐</h1>
           <p className="mt-2 text-neutral-400">
-            Manage top-up packages and pricing records used across the storefront.
+            管理商城使用的充值套餐与价格记录。
           </p>
         </div>
 
@@ -133,7 +133,7 @@ export default function AdminBillingPage() {
         <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="Search package ID, name, or label"
+          searchPlaceholder="搜索套餐 ID、名称或标签"
           onOpenFilters={() => setIsSortModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -146,17 +146,17 @@ export default function AdminBillingPage() {
             disabled={bulkDeleteMutation.isPending}
             className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || 'Failed to load billing packages.'}
+          errorMessage={error?.message || '充值套餐加载失败。'}
           onRetry={refetch}
           isLoading={isLoading}
           hasItems={packages.length > 0}
-          emptyMessage="No billing packages yet."
+          emptyMessage="暂无充值套餐。"
           pagination={pagination}
           page={page}
           pageSize={pageSize}
@@ -179,15 +179,15 @@ export default function AdminBillingPage() {
                       clearSelection();
                     }}
                     className="rounded"
-                    aria-label="Select all billing packages"
+                    aria-label="选择全部充值套餐"
                   />
                 </th>
                 <th className="px-4 py-3 text-left text-neutral-400">ID</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Package</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Price</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Points</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Status</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Created date</th>
+                <th className="px-4 py-3 text-left text-neutral-400">套餐</th>
+                <th className="px-4 py-3 text-left text-neutral-400">价格</th>
+                <th className="px-4 py-3 text-left text-neutral-400">点数</th>
+                <th className="px-4 py-3 text-left text-neutral-400">状态</th>
+                <th className="px-4 py-3 text-left text-neutral-400">创建时间</th>
               </tr>
             </thead>
             <tbody>
@@ -203,12 +203,12 @@ export default function AdminBillingPage() {
                         checked={selectedIdsSet.has(pkg.id)}
                         onChange={() => toggleSelect(pkg.id)}
                         className="rounded"
-                        aria-label={`Select package ${pkg.id}`}
+                        aria-label={`选择套餐 ${pkg.id}`}
                       />
                     </td>
                     <td className="px-4 py-3 font-medium text-neutral-300">{pkg.id}</td>
                     <td className="px-4 py-3 text-neutral-300">
-                      <div className="font-medium text-neutral-200">{pkg.name || 'Untitled package'}</div>
+                      <div className="font-medium text-neutral-200">{pkg.name || '未命名套餐'}</div>
                       {pkg.label ? <div className="mt-1 text-xs text-neutral-500">{pkg.label}</div> : null}
                     </td>
                     <td className="px-4 py-3 font-medium text-emerald-400">
@@ -223,7 +223,7 @@ export default function AdminBillingPage() {
                             : 'bg-neutral-700 text-neutral-300'
                         }`}
                       >
-                        {isActive ? 'Active' : 'Archived'}
+                        {isActive ? '启用中' : '已归档'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-neutral-400">{formatDate(pkg.createdAt)}</td>
@@ -240,17 +240,17 @@ export default function AdminBillingPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="Sort billing packages"
-          label="Sort field"
-          actionLabel="Apply"
+          title="充值套餐排序"
+          label="排序字段"
+          actionLabel="应用"
         />
 
         <ConfirmDialog
           isOpen={isDeleteConfirmOpen}
-          title="Delete billing packages"
-          message={`Delete ${selectedIds.length} selected billing package(s)? This cannot be undone.`}
-          confirmText={bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
-          cancelText="Cancel"
+          title="删除充值套餐"
+          message={`确定删除 ${selectedIds.length} 个选中套餐吗？此操作无法撤销。`}
+          confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除'}
+          cancelText="取消"
           isDangerous={true}
           isLoading={bulkDeleteMutation.isPending}
           onConfirm={handleBulkDelete}
@@ -260,4 +260,3 @@ export default function AdminBillingPage() {
     </div>
   );
 }
-

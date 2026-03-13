@@ -1,12 +1,12 @@
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
 
-const DEFAULT_EMPTY_TITLE = 'No data yet';
-const DEFAULT_EMPTY_DESCRIPTION = 'No matching records were found.';
-const DEFAULT_LOADING_TEXT = 'Loading...';
-const DEFAULT_ERROR_TITLE = 'Unable to load data';
-const DEFAULT_ERROR_MESSAGE = 'Something went wrong while loading this view.';
-const RETRY_LABEL = 'Retry';
+const DEFAULT_EMPTY_TITLE = '暂无数据';
+const DEFAULT_EMPTY_DESCRIPTION = '当前没有匹配的数据记录。';
+const DEFAULT_LOADING_TEXT = '加载中...';
+const DEFAULT_ERROR_TITLE = '数据加载失败';
+const DEFAULT_ERROR_MESSAGE = '当前页面加载时发生异常，请重试。';
+const RETRY_LABEL = '重试';
 
 export const SkeletonLoader = React.memo(function SkeletonLoader({ count = 5, height = 'h-12' }) {
   return (

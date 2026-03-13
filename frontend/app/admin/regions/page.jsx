@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export default function RegionsPage() {
   return (
-    <AdminLayout title="Regions">
+    <AdminLayout title="地区设置">
       <AdminRegionsPage />
     </AdminLayout>
   );

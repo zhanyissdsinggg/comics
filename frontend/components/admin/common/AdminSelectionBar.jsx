@@ -5,7 +5,7 @@ export function AdminSelectionBar({
   children,
   onClear,
   className = '',
-  clearLabel = 'Clear',
+  clearLabel = '清空',
 }) {
   if (!selectedCount) {
     return null;
@@ -13,7 +13,7 @@ export function AdminSelectionBar({
 
   return (
     <div className={`mb-6 flex items-center justify-between rounded-lg border border-blue-700 bg-blue-900/20 p-4 ${className}`.trim()}>
-      <span className="text-blue-300">{selectedCount} item(s) selected</span>
+      <span className="text-blue-300">已选 {selectedCount} 项</span>
       <div className="flex flex-wrap gap-2">
         {children}
         <button

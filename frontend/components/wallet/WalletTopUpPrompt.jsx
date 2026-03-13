@@ -2,11 +2,6 @@
 
 import { memo, useState, useEffect } from "react";
 import { Wallet, Sparkles, Zap, Gift, X } from "lucide-react";
-
-/**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment. */
 const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
   isOpen = false,
   onClose,
@@ -15,7 +10,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
 }) {
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // NOTE: cleaned corrupted comment.
   const packages = [
     {
       id: "starter",
@@ -40,7 +34,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }
   ];
 
-  // NOTE: cleaned corrupted comment.
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => setIsAnimating(true), 50);
@@ -49,7 +42,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }
   }, [isOpen]);
 
-  // NOTE: cleaned corrupted comment.
   const handleClose = () => {
     setIsAnimating(false);
     setTimeout(() => {
@@ -57,7 +49,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }, 300);
   };
 
-  // NOTE: cleaned corrupted comment.
   const handleSelectPackage = (pkg) => {
     handleClose();
     setTimeout(() => {
@@ -65,7 +56,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     }, 300);
   };
 
-  // NOTE: cleaned corrupted comment.
   const handleContentClick = (e) => {
     e.stopPropagation();
   };
@@ -82,7 +72,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
       onClick={handleClose}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
-      {/* iOS椋庢牸寮圭獥 */}
       <div
         onClick={handleContentClick}
         className={`relative w-full sm:max-w-lg bg-neutral-900/95 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 sm:rounded-3xl ${
@@ -95,12 +84,10 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
           borderTopRightRadius: "1.5rem"
         }}
       >
-        {/* 鑰佺帇娉ㄩ噴锛氱Щ鍔ㄧ鎷栧姩鎸囩ず鍣?*/}
         <div className="flex justify-center pt-3 pb-2 sm:hidden">
           <div className="w-10 h-1 rounded-full bg-neutral-700" />
         </div>
 
-        {/* 鑰佺帇娉ㄩ噴锛氬叧闂寜閽?*/}
         <button
           type="button"
           onClick={handleClose}
@@ -111,7 +98,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
         </button>
 
         <div className="p-6 sm:p-8">
-          {/* 鑰佺帇娉ㄩ噴锛氬ご閮?*/}
           <div className="mb-6 text-center">
             <div className="mb-4 flex justify-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-400">
@@ -124,7 +110,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </p>
           </div>
 
-          {/* 鑰佺帇娉ㄩ噴锛氬厖鍊煎椁?*/}
           <div className="mb-6 space-y-3">
             {packages.map((pkg) => (
               <button
@@ -137,7 +122,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                     : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
                 }`}
               >
-                {/* 鑰佺帇娉ㄩ噴锛氱儹闂ㄦ爣绛?*/}
                 {pkg.popular && (
                   <div className="absolute -top-2 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
                     POPULAR
@@ -176,7 +160,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             ))}
           </div>
 
-          {/* 鑰佺帇娉ㄩ噴锛氫紭鎯犳彁绀?*/}
           <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
@@ -193,7 +176,6 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </div>
           </div>
 
-          {/* 鑰佺帇娉ㄩ噴锛氬簳閮ㄦ彁绀?*/}
           <p className="mt-4 text-center text-xs text-neutral-500">
             Secure payment powered by Stripe
           </p>

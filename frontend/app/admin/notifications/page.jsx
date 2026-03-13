@@ -25,8 +25,8 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created date' },
-  { value: 'title', label: 'Title' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'title', label: '标题' },
 ];
 
 function getContentPreview(content) {
@@ -44,7 +44,7 @@ function formatDate(value) {
     return '-';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -85,11 +85,11 @@ export default function AdminNotificationsPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: 'Selected notifications were deleted.' });
+      setFeedback({ type: 'success', message: '已删除所选通知。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
     },
   });
 
@@ -101,8 +101,8 @@ export default function AdminNotificationsPage() {
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">Notifications</h1>
-          <p className="mt-2 text-neutral-400">Review queued messages and clean up outdated in-app notifications from one table.</p>
+          <h1 className="text-3xl font-bold text-neutral-100">通知管理</h1>
+          <p className="mt-2 text-neutral-400">查看待处理消息，并集中清理过期站内通知。</p>
         </div>
 
         <AdminFeedbackBanner
@@ -114,7 +114,7 @@ export default function AdminNotificationsPage() {
         <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="Search notification ID, title, or content"
+          searchPlaceholder="搜索通知 ID、标题或内容"
           onOpenFilters={() => setIsFilterModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -127,17 +127,17 @@ export default function AdminNotificationsPage() {
             disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
             className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || 'Failed to load notifications.'}
+          errorMessage={error?.message || '通知加载失败。'}
           onRetry={refetch}
           isLoading={isLoading}
           hasItems={notifications.length > 0}
-          emptyMessage="No notifications yet."
+          emptyMessage="暂无通知。"
           pagination={pagination}
           page={page}
           pageSize={pageSize}
@@ -150,7 +150,7 @@ export default function AdminNotificationsPage() {
                 <th className="px-4 py-3 text-left">
                   <input
                     type="checkbox"
-                    aria-label="Select all notifications"
+                    aria-label="选择全部通知"
                     checked={notifications.length > 0 && selectedIds.length === notifications.length}
                     onChange={(event) => {
                       if (event.target.checked) {
@@ -164,9 +164,9 @@ export default function AdminNotificationsPage() {
                   />
                 </th>
                 <th className="px-4 py-3 text-left text-neutral-400">ID</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Title</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Content</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Created</th>
+                <th className="px-4 py-3 text-left text-neutral-400">标题</th>
+                <th className="px-4 py-3 text-left text-neutral-400">内容</th>
+                <th className="px-4 py-3 text-left text-neutral-400">创建时间</th>
               </tr>
             </thead>
             <tbody>
@@ -175,7 +175,7 @@ export default function AdminNotificationsPage() {
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"
-                      aria-label={`Select notification ${notification.id}`}
+                      aria-label={`选择通知 ${notification.id}`}
                       checked={selectedIdsSet.has(notification.id)}
                       onChange={() => toggleSelect(notification.id)}
                       className="rounded"
@@ -201,10 +201,10 @@ export default function AdminNotificationsPage() {
 
         <ConfirmDialog
           isOpen={isDeleteConfirmOpen}
-          title="Delete selected notifications"
-          message={`Delete ${selectedIds.length} selected notification(s)? This action cannot be undone.`}
-          confirmText={bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
-          cancelText="Cancel"
+          title="删除所选通知"
+          message={`确定删除 ${selectedIds.length} 条选中通知吗？此操作无法撤销。`}
+          confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除'}
+          cancelText="取消"
           isDangerous={true}
           isLoading={bulkDeleteMutation.isPending}
           onConfirm={handleBulkDelete}

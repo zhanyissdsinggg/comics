@@ -26,108 +26,108 @@ const RECENT_SEARCH_STORAGE_KEY = "admin_recent_searches";
 const SEARCH_ITEMS = [
   {
     id: "dashboard",
-    label: "Dashboard",
+    label: "仪表盘",
     href: "/admin",
     icon: BookOpen,
-    keywords: ["dashboard", "overview", "analytics", "stats"],
+    keywords: ["仪表盘", "总览", "分析", "统计"],
   },
   {
     id: "series",
-    label: "Titles",
+    label: "作品",
     href: "/admin/series",
     icon: BookOpen,
-    keywords: ["titles", "series", "comics", "novels", "content"],
+    keywords: ["作品", "漫画", "小说", "内容"],
   },
   {
     id: "users",
-    label: "Users",
+    label: "用户",
     href: "/admin/users",
     icon: Users,
-    keywords: ["users", "customers", "accounts", "members"],
+    keywords: ["用户", "客户", "账号", "会员"],
   },
   {
     id: "orders",
-    label: "Orders",
+    label: "订单",
     href: "/admin/orders",
     icon: Receipt,
-    keywords: ["orders", "payments", "transactions", "billing"],
+    keywords: ["订单", "支付", "交易", "账单"],
   },
   {
     id: "promotions",
-    label: "Promotions",
+    label: "活动",
     href: "/admin/promotions",
     icon: Megaphone,
-    keywords: ["promotions", "campaigns", "offers", "discounts"],
+    keywords: ["活动", "营销", "优惠", "折扣"],
   },
   {
     id: "comments",
-    label: "Comments",
+    label: "评论",
     href: "/admin/comments",
     icon: MessageSquare,
-    keywords: ["comments", "reviews", "ratings", "feedback"],
+    keywords: ["评论", "评价", "评分", "反馈"],
   },
   {
     id: "billing",
-    label: "Billing Packages",
+    label: "充值套餐",
     href: "/admin/billing",
     icon: CreditCard,
-    keywords: ["billing", "packages", "pricing", "points"],
+    keywords: ["充值", "套餐", "价格", "点数"],
   },
   {
     id: "notifications",
-    label: "Notifications",
+    label: "通知",
     href: "/admin/notifications",
     icon: Bell,
-    keywords: ["notifications", "messages", "alerts"],
+    keywords: ["通知", "消息", "提醒"],
   },
   {
     id: "support",
-    label: "Support",
+    label: "工单支持",
     href: "/admin/support",
     icon: LifeBuoy,
-    keywords: ["support", "tickets", "help"],
+    keywords: ["支持", "工单", "帮助"],
   },
   {
     id: "branding",
-    label: "Brand Settings",
+    label: "品牌设置",
     href: "/admin/branding",
     icon: BookOpen,
-    keywords: ["branding", "assets", "brand", "images"],
+    keywords: ["品牌", "素材", "标识", "图片"],
   },
   {
     id: "email-settings",
-    label: "Email Settings",
+    label: "邮件设置",
     href: "/admin/email-settings",
     icon: Mail,
-    keywords: ["email", "smtp", "mail", "settings"],
+    keywords: ["邮件", "smtp", "邮箱", "设置"],
   },
   {
     id: "email-jobs",
-    label: "Email Jobs",
+    label: "邮件任务",
     href: "/admin/email-jobs",
     icon: Mail,
-    keywords: ["email", "jobs", "delivery", "mail"],
+    keywords: ["邮件", "任务", "投递", "发送"],
   },
   {
     id: "tracking",
-    label: "Tracking",
+    label: "追踪设置",
     href: "/admin/tracking",
     icon: Radar,
-    keywords: ["tracking", "pixels", "analytics", "events"],
+    keywords: ["追踪", "像素", "分析", "事件"],
   },
   {
     id: "regions",
-    label: "Regions",
+    label: "地区设置",
     href: "/admin/regions",
     icon: Globe,
-    keywords: ["regions", "countries", "pricing", "locale"],
+    keywords: ["地区", "国家", "价格", "区域"],
   },
   {
     id: "settings",
-    label: "System Settings",
+    label: "系统设置",
     href: "/admin/settings",
     icon: Settings,
-    keywords: ["settings", "system", "configuration"],
+    keywords: ["设置", "系统", "配置"],
   },
 ];
 
@@ -264,14 +264,14 @@ export default function GlobalSearch({ isOpen, onClose }) {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Search admin pages"
+              placeholder="搜索后台页面"
               className="flex-1 bg-transparent text-base text-neutral-100 outline-none placeholder:text-ios-gray-500"
             />
             <button
               type="button"
               onClick={onClose}
               className="flex h-10 w-10 items-center justify-center rounded-3xl bg-ios-gray-800 text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-700 hover:text-neutral-100"
-              aria-label="Close search"
+              aria-label="关闭搜索"
             >
               <X size={18} />
             </button>
@@ -315,19 +315,19 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-medium text-ios-gray-400">No matching pages found.</p>
-              <p className="mt-1 text-xs text-ios-gray-500">Try a different keyword.</p>
+              <p className="text-sm font-medium text-ios-gray-400">没有匹配的后台页面</p>
+              <p className="mt-1 text-xs text-ios-gray-500">换个关键词再试试。</p>
             </div>
           ) : recentItems.length > 0 ? (
             <div className="space-y-1">
               <div className="flex items-center justify-between px-3 py-2">
-                <div className="text-xs font-semibold uppercase tracking-wider text-ios-green/60">Recent</div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-ios-green/60">最近访问</div>
                 <button
                   type="button"
                   onClick={handleClearRecent}
                   className="text-xs text-ios-gray-500 transition-colors duration-300 hover:text-ios-green"
                 >
-                  Clear
+                  清空
                 </button>
               </div>
               {recentItems.map((item) => (
@@ -355,8 +355,8 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-medium text-ios-gray-400">Start typing to search.</p>
-              <p className="mt-1 text-xs text-ios-gray-500">Use a page name, keyword, or route intent.</p>
+              <p className="text-sm font-medium text-ios-gray-400">输入内容即可搜索</p>
+              <p className="mt-1 text-xs text-ios-gray-500">可输入页面名、关键词或功能意图。</p>
             </div>
           )}
         </div>
@@ -367,16 +367,16 @@ export default function GlobalSearch({ isOpen, onClose }) {
               <div className="flex items-center gap-1.5">
                 <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">Up</kbd>
                 <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">Down</kbd>
-                <span>Navigate</span>
+                <span>切换结果</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">Enter</kbd>
-                <span>Open</span>
+                <span>打开页面</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">Esc</kbd>
-              <span>Close</span>
+              <span>关闭</span>
             </div>
           </div>
         </div>

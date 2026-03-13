@@ -44,6 +44,12 @@ export class LRUCache {
     this.cache.clear();
   }
 
+  forEach(callback) {
+    this.cache.forEach((value, key) => {
+      callback(value, key);
+    });
+  }
+
   get size() {
     return this.cache.size;
   }

@@ -1,5 +1,9 @@
 import { randomUUID } from "crypto";
 import { readPersistedStore, schedulePersist } from "./persist";
+import {
+  toClientReadingPercent,
+  toStoredReadingPercent,
+} from "../utils/reading-percent";
 
 export type SeriesType = "comic" | "novel";
 
@@ -1264,7 +1268,7 @@ export function updateProgress(userId: string, seriesId: string, payload: any) {
   const store = getProgress(userId);
   store[seriesId] = {
     lastEpisodeId: payload.lastEpisodeId,
-    percent: payload.percent,
+    percent: toClientReadingPercent(toStoredReadingPercent(payload.percent)),
     updatedAt: payload.updatedAt || Date.now(),
   };
   persistStore();
@@ -1285,7 +1289,7 @@ export function addBookmark(userId: string, seriesId: string, entry: any) {
     id: entry.id || `bm_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
     seriesId,
     episodeId: entry.episodeId,
-    percent: entry.percent || 0,
+    percent: toClientReadingPercent(toStoredReadingPercent(entry.percent)),
     pageIndex: entry.pageIndex || 0,
     label: entry.label || "Bookmark",
     createdAt: entry.createdAt || new Date().toISOString(),
@@ -1320,7 +1324,7 @@ export function addReadingHistory(userId: string, entry: any) {
     seriesId: entry.seriesId,
     episodeId: entry.episodeId,
     title: entry.title || "",
-    percent: entry.percent || 0,
+    percent: toClientReadingPercent(toStoredReadingPercent(entry.percent)),
     createdAt: entry.createdAt || new Date().toISOString(),
   };
   const filtered = list.filter(

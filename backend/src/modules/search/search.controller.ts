@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Query, Req, Res } from "@nestjs/common";
+import { ApiQuery } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../common/utils/auth";
 import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
@@ -10,6 +11,14 @@ export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
   @Get()
+  @ApiQuery({ name: "q", required: false, type: String })
+  @ApiQuery({ name: "type", required: false, type: String })
+  @ApiQuery({ name: "status", required: false, type: String })
+  @ApiQuery({ name: "genre", required: false, type: String })
+  @ApiQuery({ name: "sort", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: String })
+  @ApiQuery({ name: "pageSize", required: false, type: String })
+  @ApiQuery({ name: "adult", required: false, type: String })
   async search(
     @Query("q") q: string,
     @Query("type") type: string,

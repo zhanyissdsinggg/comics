@@ -10,7 +10,7 @@ const QueryProvider = dynamic(
 
 export function QueryWrapper({ children }) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>加载中...</div>}>
       <QueryProvider>{children}</QueryProvider>
     </Suspense>
   );

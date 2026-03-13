@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export default function EmailSettingsPage() {
   return (
-    <AdminLayout title="Email Settings">
+    <AdminLayout title="邮件设置">
       <AdminEmailSettingsPage />
     </AdminLayout>
   );

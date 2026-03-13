@@ -9,9 +9,6 @@ import AgeGateModal from "./AgeGateModal";
 import WalletTopUpPrompt from "../wallet/WalletTopUpPrompt";
 import { LOGIN_GATE_DESCRIPTION } from "../../lib/adultGateCopy";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
-
-/**
- * NOTE: cleaned corrupted comment. */
 export default function HeaderModals({
   activeModal,
   onModalClose,
@@ -91,7 +88,6 @@ export default function HeaderModals({
 
   return (
     <>
-      {/* 閻ц缍嶅Ο鈩冣偓浣诡攱 */}
       <LoginGateModal
         open={activeModal === "login"}
         onClose={() => {
@@ -110,7 +106,6 @@ export default function HeaderModals({
         onSubmit={handleLogin}
       />
 
-      {/* 楠炴挳绶炴宀冪槈濡剝鈧焦�?*/}
       <AgeGateModal
         open={activeModal === "age"}
         onClose={() => onModalClose("age")}
@@ -119,7 +114,6 @@ export default function HeaderModals({
         legalAge={legalAge}
       />
 
-      {/* 闁藉崬瀵橀崗鍛偓鍏煎絹缁�?*/}
       <WalletTopUpPrompt
         isOpen={activeModal === "topup"}
         onClose={() => onModalClose("topup")}

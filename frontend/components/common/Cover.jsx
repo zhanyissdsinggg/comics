@@ -1,6 +1,3 @@
-/**
- * NOTE: cleaned corrupted comment.
- */
 import { useState } from "react";
 import Image from "next/image";
 
@@ -13,12 +10,7 @@ const toneMap = {
   default: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)",
 };
 
-/**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
- *  鈫?https://placehold.co/400x600/ff0000/fff.png?text=Hello
- */
+// Ensure placehold.co URLs include a real image extension when needed.
 function normalizeCoverUrl(url) {
   if (!url) return url;
   try {
@@ -27,9 +19,7 @@ function normalizeCoverUrl(url) {
       parsed.pathname = parsed.pathname + ".png";
       return parsed.toString();
     }
-  } catch {
-    // NOTE: cleaned corrupted comment.
-  }
+  } catch {}
   return url;
 }
 
@@ -39,19 +29,15 @@ export default function Cover({ tone = "default", coverUrl, className = "", styl
   const background = toneMap[tone] || toneMap.default;
   const resolvedUrl = normalizeCoverUrl(coverUrl);
 
-  // NOTE: cleaned corrupted comment.
   if (resolvedUrl) {
     return (
       <div className={`relative ${className}`.trim()} style={style} aria-hidden="true">
-        {/* 鑰佺帇娉ㄩ噴锛氬姞杞芥椂鐨勬ā绯婅儗鏅?*/}
         {isLoading && (
           <div
             className="absolute inset-0 animate-pulse bg-neutral-800"
             style={{ background }}
           />
         )}
-
-        {/* 鑰佺帇娉ㄩ噴锛氬浘鐗囧姞杞藉け璐ユ椂鐨刦allback */}
         {hasError ? (
           <div
             className="absolute inset-0"
@@ -78,7 +64,6 @@ export default function Cover({ tone = "default", coverUrl, className = "", styl
     );
   }
 
-  // NOTE: cleaned corrupted comment.
   return (
     <div
       className={`cover ${className}`.trim()}

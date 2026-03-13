@@ -1,6 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
-import { PrismaService } from "../../common/prisma/prisma.service";
-import { parseStoredJson } from "../../common/utils/stored-json";
+import { ConfigService } from "../admin/services/config.service";
 
 type TrackingConfig = {
   values: Record<string, Record<string, string>>;
@@ -14,16 +13,12 @@ const DEFAULT_TRACKING_CONFIG: TrackingConfig = {
 
 @Controller("tracking")
 export class TrackingController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly configService: ConfigService) {}
 
   @Get()
   async getConfig() {
-    const config = await this.prisma.trackingConfig.findUnique({
-      where: { key: "default" },
-    });
-
     return {
-      config: parseStoredJson(config?.payload, DEFAULT_TRACKING_CONFIG),
+      config: await this.configService.getConfig("default", DEFAULT_TRACKING_CONFIG),
     };
   }
 }

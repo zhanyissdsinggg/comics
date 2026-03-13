@@ -5,14 +5,9 @@ import { memo, useEffect, useState } from "react";
 const SEARCH_HISTORY_KEY = "mn_search_history";
 const MAX_HISTORY_ITEMS = 10;
 
-/**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
- */
 const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywords = [] }) {
   const [history, setHistory] = useState([]);
 
-  // NOTE: cleaned corrupted comment.
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem(SEARCH_HISTORY_KEY);
@@ -27,7 +22,6 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   }, []);
 
-  // NOTE: cleaned corrupted comment.
   const addToHistory = (keyword) => {
     if (!keyword || !keyword.trim()) {
       return;
@@ -46,7 +40,6 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   };
 
-  // NOTE: cleaned corrupted comment.
   const removeFromHistory = (keyword) => {
     const newHistory = history.filter((item) => item !== keyword);
     setHistory(newHistory);
@@ -56,7 +49,6 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   };
 
-  // NOTE: cleaned corrupted comment.
   const clearHistory = () => {
     setHistory([]);
     if (typeof window !== "undefined") {
@@ -64,7 +56,6 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
     }
   };
 
-  // NOTE: cleaned corrupted comment.
   const handleSearch = (keyword) => {
     addToHistory(keyword);
     if (onSearch) {
@@ -74,7 +65,6 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
 
   return (
     <div className="space-y-4 md:space-y-6">
-      {/* 鑰佺帇娉ㄩ噴锛氭悳绱㈠巻鍙?*/}
       {history.length > 0 ? (
         <div>
           <div className="mb-3 flex items-center justify-between">
@@ -133,7 +123,6 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
         </div>
       ) : null}
 
-      {/* 鑰佺帇娉ㄩ噴锛氱儹闂ㄦ悳绱?*/}
       {hotKeywords.length > 0 ? (
         <div>
           <h3 className="mb-3 text-sm font-medium text-neutral-300 md:text-base">Trending Searches</h3>
@@ -174,7 +163,6 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({ onSearch, hotKeywo
         </div>
       ) : null}
 
-      {/* 鑰佺帇娉ㄩ噴锛氭悳绱㈠缓璁?*/}
       <div>
         <h3 className="mb-3 text-sm font-medium text-neutral-300 md:text-base">Quick Searches</h3>
         <div className="flex flex-wrap gap-2">

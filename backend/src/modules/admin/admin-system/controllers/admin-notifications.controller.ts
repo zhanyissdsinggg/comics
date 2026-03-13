@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
+import { ApiBody } from "@nestjs/swagger";
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import {
@@ -52,6 +53,7 @@ export class AdminNotificationsController {
   }
 
   @Post()
+  @ApiBody({ type: CreateNotificationDto, required: false })
   async create(@Body() body: NotificationRequestBody) {
     const payload = extractNotificationPayload(body);
     if (!payload.title) {

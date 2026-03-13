@@ -71,9 +71,9 @@ export default function EpisodeList({
   }, [needsCountdown]);
 
   return (
-    <section className="mt-8" data-wallet-total={walletTotal}>
+    <section className="mt-6 rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:mt-8 sm:p-6" data-wallet-total={walletTotal}>
       {/* Toolbar */}
-      <div className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-4">
+      <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-bold text-white">Episodes</h2>
           <span className="text-sm text-neutral-500">{episodes.length}</span>
@@ -82,7 +82,7 @@ export default function EpisodeList({
           <select
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs text-neutral-300 outline-none"
+            className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-neutral-200 outline-none transition-colors focus:border-emerald-400/40"
           >
             <option value="all">All</option>
             <option value="locked">Locked</option>
@@ -92,7 +92,7 @@ export default function EpisodeList({
           <select
             value={sortOrder}
             onChange={(event) => setSortOrder(event.target.value)}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs text-neutral-300 outline-none"
+            className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-neutral-200 outline-none transition-colors focus:border-emerald-400/40"
           >
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
@@ -100,7 +100,7 @@ export default function EpisodeList({
         </div>
       </div>
       {sortedEpisodes.length === 0 ? (
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-6 text-sm text-neutral-400">
+        <div className="rounded-[24px] border border-white/10 bg-black/20 p-6 text-sm text-neutral-300">
           <p className="text-base font-semibold text-white">No episodes found</p>
           <p className="mt-2 text-sm text-neutral-500">
             {filter === "all"

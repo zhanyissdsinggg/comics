@@ -41,7 +41,7 @@ function ErrorState({ message, onRetry }) {
   return (
     <section className="space-y-4 rounded-2xl border border-red-200 bg-red-50 p-6">
       <div>
-        <h2 className="text-lg font-semibold text-red-900">Branding failed to load</h2>
+        <h2 className="text-lg font-semibold text-red-900">品牌配置加载失败</h2>
         <p className="mt-2 text-sm text-red-700">{message}</p>
       </div>
       <button
@@ -49,7 +49,7 @@ function ErrorState({ message, onRetry }) {
         onClick={onRetry}
         className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100"
       >
-        Retry
+        重试
       </button>
     </section>
   );
@@ -81,7 +81,7 @@ export default function AdminBrandingPage() {
     queryFn: async () => {
       const response = await adminGet("/api/admin/branding");
       if (!response.ok) {
-        throw new Error(response.error || response.message || "Failed to load branding.");
+        throw new Error(response.error || response.message || "品牌配置加载失败。");
       }
       return toDraft(response.data?.branding);
     },
@@ -97,10 +97,10 @@ export default function AdminBrandingPage() {
   const uploadMutation = useMutation({
     mutationFn: async ({ field, file, keyName }) => {
       if (!file.type.startsWith("image/")) {
-        throw new Error("Please upload an image file.");
+        throw new Error("请上传图片文件。");
       }
       if (file.size > MAX_UPLOAD_BYTES) {
-        throw new Error("Image size must be <= 10MB.");
+        throw new Error("图片大小不能超过 10MB。");
       }
 
       const formData = new FormData();
@@ -108,7 +108,7 @@ export default function AdminBrandingPage() {
 
       const response = await adminUpload("/api/admin/upload/image", formData);
       if (!response.ok || !response.data?.url) {
-        throw new Error(response.error || response.message || "Upload failed.");
+        throw new Error(response.error || response.message || "上传失败。");
       }
 
       return { field, keyName, url: response.data.url };
@@ -117,14 +117,14 @@ export default function AdminBrandingPage() {
       setDraft((prev) => ({ ...prev, [data.field]: data.url }));
       const label =
         data.keyName === "logo"
-          ? "Logo"
+          ? "站点 Logo"
           : data.keyName === "favicon"
-            ? "Favicon"
-            : "Banner";
-      setStatus(`${label} uploaded successfully.`);
+            ? "站点图标"
+            : "首页横幅";
+      setStatus(`${label}上传成功。`);
     },
     onError: (error) => {
-      setStatus(`Upload failed: ${error.message}`);
+      setStatus(`上传失败：${error.message}`);
     },
   });
 
@@ -132,7 +132,7 @@ export default function AdminBrandingPage() {
     mutationFn: async (payload) => {
       const response = await adminPost("/api/admin/branding", payload);
       if (!response.ok) {
-        throw new Error(response.error || response.message || "Save failed.");
+        throw new Error(response.error || response.message || "保存失败。");
       }
 
       return toDraft(response.data?.branding);
@@ -141,10 +141,10 @@ export default function AdminBrandingPage() {
       setDraft(nextDraft);
       setBranding(nextDraft);
       setHasHydratedDraft(true);
-      setStatus("Branding saved.");
+      setStatus("品牌配置已保存。");
     },
     onError: (error) => {
-      setStatus(error.message || "Save failed.");
+      setStatus(error.message || "保存失败。");
     },
   });
 
@@ -179,7 +179,7 @@ export default function AdminBrandingPage() {
   if (isLoading || !isAuthenticated) {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
-        <p className="text-sm text-slate-500">Loading...</p>
+        <p className="text-sm text-slate-500">加载中...</p>
       </section>
     );
   }
@@ -187,7 +187,7 @@ export default function AdminBrandingPage() {
   if (!hasHydratedDraft && brandingQuery.isLoading) {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
-        <p className="text-sm text-slate-500">Loading branding settings...</p>
+        <p className="text-sm text-slate-500">正在加载品牌配置...</p>
       </section>
     );
   }
@@ -195,7 +195,7 @@ export default function AdminBrandingPage() {
   if (!hasHydratedDraft && brandingQuery.isError) {
     return (
       <ErrorState
-        message={brandingQuery.error instanceof Error ? brandingQuery.error.message : "Failed to load branding."}
+        message={brandingQuery.error instanceof Error ? brandingQuery.error.message : "品牌配置加载失败。"}
         onRetry={() => brandingQuery.refetch()}
       />
     );
@@ -204,18 +204,18 @@ export default function AdminBrandingPage() {
   return (
     <section className="space-y-6 rounded-2xl border border-slate-200 bg-slate-50 p-6">
       <header className="space-y-2">
-        <h2 className="text-lg font-semibold text-slate-900">Branding</h2>
+        <h2 className="text-lg font-semibold text-slate-900">品牌配置</h2>
         <p className="text-sm text-slate-500">
-          Configure logo, favicon and homepage banner assets.
+          配置站点 Logo、图标和首页横幅资源。
         </p>
       </header>
 
       <div className="space-y-6">
         <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-slate-800">Site Logo URL</h3>
+            <h3 className="text-sm font-semibold text-slate-800">站点 Logo 地址</h3>
             <p className="mt-1 text-xs text-slate-400">
-              Use a PNG/SVG logo with transparent background.
+              建议使用透明背景的 PNG 或 SVG。
             </p>
             <div className="mt-3 space-y-2">
               <input
@@ -233,7 +233,7 @@ export default function AdminBrandingPage() {
                   className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-all"
                 >
                   <ImageIcon className="h-3 w-3" />
-                  {uploadMutation.isPending ? "Uploading..." : "Upload Logo"}
+                  {uploadMutation.isPending ? "上传中..." : "上传 Logo"}
                 </button>
                 {draft.siteLogoUrl ? (
                   <a
@@ -242,7 +242,7 @@ export default function AdminBrandingPage() {
                     rel="noopener noreferrer"
                     className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
                   >
-                    Open URL
+                    打开链接
                   </a>
                 ) : null}
                 <input
@@ -258,11 +258,11 @@ export default function AdminBrandingPage() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-slate-800">Logo Preview</h3>
+            <h3 className="text-sm font-semibold text-slate-800">Logo 预览</h3>
             <PreviewBox
               value={draft.siteLogoUrl}
-              alt="Site logo"
-              emptyText="No logo selected"
+              alt="站点 Logo"
+              emptyText="尚未选择 Logo"
               className="h-10 w-auto"
             />
           </div>
@@ -270,9 +270,9 @@ export default function AdminBrandingPage() {
 
         <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-slate-800">Favicon URL (.ico/.png)</h3>
+            <h3 className="text-sm font-semibold text-slate-800">站点图标地址（.ico/.png）</h3>
             <p className="mt-1 text-xs text-slate-400">
-              Recommended size: 32x32 or 64x64.
+              推荐尺寸：32x32 或 64x64。
             </p>
             <div className="mt-3 space-y-2">
               <input
@@ -290,7 +290,7 @@ export default function AdminBrandingPage() {
                   className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-all"
                 >
                   <ImageIcon className="h-3 w-3" />
-                  {uploadMutation.isPending ? "Uploading..." : "Upload Favicon"}
+                  {uploadMutation.isPending ? "上传中..." : "上传图标"}
                 </button>
                 <input
                   ref={faviconFileRef}
@@ -305,11 +305,11 @@ export default function AdminBrandingPage() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-slate-800">Favicon Preview</h3>
+            <h3 className="text-sm font-semibold text-slate-800">图标预览</h3>
             <PreviewBox
               value={draft.faviconUrl}
-              alt="Favicon"
-              emptyText="No favicon selected"
+              alt="站点图标"
+              emptyText="尚未选择图标"
               className="h-8 w-8"
             />
           </div>
@@ -317,9 +317,9 @@ export default function AdminBrandingPage() {
 
         <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-slate-800">Home Banner URL</h3>
+            <h3 className="text-sm font-semibold text-slate-800">首页横幅地址</h3>
             <p className="mt-1 text-xs text-slate-400">
-              Recommended ratio: 16:9 or 3:1.
+              推荐比例：16:9 或 3:1。
             </p>
             <div className="mt-3 space-y-2">
               <input
@@ -337,7 +337,7 @@ export default function AdminBrandingPage() {
                   className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-all"
                 >
                   <ImageIcon className="h-3 w-3" />
-                  {uploadMutation.isPending ? "Uploading..." : "Upload Banner"}
+                  {uploadMutation.isPending ? "上传中..." : "上传横幅"}
                 </button>
                 <input
                   ref={bannerFileRef}
@@ -352,11 +352,11 @@ export default function AdminBrandingPage() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-slate-800">Banner Preview</h3>
+            <h3 className="text-sm font-semibold text-slate-800">横幅预览</h3>
             <PreviewBox
               value={draft.homeBannerUrl}
-              alt="Banner"
-              emptyText="No banner selected"
+              alt="首页横幅"
+              emptyText="尚未选择横幅"
               className="h-full max-h-20 w-full rounded-lg object-cover"
             />
           </div>
@@ -370,7 +370,7 @@ export default function AdminBrandingPage() {
           disabled={formBusy}
           className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {saveMutation.isPending ? "Saving..." : "Save Branding"}
+          {saveMutation.isPending ? "保存中..." : "保存品牌配置"}
         </button>
         {status ? <p className="text-xs text-slate-600">{status}</p> : null}
       </footer>

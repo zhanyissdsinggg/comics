@@ -25,6 +25,7 @@ import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAutoSaveProgress } from "../../hooks/useAutoSaveProgress";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import { parallelRequests2 } from "../../lib/parallelRequests";
 
 const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
   ssr: false,
@@ -94,11 +95,18 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const progressTimerRef = useRef(null);
   const resumeRef = useRef(false);
   const gateReportedRef = useRef(false);
+  const requestRef = useRef(0);
 
   const { bySeriesId, loadEntitlement, unlockEpisode, unlockPack, claimTTF } =
     useEntitlementStore();
-  const { loadWallet, topup } = useWalletStore();
-  const { paidPts, bonusPts, subscription, subscriptionUsage } = useWalletStore();
+  const {
+    loadWallet,
+    topup,
+    paidPts,
+    bonusPts,
+    subscription,
+    subscriptionUsage,
+  } = useWalletStore();
   const {
     adultConfirmed,
     ageRuleKey,
@@ -131,9 +139,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const { bookmarksBySeries, addBookmark, removeBookmark } = useBookmarkStore();
   const reportedRef = useRef(false);
 
-  // NOTE: cleaned corrupted comment.
   const { restoreProgress } = useAutoSaveProgress(seriesId, episodeId, {
-    enabled: isSignedIn, // NOTE: cleaned corrupted comment.
+    enabled: isSignedIn, // 
   });
 
   const entitlement = bySeriesId[seriesId] || { unlockedEpisodeIds: [] };
@@ -221,75 +228,139 @@ export default function ReaderPage({ seriesId, episodeId }) {
     ]
   );
 
-  const fetchEpisode = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const adultFlag = isAdultMode ? "1" : "0";
-    const [episodeResponse, seriesResponse] = await Promise.all([
-      apiGet(`/api/episode?seriesId=${seriesId}&episodeId=${episodeId}`),
-      apiGet(`/api/series/${seriesId}?adult=${adultFlag}`),
-    ]);
+  const fetchEpisode = useCallback(
+    async ({ bustSeries = false, showLoading = true } = {}) => {
+      const requestId = requestRef.current + 1;
+      requestRef.current = requestId;
 
-    if (!episodeResponse.ok) {
-      if (episodeResponse.status === 403 || episodeResponse.error === "ADULT_GATED") {
-        setError("ADULT_GATED");
-        if (episodeResponse.reason === "NEED_LOGIN") {
-          forceDisableAdultMode();
-        }
-        if (episodeResponse.reason) {
-          setGateStatus(episodeResponse.reason);
-        }
-        if (!gateReportedRef.current) {
-          trackEvent("adult_gate_blocked", {
-            source: "reader",
-            seriesId,
-            reason: episodeResponse.reason,
-            requestId: episodeResponse.requestId,
-          });
-          gateReportedRef.current = true;
-        }
-      } else if (episodeResponse.status === 401) {
-        window.dispatchEvent(new CustomEvent("auth:open"));
-        setError("EPISODE_ERROR");
-      } else {
-        setError("EPISODE_ERROR");
+      if (showLoading) {
+        setLoading(true);
       }
-      setLoading(false);
-      return;
-    }
-    if (!seriesResponse.ok) {
-      if (seriesResponse.status === 403 || seriesResponse.error === "ADULT_GATED") {
-        setError("ADULT_GATED");
-        if (seriesResponse.reason === "NEED_LOGIN") {
-          forceDisableAdultMode();
-        }
-        if (seriesResponse.reason) {
-          setGateStatus(seriesResponse.reason);
-        }
-        if (!gateReportedRef.current) {
-          trackEvent("adult_gate_blocked", {
-            source: "reader",
-            seriesId,
-            reason: seriesResponse.reason,
-            requestId: seriesResponse.requestId,
-          });
-          gateReportedRef.current = true;
-        }
-      } else if (seriesResponse.status === 401) {
-        window.dispatchEvent(new CustomEvent("auth:open"));
-        setError("SERIES_ERROR");
-      } else {
-        setError("SERIES_ERROR");
-      }
-      setLoading(false);
-      return;
-    }
-    setEpisodeData(episodeResponse.data?.episode);
-    setSeriesData(seriesResponse.data);
-    setLoading(false);
-  }, [forceDisableAdultMode, isAdultMode, episodeId, seriesId]);
+      setError(null);
 
-  // NOTE: cleaned corrupted comment.
+      const adultFlag = isAdultMode ? "1" : "0";
+      const episodePath = `/api/episode?seriesId=${seriesId}&episodeId=${episodeId}`;
+      const seriesPath = `/api/series/${seriesId}?adult=${adultFlag}`;
+      const isCurrentRequest = () => requestRef.current === requestId;
+      const applyFailure = (response, fallbackError) => {
+        if (!isCurrentRequest()) {
+          return false;
+        }
+
+        if (response.status === 403 || response.error === "ADULT_GATED") {
+          setError("ADULT_GATED");
+          if (response.reason === "NEED_LOGIN") {
+            forceDisableAdultMode();
+          }
+          if (response.reason) {
+            setGateStatus(response.reason);
+          }
+          if (!gateReportedRef.current) {
+            trackEvent("adult_gate_blocked", {
+              source: "reader",
+              seriesId,
+              reason: response.reason,
+              requestId: response.requestId,
+            });
+            gateReportedRef.current = true;
+          }
+        } else if (response.status === 401) {
+          window.dispatchEvent(new CustomEvent("auth:open"));
+          setError(fallbackError);
+        } else {
+          setError(fallbackError);
+        }
+
+        if (showLoading) {
+          setLoading(false);
+        }
+        return true;
+      };
+
+      const [episodeResponse, seriesResponse] = await parallelRequests2(
+        () => apiGet(episodePath, bustSeries ? { dedupeMs: 0 } : undefined),
+        () =>
+          apiGet(
+            seriesPath,
+            bustSeries
+              ? {
+                  bust: true,
+                  dedupeMs: 0,
+                }
+              : undefined
+          )
+      );
+
+      if (!isCurrentRequest()) {
+        return;
+      }
+
+      if (!episodeResponse.ok) {
+        applyFailure(episodeResponse, "EPISODE_ERROR");
+        return;
+      }
+
+      if (!seriesResponse.ok) {
+        applyFailure(seriesResponse, "SERIES_ERROR");
+        return;
+      }
+
+      if (seriesResponse.data?.error === "ADULT_GATED") {
+        applyFailure(
+          {
+            ...seriesResponse,
+            ok: false,
+            status: 403,
+            error: "ADULT_GATED",
+            reason: seriesResponse.data?.reason,
+            requestId: seriesResponse.data?.requestId,
+          },
+          "SERIES_ERROR"
+        );
+        return;
+      }
+
+      setEpisodeData(episodeResponse.data?.episode);
+      setSeriesData(seriesResponse.data);
+      setGateStatus("OK");
+      if (showLoading) {
+        setLoading(false);
+      }
+
+      if (!bustSeries && seriesResponse.stale) {
+        apiGet(seriesPath, {
+          bust: true,
+          dedupeMs: 0,
+        }).then((freshResponse) => {
+          if (!isCurrentRequest()) {
+            return;
+          }
+          if (!freshResponse.ok) {
+            applyFailure(freshResponse, "SERIES_ERROR");
+            return;
+          }
+          if (freshResponse.data?.error === "ADULT_GATED") {
+            applyFailure(
+              {
+                ...freshResponse,
+                ok: false,
+                status: 403,
+                error: "ADULT_GATED",
+                reason: freshResponse.data?.reason,
+                requestId: freshResponse.data?.requestId,
+              },
+              "SERIES_ERROR"
+            );
+            return;
+          }
+          setSeriesData(freshResponse.data);
+          setGateStatus("OK");
+        });
+      }
+    },
+    [forceDisableAdultMode, isAdultMode, episodeId, seriesId]
+  );
+
   useEffect(() => {
     if (!loading && episodeData && isSignedIn) {
       restoreProgress();
@@ -423,7 +494,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       return;
     }
     setActiveModal(null);
-    fetchEpisode();
+    fetchEpisode({ bustSeries: true });
   };
 
   const handleLogin = async ({ email, password, mode }) => {
@@ -445,7 +516,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     }
     setActiveModal(null);
     if (status === "OK") {
-      fetchEpisode();
+      fetchEpisode({ bustSeries: true });
     }
     return response;
   };
@@ -454,7 +525,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     confirmAdultAge(ageRuleKey);
     setActiveModal(null);
     setGateStatus("OK");
-    fetchEpisode();
+    fetchEpisode({ bustSeries: true });
   };
 
   useEffect(() => {
@@ -1012,7 +1083,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             <div className="flex gap-2 justify-center">
               <button
                 type="button"
-                onClick={() => fetchEpisode()}
+                onClick={() => fetchEpisode({ bustSeries: true })}
                 className="rounded-full border border-red-400 bg-red-500/20 px-4 py-2 text-xs text-red-200 hover:bg-red-500/30"
               >
                 Retry
@@ -1041,7 +1112,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         onAddBookmark={handleAddBookmark}
         onToggleNight={toggleNightMode}
         onToggleLayout={handleToggleLayout}
-        onOpenSettings={() => setSettingsPanelOpen(true)} // NOTE: cleaned corrupted comment.
+        onOpenSettings={() => setSettingsPanelOpen(true)} // 
         onToggleAutoScroll={handleToggleAutoScroll}
         autoScroll={autoScroll}
         nightMode={nightMode}
@@ -1436,8 +1507,6 @@ export default function ReaderPage({ seriesId, episodeId }) {
           {uiToast}
         </div>
       ) : null}
-
-      {/* 闂佸ジ顣﹂懗鍓佹暜閸パ€鏋栭柕濞炬櫅濞呯偤鏌ㄥ☉娆忓摵婵℃彃瀚幏鐘垫嫚閸欏褰滈柣鐘辩婢т粙鎮块崱娑欘棃闁靛繆鍓濈欢?*/}
       {settingsPanelOpen ? (
         <ReaderSettingsPanel
           isOpen

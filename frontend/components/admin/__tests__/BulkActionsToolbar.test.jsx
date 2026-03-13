@@ -33,11 +33,11 @@ describe("BulkActionsToolbar", () => {
     const callbacks = createCallbacks();
     render(<BulkActionsToolbar selectedCount={5} {...callbacks} />);
 
-    expect(screen.getByText("5 selected")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Publish" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Unpublish" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument();
+    expect(screen.getByText("已选择 5 项")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "发布" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "取消发布" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "删除" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "清空" })).toBeInTheDocument();
   });
 
   it("calls publish when the publish button is clicked", async () => {
@@ -45,7 +45,7 @@ describe("BulkActionsToolbar", () => {
     const user = userEvent.setup();
     render(<BulkActionsToolbar selectedCount={3} {...callbacks} />);
 
-    await user.click(screen.getByRole("button", { name: "Publish" }));
+    await user.click(screen.getByRole("button", { name: "发布" }));
 
     expect(callbacks.onPublish).toHaveBeenCalledTimes(1);
   });
@@ -55,7 +55,7 @@ describe("BulkActionsToolbar", () => {
     const user = userEvent.setup();
     render(<BulkActionsToolbar selectedCount={3} {...callbacks} />);
 
-    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await user.click(screen.getByRole("button", { name: "清空" }));
 
     expect(callbacks.onCancel).toHaveBeenCalledTimes(1);
   });
@@ -68,20 +68,20 @@ describe("BulkActionsToolbar", () => {
     const user = userEvent.setup();
     render(<BulkActionsToolbar selectedCount={2} {...callbacks} />);
 
-    const publishButton = screen.getByRole("button", { name: "Publish" });
-    const clearButton = screen.getByRole("button", { name: "Clear" });
+    const publishButton = screen.getByRole("button", { name: "发布" });
+    const clearButton = screen.getByRole("button", { name: "清空" });
 
     await user.click(publishButton);
 
     expect(callbacks.onPublish).toHaveBeenCalledTimes(1);
     expect(publishButton).toBeDisabled();
     expect(clearButton).toBeDisabled();
-    expect(screen.getByText(/Publishing/i)).toBeInTheDocument();
+    expect(screen.getByText("发布中...")).toBeInTheDocument();
 
     deferred.resolve();
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Undo" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "撤销" })).toBeInTheDocument();
     });
   });
 
@@ -90,13 +90,13 @@ describe("BulkActionsToolbar", () => {
     const user = userEvent.setup();
     render(<BulkActionsToolbar selectedCount={1} {...callbacks} />);
 
-    await user.click(screen.getByRole("button", { name: "Publish" }));
+    await user.click(screen.getByRole("button", { name: "发布" }));
 
-    const undoButton = await screen.findByRole("button", { name: "Undo" });
+    const undoButton = await screen.findByRole("button", { name: "撤销" });
     await user.click(undoButton);
 
     await waitFor(() => {
-      expect(screen.queryByRole("button", { name: "Undo" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "撤销" })).not.toBeInTheDocument();
     });
   });
 });

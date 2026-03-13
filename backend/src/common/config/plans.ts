@@ -67,6 +67,10 @@ export const PLAN_CATALOG: Record<string, SubscriptionPlanConfig> = {
   },
 };
 
+const PLAN_CATALOG_CACHE_MS = 60_000;
+let planCatalogCache: { expiresAt: number; catalog: Record<string, SubscriptionPlanConfig> } | null =
+  null;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -144,6 +148,10 @@ async function ensurePlans(prisma: SubscriptionPlanPrismaLike): Promise<void> {
 export async function getPlanCatalog(
   prisma: SubscriptionPlanPrismaLike,
 ): Promise<Record<string, SubscriptionPlanConfig>> {
+  if (planCatalogCache && planCatalogCache.expiresAt > Date.now()) {
+    return { ...planCatalogCache.catalog };
+  }
+
   const store = getSubscriptionPlanStore(prisma);
   if (!store) {
     return { ...PLAN_CATALOG };
@@ -160,13 +168,22 @@ export async function getPlanCatalog(
       return acc;
     }, {});
     if (Object.keys(catalog).length > 0) {
+      planCatalogCache = {
+        catalog,
+        expiresAt: Date.now() + PLAN_CATALOG_CACHE_MS,
+      };
       return catalog;
     }
   } catch {
     // Fall back below.
   }
 
-  return { ...PLAN_CATALOG };
+  planCatalogCache = {
+    catalog: { ...PLAN_CATALOG },
+    expiresAt: Date.now() + PLAN_CATALOG_CACHE_MS,
+  };
+
+  return { ...planCatalogCache.catalog };
 }
 
 export async function getPlanById(

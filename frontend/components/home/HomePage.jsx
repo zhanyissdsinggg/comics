@@ -262,7 +262,7 @@ function HomeContent() {
         </section>
 
         <section className="mb-10 grid gap-4 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
-          <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-5 backdrop-blur-xl sm:px-6 sm:py-6">
+          <div className="min-w-0 rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-5 backdrop-blur-xl sm:px-6 sm:py-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
               Browse by mood
             </p>
@@ -275,7 +275,7 @@ function HomeContent() {
             </p>
           </div>
 
-          <div className="rounded-[28px] border border-white/10 bg-black/20 px-4 py-4 backdrop-blur-xl sm:px-5">
+          <div className="min-w-0 rounded-[28px] border border-white/10 bg-black/20 px-4 py-4 backdrop-blur-xl sm:px-5">
             <div className="flex items-center justify-between gap-3 px-2">
               <p className="text-sm font-semibold text-white">Shortcut filters</p>
               <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Live catalog</p>

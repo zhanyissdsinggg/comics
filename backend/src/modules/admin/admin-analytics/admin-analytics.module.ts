@@ -8,6 +8,7 @@ import { AdminStatsController } from "./controllers/admin-stats.controller";
 import { AdminMetricsController } from "./controllers/admin-metrics.controller";
 import { AdminRankingsController } from "./controllers/admin-rankings.controller";
 import { AdminTrackingController } from "./controllers/admin-tracking.controller";
+import { ConfigService } from "../services/config.service";
 
 @Module({
   imports: [AdminAuthModule],
@@ -18,7 +19,7 @@ import { AdminTrackingController } from "./controllers/admin-tracking.controller
     AdminRankingsController,
     AdminTrackingController,
   ],
-  providers: [AdminAnalyticsService, StatsService, PrismaService],
+  providers: [AdminAnalyticsService, StatsService, PrismaService, ConfigService],
   exports: [AdminAnalyticsService],
 })
 export class AdminAnalyticsModule {}

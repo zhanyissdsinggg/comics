@@ -30,9 +30,9 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'number', label: 'Episode number' },
-  { value: 'title', label: 'Title' },
-  { value: 'pricePts', label: 'Price' },
+  { value: 'number', label: '章节号' },
+  { value: 'title', label: '标题' },
+  { value: 'pricePts', label: '价格' },
 ];
 
 function normalizeParam(value) {
@@ -110,7 +110,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Failed to add the episode.'));
+        throw new Error(await readAdminResponseMessage(response, '添加章节失败。'));
       }
 
       return response.json();
@@ -124,11 +124,11 @@ export default function AdminEpisodesPage() {
         previewFreePages: '0',
         ttfEligible: false,
       });
-      setFeedback({ type: 'success', message: 'Episode added successfully.' });
+      setFeedback({ type: 'success', message: '章节添加成功。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Add failed: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `添加失败：${mutationError.message}` });
     },
   });
 
@@ -158,11 +158,11 @@ export default function AdminEpisodesPage() {
         clearSelection();
         setIsBulkActionModalOpen(false);
         setBulkActionData({ pricePts: '', previewFreePages: '' });
-        setFeedback({ type: 'success', message: 'Selected episodes were updated.' });
+        setFeedback({ type: 'success', message: '已更新所选章节。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Bulk update failed: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `批量更新失败：${mutationError.message}` });
       },
     }
   );
@@ -176,11 +176,11 @@ export default function AdminEpisodesPage() {
       onSuccess: () => {
         clearSelection();
         setIsDeleteConfirmOpen(false);
-        setFeedback({ type: 'success', message: 'Selected episodes were deleted.' });
+        setFeedback({ type: 'success', message: '已删除所选章节。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
       },
     }
   );
@@ -189,7 +189,7 @@ export default function AdminEpisodesPage() {
     mutationFn: async ({ episodeId, field, value }) => {
       const episode = episodes.find((item) => item.id === episodeId);
       if (!episode) {
-        throw new Error('Episode not found.');
+        throw new Error('未找到章节。');
       }
 
       const response = await adminFetch(`/api/admin/series/${seriesId}/episodes/${episodeId}`, {
@@ -202,7 +202,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Failed to update the episode.'));
+        throw new Error(await readAdminResponseMessage(response, '更新章节失败。'));
       }
 
       return response.json();
@@ -221,7 +221,7 @@ export default function AdminEpisodesPage() {
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Update failed: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `更新失败：${mutationError.message}` });
     },
   });
 
@@ -289,7 +289,7 @@ export default function AdminEpisodesPage() {
 
   const handleAddEpisode = () => {
     if (!hasInput(newEpisode.number) || !hasInput(newEpisode.title)) {
-      setFeedback({ type: 'error', message: 'Episode number and title are required.' });
+      setFeedback({ type: 'error', message: '章节号和标题不能为空。' });
       return;
     }
 
@@ -304,7 +304,7 @@ export default function AdminEpisodesPage() {
 
   const handleBulkUpdate = () => {
     if (!hasInput(bulkActionData.pricePts) && !hasInput(bulkActionData.previewFreePages)) {
-      setFeedback({ type: 'error', message: 'Enter at least one field to update.' });
+      setFeedback({ type: 'error', message: '请至少填写一个需要更新的字段。' });
       return;
     }
 
@@ -320,8 +320,8 @@ export default function AdminEpisodesPage() {
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">Episodes</h1>
-          <p className="mt-2 text-neutral-400">Manage episode metadata, pricing, previews, and bulk uploads for this series.</p>
+          <h1 className="text-3xl font-bold text-neutral-100">章节管理</h1>
+          <p className="mt-2 text-neutral-400">在这里管理当前作品的章节信息、定价、预览页和批量上传。</p>
         </div>
 
         <AdminFeedbackBanner
@@ -333,7 +333,7 @@ export default function AdminEpisodesPage() {
         <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="Search episode number or title"
+          searchPlaceholder="搜索章节号或标题"
           onOpenFilters={() => setIsSortModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -344,14 +344,14 @@ export default function AdminEpisodesPage() {
                 onClick={() => setIsUploadModalOpen(true)}
                 className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
               >
-                Bulk upload
+                批量上传
               </button>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(true)}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
               >
-                Add episode
+                新增章节
               </button>
             </>
           }
@@ -363,7 +363,7 @@ export default function AdminEpisodesPage() {
             onClick={() => setIsBulkActionModalOpen(true)}
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700"
           >
-            Bulk edit
+            批量编辑
           </button>
           <button
             type="button"
@@ -371,17 +371,17 @@ export default function AdminEpisodesPage() {
             disabled={bulkDeleteMutation.isPending}
             className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || 'Failed to load episodes.'}
+          errorMessage={error?.message || '章节加载失败。'}
           onRetry={refetch}
           isLoading={isLoading}
           hasItems={episodes.length > 0}
-          emptyMessage="No episodes yet."
+          emptyMessage="暂无章节。"
           pagination={pagination}
           page={page}
           pageSize={pageSize}
@@ -404,15 +404,15 @@ export default function AdminEpisodesPage() {
                       clearSelection();
                     }}
                     className="rounded"
-                    aria-label="Select all episodes"
+                      aria-label="选择全部章节"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-neutral-400">Episode</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Title</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Price</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Free preview pages</th>
+                <th className="px-4 py-3 text-left text-neutral-400">章节号</th>
+                <th className="px-4 py-3 text-left text-neutral-400">标题</th>
+                <th className="px-4 py-3 text-left text-neutral-400">价格</th>
+                <th className="px-4 py-3 text-left text-neutral-400">免费预览页数</th>
                 <th className="px-4 py-3 text-left text-neutral-400">TTF</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Action</th>
+                <th className="px-4 py-3 text-left text-neutral-400">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -424,7 +424,7 @@ export default function AdminEpisodesPage() {
                       checked={selectedIdsSet.has(episode.id)}
                       onChange={() => toggleSelect(episode.id)}
                       className="rounded"
-                      aria-label={`Select episode ${episode.number}`}
+                      aria-label={`选择章节 ${episode.number}`}
                     />
                   </td>
                   <td className="px-4 py-3 font-medium text-neutral-300">{episode.number}</td>
@@ -441,7 +441,7 @@ export default function AdminEpisodesPage() {
                         }
                       }}
                       className="w-24 rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-neutral-100"
-                      aria-label={`Price for episode ${episode.number}`}
+                       aria-label={`章节 ${episode.number} 的价格`}
                     />
                   </td>
                   <td className="px-4 py-3 text-neutral-300">
@@ -456,7 +456,7 @@ export default function AdminEpisodesPage() {
                         }
                       }}
                       className="w-24 rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-neutral-100"
-                      aria-label={`Free preview pages for episode ${episode.number}`}
+                       aria-label={`章节 ${episode.number} 的免费预览页数`}
                     />
                   </td>
                   <td className="px-4 py-3">
@@ -471,7 +471,7 @@ export default function AdminEpisodesPage() {
                         })
                       }
                       className="rounded"
-                      aria-label={`Toggle TTF eligibility for episode ${episode.number}`}
+                       aria-label={`切换章节 ${episode.number} 的 TTF 可用状态`}
                     />
                   </td>
                   <td className="px-4 py-3">
@@ -480,7 +480,7 @@ export default function AdminEpisodesPage() {
                       onClick={() => handleSingleDelete(episode.id)}
                       className="text-sm font-medium text-red-400 transition hover:text-red-300"
                     >
-                      Delete
+                      删除
                     </button>
                   </td>
                 </tr>
@@ -495,16 +495,16 @@ export default function AdminEpisodesPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="Sort episodes"
-          label="Sort field"
-          actionLabel="Apply"
+          title="章节排序"
+          label="排序字段"
+          actionLabel="应用"
         />
       </div>
 
-      <Modal isOpen={isAddModalOpen} title="Add episode" onClose={() => setIsAddModalOpen(false)}>
+      <Modal isOpen={isAddModalOpen} title="新增章节" onClose={() => setIsAddModalOpen(false)}>
         <div className="space-y-4">
           <div>
-            <label className="text-sm text-neutral-400">Episode number</label>
+            <label className="text-sm text-neutral-400">章节号</label>
             <input
               type="number"
               value={newEpisode.number}
@@ -514,7 +514,7 @@ export default function AdminEpisodesPage() {
           </div>
 
           <div>
-            <label className="text-sm text-neutral-400">Title</label>
+            <label className="text-sm text-neutral-400">标题</label>
             <input
               type="text"
               value={newEpisode.title}
@@ -524,7 +524,7 @@ export default function AdminEpisodesPage() {
           </div>
 
           <div>
-            <label className="text-sm text-neutral-400">Price</label>
+            <label className="text-sm text-neutral-400">价格</label>
             <input
               type="number"
               value={newEpisode.pricePts}
@@ -534,7 +534,7 @@ export default function AdminEpisodesPage() {
           </div>
 
           <div>
-            <label className="text-sm text-neutral-400">Free preview pages</label>
+            <label className="text-sm text-neutral-400">免费预览页数</label>
             <input
               type="number"
               value={newEpisode.previewFreePages}
@@ -552,7 +552,7 @@ export default function AdminEpisodesPage() {
               className="rounded"
             />
             <label htmlFor="ttf-eligible" className="text-sm text-neutral-400">
-              TTF eligible
+              允许使用 TTF
             </label>
           </div>
 
@@ -562,30 +562,30 @@ export default function AdminEpisodesPage() {
             disabled={addEpisodeMutation.isPending}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:opacity-50"
           >
-            {addEpisodeMutation.isPending ? 'Adding...' : 'Add episode'}
+            {addEpisodeMutation.isPending ? '添加中...' : '新增章节'}
           </button>
         </div>
       </Modal>
 
       <Modal
         isOpen={isBulkActionModalOpen}
-        title="Bulk edit episodes"
+        title="批量编辑章节"
         onClose={() => setIsBulkActionModalOpen(false)}
       >
         <div className="space-y-4">
           <div>
-            <label className="text-sm text-neutral-400">Price</label>
+            <label className="text-sm text-neutral-400">价格</label>
             <input
               type="number"
               value={bulkActionData.pricePts}
               onChange={(event) => setBulkActionData((current) => ({ ...current, pricePts: event.target.value }))}
               className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
             />
-            <p className="mt-1 text-xs text-neutral-500">Leave blank to keep the current value.</p>
+            <p className="mt-1 text-xs text-neutral-500">留空则保持当前值不变。</p>
           </div>
 
           <div>
-            <label className="text-sm text-neutral-400">Free preview pages</label>
+            <label className="text-sm text-neutral-400">免费预览页数</label>
             <input
               type="number"
               value={bulkActionData.previewFreePages}
@@ -594,7 +594,7 @@ export default function AdminEpisodesPage() {
               }
               className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
             />
-            <p className="mt-1 text-xs text-neutral-500">Leave blank to keep the current value.</p>
+            <p className="mt-1 text-xs text-neutral-500">留空则保持当前值不变。</p>
           </div>
 
           <button
@@ -603,17 +603,17 @@ export default function AdminEpisodesPage() {
             disabled={bulkUpdateMutation.isPending}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:opacity-50"
           >
-            {bulkUpdateMutation.isPending ? 'Updating...' : 'Apply updates'}
+            {bulkUpdateMutation.isPending ? '更新中...' : '应用更新'}
           </button>
         </div>
       </Modal>
 
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        title="Delete episodes"
-        message={`Delete ${selectedIds.length} selected episode(s)? This cannot be undone.`}
-        confirmText={bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
-        cancelText="Cancel"
+        title="删除章节"
+        message={`确定删除 ${selectedIds.length} 个选中章节吗？此操作无法撤销。`}
+        confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除'}
+        cancelText="取消"
         isDangerous={true}
         isLoading={bulkDeleteMutation.isPending}
         onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}

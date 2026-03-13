@@ -12,6 +12,19 @@ export class CommentMapper {
   decorate(comment: any, userId: string): any {
     const likes = Array.isArray(comment.likes) ? comment.likes : [];
     const replies = Array.isArray(comment.replies) ? comment.replies : [];
+    const author = comment.author || comment.user?.email || comment.userEmail || 'Guest';
+    const likeCount =
+      typeof comment.likeCount === 'number'
+        ? comment.likeCount
+        : likes.length;
+    const likedByUser =
+      typeof comment.likedByUser === 'boolean'
+        ? comment.likedByUser
+        : typeof comment.liked === 'boolean'
+          ? comment.liked
+          : likes.some((like: any) =>
+              typeof like === 'string' ? like === userId : like.userId === userId,
+            );
 
     return {
       id: comment.id,
@@ -19,16 +32,20 @@ export class CommentMapper {
       userId: comment.userId,
       text: String(comment.text || comment.content || ""),
       createdAt: comment.createdAt,
-      likes: likes.length,
-      liked: likes.some((like: any) => like.userId === userId),
+      author,
+      userEmail: author,
+      likeCount,
+      likes: likeCount,
+      likedByUser,
+      liked: likedByUser,
       replies: replies.map((reply: any) => ({
         id: reply.id,
         userId: reply.userId,
         text: String(reply.text || reply.content || ""),
         createdAt: reply.createdAt,
-        userEmail: reply.user?.email || '',
+        author: reply.author || reply.user?.email || reply.userEmail || 'Guest',
+        userEmail: reply.author || reply.user?.email || reply.userEmail || 'Guest',
       })),
-      userEmail: comment.user?.email || '',
     };
   }
 

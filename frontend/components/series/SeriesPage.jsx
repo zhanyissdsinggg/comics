@@ -46,6 +46,34 @@ function getFirstEpisodeId(episodes) {
   return sorted[0]?.id || null;
 }
 
+function syncSeriesRatingCache(seriesId, nextRating, nextCount) {
+  if (typeof window === "undefined" || !seriesId) {
+    return;
+  }
+
+  try {
+    Object.keys(window.localStorage)
+      .filter((key) => key.startsWith(`mn_api_cache:/api/series/${seriesId}`))
+      .forEach((key) => {
+        const raw = window.localStorage.getItem(key);
+        if (!raw) {
+          return;
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!parsed?.response?.data?.series) {
+          return;
+        }
+
+        parsed.response.data.series.rating = nextRating;
+        parsed.response.data.series.ratingCount = nextCount;
+        window.localStorage.setItem(key, JSON.stringify(parsed));
+      });
+  } catch {
+    // ignore cache sync issues
+  }
+}
+
 export default function SeriesPage({ seriesId }) {
   const router = useRouter();
   const [data, setData] = useState(null);
@@ -56,6 +84,7 @@ export default function SeriesPage({ seriesId }) {
   const [showSecondarySections, setShowSecondarySections] = useState(false);
   const [authError, setAuthError] = useState("");
   const gateReportedRef = useRef(false);
+  const requestRef = useRef(0);
   const secondarySectionsRef = useRef(null);
 
   const walletStore = useWalletStore();
@@ -107,64 +136,111 @@ export default function SeriesPage({ seriesId }) {
     [progressBySeriesId, getProgress, seriesId]
   );
 
-  const fetchSeries = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const adultFlag = isAdultMode ? "1" : "0";
-    const response = await apiGet(`/api/series/${seriesId}?adult=${adultFlag}`);
+  const fetchSeries = useCallback(
+    async ({ bust = false, showLoading = true } = {}) => {
+      const requestId = requestRef.current + 1;
+      requestRef.current = requestId;
 
-    if (!response.ok) {
-      if (response.status === 403 || response.error === "ADULT_GATED") {
-        setError("ADULT_GATED");
-        if (response.reason === "NEED_LOGIN") {
-          forceDisableAdultMode();
-        }
-        if (response.reason) {
-          setGateStatus(response.reason);
-        }
-        if (!gateReportedRef.current) {
-          trackEvent("adult_gate_blocked", {
-            source: "series",
-            seriesId,
-            reason: response.reason,
-            requestId: response.requestId,
-          });
-          gateReportedRef.current = true;
-        }
-      } else if (response.status === 401) {
-        window.dispatchEvent(new CustomEvent("auth:open"));
-        setError("FETCH_ERROR");
-      } else {
-        setError("FETCH_ERROR");
+      if (showLoading) {
+        setLoading(true);
       }
-      setLoading(false);
-      return;
-    }
+      setError(null);
 
-    if (response.data?.error === "ADULT_GATED") {
-      setError("ADULT_GATED");
-      if (response.data?.reason === "NEED_LOGIN") {
-        forceDisableAdultMode();
+      const adultFlag = isAdultMode ? "1" : "0";
+      const path = `/api/series/${seriesId}?adult=${adultFlag}`;
+      const isCurrentRequest = () => requestRef.current === requestId;
+      const applyFailure = (response) => {
+        if (!isCurrentRequest()) {
+          return false;
+        }
+
+        if (response.status === 403 || response.error === "ADULT_GATED") {
+          setError("ADULT_GATED");
+          if (response.reason === "NEED_LOGIN") {
+            forceDisableAdultMode();
+          }
+          if (response.reason) {
+            setGateStatus(response.reason);
+          }
+          if (!gateReportedRef.current) {
+            trackEvent("adult_gate_blocked", {
+              source: "series",
+              seriesId,
+              reason: response.reason,
+              requestId: response.requestId,
+            });
+            gateReportedRef.current = true;
+          }
+        } else if (response.status === 401) {
+          window.dispatchEvent(new CustomEvent("auth:open"));
+          setError("FETCH_ERROR");
+        } else {
+          setError("FETCH_ERROR");
+        }
+        if (showLoading) {
+          setLoading(false);
+        }
+        return true;
+      };
+
+      const response = await apiGet(path, bust ? { bust: true, dedupeMs: 0 } : undefined);
+      if (!isCurrentRequest()) {
+        return;
       }
-      if (response.data?.reason) {
-        setGateStatus(response.data.reason);
+
+      if (!response.ok) {
+        applyFailure(response);
+        return;
       }
-      if (!gateReportedRef.current) {
-        trackEvent("adult_gate_blocked", {
-          source: "series",
-          seriesId,
+
+      if (response.data?.error === "ADULT_GATED") {
+        applyFailure({
+          ...response,
+          ok: false,
+          status: 403,
+          error: "ADULT_GATED",
           reason: response.data?.reason,
           requestId: response.data?.requestId,
         });
-        gateReportedRef.current = true;
+        return;
       }
-      setLoading(false);
-      return;
-    }
 
-    setData(response.data);
-    setLoading(false);
-  }, [forceDisableAdultMode, isAdultMode, seriesId]);
+      setData(response.data);
+      setGateStatus("OK");
+      if (showLoading) {
+        setLoading(false);
+      }
+
+      if (!bust && response.stale) {
+        apiGet(path, {
+          bust: true,
+          dedupeMs: 0,
+        }).then((freshResponse) => {
+          if (!isCurrentRequest()) {
+            return;
+          }
+          if (!freshResponse.ok) {
+            applyFailure(freshResponse);
+            return;
+          }
+          if (freshResponse.data?.error === "ADULT_GATED") {
+            applyFailure({
+              ...freshResponse,
+              ok: false,
+              status: 403,
+              error: "ADULT_GATED",
+              reason: freshResponse.data?.reason,
+              requestId: freshResponse.data?.requestId,
+            });
+            return;
+          }
+          setData(freshResponse.data);
+          setGateStatus("OK");
+        });
+      }
+    },
+    [forceDisableAdultMode, isAdultMode, seriesId]
+  );
 
   useEffect(() => {
     fetchSeries();
@@ -274,7 +350,7 @@ export default function SeriesPage({ seriesId }) {
       return;
     }
     setActiveModal(null);
-    fetchSeries();
+    fetchSeries({ bust: true });
   };
 
   const handleLogin = async ({ email, password, mode }) => {
@@ -296,7 +372,7 @@ export default function SeriesPage({ seriesId }) {
     }
     setActiveModal(null);
     if (status === "OK") {
-      fetchSeries();
+      fetchSeries({ bust: true });
     }
     return response;
   };
@@ -305,7 +381,7 @@ export default function SeriesPage({ seriesId }) {
     confirmAdultAge(ageRuleKey);
     setActiveModal(null);
     setGateStatus("OK");
-    fetchSeries();
+    fetchSeries({ bust: true });
   };
 
   const handleRead = useCallback((seriesIdValue, episodeId) => {
@@ -357,6 +433,7 @@ export default function SeriesPage({ seriesId }) {
   };
 
   const handleRatingUpdate = (nextRating, nextCount) => {
+    syncSeriesRatingCache(seriesId, nextRating, nextCount);
     setData((prev) => {
       if (!prev?.series) {
         return prev;
@@ -376,7 +453,7 @@ export default function SeriesPage({ seriesId }) {
     return (
       <main className="min-h-screen bg-neutral-950">
         <SiteHeader />
-        <div className="mx-auto max-w-[1200px] px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
             <Skeleton className="h-80 w-full sm:w-56 md:w-64 flex-shrink-0 rounded-lg" />
             <div className="flex-1 space-y-3">
@@ -406,14 +483,14 @@ export default function SeriesPage({ seriesId }) {
     return (
       <main className="min-h-screen bg-neutral-950">
         <SiteHeader />
-        <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6">
+        <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
           <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-6 text-center">
             <p className="text-sm text-red-200 font-semibold mb-2">Failed to Load</p>
             <p className="text-xs text-red-300 mb-4">Unable to load series info. Please check your connection or try again later.</p>
             <div className="flex gap-2 justify-center">
               <button
                 type="button"
-                onClick={() => fetchSeries()}
+                onClick={() => fetchSeries({ bust: true })}
                 className="rounded-lg border border-red-400 bg-red-500/20 px-4 py-2 text-xs text-red-200 hover:bg-red-500/30"
               >
                 Retry
@@ -466,11 +543,12 @@ export default function SeriesPage({ seriesId }) {
     <main className="min-h-screen bg-neutral-950">
       <SiteHeader />
 
-      <div className="mx-auto max-w-[1200px] px-4 pb-24 sm:px-6 sm:pb-6">
+      <div className="mx-auto max-w-[1280px] px-4 pb-24 sm:px-6 sm:pb-8 lg:px-8">
         <SeriesHeader
           series={series}
           previewHint={previewHint}
           progress={progress}
+          episodeCount={episodes.length}
           onContinue={handleContinue}
           onStart={handleStart}
           onFollowToggle={handleFollowToggle}

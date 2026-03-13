@@ -1,6 +1,6 @@
 /**
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment. */
+ * Generic listing page used for comics and novels.
+ */
 
 "use client";
 
@@ -14,7 +14,6 @@ import EmptyState from "../common/EmptyState";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
 
-// NOTE: cleaned corrupted comment.
 const PAGE_CONFIG = {
   comic: {
     title: "Comics",
@@ -38,12 +37,9 @@ export default function SeriesPage({ type = "comic" }) {
   const [series, setSeries] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // NOTE: cleaned corrupted comment.
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
   const [status, setStatus] = useState("all");
-
-  // 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欎亢楠炲繘宕ｉ弽顓溾偓澶愭閵忋倕甯崇紓?
   const config = PAGE_CONFIG[type];
 
   useEffect(() => {
@@ -68,7 +64,6 @@ export default function SeriesPage({ type = "comic" }) {
     loadSeries();
   }, [isAdultMode, type]);
 
-  // NOTE: cleaned corrupted comment.
   const genres = useMemo(() => {
     const genreSet = new Set();
     series.forEach((s) => {
@@ -79,19 +74,16 @@ export default function SeriesPage({ type = "comic" }) {
     return Array.from(genreSet).sort();
   }, [series]);
 
-  // NOTE: cleaned corrupted comment.
   const filteredAndSortedSeries = useMemo(() => {
-    // NOTE: cleaned corrupted comment.
+
     let result = series;
 
-    // NOTE: cleaned corrupted comment.
     if (selectedGenre !== "all") {
       result = result.filter(
         (s) => s.genres && s.genres.includes(selectedGenre)
       );
     }
 
-    // NOTE: cleaned corrupted comment.
     if (status !== "all") {
       result = result.filter((s) => {
         if (status === "completed") return s.status === "completed";
@@ -99,13 +91,10 @@ export default function SeriesPage({ type = "comic" }) {
         return true;
       });
     }
-
-    // 闁奸鑳剁敮鍥ㄥ濡搫顕ч柨娑欒壘瑜把囧捶閵娾晜浠橀悷鏇氱劍濡炲倿骞嶅鍜佹Щ闁告帟鍩栭弳鐔虹磼閸曨喚绠婚悶娑樻湰鐢挻鎯?
     if (result.length === 0) {
       return result;
     }
 
-    // NOTE: cleaned corrupted comment.
     return [...result].sort((a, b) => {
       switch (sortBy) {
         case "latest":
@@ -121,12 +110,10 @@ export default function SeriesPage({ type = "comic" }) {
     });
   }, [series, selectedGenre, sortBy, status]);
 
-  // NOTE: cleaned corrupted comment.
   const handleSeriesClick = useCallback((seriesId) => {
     router.push(`/series/${seriesId}`);
   }, [router]);
 
-  // NOTE: cleaned corrupted comment.
   const handleResetFilters = useCallback(() => {
     setSelectedGenre("all");
     setStatus("all");
@@ -137,7 +124,6 @@ export default function SeriesPage({ type = "comic" }) {
       <SiteHeader />
 
       <main className="mx-auto max-w-7xl px-4 py-8">
-        {/* 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欏哺閵嗗妫冮姀锛勫灱濡?- 闁哄秷顫夊畵涔紋pe濞达綀娉曢弫銈嗙▔瀹ュ懏鍊遍柣銊ュ缁楀酣宕ｅΟ鍨棌 */}
         {type === "comic" ? (
           <div className="mb-8 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 p-8 border border-emerald-500/20">
             <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
@@ -153,8 +139,6 @@ export default function SeriesPage({ type = "comic" }) {
             <p className="text-neutral-300">{config.description}</p>
           </div>
         )}
-
-        {/* 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欐皑閻☆偊鏌呮径瀣焿 */}
         {!loading && (
           <div className="mb-8">
             <FilterBar
@@ -169,8 +153,6 @@ export default function SeriesPage({ type = "comic" }) {
             />
           </div>
         )}
-
-        {/* 闁奸鑳剁敮鍥р枖閵娾晛娅為柨娑欐皑闁挳宕氬Δ鈧崹顏嗘偘?- 闁衡偓閸︻厽鏆廹ap-6闁挎稑鑻幖閿嬫償閺傝法纭€闁哄洦娼欓妶?*/}
         {loading ? (
           <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 15 }).map((_, i) => (

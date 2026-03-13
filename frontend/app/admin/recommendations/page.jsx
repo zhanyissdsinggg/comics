@@ -10,31 +10,31 @@ import { Modal } from '@/components/admin/common/Modal';
 import { adminFetchJson } from '@/lib/adminApiClient';
 
 const VIEW_TABS = [
-  { key: 'slots', label: 'Slots' },
-  { key: 'rankings', label: 'Rankings' },
-  { key: 'analytics', label: 'Analytics' },
+  { key: 'slots', label: '推荐位' },
+  { key: 'rankings', label: '榜单' },
+  { key: 'analytics', label: '分析' },
 ];
 
 const RANKING_TYPE_OPTIONS = [
-  { value: 'views', label: 'Views' },
-  { value: 'rating', label: 'Rating' },
-  { value: 'trending', label: 'Trending' },
-  { value: 'ratingCount', label: 'Rating count' },
+  { value: 'views', label: '浏览量' },
+  { value: 'rating', label: '评分' },
+  { value: 'trending', label: '趋势热度' },
+  { value: 'ratingCount', label: '评分人数' },
 ];
 
 const TIME_RANGE_OPTIONS = [
-  { value: 'day', label: 'Day' },
-  { value: 'week', label: 'Week' },
-  { value: 'month', label: 'Month' },
-  { value: 'all', label: 'All time' },
+  { value: 'day', label: '日' },
+  { value: 'week', label: '周' },
+  { value: 'month', label: '月' },
+  { value: 'all', label: '全部时间' },
 ];
 
 const SERIES_TYPE_OPTIONS = [
-  { value: 'all', label: 'All series' },
-  { value: 'comic', label: 'Comic' },
-  { value: 'novel', label: 'Novel' },
-  { value: 'manga', label: 'Manga' },
-  { value: 'manhwa', label: 'Manhwa' },
+  { value: 'all', label: '全部作品' },
+  { value: 'comic', label: '漫画' },
+  { value: 'novel', label: '小说' },
+  { value: 'manga', label: '日漫' },
+  { value: 'manhwa', label: '韩漫' },
 ];
 
 const EMPTY_FEEDBACK = { type: '', message: '' };
@@ -88,17 +88,29 @@ function buildRankingPayload(form) {
   };
 }
 
+function formatRankingTypeLabel(value) {
+  return RANKING_TYPE_OPTIONS.find((option) => option.value === value)?.label || '未知';
+}
+
+function formatTimeRangeLabel(value) {
+  return TIME_RANGE_OPTIONS.find((option) => option.value === value)?.label || '未知';
+}
+
+function formatSeriesTypeLabel(value) {
+  return SERIES_TYPE_OPTIONS.find((option) => option.value === value)?.label || '未知';
+}
+
 function formatDateTime(value) {
   if (!value) {
-    return 'Not available';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Invalid date';
+    return '日期无效';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -109,7 +121,7 @@ function formatDateTime(value) {
 
 function formatNumber(value) {
   const numericValue = Number(value || 0);
-  return new Intl.NumberFormat('en-US').format(Number.isFinite(numericValue) ? numericValue : 0);
+  return new Intl.NumberFormat('zh-CN').format(Number.isFinite(numericValue) ? numericValue : 0);
 }
 
 function formatPercent(value) {
@@ -130,7 +142,7 @@ function ErrorPanel({ title, message, onRetry }) {
           onClick={onRetry}
           className="rounded-xl border border-red-400/30 px-4 py-2 font-medium text-red-50 transition hover:bg-red-400/10"
         >
-          Retry
+          重试
         </button>
       </div>
     </div>
@@ -149,22 +161,22 @@ function StatCard({ label, value, hint }) {
 
 function getDeferredStatValue(query, isLoaded) {
   if (!isLoaded) {
-    return 'Pending';
+    return '待加载';
   }
 
   if (query.isLoading && !query.data) {
-    return 'Loading...';
+    return '加载中...';
   }
 
   if (query.isError) {
-    return 'Error';
+    return '错误';
   }
 
   return formatNumber(query.data?.total || 0);
 }
 
 function getDeferredStatHint(hint, isLoaded) {
-  return isLoaded ? hint : 'Open this tab to load';
+  return isLoaded ? hint : '打开此页签后加载';
 }
 
 function SectionHeader({ title, description, action }) {
@@ -186,23 +198,23 @@ function AnalyticsTable({ analytics }) {
         <table className="min-w-full divide-y divide-neutral-800 text-sm">
           <thead className="bg-neutral-900/80 text-left text-xs uppercase tracking-[0.2em] text-neutral-500">
             <tr>
-              <th className="px-4 py-3 font-medium">Date</th>
-              <th className="px-4 py-3 font-medium">Slot</th>
-              <th className="px-4 py-3 font-medium">Series</th>
-              <th className="px-4 py-3 font-medium">Impressions</th>
-              <th className="px-4 py-3 font-medium">Views</th>
-              <th className="px-4 py-3 font-medium">Clicks</th>
-              <th className="px-4 py-3 font-medium">Conversions</th>
+              <th className="px-4 py-3 font-medium">日期</th>
+              <th className="px-4 py-3 font-medium">推荐位</th>
+              <th className="px-4 py-3 font-medium">作品</th>
+              <th className="px-4 py-3 font-medium">曝光</th>
+              <th className="px-4 py-3 font-medium">浏览</th>
+              <th className="px-4 py-3 font-medium">点击</th>
+              <th className="px-4 py-3 font-medium">转化</th>
               <th className="px-4 py-3 font-medium">CTR</th>
-              <th className="px-4 py-3 font-medium">Conversion rate</th>
+              <th className="px-4 py-3 font-medium">转化率</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-800 text-neutral-200">
             {analytics.map((item) => (
               <tr key={item.id} className="bg-neutral-950/30 transition hover:bg-neutral-900/60">
                 <td className="px-4 py-3">{formatDateTime(item.date)}</td>
-                <td className="px-4 py-3 font-medium text-neutral-50">{item.slot || item.slotId || 'Unknown'}</td>
-                <td className="px-4 py-3 font-mono text-xs text-neutral-300">{item.seriesId || 'Unknown'}</td>
+                <td className="px-4 py-3 font-medium text-neutral-50">{item.slot || item.slotId || '未知'}</td>
+                <td className="px-4 py-3 font-mono text-xs text-neutral-300">{item.seriesId || '未知'}</td>
                 <td className="px-4 py-3">{formatNumber(item.impressions)}</td>
                 <td className="px-4 py-3">{formatNumber(item.views)}</td>
                 <td className="px-4 py-3">{formatNumber(item.clicks)}</td>
@@ -252,7 +264,7 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson('/api/admin/recommendations/slots?limit=100');
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Failed to load recommendation slots.');
+        throw new Error(data?.message || data?.error || '推荐位加载失败。');
       }
 
       return {
@@ -270,7 +282,7 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson('/api/admin/recommendations/rankings?limit=100');
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Failed to load ranking configs.');
+        throw new Error(data?.message || data?.error || '榜单配置加载失败。');
       }
 
       return {
@@ -288,7 +300,7 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson('/api/admin/recommendations/analytics?limit=50');
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Failed to load recommendation analytics.');
+        throw new Error(data?.message || data?.error || '推荐分析加载失败。');
       }
 
       return {
@@ -303,7 +315,7 @@ export default function AdminRecommendationsPage() {
       const payload = buildSlotPayload(slotForm);
 
       if (!payload.name) {
-        throw new Error('Slot name is required.');
+        throw new Error('推荐位名称不能为空。');
       }
 
       const { response, data } = await adminFetchJson('/api/admin/recommendations/slots', {
@@ -315,7 +327,7 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Failed to create recommendation slot.');
+        throw new Error(data?.message || data?.error || '创建推荐位失败。');
       }
 
       return data?.slot || null;
@@ -323,11 +335,11 @@ export default function AdminRecommendationsPage() {
     onSuccess: async () => {
       setCreateTarget(null);
       setSlotForm(INITIAL_SLOT_FORM);
-      setFeedback({ type: 'success', message: 'Recommendation slot created.' });
+      setFeedback({ type: 'success', message: '推荐位已创建。' });
       await slotsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to create recommendation slot.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '创建推荐位失败。') });
     },
   });
 
@@ -336,11 +348,11 @@ export default function AdminRecommendationsPage() {
       const payload = buildRankingPayload(rankingForm);
 
       if (!payload.name) {
-        throw new Error('Ranking name is required.');
+        throw new Error('榜单名称不能为空。');
       }
 
       if (!Number.isInteger(payload.maxItems) || payload.maxItems < 1 || payload.maxItems > 200) {
-        throw new Error('Max items must be between 1 and 200.');
+        throw new Error('最大条目数必须在 1 到 200 之间。');
       }
 
       const { response, data } = await adminFetchJson('/api/admin/recommendations/rankings', {
@@ -352,7 +364,7 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Failed to create ranking config.');
+        throw new Error(data?.message || data?.error || '创建榜单配置失败。');
       }
 
       return data?.config || null;
@@ -360,11 +372,11 @@ export default function AdminRecommendationsPage() {
     onSuccess: async () => {
       setCreateTarget(null);
       setRankingForm(INITIAL_RANKING_FORM);
-      setFeedback({ type: 'success', message: 'Ranking config created.' });
+      setFeedback({ type: 'success', message: '榜单配置已创建。' });
       await rankingsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to create ranking config.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '创建榜单配置失败。') });
     },
   });
 
@@ -375,18 +387,18 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Failed to delete recommendation slot.');
+        throw new Error(data?.message || data?.error || '删除推荐位失败。');
       }
 
       return data;
     },
     onSuccess: async () => {
       setDeleteTarget(null);
-      setFeedback({ type: 'success', message: 'Recommendation slot deleted.' });
+      setFeedback({ type: 'success', message: '推荐位已删除。' });
       await slotsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to delete recommendation slot.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '删除推荐位失败。') });
     },
   });
 
@@ -397,18 +409,18 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Failed to delete ranking config.');
+        throw new Error(data?.message || data?.error || '删除榜单配置失败。');
       }
 
       return data;
     },
     onSuccess: async () => {
       setDeleteTarget(null);
-      setFeedback({ type: 'success', message: 'Ranking config deleted.' });
+      setFeedback({ type: 'success', message: '榜单配置已删除。' });
       await rankingsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Failed to delete ranking config.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '删除榜单配置失败。') });
     },
   });
 
@@ -470,8 +482,8 @@ export default function AdminRecommendationsPage() {
     if (slotsQuery.isError) {
       return (
         <ErrorPanel
-          title="Failed to load slots"
-          message={getErrorMessage(slotsQuery.error, 'The slot list could not be loaded.')}
+          title="推荐位加载失败"
+          message={getErrorMessage(slotsQuery.error, '推荐位列表无法加载。')}
           onRetry={() => slotsQuery.refetch()}
         />
       );
@@ -481,7 +493,7 @@ export default function AdminRecommendationsPage() {
       <AdminDataState
         isLoading={slotsQuery.isLoading}
         hasData={slots.length > 0}
-        emptyMessage="No recommendation slots have been created yet."
+        emptyMessage="暂无推荐位。"
         wrap={false}
       >
         <div className="grid gap-4 xl:grid-cols-2">
@@ -492,8 +504,8 @@ export default function AdminRecommendationsPage() {
               <article key={slot.id} className="rounded-3xl border border-neutral-800 bg-neutral-950/70 p-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Slot</p>
-                    <h3 className="mt-2 text-lg font-semibold text-neutral-50">{slot.name || slot.slot || 'Unnamed slot'}</h3>
+                    <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">推荐位</p>
+                    <h3 className="mt-2 text-lg font-semibold text-neutral-50">{slot.name || slot.slot || '未命名推荐位'}</h3>
                     <p className="mt-2 font-mono text-xs text-neutral-400">{slot.id}</p>
                   </div>
                   <button
@@ -501,18 +513,18 @@ export default function AdminRecommendationsPage() {
                     onClick={() => openDeleteModal('slot', slot)}
                     className="rounded-xl border border-red-500/30 px-4 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/10"
                   >
-                    Delete slot
+                    删除推荐位
                   </button>
                 </div>
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  <StatCard label="Series count" value={formatNumber(seriesIds.length)} hint="Linked series IDs" />
-                  <StatCard label="Created" value={formatDateTime(slot.createdAt)} hint="Initial setup time" />
-                  <StatCard label="Updated" value={formatDateTime(slot.updatedAt)} hint="Last saved change" />
+                  <StatCard label="作品数量" value={formatNumber(seriesIds.length)} hint="已关联作品 ID" />
+                  <StatCard label="创建时间" value={formatDateTime(slot.createdAt)} hint="首次创建时间" />
+                  <StatCard label="更新时间" value={formatDateTime(slot.updatedAt)} hint="最近保存时间" />
                 </div>
 
                 <div className="mt-5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Series IDs</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">作品 ID</p>
                   {seriesIds.length > 0 ? (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {seriesIds.map((seriesId) => (
@@ -525,7 +537,7 @@ export default function AdminRecommendationsPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="mt-3 text-sm text-neutral-400">No series IDs are linked to this slot.</p>
+                    <p className="mt-3 text-sm text-neutral-400">该推荐位还没有关联作品 ID。</p>
                   )}
                 </div>
               </article>
@@ -540,8 +552,8 @@ export default function AdminRecommendationsPage() {
     if (rankingsQuery.isError) {
       return (
         <ErrorPanel
-          title="Failed to load ranking configs"
-          message={getErrorMessage(rankingsQuery.error, 'The ranking config list could not be loaded.')}
+          title="榜单配置加载失败"
+          message={getErrorMessage(rankingsQuery.error, '榜单配置列表无法加载。')}
           onRetry={() => rankingsQuery.refetch()}
         />
       );
@@ -551,7 +563,7 @@ export default function AdminRecommendationsPage() {
       <AdminDataState
         isLoading={rankingsQuery.isLoading}
         hasData={rankings.length > 0}
-        emptyMessage="No ranking configs have been created yet."
+        emptyMessage="暂无榜单配置。"
         wrap={false}
       >
         <div className="grid gap-4 xl:grid-cols-2">
@@ -559,9 +571,9 @@ export default function AdminRecommendationsPage() {
             <article key={ranking.id} className="rounded-3xl border border-neutral-800 bg-neutral-950/70 p-5">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">Ranking</p>
+                  <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">榜单</p>
                   <h3 className="mt-2 text-lg font-semibold text-neutral-50">
-                    {ranking.name || ranking.ranking || 'Unnamed ranking'}
+                    {ranking.name || ranking.ranking || '未命名榜单'}
                   </h3>
                   <p className="mt-2 font-mono text-xs text-neutral-400">{ranking.id}</p>
                 </div>
@@ -570,22 +582,22 @@ export default function AdminRecommendationsPage() {
                   onClick={() => openDeleteModal('ranking', ranking)}
                   className="rounded-xl border border-red-500/30 px-4 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/10"
                 >
-                  Delete ranking
+                  删除榜单
                 </button>
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                <StatCard label="Type" value={ranking.rankingType || 'Unknown'} hint="Ordering signal" />
-                <StatCard label="Range" value={ranking.timeRange || 'Unknown'} hint="Aggregation window" />
-                <StatCard label="Series" value={ranking.seriesType || 'Unknown'} hint="Content filter" />
-                <StatCard label="Max items" value={formatNumber(ranking.maxItems)} hint="Response size limit" />
-                <StatCard label="Adult" value={ranking.adult ? 'Enabled' : 'Disabled'} hint="Audience filter" />
-                <StatCard label="Active" value={ranking.active ? 'Enabled' : 'Disabled'} hint="Availability state" />
+                <StatCard label="类型" value={formatRankingTypeLabel(ranking.rankingType)} hint="排序依据" />
+                <StatCard label="范围" value={formatTimeRangeLabel(ranking.timeRange)} hint="聚合时间窗口" />
+                <StatCard label="作品范围" value={formatSeriesTypeLabel(ranking.seriesType)} hint="内容筛选" />
+                <StatCard label="最大条目数" value={formatNumber(ranking.maxItems)} hint="返回条目上限" />
+                <StatCard label="成人内容" value={ranking.adult ? '开启' : '关闭'} hint="受众过滤" />
+                <StatCard label="启用状态" value={ranking.active ? '开启' : '关闭'} hint="当前可用状态" />
               </div>
 
               <div className="mt-5 flex flex-wrap gap-2 text-xs text-neutral-400">
-                <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1">Created {formatDateTime(ranking.createdAt)}</span>
-                <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1">Updated {formatDateTime(ranking.updatedAt)}</span>
+                <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1">创建于 {formatDateTime(ranking.createdAt)}</span>
+                <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1">更新于 {formatDateTime(ranking.updatedAt)}</span>
               </div>
             </article>
           ))}
@@ -598,8 +610,8 @@ export default function AdminRecommendationsPage() {
     if (analyticsQuery.isError) {
       return (
         <ErrorPanel
-          title="Failed to load analytics"
-          message={getErrorMessage(analyticsQuery.error, 'Analytics data could not be loaded.')}
+          title="分析数据加载失败"
+          message={getErrorMessage(analyticsQuery.error, '分析数据无法加载。')}
           onRetry={() => analyticsQuery.refetch()}
         />
       );
@@ -608,23 +620,23 @@ export default function AdminRecommendationsPage() {
     return (
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Impressions" value={formatNumber(analyticsSummary.impressions)} hint="Across the loaded dataset" />
-          <StatCard label="Views" value={formatNumber(analyticsSummary.views)} hint="Series detail visits" />
-          <StatCard label="Clicks" value={formatNumber(analyticsSummary.clicks)} hint="Recommendation taps" />
-          <StatCard label="Conversions" value={formatNumber(analyticsSummary.conversions)} hint="Completed actions" />
+          <StatCard label="曝光" value={formatNumber(analyticsSummary.impressions)} hint="当前已加载数据汇总" />
+          <StatCard label="浏览" value={formatNumber(analyticsSummary.views)} hint="作品详情访问量" />
+          <StatCard label="点击" value={formatNumber(analyticsSummary.clicks)} hint="推荐位点击量" />
+          <StatCard label="转化" value={formatNumber(analyticsSummary.conversions)} hint="已完成动作" />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <StatCard label="Average CTR" value={formatPercent(averageCtr)} hint="Clicks divided by impressions" />
+          <StatCard label="平均 CTR" value={formatPercent(averageCtr)} hint="点击数除以曝光数" />
           <StatCard
-            label="Average conversion rate"
+            label="平均转化率"
             value={formatPercent(averageConversionRate)}
-            hint="Conversions divided by clicks"
+            hint="转化数除以点击数"
           />
         </div>
         <AdminDataState
           isLoading={analyticsQuery.isLoading}
           hasData={analytics.length > 0}
-          emptyMessage="No recommendation analytics are available yet."
+          emptyMessage="暂无推荐分析数据。"
           wrap={false}
         >
           <AnalyticsTable analytics={analytics} />
@@ -638,23 +650,23 @@ export default function AdminRecommendationsPage() {
       <header className="rounded-[32px] border border-neutral-800 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_35%),linear-gradient(180deg,rgba(10,10,10,0.96),rgba(10,10,10,0.88))] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.28em] text-emerald-300">Admin console</p>
-            <h1 className="mt-3 text-3xl font-semibold text-white">Recommendations</h1>
+            <p className="text-xs uppercase tracking-[0.28em] text-emerald-300">后台控制台</p>
+            <h1 className="mt-3 text-3xl font-semibold text-white">推荐管理</h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-300">
-              Manage recommendation slots, ranking configs, and read the latest recommendation analytics from one stable page.
+              在一个稳定页面内统一管理推荐位、榜单配置和推荐分析数据。
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 xl:min-w-[420px]">
-            <StatCard label="Slots" value={getDeferredStatValue(slotsQuery, true)} hint="Recommendation placements" />
+            <StatCard label="推荐位" value={getDeferredStatValue(slotsQuery, true)} hint="推荐展示位置" />
             <StatCard
-              label="Rankings"
+              label="榜单"
               value={getDeferredStatValue(rankingsQuery, loadedTabs.rankings)}
-              hint={getDeferredStatHint('Ranking config records', loadedTabs.rankings)}
+              hint={getDeferredStatHint('榜单配置数量', loadedTabs.rankings)}
             />
             <StatCard
-              label="Analytics rows"
+              label="分析记录"
               value={getDeferredStatValue(analyticsQuery, loadedTabs.analytics)}
-              hint={getDeferredStatHint('Latest loaded records', loadedTabs.analytics)}
+              hint={getDeferredStatHint('当前已加载记录数', loadedTabs.analytics)}
             />
           </div>
         </div>
@@ -663,7 +675,7 @@ export default function AdminRecommendationsPage() {
       <AdminFeedbackBanner
         feedback={feedback}
         onDismiss={() => setFeedback(EMPTY_FEEDBACK)}
-        dismissAriaLabel="Dismiss feedback"
+        dismissAriaLabel="关闭提示"
       />
 
       <div className="flex flex-wrap gap-3">
@@ -692,15 +704,15 @@ export default function AdminRecommendationsPage() {
         {activeTab === 'slots' ? (
           <>
             <SectionHeader
-              title="Recommendation slots"
-              description="Slots only send the fields the backend accepts: a slot name and an optional series ID list."
+              title="推荐位"
+              description="推荐位仅提交后端支持的字段：名称和可选的作品 ID 列表。"
               action={
                 <button
                   type="button"
                   onClick={() => openCreateModal('slot')}
                   className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400"
                 >
-                  Create slot
+                  新建推荐位
                 </button>
               }
             />
@@ -711,15 +723,15 @@ export default function AdminRecommendationsPage() {
         {activeTab === 'rankings' ? (
           <>
             <SectionHeader
-              title="Ranking configs"
-              description="Ranking configs are sent using the backend contract only: name, ranking type, time range, series type, max items, adult flag, and active flag."
+              title="榜单配置"
+              description="榜单配置严格按后端契约提交：名称、榜单类型、时间范围、作品类型、最大条目数、成人标记和启用状态。"
               action={
                 <button
                   type="button"
                   onClick={() => openCreateModal('ranking')}
                   className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400"
                 >
-                  Create ranking
+                  新建榜单
                 </button>
               }
             />
@@ -730,8 +742,8 @@ export default function AdminRecommendationsPage() {
         {activeTab === 'analytics' ? (
           <>
             <SectionHeader
-              title="Analytics"
-              description="This view is read-only and shows the latest recommendation performance rows returned by the backend."
+              title="分析"
+              description="此页面只读，用于展示后端返回的最新推荐表现数据。"
             />
             {renderAnalytics()}
           </>
@@ -740,8 +752,8 @@ export default function AdminRecommendationsPage() {
 
       <Modal
         isOpen={createTarget === 'slot'}
-        title="Create recommendation slot"
-        subtitle="Only the supported backend fields are exposed on this form."
+        title="新建推荐位"
+        subtitle="表单只暴露后端当前支持的字段。"
         onClose={() => {
           if (!createSlotMutation.isPending) {
             setCreateTarget(null);
@@ -757,7 +769,7 @@ export default function AdminRecommendationsPage() {
         >
           <div>
             <label className="text-sm font-medium text-neutral-300" htmlFor="slot-name">
-              Slot name
+              推荐位名称
             </label>
             <input
               id="slot-name"
@@ -770,7 +782,7 @@ export default function AdminRecommendationsPage() {
           </div>
           <div>
             <label className="text-sm font-medium text-neutral-300" htmlFor="slot-series-ids">
-              Series IDs
+              作品 ID
             </label>
             <textarea
               id="slot-series-ids"
@@ -780,22 +792,22 @@ export default function AdminRecommendationsPage() {
               placeholder="series_001, series_002"
               className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
             />
-            <p className="mt-2 text-xs text-neutral-500">Use commas or new lines to separate IDs.</p>
+            <p className="mt-2 text-xs text-neutral-500">多个 ID 可用逗号或换行分隔。</p>
           </div>
           <button
             type="submit"
             disabled={createSlotMutation.isPending}
             className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {createSlotMutation.isPending ? 'Creating slot...' : 'Create slot'}
+            {createSlotMutation.isPending ? '创建中...' : '创建推荐位'}
           </button>
         </form>
       </Modal>
 
       <Modal
         isOpen={createTarget === 'ranking'}
-        title="Create ranking config"
-        subtitle="The payload matches the active backend DTO and validation rules."
+        title="新建榜单配置"
+        subtitle="提交数据与当前后端 DTO 和校验规则保持一致。"
         onClose={() => {
           if (!createRankingMutation.isPending) {
             setCreateTarget(null);
@@ -813,7 +825,7 @@ export default function AdminRecommendationsPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-name">
-                Ranking name
+                榜单名称
               </label>
               <input
                 id="ranking-name"
@@ -826,7 +838,7 @@ export default function AdminRecommendationsPage() {
             </div>
             <div>
               <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-type">
-                Ranking type
+                榜单类型
               </label>
               <select
                 id="ranking-type"
@@ -843,7 +855,7 @@ export default function AdminRecommendationsPage() {
             </div>
             <div>
               <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-range">
-                Time range
+                时间范围
               </label>
               <select
                 id="ranking-range"
@@ -860,7 +872,7 @@ export default function AdminRecommendationsPage() {
             </div>
             <div>
               <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-series-type">
-                Series type
+                作品类型
               </label>
               <select
                 id="ranking-series-type"
@@ -877,7 +889,7 @@ export default function AdminRecommendationsPage() {
             </div>
             <div>
               <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-max-items">
-                Max items
+                最大条目数
               </label>
               <input
                 id="ranking-max-items"
@@ -891,7 +903,7 @@ export default function AdminRecommendationsPage() {
             </div>
             <div className="grid gap-3">
               <label className="flex items-center justify-between rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-sm text-neutral-200">
-                <span>Adult content enabled</span>
+                <span>启用成人内容</span>
                 <input
                   type="checkbox"
                   checked={rankingForm.adult}
@@ -900,7 +912,7 @@ export default function AdminRecommendationsPage() {
                 />
               </label>
               <label className="flex items-center justify-between rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-sm text-neutral-200">
-                <span>Config active</span>
+                <span>配置启用</span>
                 <input
                   type="checkbox"
                   checked={rankingForm.active}
@@ -915,15 +927,15 @@ export default function AdminRecommendationsPage() {
             disabled={createRankingMutation.isPending}
             className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {createRankingMutation.isPending ? 'Creating ranking...' : 'Create ranking'}
+            {createRankingMutation.isPending ? '创建中...' : '创建榜单'}
           </button>
         </form>
       </Modal>
 
       <Modal
         isOpen={Boolean(deleteTarget)}
-        title="Delete item"
-        subtitle="This action removes the selected record immediately."
+        title="删除项目"
+        subtitle="该操作会立即删除所选记录。"
         onClose={() => {
           if (!deleteBusy) {
             setDeleteTarget(null);
@@ -934,8 +946,8 @@ export default function AdminRecommendationsPage() {
         <div className="space-y-4">
           <p className="text-sm text-neutral-300">
             {deleteTarget?.kind === 'slot'
-              ? `Delete slot "${deleteTarget?.item?.name || deleteTarget?.item?.slot || 'Unknown'}"?`
-              : `Delete ranking "${deleteTarget?.item?.name || deleteTarget?.item?.ranking || 'Unknown'}"?`}
+              ? `确定删除推荐位「${deleteTarget?.item?.name || deleteTarget?.item?.slot || '未知'}」吗？`
+              : `确定删除榜单「${deleteTarget?.item?.name || deleteTarget?.item?.ranking || '未知'}」吗？`}
           </p>
           <div className="flex gap-3">
             <button
@@ -944,7 +956,7 @@ export default function AdminRecommendationsPage() {
               disabled={deleteBusy}
               className="flex-1 rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-sm font-medium text-neutral-200 transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Cancel
+              取消
             </button>
             <button
               type="button"
@@ -952,7 +964,7 @@ export default function AdminRecommendationsPage() {
               disabled={deleteBusy}
               className="flex-1 rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {deleteBusy ? 'Deleting...' : 'Delete'}
+              {deleteBusy ? '删除中...' : '删除'}
             </button>
           </div>
         </div>

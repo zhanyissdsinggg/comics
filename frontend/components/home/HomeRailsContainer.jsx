@@ -1,9 +1,5 @@
 /**
- * NOTE: cleaned corrupted comment.
- *
- * 閼卞矁鐭楅敍? * - 濞撳弶鐓嬮幒銊ㄥ礃rails
- * NOTE: cleaned corrupted comment.
- * NOTE: cleaned corrupted comment.
+ * HomeRailsContainer renders the personalized rails for the home page.
  */
 
 "use client";
@@ -22,7 +18,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
   const { seriesList } = useHomeData();
   const recoImpressionRef = useRef(new Set());
 
-    // Build a map for efficient genre filtering
+  // Build a map for efficient genre filtering.
   const seriesGenresMap = useMemo(() => {
     const map = new Map();
     seriesList.forEach((series) => {
@@ -33,17 +29,15 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
     return map;
   }, [seriesList]);
 
-  // 閼颁胶甯囧ǎ璇插閿涙碍鐗撮幑鐢tiveGenre鏉╁洦鎶ails
   const filteredRails = useMemo(() => {
     if (activeGenre === "all") {
       return activeRails;
     }
 
-    // NOTE: cleaned corrupted comment.
     return activeRails
       .map((rail) => {
         const filteredItems = rail.items.filter((item) => {
-                    // Item ids can be in the form seriesId-episodeId
+          // Item ids can be in the form seriesId-episodeId.
           const seriesId = item.id.split("-")[0];
           const genres = seriesGenresMap.get(seriesId);
 
@@ -51,7 +45,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
             return false;
           }
 
-                    // Keep items whose genre matches the active chip
+          // Keep items whose genre matches the active chip.
           return genres.some((g) => g.toLowerCase() === activeGenre.toLowerCase());
         });
 
@@ -60,7 +54,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
           items: filteredItems,
         };
       })
-      .filter((rail) => rail.items.length > 0); // NOTE: cleaned corrupted comment.
+      .filter((rail) => rail.items.length > 0);
   }, [activeRails, activeGenre, seriesGenresMap]);
 
   // Track rail impressions
@@ -77,7 +71,6 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
     });
   }, [filteredRails]);
 
-  // 閼颁胶甯囨导妯哄閿涙矮濞囬悽鈺眘eCallback闁灝鍘ゆ稉宥呯箑鐟曚胶娈憆e-render
   const handleItemClick = useCallback((rail, item) => {
     trackEvent("reco_click", {
       railName: rail.title,
@@ -86,7 +79,6 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
     router.push(`/series/${item.id}`);
   }, [router]);
 
-  // NOTE: cleaned corrupted comment.
   const getRailReason = useCallback((rail) => {
     const title = rail.title.toLowerCase();
     if (title.includes("trending") || title.includes("popular")) {
@@ -107,7 +99,7 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
     return "Recommended for you";
   }, []);
 
-    // Friendly empty state for current filter
+  // Show a friendly empty state for the active filter.
   if (filteredRails.length === 0) {
     return (
       <EmptyState

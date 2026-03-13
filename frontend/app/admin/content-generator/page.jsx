@@ -42,29 +42,29 @@ function buildGeneratorPayload(form) {
 function validateForm(form) {
   const seriesPerType = parsePositiveInteger(form.seriesPerType);
   if (!seriesPerType) {
-    return "Series per type must be a positive integer.";
+    return "每种类型的作品数量必须是正整数。";
   }
   if (seriesPerType > 20) {
-    return "Series per type cannot exceed 20.";
+    return "每种类型的作品数量不能超过 20。";
   }
 
   const minEpisodes = parsePositiveInteger(form.minEpisodes);
   if (!minEpisodes) {
-    return "Minimum episodes must be a positive integer.";
+    return "最少章节数必须是正整数。";
   }
   if (minEpisodes > 30) {
-    return "Minimum episodes cannot exceed 30.";
+    return "最少章节数不能超过 30。";
   }
 
   const maxEpisodes = parsePositiveInteger(form.maxEpisodes);
   if (!maxEpisodes) {
-    return "Maximum episodes must be a positive integer.";
+    return "最多章节数必须是正整数。";
   }
   if (maxEpisodes > 30) {
-    return "Maximum episodes cannot exceed 30.";
+    return "最多章节数不能超过 30。";
   }
   if (minEpisodes > maxEpisodes) {
-    return "Maximum episodes must be greater than or equal to minimum episodes.";
+    return "最多章节数必须大于或等于最少章节数。";
   }
 
   return "";
@@ -74,7 +74,7 @@ function readErrorMessage(error) {
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return "Generation failed.";
+  return "生成失败。";
 }
 
 export default function ContentGeneratorPage() {
@@ -96,54 +96,54 @@ export default function ContentGeneratorPage() {
   const generateContent = async () => {
     if (validationError) {
       setResult(null);
-      setProgress(`Error: ${validationError}`);
+      setProgress(`错误：${validationError}`);
       return;
     }
 
     const payload = buildGeneratorPayload(form);
     setGenerating(true);
-    setProgress("Generating demo content...");
+    setProgress("正在生成演示内容...");
     setResult(null);
 
     try {
       const response = await adminPost("/api/admin/generate-content", payload);
       if (!response.ok) {
-        throw new Error(response.error || response.message || "Generation failed.");
+        throw new Error(response.error || response.message || "生成失败。");
       }
 
       setResult({ ...(response.data || {}), requestPayload: payload });
-      setProgress(`Generation completed${response.data?.runId ? ` for run ${response.data.runId}.` : "."}`);
+      setProgress(`生成完成${response.data?.runId ? `，任务编号：${response.data.runId}。` : "。"}`);
     } catch (error) {
-      setProgress(`Error: ${readErrorMessage(error)}`);
+      setProgress(`错误：${readErrorMessage(error)}`);
     } finally {
       setGenerating(false);
     }
   };
 
   return (
-    <AdminLayout title="Content Generator">
+    <AdminLayout title="内容生成器">
       <div className="mx-auto max-w-5xl space-y-6">
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h1 className="text-3xl font-bold text-white">Demo content generator</h1>
+          <h1 className="text-3xl font-bold text-white">演示内容生成器</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-300">
-            Create a balanced set of demo comics and novels for QA, layout validation, and admin workflows.
-            The backend route is protected by admin auth and can be disabled in production.
+            一键生成平衡的演示漫画和小说数据，用于 QA、排版验收和后台流程联调。
+            该后端接口受后台鉴权保护，并且可以在生产环境中禁用。
           </p>
 
           <div className="mt-6 grid gap-3 text-sm text-neutral-300 lg:grid-cols-[1.2fr,0.8fr]">
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <p className="font-semibold text-white">What gets created</p>
+              <p className="font-semibold text-white">将生成的内容</p>
               <ul className="mt-2 list-disc space-y-1 pl-5">
-                <li>{previewSeriesPerType} comic series</li>
-                <li>{previewSeriesPerType} novel series</li>
-                <li>{previewMinEpisodes} to {previewMaxEpisodes} episodes per series</li>
-                <li>Ratings, tags, pricing, and preview content</li>
+                <li>{previewSeriesPerType} 部漫画作品</li>
+                <li>{previewSeriesPerType} 部小说作品</li>
+                <li>每部作品 {previewMinEpisodes} 到 {previewMaxEpisodes} 章</li>
+                <li>评分、标签、定价和预览内容</li>
               </ul>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <p className="font-semibold text-white">Operational note</p>
+              <p className="font-semibold text-white">运行说明</p>
               <p className="mt-2 leading-6 text-neutral-400">
-                Production environments require <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code> before this action can run.
+                生产环境需要先配置 <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code>，此操作才可执行。
               </p>
             </div>
           </div>
@@ -152,16 +152,16 @@ export default function ContentGeneratorPage() {
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <label className="space-y-2 text-sm text-neutral-300">
-              <span className="font-semibold text-white">Seed</span>
+              <span className="font-semibold text-white">种子</span>
               <input
                 value={form.seed}
                 onChange={(event) => updateField("seed", event.target.value)}
-                placeholder="Optional reproducible seed"
+                placeholder="可选的复现实验种子"
                 className="w-full rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400/50"
               />
             </label>
             <label className="space-y-2 text-sm text-neutral-300">
-              <span className="font-semibold text-white">Series per type</span>
+              <span className="font-semibold text-white">每种类型作品数</span>
               <input
                 value={form.seriesPerType}
                 onChange={(event) => updateField("seriesPerType", event.target.value)}
@@ -170,7 +170,7 @@ export default function ContentGeneratorPage() {
               />
             </label>
             <label className="space-y-2 text-sm text-neutral-300">
-              <span className="font-semibold text-white">Min episodes</span>
+              <span className="font-semibold text-white">最少章节数</span>
               <input
                 value={form.minEpisodes}
                 onChange={(event) => updateField("minEpisodes", event.target.value)}
@@ -179,7 +179,7 @@ export default function ContentGeneratorPage() {
               />
             </label>
             <label className="space-y-2 text-sm text-neutral-300">
-              <span className="font-semibold text-white">Max episodes</span>
+              <span className="font-semibold text-white">最多章节数</span>
               <input
                 value={form.maxEpisodes}
                 onChange={(event) => updateField("maxEpisodes", event.target.value)}
@@ -190,9 +190,9 @@ export default function ContentGeneratorPage() {
           </div>
 
           <div className="mt-3 flex flex-wrap gap-3 text-xs text-neutral-500">
-            <span>Series per type: 1-20</span>
-            <span>Episode range: 1-30</span>
-            <span>Seed is optional and makes runs reproducible</span>
+            <span>每种类型作品数：1-20</span>
+            <span>章节范围：1-30</span>
+            <span>种子可选，填写后可复现生成结果</span>
           </div>
 
           {validationError ? (
@@ -210,7 +210,7 @@ export default function ContentGeneratorPage() {
                 generating ? "cursor-not-allowed bg-neutral-600" : "bg-emerald-500 hover:bg-emerald-600"
               }`}
             >
-              {generating ? "Generating..." : "Generate content"}
+              {generating ? "生成中..." : "生成内容"}
             </button>
             <button
               type="button"
@@ -218,14 +218,14 @@ export default function ContentGeneratorPage() {
               disabled={generating}
               className="rounded-2xl border border-white/10 px-6 py-3 font-semibold text-neutral-200 transition hover:border-emerald-400 hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Reset settings
+              重置设置
             </button>
             <button
               type="button"
               onClick={() => router.push("/admin/series")}
               className="rounded-2xl border border-white/10 px-6 py-3 font-semibold text-neutral-200 transition hover:border-emerald-400 hover:text-emerald-300"
             >
-              Review series
+              查看作品
             </button>
           </div>
         </section>
@@ -238,17 +238,17 @@ export default function ContentGeneratorPage() {
 
         {result ? (
           <section className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
-            <h2 className="text-lg font-semibold text-emerald-400">Generation summary</h2>
+            <h2 className="text-lg font-semibold text-emerald-400">生成结果</h2>
             <div className="mt-3 grid gap-2 text-sm text-neutral-200 sm:grid-cols-2 lg:grid-cols-3">
-              <p>Run ID: {result.runId || "-"}</p>
-              <p>Comic series: {result.comicsCount}</p>
-              <p>Novel series: {result.novelsCount}</p>
-              <p>Total episodes: {result.totalEpisodes}</p>
-              <p>Duration: {result.duration}s</p>
-              <p>Seed: {String(result.requestPayload?.seed || "random")}</p>
-              <p>Series per type: {result.settings?.seriesPerType ?? result.requestPayload?.seriesPerType ?? previewSeriesPerType}</p>
-              <p>Min episodes: {result.settings?.minEpisodes ?? result.requestPayload?.minEpisodes ?? previewMinEpisodes}</p>
-              <p>Max episodes: {result.settings?.maxEpisodes ?? result.requestPayload?.maxEpisodes ?? previewMaxEpisodes}</p>
+              <p>任务编号：{result.runId || "-"}</p>
+              <p>漫画作品：{result.comicsCount}</p>
+              <p>小说作品：{result.novelsCount}</p>
+              <p>总章节数：{result.totalEpisodes}</p>
+              <p>耗时：{result.duration} 秒</p>
+              <p>种子：{String(result.requestPayload?.seed || "随机")}</p>
+              <p>每种类型作品数：{result.settings?.seriesPerType ?? result.requestPayload?.seriesPerType ?? previewSeriesPerType}</p>
+              <p>最少章节数：{result.settings?.minEpisodes ?? result.requestPayload?.minEpisodes ?? previewMinEpisodes}</p>
+              <p>最多章节数：{result.settings?.maxEpisodes ?? result.requestPayload?.maxEpisodes ?? previewMaxEpisodes}</p>
             </div>
           </section>
         ) : null}

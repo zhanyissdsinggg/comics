@@ -8,8 +8,8 @@ import AdminBrandingPage from '../../../components/admin/AdminBrandingPage';
 
 export default function BrandingPage() {
   return (
-    <AdminLayout title="Brand Settings">
-      <Suspense fallback={<div>Loading...</div>}>
+    <AdminLayout title="品牌设置">
+      <Suspense fallback={<div>加载中...</div>}>
         <AdminBrandingPage />
       </Suspense>
     </AdminLayout>

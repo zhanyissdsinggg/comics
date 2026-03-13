@@ -1,22 +1,9 @@
-# 老王配置：Robots.txt - 告诉搜索引擎爬虫哪些页面可以访问
-# https://www.robotstxt.org/robotstxt.html
-
-# 允许所有搜索引擎爬虫访问所有页面
 User-agent: *
 Allow: /
 
-# 不允许爬取API端点（避免浪费爬虫配额）
 Disallow: /api/
-
-# 不允许爬取管理后台
 Disallow: /admin/
-
-# 不允许爬取私有页面
 Disallow: /account/
 Disallow: /orders/
 
-# Sitemap位置
-Sitemap: https://comics-eta.vercel.app/sitemap.xml
-
-# 爬取延迟（可选，避免服务器压力）
-# Crawl-delay: 1
+Sitemap: https://www.gushcomics.com/sitemap.xml

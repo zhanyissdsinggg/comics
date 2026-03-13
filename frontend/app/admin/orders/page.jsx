@@ -26,9 +26,9 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created date' },
-  { value: 'amount', label: 'Amount' },
-  { value: 'status', label: 'Status' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'amount', label: '金额' },
+  { value: 'status', label: '状态' },
 ];
 
 function formatDate(value) {
@@ -41,7 +41,7 @@ function formatDate(value) {
     return '-';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -50,18 +50,18 @@ function formatDate(value) {
 
 function getStatusLabel(status) {
   const statusMap = {
-    PENDING: 'Pending',
-    PAID: 'Paid',
-    COMPLETED: 'Completed',
-    REFUNDED: 'Refunded',
-    FAILED: 'Failed',
-    CHARGEBACK: 'Chargeback',
-    pending: 'Pending',
-    paid: 'Paid',
-    completed: 'Completed',
-    refunded: 'Refunded',
-    failed: 'Failed',
-    chargeback: 'Chargeback',
+    PENDING: '待支付',
+    PAID: '已支付',
+    COMPLETED: '已完成',
+    REFUNDED: '已退款',
+    FAILED: '失败',
+    CHARGEBACK: '拒付',
+    pending: '待支付',
+    paid: '已支付',
+    completed: '已完成',
+    refunded: '已退款',
+    failed: '失败',
+    chargeback: '拒付',
   };
 
   return statusMap[status] || status || '-';
@@ -131,11 +131,11 @@ export default function AdminOrdersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setFeedback({ type: 'success', message: 'Selected orders were refunded.' });
+        setFeedback({ type: 'success', message: '已为所选订单执行退款。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Refund failed: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `退款失败：${mutationError.message}` });
       },
     }
   );
@@ -149,11 +149,11 @@ export default function AdminOrdersPage() {
       onSuccess: () => {
         clearSelection();
         setIsDeleteConfirmOpen(false);
-        setFeedback({ type: 'success', message: 'Selected orders were deleted.' });
+        setFeedback({ type: 'success', message: '已删除所选订单。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Delete failed: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
       },
     }
   );
@@ -164,12 +164,12 @@ export default function AdminOrdersPage() {
   const handleExport = () => {
     const exportData = orders.filter((order) => selectedIdsSet.has(order.id));
     if (exportData.length === 0) {
-      setFeedback({ type: 'error', message: 'Select at least one order to export.' });
+      setFeedback({ type: 'error', message: '请至少选择一个订单后再导出。' });
       return;
     }
 
     const csv = [
-      ['Order ID', 'User ID', 'Amount', 'Status', 'Created'].join(','),
+      ['订单 ID', '用户 ID', '金额', '状态', '创建时间'].join(','),
       ...exportData.map((order) =>
         [
           order.id,
@@ -194,8 +194,8 @@ export default function AdminOrdersPage() {
     <div className="min-h-screen bg-neutral-900 p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">Orders</h1>
-          <p className="mt-2 text-neutral-400">Manage transactions, refunds, and bulk operational cleanup from one queue.</p>
+          <h1 className="text-3xl font-bold text-neutral-100">订单管理</h1>
+          <p className="mt-2 text-neutral-400">在同一队列中统一处理交易、退款与批量清理操作。</p>
         </div>
 
         <AdminFeedbackBanner
@@ -207,7 +207,7 @@ export default function AdminOrdersPage() {
         <AdminListToolbar
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
-          searchPlaceholder="Search orders by order ID or user ID"
+          searchPlaceholder="按订单 ID 或用户 ID 搜索"
           onOpenFilters={() => setIsFilterModalOpen(true)}
           sortOrder={sortOrder}
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -220,7 +220,7 @@ export default function AdminOrdersPage() {
             disabled={selectedIds.length === 0 || bulkRefundMutation.isPending}
             className="rounded-lg bg-orange-600 px-4 py-2 text-sm text-white transition hover:bg-orange-700 disabled:opacity-50"
           >
-            {bulkRefundMutation.isPending ? 'Refunding...' : 'Refund'}
+            {bulkRefundMutation.isPending ? '退款中...' : '退款'}
           </button>
           <button
             type="button"
@@ -228,7 +228,7 @@ export default function AdminOrdersPage() {
             disabled={selectedIds.length === 0}
             className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
-            Export
+            导出
           </button>
           <button
             type="button"
@@ -236,17 +236,17 @@ export default function AdminOrdersPage() {
             disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
             className="rounded-lg bg-red-700 px-4 py-2 text-sm text-white transition hover:bg-red-800 disabled:opacity-50"
           >
-            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
           </button>
         </AdminSelectionBar>
 
         <AdminTableShell
           isError={isError}
-          errorMessage={error?.message || 'Failed to load orders.'}
+          errorMessage={error?.message || '订单加载失败。'}
           onRetry={refetch}
           isLoading={isLoading}
           hasItems={orders.length > 0}
-          emptyMessage="No orders yet."
+          emptyMessage="暂无订单。"
           pagination={pagination}
           page={page}
           pageSize={pageSize}
@@ -259,7 +259,7 @@ export default function AdminOrdersPage() {
                 <th className="px-4 py-3 text-left">
                   <input
                     type="checkbox"
-                    aria-label="Select all orders"
+                    aria-label="选择全部订单"
                     checked={orders.length > 0 && selectedIds.length === orders.length}
                     onChange={(event) => {
                       if (event.target.checked) {
@@ -271,12 +271,12 @@ export default function AdminOrdersPage() {
                     className="rounded"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-neutral-400">Order ID</th>
-                <th className="px-4 py-3 text-left text-neutral-400">User ID</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Amount</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Status</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Created</th>
-                <th className="px-4 py-3 text-left text-neutral-400">Actions</th>
+                <th className="px-4 py-3 text-left text-neutral-400">订单 ID</th>
+                <th className="px-4 py-3 text-left text-neutral-400">用户 ID</th>
+                <th className="px-4 py-3 text-left text-neutral-400">金额</th>
+                <th className="px-4 py-3 text-left text-neutral-400">状态</th>
+                <th className="px-4 py-3 text-left text-neutral-400">创建时间</th>
+                <th className="px-4 py-3 text-left text-neutral-400">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -285,7 +285,7 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"
-                      aria-label={`Select order ${order.id}`}
+                      aria-label={`选择订单 ${order.id}`}
                       checked={selectedIdsSet.has(order.id)}
                       onChange={() => toggleSelect(order.id)}
                       className="rounded"
@@ -308,7 +308,7 @@ export default function AdminOrdersPage() {
                         disabled={bulkRefundMutation.isPending}
                         className="text-sm text-orange-400 transition hover:text-orange-300 disabled:opacity-50"
                       >
-                        Refund
+                        退款
                       </button>
                     ) : null}
                   </td>
@@ -329,10 +329,10 @@ export default function AdminOrdersPage() {
 
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        title="Delete selected orders"
-        message={`Delete ${selectedIds.length} selected order(s)? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title="删除所选订单"
+        message={`确定删除 ${selectedIds.length} 个选中订单吗？此操作无法撤销。`}
+        confirmText="删除"
+        cancelText="取消"
         isDangerous={true}
         isLoading={bulkDeleteMutation.isPending}
         onConfirm={handleBulkDelete}

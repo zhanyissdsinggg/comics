@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
+import { normalizeReadingPercent } from "../lib/readingPercent";
 import { useAuthStore } from "./useAuthStore";
 
 const ProgressContext = createContext(null);
@@ -27,10 +28,35 @@ function readProgress(seriesId) {
     return null;
   }
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return null;
+    }
+    return {
+      ...parsed,
+      percent: normalizeReadingPercent(parsed.percent),
+    };
   } catch (err) {
     return null;
   }
+}
+
+function normalizeProgressMap(source) {
+  if (!source || typeof source !== "object") {
+    return {};
+  }
+
+  return Object.entries(source).reduce((acc, [seriesId, value]) => {
+    if (!value || typeof value !== "object") {
+      return acc;
+    }
+
+    acc[seriesId] = {
+      ...value,
+      percent: normalizeReadingPercent(value.percent),
+    };
+    return acc;
+  }, {});
 }
 
 export function ProgressProvider({ children }) {
@@ -66,9 +92,10 @@ export function ProgressProvider({ children }) {
 
     apiGet("/api/progress", { suppressAuthModal: true }).then((response) => {
       if (response.ok && response.data?.progress) {
-        setBySeriesId(response.data.progress);
+        const normalizedProgress = normalizeProgressMap(response.data.progress);
+        setBySeriesId(normalizedProgress);
         if (typeof window !== "undefined") {
-          Object.entries(response.data.progress).forEach(([seriesId, value]) => {
+          Object.entries(normalizedProgress).forEach(([seriesId, value]) => {
             window.localStorage.setItem(getProgressKey(seriesId), JSON.stringify(value));
           });
         }
@@ -85,9 +112,10 @@ export function ProgressProvider({ children }) {
 
   const setProgress = useCallback(
     (seriesId, episodeId, percent) => {
+      const normalizedPercent = normalizeReadingPercent(percent);
       const payload = {
         lastEpisodeId: episodeId,
-        percent,
+        percent: normalizedPercent,
         updatedAt: Date.now(),
       };
       if (typeof window !== "undefined") {
@@ -110,7 +138,7 @@ export function ProgressProvider({ children }) {
           apiPost("/api/progress/update", {
             seriesId: id,
             lastEpisodeId: entry.lastEpisodeId,
-            percent: entry.percent,
+            percent: normalizeReadingPercent(entry.percent),
           });
         });
         timerRef.current = null;
@@ -127,7 +155,7 @@ export function ProgressProvider({ children }) {
 
     const response = await apiGet("/api/progress", { suppressAuthModal: true });
     if (response.ok && response.data?.progress) {
-      setBySeriesId(response.data.progress);
+      setBySeriesId(normalizeProgressMap(response.data.progress));
     }
     setLoaded(true);
     return response;

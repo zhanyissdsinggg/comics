@@ -136,7 +136,7 @@ export function useAdminList<T extends { id: string }>(
   const [filters, setFilters] = useState<FilterState>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(100);
+  const [pageSize, setPageSize] = useState(20);
 
   const filtersKey = JSON.stringify(filters);
 
@@ -168,6 +168,7 @@ export function useAdminList<T extends { id: string }>(
       return (await response.json()) as AdminListPayload<T>;
     },
     staleTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 
   const items = useMemo(() => extractItems<T>(data, endpoint), [data, endpoint]);

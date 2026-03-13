@@ -8,8 +8,8 @@ import AdminEmailJobsPage from '../../../components/admin/AdminEmailJobsPage';
 
 export default function EmailJobsPage() {
   return (
-    <AdminLayout title="Email Jobs">
-      <Suspense fallback={<div>Loading...</div>}>
+    <AdminLayout title="邮件任务">
+      <Suspense fallback={<div>加载中...</div>}>
         <AdminEmailJobsPage />
       </Suspense>
     </AdminLayout>

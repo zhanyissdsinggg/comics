@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -40,10 +40,16 @@ export default function SiteHeader({ onSearch }) {
 
   useEffect(() => {
     const handler = (event) => {
+      if (typeof event.stopImmediatePropagation === "function") {
+        event.stopImmediatePropagation();
+      }
       event.__mnAuthHandled = true;
       const returnTo = event?.detail?.returnTo || null;
-      if (returnTo && typeof window !== "undefined") {
-        window.sessionStorage.setItem("mn_return_to", returnTo);
+      if (typeof window !== "undefined") {
+        window.__mnAuthModalHandledAt = Date.now();
+        if (returnTo) {
+          window.sessionStorage.setItem("mn_return_to", returnTo);
+        }
       }
       setActiveModal("login");
       setAuthError("");
@@ -138,7 +144,7 @@ export default function SiteHeader({ onSearch }) {
 
   return (
     <>
-      <header
+      <header data-site-header="1"
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
           scrolled
             ? "border-white/10 bg-neutral-950/92 shadow-ios-lg backdrop-blur-2xl"
@@ -177,3 +183,6 @@ export default function SiteHeader({ onSearch }) {
     </>
   );
 }
+
+
+

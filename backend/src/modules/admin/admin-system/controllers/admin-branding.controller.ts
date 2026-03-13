@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { ApiBody } from "@nestjs/swagger";
 import { ConfigService } from "../../services/config.service";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import {
@@ -31,6 +32,7 @@ export class AdminBrandingController {
   }
 
   @Post()
+  @ApiBody({ type: UpdateBrandingDto, required: false })
   async save(@Body() body: BrandingSaveBody) {
     const source = body?.branding || body;
     const branding = buildBrandingPayload(source);
