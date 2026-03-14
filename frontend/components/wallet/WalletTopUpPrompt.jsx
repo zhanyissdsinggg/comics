@@ -177,7 +177,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
           </div>
 
           <p className="mt-4 text-center text-xs text-neutral-500">
-            Secure payment powered by Stripe
+            Final payment methods appear only after secure checkout is enabled.
           </p>
         </div>
       </div>

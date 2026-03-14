@@ -10,6 +10,10 @@ import { logger } from "../../../common/logger/winston.init";
 import { isAdminAuthorized } from "../../../common/utils/admin";
 import { getAdminIdentityFromKey } from "../../../common/utils/admin-security";
 import { isAdminTokenJtiRevoked } from "../utils/admin-token-revocation";
+import {
+  isAdminLegacyAdminKeyFallbackEnabled,
+  isAdminTokenFallbackEnabled,
+} from "../utils/admin-auth-transport";
 
 const ADMIN_ACCESS_COOKIE_NAME = "admin_access_token";
 
@@ -20,14 +24,6 @@ interface JwtPayload {
   type?: string;
   jti?: string;
   adminId?: string;
-}
-
-function isLegacyBearerEnabled(): boolean {
-  const flag = String(process.env.ADMIN_LEGACY_BEARER_ENABLED || "").trim();
-  if (flag) {
-    return flag === "1";
-  }
-  return process.env.NODE_ENV !== "production";
 }
 
 @Injectable()
@@ -41,11 +37,11 @@ export class AdminAuthGuard implements CanActivate {
     const cookieToken = this.getCookieToken(request, ADMIN_ACCESS_COOKIE_NAME);
     const jwtCandidates: Array<{ source: TokenSource; token: string }> = [];
 
-    if (bearerToken) {
-      jwtCandidates.push({ source: "bearer", token: bearerToken });
-    }
-    if (cookieToken && cookieToken !== bearerToken) {
+    if (cookieToken) {
       jwtCandidates.push({ source: "cookie", token: cookieToken });
+    }
+    if (isAdminTokenFallbackEnabled() && bearerToken && bearerToken !== cookieToken) {
+      jwtCandidates.push({ source: "bearer", token: bearerToken });
     }
 
     let lastJwtError: unknown = null;
@@ -73,7 +69,7 @@ export class AdminAuthGuard implements CanActivate {
       }
     }
 
-    if (isLegacyBearerEnabled() && isAdminAuthorized(request, request.body)) {
+    if (isAdminLegacyAdminKeyFallbackEnabled() && isAdminAuthorized(request, request.body)) {
       const adminId = getAdminIdentityFromKey(bearerToken || "") || "admin";
       request.user = {
         userId: adminId,

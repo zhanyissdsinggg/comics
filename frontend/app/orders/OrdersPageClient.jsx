@@ -6,6 +6,7 @@ import SiteHeader from "../../components/layout/SiteHeader";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import { apiGet, apiPost } from "../../lib/apiClient";
+import { getFriendlyMessage } from "../../lib/errorMessages";
 import { formatUSCurrency } from "../../lib/localization";
 import { useAuthStore } from "../../store/useAuthStore";
 
@@ -24,7 +25,7 @@ export default function OrdersPageClient() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [workingId, setWorkingId] = useState("");
-  const [message, setMessage] = useState("");
+  const [feedback, setFeedback] = useState({ type: "", text: "" });
 
   useEffect(() => {
     let mounted = true;
@@ -132,9 +133,12 @@ export default function OrdersPageClient() {
                   });
                   if (response.ok) {
                     setOrders(response.data?.orders || []);
-                    setMessage("Order status updated.");
+                    setFeedback({ type: "success", text: "Order status updated." });
                   } else {
-                    setMessage(response.error || "Refresh failed.");
+                    setFeedback({
+                      type: "error",
+                      text: getFriendlyMessage(response.error, response.message || "Refresh failed."),
+                    });
                   }
                   setWorkingId("");
                 }}
@@ -154,9 +158,15 @@ export default function OrdersPageClient() {
           }
         />
 
-        {message ? (
-          <SurfacePanel className="border border-white/10 bg-emerald-500/10">
-            <p className="text-sm text-neutral-100">{message}</p>
+        {feedback.text ? (
+          <SurfacePanel
+            className={
+              feedback.type === "error"
+                ? "border border-red-500/40 bg-red-500/10 text-red-100"
+                : "border border-white/10 bg-emerald-500/10"
+            }
+          >
+            <p className="text-sm text-neutral-100">{feedback.text}</p>
           </SurfacePanel>
         ) : null}
 
@@ -233,9 +243,12 @@ export default function OrdersPageClient() {
                               item.orderId === order.orderId ? response.data?.order : item,
                             ),
                           );
-                          setMessage("Refund requested.");
+                          setFeedback({ type: "success", text: "Refund requested." });
                         } else {
-                          setMessage(response.error || "Refund failed.");
+                          setFeedback({
+                            type: "error",
+                            text: getFriendlyMessage(response.error, response.message || "Refund failed."),
+                          });
                         }
                         setWorkingId("");
                       }}

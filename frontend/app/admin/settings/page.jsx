@@ -1,4 +1,4 @@
-import { AdminLayout } from '../../../components/admin/AdminLayout';
+import { AdminLayout } from "../../../components/admin/AdminLayout";
 
 function SettingsContent() {
   return (
@@ -6,7 +6,8 @@ function SettingsContent() {
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold">后台访问</h2>
         <p className="mt-2 text-sm text-slate-600">
-          后台认证可通过查询参数、请求头或 Bearer Token 提供。
+          后台认证现在统一走 HttpOnly Cookie 会话。不要再通过 URL 参数、前端本地存储或手动
+          Bearer Token 传递敏感凭据。
         </p>
       </section>
 

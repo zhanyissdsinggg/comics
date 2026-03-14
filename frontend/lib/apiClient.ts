@@ -53,7 +53,8 @@ const CIRCUIT_OPEN_MS = 10_000;
 const DEFAULT_TIMEOUT_MS = 8000;
 const LOCAL_CACHE_PREFIX = "mn_api_cache:";
 const CACHE_LOG_LIMIT = 120;
-const ADMIN_ACCESS_TOKEN_KEY = "admin_token";
+const ADMIN_AUTH_INVALIDATED_EVENT = "admin-auth-invalidated";
+const AUTH_SNAPSHOT_KEY = "admin_auth_snapshot";
 
 const SILENT_AUTH_PATH_PREFIXES = [
   "/api/auth/me",
@@ -146,35 +147,18 @@ function getBaseUrl(): string {
   return "http://localhost:4000";
 }
 
-function getStoredAdminAccessToken(): string {
+function notifyAdminAuthInvalidated(): void {
   if (typeof window === "undefined") {
-    return "";
+    return;
   }
+
   try {
-    return window.localStorage.getItem(ADMIN_ACCESS_TOKEN_KEY) || "";
+    window.sessionStorage.removeItem(AUTH_SNAPSHOT_KEY);
   } catch {
-    return "";
-  }
-}
-
-function hasAuthorizationHeader(headers: Record<string, string>): boolean {
-  return Object.entries(headers).some(([key, value]) => {
-    return key.toLowerCase() === "authorization" && Boolean(value);
-  });
-}
-
-function attachAdminAuthHeader(path: string, headers: Record<string, string>): void {
-  if (!path.startsWith("/api/admin")) {
-    return;
-  }
-  if (hasAuthorizationHeader(headers)) {
-    return;
+    // Ignore storage removal failures.
   }
 
-  const token = getStoredAdminAccessToken();
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
+  window.dispatchEvent(new Event(ADMIN_AUTH_INVALIDATED_EVENT));
 }
 
 function isSilentAuthPath(path: string): boolean {
@@ -452,7 +436,6 @@ async function requestJson(
       const timeoutMs = options?.timeoutMs || DEFAULT_TIMEOUT_MS;
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       const headers = { ...options?.headers };
-      attachAdminAuthHeader(path, headers);
 
       const response = await fetch(`${baseUrl}${path}`, {
         ...options,
@@ -482,6 +465,9 @@ async function requestJson(
         };
         const friendly = getFriendlyMessage(errorPayload.error, errorPayload.message);
         if (response.status === 401) {
+          if (path.startsWith("/api/admin")) {
+            notifyAdminAuthInvalidated();
+          }
           const suppressAuth =
             options?.suppressAuthModal ||
             path.startsWith("/api/admin") ||

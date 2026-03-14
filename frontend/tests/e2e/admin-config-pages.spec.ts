@@ -1,8 +1,6 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
-const ADMIN_ACCESS_TOKEN = "e2e-admin-access-token";
-const ADMIN_REFRESH_TOKEN = "e2e-admin-refresh-token";
 const ADMIN_UI_TIMEOUT_MS = 15000;
 
 type AdminRouteHandler = (route: Route, url: URL) => Promise<boolean>;
@@ -22,14 +20,12 @@ async function primeAdminSession(
   } = {},
 ): Promise<void> {
   await page.addInitScript(
-    ([accessToken, refreshToken, trackingSnapshot]) => {
-      window.localStorage.setItem("admin_token", accessToken);
-      window.localStorage.setItem("admin_refresh_token", refreshToken);
+    ([trackingSnapshot]) => {
       if (trackingSnapshot) {
         window.localStorage.setItem("mn_tracking_settings_v1", JSON.stringify(trackingSnapshot));
       }
     },
-    [ADMIN_ACCESS_TOKEN, ADMIN_REFRESH_TOKEN, options.localTrackingSnapshot ?? null],
+    [options.localTrackingSnapshot ?? null],
   );
 }
 
@@ -50,8 +46,6 @@ async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Pro
     if (pathname.endsWith("/api/admin/auth/refresh")) {
       await fulfillJson(route, {
         success: true,
-        accessToken: ADMIN_ACCESS_TOKEN,
-        refreshToken: ADMIN_REFRESH_TOKEN,
       });
       return;
     }
@@ -87,11 +81,11 @@ test.describe("Admin config page regressions", () => {
     const response = await page.goto("/admin/branding", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Loading branding settings...", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText(/正在加载品牌配置|姝ｅ湪鍔犺浇鍝佺墝閰嶇疆/)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.locator('input[placeholder="https://.../logo.png"]')).toHaveValue("https://cdn.example.com/logo.png", {
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Save Branding" })).toBeEnabled({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("button", { name: /保存品牌配置|淇濆瓨鍝佺墝閰嶇疆/ })).toBeEnabled({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/branding", runtimeIssues);
@@ -157,8 +151,8 @@ test.describe("Admin config page regressions", () => {
 
     await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
-    await page.getByRole("button", { name: "Failed only" }).dispatchEvent("click");
-    await page.getByRole("button", { name: "All jobs" }).dispatchEvent("click");
+    await page.getByRole("button", { name: /仅失败任务|浠呭け璐ヤ换鍔?/ }).dispatchEvent("click");
+    await page.getByRole("button", { name: /全部任务|鍏ㄩ儴浠诲姟/ }).dispatchEvent("click");
 
     await page.waitForTimeout(900);
     await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });

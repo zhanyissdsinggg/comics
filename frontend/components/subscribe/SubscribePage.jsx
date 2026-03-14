@@ -9,6 +9,7 @@ import SurfacePanel from "../common/SurfacePanel";
 import { SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
 import { getPlanCatalog, setPlanCatalog } from "../../lib/subscriptions";
 import { apiGet } from "../../lib/apiClient";
+import { getFriendlyMessage } from "../../lib/errorMessages";
 import { useWalletStore } from "../../store/useWalletStore";
 import {
   loadPersistedPaymentAttribution,
@@ -23,6 +24,7 @@ export default function SubscribePage() {
   const searchParams = useSearchParams();
   const { subscription, subscribe, cancelSubscription } = useWalletStore();
   const [workingId, setWorkingId] = useState("");
+  const [feedback, setFeedback] = useState("");
   const [planCatalog, setPlanCatalogState] = useState(getPlanCatalog());
   const isActive = Boolean(subscription?.active);
   const baseUnlockPrice = 5;
@@ -80,6 +82,7 @@ export default function SubscribePage() {
 
   const handleSubscribe = async (planId) => {
     setWorkingId(planId);
+    setFeedback("");
     trackEvent("subscribe_cta_click", {
       planId,
       entryPoint: attribution?.entryPoint,
@@ -95,13 +98,24 @@ export default function SubscribePage() {
     setWorkingId("");
     if (response.ok) {
       router.replace(returnTo);
+      return;
     }
+
+    setFeedback(
+      getFriendlyMessage(response.error, response.message || "Subscription could not be updated right now."),
+    );
   };
 
   const handleCancel = async () => {
     setWorkingId("cancel");
-    await cancelSubscription();
+    setFeedback("");
+    const response = await cancelSubscription();
     setWorkingId("");
+    if (!response.ok) {
+      setFeedback(
+        getFriendlyMessage(response.error, response.message || "Subscription could not be updated right now."),
+      );
+    }
   };
 
   const getPlanIcon = (planId) => {
@@ -155,8 +169,8 @@ export default function SubscribePage() {
         <EditorialHero
           eyebrow="Membership"
           title="Choose a plan with clear perks, clear pricing, and no storefront noise."
-          description="The subscription page now follows the same editorial system as search, library, and series while preserving the existing subscribe and cancel flows."
-          secondary="Each tier keeps the same benefit math, but the hierarchy is tighter: plan cards first, comparison grid second, current status last."
+          description="Plan comparison stays visible even when secure subscription billing is still being configured, so users can review the tiers before checkout opens."
+          secondary="Each tier keeps the same benefit math, but activation now depends on secure billing being available on the backend."
           stats={subscriptionHeroStats}
           actions={
             <>
@@ -179,6 +193,11 @@ export default function SubscribePage() {
         />
 
         <SurfacePanel className="space-y-6">
+          {feedback ? (
+            <div className="rounded-[24px] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+              {feedback}
+            </div>
+          ) : null}
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">

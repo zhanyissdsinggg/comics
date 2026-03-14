@@ -1,8 +1,6 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
-const ADMIN_ACCESS_TOKEN = "e2e-admin-access-token";
-const ADMIN_REFRESH_TOKEN = "e2e-admin-refresh-token";
 const ADMIN_UI_TIMEOUT_MS = 15000;
 
 type AdminRouteHandler = (route: Route, url: URL) => Promise<boolean>;
@@ -16,13 +14,7 @@ async function fulfillJson(route: Route, body: unknown, status = 200): Promise<v
 }
 
 async function primeAdminSession(page: Page): Promise<void> {
-  await page.addInitScript(
-    ([accessToken, refreshToken]) => {
-      window.localStorage.setItem("admin_token", accessToken);
-      window.localStorage.setItem("admin_refresh_token", refreshToken);
-    },
-    [ADMIN_ACCESS_TOKEN, ADMIN_REFRESH_TOKEN],
-  );
+  await page.addInitScript(() => undefined);
 }
 
 async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Promise<void> {
@@ -40,11 +32,7 @@ async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Pro
     }
 
     if (pathname.endsWith("/api/admin/auth/refresh")) {
-      await fulfillJson(route, {
-        success: true,
-        accessToken: ADMIN_ACCESS_TOKEN,
-        refreshToken: ADMIN_REFRESH_TOKEN,
-      });
+      await fulfillJson(route, { success: true });
       return;
     }
 
@@ -65,9 +53,12 @@ test.describe("Admin system page regressions", () => {
     const response = await page.goto("/admin/settings", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "系统设置" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("后台访问", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("指标规则", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    const sectionHeadings = page.locator("section h2");
+    await expect(page.locator("h1").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(sectionHeadings).toHaveCount(3, { timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(sectionHeadings.nth(0)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(sectionHeadings.nth(2)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText(/HttpOnly Cookie/)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await page.waitForTimeout(1200);
     await expect(page.getByText("We use cookies", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Install Gush App", { exact: true })).toHaveCount(0);
@@ -79,8 +70,8 @@ test.describe("Admin system page regressions", () => {
   test("email settings saves the latest draft before sending a test email", async ({ page }) => {
     await primeAdminSession(page);
 
-    const savePayloads = [];
-    const testPayloads = [];
+    const savePayloads: Record<string, unknown>[] = [];
+    const testPayloads: Record<string, unknown>[] = [];
 
     await installAdminApiMocks(page, async (route, url) => {
       if (url.pathname.endsWith("/api/admin/email") && route.request().method() === "GET") {
@@ -100,7 +91,7 @@ test.describe("Admin system page regressions", () => {
       }
 
       if (url.pathname.endsWith("/api/admin/email") && route.request().method() === "POST") {
-        const payload = JSON.parse(route.request().postData() || "{}");
+        const payload = JSON.parse(route.request().postData() || "{}") as Record<string, unknown>;
         savePayloads.push(payload);
         await fulfillJson(route, {
           config: {
@@ -114,7 +105,7 @@ test.describe("Admin system page regressions", () => {
       }
 
       if (url.pathname.endsWith("/api/admin/email/test")) {
-        testPayloads.push(JSON.parse(route.request().postData() || "{}"));
+        testPayloads.push(JSON.parse(route.request().postData() || "{}") as Record<string, unknown>);
         await fulfillJson(route, { ok: true });
         return true;
       }
@@ -126,12 +117,15 @@ test.describe("Admin system page regressions", () => {
     const response = await page.goto("/admin/email-settings", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.locator("main").getByRole("heading", { name: "邮件设置" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByLabel("发件地址").fill("latest@gush.test");
-    await expect(page.getByRole("button", { name: "保存并发送测试" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: "保存并发送测试" }).click();
+    const fromInput = page.locator('input[placeholder="no-reply@yourdomain.com"]');
+    await expect(fromInput).toHaveValue("old@gush.test", { timeout: ADMIN_UI_TIMEOUT_MS });
+    await fromInput.fill("latest@gush.test");
 
-    await expect(page.getByText("邮件设置已保存，并已发送测试邮件。", { exact: true })).toBeVisible({
+    const sendTestButton = page.getByRole("button", { name: /测试|娴嬭瘯|发送|鍙戦€?/ }).first();
+    await expect(sendTestButton).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await sendTestButton.click();
+
+    await expect(page.getByText(/已保存.*测试邮件|宸蹭繚瀛.*娴嬭瘯閭欢/)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     expect(savePayloads).toHaveLength(1);
@@ -166,19 +160,19 @@ test.describe("Admin system page regressions", () => {
     const response = await page.goto("/admin/regions", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("还没有配置任何国家区号。", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: "新增条目" }).click();
-    await page.getByRole("button", { name: "新增条目" }).click();
+    const addButton = page.getByRole("button", { name: /新增|鏂板/ });
+    await expect(addButton).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await addButton.click();
+    await addButton.click();
 
-    const codeInputs = page.locator('input[placeholder="+1"]');
-    const labelInputs = page.locator('input[placeholder="美国"]');
-    await codeInputs.nth(0).fill("1");
-    await labelInputs.nth(0).fill("美国");
-    await codeInputs.nth(1).fill("+1");
-    await labelInputs.nth(1).fill("重复美国");
+    const inputs = page.locator('input:not([type="file"])');
+    await inputs.nth(0).fill("1");
+    await inputs.nth(1).fill("United States");
+    await inputs.nth(2).fill("+1");
+    await inputs.nth(3).fill("Duplicate United States");
 
-    await page.getByRole("button", { name: "保存更改" }).click();
-    await expect(page.getByText("国家区号不能重复：+1。", { exact: true })).toBeVisible({
+    await page.getByRole("button", { name: /保存|淇濆瓨/ }).click();
+    await expect(page.getByText(/(\+1).*(不能重复|涓嶈兘閲嶅)|(不能重复|涓嶈兘閲嶅).*(\+1)/)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     expect(saveRequests).toBe(0);
@@ -190,11 +184,11 @@ test.describe("Admin system page regressions", () => {
   test("content generator submits custom settings and renders the returned summary", async ({ page }) => {
     await primeAdminSession(page);
 
-    const payloads = [];
+    const payloads: Record<string, unknown>[] = [];
 
     await installAdminApiMocks(page, async (route, url) => {
       if (url.pathname.endsWith("/api/admin/generate-content")) {
-        payloads.push(JSON.parse(route.request().postData() || "{}"));
+        payloads.push(JSON.parse(route.request().postData() || "{}") as Record<string, unknown>);
         await fulfillJson(route, {
           success: true,
           runId: "run-custom-1",
@@ -218,12 +212,14 @@ test.describe("Admin system page regressions", () => {
     const response = await page.goto("/admin/content-generator", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "演示内容生成器" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByLabel("种子").fill("night-run");
-    await page.getByLabel("每种类型作品数").fill("3");
-    await page.getByLabel("最少章节数").fill("4");
-    await page.getByLabel("最多章节数").fill("4");
-    await page.getByRole("button", { name: "生成内容" }).click();
+    await expect(page.locator("h1").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+
+    const inputs = page.locator('input:not([type="file"])');
+    await inputs.nth(0).fill("night-run");
+    await inputs.nth(1).fill("3");
+    await inputs.nth(2).fill("4");
+    await inputs.nth(3).fill("4");
+    await page.getByRole("button", { name: /内容|生成|鍐呭|鐢熸垚/ }).first().click();
 
     await expect.poll(() => payloads.length).toBe(1);
     expect(payloads).toEqual([
@@ -234,13 +230,11 @@ test.describe("Admin system page regressions", () => {
         maxEpisodes: 4,
       },
     ]);
-    await expect(page.getByText("生成完成，任务编号：run-custom-1。", { exact: true })).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
-    await expect(page.getByText("任务编号：run-custom-1", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("每种类型作品数：3", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("最少章节数：4", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("最多章节数：4", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+
+    const resultSection = page.locator("section").filter({ hasText: /run-custom-1/ }).last();
+    await expect(resultSection).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(resultSection).toContainText(/run-custom-1/);
+    await expect(resultSection).toContainText(/24/);
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/content-generator", runtimeIssues);

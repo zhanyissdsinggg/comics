@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
 import { WalletService } from "./wallet.service";
 import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../common/utils/auth";
+import { buildBillingProviderRequiredError, isDemoBillingEnabled } from "../../common/utils/billing-mode";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { checkRateLimit, getIdempotencyRecord, setIdempotencyRecord } from "../../common/storage/limits";
 import { buildWalletSnapshot } from "../../common/utils/subscription";
@@ -29,6 +30,13 @@ export class WalletController {
 
   @Post("topup")
   async topup(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    if (!isDemoBillingEnabled()) {
+      res.status(409);
+      return buildBillingProviderRequiredError(
+        "Direct wallet top-ups are disabled until a secure billing provider is configured.",
+      );
+    }
+
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);

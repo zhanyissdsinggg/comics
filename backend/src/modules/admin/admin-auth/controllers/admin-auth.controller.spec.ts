@@ -1,4 +1,4 @@
-﻿import { HttpStatus } from "@nestjs/common";
+import { HttpStatus } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
@@ -80,15 +80,17 @@ describe("AdminAuthController", () => {
     (getAdminIdentityFromKey as jest.Mock).mockReturnValue("admin-1-test");
     (isAdminTotpEnabled as jest.Mock).mockReturnValue(false);
     (verifyAdminTotpCode as jest.Mock).mockReturnValue(true);
+    delete process.env.ADMIN_TOKEN_FALLBACK_ENABLED;
   });
 
   afterEach(() => {
     jest.clearAllMocks();
     resetAdminTokenRevocationStore();
+    delete process.env.ADMIN_TOKEN_FALLBACK_ENABLED;
   });
 
   describe("login", () => {
-    it("should login successfully with valid admin key", async () => {
+    it("should login successfully with valid admin key and set auth cookies", async () => {
       const req = {
         ip: "127.0.0.1",
         headers: {},
@@ -101,10 +103,18 @@ describe("AdminAuthController", () => {
       expect(result).toEqual(
         expect.objectContaining({
           success: true,
-          accessToken: "mock-access-token",
-          refreshToken: "mock-refresh-token",
           expiresIn: 86400,
+          sessionTransport: "cookie",
         }),
+      );
+      expect(result).not.toHaveProperty("accessToken");
+      expect(result).not.toHaveProperty("refreshToken");
+      expect(req.res.setHeader).toHaveBeenCalledWith(
+        "Set-Cookie",
+        expect.arrayContaining([
+          expect.stringContaining("admin_access_token=mock-access-token"),
+          expect.stringContaining("admin_refresh_token=mock-refresh-token"),
+        ]),
       );
       expect(adminLogService.log).toHaveBeenCalledWith(
         "login_success",
@@ -148,35 +158,57 @@ describe("AdminAuthController", () => {
   });
 
   describe("refresh", () => {
-    it("should refresh access token", async () => {
-      const result = await controller.refresh(
-        { refreshToken: "valid-refresh-token" },
-        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
-      );
+    it("should refresh access token using the refresh cookie", async () => {
+      const req = {
+        headers: {},
+        cookies: { admin_refresh_token: "valid-refresh-token" },
+        res: { setHeader: jest.fn() },
+      };
+
+      const result = await controller.refresh({}, req);
 
       expect(result).toEqual(
         expect.objectContaining({
           success: true,
-          accessToken: "mock-access-token",
-          refreshToken: "valid-refresh-token",
           expiresIn: 86400,
+          sessionTransport: "cookie",
         }),
       );
+      expect(result).not.toHaveProperty("accessToken");
+      expect(result).not.toHaveProperty("refreshToken");
       expect(jwtService.verify).toHaveBeenCalledWith("valid-refresh-token");
+      expect(req.res.setHeader).toHaveBeenCalledWith(
+        "Set-Cookie",
+        expect.arrayContaining([
+          expect.stringContaining("admin_access_token=mock-access-token"),
+          expect.stringContaining("admin_refresh_token=valid-refresh-token"),
+        ]),
+      );
     });
 
     it("should reject a revoked refresh token", async () => {
       mockGetRedisClient.mockReturnValue(null);
 
       await controller.logout(
-        { refreshToken: "valid-refresh-token" },
-        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
+        {},
+        {
+          headers: {},
+          cookies: {
+            admin_access_token: "valid-access-token",
+            admin_refresh_token: "valid-refresh-token",
+          },
+          res: { setHeader: jest.fn() },
+        },
       );
 
       await expect(
         controller.refresh(
-          { refreshToken: "valid-refresh-token" },
-          { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
+          {},
+          {
+            headers: {},
+            cookies: { admin_refresh_token: "valid-refresh-token" },
+            res: { setHeader: jest.fn() },
+          },
         ),
       ).rejects.toMatchObject({
         status: HttpStatus.UNAUTHORIZED,
@@ -195,17 +227,46 @@ describe("AdminAuthController", () => {
       );
     });
 
+    it("should verify the access cookie by default", async () => {
+      const result = await controller.verify(
+        {},
+        {
+          headers: {},
+          cookies: { admin_access_token: "valid-access-token" },
+          res: {},
+        },
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          success: true,
+          valid: true,
+        }),
+      );
+    });
+
     it("should return invalid after logout revokes the access token", async () => {
       mockGetRedisClient.mockReturnValue(null);
 
       await controller.logout(
-        { token: "valid-access-token" },
-        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
+        {},
+        {
+          headers: {},
+          cookies: {
+            admin_access_token: "valid-access-token",
+            admin_refresh_token: "valid-refresh-token",
+          },
+          res: { setHeader: jest.fn() },
+        },
       );
 
       const result = await controller.verify(
-        { token: "valid-access-token" },
-        { headers: {}, cookies: {}, res: {} },
+        {},
+        {
+          headers: {},
+          cookies: { admin_access_token: "valid-access-token" },
+          res: {},
+        },
       );
 
       expect(result).toEqual(
@@ -218,11 +279,17 @@ describe("AdminAuthController", () => {
   });
 
   describe("logout", () => {
-    it("should logout successfully and revoke both token types", async () => {
-      const result = await controller.logout(
-        { token: "valid-access-token", refreshToken: "valid-refresh-token" },
-        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
-      );
+    it("should logout successfully and revoke both token types from cookies", async () => {
+      const req = {
+        headers: {},
+        cookies: {
+          admin_access_token: "valid-access-token",
+          admin_refresh_token: "valid-refresh-token",
+        },
+        res: { setHeader: jest.fn() },
+      };
+
+      const result = await controller.logout({}, req);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -231,6 +298,14 @@ describe("AdminAuthController", () => {
       );
       expect(mockRedis.setex).toHaveBeenCalledWith("admin:token:blacklist:access-jti", 86400, "1");
       expect(mockRedis.setex).toHaveBeenCalledWith("admin:token:blacklist:refresh-jti", 604800, "1");
+      expect(req.res.setHeader).toHaveBeenCalledWith(
+        "Set-Cookie",
+        expect.arrayContaining([
+          expect.stringContaining("admin_access_token="),
+          expect.stringContaining("admin_refresh_token="),
+          expect.stringContaining("Max-Age=0"),
+        ]),
+      );
       expect(adminLogService.log).toHaveBeenCalledWith(
         "logout_success",
         "auth",
@@ -241,6 +316,21 @@ describe("AdminAuthController", () => {
           adminId: "admin-1-test",
         }),
         expect.anything(),
+      );
+    });
+
+    it("should allow explicit token fallback when enabled", async () => {
+      process.env.ADMIN_TOKEN_FALLBACK_ENABLED = "1";
+
+      const result = await controller.logout(
+        { token: "valid-access-token", refreshToken: "valid-refresh-token" },
+        { headers: {}, cookies: {}, res: { setHeader: jest.fn() } },
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          success: true,
+        }),
       );
     });
   });

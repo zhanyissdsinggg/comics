@@ -2,6 +2,7 @@ import { Body, Controller, Post, Req, Res } from "@nestjs/common";
 import { PaymentsService } from "../payments.service";
 import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../../common/utils/auth";
+import { buildBillingProviderRequiredError, isDemoBillingEnabled } from "../../../common/utils/billing-mode";
 import { buildError, ERROR_CODES } from "../../../common/utils/errors";
 import {
   checkRateLimit,
@@ -43,6 +44,13 @@ export class PaymentsOrdersController {
 
   @Post("create")
   async create(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    if (!isDemoBillingEnabled()) {
+      res.status(409);
+      return buildBillingProviderRequiredError(
+        "Secure checkout is not configured yet. Demo payment creation is disabled.",
+      );
+    }
+
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);
@@ -129,6 +137,13 @@ export class PaymentsOrdersController {
 
   @Post("confirm")
   async confirm(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    if (!isDemoBillingEnabled()) {
+      res.status(409);
+      return buildBillingProviderRequiredError(
+        "Secure checkout is not configured yet. Demo payment confirmation is disabled.",
+      );
+    }
+
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);
@@ -194,6 +209,13 @@ export class PaymentsOrdersController {
 
   @Post("refund")
   async refund(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    if (!isDemoBillingEnabled()) {
+      res.status(409);
+      return buildBillingProviderRequiredError(
+        "Secure checkout is not configured yet. Demo refunds are disabled.",
+      );
+    }
+
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);

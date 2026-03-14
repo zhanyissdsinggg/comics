@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Delete,
   Get,
@@ -17,6 +18,7 @@ import { logger } from "../../../../common/logger/winston.init";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { getIdempotencyRecord, setIdempotencyRecord } from "../../../../common/storage/limits";
+import { isDemoBillingEnabled } from "../../../../common/utils/billing-mode";
 import { ORDER_STATUS } from "../../../../common/utils/order-status";
 import {
   buildPaginationResult,
@@ -126,6 +128,12 @@ export class AdminOrdersController {
 
   @Post("refund")
   async refund(@Body() body: CreateOrderDto, @Req() req: Request) {
+    if (!isDemoBillingEnabled()) {
+      throw new ConflictException(
+        "Secure billing is required. Demo refund mutations are disabled outside demo mode.",
+      );
+    }
+
     const userId = body?.userId;
     const orderId = body?.orderId;
     if (!userId || !orderId) {

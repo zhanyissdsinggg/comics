@@ -25,6 +25,7 @@ import {
   isAdminTokenJtiRevoked,
   revokeAdminTokenJti,
 } from "../../utils/admin-token-revocation";
+import { isAdminTokenFallbackEnabled } from "../../utils/admin-auth-transport";
 import { AdminLoginDto, AdminRefreshTokenDto } from "../../dtos/admin-auth.dto";
 
 const ADMIN_ACCESS_COOKIE_NAME = "admin_access_token";
@@ -158,17 +159,15 @@ export class AdminAuthController {
 
     return {
       success: true,
-      accessToken,
-      refreshToken,
       expiresIn: ACCESS_TOKEN_EXPIRES_SECONDS,
+      sessionTransport: "cookie",
     };
   }
   @Post("refresh")
   @HttpCode(200)
   @UsePipes(new ValidationPipe())
   async refresh(@Body() dto: AdminRefreshTokenDto, @Req() req: RequestLike) {
-    const refreshToken =
-      dto?.refreshToken || this.getCookieToken(req, ADMIN_REFRESH_COOKIE_NAME);
+    const refreshToken = this.resolveRefreshToken(req, dto?.refreshToken);
 
     if (!refreshToken) {
       throw new HttpException("Missing refresh token", HttpStatus.UNAUTHORIZED);
@@ -196,9 +195,8 @@ export class AdminAuthController {
 
       return {
         success: true,
-        accessToken: newAccessToken,
-        refreshToken,
         expiresIn: ACCESS_TOKEN_EXPIRES_SECONDS,
+        sessionTransport: "cookie",
       };
     } catch (error) {
       if (error instanceof HttpException) {
@@ -211,10 +209,7 @@ export class AdminAuthController {
   @Post("verify")
   @HttpCode(200)
   async verify(@Body() body: { token?: string }, @Req() req: RequestLike) {
-    const token =
-      body?.token ||
-      this.getBearerToken(req) ||
-      this.getCookieToken(req, ADMIN_ACCESS_COOKIE_NAME);
+    const token = this.resolveAccessToken(req, body?.token);
 
     if (!token) {
       return {
@@ -260,13 +255,8 @@ export class AdminAuthController {
   @Post("logout")
   @HttpCode(200)
   async logout(@Body() body: { token?: string; refreshToken?: string }, @Req() req: RequestLike) {
-    const token =
-      body?.token ||
-      this.getBearerToken(req) ||
-      this.getCookieToken(req, ADMIN_ACCESS_COOKIE_NAME);
-    const refreshToken =
-      body?.refreshToken ||
-      this.getCookieToken(req, ADMIN_REFRESH_COOKIE_NAME);
+    const token = this.resolveAccessToken(req, body?.token);
+    const refreshToken = this.resolveRefreshToken(req, body?.refreshToken);
 
     const accessSession = await this.revokeSessionToken(token, {
       ttlSeconds: ACCESS_TOKEN_EXPIRES_SECONDS,
@@ -461,6 +451,44 @@ export class AdminAuthController {
     }
     const token = authHeader.slice(7).trim();
     return token || null;
+  }
+
+  private resolveAccessToken(
+    req: RequestLike,
+    fallbackToken?: string,
+  ): string | null {
+    const cookieToken = this.getCookieToken(req, ADMIN_ACCESS_COOKIE_NAME);
+    if (cookieToken) {
+      return cookieToken;
+    }
+
+    if (!isAdminTokenFallbackEnabled()) {
+      return null;
+    }
+
+    const normalizedFallback = String(fallbackToken || "").trim();
+    if (normalizedFallback) {
+      return normalizedFallback;
+    }
+
+    return this.getBearerToken(req);
+  }
+
+  private resolveRefreshToken(
+    req: RequestLike,
+    fallbackToken?: string,
+  ): string | null {
+    const cookieToken = this.getCookieToken(req, ADMIN_REFRESH_COOKIE_NAME);
+    if (cookieToken) {
+      return cookieToken;
+    }
+
+    if (!isAdminTokenFallbackEnabled()) {
+      return null;
+    }
+
+    const normalizedFallback = String(fallbackToken || "").trim();
+    return normalizedFallback || null;
   }
 
   private getCookieToken(req: RequestLike, cookieName: string): string | null {

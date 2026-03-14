@@ -1,8 +1,6 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
-const ADMIN_ACCESS_TOKEN = "e2e-admin-access-token";
-const ADMIN_REFRESH_TOKEN = "e2e-admin-refresh-token";
 const ADMIN_UI_TIMEOUT_MS = 15000;
 const EMPTY_PAGINATION = {
   page: 1,
@@ -16,51 +14,51 @@ const EMPTY_PAGINATION = {
 const ADMIN_ROUTE_CASES = [
   {
     route: "/admin/users",
-    emptyStateMessage: "No users yet.",
+    emptyStatePattern: /暂无用户|鏆傛棤鐢ㄦ埛/,
   },
   {
     route: "/admin/support",
-    emptyStateMessage: "No tickets yet.",
+    emptyStatePattern: /暂无工单|鏆傛棤宸ュ崟/,
   },
   {
     route: "/admin/analytics",
-    emptyStateMessage: "No analytics data is available yet.",
+    emptyStatePattern: /暂无分析数据|鏆傛棤鍒嗘瀽鏁版嵁/,
   },
   {
     route: "/admin/orders",
-    emptyStateMessage: "No orders yet.",
+    emptyStatePattern: /暂无订单|鏆傛棤璁㈠崟/,
   },
   {
     route: "/admin/comments",
-    emptyStateMessage: "No comments yet.",
+    emptyStatePattern: /暂无评论|鏆傛棤璇勮/,
   },
   {
     route: "/admin/notifications",
-    emptyStateMessage: "No notifications yet.",
+    emptyStatePattern: /暂无通知|鏆傛棤閫氱煡/,
   },
   {
     route: "/admin/promotions",
-    emptyStateMessage: "No promotions yet.",
+    emptyStatePattern: /暂无活动|鏆傛棤娲诲姩/,
   },
   {
     route: "/admin/billing",
-    emptyStateMessage: "No billing packages yet.",
+    emptyStatePattern: /暂无充值套餐|鏆傛棤鍏呭€煎椁?/,
   },
   {
     route: "/admin/marketing",
-    emptyStateMessage: "No campaigns yet.",
+    emptyStatePattern: /暂无活动|鏆傛棤娲诲姩/,
   },
   {
     route: "/admin/recommendations",
-    emptyStateMessage: "No recommendation slots have been created yet.",
+    emptyStatePattern: /暂无推荐位|鏆傛棤鎺ㄨ崘浣?/,
   },
   {
     route: "/admin/logs",
-    emptyStateMessage: "No audit logs found",
+    emptyStatePattern: /未找到审计日志|鏈壘鍒板璁℃棩蹇?/,
   },
   {
     route: "/admin/revenue",
-    emptyStateMessage: "No revenue data available yet.",
+    emptyStatePattern: /暂无收入数据|鏆傛棤鏀跺叆鏁版嵁/,
   },
 ] as const;
 
@@ -73,13 +71,7 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 async function primeAdminSession(page: Page): Promise<void> {
-  await page.addInitScript(
-    ([accessToken, refreshToken]) => {
-      window.localStorage.setItem("admin_token", accessToken);
-      window.localStorage.setItem("admin_refresh_token", refreshToken);
-    },
-    [ADMIN_ACCESS_TOKEN, ADMIN_REFRESH_TOKEN],
-  );
+  await page.addInitScript(() => undefined);
 }
 
 async function installAdminApiMocks(
@@ -127,8 +119,6 @@ async function installAdminApiMocks(
     if (pathname.endsWith("/api/admin/auth/refresh")) {
       await fulfillJson(route, {
         success: true,
-        accessToken: ADMIN_ACCESS_TOKEN,
-        refreshToken: ADMIN_REFRESH_TOKEN,
       });
       return;
     }
@@ -276,7 +266,7 @@ test.describe("Admin route regression", () => {
 
       await expect(page).toHaveURL(new RegExp(`${scenario.route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
       await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-      await expect(page.getByText(scenario.emptyStateMessage, { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+      await expect(page.getByText(scenario.emptyStatePattern).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
       await page.waitForTimeout(300);
       await expectNoRuntimeIssues(scenario.route, runtimeIssues);
@@ -409,14 +399,36 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/support", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Support Tickets" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: /工单支持|宸ュ崟鏀寔/ })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("reader@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("I was charged twice and need a refund update.", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.locator("tbody span", { hasText: "Open" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.locator("tbody span").filter({ hasText: /待处理|寰呭鐞?/ }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/support", runtimeIssues);
     expect(docsJsonRequests).toBe(0);
   });
-});
 
+  test("should not send bearer headers for admin api requests", async ({ page }) => {
+    const authorizationHeaders: string[] = [];
+
+    page.on("request", (request) => {
+      const pathname = new URL(request.url()).pathname;
+      if (pathname.startsWith("/api/admin")) {
+        const authorization = request.headers().authorization;
+        if (authorization) {
+          authorizationHeaders.push(authorization);
+        }
+      }
+    });
+
+    await primeAdminSession(page);
+    await installAdminApiMocks(page);
+
+    const response = await page.goto("/admin/settings", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "系统设置" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    expect(authorizationHeaders).toEqual([]);
+  });
+});

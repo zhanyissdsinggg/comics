@@ -15,6 +15,7 @@ import { POINTS_PACKS, OFFERS } from "../../lib/offers/catalog";
 import { getRegionConfig } from "../../lib/region/config";
 import { getCookie } from "../../lib/cookies";
 import { apiGet } from "../../lib/apiClient";
+import { getFriendlyMessage } from "../../lib/errorMessages";
 import { fetchTopupCatalog } from "../../lib/topupCatalog";
 import {
   buildPathWithAttribution,
@@ -235,7 +236,7 @@ export default function StorePage() {
       return;
     }
 
-    setErrorMessage(response.error || "Top up failed. Please try again.");
+    setErrorMessage(getFriendlyMessage(response.error, response.message || "Top up failed. Please try again."));
   };
 
   const handleClaim = async () => {
@@ -299,7 +300,7 @@ export default function StorePage() {
         <EditorialHero
           eyebrow="Points store"
           title="Buy points with clear pricing and fewer checkout surprises."
-          description="Balance, coupons, promotions, and point packs are grouped into one cleaner purchase flow without hiding the details that matter."
+          description="Balance, coupons, promotions, and point packs stay in one storefront, while final checkout only opens after secure billing is available."
           secondary={`${regionConfig.label} storefront - ${regionConfig.taxHint}`}
           stats={storeHeroStats}
           actions={

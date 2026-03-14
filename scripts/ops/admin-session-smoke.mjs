@@ -45,6 +45,92 @@ function unwrapPayload(payload) {
   return payload.data && typeof payload.data === "object" ? payload.data : payload;
 }
 
+function splitSetCookieHeader(headerValue) {
+  const items = [];
+  let current = "";
+  let inExpires = false;
+
+  for (let index = 0; index < headerValue.length; index += 1) {
+    const char = headerValue[index];
+    const next = headerValue.slice(index, index + 8).toLowerCase();
+
+    if (next === "expires=") {
+      inExpires = true;
+    }
+
+    if (char === "," && !inExpires) {
+      items.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    current += char;
+
+    if (inExpires && char === ";") {
+      inExpires = false;
+    }
+  }
+
+  if (current.trim()) {
+    items.push(current.trim());
+  }
+
+  return items;
+}
+
+function readSetCookieHeaders(headers) {
+  if (typeof headers.getSetCookie === "function") {
+    return headers.getSetCookie();
+  }
+
+  const single = headers.get("set-cookie");
+  if (!single) {
+    return [];
+  }
+
+  return splitSetCookieHeader(single);
+}
+
+function updateCookieJar(cookieJar, response) {
+  const setCookieHeaders = readSetCookieHeaders(response.headers);
+  for (const entry of setCookieHeaders) {
+    const [pair = "", ...attributes] = String(entry || "").split(";");
+    const separatorIndex = pair.indexOf("=");
+    if (separatorIndex <= 0) {
+      continue;
+    }
+
+    const name = pair.slice(0, separatorIndex).trim();
+    const value = pair.slice(separatorIndex + 1).trim();
+    const shouldDelete = attributes.some((item) => {
+      const normalized = String(item || "").trim().toLowerCase();
+      return normalized === "max-age=0" || normalized === "expires=thu, 01 jan 1970 00:00:00 gmt";
+    });
+
+    if (!name) {
+      continue;
+    }
+
+    if (shouldDelete || !value) {
+      delete cookieJar[name];
+      continue;
+    }
+
+    cookieJar[name] = value;
+  }
+}
+
+function buildCookieHeader(cookieJar) {
+  const entries = Object.entries(cookieJar).filter(([, value]) => String(value || "").trim());
+  if (entries.length === 0) {
+    return "";
+  }
+
+  return entries
+    .map(([name, value]) => `${name}=${value}`)
+    .join("; ");
+}
+
 function readTimeout() {
   const parsed = Number(process.env.OPS_REQUEST_TIMEOUT_MS || DEFAULT_TIMEOUT_MS);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_TIMEOUT_MS;
@@ -72,15 +158,26 @@ async function requestJson(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), readTimeout());
   const startedAt = Date.now();
+  const {
+    cookieJar = null,
+    headers: requestHeaders = {},
+    ...fetchOptions
+  } = options;
+
   try {
+    const cookieHeader = cookieJar ? buildCookieHeader(cookieJar) : "";
     const response = await fetch(url, {
-      ...options,
+      ...fetchOptions,
       signal: controller.signal,
       headers: {
         Accept: "application/json",
-        ...(options.headers || {}),
+        ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+        ...requestHeaders,
       },
     });
+    if (cookieJar) {
+      updateCookieJar(cookieJar, response);
+    }
     const text = await response.text();
     return {
       ok: response.ok,
@@ -172,11 +269,13 @@ async function run() {
   console.log(`[ops-admin] readPaths=${readPaths.join(",")}`);
 
   await assertReadPaths(backendBaseUrl, readPaths, "unauthorized", [401, 403]);
+  const cookieJar = {};
 
   const login = await requestJson(`${backendBaseUrl}${LOGIN_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ adminKey }),
+    cookieJar,
   });
   logStep(`POST ${LOGIN_PATH}`, login);
   const loginBody = unwrapPayload(login.payload);
@@ -184,36 +283,33 @@ async function run() {
     fail(`admin login failed: status=${login.status}`);
   }
 
-  const accessToken = String(loginBody.accessToken || "").trim();
-  const refreshToken = String(loginBody.refreshToken || "").trim();
-  if (!accessToken || !refreshToken) {
-    fail("admin login did not return both accessToken and refreshToken");
+  if (!cookieJar.admin_access_token || !cookieJar.admin_refresh_token) {
+    fail("admin login did not set both admin auth cookies");
   }
-
-  const authHeaders = {
-    Authorization: `Bearer ${accessToken}`,
-  };
 
   const verify = await requestJson(`${backendBaseUrl}${VERIFY_PATH}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
+    cookieJar,
   });
   logStep(`POST ${VERIFY_PATH} (before logout)`, verify);
   if (unwrapPayload(verify.payload).valid !== true) {
     fail("verify before logout did not return valid=true");
   }
 
-  await assertReadPaths(backendBaseUrl, readPaths, "authorized", [200], authHeaders);
-  await assertAppendOnlyAuditDelete(backendBaseUrl, authHeaders);
+  await assertReadPaths(backendBaseUrl, readPaths, "authorized", [200], {
+    Cookie: buildCookieHeader(cookieJar),
+  });
+  await assertAppendOnlyAuditDelete(backendBaseUrl, {
+    Cookie: buildCookieHeader(cookieJar),
+  });
 
   const logout = await requestJson(`${backendBaseUrl}${LOGOUT_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: accessToken, refreshToken }),
+    body: JSON.stringify({}),
+    cookieJar,
   });
   logStep(`POST ${LOGOUT_PATH}`, logout);
   if (unwrapPayload(logout.payload).success !== true) {
@@ -222,11 +318,9 @@ async function run() {
 
   const verifyAfterLogout = await requestJson(`${backendBaseUrl}${VERIFY_PATH}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
+    cookieJar,
   });
   logStep(`POST ${VERIFY_PATH} (after logout)`, verifyAfterLogout);
   if (unwrapPayload(verifyAfterLogout.payload).valid !== false) {
@@ -236,14 +330,17 @@ async function run() {
   const refreshAfterLogout = await requestJson(`${backendBaseUrl}${REFRESH_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
+    body: JSON.stringify({}),
+    cookieJar,
   });
   logStep(`POST ${REFRESH_PATH} (after logout)`, refreshAfterLogout);
   if (![401, 403].includes(refreshAfterLogout.status)) {
     fail(`expected refresh after logout to return 401/403, got ${refreshAfterLogout.status}`);
   }
 
-  await assertReadPaths(backendBaseUrl, readPaths, "after logout", [401, 403], authHeaders);
+  await assertReadPaths(backendBaseUrl, readPaths, "after logout", [401, 403], {
+    Cookie: buildCookieHeader(cookieJar),
+  });
 
   console.log("[ops-admin] admin session smoke passed");
 }

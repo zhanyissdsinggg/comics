@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../common/utils/auth";
+import { buildBillingProviderRequiredError, isDemoBillingEnabled } from "../../common/utils/billing-mode";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { normalizePaymentAttribution } from "../../common/utils/payment-attribution";
@@ -32,6 +33,13 @@ export class SubscriptionController {
 
   @Post()
   async subscribe(@Body() body: Record<string, any>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    if (!isDemoBillingEnabled()) {
+      res.status(409);
+      return buildBillingProviderRequiredError(
+        "Secure subscription billing is not configured yet. Demo subscription activation is disabled.",
+      );
+    }
+
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);
@@ -63,6 +71,13 @@ export class SubscriptionController {
 
   @Delete()
   async cancel(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    if (!isDemoBillingEnabled()) {
+      res.status(409);
+      return buildBillingProviderRequiredError(
+        "Secure subscription billing is not configured yet. Demo subscription cancellation is disabled.",
+      );
+    }
+
     const userId = getUserIdFromRequest(req, false);
     if (!userId) {
       res.status(401);

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { AdminDataState } from '@/components/admin/common/AdminDataState';
+import { adminFetchJson } from '@/lib/adminApiClient';
 
 const LEGACY_REVENUE_CACHE_TTL_MS = 60_000;
 const EMPTY_MESSAGE = '暂无收入数据。';
@@ -53,19 +54,11 @@ const REVENUE_TABS = [
   { key: 'promotions', label: '活动' },
 ];
 
-function getAdminAuthHeaders() {
-  return {
-    Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : ''}`,
-  };
-}
-
 async function fetchAdminJson(path) {
   try {
-    const response = await fetch(path, {
-      headers: getAdminAuthHeaders(),
+    const { response, data } = await adminFetchJson(path, {
       cache: 'no-store',
     });
-    const data = await response.json().catch(() => ({}));
 
     return {
       ok: response.ok,

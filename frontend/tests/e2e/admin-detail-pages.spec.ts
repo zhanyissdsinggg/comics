@@ -1,8 +1,6 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
-const ADMIN_ACCESS_TOKEN = "e2e-admin-access-token";
-const ADMIN_REFRESH_TOKEN = "e2e-admin-refresh-token";
 const ADMIN_UI_TIMEOUT_MS = 15000;
 
 async function fulfillJson(route: Route, body: unknown): Promise<void> {
@@ -14,13 +12,7 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 async function primeAdminSession(page: Page): Promise<void> {
-  await page.addInitScript(
-    ([accessToken, refreshToken]) => {
-      window.localStorage.setItem("admin_token", accessToken);
-      window.localStorage.setItem("admin_refresh_token", refreshToken);
-    },
-    [ADMIN_ACCESS_TOKEN, ADMIN_REFRESH_TOKEN],
-  );
+  await page.addInitScript(() => undefined);
 }
 
 async function installAdminBaseMocks(page: Page): Promise<void> {
@@ -39,8 +31,6 @@ async function installAdminBaseMocks(page: Page): Promise<void> {
     if (pathname.endsWith("/api/admin/auth/refresh")) {
       await fulfillJson(route, {
         success: true,
-        accessToken: ADMIN_ACCESS_TOKEN,
-        refreshToken: ADMIN_REFRESH_TOKEN,
       });
       return;
     }

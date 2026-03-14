@@ -1,6 +1,8 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { logger } from "../../common/logger/winston.init";
+import { isDemoBillingEnabled } from "../../common/utils/billing-mode";
+import { ERROR_CODES } from "../../common/utils/errors";
 import { getTopupPackage } from "../../common/config/topup";
 import { ORDER_STATUS, PAYMENT_STATUS } from "../../common/utils/order-status";
 
@@ -11,6 +13,9 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
   private retryTimer: NodeJS.Timeout | null = null;
 
   onModuleInit() {
+    if (!isDemoBillingEnabled()) {
+      return;
+    }
     this.retryTimer = setInterval(() => {
       this.processRetries().catch(() => null);
     }, 20_000);
@@ -58,6 +63,10 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
    * 老王说：添加乐观锁防止并发更新冲突
    */
   async processRetries() {
+    if (!isDemoBillingEnabled()) {
+      return;
+    }
+
     const now = new Date();
     const due = await this.prisma.paymentRetry.findMany({
       where: { status: "PENDING", nextAttemptAt: { lte: now } },
@@ -227,6 +236,10 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async confirm(userId: string, paymentId: string) {
+    if (!isDemoBillingEnabled()) {
+      return { ok: false, error: ERROR_CODES.BILLING_PROVIDER_REQUIRED };
+    }
+
     if (!paymentId) {
       return { ok: false, error: "PAYMENT_NOT_FOUND" };
     }
@@ -291,6 +304,10 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async refund(userId: string, orderId: string) {
+    if (!isDemoBillingEnabled()) {
+      return { ok: false, error: ERROR_CODES.BILLING_PROVIDER_REQUIRED };
+    }
+
     if (!orderId) {
       return { ok: false, error: "ORDER_NOT_FOUND" };
     }

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { readAdminResponseMessage } from '@/lib/adminApiClient';
+import { adminFetch, readAdminResponseMessage } from '@/lib/adminApiClient';
 
 interface UploadProgress {
   fileName: string;
@@ -45,12 +45,8 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
         formData.append('startNumber', startNumber);
       }
 
-      const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : '';
-      const response = await fetch(`/api/admin/series/${seriesId}/episodes/upload`, {
+      const response = await adminFetch(`/api/admin/series/${seriesId}/episodes/upload`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: formData,
       });
 

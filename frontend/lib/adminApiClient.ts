@@ -36,8 +36,8 @@ export interface PaginatedResponse<T> {
   };
 }
 
-const ACCESS_TOKEN_KEY = "admin_token";
-const REFRESH_TOKEN_KEY = "admin_refresh_token";
+const ADMIN_AUTH_INVALIDATED_EVENT = "admin-auth-invalidated";
+const AUTH_SNAPSHOT_KEY = "admin_auth_snapshot";
 
 // ============ Auth and headers ============
 
@@ -69,19 +69,18 @@ function addCsrfToken(headers: Record<string, string>, method?: string): Record<
   return headers;
 }
 
-function getAdminAccessToken(): string {
-  if (typeof window === "undefined") {
-    return "";
-  }
-  return localStorage.getItem(ACCESS_TOKEN_KEY) || "";
-}
-
-function clearAdminTokens(): void {
+function notifyAdminAuthInvalidated(): void {
   if (typeof window === "undefined") {
     return;
   }
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
+
+  try {
+    window.sessionStorage.removeItem(AUTH_SNAPSHOT_KEY);
+  } catch {
+    // Ignore storage removal failures.
+  }
+
+  window.dispatchEvent(new Event(ADMIN_AUTH_INVALIDATED_EVENT));
 }
 
 function toHeaderRecord(headers?: HeadersInit): Record<string, string> {
@@ -110,11 +109,6 @@ function prepareAdminHeaders(
   // Add CSRF protection before sending write requests.
   addCsrfToken(headers, method);
 
-  const accessToken = getAdminAccessToken();
-  if (accessToken && !headers.Authorization) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
-
   return headers;
 }
 
@@ -140,7 +134,7 @@ export async function adminFetch(
 
   const response = await fetch(url, finalOptions);
   if (response.status === 401) {
-    clearAdminTokens();
+    notifyAdminAuthInvalidated();
   }
   return response;
 }

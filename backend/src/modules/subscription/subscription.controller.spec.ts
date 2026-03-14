@@ -72,4 +72,30 @@ describe('SubscriptionController', () => {
     expect(prisma.auditLog.create.mock.calls[0][0].data.payload).toContain('"promotionId":"promo-1"');
     expect(result).toEqual({ subscription: { id: 'sub-1', planId: 'vip' } });
   });
+
+  it("blocks demo subscription activation when billing mode requires a provider", async () => {
+    const req = { userId: "user-1" } as any;
+    const res = { status: jest.fn() } as any;
+    const originalMode = process.env.BILLING_MODE;
+
+    try {
+      process.env.BILLING_MODE = "provider";
+
+      const result = await controller.subscribe({ planId: "vip" }, req, res);
+
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(subscriptionService.subscribe).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          error: "BILLING_PROVIDER_REQUIRED",
+        }),
+      );
+    } finally {
+      if (typeof originalMode === "string") {
+        process.env.BILLING_MODE = originalMode;
+      } else {
+        delete process.env.BILLING_MODE;
+      }
+    }
+  });
 });
