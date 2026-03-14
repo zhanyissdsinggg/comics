@@ -15,4 +15,6 @@ export const CRITICAL_ROUTES = [
   "/admin/orders",
   "/admin/promotions",
   "/admin/series",
+  "/admin/series/demo-series",
+  "/admin/series/demo-series/episodes",
 ];

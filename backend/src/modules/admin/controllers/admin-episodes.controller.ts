@@ -17,6 +17,18 @@ import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { readBooleanLike, readDateLike, readIntLike } from "../utils/param-parsing";
 
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 100;
+const EPISODE_SORT_FIELDS = new Set([
+  "number",
+  "title",
+  "pricePts",
+  "previewFreePages",
+  "releasedAt",
+  "createdAt",
+  "updatedAt",
+]);
+
 type EpisodeInput = Record<string, unknown>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -71,6 +83,25 @@ function readEpisodeParagraphs(value: unknown, fallback: string[]): string[] {
     return fallback;
   }
   return value.filter((item): item is string => typeof item === "string");
+}
+
+function normalizeEpisodeSortField(value: unknown): keyof Prisma.EpisodeOrderByWithRelationInput {
+  const candidate = String(value ?? "").trim();
+  return EPISODE_SORT_FIELDS.has(candidate) ? (candidate as keyof Prisma.EpisodeOrderByWithRelationInput) : "number";
+}
+
+function normalizeEpisodeSortOrder(value: unknown): Prisma.SortOrder {
+  return String(value ?? "").trim().toLowerCase() === "desc" ? "desc" : "asc";
+}
+
+function readQueryPrimitive(value: unknown): string | undefined {
+  if (Array.isArray(value)) {
+    return readQueryPrimitive(value[0]);
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  return undefined;
 }
 
 interface EpisodeDraft {
@@ -174,29 +205,91 @@ export class AdminEpisodesController {
 
   private async syncLatest(seriesId: string) {
     const latest = await this.prisma.episode.findFirst({
-      where: { seriesId },
+      where: { seriesId, isDeleted: false },
       orderBy: { number: "desc" },
     });
-    if (latest) {
-      await this.prisma.series.update({
-        where: { id: seriesId },
-        data: { latestEpisodeId: latest.id },
-      });
-      this.logger.log(`Synced latest episode for series ${seriesId}: ${latest.id}`);
-    }
+    await this.prisma.series.update({
+      where: { id: seriesId },
+      data: { latestEpisodeId: latest?.id ?? null },
+    });
+    this.logger.log(`Synced latest episode for series ${seriesId}: ${latest?.id ?? "none"}`);
   }
 
   @Get()
   async listEpisodes(@Req() req: Request) {
     const seriesId = String(req.params.id || "");
+    const search = String(readQueryPrimitive(req.query.search) || "").trim();
+    const page = Math.max(1, readIntLike(readQueryPrimitive(req.query.page), 1, 1));
+    const pageSize = Math.min(
+      MAX_PAGE_SIZE,
+      Math.max(
+        1,
+        readIntLike(readQueryPrimitive(req.query.pageSize) ?? readQueryPrimitive(req.query.limit), DEFAULT_PAGE_SIZE, 1),
+      ),
+    );
+    const sortBy = normalizeEpisodeSortField(readQueryPrimitive(req.query.sortBy));
+    const sortOrder = normalizeEpisodeSortOrder(readQueryPrimitive(req.query.sortOrder));
+    const priceType = String(readQueryPrimitive(req.query.priceType) || "").trim();
+    const previewStatus = String(readQueryPrimitive(req.query.previewStatus) || "").trim();
+    const ttfEligibleFilter = String(readQueryPrimitive(req.query.ttfEligible) || "").trim();
+
     this.logger.log(`Listing episodes for series: ${seriesId}`);
 
-    const episodes = await this.prisma.episode.findMany({
-      where: { seriesId },
-      orderBy: { number: "asc" },
-    });
+    const where: Prisma.EpisodeWhereInput = {
+      seriesId,
+      isDeleted: false,
+    };
 
-    return { episodes };
+    if (search) {
+      const searchNumber = Number.parseInt(search, 10);
+      where.OR = [
+        { id: { contains: search, mode: "insensitive" } },
+        { title: { contains: search, mode: "insensitive" } },
+        ...(Number.isFinite(searchNumber) ? [{ number: searchNumber }] : []),
+      ];
+    }
+
+    if (priceType === "free") {
+      where.pricePts = 0;
+    } else if (priceType === "paid") {
+      where.pricePts = { gt: 0 };
+    }
+
+    if (previewStatus === "enabled") {
+      where.previewFreePages = { gt: 0 };
+    } else if (previewStatus === "disabled") {
+      where.previewFreePages = 0;
+    }
+
+    if (ttfEligibleFilter === "true") {
+      where.ttfEligible = true;
+    } else if (ttfEligibleFilter === "false") {
+      where.ttfEligible = false;
+    }
+
+    const [episodes, total] = await Promise.all([
+      this.prisma.episode.findMany({
+        where,
+        orderBy: { [sortBy]: sortOrder },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.episode.count({ where }),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+    return {
+      episodes,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    };
   }
 
   @Post()
@@ -214,7 +307,7 @@ export class AdminEpisodesController {
       this.logger.log(`Bulk creating ${count} episodes for series: ${seriesId}`);
 
       const existing = await this.prisma.episode.findMany({
-        where: { seriesId },
+        where: { seriesId, isDeleted: false },
         orderBy: { number: "desc" },
         take: 1,
       });
@@ -238,7 +331,7 @@ export class AdminEpisodesController {
       await this.syncLatest(seriesId);
 
       const episodes = await this.prisma.episode.findMany({
-        where: { seriesId },
+        where: { seriesId, isDeleted: false },
         orderBy: { number: "asc" },
       });
 
@@ -266,7 +359,7 @@ export class AdminEpisodesController {
     await this.syncLatest(seriesId);
 
     const episodes = await this.prisma.episode.findMany({
-      where: { seriesId },
+      where: { seriesId, isDeleted: false },
       orderBy: { number: "asc" },
     });
 
@@ -282,7 +375,7 @@ export class AdminEpisodesController {
     this.logger.log(`Bulk updating episodes for series: ${seriesId}, count: ${ids.length || "all"}`);
 
     const list = await this.prisma.episode.findMany({
-      where: { seriesId },
+      where: { seriesId, isDeleted: false },
       orderBy: { number: "asc" },
     });
 
@@ -309,11 +402,95 @@ export class AdminEpisodesController {
     );
 
     const episodes = await this.prisma.episode.findMany({
-      where: { seriesId },
+      where: { seriesId, isDeleted: false },
       orderBy: { number: "asc" },
     });
 
     this.logger.log(`Successfully bulk updated episodes for series: ${seriesId}`);
+    return { episodes };
+  }
+
+  @Post("reorder")
+  async reorderEpisodes(@Body() body: Record<string, unknown>, @Req() req: Request) {
+    const seriesId = String(req.params.id || "");
+    const compact = readBooleanLike(body.compact as boolean | string | null | undefined, false);
+    const startNumber = readIntLike(body.startNumber as number | string | null | undefined, 1, 1);
+
+    if (compact) {
+      const existingEpisodes = await this.prisma.episode.findMany({
+        where: { seriesId, isDeleted: false },
+        orderBy: { number: "asc" },
+      });
+
+      await Promise.all(
+        existingEpisodes.map((episode, index) =>
+          this.prisma.episode.update({
+            where: { id: episode.id },
+            data: { number: startNumber + index },
+          })
+        )
+      );
+
+      await this.syncLatest(seriesId);
+
+      const episodes = await this.prisma.episode.findMany({
+        where: { seriesId, isDeleted: false },
+        orderBy: { number: "asc" },
+      });
+
+      return { episodes };
+    }
+
+    const items = Array.isArray(body.items) ? body.items.filter(isRecord) : [];
+
+    if (items.length === 0) {
+      throw new BadRequestException("缺少要重排的章节。");
+    }
+
+    const normalizedItems = items.map((item) => ({
+      id: typeof item.id === "string" ? item.id.trim() : "",
+      number: readIntLike(item.number as number | string | null | undefined, 0, 1),
+    }));
+
+    if (normalizedItems.some((item) => !item.id || item.number < 1)) {
+      throw new BadRequestException("章节重排参数无效。");
+    }
+
+    const idSet = new Set(normalizedItems.map((item) => item.id));
+    const numberSet = new Set(normalizedItems.map((item) => item.number));
+
+    if (idSet.size !== normalizedItems.length || numberSet.size !== normalizedItems.length) {
+      throw new BadRequestException("章节编号或章节 ID 重复。");
+    }
+
+    const existing = await this.prisma.episode.findMany({
+      where: {
+        seriesId,
+        isDeleted: false,
+        id: { in: normalizedItems.map((item) => item.id) },
+      },
+    });
+
+    if (existing.length !== normalizedItems.length) {
+      throw new NotFoundException("部分章节不存在。");
+    }
+
+    await Promise.all(
+      normalizedItems.map((item) =>
+        this.prisma.episode.update({
+          where: { id: item.id },
+          data: { number: item.number },
+        })
+      )
+    );
+
+    await this.syncLatest(seriesId);
+
+    const episodes = await this.prisma.episode.findMany({
+      where: { seriesId, isDeleted: false },
+      orderBy: { number: "asc" },
+    });
+
     return { episodes };
   }
 
@@ -354,7 +531,7 @@ export class AdminEpisodesController {
     await this.syncLatest(seriesId);
 
     const episodes = await this.prisma.episode.findMany({
-      where: { seriesId },
+      where: { seriesId, isDeleted: false },
       orderBy: { number: "asc" },
     });
 

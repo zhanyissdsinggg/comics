@@ -27,6 +27,7 @@ export default function HeaderActions({
   onAdultToggleClick,
   onLoginClick,
   isAdultMode,
+  legalAge,
 }) {
   const router = useRouter();
   const { hydrated, isSignedIn } = useAuthStore();
@@ -39,7 +40,7 @@ export default function HeaderActions({
         type="button"
         onClick={onWalletClick}
         className="group relative hidden min-h-[44px] items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-emerald-500/50 hover:bg-emerald-500/20 hover:shadow-ios-glow active:scale-95 sm:flex touch-manipulation"
-        aria-label="Wallet"
+        aria-label="Points store"
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
         <svg
@@ -96,18 +97,24 @@ export default function HeaderActions({
         style={{ WebkitTapHighlightColor: "transparent" }}
         aria-label="Adult content"
         aria-pressed={isAdultMode}
-        title={`Adult content ${isAdultMode ? "on" : "off"}`}
+        title={`Adult content ${legalAge}+ ${isAdultMode ? "on" : "off"}`}
         data-testid="adult-toggle-button"
       >
-        <span className={`transition-transform duration-300 ${isAdultMode ? "scale-110" : ""}`}>
-          18+
+        <span
+          className={`rounded-full border px-2 py-0.5 text-[10px] font-extrabold transition-transform duration-300 ${
+            isAdultMode
+              ? "border-red-300/40 bg-red-400/10 text-red-100"
+              : "border-white/10 bg-white/[0.04] text-neutral-200"
+          } ${isAdultMode ? "scale-110" : ""}`}
+        >
+          {legalAge}+
         </span>
         <span
           className={`hidden text-[10px] font-bold sm:inline ${
-            isAdultMode ? "text-red-400" : "text-neutral-500"
+            isAdultMode ? "text-red-200" : "text-neutral-300"
           }`}
         >
-          {isAdultMode ? "ON" : "OFF"}
+          {isAdultMode ? "Mature on" : "Mature"}
         </span>
       </button>
 

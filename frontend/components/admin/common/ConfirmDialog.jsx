@@ -23,7 +23,7 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
         {isDangerous ? (
           <div className="flex items-center gap-3 rounded-lg bg-red-900/20 p-3">
             <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-400" />
-            <p className="text-sm text-red-300">此操作不可撤销，请确认后再继续。</p>
+            <p className="text-sm text-red-300">此操作无法撤销，请确认后再继续。</p>
           </div>
         ) : null}
 

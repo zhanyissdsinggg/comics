@@ -1,4 +1,7 @@
 import SeriesPage from "../../../components/series/SeriesPage";
+import { CouponProvider } from "../../../store/useCouponStore";
+import { EntitlementProvider } from "../../../store/useEntitlementStore";
+import { RewardsProvider } from "../../../store/useRewardsStore";
 import { createPageMetadata } from "../../../lib/seo";
 import { siteConfig } from "../../../lib/siteConfig";
 
@@ -65,5 +68,14 @@ export async function generateMetadata({ params }) {
 
 export default async function SeriesRoutePage({ params }) {
   const resolvedParams = await Promise.resolve(params);
-  return <SeriesPage seriesId={resolvedParams.id} />;
+
+  return (
+    <RewardsProvider>
+      <EntitlementProvider>
+        <CouponProvider>
+          <SeriesPage seriesId={resolvedParams.id} />
+        </CouponProvider>
+      </EntitlementProvider>
+    </RewardsProvider>
+  );
 }

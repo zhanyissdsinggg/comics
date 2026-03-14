@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Modal } from './Modal';
 
 export function AdminSortModal({
@@ -40,3 +40,4 @@ export function AdminSortModal({
     </Modal>
   );
 }
+

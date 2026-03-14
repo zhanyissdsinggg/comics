@@ -15,6 +15,7 @@ const AdultGateContext = createContext(null);
 const CONFIRMED_KEY = "mn_adult_confirmed";
 const RULE_KEY = "mn_age_rule";
 const MODE_KEY = "mn_adult_mode";
+const REGION_KEY = "mn_region";
 
 const requireLoginForAdult = true;
 
@@ -25,6 +26,17 @@ function readStorageValue(key, fallback) {
   return window.localStorage.getItem(key) || fallback;
 }
 
+function normalizeRuleKey(value) {
+  return AGE_RULES[value] ? value : "global";
+}
+
+function readRegionRule() {
+  if (typeof window === "undefined") {
+    return "global";
+  }
+  return normalizeRuleKey(window.localStorage.getItem(REGION_KEY) || "global");
+}
+
 export function AdultGateProvider({ children }) {
   const [adultConfirmed, setAdultConfirmed] = useState(false);
   const [ageRuleKey, setAgeRuleKey] = useState("global");
@@ -33,11 +45,9 @@ export function AdultGateProvider({ children }) {
 
   useEffect(() => {
     const confirmed = readStorageValue(CONFIRMED_KEY, "0") === "1";
-    const region =
-      typeof window !== "undefined"
-        ? window.localStorage.getItem("mn_region")
-        : null;
-    const rule = readStorageValue(RULE_KEY, region || "global");
+    const regionRule = readRegionRule();
+    const storedRule = readStorageValue(RULE_KEY, regionRule);
+    const rule = normalizeRuleKey(storedRule || regionRule);
     const mode = readStorageValue(MODE_KEY, "0") === "1";
     setAdultConfirmed(confirmed);
     setAgeRuleKey(rule);
@@ -86,6 +96,51 @@ export function AdultGateProvider({ children }) {
     setCookie("mn_adult_mode", isAdultMode ? "1" : "0");
   }, [hydrated, isAdultMode]);
 
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") {
+      return undefined;
+    }
+
+    const syncRegionRule = (nextRuleKey) => {
+      const normalized = normalizeRuleKey(nextRuleKey);
+      if (normalized === ageRuleKey) {
+        return;
+      }
+      setAgeRuleKey(normalized);
+      persistAgeRule(normalized);
+      setAdultConfirmed(false);
+      setIsAdultMode(false);
+      persistConfirmed(false);
+      persistAdultMode(false);
+    };
+
+    const handleRegionEvent = (event) => {
+      const nextRule =
+        event?.detail?.region ||
+        readRegionRule();
+      syncRegionRule(nextRule);
+    };
+
+    const handleStorage = (event) => {
+      if (event.key === REGION_KEY) {
+        syncRegionRule(event.newValue || "global");
+      }
+    };
+
+    window.addEventListener("mn-region-change", handleRegionEvent);
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener("mn-region-change", handleRegionEvent);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [
+    ageRuleKey,
+    hydrated,
+    persistAdultMode,
+    persistAgeRule,
+    persistConfirmed,
+  ]);
+
   const requestAdultToggle = useCallback(
     (isSignedIn) => {
       if (isAdultMode) {
@@ -113,7 +168,7 @@ export function AdultGateProvider({ children }) {
 
   const confirmAge = useCallback(
     (ruleKey) => {
-      const normalized = AGE_RULES[ruleKey] ? ruleKey : "global";
+      const normalized = normalizeRuleKey(ruleKey || readRegionRule());
       setAdultConfirmed(true);
       setAgeRuleKey(normalized);
       setIsAdultMode(true);

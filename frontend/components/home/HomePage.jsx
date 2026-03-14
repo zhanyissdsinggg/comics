@@ -230,6 +230,23 @@ function HomeContent() {
                 {siteConfig.defaultDescription}
               </p>
 
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/comics")}
+                  className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                >
+                  Browse comics
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/search")}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  Search titles
+                </button>
+              </div>
+
               <div className="mt-6 flex flex-wrap gap-2.5">
                 {HOME_PILLARS.map((item) => (
                   <span

@@ -6,7 +6,17 @@ import SiteHeader from "../../components/layout/SiteHeader";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import { apiGet, apiPost } from "../../lib/apiClient";
+import { formatUSCurrency } from "../../lib/localization";
 import { useAuthStore } from "../../store/useAuthStore";
+
+function formatOrderAmount(amount, currency) {
+  const numericAmount = Number(amount || 0);
+  const normalizedCurrency = String(currency || "USD").toUpperCase();
+  if (normalizedCurrency === "USD") {
+    return formatUSCurrency(numericAmount);
+  }
+  return `${normalizedCurrency} ${numericAmount.toFixed(2)}`;
+}
 
 export default function OrdersPageClient() {
   const router = useRouter();
@@ -53,6 +63,17 @@ export default function OrdersPageClient() {
     const paidCount = orders.filter((order) => order.status === "PAID").length;
     const refundedCount = orders.filter((order) => String(order.status).includes("REFUND")).length;
     const totalAmount = orders.reduce((sum, order) => sum + Number(order.amount || 0), 0);
+    const currencies = Array.from(
+      new Set(orders.map((order) => String(order.currency || "").toUpperCase()).filter(Boolean)),
+    );
+    const singleCurrency = currencies.length === 1 ? currencies[0] : "";
+    const totalSpentLabel = loading
+      ? "..."
+      : singleCurrency
+        ? formatOrderAmount(totalAmount, singleCurrency)
+        : currencies.length > 1
+          ? "Multiple"
+          : formatUSCurrency(0);
 
     return [
       {
@@ -71,9 +92,12 @@ export default function OrdersPageClient() {
         hint: "Orders already moved into a refund state.",
       },
       {
-        label: "Amount",
-        value: loading ? "..." : totalAmount.toFixed(2),
-        hint: "Raw total of visible order amounts before currency conversion.",
+        label: "Spent",
+        value: totalSpentLabel,
+        hint:
+          currencies.length > 1
+            ? "Multiple currencies appear in your loaded receipts."
+            : "Visible order total across the receipts on this page.",
       },
     ];
   }, [isSignedIn, loading, orders]);
@@ -86,10 +110,10 @@ export default function OrdersPageClient() {
       <SiteHeader />
       <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Receipt desk"
-          title="Track receipts, reconciliation, and refund state from one ledger view."
-          description="Orders now live in the same editorial surface as the rest of the product, with better scanning for status, amount, and action state."
-          secondary="Reconciliation and refund requests still use the existing backend endpoints and account gating."
+          eyebrow="Orders"
+          title="View receipts, payment status, and refund requests in one place."
+          description="Scan recent purchases quickly, refresh the latest payment state, and review refunds without bouncing through account settings."
+          secondary="Order status refreshes are available here whenever you want to check for updates."
           stats={orderStats}
           actions={
             <>
@@ -100,20 +124,24 @@ export default function OrdersPageClient() {
                     router.push("/signin?returnTo=/orders");
                     return;
                   }
-                  setWorkingId("reconcile");
-                  const response = await apiPost("/api/orders/reconcile");
+                  setWorkingId("refresh");
+                  const response = await apiGet("/api/orders", {
+                    suppressAuthModal: true,
+                    bust: true,
+                    dedupeMs: 0,
+                  });
                   if (response.ok) {
                     setOrders(response.data?.orders || []);
-                    setMessage(`Reconciled ${response.data?.updated || 0} orders.`);
+                    setMessage("Order status updated.");
                   } else {
-                    setMessage(response.error || "Reconcile failed.");
+                    setMessage(response.error || "Refresh failed.");
                   }
                   setWorkingId("");
                 }}
                 className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={!hydrated || !isSignedIn || workingId === "reconcile"}
+                disabled={!hydrated || !isSignedIn || workingId === "refresh"}
               >
-                {workingId === "reconcile" ? "Reconciling..." : "Reconcile Orders"}
+                {workingId === "refresh" ? "Refreshing..." : "Refresh status"}
               </button>
               <button
                 type="button"
@@ -139,10 +167,10 @@ export default function OrdersPageClient() {
         ) : !isSignedIn ? (
           <SurfacePanel className="space-y-4">
             <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-              Sign in to load your ledger
+              Sign in to view your orders
             </h2>
             <p className="text-sm leading-6 text-neutral-300">
-              Receipts, reconciliation, and refund actions require an authenticated account session.
+              Receipts and refund actions are tied to your account, so you will need to sign in first.
             </p>
             <button
               type="button"
@@ -154,7 +182,7 @@ export default function OrdersPageClient() {
           </SurfacePanel>
         ) : orders.length === 0 ? (
           <SurfacePanel>
-            <p className="text-sm text-neutral-400">No orders yet.</p>
+            <p className="text-sm text-neutral-400">No purchases yet.</p>
           </SurfacePanel>
         ) : (
           <SurfacePanel className="space-y-5">
@@ -180,7 +208,7 @@ export default function OrdersPageClient() {
                     <div>
                       <p className="text-sm font-semibold text-white">{order.packageId}</p>
                       <p className="mt-2 text-xs text-neutral-400">
-                        {order.amount} {order.currency} - {order.orderId}
+                        {formatOrderAmount(order.amount, order.currency)} - {order.orderId}
                       </p>
                     </div>
                     <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-neutral-300">
@@ -218,7 +246,7 @@ export default function OrdersPageClient() {
                       }`}
                       disabled={workingId === order.orderId}
                     >
-                      {workingId === order.orderId ? "Requesting..." : "Refund"}
+                      {workingId === order.orderId ? "Requesting..." : "Request refund"}
                     </button>
                   ) : null}
                 </div>

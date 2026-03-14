@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
+import { HomeProvider } from "../../store/useHomeStore";
 import { getCookie } from "../../lib/cookies";
 import { trackEvent } from "../../lib/trackEvent";
 import HeaderLogo from "./HeaderLogo";
@@ -16,7 +17,7 @@ const HeaderSearch = dynamic(() => import("./HeaderSearch"), {
 });
 
 export default function SiteHeader({ onSearch }) {
-  const { isAdultMode, requestAdultToggle } = useAdultGateStore();
+  const { isAdultMode, legalAge, requestAdultToggle } = useAdultGateStore();
   const { isSignedIn, hydrated } = useAuthStore();
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
@@ -144,7 +145,8 @@ export default function SiteHeader({ onSearch }) {
 
   return (
     <>
-      <header data-site-header="1"
+      <header
+        data-site-header="1"
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
           scrolled
             ? "border-white/10 bg-neutral-950/92 shadow-ios-lg backdrop-blur-2xl"
@@ -155,7 +157,9 @@ export default function SiteHeader({ onSearch }) {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.10),transparent_32%),radial-gradient(circle_at_85%_0%,rgba(34,211,238,0.08),transparent_24%)] opacity-90" />
         <div className="relative mx-auto flex min-h-[72px] max-w-[1280px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 lg:px-8">
           <HeaderLogo />
-          <HeaderNav />
+          <HomeProvider>
+            <HeaderNav />
+          </HomeProvider>
           <div className="min-w-0 flex-1 md:max-w-xs lg:max-w-sm xl:max-w-md">
             <HeaderSearch onSearch={onSearch} />
           </div>
@@ -164,6 +168,7 @@ export default function SiteHeader({ onSearch }) {
             onAdultToggleClick={handleAdultToggle}
             onLoginClick={handleLoginClick}
             isAdultMode={isAdultMode}
+            legalAge={legalAge}
           />
         </div>
       </header>
@@ -183,6 +188,3 @@ export default function SiteHeader({ onSearch }) {
     </>
   );
 }
-
-
-

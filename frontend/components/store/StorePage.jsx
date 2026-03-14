@@ -53,6 +53,10 @@ export default function StorePage() {
   const sourceEpisodeId = routeAttribution?.sourceEpisodeId || "";
   const sourcePath = routeAttribution?.sourcePath || returnTo || "/store";
   const isSubscriber = Boolean(subscription?.active);
+  const returnLabel =
+    /^\/(read|series)\//.test(returnTo) || sourceEntry.includes("READER")
+      ? "Back to reading"
+      : "Go back";
 
   useEffect(() => {
     trackEvent("store_view", {
@@ -293,9 +297,9 @@ export default function StorePage() {
       <SiteHeader />
       <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Wallet desk"
-          title="Top up points with a storefront that reads fast and stays transparent."
-          description="Balance, coupons, promotions, and package purchase paths are grouped into a cleaner commerce surface without touching the existing checkout flow."
+          eyebrow="Points store"
+          title="Buy points with clear pricing and fewer checkout surprises."
+          description="Balance, coupons, promotions, and point packs are grouped into one cleaner purchase flow without hiding the details that matter."
           secondary={`${regionConfig.label} storefront - ${regionConfig.taxHint}`}
           stats={storeHeroStats}
           actions={
@@ -318,7 +322,7 @@ export default function StorePage() {
                   }
                   className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
                 >
-                  Compare Membership
+                  View plans
                 </button>
               ) : null}
               <button
@@ -326,7 +330,7 @@ export default function StorePage() {
                 onClick={() => router.push(returnTo)}
                 className={secondaryButtonClass}
               >
-                Return to Reading
+                {returnLabel}
               </button>
             </>
           }
@@ -369,7 +373,7 @@ export default function StorePage() {
                   Subscriber savings
                 </h2>
                 <p className="text-sm leading-6 text-neutral-400">
-                  Save up to {subscriptionStats.maxDiscount}% on unlocks, receive up to {subscriptionStats.maxDailyFree} daily free episodes, and accelerate TTF down to {Math.round(subscriptionStats.bestTtf * 100)}%.
+                  Save up to {subscriptionStats.maxDiscount}% on unlocks, receive up to {subscriptionStats.maxDailyFree} daily free episodes, and cut free-unlock wait times down to {Math.round(subscriptionStats.bestTtf * 100)}% of the standard timer.
                 </p>
                 <button
                   type="button"
@@ -388,7 +392,7 @@ export default function StorePage() {
                   }
                   className={secondaryButtonClass}
                 >
-                  Compare subscription
+                  View plans
                 </button>
               </SurfacePanel>
             ) : null}

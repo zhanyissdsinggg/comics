@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 export function AdminListToolbar({
   searchTerm,
@@ -9,7 +9,7 @@ export function AdminListToolbar({
   onToggleSortOrder,
   extraActions = null,
   className = '',
-  filtersLabel = '筛选',
+  filtersLabel = '筛选与排序',
   ascendingLabel = '升序',
   descendingLabel = '降序',
 }) {
@@ -43,3 +43,4 @@ export function AdminListToolbar({
     </div>
   );
 }
+

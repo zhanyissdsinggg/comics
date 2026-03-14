@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SeriesHeader from "./SeriesHeader";
-import EpisodeList from "./EpisodeList";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
 import SiteHeader from "../layout/SiteHeader";
 import Skeleton from "../common/Skeleton";
@@ -21,6 +20,28 @@ import { useCouponStore } from "../../store/useCouponStore";
 import { useProgressStore } from "../../store/useProgressStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 
+function EpisodeListSkeleton() {
+  return (
+    <section className="mt-6 rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:mt-8 sm:p-6">
+      <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-6 w-28 rounded-full" />
+          <Skeleton className="h-4 w-10 rounded-full" />
+        </div>
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-9 w-24 rounded-full" />
+          <Skeleton className="h-9 w-24 rounded-full" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <Skeleton key={`episode-list-skeleton-${index}`} className="h-24 w-full rounded-[24px]" />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 const AdultLoginModal = dynamic(() => import("./AdultLoginModal"), {
   ssr: false,
 });
@@ -32,6 +53,9 @@ const CommentsSection = dynamic(() => import("./CommentsSection"), {
 });
 const SimilarSeriesSection = dynamic(() => import("./SimilarSeriesSection"), {
   ssr: false,
+});
+const EpisodeList = dynamic(() => import("./EpisodeList"), {
+  loading: () => <EpisodeListSkeleton />,
 });
 
 function getFirstEpisodeId(episodes) {

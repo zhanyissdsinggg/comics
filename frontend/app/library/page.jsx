@@ -1,4 +1,6 @@
 import LibraryPage from "../../components/library/LibraryPage";
+import { BookmarkProvider } from "../../store/useBookmarkStore";
+import { RewardsProvider } from "../../store/useRewardsStore";
 
 export const metadata = {
   title: "Library",
@@ -6,5 +8,11 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <LibraryPage />;
+  return (
+    <RewardsProvider>
+      <BookmarkProvider>
+        <LibraryPage />
+      </BookmarkProvider>
+    </RewardsProvider>
+  );
 }

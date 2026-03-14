@@ -70,7 +70,7 @@ export default function EndOfEpisodeOverlay({
     const primaryId = showPackPrimary ? packOfferId : "unlock_single";
     onOfferClick?.(primaryId);
     if (showPackPrimary) {
-      onPackOffer?.(packOfferId);
+      onPackOffer?.(packOffer);
       return;
     }
     onUnlock();
@@ -148,7 +148,7 @@ export default function EndOfEpisodeOverlay({
                     onUnlock();
                     return;
                   }
-                  onPackOffer?.(offerId);
+                  onPackOffer?.(packOffer);
                 }}
                 className="rounded-full border border-neutral-700 px-4 py-2 text-sm"
               >

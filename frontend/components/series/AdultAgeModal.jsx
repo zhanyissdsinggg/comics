@@ -6,7 +6,6 @@ export default function AdultAgeModal({
   open,
   onClose,
   onConfirm,
-  ageRuleKey,
   legalAge,
 }) {
   if (!open) {
@@ -18,7 +17,7 @@ export default function AdultAgeModal({
       <div className="modal-card" role="dialog" aria-modal="true">
         <h3>{AGE_GATE_TITLE}</h3>
         <p>
-          You must be at least {legalAge} years old ({ageRuleKey} policy).
+          You must be at least {legalAge} years old to access mature content.
         </p>
         <div className="modal-actions">
           <button type="button" onClick={onClose}>

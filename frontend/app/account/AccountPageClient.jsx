@@ -165,6 +165,11 @@ export default function AccountPage() {
       window.localStorage.setItem(NOTIFY_NEW_KEY, nextNotify.newEpisode ? "1" : "0");
       window.localStorage.setItem(NOTIFY_TTF_KEY, nextNotify.ttfReady ? "1" : "0");
       window.localStorage.setItem(NOTIFY_PROMO_KEY, nextNotify.promo ? "1" : "0");
+      window.dispatchEvent(
+        new CustomEvent("mn-region-change", {
+          detail: { region: nextRegion },
+        })
+      );
     }
     setCookie(REGION_KEY, nextRegion);
     setCookie(LANG_KEY, nextLang);
@@ -307,7 +312,7 @@ export default function AccountPage() {
                 }
                 className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Manage Membership
+                Manage plan
               </button>
               <button
                 type="button"
@@ -411,7 +416,7 @@ export default function AccountPage() {
                   onClick={() => router.push("/notifications")}
                   className={secondaryButtonClass}
                 >
-                  Notification Center
+                  Notifications
                 </button>
                 <button
                   type="button"
@@ -513,7 +518,7 @@ export default function AccountPage() {
                   onChange={(event) => setNotifyTtf(event.target.checked)}
                   className={checkboxClass}
                 />
-                TTF ready reminders
+                Free unlock reminders
               </label>
               <label className="flex items-center gap-3 rounded-[24px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-neutral-200">
                 <input
@@ -727,7 +732,7 @@ export default function AccountPage() {
                 onClick={handleSave}
                 className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Save Preferences
+                Save settings
               </button>
             </SurfacePanel>
           </div>

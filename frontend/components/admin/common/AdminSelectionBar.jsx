@@ -1,11 +1,11 @@
-import React from 'react';
+﻿import React from 'react';
 
 export function AdminSelectionBar({
   selectedCount,
   children,
   onClear,
   className = '',
-  clearLabel = '清空',
+  clearLabel = '清空选择',
 }) {
   if (!selectedCount) {
     return null;
@@ -13,7 +13,7 @@ export function AdminSelectionBar({
 
   return (
     <div className={`mb-6 flex items-center justify-between rounded-lg border border-blue-700 bg-blue-900/20 p-4 ${className}`.trim()}>
-      <span className="text-blue-300">已选 {selectedCount} 项</span>
+      <span className="text-blue-300">已选择 {selectedCount} 项</span>
       <div className="flex flex-wrap gap-2">
         {children}
         <button
@@ -27,3 +27,4 @@ export function AdminSelectionBar({
     </div>
   );
 }
+

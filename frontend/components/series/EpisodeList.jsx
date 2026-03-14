@@ -87,7 +87,7 @@ export default function EpisodeList({
             <option value="all">All</option>
             <option value="locked">Locked</option>
             <option value="unlocked">Unlocked</option>
-            <option value="ttf">TTF</option>
+            <option value="ttf">Free unlocks</option>
           </select>
           <select
             value={sortOrder}

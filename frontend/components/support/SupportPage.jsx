@@ -23,6 +23,10 @@ function buildSupportBody(message, replyEmail, orderId) {
   return `${notes.join("\n")}\n\n${message}`;
 }
 
+function buildSupportDraft(subject, body, supportEmail) {
+  return `To: ${supportEmail}\nSubject: ${subject}\n\n${body}`;
+}
+
 export default function SupportPage() {
   const { hydrated, isSignedIn, user } = useAuthStore();
   const [email, setEmail] = useState("");
@@ -39,10 +43,13 @@ export default function SupportPage() {
   }, [hydrated, isSignedIn, user?.email]);
 
   const trimmedEmail = email.trim();
+  const trimmedSubject = subject.trim();
+  const trimmedMessage = message.trim();
   const supportBody = useMemo(
-    () => buildSupportBody(message.trim(), trimmedEmail, orderId.trim()),
-    [message, trimmedEmail, orderId],
+    () => buildSupportBody(trimmedMessage, trimmedEmail, orderId.trim()),
+    [trimmedEmail, trimmedMessage, orderId],
   );
+  const canPrepareGuestEmail = Boolean(trimmedSubject && trimmedMessage);
 
   const supportStats = useMemo(
     () => [
@@ -70,9 +77,46 @@ export default function SupportPage() {
     [hydrated, isSignedIn, orderId],
   );
 
+  const openGuestMailApp = () => {
+    if (!canPrepareGuestEmail) {
+      setFeedback({ type: "error", text: "Please fill in both subject and message." });
+      return;
+    }
+
+    const mailto = `mailto:${siteConfig.supportEmail}?subject=${encodeURIComponent(trimmedSubject)}&body=${encodeURIComponent(supportBody)}`;
+    if (typeof window !== "undefined") {
+      window.location.href = mailto;
+    }
+  };
+
+  const copyGuestDraft = async () => {
+    const draft = buildSupportDraft(trimmedSubject, supportBody, siteConfig.supportEmail);
+    if (!canPrepareGuestEmail) {
+      setFeedback({ type: "error", text: "Please fill in both subject and message." });
+      return false;
+    }
+
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(draft);
+        setFeedback({
+          type: "success",
+          text: `Support details copied. Paste them into an email to ${siteConfig.supportEmail}, or use Open Email App.`,
+        });
+        return true;
+      }
+    } catch {
+      // fall through to the fallback message below
+    }
+
+    setFeedback({
+      type: "success",
+      text: `Your message is ready. Send it to ${siteConfig.supportEmail}, or use Open Email App if your device supports it.`,
+    });
+    return true;
+  };
+
   const handleSubmit = async () => {
-    const trimmedSubject = subject.trim();
-    const trimmedMessage = message.trim();
     const trimmedOrderId = orderId.trim();
 
     if (!trimmedSubject || !trimmedMessage) {
@@ -98,14 +142,7 @@ export default function SupportPage() {
 
     try {
       if (!hydrated || !isSignedIn) {
-        const mailto = `mailto:${siteConfig.supportEmail}?subject=${encodeURIComponent(trimmedSubject)}&body=${encodeURIComponent(buildSupportBody(trimmedMessage, trimmedEmail, trimmedOrderId))}`;
-        if (typeof window !== "undefined") {
-          window.location.href = mailto;
-        }
-        setFeedback({
-          type: "success",
-          text: `Your email draft is ready. If nothing opened, send the details to ${siteConfig.supportEmail}.`,
-        });
+        await copyGuestDraft();
         return;
       }
 
@@ -238,8 +275,18 @@ export default function SupportPage() {
                 disabled={submitting}
                 className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {submitting ? "Submitting..." : hydrated && isSignedIn ? "Submit Ticket" : "Email Support"}
+                {submitting ? "Submitting..." : hydrated && isSignedIn ? "Submit Ticket" : "Copy Email Details"}
               </button>
+              {!isSignedIn ? (
+                <button
+                  type="button"
+                  onClick={openGuestMailApp}
+                  disabled={!canPrepareGuestEmail}
+                  className={secondaryButtonClass}
+                >
+                  Open Email App
+                </button>
+              ) : null}
               {hydrated && !isSignedIn ? (
                 <button
                   type="button"
@@ -250,7 +297,7 @@ export default function SupportPage() {
                   }}
                   className={secondaryButtonClass}
                 >
-                  Sign in for in-app tickets
+                  Sign in to submit in app
                 </button>
               ) : null}
             </div>

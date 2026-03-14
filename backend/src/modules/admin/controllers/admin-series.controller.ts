@@ -22,6 +22,17 @@ import { AdminAuthGuard } from "../guards/admin-auth.guard";
 export class AdminSeriesController {
   constructor(private readonly prisma: PrismaService) {}
 
+  private mapSeriesSummary(series: any) {
+    if (!series) {
+      return series;
+    }
+
+    return {
+      ...series,
+      episodeCount: Number(series?._count?.episodes ?? 0),
+    };
+  }
+
   private toSeriesPayload(input: any, existing?: any) {
     const pricing = input?.pricing || {};
     const ttf = input?.ttf || {};
@@ -56,8 +67,17 @@ export class AdminSeriesController {
 
   @Get()
   async list() {
-    const series = await this.prisma.series.findMany({ orderBy: { title: "asc" } });
-    return { series };
+    const series = await this.prisma.series.findMany({
+      orderBy: { title: "asc" },
+      include: {
+        _count: {
+          select: {
+            episodes: true,
+          },
+        },
+      },
+    });
+    return { series: series.map((item) => this.mapSeriesSummary(item)) };
   }
 
   @Get("search/advanced")
@@ -107,12 +127,19 @@ export class AdminSeriesController {
         orderBy: { [finalSortField]: finalSortDirection },
         skip: (page - 1) * limit,
         take: limit,
+        include: {
+          _count: {
+            select: {
+              episodes: true,
+            },
+          },
+        },
       }),
       this.prisma.series.count({ where }),
     ]);
 
     return {
-      series,
+      series: series.map((item) => this.mapSeriesSummary(item)),
       pagination: {
         page,
         limit,
@@ -144,11 +171,20 @@ export class AdminSeriesController {
   @Get(":id")
   async detail(@Query("key") _key: string, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
-    const series = await this.prisma.series.findUnique({ where: { id: seriesId } });
+    const series = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+      include: {
+        _count: {
+          select: {
+            episodes: true,
+          },
+        },
+      },
+    });
     if (!series) {
       throw new NotFoundException("Series not found.");
     }
-    return { series };
+    return { series: this.mapSeriesSummary(series) };
   }
 
   @Patch(":id")

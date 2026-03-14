@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
@@ -7,7 +8,6 @@ import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
-import CollectionManager from "./CollectionManager";
 import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
 import { apiGet } from "../../lib/apiClient";
@@ -16,15 +16,37 @@ import { useRewardsStore } from "../../store/useRewardsStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useFollowStore } from "../../store/useFollowStore";
-import CheckInPanel from "./CheckInPanel";
-import MissionsPanel from "./MissionsPanel";
-import RewardToast from "./RewardToast";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useAuthStore } from "../../store/useAuthStore";
-import ActionModal from "../series/ActionModal";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+
+function PanelLoadingSkeleton({ rows = 3 }) {
+  return (
+    <SurfacePanel className="space-y-3">
+      {Array.from({ length: rows }).map((_, index) => (
+        <Skeleton key={`panel-loading-${rows}-${index}`} className="h-12 w-full rounded-2xl" />
+      ))}
+    </SurfacePanel>
+  );
+}
+
+const CollectionManager = dynamic(() => import("./CollectionManager"), {
+  loading: () => <PanelLoadingSkeleton rows={4} />,
+});
+const CheckInPanel = dynamic(() => import("./CheckInPanel"), {
+  loading: () => <PanelLoadingSkeleton rows={3} />,
+});
+const MissionsPanel = dynamic(() => import("./MissionsPanel"), {
+  loading: () => <PanelLoadingSkeleton rows={5} />,
+});
+const RewardToast = dynamic(() => import("./RewardToast"), {
+  ssr: false,
+});
+const ActionModal = dynamic(() => import("../series/ActionModal"), {
+  ssr: false,
+});
 
 function parseEpisodeNumber(value) {
   if (!value) {
@@ -206,7 +228,7 @@ export default function LibraryPage() {
     const response = await checkIn();
     if (response.ok) {
       const rewardPts = response.data?.rewardPts ?? rewards?.todayReward ?? 0;
-      setToastMessage(`+${rewardPts} bonus POINTS`);
+      setToastMessage(`+${rewardPts} bonus points`);
     } else if (response.error === "ALREADY_CHECKED_IN") {
       setToastMessage("Already checked in today.");
     } else {
@@ -223,8 +245,8 @@ export default function LibraryPage() {
     } else if (response.status === 402) {
       setMakeupModal({
         type: "SHORTFALL",
-        title: "Not enough POINTS",
-        description: "Not enough POINTS to make up today.",
+        title: "Not enough points",
+        description: "You do not have enough points to make up today.",
         shortfallPts: response.shortfallPts || 0,
       });
     } else if (response.error === "MAKEUP_USED") {
@@ -242,7 +264,7 @@ export default function LibraryPage() {
       const reward = [...missions.daily, ...missions.weekly].find(
         (mission) => mission.id === missionId,
       )?.reward;
-      setToastMessage(`+${reward || 0} bonus POINTS`);
+      setToastMessage(`+${reward || 0} bonus points`);
     } else if (response.error === "MISSION_ALREADY_CLAIMED") {
       setToastMessage("Mission already claimed.");
     } else if (response.error === "MISSION_NOT_COMPLETE") {
@@ -550,7 +572,7 @@ export default function LibraryPage() {
           makeupModal
             ? [
                 {
-                  label: "Top up POINTS",
+                  label: "Buy points",
                   onClick: () => {
                     router.push(
                       buildPathWithAttribution(
@@ -569,7 +591,7 @@ export default function LibraryPage() {
                   variant: "secondary",
                 },
                 {
-                  label: "Quick top up (Starter)",
+                  label: "Quick buy (Starter)",
                   onClick: async () => {
                     const topupResponse = await topup("starter", {
                       attribution: {

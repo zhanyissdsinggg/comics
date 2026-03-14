@@ -11,13 +11,9 @@ import PageStream from "./PageStream";
 import ReaderTopBar from "./ReaderTopBar";
 import { useProgressStore } from "../../store/useProgressStore";
 import { useRewardsStore } from "../../store/useRewardsStore";
-import { decideOffers } from "../../lib/offers/decide";
-import { getBucket, getOrCreateUserId, trackExposure } from "../../lib/experiments/ab";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
-import { OFFERS } from "../../lib/offers/catalog";
 import { useCouponStore } from "../../store/useCouponStore";
-import { calculatePrice } from "../../lib/pricing";
 import AdultGateBlockingPanel from "../series/AdultGateBlockingPanel";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
@@ -57,12 +53,13 @@ function createIdempotencyKey() {
   return `idem_${Date.now()}_${Math.random().toString(16).slice(2, 10)}`;
 }
 
-function getPackSize(offerId) {
-  const offer = OFFERS[offerId];
-  if (!offer) {
-    return 0;
-  }
-  return offer.episodes || 0;
+function createPricingFallback(basePrice = 0) {
+  return {
+    finalPrice: Number(basePrice || 0),
+    discountPct: 0,
+    appliedCoupon: null,
+    appliedDailyFree: false,
+  };
 }
 
 export default function ReaderPage({ seriesId, episodeId }) {
@@ -87,6 +84,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const [gateStatus, setGateStatus] = useState("OK");
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
+  const [commerceState, setCommerceState] = useState({
+    loading: false,
+    offerDecision: null,
+    currentPricing: createPricingFallback(),
+    nextPricing: createPricingFallback(),
+    packPricing: null,
+  });
   const previewEndRef = useRef(null);
   const endRef = useRef(null);
   const scrollRef = useRef(0);
@@ -96,6 +100,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const resumeRef = useRef(false);
   const gateReportedRef = useRef(false);
   const requestRef = useRef(0);
+  const commerceExposureRef = useRef(new Set());
 
   const { bySeriesId, loadEntitlement, unlockEpisode, unlockPack, claimTTF } =
     useEntitlementStore();
@@ -171,62 +176,152 @@ export default function ReaderPage({ seriesId, episodeId }) {
   }, [episodeData?.previewParagraphs, unlocked]);
 
   const isSubscriber = Boolean(subscription?.active);
-  const isNewPayer =
-    typeof window !== "undefined"
-      ? window.localStorage.getItem("mn_has_purchased") !== "1"
-      : true;
-  const userId = typeof window !== "undefined" ? getOrCreateUserId() : "guest";
-  const bucketMap = useMemo(
-    () => ({
-      unlock_offer_v1: getBucket(userId, "unlock_offer_v1"),
-      topup_offer_v1: getBucket(userId, "topup_offer_v1"),
-      subscribe_upsell_v1: getBucket(userId, "subscribe_upsell_v1"),
-      reader_paywall_v1: getBucket(userId, "reader_paywall_v1"),
-    }),
-    [userId]
-  );
+  const commerceActive =
+    showPaywall || showEndOverlay || modalState?.type === "SHORTFALL";
+  const offerDecision = commerceState.offerDecision;
+  const currentPricing =
+    commerceState.currentPricing ||
+    createPricingFallback(episodeData?.pricePts || 0);
+  const nextPricing =
+    commerceState.nextPricing || createPricingFallback(nextEpisode?.pricePts || 0);
+  const packPricing = commerceState.packPricing;
 
   useEffect(() => {
-    Object.entries(bucketMap).forEach(([experimentId, bucket]) => {
-      trackExposure(experimentId, bucket);
-    });
-  }, [bucketMap]);
+    if (!commerceActive) {
+      return;
+    }
 
-  const offerDecision = useMemo(
-    () =>
-      decideOffers({
-        user: {
-          isSubscriber,
-          paidPts,
-          bonusPts,
-          isNewPayer,
-          region: "global",
-          isAdultMode,
-        },
-        content: {
-          seriesId,
-          episodeId,
-          pricePts: nextEpisode?.pricePts || episodeData?.pricePts || 0,
-          isAdult: false,
-          ttfEligible: nextEpisode?.ttfEligible,
-        },
-        entry: "READER_END",
-        experiments: { bucketMap },
-      }),
-    [
-      isSubscriber,
-      paidPts,
-      bonusPts,
-      isNewPayer,
-      isAdultMode,
-      seriesId,
-      episodeId,
-      nextEpisode?.pricePts,
-      episodeData?.pricePts,
-      nextEpisode?.ttfEligible,
-      bucketMap,
-    ]
-  );
+    let cancelled = false;
+
+    setCommerceState({
+      loading: true,
+      offerDecision: null,
+      currentPricing: createPricingFallback(episodeData?.pricePts || 0),
+      nextPricing: createPricingFallback(nextEpisode?.pricePts || 0),
+      packPricing: null,
+    });
+
+    Promise.all([
+      import("../../lib/offers/decide"),
+      import("../../lib/experiments/ab"),
+      import("../../lib/pricing"),
+    ])
+      .then(([offersModule, experimentsModule, pricingModule]) => {
+        if (cancelled) {
+          return;
+        }
+
+        const isNewPayer =
+          typeof window !== "undefined"
+            ? window.localStorage.getItem("mn_has_purchased") !== "1"
+            : true;
+        const userId =
+          typeof window !== "undefined"
+            ? experimentsModule.getOrCreateUserId()
+            : "guest";
+        const bucketMap = {
+          unlock_offer_v1: experimentsModule.getBucket(userId, "unlock_offer_v1"),
+          topup_offer_v1: experimentsModule.getBucket(userId, "topup_offer_v1"),
+          subscribe_upsell_v1: experimentsModule.getBucket(userId, "subscribe_upsell_v1"),
+          reader_paywall_v1: experimentsModule.getBucket(userId, "reader_paywall_v1"),
+        };
+
+        Object.entries(bucketMap).forEach(([experimentId, bucket]) => {
+          const exposureKey = `${experimentId}:${bucket}`;
+          if (commerceExposureRef.current.has(exposureKey)) {
+            return;
+          }
+          commerceExposureRef.current.add(exposureKey);
+          experimentsModule.trackExposure(experimentId, bucket);
+        });
+
+        const nextOfferDecision = offersModule.decideOffers({
+          user: {
+            isSubscriber,
+            paidPts,
+            bonusPts,
+            isNewPayer,
+            region: "global",
+            isAdultMode,
+          },
+          content: {
+            seriesId,
+            episodeId,
+            pricePts: nextEpisode?.pricePts || episodeData?.pricePts || 0,
+            isAdult: false,
+            ttfEligible: nextEpisode?.ttfEligible,
+          },
+          entry: "READER_END",
+          experiments: { bucketMap },
+        });
+
+        const nextCurrentPricing = pricingModule.calculatePrice({
+          basePrice: episodeData?.pricePts || 0,
+          subscription: subscription?.active ? subscription : null,
+          coupons,
+          method: "WALLET",
+          applyDailyFree: Boolean(subscriptionUsage?.remaining),
+        });
+
+        const nextEpisodePricing = pricingModule.calculatePrice({
+          basePrice: nextEpisode?.pricePts || 0,
+          subscription: subscription?.active ? subscription : null,
+          coupons,
+          method: "WALLET",
+          applyDailyFree: Boolean(subscriptionUsage?.remaining),
+        });
+
+        const recommendedPack = nextOfferDecision?.recommendedUnlockOffer;
+        const nextPackPricing =
+          recommendedPack?.type === "unlock" && recommendedPack?.episodes > 1
+            ? pricingModule.calculatePrice({
+                basePrice: recommendedPack.pricePts || 0,
+                subscription: subscription?.active ? subscription : null,
+                coupons,
+                method: "PACK",
+                applyDailyFree: false,
+              })
+            : null;
+
+        setCommerceState({
+          loading: false,
+          offerDecision: nextOfferDecision,
+          currentPricing: nextCurrentPricing,
+          nextPricing: nextEpisodePricing,
+          packPricing: nextPackPricing,
+        });
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+        setCommerceState({
+          loading: false,
+          offerDecision: null,
+          currentPricing: createPricingFallback(episodeData?.pricePts || 0),
+          nextPricing: createPricingFallback(nextEpisode?.pricePts || 0),
+          packPricing: null,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    commerceActive,
+    isSubscriber,
+    paidPts,
+    bonusPts,
+    isAdultMode,
+    seriesId,
+    episodeId,
+    nextEpisode?.pricePts,
+    nextEpisode?.ttfEligible,
+    episodeData?.pricePts,
+    subscription,
+    coupons,
+    subscriptionUsage?.remaining,
+  ]);
 
   const fetchEpisode = useCallback(
     async ({ bustSeries = false, showLoading = true } = {}) => {
@@ -802,8 +897,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const handleShortfall = (response, targetEpisodeId) => {
     setModalState({
       type: "SHORTFALL",
-      title: "Not enough POINTS",
-      description: "Not enough POINTS to unlock this episode.",
+      title: "Not enough points",
+      description: "You do not have enough points to unlock this episode.",
       shortfallPts: response.shortfallPts || 0,
       targetEpisodeId,
       offerId: offerDecision?.recommendedTopupOffer?.id,
@@ -905,13 +1000,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
     setModalState({
       type: "ERROR",
       title: "Claim failed",
-      description: response.error || "TTF not ready.",
+      description: response.error || "Free unlock not ready yet.",
     });
   };
 
-  const handlePackOffer = async (offerId) => {
-    const packSize = getPackSize(offerId);
-    if (!packSize || currentIndex < 0) {
+  const handlePackOffer = async (offer) => {
+    const packSize = Number(offer?.episodes || 0);
+    if (!packSize || currentIndex < 0 || !offer?.id) {
       return;
     }
     const targets = episodes.slice(currentIndex + 1, currentIndex + 1 + packSize);
@@ -921,7 +1016,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     const response = await unlockPack(
       seriesId,
       targets.map((episode) => episode.id),
-      offerId
+      offer.id
     );
     if (!response.ok) {
       if (response.status === 402) {
@@ -942,45 +1037,6 @@ export default function ReaderPage({ seriesId, episodeId }) {
     });
     router.push(`/read/${seriesId}/${targets[0].id}`);
   };
-
-  const currentPricing = useMemo(
-    () =>
-      calculatePrice({
-        basePrice: episodeData?.pricePts || 0,
-        subscription: subscription?.active ? subscription : null,
-        coupons,
-        method: "WALLET",
-        applyDailyFree: Boolean(subscriptionUsage?.remaining),
-      }),
-    [episodeData?.pricePts, subscription, coupons, subscriptionUsage?.remaining]
-  );
-
-  const nextPricing = useMemo(
-    () =>
-      calculatePrice({
-        basePrice: nextEpisode?.pricePts || 0,
-        subscription: subscription?.active ? subscription : null,
-        coupons,
-        method: "WALLET",
-        applyDailyFree: Boolean(subscriptionUsage?.remaining),
-      }),
-    [nextEpisode?.pricePts, subscription, coupons, subscriptionUsage?.remaining]
-  );
-
-  const packPricing = useMemo(() => {
-    const offerId = offerDecision?.recommendedUnlockOffer?.id;
-    const offer = offerId ? OFFERS[offerId] : null;
-    if (!offer || offer.type !== "unlock" || offer.episodes <= 1) {
-      return null;
-    }
-    return calculatePrice({
-      basePrice: offer.pricePts || 0,
-      subscription: subscription?.active ? subscription : null,
-      coupons,
-      method: "PACK",
-      applyDailyFree: false,
-    });
-  }, [offerDecision?.recommendedUnlockOffer?.id, subscription, coupons]);
 
   const handleGoBookmark = (bookmark) => {
     if (bookmark.episodeId && bookmark.episodeId !== episodeId) {
@@ -1188,14 +1244,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
             >
               {currentPricing.finalPrice === 0
                 ? "Unlock Free"
-                : `Unlock (${currentPricing.finalPrice} POINTS)`}
+                : `Unlock (${currentPricing.finalPrice} points)`}
             </button>
             <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-left text-[11px] text-neutral-300">
               <div className="font-semibold text-neutral-100">Why unlock?</div>
               <div className="mt-2 space-y-1 text-neutral-400">
                 <div>- Keep this episode in your library.</div>
-                <div>- Packs save more POINTS over time.</div>
-                <div>- Subscribers get daily free unlocks & faster TTF.</div>
+                <div>- Packs save more points over time.</div>
+                <div>- Members get daily free unlocks and shorter free-unlock waits.</div>
               </div>
             </div>
             <button
@@ -1214,7 +1270,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               }}
               className="mt-3 w-full rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-100"
             >
-              Subscribe for perks
+              View membership perks
             </button>
             <button
               type="button"
@@ -1236,7 +1292,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               }}
               className="mt-2 w-full rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300"
             >
-              Top up POINTS
+              Buy points
             </button>
           </div>
         </div>
@@ -1344,8 +1400,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
             modalState?.type === "SHORTFALL"
               ? [
                   "Unlock keeps this episode in your library.",
-                  "Packs save more POINTS on future episodes.",
-                  "Subscribers get daily free unlocks and faster TTF.",
+                  "Packs save more points on future episodes.",
+                  "Members get daily free unlocks and shorter free-unlock waits.",
                   "Subscribe to unlock daily free chapters.",
                 ]
               : []
@@ -1354,7 +1410,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             modalState?.type === "SHORTFALL"
               ? [
                   {
-                    label: "Top up POINTS",
+                    label: "Buy points",
                     onClick: () => {
                       router.push(
                         buildPathWithAttribution(
@@ -1378,7 +1434,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     variant: "secondary",
                   },
                   {
-                    label: "Subscribe for perks",
+                    label: "View membership perks",
                     onClick: () => {
                       trackEvent("click_subscribe_from_shortfall", {
                         seriesId,
@@ -1398,7 +1454,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     variant: "secondary",
                   },
                   {
-                    label: "Quick top up",
+                    label: "Quick buy",
                     onClick: async () => {
                       const packageId =
                         offerDecision?.recommendedTopupOffer?.id?.replace(

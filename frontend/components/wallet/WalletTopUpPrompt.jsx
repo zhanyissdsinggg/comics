@@ -104,9 +104,9 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                 <Wallet size={32} />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Top Up Points</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Buy points</h2>
             <p className="text-sm text-neutral-400">
-              Current balance: <span className="font-semibold text-emerald-400">{currentPoints} POINTS</span>
+              Current balance: <span className="font-semibold text-emerald-400">{currentPoints} points</span>
             </p>
           </div>
 
@@ -137,7 +137,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-white">{pkg.points} POINTS</span>
+                        <span className="text-lg font-bold text-white">{pkg.points} points</span>
                         {pkg.bonus > 0 && (
                           <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">
                             <Gift size={12} />
@@ -147,7 +147,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                       </div>
                       {pkg.bonus > 0 && (
                         <p className="text-xs text-neutral-400">
-                          Total: {pkg.points + pkg.bonus} POINTS
+                          Total: {pkg.points + pkg.bonus} points
                         </p>
                       )}
                     </div>
@@ -170,7 +170,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                   Special Offer!
                 </p>
                 <p className="text-xs text-neutral-400">
-                  Get bonus POINTS with larger packages. The more you buy, the more you save!
+                  Larger packs include bonus points, so your balance stretches further.
                 </p>
               </div>
             </div>

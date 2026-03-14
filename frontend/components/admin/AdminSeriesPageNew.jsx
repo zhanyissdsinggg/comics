@@ -4,7 +4,22 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Search, Grid, List, Edit, Trash2, Copy, Eye, EyeOff, Upload, X, Image as ImageIcon } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Grid,
+  List,
+  Edit,
+  Trash2,
+  Copy,
+  Eye,
+  EyeOff,
+  Upload,
+  X,
+  BookOpen,
+  ExternalLink,
+  Image as ImageIcon,
+} from "lucide-react";
 import { useAdminAuth } from "./AuthContext";
 import { adminDelete as apiDelete, adminGet as apiGet, adminPatch as apiPatch, adminPost as apiPost, adminUpload } from "../../lib/adminApiClient";
 import { ConfirmModal } from "../common/Modal";
@@ -17,13 +32,40 @@ const TYPE_TABS = [
   { value: "comic", label: "漫画" },
   { value: "novel", label: "小说" },
 ];
-const STATUS_OPTIONS = ["Ongoing", "Completed", "Hiatus"];
+const STATUS_OPTIONS = ["Ongoing", "Completed", "Hiatus", "Cancelled"];
 const DEFAULT_FILTERS = { status: "all", publishStatus: "all", adultContent: "all", sortBy: "createdAt_desc" };
 const EMPTY_FEEDBACK = { type: "", message: "" };
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const QUICK_FILTERS = [
+  { value: "all", label: "全部" },
+  { value: "needsEpisodes", label: "待补章节" },
+  { value: "noCover", label: "缺封面" },
+  { value: "draft", label: "未发布" },
+  { value: "adult", label: "18+" },
+];
+const CREATE_FLOW_OPTIONS = [
+  { value: "stay", label: "留在列表", helper: "创建后继续批量整理作品库。" },
+  { value: "details", label: "打开详情", helper: "继续补作品信息、封面与定价。" },
+  { value: "episodes", label: "进入章节", helper: "直接去添加漫画章节或小说章节。" },
+];
 
 function createEmptyCreateForm() {
-  return { title: "", type: "comic", adult: false, coverFile: null, coverPreviewUrl: "" };
+  return {
+    title: "",
+    type: "comic",
+    status: "Ongoing",
+    adult: false,
+    description: "",
+    genres: "",
+    badge: "",
+    episodePrice: "0",
+    ttfEnabled: false,
+    ttfIntervalHours: "24",
+    isPublished: true,
+    openAfterCreate: "episodes",
+    coverFile: null,
+    coverPreviewUrl: "",
+  };
 }
 function revokeObjectUrl(url) {
   if (typeof url === "string" && url.startsWith("blob:")) URL.revokeObjectURL(url);
@@ -38,6 +80,12 @@ function createSeriesId(title) {
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+function normalizeGenresInput(value) {
+  return String(value || "")
+    .split(",")
+    .map((genre) => genre.trim())
+    .filter(Boolean);
 }
 function normalizeSeries(entry, index) {
   const source = entry && typeof entry === "object" ? entry : {};
@@ -56,7 +104,7 @@ function normalizeSeries(entry, index) {
     ttfEnabled: Boolean(source.ttfEnabled),
     ttfIntervalHours: toNumber(source.ttfIntervalHours, 24),
     latestEpisodeId: String(source.latestEpisodeId || ""),
-    episodeCount: toNumber(source.episodeCount ?? source.totalEpisodes, 0),
+    episodeCount: toNumber(source.episodeCount ?? source?._count?.episodes ?? source.totalEpisodes, 0),
     rating: toNumber(source.rating, 0),
     ratingCount: toNumber(source.ratingCount, 0),
     createdAt: source.createdAt || null,
@@ -99,6 +147,7 @@ function formatSeriesTypeLabel(type) {
 function formatSeriesStatusLabel(status) {
   if (status === "Completed") return "已完结";
   if (status === "Hiatus") return "暂停中";
+  if (status === "Cancelled") return "已停更";
   return "连载中";
 }
 function buildQueryString(search, typeFilter, filters) {
@@ -122,6 +171,7 @@ function sortSeries(list, sortBy) {
     if (field === "title") return left.title.localeCompare(right.title) * sign;
     if (field === "updatedAt") return (new Date(left.updatedAt || 0).getTime() - new Date(right.updatedAt || 0).getTime()) * sign;
     if (field === "createdAt") return (new Date(left.createdAt || 0).getTime() - new Date(right.createdAt || 0).getTime()) * sign;
+    if (field === "episodeCount") return (toNumber(left.episodeCount) - toNumber(right.episodeCount)) * sign;
     if (field === "rating") return (toNumber(left.rating) - toNumber(right.rating)) * sign;
     if (field === "ratingCount") return (toNumber(left.ratingCount) - toNumber(right.ratingCount)) * sign;
     return 0;
@@ -131,7 +181,25 @@ function Feedback({ feedback, onDismiss }) {
   return feedback?.message ? <AdminFeedbackBanner feedback={feedback} onDismiss={onDismiss} /> : null;
 }
 function SeriesCard(props) {
-  const { series, viewMode, isSelected, isEditing, editDraft, isSaving, onSelect, onStartEdit, onEditDraftChange, onSaveEdit, onCancelEdit, onOpenDetails, onTogglePublish, onDuplicate, onDelete } = props;
+  const {
+    series,
+    viewMode,
+    isSelected,
+    isEditing,
+    editDraft,
+    isSaving,
+    onSelect,
+    onStartEdit,
+    onEditDraftChange,
+    onSaveEdit,
+    onCancelEdit,
+    onOpenDetails,
+    onOpenEpisodes,
+    onOpenFrontend,
+    onTogglePublish,
+    onDuplicate,
+    onDelete,
+  } = props;
   const isList = viewMode === "list";
   return (
     <article className={`rounded-5xl border bg-neutral-900/60 p-4 shadow-ios transition ${isSelected ? "border-ios-blue/50 ring-1 ring-ios-blue/40" : "border-ios-gray-800"}`}>
@@ -164,15 +232,38 @@ function SeriesCard(props) {
             </div>
           ) : (
             <div className="space-y-1">
-              <button type="button" onClick={() => onStartEdit(series)} className="text-left text-lg font-semibold text-white transition hover:text-ios-blue">{series.title}</button>
+              <button type="button" onClick={() => onOpenDetails(series.id)} className="text-left text-lg font-semibold text-white transition hover:text-ios-blue">{series.title}</button>
               <p className="text-xs uppercase tracking-wide text-ios-gray-500">{series.id}</p>
               <p className="line-clamp-2 text-sm text-ios-gray-300">{series.description || "暂无简介。"}</p>
+              <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-medium">
+                <span className="rounded-full bg-ios-gray-800/80 px-2.5 py-1 text-ios-gray-300">
+                  {series.episodePrice > 0 ? `${series.episodePrice} 金币/章` : "免费章节"}
+                </span>
+                {!series.coverUrl ? (
+                  <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-amber-300">缺少封面</span>
+                ) : null}
+                {series.episodeCount === 0 ? (
+                  <span className="rounded-full bg-orange-500/15 px-2.5 py-1 text-orange-300">还没有章节</span>
+                ) : null}
+                {series.ttfEnabled ? (
+                  <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-emerald-300">
+                    免费券 {series.ttfIntervalHours}h
+                  </span>
+                ) : null}
+                {series.genres.slice(0, 3).map((genre) => (
+                  <span key={`${series.id}-${genre}`} className="rounded-full bg-ios-blue/10 px-2.5 py-1 text-ios-blue">
+                    {genre}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
-        <div className="grid grid-cols-2 gap-3 rounded-3xl bg-ios-gray-950/50 p-4 text-sm lg:grid-cols-1">
+        <div className="grid grid-cols-2 gap-3 rounded-3xl bg-ios-gray-950/50 p-4 text-sm lg:grid-cols-2">
           <div><p className="text-ios-gray-500">章节数</p><p className="mt-1 font-semibold text-white">{series.episodeCount || 0}</p></div>
           <div><p className="text-ios-gray-500">更新时间</p><p className="mt-1 font-semibold text-white">{formatUpdatedAt(series.updatedAt, true)}</p></div>
+          <div><p className="text-ios-gray-500">封面状态</p><p className="mt-1 font-semibold text-white">{series.coverUrl ? "已上传" : "待补充"}</p></div>
+          <div><p className="text-ios-gray-500">发布状态</p><p className="mt-1 font-semibold text-white">{series.isPublished ? "已发布" : "草稿"}</p></div>
         </div>
         <div className="flex flex-wrap gap-2 lg:justify-end">
           {isEditing ? (
@@ -182,7 +273,25 @@ function SeriesCard(props) {
             </>
           ) : (
             <>
-              <button type="button" onClick={() => onOpenDetails(series.id)} className="rounded-full border border-ios-gray-700 px-3 py-2 text-ios-gray-200 transition hover:bg-ios-gray-800" title="编辑详情"><Edit size={16} /></button>
+              <button type="button" onClick={() => onOpenEpisodes(series.id)} className="inline-flex items-center gap-2 rounded-full border border-ios-blue/30 px-3 py-2 text-xs font-semibold text-ios-blue transition hover:bg-ios-blue/10" title="管理章节">
+                <BookOpen size={15} />
+                <span>章节</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenFrontend(series.id)}
+                disabled={!series.isPublished}
+                className="inline-flex items-center gap-2 rounded-full border border-ios-gray-700 px-3 py-2 text-xs font-semibold text-ios-gray-200 transition hover:bg-ios-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                title={series.isPublished ? "查看前台页面" : "未发布作品不能预览"}
+              >
+                <ExternalLink size={15} />
+                <span>前台</span>
+              </button>
+              <button type="button" onClick={() => onOpenDetails(series.id)} className="inline-flex items-center gap-2 rounded-full border border-ios-gray-700 px-3 py-2 text-xs font-semibold text-ios-gray-200 transition hover:bg-ios-gray-800" title="编辑详情">
+                <Edit size={15} />
+                <span>详情</span>
+              </button>
+              <button type="button" onClick={() => onStartEdit(series)} className="rounded-full border border-ios-gray-700 px-3 py-2 text-ios-gray-200 transition hover:bg-ios-gray-800" title="快速编辑"><Edit size={16} /></button>
               <button type="button" onClick={() => onTogglePublish(series)} className="rounded-full border border-ios-gray-700 px-3 py-2 text-ios-gray-200 transition hover:bg-ios-gray-800" title={series.isPublished ? "取消发布" : "立即发布"}>{series.isPublished ? <EyeOff size={16} /> : <Eye size={16} />}</button>
               <button type="button" onClick={() => onDuplicate(series)} className="rounded-full border border-ios-gray-700 px-3 py-2 text-ios-gray-200 transition hover:bg-ios-gray-800" title="复制作品"><Copy size={16} /></button>
               <button type="button" onClick={() => onDelete(series)} className="rounded-full border border-rose-500/30 px-3 py-2 text-rose-300 transition hover:bg-rose-500/10" title="删除作品"><Trash2 size={16} /></button>
@@ -204,6 +313,7 @@ export default function AdminSeriesPageNew() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [quickFilter, setQuickFilter] = useState("all");
   const [advancedFilters, setAdvancedFilters] = useState(DEFAULT_FILTERS);
   const [viewMode, setViewMode] = useState("grid");
   const [selectedSeries, setSelectedSeries] = useState([]);
@@ -262,10 +372,34 @@ export default function AdminSeriesPageNew() {
     const items = seriesList.filter((series) => {
       const matchesSearch = !normalizedQuery || series.title.toLowerCase().includes(normalizedQuery) || series.id.toLowerCase().includes(normalizedQuery);
       const matchesPublish = advancedFilters.publishStatus === "all" || (advancedFilters.publishStatus === "published" && series.isPublished) || (advancedFilters.publishStatus === "unpublished" && !series.isPublished);
-      return matchesSearch && matchesPublish;
+      const matchesQuick =
+        quickFilter === "all" ||
+        (quickFilter === "needsEpisodes" && series.episodeCount === 0) ||
+        (quickFilter === "noCover" && !series.coverUrl) ||
+        (quickFilter === "draft" && !series.isPublished) ||
+        (quickFilter === "adult" && series.adult);
+      return matchesSearch && matchesPublish && matchesQuick;
     });
     return sortSeries(items, advancedFilters.sortBy);
-  }, [advancedFilters.publishStatus, advancedFilters.sortBy, searchQuery, seriesList]);
+  }, [advancedFilters.publishStatus, advancedFilters.sortBy, quickFilter, searchQuery, seriesList]);
+
+  const seriesStats = useMemo(() => {
+    const total = seriesList.length;
+    const comics = seriesList.filter((item) => item.type === "comic").length;
+    const novels = seriesList.filter((item) => item.type === "novel").length;
+    const drafts = seriesList.filter((item) => !item.isPublished).length;
+    const noEpisodes = seriesList.filter((item) => item.episodeCount === 0).length;
+    const noCover = seriesList.filter((item) => !item.coverUrl).length;
+
+    return [
+      { label: "全部作品", value: total, hint: "当前作品库总量" },
+      { label: "漫画作品", value: comics, hint: `小说 ${novels} 部` },
+      { label: "待补章节", value: noEpisodes, hint: "适合优先处理新作" },
+      { label: "待补封面", value: noCover, hint: `草稿 ${drafts} 部` },
+    ];
+  }, [seriesList]);
+
+  const suggestedSeriesId = useMemo(() => `${slugifyTitle(createForm.title)}-xxxxxx`, [createForm.title]);
 
   const allVisibleSelected = filteredSeries.length > 0 && filteredSeries.every((series) => selectedSeries.includes(series.id));
   const dismissFeedback = () => setFeedback(EMPTY_FEEDBACK);
@@ -279,6 +413,14 @@ export default function AdminSeriesPageNew() {
     setSeriesList((current) => current.map((series) => (series.id === seriesId ? updater(series) : series)));
   }, []);
   const handleOpenDetails = useCallback((seriesId) => router.push(`/admin/series/${seriesId}`), [router]);
+  const handleOpenEpisodes = useCallback((seriesId) => router.push(`/admin/series/${seriesId}/episodes`), [router]);
+  const handleOpenFrontend = useCallback((seriesId) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.open(`/series/${seriesId}`, "_blank", "noopener,noreferrer");
+  }, []);
   const handleToggleSelection = (seriesId) => setSelectedSeries((current) => (current.includes(seriesId) ? current.filter((item) => item !== seriesId) : [...current, seriesId]));
   const handleToggleSelectAll = () => setSelectedSeries(allVisibleSelected ? [] : filteredSeries.map((series) => series.id));
   const handleStartEdit = (series) => {
@@ -336,14 +478,62 @@ export default function AdminSeriesPageNew() {
       setFeedback({ type: "error", message: "标题不能为空。" });
       return;
     }
+    if (!/^\d+$/.test(String(createForm.episodePrice || "0"))) {
+      setFeedback({ type: "error", message: "默认章节价格必须是非负整数。" });
+      return;
+    }
+    if (createForm.ttfEnabled && (!/^\d+$/.test(String(createForm.ttfIntervalHours || "")) || toNumber(createForm.ttfIntervalHours, 0) < 1)) {
+      setFeedback({ type: "error", message: "免费券刷新间隔至少为 1 小时。" });
+      return;
+    }
     setIsCreating(true);
     try {
+      const nextSeriesId = createSeriesId(createForm.title);
       const coverUrl = await uploadCoverImage(createForm.coverFile);
-      const response = await apiPost("/api/admin/series", { series: buildSeriesPayload({ id: createSeriesId(createForm.title), title: createForm.title, type: createForm.type, adult: createForm.adult, coverUrl, description: "", genres: [], status: "Ongoing", episodePrice: 0, ttfEnabled: false, ttfIntervalHours: 24, isPublished: true, isFeatured: false }) });
+      const response = await apiPost("/api/admin/series", {
+        series: buildSeriesPayload({
+          id: nextSeriesId,
+          title: createForm.title,
+          type: createForm.type,
+          adult: createForm.adult,
+          coverUrl,
+          description: createForm.description,
+          genres: normalizeGenresInput(createForm.genres),
+          status: createForm.status,
+          badge: createForm.badge,
+          episodePrice: toNumber(createForm.episodePrice, 0),
+          ttfEnabled: createForm.ttfEnabled,
+          ttfIntervalHours: Math.max(1, toNumber(createForm.ttfIntervalHours, 24)),
+          isPublished: createForm.isPublished,
+          isFeatured: false,
+        }),
+      });
       if (!response.ok) throw new Error(response.error || "创建作品失败。");
-      setFeedback({ type: "success", message: "作品创建成功。" });
+      const createdSeriesId = response.data?.series?.id || nextSeriesId;
+      const nextFlow = createForm.openAfterCreate || "stay";
+
+      setFeedback({
+        type: "success",
+        message:
+          nextFlow === "episodes"
+            ? "作品已创建，正在进入章节管理。"
+            : nextFlow === "details"
+              ? "作品已创建，正在打开详情页。"
+              : "作品创建成功。",
+      });
       setShowCreateModal(false);
       resetCreateForm();
+
+      if (nextFlow === "episodes") {
+        router.push(`/admin/series/${createdSeriesId}/episodes`);
+        return;
+      }
+
+      if (nextFlow === "details") {
+        router.push(`/admin/series/${createdSeriesId}`);
+        return;
+      }
+
       await loadSeries();
     } catch (error) {
       setFeedback({ type: "error", message: error instanceof Error ? error.message : "创建作品失败。" });
@@ -442,27 +632,73 @@ export default function AdminSeriesPageNew() {
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="space-y-2">
             <h2 className="text-2xl font-bold text-white">作品管理</h2>
-            <p className="text-sm text-ios-gray-300">在后台内直接搜索、编辑、复制和整理你的作品库。</p>
+            <p className="text-sm text-ios-gray-300">把漫画、小说、章节准备度和发布状态放在同一块后台里处理，减少来回跳页。</p>
           </div>
-          <button type="button" onClick={() => setShowCreateModal(true)} className="inline-flex items-center gap-2 rounded-full bg-ios-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500"><Plus size={16} /><span>新增作品</span></button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setCreateForm({
+                  ...createEmptyCreateForm(),
+                  type: "comic",
+                  openAfterCreate: "episodes",
+                });
+                setShowCreateModal(true);
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-ios-blue/30 bg-ios-blue/10 px-4 py-2.5 text-sm font-semibold text-ios-blue transition hover:bg-ios-blue/20"
+            >
+              <BookOpen size={16} />
+              <span>新建漫画并进章节</span>
+            </button>
+            <button type="button" onClick={() => { setCreateForm(createEmptyCreateForm()); setShowCreateModal(true); }} className="inline-flex items-center gap-2 rounded-full bg-ios-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500"><Plus size={16} /><span>新增作品</span></button>
+          </div>
         </div>
       </section>
 
       <Feedback feedback={feedback} onDismiss={dismissFeedback} />
 
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {seriesStats.map((item) => (
+          <article key={item.label} className="rounded-4xl border border-ios-gray-800 bg-neutral-900/60 p-5 shadow-ios">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-ios-gray-500">{item.label}</p>
+            <p className="mt-3 text-3xl font-bold text-white">{item.value}</p>
+            <p className="mt-2 text-sm text-ios-gray-400">{item.hint}</p>
+          </article>
+        ))}
+      </section>
+
       <section className="rounded-5xl border border-ios-gray-800 bg-neutral-900/60 p-5 shadow-ios">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex flex-wrap gap-2">
-            {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "bg-ios-blue text-white" : "bg-ios-gray-900 text-ios-gray-300 hover:bg-ios-gray-800"}`}>{tab.label}</button>)}
-          </div>
-          <div className="flex flex-1 flex-wrap items-center gap-2 xl:justify-end">
-            <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-ios-gray-800 bg-ios-gray-950/80 px-4 py-3 xl:max-w-md"><Search size={16} className="text-ios-gray-500" /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题或 ID..." className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ios-gray-500" /></label>
-            <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
-            <button type="button" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0} className="rounded-full border border-ios-gray-800 bg-ios-gray-950/80 px-4 py-3 text-sm font-semibold text-ios-gray-200 transition hover:bg-ios-gray-900 disabled:cursor-not-allowed disabled:opacity-50">{allVisibleSelected ? "清空选择" : "全选"}</button>
-            <div className="flex items-center overflow-hidden rounded-full border border-ios-gray-800 bg-ios-gray-950/80">
-              <button type="button" onClick={() => setViewMode("grid")} className={`px-4 py-3 transition ${viewMode === "grid" ? "bg-ios-blue text-white" : "text-ios-gray-300 hover:bg-ios-gray-900"}`} title="网格视图"><Grid size={16} /></button>
-              <button type="button" onClick={() => setViewMode("list")} className={`px-4 py-3 transition ${viewMode === "list" ? "bg-ios-blue text-white" : "text-ios-gray-300 hover:bg-ios-gray-900"}`} title="列表视图"><List size={16} /></button>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "bg-ios-blue text-white" : "bg-ios-gray-900 text-ios-gray-300 hover:bg-ios-gray-800"}`}>{tab.label}</button>)}
             </div>
+            <div className="flex flex-1 flex-wrap items-center gap-2 xl:justify-end">
+              <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-ios-gray-800 bg-ios-gray-950/80 px-4 py-3 xl:max-w-md"><Search size={16} className="text-ios-gray-500" /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、ID、发布草稿..." className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ios-gray-500" /></label>
+              <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
+              <button type="button" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0} className="rounded-full border border-ios-gray-800 bg-ios-gray-950/80 px-4 py-3 text-sm font-semibold text-ios-gray-200 transition hover:bg-ios-gray-900 disabled:cursor-not-allowed disabled:opacity-50">{allVisibleSelected ? "清空选择" : "全选"}</button>
+              <div className="flex items-center overflow-hidden rounded-full border border-ios-gray-800 bg-ios-gray-950/80">
+                <button type="button" onClick={() => setViewMode("grid")} className={`px-4 py-3 transition ${viewMode === "grid" ? "bg-ios-blue text-white" : "text-ios-gray-300 hover:bg-ios-gray-900"}`} title="网格视图"><Grid size={16} /></button>
+                <button type="button" onClick={() => setViewMode("list")} className={`px-4 py-3 transition ${viewMode === "list" ? "bg-ios-blue text-white" : "text-ios-gray-300 hover:bg-ios-gray-900"}`} title="列表视图"><List size={16} /></button>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {QUICK_FILTERS.map((filter) => (
+                <button
+                  key={filter.value}
+                  type="button"
+                  onClick={() => setQuickFilter(filter.value)}
+                  className={`rounded-full px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "bg-white text-neutral-950" : "bg-ios-gray-950/80 text-ios-gray-300 hover:bg-ios-gray-900"}`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-sm text-ios-gray-400">
+              当前结果 <span className="font-semibold text-white">{filteredSeries.length}</span> 部
+            </p>
           </div>
         </div>
       </section>
@@ -470,10 +706,10 @@ export default function AdminSeriesPageNew() {
       <BulkActionsToolbar selectedCount={selectedSeries.length} onPublish={handleBulkPublish} onUnpublish={handleBulkUnpublish} onDelete={handleBulkDelete} onCancel={() => setSelectedSeries([])} />
 
       {filteredSeries.length === 0 ? (
-        <section className="rounded-5xl border border-dashed border-ios-gray-700 bg-neutral-900/60 p-12 text-center"><ImageIcon size={36} className="mx-auto text-ios-gray-500" /><h3 className="mt-4 text-lg font-semibold text-white">未找到作品</h3><p className="mt-2 text-sm text-ios-gray-400">{searchQuery || typeFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "请尝试调整筛选条件或搜索关键词。" : "可以先通过上方按钮创建第一部作品。"}</p></section>
+        <section className="rounded-5xl border border-dashed border-ios-gray-700 bg-neutral-900/60 p-12 text-center"><ImageIcon size={36} className="mx-auto text-ios-gray-500" /><h3 className="mt-4 text-lg font-semibold text-white">未找到作品</h3><p className="mt-2 text-sm text-ios-gray-400">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "请尝试调整筛选条件或搜索关键词。" : "可以先通过上方按钮创建第一部作品。"}</p></section>
       ) : (
         <section className={viewMode === "grid" ? "grid gap-5 md:grid-cols-2 xl:grid-cols-3" : "space-y-4"}>
-          {filteredSeries.map((series) => <SeriesCard key={series.id} series={series} viewMode={viewMode} isSelected={selectedSeries.includes(series.id)} isEditing={editingId === series.id} editDraft={editingId === series.id ? editingDraft : null} isSaving={isSavingEdit} onSelect={handleToggleSelection} onStartEdit={handleStartEdit} onEditDraftChange={setEditingDraft} onSaveEdit={() => handleSaveEdit(series.id)} onCancelEdit={handleCancelEdit} onOpenDetails={handleOpenDetails} onTogglePublish={handleTogglePublish} onDuplicate={handleOpenDuplicate} onDelete={handleDelete} />)}
+          {filteredSeries.map((series) => <SeriesCard key={series.id} series={series} viewMode={viewMode} isSelected={selectedSeries.includes(series.id)} isEditing={editingId === series.id} editDraft={editingId === series.id ? editingDraft : null} isSaving={isSavingEdit} onSelect={handleToggleSelection} onStartEdit={handleStartEdit} onEditDraftChange={setEditingDraft} onSaveEdit={() => handleSaveEdit(series.id)} onCancelEdit={handleCancelEdit} onOpenDetails={handleOpenDetails} onOpenEpisodes={handleOpenEpisodes} onOpenFrontend={handleOpenFrontend} onTogglePublish={handleTogglePublish} onDuplicate={handleOpenDuplicate} onDelete={handleDelete} />)}
         </section>
       )}
 
@@ -511,7 +747,7 @@ export default function AdminSeriesPageNew() {
                 <label className="block space-y-2">
                   <span className="text-sm font-semibold text-ios-gray-300">作品标题 *</span>
                   <input value={createForm.title} onChange={(event) => setCreateForm((current) => ({ ...current, title: event.target.value }))} placeholder="例如：午夜契约" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
-                  <span className="text-xs text-ios-gray-500">创建作品时会自动生成唯一 ID。</span>
+                  <span className="text-xs text-ios-gray-500">预计作品 ID：{suggestedSeriesId}</span>
                 </label>
 
                 <div className="space-y-2">
@@ -526,6 +762,69 @@ export default function AdminSeriesPageNew() {
                   <input type="checkbox" checked={createForm.adult} onChange={(event) => setCreateForm((current) => ({ ...current, adult: event.target.checked }))} className="h-4 w-4 rounded border-ios-gray-600 bg-ios-gray-900 text-ios-blue" />
                   <span>成人内容（18+）</span>
                 </label>
+
+                <label className="flex items-center gap-3 rounded-3xl border border-ios-gray-800 bg-ios-gray-950/40 px-4 py-3 text-sm text-ios-gray-200">
+                  <input type="checkbox" checked={createForm.isPublished} onChange={(event) => setCreateForm((current) => ({ ...current, isPublished: event.target.checked }))} className="h-4 w-4 rounded border-ios-gray-600 bg-ios-gray-900 text-ios-blue" />
+                  <span>创建后立即发布</span>
+                </label>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-ios-gray-300">作品状态</span>
+                    <select value={createForm.status} onChange={(event) => setCreateForm((current) => ({ ...current, status: event.target.value }))} className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue">
+                      {STATUS_OPTIONS.map((option) => <option key={option} value={option}>{formatSeriesStatusLabel(option)}</option>)}
+                    </select>
+                  </label>
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-ios-gray-300">角标</span>
+                    <input value={createForm.badge} onChange={(event) => setCreateForm((current) => ({ ...current, badge: event.target.value }))} placeholder="例如：HOT" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                  </label>
+                </div>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-ios-gray-300">作品简介</span>
+                  <textarea value={createForm.description} onChange={(event) => setCreateForm((current) => ({ ...current, description: event.target.value }))} placeholder="填写后台简介，创建后可以继续在详情页完善。" rows={4} className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-ios-gray-300">分类标签</span>
+                  <input value={createForm.genres} onChange={(event) => setCreateForm((current) => ({ ...current, genres: event.target.value }))} placeholder="动作, 恋爱, 奇幻" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                </label>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-ios-gray-300">默认章节价格</span>
+                    <input value={createForm.episodePrice} onChange={(event) => setCreateForm((current) => ({ ...current, episodePrice: event.target.value }))} inputMode="numeric" placeholder="0" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                  </label>
+                  <label className="flex items-center gap-3 rounded-3xl border border-ios-gray-800 bg-ios-gray-950/40 px-4 py-3 text-sm text-ios-gray-200">
+                    <input type="checkbox" checked={createForm.ttfEnabled} onChange={(event) => setCreateForm((current) => ({ ...current, ttfEnabled: event.target.checked }))} className="h-4 w-4 rounded border-ios-gray-600 bg-ios-gray-900 text-ios-blue" />
+                    <span>开启免费券</span>
+                  </label>
+                </div>
+
+                {createForm.ttfEnabled ? (
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-ios-gray-300">免费券刷新间隔（小时）</span>
+                    <input value={createForm.ttfIntervalHours} onChange={(event) => setCreateForm((current) => ({ ...current, ttfIntervalHours: event.target.value }))} inputMode="numeric" placeholder="24" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                  </label>
+                ) : null}
+
+                <div className="space-y-2">
+                  <span className="text-sm font-semibold text-ios-gray-300">创建后继续</span>
+                  <div className="grid gap-2">
+                    {CREATE_FLOW_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setCreateForm((current) => ({ ...current, openAfterCreate: option.value }))}
+                        className={`rounded-3xl border px-4 py-3 text-left transition ${createForm.openAfterCreate === option.value ? "border-ios-blue bg-ios-blue/10 text-white" : "border-ios-gray-800 bg-ios-gray-950/40 text-ios-gray-300 hover:bg-ios-gray-900"}`}
+                      >
+                        <p className="text-sm font-semibold">{option.label}</p>
+                        <p className="mt-1 text-xs text-ios-gray-500">{option.helper}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
                 <div className="flex gap-3 pt-2">
                   <button type="button" onClick={closeCreateModal} className="flex-1 rounded-full border border-ios-gray-700 px-4 py-3 text-sm font-semibold text-ios-gray-200 transition hover:bg-ios-gray-800">取消</button>

@@ -153,7 +153,7 @@ export default function SubscribePage() {
       <SiteHeader />
       <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Membership desk"
+          eyebrow="Membership"
           title="Choose a plan with clear perks, clear pricing, and no storefront noise."
           description="The subscription page now follows the same editorial system as search, library, and series while preserving the existing subscribe and cancel flows."
           secondary="Each tier keeps the same benefit math, but the hierarchy is tighter: plan cards first, comparison grid second, current status last."
@@ -172,7 +172,7 @@ export default function SubscribePage() {
                 onClick={() => router.push("/store")}
                 className={secondaryButtonClass}
               >
-                Points Store
+                Buy points
               </button>
             </>
           }
@@ -276,7 +276,7 @@ export default function SubscribePage() {
                           <span className="font-semibold text-white">
                             {perks?.ttfMultiplier ? `${Math.round(perks.ttfMultiplier * 100)}%` : "-"}
                           </span>{" "}
-                          faster TTF
+                          of the normal free-unlock wait
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
@@ -307,7 +307,7 @@ export default function SubscribePage() {
                           : "bg-white text-neutral-950 hover:bg-neutral-200"
                       }`}
                     >
-                      {isCurrent ? "Current Plan" : workingId === key ? "Processing..." : "Subscribe Now"}
+                      {isCurrent ? "Current Plan" : workingId === key ? "Processing..." : "Choose this plan"}
                     </button>
                   </div>
                 </div>
@@ -344,7 +344,7 @@ export default function SubscribePage() {
                   })}
                 </tr>
                 <tr>
-                  <td className="py-4 text-neutral-300">TTF Speed Boost</td>
+                  <td className="py-4 text-neutral-300">Free Unlock Wait</td>
                   {SUBSCRIPTION_OFFERS.map((plan) => {
                     const key = plan.id.replace("subscribe_", "");
                     const perks = planCatalog[key];

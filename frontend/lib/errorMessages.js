@@ -3,9 +3,9 @@ import { emitToast } from "./toastBus";
 const friendlyMessages = {
   UNAUTHENTICATED: "Please sign in to continue.",
   FORBIDDEN: "You do not have access.",
-  ADULT_GATED: "Adult content is locked. Please verify.",
-  INSUFFICIENT_POINTS: "Not enough POINTS.",
-  TTF_NOT_READY: "This free claim is not ready yet.",
+  ADULT_GATED: "Mature content is locked. Please verify your age.",
+  INSUFFICIENT_POINTS: "Not enough points.",
+  TTF_NOT_READY: "This free unlock is not ready yet.",
   RATE_LIMITED: "Too many requests. Please try again soon.",
   INVALID_REQUEST: "Invalid request. Please retry.",
   NOT_FOUND: "Content not found.",

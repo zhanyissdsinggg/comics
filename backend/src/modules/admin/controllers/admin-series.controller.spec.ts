@@ -44,14 +44,28 @@ describe("AdminSeriesController", () => {
 
   it("lists series in ascending title order", async () => {
     const mockSeries = [
-      { id: "series-1", title: "A Title" },
-      { id: "series-2", title: "B Title" },
+      { id: "series-1", title: "A Title", _count: { episodes: 3 } },
+      { id: "series-2", title: "B Title", _count: { episodes: 0 } },
     ];
 
     jest.spyOn(prisma.series, "findMany").mockResolvedValue(mockSeries as never);
 
-    await expect(controller.list()).resolves.toEqual({ series: mockSeries });
-    expect(prisma.series.findMany).toHaveBeenCalledWith({ orderBy: { title: "asc" } });
+    await expect(controller.list()).resolves.toEqual({
+      series: [
+        { id: "series-1", title: "A Title", _count: { episodes: 3 }, episodeCount: 3 },
+        { id: "series-2", title: "B Title", _count: { episodes: 0 }, episodeCount: 0 },
+      ],
+    });
+    expect(prisma.series.findMany).toHaveBeenCalledWith({
+      orderBy: { title: "asc" },
+      include: {
+        _count: {
+          select: {
+            episodes: true,
+          },
+        },
+      },
+    });
   });
 
   it("creates a series and persists publish state", async () => {
@@ -95,7 +109,7 @@ describe("AdminSeriesController", () => {
   });
 
   it("supports publish status filtering in advanced search", async () => {
-    const mockSeries = [{ id: "series-1", title: "Published", isPublished: true }];
+    const mockSeries = [{ id: "series-1", title: "Published", isPublished: true, _count: { episodes: 5 } }];
     jest.spyOn(prisma.series, "findMany").mockResolvedValue(mockSeries as never);
     jest.spyOn(prisma.series, "count").mockResolvedValue(1 as never);
 
@@ -106,10 +120,19 @@ describe("AdminSeriesController", () => {
       sortBy: "createdAt_desc",
     });
 
-    expect(result.series).toEqual(mockSeries);
+    expect(result.series).toEqual([
+      { id: "series-1", title: "Published", isPublished: true, _count: { episodes: 5 }, episodeCount: 5 },
+    ]);
     expect(prisma.series.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({ isPublished: true }),
+        include: {
+          _count: {
+            select: {
+              episodes: true,
+            },
+          },
+        },
       }),
     );
     expect(prisma.series.count).toHaveBeenCalledWith({

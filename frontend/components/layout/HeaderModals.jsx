@@ -61,9 +61,9 @@ export default function HeaderModals({
     return response;
   };
 
-  const handleAgeConfirm = (ruleKey) => {
-    trackEvent("adult_gate_confirm", { source: "header", ruleKey });
-    confirmAge(ruleKey);
+  const handleAgeConfirm = () => {
+    trackEvent("adult_gate_confirm", { source: "header", ruleKey: ageRuleKey });
+    confirmAge(ageRuleKey);
     onModalClose("age");
     trackEvent("adult_gate_enabled", { source: "header" });
   };

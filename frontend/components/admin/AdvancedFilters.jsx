@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown, Filter, X } from "lucide-react";
 
 const STATUS_OPTIONS = [
@@ -27,8 +27,12 @@ const SORT_OPTIONS = [
   { value: "createdAt_asc", label: "创建时间（最早优先）" },
   { value: "updatedAt_desc", label: "更新时间（最新优先）" },
   { value: "updatedAt_asc", label: "更新时间（最早优先）" },
+  { value: "episodeCount_desc", label: "章节数（最多优先）" },
+  { value: "episodeCount_asc", label: "章节数（最少优先）" },
   { value: "title_asc", label: "标题（A-Z）" },
   { value: "title_desc", label: "标题（Z-A）" },
+  { value: "rating_desc", label: "评分（最高优先）" },
+  { value: "ratingCount_desc", label: "评分数（最多优先）" },
 ];
 
 const DEFAULT_FILTERS = {
@@ -41,10 +45,13 @@ const DEFAULT_FILTERS = {
 export default function AdvancedFilters({ filters, onFiltersChange }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const resolvedFilters = {
-    ...DEFAULT_FILTERS,
-    ...filters,
-  };
+  const resolvedFilters = useMemo(
+    () => ({
+      ...DEFAULT_FILTERS,
+      ...filters,
+    }),
+    [filters]
+  );
 
   const activeFiltersCount = Object.entries(resolvedFilters).filter(([key, value]) => {
     if (key === "sortBy") {
@@ -210,3 +217,4 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
     </div>
   );
 }
+

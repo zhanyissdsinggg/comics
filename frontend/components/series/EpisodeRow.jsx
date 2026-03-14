@@ -176,14 +176,14 @@ function EpisodeRow({
       ? [
           "Unlock keeps this episode in your library.",
           "Packs save more POINTS on future episodes.",
-          "Subscribers get daily free unlocks and faster TTF.",
+          "Members get daily free unlocks and shorter free-unlock waits.",
         ]
       : [];
   const subscribeUpsellTips =
     modalState?.type === "SHORTFALL"
       ? [
           "Subscribe to unlock daily free chapters.",
-          "TTF cooldown is shorter with subscription perks.",
+          "Membership shortens the wait before free unlocks are ready.",
         ]
       : [];
 
@@ -282,7 +282,7 @@ function EpisodeRow({
         className="min-h-[44px] rounded-full border border-neutral-700 bg-neutral-900 px-6 py-2 text-sm font-semibold text-neutral-300 transition-all hover:border-neutral-600 hover:bg-neutral-800 active:scale-95 active:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ willChange: "transform" }}
       >
-        Subscribe for perks
+        View membership perks
       </button>
     );
   } else {
@@ -334,8 +334,8 @@ function EpisodeRow({
           } else if (response.status === 402) {
             setModalState({
               type: "SHORTFALL",
-              title: "Not enough POINTS",
-              description: "Not enough POINTS to unlock this episode.",
+              title: "Not enough points",
+              description: "You do not have enough points to unlock this episode.",
               shortfallPts: response.shortfallPts || 0,
               offerId: recommendedTopup?.id,
             });
@@ -421,7 +421,7 @@ function EpisodeRow({
           modalState?.type === "SHORTFALL"
             ? [
                 {
-                  label: "Top up POINTS",
+                    label: "Buy points",
                   onClick: () => {
                     router.push(
                       buildPathWithAttribution(
@@ -445,7 +445,7 @@ function EpisodeRow({
                   variant: "secondary",
                 },
                 {
-                  label: "Subscribe for perks",
+                    label: "View membership perks",
                   onClick: () => {
                     trackEvent("click_subscribe_from_shortfall", {
                       seriesId,
@@ -466,8 +466,8 @@ function EpisodeRow({
                 },
                 {
                   label: recommendedTopup?.name
-                    ? `Quick top up (${recommendedTopup.name})`
-                    : "Quick top up",
+                    ? `Quick buy (${recommendedTopup.name})`
+                    : "Quick buy",
                   onClick: async () => {
                     const packageId =
                       recommendedTopup?.id?.replace("points_pack_", "") ||

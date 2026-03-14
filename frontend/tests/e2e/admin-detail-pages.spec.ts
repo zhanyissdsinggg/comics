@@ -176,11 +176,11 @@ test.describe("Admin detail page regressions", () => {
     const response = await page.goto("/admin/series/series-qa-001", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("button", { name: "编辑作品" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: "编辑作品" }).click();
+    await expect(page.getByRole("button", { name: "开始编辑" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: "开始编辑" }).click();
 
-    await page.getByLabel("章节价格").fill("3.5");
-    await page.getByRole("button", { name: "保存更改" }).click();
+    await page.getByLabel("默认章节价格").fill("3.5");
+    await page.getByRole("button", { name: "保存全部更改" }).click();
 
     await expect(page.getByText("章节价格必须是整数金币。", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
@@ -189,5 +189,101 @@ test.describe("Admin detail page regressions", () => {
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/series/series-qa-001", runtimeIssues);
+  });
+
+  test("episodes workspace supports bulk edits and reorder actions", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminBaseMocks(page);
+
+    let bulkCalls = 0;
+    let reorderCalls = 0;
+
+    await page.route("**/api/admin/series/series-qa-001", async (route) => {
+      await fulfillJson(route, {
+        series: {
+          id: "series-qa-001",
+          title: "Regression Test Series",
+          type: "comic",
+          status: "Ongoing",
+          adult: false,
+          isPublished: true,
+          description: "A fixture series for episode workspace validation.",
+          latestEpisodeId: "series-qa-001e2",
+        },
+      });
+    });
+
+    await page.route("**/api/admin/series/series-qa-001/episodes**", async (route) => {
+      if (route.request().method() !== "GET") {
+        await fulfillJson(route, { episode: { id: "series-qa-001e1" } });
+        return;
+      }
+
+      await fulfillJson(route, {
+        episodes: [
+          {
+            id: "series-qa-001e1",
+            number: 1,
+            title: "Episode One",
+            pricePts: 3,
+            previewFreePages: 1,
+            ttfEligible: true,
+            releasedAt: "2026-03-01T10:00:00.000Z",
+            updatedAt: "2026-03-10T10:00:00.000Z",
+          },
+          {
+            id: "series-qa-001e2",
+            number: 2,
+            title: "Episode Two",
+            pricePts: 0,
+            previewFreePages: 0,
+            ttfEligible: false,
+            releasedAt: "2026-03-02T10:00:00.000Z",
+            updatedAt: "2026-03-11T10:00:00.000Z",
+          },
+        ],
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          total: 2,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      });
+    });
+
+    await page.route("**/api/admin/series/series-qa-001/episodes/reorder", async (route) => {
+      reorderCalls += 1;
+      await fulfillJson(route, { episodes: [] });
+    });
+
+    await page.route("**/api/admin/series/series-qa-001/episodes/bulk", async (route) => {
+      bulkCalls += 1;
+      await fulfillJson(route, { episodes: [] });
+    });
+
+    const runtimeIssues = collectRuntimeIssues(page);
+    const response = await page.goto("/admin/series/series-qa-001/episodes", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "Regression Test Series" })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("总章节数", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+
+    await page.getByLabel("选择章节 1").check();
+    await expect(page.getByRole("button", { name: "批量编辑" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: "批量编辑" }).click();
+
+    await page.getByLabel("批量金币价格").fill("9");
+    await page.getByRole("button", { name: "应用批量更新" }).click();
+    await expect.poll(() => bulkCalls).toBe(1);
+
+    await page.getByRole("button", { name: "自动重排章节号" }).click();
+    await expect.poll(() => reorderCalls).toBe(1);
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/series/series-qa-001/episodes", runtimeIssues);
   });
 });

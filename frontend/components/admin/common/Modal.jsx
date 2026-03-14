@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shared admin modal component.
  * Keep the API small so admin flows stay predictable.
  */
@@ -56,3 +56,4 @@ export const Modal = React.memo(function Modal({
 });
 
 Modal.displayName = 'Modal';
+

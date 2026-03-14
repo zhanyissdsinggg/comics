@@ -1,11 +1,13 @@
-﻿import "./globals.css";
+import dynamic from "next/dynamic";
 import Script from "next/script";
 import { Manrope, Space_Grotesk } from "next/font/google";
+import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
-import CookieConsent from "../components/common/CookieConsent";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import { defaultSocialImage } from "../lib/seo";
 import { siteConfig } from "../lib/siteConfig";
+
+const CookieConsent = dynamic(() => import("../components/common/CookieConsent"));
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const defaultTitle = `${siteConfig.siteName} - Read Comics and Novels Online`;

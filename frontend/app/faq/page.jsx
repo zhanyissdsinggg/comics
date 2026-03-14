@@ -15,7 +15,7 @@ export const metadata = createPageMetadata({
 const FAQ = [
   {
     q: "How do I unlock episodes?",
-    a: "Use POINTS to unlock or wait for TTF if the series is eligible. Subscription benefits may also reduce the cost on selected titles.",
+    a: "Use points to unlock an episode, or wait for a free unlock if the series offers one. Membership benefits may also reduce the cost on selected titles.",
   },
   {
     q: "How do I cancel my subscription?",
@@ -23,11 +23,11 @@ const FAQ = [
   },
   {
     q: "Where can I see my orders?",
-    a: "Visit the orders ledger to review recent purchases, reconciliation state, and refund eligibility from one place.",
+    a: "Visit Orders to review recent purchases, payment status, and refund eligibility from one place.",
   },
   {
     q: "Why can't I see adult series?",
-    a: "Enable 18+ mode and complete the age gate flow. The catalog view changes immediately after the gate confirms access.",
+    a: "Turn on mature content and complete the age gate flow for your current region. The catalog updates as soon as access is confirmed.",
   },
 ];
 
@@ -40,7 +40,7 @@ const QUICK_LINKS = [
   },
   {
     title: "Orders",
-    description: "Review receipts, reconciliation, and refund status in the same ledger view.",
+    description: "Review receipts, payment status, and refund status in the same view.",
     href: "/orders",
     label: "View orders",
   },
@@ -99,8 +99,8 @@ export default function FAQPage() {
               },
               {
                 label: "Adult access",
-                value: "18+ gate",
-                hint: "Catalog visibility depends on the age-gate flow and current preference state.",
+                value: "Mature gate",
+                hint: "Catalog visibility depends on the age gate and your current region settings.",
               },
             ]}
           />
