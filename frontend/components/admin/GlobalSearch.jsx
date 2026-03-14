@@ -29,105 +29,105 @@ const SEARCH_ITEMS = [
     label: "仪表盘",
     href: "/admin",
     icon: BookOpen,
-    keywords: ["仪表盘", "总览", "分析", "统计"],
+    keywords: ["仪表盘", "总览", "分析", "统计", "dashboard", "overview"],
   },
   {
     id: "series",
     label: "作品",
     href: "/admin/series",
     icon: BookOpen,
-    keywords: ["作品", "漫画", "小说", "内容"],
+    keywords: ["作品", "漫画", "小说", "内容", "series", "content"],
   },
   {
     id: "users",
     label: "用户",
     href: "/admin/users",
     icon: Users,
-    keywords: ["用户", "客户", "账号", "会员"],
+    keywords: ["用户", "账号", "会员", "customers", "users"],
   },
   {
     id: "orders",
     label: "订单",
     href: "/admin/orders",
     icon: Receipt,
-    keywords: ["订单", "支付", "交易", "账单"],
+    keywords: ["订单", "支付", "交易", "orders", "payments"],
   },
   {
     id: "promotions",
     label: "活动",
     href: "/admin/promotions",
     icon: Megaphone,
-    keywords: ["活动", "营销", "优惠", "折扣"],
+    keywords: ["活动", "营销", "优惠", "promotions", "marketing"],
   },
   {
     id: "comments",
     label: "评论",
     href: "/admin/comments",
     icon: MessageSquare,
-    keywords: ["评论", "评价", "评分", "反馈"],
+    keywords: ["评论", "评分", "反馈", "comments", "reviews"],
   },
   {
     id: "billing",
-    label: "充值套餐",
+    label: "计费",
     href: "/admin/billing",
     icon: CreditCard,
-    keywords: ["充值", "套餐", "价格", "点数"],
+    keywords: ["计费", "套餐", "价格", "点数", "billing", "pricing"],
   },
   {
     id: "notifications",
     label: "通知",
     href: "/admin/notifications",
     icon: Bell,
-    keywords: ["通知", "消息", "提醒"],
+    keywords: ["通知", "消息", "提醒", "notifications"],
   },
   {
     id: "support",
-    label: "工单支持",
+    label: "工单",
     href: "/admin/support",
     icon: LifeBuoy,
-    keywords: ["支持", "工单", "帮助"],
+    keywords: ["工单", "客服", "帮助", "support", "tickets"],
   },
   {
     id: "branding",
     label: "品牌设置",
     href: "/admin/branding",
     icon: BookOpen,
-    keywords: ["品牌", "素材", "标识", "图片"],
+    keywords: ["品牌", "Logo", "图标", "横幅", "branding", "assets"],
   },
   {
     id: "email-settings",
     label: "邮件设置",
     href: "/admin/email-settings",
     icon: Mail,
-    keywords: ["邮件", "smtp", "邮箱", "设置"],
+    keywords: ["邮件", "邮箱", "SMTP", "mail", "settings"],
   },
   {
     id: "email-jobs",
     label: "邮件任务",
     href: "/admin/email-jobs",
     icon: Mail,
-    keywords: ["邮件", "任务", "投递", "发送"],
+    keywords: ["邮件", "投递", "任务", "delivery", "jobs"],
   },
   {
     id: "tracking",
     label: "追踪设置",
     href: "/admin/tracking",
     icon: Radar,
-    keywords: ["追踪", "像素", "分析", "事件"],
+    keywords: ["追踪", "埋点", "像素", "analytics", "tracking"],
   },
   {
     id: "regions",
     label: "地区设置",
     href: "/admin/regions",
     icon: Globe,
-    keywords: ["地区", "国家", "价格", "区域"],
+    keywords: ["地区", "国家", "区号", "regions", "locales"],
   },
   {
     id: "settings",
     label: "系统设置",
     href: "/admin/settings",
     icon: Settings,
-    keywords: ["设置", "系统", "配置"],
+    keywords: ["设置", "系统", "配置", "settings", "system"],
   },
 ];
 
@@ -181,7 +181,7 @@ export default function GlobalSearch({ isOpen, onClose }) {
 
   const recentItems = useMemo(
     () => recentSearchIds.map((id) => getSearchItemById(id)).filter(Boolean),
-    [recentSearchIds]
+    [recentSearchIds],
   );
 
   useEffect(() => {
@@ -316,7 +316,7 @@ export default function GlobalSearch({ isOpen, onClose }) {
                 </div>
               </div>
               <p className="text-sm font-medium text-ios-gray-400">没有匹配的后台页面</p>
-              <p className="mt-1 text-xs text-ios-gray-500">换个关键词再试试。</p>
+              <p className="mt-1 text-xs text-ios-gray-500">试试别的关键词或页面名称。</p>
             </div>
           ) : recentItems.length > 0 ? (
             <div className="space-y-1">
@@ -355,8 +355,8 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-medium text-ios-gray-400">输入内容即可搜索</p>
-              <p className="mt-1 text-xs text-ios-gray-500">可输入页面名、关键词或功能意图。</p>
+              <p className="text-sm font-medium text-ios-gray-400">输入关键词开始搜索</p>
+              <p className="mt-1 text-xs text-ios-gray-500">可以按页面名称、功能或关键词查找。</p>
             </div>
           )}
         </div>

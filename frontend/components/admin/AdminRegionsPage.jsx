@@ -36,7 +36,7 @@ function normalizeLengthValues(values) {
   return [...new Set(
     source
       .map((value) => Number(String(value).trim()))
-      .filter((value) => Number.isInteger(value) && value > 0)
+      .filter((value) => Number.isInteger(value) && value > 0),
   )].sort((left, right) => left - right);
 }
 
@@ -84,7 +84,7 @@ function buildPayload(countryCodes, lengthRules) {
 function getRegionValidationError(countryCodes) {
   const duplicates = findDuplicateCountryCodes(countryCodes);
   if (duplicates.length > 0) {
-    return `国家区号不能重复：${duplicates.join(", ")}。`;
+    return `国家区号必须唯一：${duplicates.join(", ")}。`;
   }
 
   return "";
@@ -129,7 +129,7 @@ export default function AdminRegionsPage() {
       setLengthRules(payload.lengthRules);
       setStatus({ tone: "success", message: "" });
     } else {
-      setStatus({ tone: "error", message: response.error || response.message || "地区配置加载失败。" });
+      setStatus({ tone: "error", message: response.error || response.message || "地区设置加载失败。" });
     }
 
     setLoading(false);
@@ -160,7 +160,7 @@ export default function AdminRegionsPage() {
         }
 
         return { ...item, [field]: value };
-      })
+      }),
     );
 
     if (field === "code") {
@@ -225,9 +225,9 @@ export default function AdminRegionsPage() {
       const nextPayload = buildPayload(response.data?.config?.countryCodes, response.data?.config?.lengthRules);
       setCountryCodes(nextPayload.countryCodes);
       setLengthRules(nextPayload.lengthRules);
-      setStatus({ tone: "success", message: "地区配置已保存。" });
+      setStatus({ tone: "success", message: "地区设置已保存。" });
     } else {
-      setStatus({ tone: "error", message: response.error || response.message || "地区配置保存失败。" });
+      setStatus({ tone: "error", message: response.error || response.message || "地区设置保存失败。" });
     }
 
     setSaving(false);
@@ -264,9 +264,9 @@ export default function AdminRegionsPage() {
       const payload = buildPayload(parsed?.countryCodes, parsed?.lengthRules);
       setCountryCodes(payload.countryCodes);
       setLengthRules(payload.lengthRules);
-      setStatus({ tone: "success", message: "配置已导入，请保存后生效。" });
+      setStatus({ tone: "success", message: "配置已导入，保存后即可生效。" });
     } catch {
-      setStatus({ tone: "error", message: "导入失败，请提供有效的 JSON 文件。" });
+      setStatus({ tone: "error", message: "导入失败，请上传有效的 JSON 文件。" });
     } finally {
       event.target.value = "";
     }
@@ -275,7 +275,7 @@ export default function AdminRegionsPage() {
   if (isLoading || loading) {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
-        <p className="text-sm text-slate-500">正在加载地区配置...</p>
+        <p className="text-sm text-slate-500">正在加载地区设置...</p>
       </section>
     );
   }
@@ -292,9 +292,9 @@ export default function AdminRegionsPage() {
     <section className="space-y-6">
       <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-slate-900">地区配置</h2>
+          <h2 className="text-lg font-semibold text-slate-900">地区设置</h2>
           <p className="text-sm text-slate-500">
-            管理 OTP 与账号流程使用的手机号国家区号和本地号码长度规则。
+            管理 OTP 与账号流程中使用的国家区号和本地号码长度规则。
           </p>
         </div>
 
@@ -316,7 +316,7 @@ export default function AdminRegionsPage() {
             disabled={saving}
             className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? "保存中..." : "保存更改"}
+            {saving ? "保存中..." : "保存修改"}
           </button>
         </div>
       </div>
@@ -328,7 +328,9 @@ export default function AdminRegionsPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">国家区号</h3>
-              <p className="text-xs text-slate-500">定义前台区号选择器使用的拨号前缀和展示名称。</p>
+              <p className="text-xs text-slate-500">
+                配置用户手机号流程里展示的区号与名称。
+              </p>
             </div>
             <button
               type="button"
@@ -341,12 +343,15 @@ export default function AdminRegionsPage() {
 
           {countryCodes.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-              还没有配置任何国家区号。
+              当前还没有配置任何国家区号。
             </div>
           ) : (
             <div className="mt-6 space-y-3">
               {countryCodes.map((item, index) => (
-                <div key={`${item.code || "new"}-${index}`} className="grid gap-3 rounded-2xl border border-slate-200 p-4 md:grid-cols-[120px,1fr,auto] md:items-center">
+                <div
+                  key={`${item.code || "new"}-${index}`}
+                  className="grid gap-3 rounded-2xl border border-slate-200 p-4 md:grid-cols-[120px,1fr,auto] md:items-center"
+                >
                   <input
                     value={item.code}
                     onChange={(event) => updateCode(index, "code", event.target.value)}
@@ -364,7 +369,7 @@ export default function AdminRegionsPage() {
                     onClick={() => removeCode(index)}
                     className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
                   >
-                    移除
+                    删除
                   </button>
                 </div>
               ))}
@@ -375,12 +380,14 @@ export default function AdminRegionsPage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="space-y-2">
             <h3 className="text-sm font-semibold text-slate-900">手机号长度规则</h3>
-            <p className="text-xs text-slate-500">输入以逗号分隔的数字，例如 `10` 或 `9,10,11`。</p>
+            <p className="text-xs text-slate-500">
+              请输入逗号分隔的长度，例如 `10` 或 `9,10,11`。
+            </p>
           </div>
 
           {countryCodes.filter((item) => normalizeDialCode(item.code)).length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-              请先至少添加一个国家区号，再设置长度规则。
+              请先添加至少一个国家区号，再编辑号码长度规则。
             </div>
           ) : (
             <div className="mt-6 space-y-3">

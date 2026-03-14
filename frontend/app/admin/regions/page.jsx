@@ -1,7 +1,7 @@
-import { AdminLayout } from '../../../components/admin/AdminLayout';
-import AdminRegionsPage from '../../../components/admin/AdminRegionsPage';
+import { AdminLayout } from "../../../components/admin/AdminLayout";
+import AdminRegionsPage from "../../../components/admin/AdminRegionsPage";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function RegionsPage() {
   return (

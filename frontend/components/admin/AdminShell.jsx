@@ -51,11 +51,11 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "商业",
+    label: "交易",
     items: [
       { label: "活动", href: "/admin/promotions", icon: Megaphone, match: ["/admin/promotions"] },
       { label: "订单", href: "/admin/orders", icon: Receipt, match: ["/admin/orders"] },
-      { label: "充值套餐", href: "/admin/billing", icon: CreditCard, match: ["/admin/billing"] },
+      { label: "计费", href: "/admin/billing", icon: CreditCard, match: ["/admin/billing"] },
       { label: "通知", href: "/admin/notifications", icon: Bell, match: ["/admin/notifications"] },
     ],
   },
@@ -63,7 +63,7 @@ const NAV_GROUPS = [
     label: "用户运营",
     items: [
       { label: "用户", href: "/admin/users", icon: Users, match: ["/admin/users"] },
-      { label: "工单支持", href: "/admin/support", icon: LifeBuoy, match: ["/admin/support"] },
+      { label: "工单", href: "/admin/support", icon: LifeBuoy, match: ["/admin/support"] },
     ],
   },
   {
@@ -84,12 +84,12 @@ const BREADCRUMB_MAP = [
   { match: "/admin/series", label: "作品" },
   { match: "/admin/promotions", label: "活动" },
   { match: "/admin/orders", label: "订单" },
-  { match: "/admin/billing", label: "充值套餐" },
+  { match: "/admin/billing", label: "计费" },
   { match: "/admin/branding", label: "品牌设置" },
   { match: "/admin/email-settings", label: "邮件设置" },
   { match: "/admin/email-jobs", label: "邮件任务" },
   { match: "/admin/regions", label: "地区设置" },
-  { match: "/admin/support", label: "工单支持" },
+  { match: "/admin/support", label: "工单" },
   { match: "/admin/users", label: "用户" },
   { match: "/admin/tracking", label: "追踪设置" },
   { match: "/admin/notifications", label: "通知" },
@@ -184,7 +184,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
               {!isCollapsed ? (
                 <div className="animate-fade-in">
                   <h1 className="text-base font-bold text-ios-green">后台控制台</h1>
-                  <p className="text-[10px] text-ios-gray-500">后台运营面板</p>
+                  <p className="text-[10px] text-ios-gray-500">运营工作台</p>
                 </div>
               ) : null}
             </div>
@@ -193,7 +193,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
               type="button"
               onClick={() => setIsCollapsed((current) => !current)}
               className="hidden h-9 w-9 items-center justify-center rounded-3xl bg-ios-green/10 text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-110 hover:shadow-ios-sm active:scale-95 lg:flex"
-              aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
+              aria-label={isCollapsed ? "展开侧栏" : "收起侧栏"}
             >
               {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
             </button>
@@ -289,7 +289,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-neutral-200">管理员</p>
-                  <p className="truncate text-[10px] text-ios-gray-500">后台账号</p>
+                  <p className="truncate text-[10px] text-ios-gray-500">安全会话</p>
                 </div>
               </div>
             </div>
@@ -311,7 +311,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   type="button"
                   onClick={() => setIsMobileMenuOpen((current) => !current)}
                   className="flex h-11 w-11 items-center justify-center rounded-3xl bg-ios-green/10 text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-110 hover:shadow-ios-sm active:scale-95 lg:hidden"
-                  aria-label="打开移动端菜单"
+                  aria-label="打开导航"
                 >
                   <ChevronRight size={22} />
                 </button>
@@ -329,10 +329,10 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   className="hidden items-center gap-2 rounded-4xl border border-ios-green/20 bg-ios-green/5 px-5 py-2.5 text-xs text-ios-green transition-all duration-300 hover:border-ios-green/30 hover:bg-ios-green/10 hover:scale-105 hover:shadow-ios-sm active:scale-95 md:flex"
                 >
                   <Search size={16} />
-                    <span>搜索</span>
-                    <kbd className="rounded-2xl border border-ios-green/20 bg-ios-green/10 px-2 py-1 text-[10px] font-medium shadow-ios-sm">
-                      Ctrl+K
-                    </kbd>
+                  <span>搜索</span>
+                  <kbd className="rounded-2xl border border-ios-green/20 bg-ios-green/10 px-2 py-1 text-[10px] font-medium shadow-ios-sm">
+                    Ctrl+K
+                  </kbd>
                 </button>
                 {actions ? <div className="flex items-center gap-2 animate-fade-in">{actions}</div> : null}
               </div>

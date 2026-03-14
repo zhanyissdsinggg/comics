@@ -92,26 +92,29 @@ export default function AdminEmailSettingsPage() {
     setDraft((current) => ({ ...current, [field]: value }));
   };
 
-  const persist = useCallback(async (payload, successMessage) => {
-    setSaving(true);
-    setStatus({ type: "idle", message: "" });
+  const persist = useCallback(
+    async (payload, successMessage) => {
+      setSaving(true);
+      setStatus({ type: "idle", message: "" });
 
-    const response = await adminPost("/api/admin/email", payload);
-    if (response.ok && response.data?.config) {
-      applyConfig(response.data.config);
-      setStatus({ type: "success", message: successMessage });
-    } else if (response.ok) {
-      const nextDraft = normalizeDraft(payload);
-      setDraft(nextDraft);
-      setSavedDraft(nextDraft);
-      setStatus({ type: "success", message: successMessage });
-    } else {
-      setStatus({ type: "error", message: response.error || response.message || "保存失败。" });
-    }
+      const response = await adminPost("/api/admin/email", payload);
+      if (response.ok && response.data?.config) {
+        applyConfig(response.data.config);
+        setStatus({ type: "success", message: successMessage });
+      } else if (response.ok) {
+        const nextDraft = normalizeDraft(payload);
+        setDraft(nextDraft);
+        setSavedDraft(nextDraft);
+        setStatus({ type: "success", message: successMessage });
+      } else {
+        setStatus({ type: "error", message: response.error || response.message || "修改保存失败。" });
+      }
 
-    setSaving(false);
-    return response;
-  }, [applyConfig]);
+      setSaving(false);
+      return response;
+    },
+    [applyConfig],
+  );
 
   const handleSave = async () => {
     await persist(draft, "邮件设置已保存。");
@@ -121,9 +124,7 @@ export default function AdminEmailSettingsPage() {
     await persist({ ...draft, [field]: "" }, "密钥已清空。");
   };
 
-  const hasUnsavedChanges = useMemo(() => {
-    return serializeDraft(draft) !== serializeDraft(savedDraft);
-  }, [draft, savedDraft]);
+  const hasUnsavedChanges = useMemo(() => serializeDraft(draft) !== serializeDraft(savedDraft), [draft, savedDraft]);
 
   const handleTest = async () => {
     const recipient = String(draft.testRecipient || "").trim();
@@ -148,10 +149,12 @@ export default function AdminEmailSettingsPage() {
     if (response.ok) {
       setStatus({
         type: "success",
-        message: savedBeforeTest ? "邮件设置已保存，并已发送测试邮件。" : "测试邮件已发送。",
+        message: savedBeforeTest
+          ? "邮件设置已保存，并已发送测试邮件。"
+          : "测试邮件已发送。",
       });
     } else {
-      setStatus({ type: "error", message: response.error || response.message || "无法发送测试邮件。" });
+      setStatus({ type: "error", message: response.error || response.message || "测试邮件发送失败。" });
     }
 
     setTesting(false);
@@ -178,12 +181,12 @@ export default function AdminEmailSettingsPage() {
   const secretFields = [
     {
       key: "resendApiKey",
-      label: "Resend API 密钥",
+      label: "Resend API Key",
       placeholder: "re_...",
     },
     {
       key: "sendgridApiKey",
-      label: "SendGrid API 密钥",
+      label: "SendGrid API Key",
       placeholder: "SG...",
     },
     {
@@ -196,7 +199,7 @@ export default function AdminEmailSettingsPage() {
   if (!isAuthenticated) {
     return (
       <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-        请先以管理员身份登录后再管理邮件投递。
+        需要先以管理员身份登录，才能管理邮件投递。
       </div>
     );
   }
@@ -215,11 +218,11 @@ export default function AdminEmailSettingsPage() {
         <div>
           <h1 className="text-3xl font-bold text-slate-900">邮件设置</h1>
           <p className="mt-2 text-sm text-slate-500">
-            配置邮件投递服务商、发件身份与密钥信息。
+            配置邮件投递服务商、发件人身份，以及系统邮件流程依赖的密钥信息。
           </p>
           {hasUnsavedChanges ? (
             <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">
-              有未保存更改
+              尚未保存的修改
             </p>
           ) : null}
         </div>
@@ -251,7 +254,7 @@ export default function AdminEmailSettingsPage() {
 
       <Section
         title="投递服务"
-        description="选择后台邮件使用的投递服务商与发件身份。"
+        description="选择事务邮件使用的投递服务商与发件人身份。"
       >
         <Field label="服务商">
           <select
@@ -259,13 +262,13 @@ export default function AdminEmailSettingsPage() {
             onChange={(event) => handleChange("provider", event.target.value)}
             className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
           >
-            <option value="console">控制台</option>
+            <option value="console">Console</option>
             <option value="webhook">Webhook</option>
             <option value="resend">Resend</option>
             <option value="sendgrid">SendGrid</option>
           </select>
         </Field>
-        <Field label="发件地址" hint="示例：no-reply@yourdomain.com">
+        <Field label="发件地址" hint="例如：no-reply@yourdomain.com">
           <input
             value={draft.from}
             onChange={(event) => handleChange("from", event.target.value)}
@@ -273,7 +276,7 @@ export default function AdminEmailSettingsPage() {
             placeholder="no-reply@yourdomain.com"
           />
         </Field>
-        <Field label="管理员告警邮箱" hint="运营通知与错误摘要会发送到这里。">
+        <Field label="管理员告警邮箱" hint="运营告警和错误摘要会发送到这里。">
           <input
             value={draft.adminNotifyEmail}
             onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
@@ -284,10 +287,10 @@ export default function AdminEmailSettingsPage() {
       </Section>
 
       <Section
-        title="投递端点"
-        description="Webhook 地址与密钥保存后会以脱敏形式展示。"
+        title="接口与密钥"
+        description="Webhook 地址和服务商密钥在保存后会保持脱敏显示。"
       >
-        <Field label="通用 Webhook 地址" hint="当服务商设置为 Webhook 时使用。">
+        <Field label="默认 Webhook 地址" hint="当服务商选择 Webhook 时使用。">
           <input
             value={draft.webhookUrl}
             onChange={(event) => handleChange("webhookUrl", event.target.value)}
@@ -297,7 +300,11 @@ export default function AdminEmailSettingsPage() {
         </Field>
 
         {secretFields.map((field) => (
-          <Field key={field.key} label={field.label} hint="保留脱敏值不改即可继续使用当前密钥。">
+          <Field
+            key={field.key}
+            label={field.label}
+            hint="如果要保留当前密钥，请保持脱敏值不变。"
+          >
             <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 value={draft[field.key]}
@@ -319,8 +326,8 @@ export default function AdminEmailSettingsPage() {
       </Section>
 
       <Section
-        title="验证测试"
-        description="可使用临时邮箱或自己的邮箱验证配置是否生效。"
+        title="验证"
+        description="发送测试邮件，确认当前服务商和发件配置是否可用。"
       >
         <Field label="测试收件人">
           <input
@@ -332,7 +339,7 @@ export default function AdminEmailSettingsPage() {
         </Field>
         <p className="text-xs text-slate-500">
           {hasUnsavedChanges
-            ? "执行测试前会先保存当前草稿，确保测试邮件使用最新配置。"
+            ? "发送测试邮件前会先保存当前最新草稿。"
             : "测试邮件将使用当前已保存的投递配置。"}
         </p>
       </Section>

@@ -55,7 +55,7 @@ export default function AdminRouteGuard({ children }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-neutral-950">
         <div className="rounded-2xl border border-neutral-800 bg-neutral-900/70 px-6 py-4 text-sm text-neutral-300">
-          正在校验后台登录状态...
+          正在校验后台会话...
         </div>
       </div>
     );

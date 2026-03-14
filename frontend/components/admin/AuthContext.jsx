@@ -273,12 +273,15 @@ export function AdminAuthProvider({ children }) {
       const raw = await response.json().catch(() => ({}));
       const data = unwrapPayload(raw);
       if (!response.ok || data.success === false) {
-        return { success: false, error: data?.message || "后台密钥无效" };
+        return { success: false, error: data?.message || "后台密钥无效。" };
       }
 
       const valid = await verifySession({ fallbackAuthenticated: true });
       if (!valid) {
-        return { success: false, error: "登录成功，但后台会话未建立。请检查 Cookie 或代理配置。" };
+        return {
+          success: false,
+          error: "登录成功，但后台会话 Cookie 没有建立。请检查 Cookie 或代理配置。",
+        };
       }
 
       setIsLoading(false);

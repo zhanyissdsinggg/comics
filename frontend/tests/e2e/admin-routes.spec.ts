@@ -428,7 +428,7 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/settings", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "系统设置" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: /系统设置|System Settings/ })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     expect(authorizationHeaders).toEqual([]);
   });
 });

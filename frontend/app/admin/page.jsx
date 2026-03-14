@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 export const dynamic = "force-dynamic";
 
@@ -33,8 +33,8 @@ export default function AdminPage() {
 
   return (
     <AdminShell
-      title="后台仪表盘"
-      subtitle="实时查看运营状态与平台健康度"
+      title="仪表盘"
+      subtitle="实时查看运营状态、收入表现与平台健康度。"
     >
       <AdminDashboardNew />
     </AdminShell>

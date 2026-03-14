@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,13 @@ const STATUS_CLASS_MAP = {
   QUEUED: "border-amber-200 bg-amber-50 text-amber-700",
   SENT: "border-emerald-200 bg-emerald-50 text-emerald-700",
   SUCCESS: "border-emerald-200 bg-emerald-50 text-emerald-700",
+};
+
+const STATUS_LABEL_MAP = {
+  FAILED: "失败",
+  QUEUED: "排队中",
+  SENT: "已发送",
+  SUCCESS: "成功",
 };
 
 function toCsv(rows) {
@@ -246,7 +253,7 @@ export default function AdminEmailJobsPage() {
                     <tr key={job.id} className="border-t border-slate-100 align-top">
                       <td className="px-4 py-3">
                         <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClassName}`}>
-                          {job.status || "未知"}
+                          {STATUS_LABEL_MAP[job.status] || job.status || "未知"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-slate-700">{job.to || "-"}</td>

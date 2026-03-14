@@ -53,12 +53,16 @@ test.describe("Admin system page regressions", () => {
     const response = await page.goto("/admin/settings", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const sectionHeadings = page.locator("section h2");
-    await expect(page.locator("h1").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(sectionHeadings).toHaveCount(3, { timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(sectionHeadings.nth(0)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(sectionHeadings.nth(2)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText(/HttpOnly Cookie/)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: /系统设置|System Settings/ })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("heading", { name: /后台访问|Admin access/ })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("heading", { name: /指标口径|Metric rules/ })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText(/HttpOnly/i)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await page.waitForTimeout(1200);
     await expect(page.getByText("We use cookies", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Install Gush App", { exact: true })).toHaveCount(0);
@@ -121,11 +125,11 @@ test.describe("Admin system page regressions", () => {
     await expect(fromInput).toHaveValue("old@gush.test", { timeout: ADMIN_UI_TIMEOUT_MS });
     await fromInput.fill("latest@gush.test");
 
-    const sendTestButton = page.getByRole("button", { name: /测试|娴嬭瘯|发送|鍙戦€?/ }).first();
+    const sendTestButton = page.getByRole("button", { name: /保存并发送测试|Save and send test/ });
     await expect(sendTestButton).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await sendTestButton.click();
 
-    await expect(page.getByText(/已保存.*测试邮件|宸蹭繚瀛.*娴嬭瘯閭欢/)).toBeVisible({
+    await expect(page.getByText(/邮件设置已保存，并已发送测试邮件。|Email settings saved, then the test email was sent\./)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     expect(savePayloads).toHaveLength(1);
@@ -160,7 +164,7 @@ test.describe("Admin system page regressions", () => {
     const response = await page.goto("/admin/regions", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const addButton = page.getByRole("button", { name: /新增|鏂板/ });
+    const addButton = page.getByRole("button", { name: /新增条目|Add entry/ });
     await expect(addButton).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await addButton.click();
     await addButton.click();
@@ -171,8 +175,8 @@ test.describe("Admin system page regressions", () => {
     await inputs.nth(2).fill("+1");
     await inputs.nth(3).fill("Duplicate United States");
 
-    await page.getByRole("button", { name: /保存|淇濆瓨/ }).click();
-    await expect(page.getByText(/(\+1).*(不能重复|涓嶈兘閲嶅)|(不能重复|涓嶈兘閲嶅).*(\+1)/)).toBeVisible({
+    await page.getByRole("button", { name: /保存修改|Save changes/ }).click();
+    await expect(page.getByText(/国家区号必须唯一：\+1。|Country calling codes must be unique: \+1\./)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     expect(saveRequests).toBe(0);
@@ -212,14 +216,16 @@ test.describe("Admin system page regressions", () => {
     const response = await page.goto("/admin/content-generator", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.locator("h1").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: /演示内容生成器|Demo Content Generator/ })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
 
     const inputs = page.locator('input:not([type="file"])');
     await inputs.nth(0).fill("night-run");
     await inputs.nth(1).fill("3");
     await inputs.nth(2).fill("4");
     await inputs.nth(3).fill("4");
-    await page.getByRole("button", { name: /内容|生成|鍐呭|鐢熸垚/ }).first().click();
+    await page.getByRole("button", { name: /生成内容|Generate content/ }).click();
 
     await expect.poll(() => payloads.length).toBe(1);
     expect(payloads).toEqual([

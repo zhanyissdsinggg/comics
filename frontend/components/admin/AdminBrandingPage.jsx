@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
@@ -100,7 +100,7 @@ export default function AdminBrandingPage() {
         throw new Error("请上传图片文件。");
       }
       if (file.size > MAX_UPLOAD_BYTES) {
-        throw new Error("图片大小不能超过 10MB。");
+        throw new Error("图片大小不能超过 10 MB。");
       }
 
       const formData = new FormData();
@@ -204,7 +204,7 @@ export default function AdminBrandingPage() {
   return (
     <section className="space-y-6 rounded-2xl border border-slate-200 bg-slate-50 p-6">
       <header className="space-y-2">
-        <h2 className="text-lg font-semibold text-slate-900">品牌配置</h2>
+        <h2 className="text-lg font-semibold text-slate-900">品牌设置</h2>
         <p className="text-sm text-slate-500">
           配置站点 Logo、图标和首页横幅资源。
         </p>
@@ -230,7 +230,7 @@ export default function AdminBrandingPage() {
                   type="button"
                   onClick={() => logoFileRef.current?.click()}
                   disabled={formBusy}
-                  className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-all"
+                  className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-purple-700 disabled:opacity-50"
                 >
                   <ImageIcon className="h-3 w-3" />
                   {uploadMutation.isPending ? "上传中..." : "上传 Logo"}
@@ -240,7 +240,7 @@ export default function AdminBrandingPage() {
                     href={draft.siteLogoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
+                    className="text-xs text-blue-600 transition-colors hover:text-blue-700"
                   >
                     打开链接
                   </a>
@@ -287,7 +287,7 @@ export default function AdminBrandingPage() {
                   type="button"
                   onClick={() => faviconFileRef.current?.click()}
                   disabled={formBusy}
-                  className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-all"
+                  className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-purple-700 disabled:opacity-50"
                 >
                   <ImageIcon className="h-3 w-3" />
                   {uploadMutation.isPending ? "上传中..." : "上传图标"}
@@ -334,7 +334,7 @@ export default function AdminBrandingPage() {
                   type="button"
                   onClick={() => bannerFileRef.current?.click()}
                   disabled={formBusy}
-                  className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-all"
+                  className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-purple-700 disabled:opacity-50"
                 >
                   <ImageIcon className="h-3 w-3" />
                   {uploadMutation.isPending ? "上传中..." : "上传横幅"}
