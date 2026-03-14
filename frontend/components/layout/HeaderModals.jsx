@@ -69,18 +69,25 @@ export default function HeaderModals({
   };
 
   const handleTopUp = (pkg) => {
-    trackEvent("wallet_topup_selected", { package: pkg.id, points: pkg.points, price: pkg.price });
+    const packageId = pkg?.id || pkg?.packageId || "auto";
+    const totalPoints = Number(pkg?.paidPts || 0) + Number(pkg?.bonusPts || 0);
+
+    trackEvent("wallet_topup_selected", {
+      package: packageId,
+      points: totalPoints || undefined,
+      price: pkg?.price,
+    });
     if (typeof window !== "undefined") {
       const currentPath = `${window.location.pathname}${window.location.search || ""}`;
       const target = buildPathWithAttribution(
         "/store",
         {
           entryPoint: "HEADER_TOPUP",
-          offerId: pkg?.id ? `points_pack_${pkg.id}` : undefined,
+          offerId: packageId !== "auto" ? `points_pack_${packageId}` : undefined,
           sourcePath: currentPath,
           returnTo: currentPath,
         },
-        { focus: pkg?.id || "auto" }
+        { focus: packageId }
       );
       window.location.href = target;
     }

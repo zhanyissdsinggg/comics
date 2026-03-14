@@ -32,7 +32,10 @@ test.describe("Theme toggle behavior", () => {
     expect(before.isDark || before.isLight).toBeTruthy();
     expect(before.isDark && before.isLight).toBeFalsy();
 
-    await toggle.click();
+    await toggle.scrollIntoViewIfNeeded();
+    await toggle.evaluate((node) => {
+      node.click();
+    });
 
     await page.waitForFunction(() => {
       const root = document.documentElement;

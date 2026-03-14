@@ -12,7 +12,13 @@ function BenefitRow({ children }) {
   );
 }
 
-export default function PackageCard({ pkg, highlighted, onSelect }) {
+export default function PackageCard({
+  pkg,
+  highlighted,
+  onSelect,
+  disabled = false,
+  ctaLabel = "Buy points",
+}) {
   const totalPts = (pkg.paidPts || 0) + (pkg.bonusPts || 0);
   const bonusPct =
     pkg.paidPts && pkg.bonusPts ? Math.round((pkg.bonusPts / pkg.paidPts) * 100) : 0;
@@ -79,11 +85,16 @@ export default function PackageCard({ pkg, highlighted, onSelect }) {
 
       <button
         type="button"
-        className="mt-4 w-full min-h-[44px] rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition-all hover:bg-emerald-50 active:scale-95 active:bg-emerald-100"
+        className={`mt-4 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+          disabled
+            ? "cursor-not-allowed bg-neutral-700 text-neutral-300"
+            : "bg-white text-neutral-900 hover:bg-emerald-50 active:scale-95 active:bg-emerald-100"
+        }`}
         onClick={() => onSelect?.(pkg.id)}
+        disabled={disabled}
         style={{ willChange: "transform" }}
       >
-        Buy points
+        {ctaLabel}
       </button>
     </div>
   );

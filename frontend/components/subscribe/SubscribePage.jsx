@@ -26,6 +26,7 @@ export default function SubscribePage() {
   const [workingId, setWorkingId] = useState("");
   const [feedback, setFeedback] = useState("");
   const [planCatalog, setPlanCatalogState] = useState(getPlanCatalog());
+  const [billingAvailability, setBillingAvailability] = useState(null);
   const isActive = Boolean(subscription?.active);
   const baseUnlockPrice = 5;
   const returnTo = searchParams.get("returnTo") || "/account";
@@ -67,6 +68,7 @@ export default function SubscribePage() {
         });
         setPlanCatalog(catalog);
         setPlanCatalogState(catalog);
+        setBillingAvailability(response.data?.billing || null);
       }
     });
     return () => {
@@ -80,7 +82,17 @@ export default function SubscribePage() {
     }
   }, [attribution]);
 
+  const subscriptionActionsEnabled = billingAvailability?.subscriptionActionsEnabled === true;
+  const subscriptionPreviewOnly = billingAvailability?.subscriptionActionsEnabled === false;
+
   const handleSubscribe = async (planId) => {
+    if (!subscriptionActionsEnabled) {
+      setFeedback(
+        "Membership checkout is temporarily unavailable while secure billing is being configured. Plan comparison is still available below.",
+      );
+      return;
+    }
+
     setWorkingId(planId);
     setFeedback("");
     trackEvent("subscribe_cta_click", {
@@ -107,6 +119,11 @@ export default function SubscribePage() {
   };
 
   const handleCancel = async () => {
+    if (!subscriptionActionsEnabled) {
+      router.push("/support");
+      return;
+    }
+
     setWorkingId("cancel");
     setFeedback("");
     const response = await cancelSubscription();
@@ -169,8 +186,16 @@ export default function SubscribePage() {
         <EditorialHero
           eyebrow="Membership"
           title="Choose a plan with clear perks, clear pricing, and no storefront noise."
-          description="Plan comparison stays visible even when secure subscription billing is still being configured, so users can review the tiers before checkout opens."
-          secondary="Each tier keeps the same benefit math, but activation now depends on secure billing being available on the backend."
+          description={
+            subscriptionPreviewOnly
+              ? "Review every tier, discount, and monthly bonus before checkout opens, without guessing what each plan will include later."
+              : "Compare every tier, perk, and monthly bonus in one place, then start the plan that fits your reading pace."
+          }
+          secondary={
+            subscriptionPreviewOnly
+              ? "Plan comparison stays live, but activation remains disabled until secure billing is fully available on the backend."
+              : "Each tier keeps the same benefit math from comparison through activation."
+          }
           stats={subscriptionHeroStats}
           actions={
             <>
@@ -196,6 +221,11 @@ export default function SubscribePage() {
           {feedback ? (
             <div className="rounded-[24px] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
               {feedback}
+            </div>
+          ) : null}
+          {subscriptionPreviewOnly ? (
+            <div className="rounded-[24px] border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-50">
+              Membership checkout is currently preview-only. Users can compare tiers now, but plan activation and cancellation stay locked until secure billing is enabled.
             </div>
           ) : null}
           <div className="flex flex-wrap items-end justify-between gap-3">
@@ -319,14 +349,20 @@ export default function SubscribePage() {
                     <button
                       type="button"
                       onClick={() => handleSubscribe(key)}
-                      disabled={workingId === key || isCurrent}
+                      disabled={workingId === key || isCurrent || !subscriptionActionsEnabled}
                       className={`w-full rounded-full px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                         isBest
                           ? "bg-emerald-400 text-neutral-950 hover:bg-emerald-300"
                           : "bg-white text-neutral-950 hover:bg-neutral-200"
                       }`}
                     >
-                      {isCurrent ? "Current Plan" : workingId === key ? "Processing..." : "Choose this plan"}
+                      {isCurrent
+                        ? "Current Plan"
+                        : !subscriptionActionsEnabled
+                          ? "Checkout coming soon"
+                          : workingId === key
+                            ? "Processing..."
+                            : "Choose this plan"}
                     </button>
                   </div>
                 </div>
@@ -426,10 +462,14 @@ export default function SubscribePage() {
               <button
                 type="button"
                 onClick={handleCancel}
-                disabled={workingId === "cancel"}
+                disabled={workingId === "cancel" || !subscriptionActionsEnabled}
                 className={secondaryButtonClass}
               >
-                {workingId === "cancel" ? "Canceling..." : "Cancel Subscription"}
+                {!subscriptionActionsEnabled
+                  ? "Contact support"
+                  : workingId === "cancel"
+                    ? "Canceling..."
+                    : "Cancel Subscription"}
               </button>
             </div>
           </SurfacePanel>

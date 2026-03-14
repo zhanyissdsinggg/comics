@@ -26,6 +26,22 @@ export default function OrdersPageClient() {
   const [loading, setLoading] = useState(true);
   const [workingId, setWorkingId] = useState("");
   const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const [billingAvailability, setBillingAvailability] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    apiGet("/api/billing/topups").then((response) => {
+      if (!mounted || !response.ok) {
+        return;
+      }
+      setBillingAvailability(response.data?.billing || null);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -59,6 +75,9 @@ export default function OrdersPageClient() {
       mounted = false;
     };
   }, [hydrated, isSignedIn]);
+
+  const refundActionsEnabled = billingAvailability?.refundActionsEnabled === true;
+  const refundPreviewOnly = billingAvailability?.refundActionsEnabled === false;
 
   const orderStats = useMemo(() => {
     const paidCount = orders.filter((order) => order.status === "PAID").length;
@@ -170,6 +189,26 @@ export default function OrdersPageClient() {
           </SurfacePanel>
         ) : null}
 
+        {isSignedIn && refundPreviewOnly ? (
+          <SurfacePanel className="border border-amber-500/30 bg-amber-500/10 text-amber-50">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">Self-serve refunds are temporarily unavailable</p>
+                <p className="text-sm text-amber-100/85">
+                  Receipts are still visible here, but refund requests stay locked until secure billing is fully enabled.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/support")}
+                className={secondaryButtonClass}
+              >
+                Contact support
+              </button>
+            </div>
+          </SurfacePanel>
+        ) : null}
+
         {!hydrated || loading ? (
           <SurfacePanel>
             <p className="text-sm text-neutral-400">Loading orders...</p>
@@ -225,7 +264,7 @@ export default function OrdersPageClient() {
                       {order.status}
                     </span>
                   </div>
-                  {order.status === "PAID" ? (
+                  {order.status === "PAID" && refundActionsEnabled ? (
                     <button
                       type="button"
                       onClick={async () => {
@@ -260,6 +299,14 @@ export default function OrdersPageClient() {
                       disabled={workingId === order.orderId}
                     >
                       {workingId === order.orderId ? "Requesting..." : "Request refund"}
+                    </button>
+                  ) : order.status === "PAID" ? (
+                    <button
+                      type="button"
+                      onClick={() => router.push("/support")}
+                      className="mt-4 rounded-full border border-white/10 bg-black/10 px-3 py-1.5 text-xs font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/10"
+                    >
+                      Contact support
                     </button>
                   ) : null}
                 </div>

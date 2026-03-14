@@ -16,7 +16,7 @@ import { getRegionConfig } from "../../lib/region/config";
 import { getCookie } from "../../lib/cookies";
 import { apiGet } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
-import { fetchTopupCatalog } from "../../lib/topupCatalog";
+import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 import {
   buildPathWithAttribution,
   mergePaymentAttribution,
@@ -39,6 +39,7 @@ export default function StorePage() {
   const [couponMessage, setCouponMessage] = useState("");
   const [promotions, setPromotions] = useState([]);
   const [topupCatalog, setTopupCatalog] = useState([]);
+  const [billingAvailability, setBillingAvailability] = useState(null);
   const [isNewPayer, setIsNewPayer] = useState(true);
 
   const returnTo = searchParams.get("returnTo") || "/";
@@ -103,15 +104,17 @@ export default function StorePage() {
 
   useEffect(() => {
     let mounted = true;
-    fetchTopupCatalog()
-      .then((packages) => {
+    fetchTopupCatalogSnapshot()
+      .then(({ packages, billing }) => {
         if (mounted) {
           setTopupCatalog(packages);
+          setBillingAvailability(billing || null);
         }
       })
       .catch(() => {
         if (mounted) {
           setTopupCatalog([]);
+          setBillingAvailability(null);
         }
       });
     return () => {
@@ -193,7 +196,17 @@ export default function StorePage() {
     return [selected, ...packages.filter((pkg) => pkg.id !== focusId)];
   }, [focusId, region, topupCatalog]);
 
+  const purchaseActionsEnabled = billingAvailability?.purchaseActionsEnabled === true;
+  const purchasePreviewOnly = billingAvailability?.purchaseActionsEnabled === false;
+
   const handleBuy = async (packageId) => {
+    if (!purchaseActionsEnabled) {
+      setErrorMessage(
+        "Checkout is temporarily unavailable while secure billing is being configured. You can still review packages here.",
+      );
+      return;
+    }
+
     const selectedPackage = orderedPackages.find((item) => item.id === packageId);
     const attribution = mergePaymentAttribution(routeAttribution, {
       promotionId: promotionId || undefined,
@@ -300,8 +313,16 @@ export default function StorePage() {
         <EditorialHero
           eyebrow="Points store"
           title="Buy points with clear pricing and fewer checkout surprises."
-          description="Balance, coupons, promotions, and point packs stay in one storefront, while final checkout only opens after secure billing is available."
-          secondary={`${regionConfig.label} storefront - ${regionConfig.taxHint}`}
+          description={
+            purchasePreviewOnly
+              ? "Review live point-pack pricing, coupons, and regional tax notes in one place while checkout is temporarily unavailable."
+              : "Balance, coupons, promotions, and point packs stay in one storefront, with checkout available as soon as you are ready."
+          }
+          secondary={
+            purchasePreviewOnly
+              ? `${regionConfig.label} storefront - checkout preview only right now`
+              : `${regionConfig.label} storefront - ${regionConfig.taxHint}`
+          }
           stats={storeHeroStats}
           actions={
             <>
@@ -340,6 +361,26 @@ export default function StorePage() {
         {errorMessage ? (
           <SurfacePanel className="border border-red-500/40 bg-red-500/10 text-red-100">
             <p className="text-sm">{errorMessage}</p>
+          </SurfacePanel>
+        ) : null}
+
+        {purchasePreviewOnly ? (
+          <SurfacePanel className="border border-amber-500/30 bg-amber-500/10 text-amber-50">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">Checkout preview only</p>
+                <p className="text-sm text-amber-100/85">
+                  Package pricing is live, but purchase actions stay disabled until secure billing is fully enabled on the backend.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/support")}
+                className={secondaryButtonClass}
+              >
+                Contact support
+              </button>
+            </div>
           </SurfacePanel>
         ) : null}
 
@@ -453,7 +494,13 @@ export default function StorePage() {
             <div className="grid gap-4 md:grid-cols-2">
               {orderedPackages.map((pkg) => (
                 <div key={pkg.id} className={busyId === pkg.id ? "opacity-70" : ""}>
-                  <PackageCard pkg={pkg} highlighted={pkg.id === focusId} onSelect={handleBuy} />
+                  <PackageCard
+                    pkg={pkg}
+                    highlighted={pkg.id === focusId}
+                    onSelect={handleBuy}
+                    disabled={!purchaseActionsEnabled}
+                    ctaLabel={purchaseActionsEnabled ? "Buy points" : "Checkout coming soon"}
+                  />
                 </div>
               ))}
             </div>

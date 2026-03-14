@@ -7,6 +7,13 @@ export const BILLING_MODES = {
 
 export type BillingMode = (typeof BILLING_MODES)[keyof typeof BILLING_MODES];
 
+export type PublicBillingAvailability = {
+  billingMode: BillingMode;
+  purchaseActionsEnabled: boolean;
+  subscriptionActionsEnabled: boolean;
+  refundActionsEnabled: boolean;
+};
+
 export function getBillingMode(): BillingMode {
   const explicitMode = String(process.env.BILLING_MODE || "")
     .trim()
@@ -21,6 +28,18 @@ export function getBillingMode(): BillingMode {
 
 export function isDemoBillingEnabled(): boolean {
   return getBillingMode() === BILLING_MODES.DEMO;
+}
+
+export function getPublicBillingAvailability(): PublicBillingAvailability {
+  const billingMode = getBillingMode();
+  const demoEnabled = billingMode === BILLING_MODES.DEMO;
+
+  return {
+    billingMode,
+    purchaseActionsEnabled: demoEnabled,
+    subscriptionActionsEnabled: demoEnabled,
+    refundActionsEnabled: demoEnabled,
+  };
 }
 
 export function buildBillingProviderRequiredError(message: string) {

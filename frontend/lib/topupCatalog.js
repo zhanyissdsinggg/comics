@@ -2,6 +2,7 @@ import { apiGet } from "./apiClient";
 
 let catalogPromise = null;
 let cachedCatalog = null;
+let cachedBilling = null;
 
 function normalizePackage(item) {
   if (!item || typeof item !== "object") {
@@ -22,8 +23,13 @@ function normalizePackage(item) {
 }
 
 export async function fetchTopupCatalog(force = false) {
+  const snapshot = await fetchTopupCatalogSnapshot(force);
+  return snapshot.packages;
+}
+
+export async function fetchTopupCatalogSnapshot(force = false) {
   if (!force && Array.isArray(cachedCatalog)) {
-    return cachedCatalog;
+    return { packages: cachedCatalog, billing: cachedBilling };
   }
 
   if (!force && catalogPromise) {
@@ -39,8 +45,9 @@ export async function fetchTopupCatalog(force = false) {
     cachedCatalog = response.data.packages
       .map((item) => normalizePackage(item))
       .filter(Boolean);
+    cachedBilling = response.data?.billing || null;
 
-    return cachedCatalog;
+    return { packages: cachedCatalog, billing: cachedBilling };
   })();
 
   try {
@@ -56,6 +63,6 @@ export async function getTopupPackage(packageId, force = false) {
     return null;
   }
 
-  const packages = await fetchTopupCatalog(force);
+  const { packages } = await fetchTopupCatalogSnapshot(force);
   return packages.find((item) => item.packageId === normalizedId || item.id === normalizedId) || null;
 }
