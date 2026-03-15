@@ -197,7 +197,7 @@ test.describe("Admin config page regressions", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.locator('input[value="LOCAL-PIXEL"]')).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Using newer local tracking draft. Save to sync it to the server.", { exact: true })).toBeVisible({
+    await expect(page.getByText(/已使用较新的本地追踪草稿。点击保存后会同步到服务器。|Using newer local tracking draft\. Save to sync it to the server\./)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 

@@ -7,32 +7,32 @@ const TRACKING_GROUPS = [
   {
     id: "facebook",
     title: "Facebook Pixel",
-    desc: "Track conversions and ad attribution for Facebook.",
+    desc: "用于追踪 Facebook 广告转化和归因数据。",
     fields: [
       {
         key: "pixelId",
         label: "Pixel ID",
         legacyName: "Pixel ID",
-        placeholder: "e.g. 1234567890",
+        placeholder: "例如：1234567890",
         inputType: "text",
       },
       {
         key: "accessToken",
-        label: "Access Token",
+        label: "访问令牌",
         legacyName: "Access Token",
-        placeholder: "Token for CAPI requests",
+        placeholder: "用于 CAPI 请求的令牌",
         inputType: "text",
       },
       {
         key: "headScript",
-        label: "Script (Head)",
+        label: "头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* fb pixel */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Script (Body)",
+        label: "Body 脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -43,32 +43,32 @@ const TRACKING_GROUPS = [
   {
     id: "instagram",
     title: "Instagram",
-    desc: "Track campaign conversions and audience signals.",
+    desc: "用于追踪 Instagram 活动转化和受众信号。",
     fields: [
       {
         key: "businessId",
-        label: "Business ID",
+        label: "企业 ID",
         legacyName: "Business ID",
-        placeholder: "e.g. IG-BIZ-XXXX",
+        placeholder: "例如：IG-BIZ-XXXX",
         inputType: "text",
       },
       {
         key: "accessToken",
-        label: "Access Token",
+        label: "访问令牌",
         legacyName: "Access Token",
-        placeholder: "Token for API requests",
+        placeholder: "用于 API 请求的令牌",
         inputType: "text",
       },
       {
         key: "headScript",
-        label: "Script (Head)",
+        label: "头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* instagram */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Script (Body)",
+        label: "Body 脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -79,32 +79,32 @@ const TRACKING_GROUPS = [
   {
     id: "snapchat",
     title: "Snapchat Pixel",
-    desc: "Track Snapchat Ads conversions.",
+    desc: "用于追踪 Snapchat Ads 广告转化。",
     fields: [
       {
         key: "pixelId",
         label: "Pixel ID",
         legacyName: "Pixel ID",
-        placeholder: "e.g. SNAP-PIXEL-XXXX",
+        placeholder: "例如：SNAP-PIXEL-XXXX",
         inputType: "text",
       },
       {
         key: "apiToken",
-        label: "API Token",
+        label: "API 令牌",
         legacyName: "API Token",
-        placeholder: "Token for conversion API",
+        placeholder: "用于转化 API 的令牌",
         inputType: "text",
       },
       {
         key: "headScript",
-        label: "Script (Head)",
+        label: "头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* snap pixel */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Script (Body)",
+        label: "Body 脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -115,32 +115,32 @@ const TRACKING_GROUPS = [
   {
     id: "google",
     title: "Google Analytics / Ads",
-    desc: "Track conversions for GA4 and Google Ads.",
+    desc: "用于追踪 GA4 与 Google Ads 的转化数据。",
     fields: [
       {
         key: "measurementId",
         label: "Measurement ID",
         legacyName: "Measurement ID",
-        placeholder: "e.g. G-XXXXXXX",
+        placeholder: "例如：G-XXXXXXX",
         inputType: "text",
       },
       {
         key: "adsConversionId",
-        label: "Ads Conversion ID",
+        label: "Ads 转化 ID",
         legacyName: "Ads Conversion ID",
-        placeholder: "e.g. AW-XXXXXXX",
+        placeholder: "例如：AW-XXXXXXX",
         inputType: "text",
       },
       {
         key: "headScript",
-        label: "Script (Head)",
+        label: "头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* gtag */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Script (Body)",
+        label: "Body 脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -150,19 +150,19 @@ const TRACKING_GROUPS = [
   },
   {
     id: "global",
-    title: "Global Tracking",
-    desc: "Platform-agnostic tracking scripts.",
+    title: "全局追踪",
+    desc: "用于配置不依赖具体平台的通用追踪脚本。",
     fields: [
       {
         key: "headScript",
-        label: "Script (Head)",
+        label: "头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* any */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Script (Body)",
+        label: "Body 脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -275,7 +275,7 @@ export default function TrackingSettings() {
   const [savedAt, setSavedAt] = useState("");
   const [status, setStatus] = useState({
     tone: "neutral",
-    message: "Loading tracking settings...",
+    message: "正在加载追踪设置...",
   });
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -295,7 +295,7 @@ export default function TrackingSettings() {
         }
         setStatus({
           tone: "neutral",
-          message: "Loaded the local draft while checking the server copy.",
+          message: "已先载入本地草稿，同时正在检查服务器配置。",
         });
       }
 
@@ -320,7 +320,7 @@ export default function TrackingSettings() {
             setReadOnly(false);
             setStatus({
               tone: "warning",
-              message: "Using newer local tracking draft. Save to sync it to the server.",
+              message: "已使用较新的本地追踪草稿。点击保存后会同步到服务器。",
             });
             setHydrating(false);
             return;
@@ -334,7 +334,7 @@ export default function TrackingSettings() {
           writeLocalTrackingSnapshot(normalizedValues, serverUpdatedAt, false);
           setStatus({
             tone: "success",
-            message: "Loaded tracking settings from the server.",
+            message: "已从服务器载入追踪设置。",
           });
           setHydrating(false);
           return;
@@ -345,7 +345,7 @@ export default function TrackingSettings() {
           setDirty(false);
           setStatus({
             tone: "warning",
-            message: "This account cannot edit or sync tracking settings. The page is now read-only.",
+            message: "当前账号没有编辑或同步追踪设置的权限，页面已切为只读。",
           });
           setHydrating(false);
           return;
@@ -353,7 +353,7 @@ export default function TrackingSettings() {
 
         setStatus({
           tone: "danger",
-          message: response.error || "Failed to load server tracking settings. Local draft remains available.",
+          message: response.error || "服务器追踪设置加载失败，当前仍可使用本地草稿。",
         });
       } catch {
         if (!mounted) {
@@ -361,7 +361,7 @@ export default function TrackingSettings() {
         }
         setStatus({
           tone: "danger",
-          message: "Failed to load server tracking settings. Local draft remains available.",
+          message: "服务器追踪设置加载失败，当前仍可使用本地草稿。",
         });
       } finally {
         if (mounted) {
@@ -392,7 +392,7 @@ export default function TrackingSettings() {
     setDirty(true);
     setStatus({
       tone: "neutral",
-      message: "Draft changed. Save all changes to sync this version.",
+      message: "草稿已变更，保存全部修改后会同步当前版本。",
     });
   };
 
@@ -406,7 +406,7 @@ export default function TrackingSettings() {
     setSavedAt(localTimestamp);
     setStatus({
       tone: "neutral",
-      message: "Draft saved locally. Syncing to the server...",
+      message: "草稿已先保存到本地，正在同步到服务器...",
     });
     setSaving(true);
 
@@ -425,7 +425,7 @@ export default function TrackingSettings() {
         writeLocalTrackingSnapshot(normalizedValues, syncedAt, true);
         setStatus({
           tone: "success",
-          message: "Saved locally and synced to the server.",
+          message: "已保存到本地，并成功同步到服务器。",
         });
         return;
       }
@@ -435,19 +435,19 @@ export default function TrackingSettings() {
         setDirty(false);
         setStatus({
           tone: "warning",
-          message: "Draft saved locally, but this account cannot sync tracking settings to the server.",
+          message: "草稿已保存到本地，但当前账号没有权限同步到服务器。",
         });
         return;
       }
 
       setStatus({
         tone: "danger",
-        message: response.error || "Server save failed. The draft is still saved locally.",
+        message: response.error || "服务器保存失败，但草稿仍保存在本地。",
       });
     } catch {
       setStatus({
         tone: "danger",
-        message: "Server save failed. The draft is still saved locally.",
+        message: "服务器保存失败，但草稿仍保存在本地。",
       });
     } finally {
       setSaving(false);
@@ -459,17 +459,16 @@ export default function TrackingSettings() {
       <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
-            <h1 className="text-2xl font-semibold">Tracking Settings</h1>
+            <h1 className="text-2xl font-semibold">追踪设置</h1>
             <p className="mt-2 text-sm text-neutral-400">
-              Configure platform scripts, API tokens, and pixel IDs. Use the global save action to store the current
-              draft locally and sync it to the backend when permissions allow.
+              在这里配置各平台脚本、API 令牌和 Pixel 标识。点击统一保存后，会先把当前草稿保存到本地，再在有权限时同步到后端。
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs">
               <span className="rounded-full border border-neutral-800 px-3 py-1 text-neutral-300">
-                {readOnly ? "Read-only" : dirty ? "Unsynced changes" : "Synced draft"}
+                {readOnly ? "只读模式" : dirty ? "有未同步修改" : "草稿已同步"}
               </span>
               <span className="rounded-full border border-neutral-800 px-3 py-1 text-neutral-400">
-                {savedAt ? `Last saved: ${savedAt}` : "Not saved yet"}
+                {savedAt ? `最近保存时间：${savedAt}` : "尚未保存"}
               </span>
             </div>
           </div>
@@ -480,7 +479,7 @@ export default function TrackingSettings() {
             disabled={hydrating || saving || readOnly || !dirty}
             className="rounded-full border border-neutral-700 px-5 py-3 text-sm font-semibold text-white transition hover:border-emerald-300 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {saving ? "Saving all changes..." : "Save all changes"}
+            {saving ? "正在保存全部修改..." : "保存全部修改"}
           </button>
         </div>
 
@@ -503,7 +502,7 @@ export default function TrackingSettings() {
                 <p className="mt-1 text-xs leading-6 text-neutral-400">{group.desc}</p>
               </div>
               <span className="rounded-full border border-neutral-800 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-                {group.fields.length} fields
+                {group.fields.length} 个字段
               </span>
             </div>
 
