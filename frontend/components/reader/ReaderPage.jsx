@@ -898,7 +898,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     setModalState({
       type: "SHORTFALL",
       title: "Not enough points",
-      description: "You do not have enough points to unlock this episode.",
+      description: "Add points or use member perks to keep reading.",
       shortfallPts: response.shortfallPts || 0,
       targetEpisodeId,
       offerId: offerDecision?.recommendedTopupOffer?.id,
@@ -911,8 +911,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
     if (response.ok) {
       setModalState({
         type: "SUCCESS",
-        title: "Unlocked",
-        description: "Episode unlocked successfully.",
+        title: "Episode unlocked",
+        description: "This episode is now in your library.",
       });
       return;
     }
@@ -921,7 +921,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setModalState({
         type: "ERROR",
         title: "Sign in required",
-        description: "Please sign in to unlock this episode.",
+        description: "Sign in to unlock this episode and keep your progress synced.",
       });
       return;
     }
@@ -939,7 +939,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     setModalState({
       type: "ERROR",
       title: "Unlock failed",
-      description: response.error || "Please try again.",
+      description: response.error || "Please try again in a moment.",
     });
   };
 
@@ -957,7 +957,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setModalState({
         type: "ERROR",
         title: "Sign in required",
-        description: "Please sign in to unlock this episode.",
+        description: "Sign in to unlock this episode and keep your progress synced.",
       });
       return;
     }
@@ -975,7 +975,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     setModalState({
       type: "ERROR",
       title: "Unlock failed",
-      description: response.error || "Please try again.",
+      description: response.error || "Please try again in a moment.",
     });
   };
 
@@ -993,14 +993,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setModalState({
         type: "ERROR",
         title: "Sign in required",
-        description: "Please sign in to claim this episode.",
+        description: "Sign in to claim this free unlock and keep your progress synced.",
       });
       return;
     }
     setModalState({
       type: "ERROR",
-      title: "Claim failed",
-      description: response.error || "Free unlock not ready yet.",
+      title: "Free unlock unavailable",
+      description: response.error || "The free unlock timer is not ready yet.",
     });
   };
 
@@ -1026,14 +1026,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setModalState({
         type: "ERROR",
         title: "Unlock failed",
-        description: response.error || "Please try again.",
+        description: response.error || "Please try again in a moment.",
       });
       return;
     }
     setModalState({
       type: "SUCCESS",
       title: "Pack unlocked",
-      description: `Unlocked ${targets.length} episodes.`,
+      description: `${targets.length} episodes are now unlocked and ready to read.`,
     });
     router.push(`/read/${seriesId}/${targets[0].id}`);
   };
@@ -1218,19 +1218,19 @@ export default function ReaderPage({ seriesId, episodeId }) {
           <div className="w-full max-w-md rounded-3xl border border-neutral-800 bg-neutral-900/95 p-6 text-center">
             <h2 className="text-xl font-semibold">Unlock this episode</h2>
             <p className="mt-2 text-sm text-neutral-400">
-              Continue reading by unlocking this episode.
+              Continue reading with a one-tap unlock, points pack, or member perk.
             </p>
             {previewCount ? (
               <p className="mt-2 text-xs text-neutral-500">
-                Free preview reached ({previewCount} pages).
+                Free preview reached: {previewCount} pages.
               </p>
             ) : previewParagraphs ? (
               <p className="mt-2 text-xs text-neutral-500">
-                Free preview reached ({previewParagraphs} sections).
+                Free preview reached: {previewParagraphs} sections.
               </p>
             ) : null}
             {currentPricing.appliedDailyFree ? (
-              <p className="mt-3 text-xs text-emerald-300">Daily free available</p>
+              <p className="mt-3 text-xs text-emerald-300">Daily free unlock available</p>
             ) : currentPricing.discountPct ? (
               <p className="mt-3 text-xs text-emerald-300">
                 Subscriber {currentPricing.discountPct}% off
@@ -1243,15 +1243,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
               style={{ willChange: "transform" }}
             >
               {currentPricing.finalPrice === 0
-                ? "Unlock Free"
+                ? "Unlock free"
                 : `Unlock (${currentPricing.finalPrice} points)`}
             </button>
             <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-left text-[11px] text-neutral-300">
               <div className="font-semibold text-neutral-100">Why unlock?</div>
               <div className="mt-2 space-y-1 text-neutral-400">
-                <div>- Keep this episode in your library.</div>
-                <div>- Packs save more points over time.</div>
-                <div>- Members get daily free unlocks and shorter free-unlock waits.</div>
+                <div>- Unlocking keeps this episode in your library.</div>
+                <div>- Episode packs lower your cost per chapter.</div>
+                <div>- Membership adds daily free unlocks and shorter wait timers.</div>
               </div>
             </div>
             <button
@@ -1270,7 +1270,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               }}
               className="mt-3 w-full rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-100"
             >
-              View membership perks
+              See member perks
             </button>
             <button
               type="button"
@@ -1374,10 +1374,18 @@ export default function ReaderPage({ seriesId, episodeId }) {
           title={modalState?.title}
           description={modalState?.description}
           shortfallPts={modalState?.shortfallPts}
-          offer={offerDecision?.recommendedUnlockOffer}
-          offerBadge={offerDecision?.recommendedUnlockOffer?.tag}
+          offer={
+            modalState?.type === "SHORTFALL"
+              ? offerDecision?.recommendedTopupOffer
+              : offerDecision?.recommendedUnlockOffer
+          }
+          offerBadge={
+            modalState?.type === "SHORTFALL"
+              ? offerDecision?.recommendedTopupOffer?.tag
+              : offerDecision?.recommendedUnlockOffer?.tag
+          }
           offerSavingsText={
-            offerDecision?.recommendedUnlockOffer?.savingsPct
+            modalState?.type !== "SHORTFALL" && offerDecision?.recommendedUnlockOffer?.savingsPct
               ? `You save ${offerDecision.recommendedUnlockOffer.savingsPct}%`
               : null
           }
@@ -1386,12 +1394,12 @@ export default function ReaderPage({ seriesId, episodeId }) {
             offerDecision?.recommendedUnlockOffer?.episodes > 1
               ? [
                   {
-                    label: "Single",
-                    value: `${episodeData?.pricePts || 0} POINTS`,
+                    label: "Single episode",
+                    value: `${episodeData?.pricePts || 0} points`,
                   },
                   {
-                    label: `${offerDecision.recommendedUnlockOffer.episodes} Pack`,
-                    value: `${offerDecision.recommendedUnlockOffer.pricePts} POINTS`,
+                    label: `${offerDecision.recommendedUnlockOffer.episodes}-episode pack`,
+                    value: `${offerDecision.recommendedUnlockOffer.pricePts} points`,
                   },
                 ]
               : []
@@ -1399,10 +1407,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
           tips={
             modalState?.type === "SHORTFALL"
               ? [
-                  "Unlock keeps this episode in your library.",
-                  "Packs save more points on future episodes.",
-                  "Members get daily free unlocks and shorter free-unlock waits.",
-                  "Subscribe to unlock daily free chapters.",
+                  "Unlocking keeps this episode in your library.",
+                  "Episode packs lower your cost per chapter.",
+                  "Membership adds daily free unlocks and shorter wait timers.",
+                  "Member perks can reduce unlock costs on supported titles.",
                 ]
               : []
           }
@@ -1434,7 +1442,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     variant: "secondary",
                   },
                   {
-                    label: "View membership perks",
+                    label: "See member perks",
                     onClick: () => {
                       trackEvent("click_subscribe_from_shortfall", {
                         seriesId,
@@ -1454,7 +1462,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     variant: "secondary",
                   },
                   {
-                    label: "Quick buy",
+                    label: offerDecision?.recommendedTopupOffer?.name
+                      ? `Quick top up (${offerDecision.recommendedTopupOffer.name})`
+                      : "Quick top up",
                     onClick: async () => {
                       const packageId =
                         offerDecision?.recommendedTopupOffer?.id?.replace(
@@ -1493,8 +1503,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
                         });
                         setModalState({
                           type: "SUCCESS",
-                          title: "Unlocked",
-                          description: "Episode unlocked successfully.",
+                          title: "Episode unlocked",
+                          description: "This episode is now in your library.",
                         });
                         return;
                       }
@@ -1507,7 +1517,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       setModalState({
                         type: "ERROR",
                         title: "Top up failed",
-                        description: "Unable to top up and unlock.",
+                        description: "We couldn't complete the top-up and unlock flow.",
                       });
                     },
                     variant: "primary",

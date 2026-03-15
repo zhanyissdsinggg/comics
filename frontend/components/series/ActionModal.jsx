@@ -23,7 +23,7 @@ export default function ActionModal({
       ? actions
       : [
           {
-            label: "OK",
+            label: "Got it",
             onClick: onClose,
             variant: "primary",
           },
@@ -35,7 +35,7 @@ export default function ActionModal({
         <h3>{title}</h3>
         <p>{description}</p>
         {type === "SHORTFALL" ? (
-          <p>Need {shortfallPts} POINTS more.</p>
+          <p>You need {shortfallPts} more points.</p>
         ) : null}
         {offer ? (
           <div className="mt-3 rounded-xl border border-neutral-800 bg-neutral-900/60 p-3 text-xs text-neutral-300">
@@ -49,7 +49,7 @@ export default function ActionModal({
             </div>
             {offer.pricePts ? (
               <p className="mt-2 text-[11px] text-neutral-400">
-                Price {offer.pricePts} POINTS
+                Price: {offer.pricePts} points
               </p>
             ) : null}
             {offerSavingsText ? (
@@ -90,4 +90,3 @@ export default function ActionModal({
     </div>
   );
 }
-

@@ -21,6 +21,13 @@ function formatEpisodeNumber(value) {
   return match ? match[1] : String(value);
 }
 
+function formatSeriesKind(value) {
+  if (!value) {
+    return "Series";
+  }
+  return `${capitalize(value)} series`;
+}
+
 export default function SeriesHeader({
   series,
   previewHint,
@@ -37,29 +44,33 @@ export default function SeriesHeader({
   const hasFreeEpisodes = series.hasFreeEpisodes || series.freeEpisodeCount > 0;
   const ratingValue = series.rating ? Number(series.rating).toFixed(1) : "New";
   const lastEpisodeLabel = formatEpisodeNumber(progress?.lastEpisodeId);
-  const primaryActionLabel = onContinue ? "Continue reading" : "Start reading";
+  const primaryActionLabel = onContinue
+    ? lastEpisodeLabel
+      ? `Continue Episode ${lastEpisodeLabel}`
+      : "Continue reading"
+    : "Start reading";
   const metadataCards = [
     {
       label: "Rating",
       value: ratingValue,
-      hint: series.ratingCount ? `${series.ratingCount} ratings` : "Be the first to rate it",
+      hint: series.ratingCount ? `${series.ratingCount} reader ratings` : "Be the first reader to rate it",
     },
     {
       label: "Episodes",
       value: episodeCount ? String(episodeCount) : "--",
       hint: hasFreeEpisodes
-        ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"}`
-        : "Unlock chapter access as you go",
+        ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"} available`
+        : "Unlock chapters as you read",
     },
     {
       label: "Status",
-      value: series.status || "Updating",
-      hint: series.type ? `${capitalize(series.type)} series` : "Catalog detail",
+      value: capitalize(series.status || "updating"),
+      hint: series.type ? formatSeriesKind(series.type) : "Series availability and release pace",
     },
     {
       label: "Author",
       value: series.author || "Studio",
-      hint: previewHint || "Series detail and reading controls",
+      hint: previewHint || "Open any episode to start reading",
     },
   ];
 
@@ -90,7 +101,7 @@ export default function SeriesHeader({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
-                Series detail
+                {formatSeriesKind(series.type)}
               </span>
               {isAdult ? (
                 <span className="rounded-full border border-red-400/30 bg-red-500/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-red-200">
@@ -99,7 +110,7 @@ export default function SeriesHeader({
               ) : null}
               {hasFreeEpisodes ? (
                 <span className="rounded-full border border-emerald-400/30 bg-emerald-400/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
-                  Free preview
+                  Free episodes available
                 </span>
               ) : null}
             </div>
@@ -109,7 +120,7 @@ export default function SeriesHeader({
             </h1>
 
             <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-300 sm:text-base">
-              {series.description || "A premium reading lane with unlock controls, chapter history, and storefront-level polish."}
+              {series.description || "A polished reading experience with fast chapter access, clear unlock options, and progress that stays in sync."}
             </p>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -154,9 +165,9 @@ export default function SeriesHeader({
               <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-neutral-300">
                 <div className="flex items-center gap-2 text-amber-200">
                   <Star size={16} className="fill-current" />
-                  <span className="font-semibold">Reading note</span>
+                  <span className="font-semibold">Pick up where you left off</span>
                 </div>
-                {lastEpisodeLabel ? <span>Last session reached Episode {lastEpisodeLabel}.</span> : null}
+                {lastEpisodeLabel ? <span>Last read: Episode {lastEpisodeLabel}.</span> : null}
                 {previewHint ? <span>{previewHint}.</span> : null}
               </div>
             ) : null}
@@ -171,10 +182,10 @@ export default function SeriesHeader({
                       ? "border border-pink-400/30 bg-pink-500/16 text-white shadow-[0_18px_50px_rgba(236,72,153,0.2)]"
                       : "border border-white/10 bg-white/[0.05] text-neutral-200 hover:border-pink-400/30 hover:bg-pink-500/10"
                   }`}
-                  aria-label={isFollowing ? "Unfollow series" : "Follow series"}
+                  aria-label={isFollowing ? "Remove from library" : "Add to library"}
                 >
                   <Heart size={18} className={isFollowing ? "fill-current" : "group-hover:scale-110"} />
-                  <span>{isFollowing ? "Following" : "Follow"}</span>
+                  <span>{isFollowing ? "In Library" : "Add to Library"}</span>
                 </button>
               ) : null}
               <ShareButton

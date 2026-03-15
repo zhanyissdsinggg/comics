@@ -4,6 +4,15 @@ import useCountdown from "../../hooks/useCountdown";
 import { OFFERS } from "../../lib/offers/catalog";
 import ShareButton from "../common/ShareButton";
 
+function formatPointsLabel(value) {
+  return `${Number(value || 0)} points`;
+}
+
+function formatPackLabel(value) {
+  const count = Number(value || 0);
+  return `${count || 1} more episode${count === 1 ? "" : "s"}`;
+}
+
 export default function EndOfEpisodeOverlay({
   open,
   nextEpisode,
@@ -46,25 +55,25 @@ export default function EndOfEpisodeOverlay({
   const showPackPrimary =
     packHintVariant === "C" || (recommendedOffer?.episodes || 0) > 1;
   const primaryLabel = showPackPrimary
-    ? `Unlock ${packOffer?.episodes || 3} Pack (${packPrice} POINTS)`
+    ? `Unlock ${formatPackLabel(packOffer?.episodes || 3)} (${formatPointsLabel(packPrice)})`
     : singlePrice === 0
-      ? "Unlock Next (Free)"
-      : `Unlock Next (${singlePrice} POINTS)`;
+      ? "Unlock next episode free"
+      : `Unlock next episode (${formatPointsLabel(singlePrice)})`;
   const secondaryLabel = showPackPrimary
-    ? `Single (${singlePrice} POINTS)`
-    : `Pack Offer (${packPrice} POINTS)`;
+    ? `Single episode (${formatPointsLabel(singlePrice)})`
+    : `${formatPackLabel(packOffer?.episodes || 3)} (${formatPointsLabel(packPrice)})`;
   const packSavingsText = packOffer?.savingsPct
     ? `Save ${packOffer.savingsPct}%`
     : "";
   const pricingNote = pricing?.appliedDailyFree
-    ? "Daily free available"
+    ? "Daily free unlock available"
     : pricing?.appliedCoupon?.label ||
       (pricing?.discountPct ? `Subscriber ${pricing.discountPct}% off` : "");
   const packNote =
     packPricing?.appliedCoupon?.label ||
     (packPricing?.discountPct ? `Subscriber ${packPricing.discountPct}% off` : "");
   const subscriptionNote =
-    "Subscribe to get daily free unlocks, faster TTF, and bundle savings.";
+    "Membership adds daily free unlocks, shorter wait timers, and better bundle value.";
   const upsellBadge = showSubscribe ? "Recommended" : "";
   const handlePrimary = () => {
     const primaryId = showPackPrimary ? packOfferId : "unlock_single";
@@ -81,7 +90,7 @@ export default function EndOfEpisodeOverlay({
       <div className="w-full max-w-2xl rounded-3xl border border-neutral-800 bg-neutral-900/95 p-5 shadow-xl">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-neutral-400">Next Episode</p>
+            <p className="text-sm text-neutral-400">Up next</p>
             <p className="text-lg font-semibold">{nextEpisode.title}</p>
           </div>
           <div className="flex items-center gap-2">
@@ -98,7 +107,7 @@ export default function EndOfEpisodeOverlay({
                 onClick={onNext}
                 className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
               >
-                Next
+                Read next
               </button>
             ) : null}
           </div>
@@ -131,7 +140,7 @@ export default function EndOfEpisodeOverlay({
                   }}
                   className="rounded-full border border-neutral-700 px-4 py-2 text-sm"
                 >
-                  Subscribe for perks
+                  See member perks
                   {upsellBadge ? (
                     <span className="ml-2 text-[10px] text-emerald-300">{upsellBadge}</span>
                   ) : null}
@@ -162,10 +171,10 @@ export default function EndOfEpisodeOverlay({
             ) : null}
             {anchorVariant !== "A" && packOffer ? (
               <div className="rounded-2xl border border-neutral-800 px-4 py-2 text-xs text-neutral-300">
-                <span>Single {singlePrice} POINTS</span>
+                <span>Single episode {formatPointsLabel(singlePrice)}</span>
                 <span className="mx-2 text-neutral-600">--</span>
                 <span>
-                  {packOffer.episodes} Pack {packPrice} POINTS
+                  {formatPackLabel(packOffer.episodes)} {formatPointsLabel(packPrice)}
                 </span>
               </div>
             ) : null}
@@ -176,7 +185,7 @@ export default function EndOfEpisodeOverlay({
                   onClick={onClaim}
                   className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
                 >
-                  Claim Free
+                  Unlock free
                 </button>
               ) : (
                 <div
@@ -186,7 +195,7 @@ export default function EndOfEpisodeOverlay({
                       : "flex items-center justify-between rounded-full border border-neutral-800 px-4 py-2 text-xs text-neutral-300"
                   }
                 >
-                  <span>TTF in {formatted || "--:--:--"}</span>
+                  <span>Free unlock in {formatted || "--:--:--"}</span>
                   <button
                     type="button"
                     onClick={() => onNotify?.()}
@@ -196,7 +205,7 @@ export default function EndOfEpisodeOverlay({
                         : "rounded-full border border-neutral-700 px-3 py-1 text-[10px]"
                     }
                   >
-                    Notify me
+                    Remind me
                   </button>
                 </div>
               )

@@ -17,7 +17,7 @@ function getPackageTitle(pkg) {
 
   const packageId = getPackageId(pkg);
   if (!packageId) {
-    return "Point pack";
+    return "Points pack";
   }
 
   return packageId
@@ -179,7 +179,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
           type="button"
           onClick={handleClose}
           className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-neutral-400 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
-          aria-label="Close"
+          aria-label="Close top-up dialog"
         >
           <X size={20} />
         </button>
@@ -191,9 +191,9 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                 <Wallet size={32} />
               </div>
             </div>
-            <h2 className="mb-2 text-2xl font-bold text-white">Explore point packs</h2>
+            <h2 className="mb-2 text-2xl font-bold text-white">Top up points</h2>
             <p className="text-sm text-neutral-400">
-              Current balance: <span className="font-semibold text-emerald-400">{formatUSNumber(currentPoints)} points</span>
+              Balance: <span className="font-semibold text-emerald-400">{formatUSNumber(currentPoints)} points</span>
             </p>
           </div>
 
@@ -228,7 +228,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                   >
                     {isHighlighted ? (
                       <div className="absolute -top-2 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
-                        Featured
+                        Best value
                       </div>
                     ) : null}
 
@@ -260,7 +260,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                       <div className="text-right">
                         <div className="text-xl font-bold text-white">{formatPackagePrice(pkg)}</div>
                         <div className="text-xs text-neutral-500">
-                          {purchaseActionsEnabled ? "Open in store" : "Preview in store"}
+                          {purchaseActionsEnabled ? "Open checkout" : "View in store"}
                         </div>
                       </div>
                     </div>
@@ -270,18 +270,18 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </div>
           ) : (
             <div className="mb-6 rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4 text-sm text-neutral-300">
-              <p className="font-semibold text-white">Package details are unavailable right now.</p>
+              <p className="font-semibold text-white">Point-pack details are unavailable right now.</p>
               <p className="mt-2 text-neutral-400">
                 {loadFailed
-                  ? "The latest catalog could not be loaded, but you can still open the store overview."
-                  : "Open the store overview to review packages and billing details."}
+                  ? "The latest catalog could not be loaded, but you can still open the points store."
+                  : "Open the points store to review packages and billing details."}
               </p>
               <button
                 type="button"
                 onClick={() => handleSelectPackage({ id: "auto" })}
                 className="mt-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Open store
+                Open points store
               </button>
             </div>
           )}
@@ -293,11 +293,11 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
               </div>
               <div>
                 <p className="mb-1 text-sm font-semibold text-emerald-400">
-                  {purchaseActionsEnabled ? "Checkout available" : "Checkout preview only"}
+                  {purchaseActionsEnabled ? "Checkout ready" : "Checkout preview only"}
                 </p>
                 <p className="text-xs text-neutral-400">
                   {purchaseActionsEnabled
-                    ? "Choose a pack to jump straight into the store with the matching offer already focused."
+                    ? "Choose a pack to jump into the store with the matching offer already focused."
                     : "You can review the live pack mix now, and checkout will unlock once secure billing is enabled."}
                 </p>
               </div>
@@ -305,7 +305,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
           </div>
 
           <p className="mt-4 text-center text-xs text-neutral-500">
-            Store pricing stays synced with the backend catalog so promo modals do not drift away from the actual checkout surface.
+            Pricing stays synced with the live backend catalog so the offer you open matches the real checkout surface.
           </p>
         </div>
       </div>

@@ -73,7 +73,7 @@ export default function ReaderDrawer({
         {onSubscribe ? (
           <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-900/40 p-3 text-xs text-neutral-300">
             <div className="flex items-center justify-between gap-3">
-              <span>Unlock more with subscription perks.</span>
+              <span>Unlock more with member perks and daily free reads.</span>
               <button
                 type="button"
                 onClick={() => {
@@ -82,7 +82,7 @@ export default function ReaderDrawer({
                 }}
                 className="rounded-full border border-neutral-700 px-3 py-1 text-[10px]"
               >
-                Subscribe for perks
+                See member perks
               </button>
             </div>
           </div>
