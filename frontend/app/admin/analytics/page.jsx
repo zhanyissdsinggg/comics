@@ -131,7 +131,7 @@ async function fetchAdminPayload(path) {
   const { response, data } = await adminFetchJson(path, { cache: 'no-store' });
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || `Request failed with status ${response.status}.`);
+    throw new Error(data?.message || data?.error || `请求失败，状态码 ${response.status}。`);
   }
 
   return data || {};

@@ -108,7 +108,7 @@ export default function ContentGeneratorPage() {
     try {
       const response = await adminPost("/api/admin/generate-content", payload);
       if (!response.ok) {
-        throw new Error(response.error || response.message || "Content generation failed.");
+        throw new Error(response.error || response.message || "内容生成失败。");
       }
 
       setResult({ ...(response.data || {}), requestPayload: payload });

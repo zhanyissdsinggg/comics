@@ -776,7 +776,7 @@ export default function AdminRecommendationsPage() {
               type="text"
               value={slotForm.name}
               onChange={(event) => setSlotForm((current) => ({ ...current, name: event.target.value }))}
-              placeholder="homepage-featured"
+              placeholder="例如：home-featured"
               className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
             />
           </div>
@@ -789,7 +789,7 @@ export default function AdminRecommendationsPage() {
               rows={5}
               value={slotForm.seriesIdsText}
               onChange={(event) => setSlotForm((current) => ({ ...current, seriesIdsText: event.target.value }))}
-              placeholder="series_001, series_002"
+              placeholder="例如：series_001, series_002"
               className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
             />
             <p className="mt-2 text-xs text-neutral-500">多个 ID 可用逗号或换行分隔。</p>
@@ -832,7 +832,7 @@ export default function AdminRecommendationsPage() {
                 type="text"
                 value={rankingForm.name}
                 onChange={(event) => setRankingForm((current) => ({ ...current, name: event.target.value }))}
-                placeholder="weekly-trending"
+                placeholder="例如：weekly-trending"
                 className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
               />
             </div>

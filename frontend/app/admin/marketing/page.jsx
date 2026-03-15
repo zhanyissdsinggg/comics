@@ -115,7 +115,7 @@ function getCampaignMetrics(campaign) {
 async function requestPayload(path, init = {}) {
   const { response, data } = await adminFetchJson(path, init);
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || `Request failed with status ${response.status}.`);
+    throw new Error(data?.message || data?.error || `请求失败，状态码 ${response.status}。`);
   }
   return data || {};
 }

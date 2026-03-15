@@ -181,12 +181,12 @@ export default function AdminEmailSettingsPage() {
   const secretFields = [
     {
       key: "resendApiKey",
-      label: "Resend API Key",
+      label: "Resend API 密钥",
       placeholder: "re_...",
     },
     {
       key: "sendgridApiKey",
-      label: "SendGrid API Key",
+      label: "SendGrid API 密钥",
       placeholder: "SG...",
     },
     {
@@ -262,8 +262,8 @@ export default function AdminEmailSettingsPage() {
             onChange={(event) => handleChange("provider", event.target.value)}
             className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
           >
-            <option value="console">Console</option>
-            <option value="webhook">Webhook</option>
+            <option value="console">控制台（Console）</option>
+            <option value="webhook">Webhook 回调</option>
             <option value="resend">Resend</option>
             <option value="sendgrid">SendGrid</option>
           </select>
