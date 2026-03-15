@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { id: "home", label: "Home", href: "/" },
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
+  { id: "creators", label: "Creators", href: "/creators" },
   { id: "rankings", label: "Rankings", href: "/rankings" },
 ];
 

@@ -14,11 +14,21 @@ import { parallelRequests2 } from "../../lib/parallelRequests";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useProgressStore } from "../../store/useProgressStore";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { recommendRails } from "../../lib/reco/recommender";
 import { trackEvent } from "../../lib/trackEvent";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useAuthStore } from "../../store/useAuthStore";
+import {
+  consumeCommerceSuccessForPath,
+  getCommerceSuccessPresentation,
+} from "../../lib/commerceSuccess";
+import {
+  readSearchHistory,
+  saveSearchHistoryItem,
+  subscribeSearchHistory,
+} from "../../lib/searchHistory";
 
 const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
   ssr: false,
@@ -29,9 +39,19 @@ const AdvancedFilterPanel = dynamic(() => import("./AdvancedFilterPanel"), {
   ssr: false,
 });
 const PortraitCard = dynamic(() => import("../home/PortraitCard"));
+const CreatorShelfLinks = dynamic(() => import("../common/CreatorShelfLinks"));
+const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
+const StorefrontEventHub = dynamic(() => import("../common/StorefrontEventHub"));
+const StorefrontPathwaysGrid = dynamic(() => import("../common/StorefrontPathwaysGrid"));
+const SearchCreatorMatchesPanel = dynamic(() => import("./SearchCreatorMatchesPanel"), {
+  ssr: false,
+});
 
 const STATUS_OPTIONS = ["Ongoing", "Completed"];
-const TYPE_OPTIONS = ["comic", "novel"];
+const TYPE_OPTIONS = [
+  { id: "comic", label: "Comics" },
+  { id: "novel", label: "Novels" },
+];
 const SORT_OPTIONS = [
   { id: "relevance", label: "Relevance" },
   { id: "popular", label: "Popular" },
@@ -40,8 +60,8 @@ const SORT_OPTIONS = [
   { id: "alphabetical", label: "A-Z" },
 ];
 
-const HISTORY_KEY = "mn_search_history";
 const PAGE_SIZE = 12;
+const MAX_HISTORY_ITEMS = 8;
 
 function highlight(text, query) {
   if (!query) {
@@ -68,6 +88,59 @@ function highlight(text, query) {
   );
 }
 
+function normalizeKeywordItem(item, index = 0) {
+  if (typeof item === "string") {
+    const value = item.trim();
+    if (!value) {
+      return null;
+    }
+    return {
+      id: `keyword-${index}-${value}`,
+      label: value,
+      value,
+      hint: "",
+      badge: "",
+      rank: index + 1,
+    };
+  }
+
+  if (!item || typeof item !== "object") {
+    return null;
+  }
+
+  const labelSource =
+    item.keyword || item.term || item.label || item.name || item.query || item.title || "";
+  const label = String(labelSource).trim();
+  if (!label) {
+    return null;
+  }
+
+  const hintSource = item.hint || item.context || item.genre || item.category || item.type || "";
+  const badgeSource =
+    item.badge ||
+    item.trendLabel ||
+    item.momentum ||
+    item.deltaLabel ||
+    (item.rank ? `#${item.rank}` : "");
+
+  return {
+    id: String(item.id || `keyword-${index}-${label}`),
+    label,
+    value: String(item.query || label).trim(),
+    hint: typeof hintSource === "string" ? hintSource : "",
+    badge: typeof badgeSource === "string" ? badgeSource : "",
+    rank: Number(item.rank) || index + 1,
+  };
+}
+
+function normalizeKeywordList(items) {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  return items.map((item, index) => normalizeKeywordItem(item, index)).filter(Boolean);
+}
+
 export default function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -82,6 +155,7 @@ export default function SearchPage() {
   const [history, setHistory] = useState([]);
   const [total, setTotal] = useState(0);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [commerceNotice, setCommerceNotice] = useState(null);
   const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
   const { behavior } = useBehaviorStore();
   const { bySeriesId: progressMap } = useProgressStore();
@@ -104,6 +178,14 @@ export default function SearchPage() {
   const sort = searchParams.get("sort") || "relevance";
   const page = Math.max(1, Number(searchParams.get("page") || 1));
   const adultFlag = isAdultMode ? "1" : "0";
+  const searchPath = useMemo(() => {
+    const params = searchParams.toString();
+    return params ? `/search?${params}` : "/search";
+  }, [searchParams]);
+
+  useEffect(() => {
+    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/search")));
+  }, []);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
@@ -118,7 +200,7 @@ export default function SearchPage() {
     return params.toString();
   }, [adultFlag, genre, page, query, sort, status, type]);
 
-  const shouldLoadRecoCatalog = !query || (!loading && results.length === 0);
+  const shouldLoadRecoCatalog = true;
 
   useEffect(() => {
     const requestId = resultsRequestRef.current + 1;
@@ -202,7 +284,7 @@ export default function SearchPage() {
         return false;
       }
       if (response.ok) {
-        setKeywords(response.data?.keywords || []);
+        setKeywords(normalizeKeywordList(response.data?.keywords));
         return true;
       }
       if (response.error === "ADULT_GATED") {
@@ -217,7 +299,7 @@ export default function SearchPage() {
         return false;
       }
       if (response.ok) {
-        setHotKeywords(response.data?.keywords || []);
+        setHotKeywords(normalizeKeywordList(response.data?.keywords));
         return true;
       }
       if (response.error === "ADULT_GATED") {
@@ -379,6 +461,11 @@ export default function SearchPage() {
     return () => clearTimeout(timer);
   }, [query, isSignedIn]);
 
+  useEffect(() => {
+    setHistory(readSearchHistory({ limit: MAX_HISTORY_ITEMS }));
+    return subscribeSearchHistory(setHistory, { limit: MAX_HISTORY_ITEMS });
+  }, []);
+
   const reco = useMemo(
     () => recommendRails(catalog, behavior, progressMap, { isAdultMode }),
     [catalog, behavior, progressMap, isAdultMode],
@@ -413,36 +500,34 @@ export default function SearchPage() {
   }, [recoRails]);
 
   const handleSeriesClick = useCallback(
-    (seriesId) => {
-      router.push(`/series/${seriesId}`);
+    (seriesId, entryPoint = "SEARCH_RESULTS", campaignId = query ? "search_result_grid" : "catalog_grid") => {
+      const targetPath = `/series/${seriesId}`;
+      trackEvent("search_result_click", {
+        seriesId,
+        entryPoint,
+        campaignId,
+        query: query || undefined,
+      });
+      router.push(
+        buildPathWithAttribution(targetPath, {
+          entryPoint,
+          campaignId,
+          sourcePath: searchPath,
+          sourceSeriesId: seriesId,
+          returnTo: targetPath,
+        }),
+      );
     },
-    [router],
+    [query, router, searchPath],
   );
 
   useEffect(() => {
     if (!query) {
       return;
     }
-    if (typeof window === "undefined") {
-      return;
-    }
 
-    const stored = window.localStorage.getItem(HISTORY_KEY);
-    const list = stored ? stored.split("|").filter(Boolean) : [];
-    const next = [query, ...list.filter((item) => item !== query)].slice(0, 8);
-    window.localStorage.setItem(HISTORY_KEY, next.join("|"));
-    setHistory(next);
+    setHistory(saveSearchHistoryItem(query, { limit: MAX_HISTORY_ITEMS }));
   }, [query]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    const stored = window.localStorage.getItem(HISTORY_KEY);
-    if (stored) {
-      setHistory(stored.split("|").filter(Boolean));
-    }
-  }, []);
 
   const updateParams = useCallback(
     (updates, options = {}) => {
@@ -474,6 +559,7 @@ export default function SearchPage() {
     .filter(Boolean)
     .length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const hasSparseResults = Boolean(query) && !loading && results.length > 0 && results.length < 4;
   const heroTitle = query ? `Results for "${query}"` : "Search the catalog with intent.";
   const heroDescription = query
     ? "Refine the current match set by type, status, genre, and ranking without losing your place in the catalog."
@@ -508,8 +594,218 @@ export default function SearchPage() {
     ],
     [activeFilterCount, history.length, hotKeywords.length, isAdultMode, keywords.length, loading, query, total],
   );
-  const shouldShowReco = recoRails.length > 0 && (!query || results.length === 0);
-  const shouldShowSearchTools = suggestions.length > 0 || (!query && (keywords.length > 0 || hotKeywords.length > 0));
+  const shouldShowReco = recoRails.length > 0 && (!query || results.length === 0 || hasSparseResults);
+  const shouldShowSearchTools =
+    suggestions.length > 0 || (!query && (history.length > 0 || keywords.length > 0 || hotKeywords.length > 0));
+  const recoPanelTitle = !query
+    ? "Editorial shelves stay live even when search is quiet."
+    : results.length === 0
+      ? "No clean hit yet. Keep browsing without starting over."
+      : "A slim match set should still open up better options.";
+  const recoPanelHint = !query
+    ? "Move from trending terms into curated rails while the storefront stays warm."
+    : results.length === 0
+      ? "These shelves help rescue dead-end searches with relevant alternatives and live charts."
+      : "The result grid is narrow, so these rails widen discovery before the session stalls.";
+  const editorialBrowsePaths = useMemo(() => {
+    const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
+    const backupKeyword = hotKeywords[1] || keywords[1] || null;
+    const leadHotLabel = leadHotKeyword?.label || "Romance";
+    const leadHotValue = leadHotKeyword?.value || leadHotLabel;
+    const backupLabel = backupKeyword?.label || "Fantasy";
+    const backupValue = backupKeyword?.value || backupLabel;
+
+    return [
+      {
+        id: "free-unlock",
+        eyebrow: "Free start",
+        title: "Open the chart built for readers who want forward motion before they spend.",
+        description:
+          "Free-unlock momentum is one of the easiest ways to keep a cold session moving without dropping out of the storefront.",
+        ctaLabel: "Open free unlock chart",
+        onClick: () => router.push("/rankings?type=ttf&window=all"),
+        accentClass:
+          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+      },
+      {
+        id: "completed-binge",
+        eyebrow: "Binge path",
+        title: "Jump straight into completed series that can hold a full-session read.",
+        description:
+          "Finished runs convert well when the reader wants commitment, closure, and zero waiting between chapters.",
+        ctaLabel: "Browse completed",
+        onClick: () =>
+          updateParams(
+            {
+              q: "",
+              type: "",
+              genre: "",
+              status: "Completed",
+              sort: "popular",
+            },
+            { resetPage: true },
+          ),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "breakout-watch",
+        eyebrow: "Breakout watch",
+        title: `Use "${leadHotLabel}" as the quickest path into today's live discovery energy.`,
+        description:
+          "When search intent is soft, a trending term gives the reader a stronger first click than a blank grid ever will.",
+        ctaLabel: `Search ${leadHotLabel}`,
+        onClick: () =>
+          updateParams(
+            {
+              q: leadHotValue,
+              type: "",
+              genre: "",
+              status: "",
+              sort: "popular",
+            },
+            { resetPage: true },
+          ),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: isAdultMode ? "adult-desk" : "broad-browse",
+        eyebrow: isAdultMode ? "Protected desk" : "Open browse",
+        title: isAdultMode
+          ? "The 18+ shelf should feel like a premium lane, not a hidden switch."
+          : `If "${backupLabel}" feels too narrow, move back into the broad storefront.`,
+        description: isAdultMode
+          ? "Keep protected titles discoverable with a dedicated hub, then come back to search once the reader has stronger intent."
+          : "Broad browse is still useful when the user wants to compare mood, genre, and popularity before locking onto one title.",
+        ctaLabel: isAdultMode ? "Open adult hub" : `Search ${backupLabel}`,
+        onClick: () =>
+          isAdultMode
+            ? router.push("/adult")
+            : updateParams(
+                {
+                  q: backupValue,
+                  type: "",
+                  genre: "",
+                  status: "",
+                  sort: "relevance",
+                },
+                { resetPage: true },
+              ),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+    ];
+  }, [hotKeywords, isAdultMode, keywords, router, updateParams]);
+  const browsePathGrid = <StorefrontPathwaysGrid cards={editorialBrowsePaths} />;
+  const leadSearchResult = results[0] || recoRails[0]?.items?.[0] || null;
+  const searchEventCards = useMemo(() => {
+    const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
+    const leadHotLabel = leadHotKeyword?.label || "Romance";
+    const leadHotValue = leadHotKeyword?.value || leadHotLabel;
+    const sortLabel = SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance";
+
+    return [
+      query && leadSearchResult
+        ? {
+            id: "lead-match",
+            eyebrow: "Live match",
+            title: `${leadSearchResult.title} is the strongest handoff from this search lane.`,
+            description: hasSparseResults
+              ? "The result set is narrow, so the first click should feel confident while the rest of the storefront stays ready as backup."
+              : "Once intent appears, the search desk should move the reader into the right series page without killing context.",
+            signalLabel: "Matches",
+            signalValue: loading ? "--" : total.toLocaleString(),
+            signalHint: `Sorted by ${sortLabel}`,
+            ctaLabel: `Open ${leadSearchResult.title}`,
+            onClick: () => handleSeriesClick(leadSearchResult.id, "SEARCH_EVENT_HUB", "search_lead_match"),
+            accentClass:
+              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          }
+        : {
+            id: "lead-trend",
+            eyebrow: "Live search heat",
+            title: `${leadHotLabel} is pulling readers into the catalog right now.`,
+            description:
+              "When intent is still soft, a trending term is a cleaner first click than a blank result grid or an over-filtered query.",
+            signalLabel: "Hot keyword",
+            signalValue: leadHotLabel,
+            signalHint:
+              leadHotKeyword?.hint || (hotWindow === "week" ? "This week's momentum" : "Today's momentum"),
+            ctaLabel: `Search ${leadHotLabel}`,
+            onClick: () =>
+              updateParams(
+                {
+                  q: leadHotValue,
+                  type: "",
+                  genre: "",
+                  status: "",
+                  sort: "popular",
+                },
+                { resetPage: true },
+              ),
+            accentClass:
+              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          },
+      {
+        id: "free-start-desk",
+        eyebrow: "Free start",
+        title: "Keep the session moving before payment friction shows up.",
+        description:
+          "Free-unlock and sample-friendly lanes keep search alive even when the reader has not committed to a title yet.",
+        signalLabel: "Chart",
+        signalValue: "TTF",
+        signalHint: "Timed free unlock momentum",
+        ctaLabel: "Open free unlock chart",
+        onClick: () => router.push("/rankings?type=ttf&window=all"),
+        accentClass:
+          "group border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+      },
+      {
+        id: isAdultMode ? "protected-desk" : "binge-desk",
+        eyebrow: isAdultMode ? "Protected desk" : "Binge lane",
+        title: isAdultMode
+          ? "The 18+ shelf should feel curated, not hidden behind guesswork."
+          : "Completed runs are the cleanest rescue path when a search lane feels too narrow.",
+        description: isAdultMode
+          ? "If a mature search misses, the reader still needs a premium lane with explicit access rules and clear boundaries."
+          : "Finished series widen discovery fast because they trade uncertainty for payoff, depth, and stronger return intent.",
+        signalLabel: isAdultMode ? "Mode" : "Finished",
+        signalValue: isAdultMode ? "18+" : "Runs",
+        signalHint: isAdultMode ? "Age-gated catalog available" : "Ready for long-session reading",
+        ctaLabel: isAdultMode ? "Open adult hub" : "Browse completed",
+        onClick: () =>
+          isAdultMode
+            ? router.push("/adult")
+            : updateParams(
+                {
+                  q: "",
+                  type: "",
+                  genre: "",
+                  status: "Completed",
+                  sort: "popular",
+                },
+                { resetPage: true },
+              ),
+        accentClass:
+          "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+    ];
+  }, [
+    handleSeriesClick,
+    hasSparseResults,
+    hotKeywords,
+    hotWindow,
+    isAdultMode,
+    keywords,
+    leadSearchResult,
+    loading,
+    query,
+    router,
+    sort,
+    total,
+    updateParams,
+  ]);
 
   return (
     <main className="min-h-screen bg-transparent text-neutral-100">
@@ -537,6 +833,13 @@ export default function SearchPage() {
             </button>
           }
         />
+
+        {commerceNotice ? (
+          <CommerceSuccessBanner
+            notice={commerceNotice}
+            onDismiss={() => setCommerceNotice(null)}
+          />
+        ) : null}
 
         {resultsStale || catalogStale ? (
           <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
@@ -576,10 +879,61 @@ export default function SearchPage() {
                 <SearchHistoryPanel
                   onSearch={(keyword) => updateParam("q", keyword)}
                   hotKeywords={hotKeywords}
+                  quickKeywords={keywords}
                 />
               </div>
             ) : null}
           </div>
+        ) : null}
+
+        <StorefrontEventHub
+          eyebrow={query ? "Search moments" : "Discovery moments"}
+          title={
+            query
+              ? "Keep the search desk warm after the first result appears."
+              : "Turn vague search intent into a stronger storefront route."
+          }
+          description={
+            query
+              ? "Top-tier search pages do not stop at a result count. They keep the session alive with a best next click, a backup lane, and a value path before the reader stalls."
+              : "When the reader has not typed much yet, the search desk should behave like a discovery engine with live momentum and cleaner first clicks."
+          }
+          events={searchEventCards}
+        />
+
+        <SearchCreatorMatchesPanel
+          catalog={catalog}
+          query={query}
+          loading={loading}
+          resultsLength={results.length}
+          searchPath={searchPath}
+        />
+
+        {!query ? (
+          <SurfacePanel className="space-y-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                  Browse paths
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                  Give the reader an editorial next step before they even type.
+                </h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
+                  The strongest search desks act like discovery engines. These paths keep the session warm when intent
+                  is still fuzzy.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/rankings?type=popular&window=week")}
+                className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                Open weekly chart
+              </button>
+            </div>
+            {browsePathGrid}
+          </SurfacePanel>
         ) : null}
 
         {shouldShowReco ? (
@@ -590,8 +944,9 @@ export default function SearchPage() {
                   Discovery rails
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Editorial shelves stay live even when search is quiet.
+                  {recoPanelTitle}
                 </h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">{recoPanelHint}</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -624,10 +979,18 @@ export default function SearchPage() {
                 <section key={rail.id} className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Recommended rail</p>
+                      <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Recommended shelf</p>
                       <h3 className="mt-1 text-lg font-semibold text-white">{rail.title}</h3>
                     </div>
                   </div>
+                  <CreatorShelfLinks
+                    items={rail.items}
+                    entryPoint="SEARCH_CREATOR_CHIP"
+                    campaignId={`${rail.id}_creator`}
+                    sourcePath={searchPath}
+                    label="Creators behind this shelf"
+                    compact
+                  />
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {rail.items.map((item) => (
                       <PortraitCard
@@ -635,7 +998,7 @@ export default function SearchPage() {
                         item={item}
                         onClick={() => {
                           trackEvent("reco_click", { railName: rail.title, seriesId: item.id });
-                          router.push(`/series/${item.id}`);
+                          handleSeriesClick(item.id, "SEARCH_RECO", rail.id);
                         }}
                       />
                     ))}
@@ -669,8 +1032,8 @@ export default function SearchPage() {
             >
               <option value="">All types</option>
               {TYPE_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
+                <option key={option.id} value={option.id}>
+                  {option.label}
                 </option>
               ))}
             </select>
@@ -689,7 +1052,7 @@ export default function SearchPage() {
             <input
               value={genre}
               onChange={(event) => updateParam("genre", event.target.value)}
-              placeholder="Genre"
+              placeholder="Genres"
               className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-neutral-100 outline-none transition-colors placeholder:text-neutral-500 focus:border-emerald-400/40"
             />
             <select
@@ -729,7 +1092,7 @@ export default function SearchPage() {
                 onClick={() => router.push("/")}
                 className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
               >
-                Go Home
+                Back to home
               </button>
             </div>
           </SurfacePanel>
@@ -743,18 +1106,71 @@ export default function SearchPage() {
                 The catalog did not return a clean hit.
               </h2>
               <p className="mt-3 text-sm leading-7 text-neutral-400">
-                Try a broader keyword, switch sort order, or jump into one of the active trending terms below.
+                Try a broader keyword, clear the current filters, or jump into a stronger storefront lane below.
               </p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-sm">
+              {activeFilterCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateParams(
+                      {
+                        type: "",
+                        status: "",
+                        genre: "",
+                        sort: "relevance",
+                      },
+                      { resetPage: true },
+                    )
+                  }
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  Clear filters
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() =>
+                  updateParams(
+                    {
+                      q: "",
+                      type: "",
+                      genre: "",
+                      status: "Completed",
+                      sort: "popular",
+                    },
+                    { resetPage: true },
+                  )
+                }
+                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                Browse completed
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/rankings?type=popular&window=week")}
+                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                This week&apos;s chart
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/rankings?type=ttf&window=all")}
+                className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+              >
+                Free unlock picks
+              </button>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
               {hotKeywords.slice(0, 6).map((item) => (
                 <button
-                  key={item}
+                  key={item.id}
                   type="button"
-                  onClick={() => updateParam("q", item)}
+                  onClick={() => updateParam("q", item.value)}
                   className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-neutral-200 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
                 >
-                  {item}
+                  {item.label}
                 </button>
               ))}
               <button
@@ -765,6 +1181,7 @@ export default function SearchPage() {
                 Browse popular
               </button>
             </div>
+            <div className="pt-2">{browsePathGrid}</div>
           </SurfacePanel>
         ) : (
           <div className="space-y-5">
@@ -781,6 +1198,70 @@ export default function SearchPage() {
                 Sorted by {SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance"}
               </p>
             </div>
+
+            {hasSparseResults ? (
+              <SurfacePanel className="space-y-3 border-white/10 bg-white/[0.025]">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                      Discovery backup
+                    </p>
+                    <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-white">
+                      A narrow result set should not become a dead end.
+                    </h3>
+                  </div>
+                  <p className="text-sm text-neutral-400">
+                    Keep the current query, then widen the next click with a stronger shelf.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {activeFilterCount > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateParams(
+                          {
+                            type: "",
+                            status: "",
+                            genre: "",
+                            sort: "relevance",
+                          },
+                          { resetPage: true },
+                        )
+                      }
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                    >
+                      Widen filters
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => router.push("/rankings?type=popular&window=week")}
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  >
+                    Compare with the chart
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateParams(
+                        {
+                          q: "",
+                          type: "",
+                          genre: "",
+                          status: "Completed",
+                          sort: "popular",
+                        },
+                        { resetPage: true },
+                      )
+                    }
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  >
+                    Check completed picks
+                  </button>
+                </div>
+              </SurfacePanel>
+            ) : null}
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((series) => (
@@ -829,7 +1310,7 @@ export default function SearchPage() {
                     aria-label="Previous page"
                     className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-neutral-200 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Prev
+                    Previous
                   </button>
                   <button
                     type="button"
@@ -838,7 +1319,7 @@ export default function SearchPage() {
                     aria-label="Next page"
                     className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-neutral-200 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Next
+                    Next page
                   </button>
                 </div>
               </div>

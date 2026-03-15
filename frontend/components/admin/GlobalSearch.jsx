@@ -13,6 +13,7 @@ import {
   Mail,
   Megaphone,
   MessageSquare,
+  PenSquare,
   Radar,
   Receipt,
   Search,
@@ -86,6 +87,13 @@ const SEARCH_ITEMS = [
     href: "/admin/support",
     icon: LifeBuoy,
     keywords: ["工单", "客服", "帮助", "support", "tickets"],
+  },
+  {
+    id: "creators",
+    label: "创作者",
+    href: "/admin/creators",
+    icon: PenSquare,
+    keywords: ["创作者", "作者", "工作室", "creator", "author", "studio"],
   },
   {
     id: "branding",
@@ -365,8 +373,8 @@ export default function GlobalSearch({ isOpen, onClose }) {
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-ios-gray-500">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
-                <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">Up</kbd>
-                <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">Down</kbd>
+                <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">↑</kbd>
+                <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">↓</kbd>
                 <span>切换结果</span>
               </div>
               <div className="flex items-center gap-1.5">

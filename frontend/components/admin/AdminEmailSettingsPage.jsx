@@ -263,9 +263,9 @@ export default function AdminEmailSettingsPage() {
             className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
           >
             <option value="console">控制台（Console）</option>
-            <option value="webhook">Webhook 回调</option>
-            <option value="resend">Resend</option>
-            <option value="sendgrid">SendGrid</option>
+            <option value="webhook">自定义 Webhook</option>
+            <option value="resend">Resend（邮件服务）</option>
+            <option value="sendgrid">SendGrid（邮件服务）</option>
           </select>
         </Field>
         <Field label="发件地址" hint="例如：no-reply@yourdomain.com">

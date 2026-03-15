@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import EditorialHero from "../../components/common/EditorialHero";
+import StorefrontEventHub from "../../components/common/StorefrontEventHub";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import NotificationList from "../../components/notifications/NotificationList";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
@@ -39,6 +40,93 @@ export default function NotificationsPage() {
     setWorkingId(null);
   };
 
+  const handleNavigate = useCallback(
+    (item) => {
+      if (!item) {
+        return;
+      }
+
+      if (item.seriesId && item.episodeId) {
+        const targetPath = `/read/${item.seriesId}/${item.episodeId}`;
+        router.push(
+          buildPathWithAttribution(targetPath, {
+            entryPoint: item.type === "TTF_READY" ? "NOTIFICATION_TTF_READY" : "NOTIFICATION_EPISODE",
+            sourcePath: "/notifications",
+            sourceSeriesId: item.seriesId,
+            sourceEpisodeId: item.episodeId,
+            returnTo: targetPath,
+          }),
+        );
+        return;
+      }
+
+      if (item.seriesId) {
+        const targetPath = `/series/${item.seriesId}`;
+        router.push(
+          buildPathWithAttribution(targetPath, {
+            entryPoint: "NOTIFICATION_SERIES",
+            sourcePath: "/notifications",
+            sourceSeriesId: item.seriesId,
+            returnTo: targetPath,
+          }),
+        );
+        return;
+      }
+
+      if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
+        const ctaType = item.ctaType || "STORE";
+        const target = item.ctaTarget || "";
+        const promotionId =
+          item.type === "PROMO" && typeof item.id === "string" && item.id.startsWith("PROMO_")
+            ? item.id.replace(/^PROMO_/, "")
+            : undefined;
+        const attribution = {
+          promotionId,
+          entryPoint: item.type === "PROMO" ? "NOTIFICATION_PROMO" : "NOTIFICATION_SUB_VOUCHER",
+          sourcePath: "/notifications",
+          returnTo: "/notifications",
+        };
+
+        if (ctaType === "SUBSCRIBE") {
+          router.push(buildPathWithAttribution("/subscribe", attribution));
+          return;
+        }
+        if (ctaType === "SERIES" && target) {
+          const targetPath = `/series/${target}`;
+          router.push(
+            buildPathWithAttribution(targetPath, {
+              ...attribution,
+              sourceSeriesId: target,
+              returnTo: targetPath,
+            }),
+          );
+          return;
+        }
+        if (ctaType === "READ" && target) {
+          const [seriesId, episodeId] = target.split("/");
+          if (seriesId && episodeId) {
+            const targetPath = `/read/${seriesId}/${episodeId}`;
+            router.push(
+              buildPathWithAttribution(targetPath, {
+                ...attribution,
+                sourceSeriesId: seriesId,
+                sourceEpisodeId: episodeId,
+                returnTo: targetPath,
+              }),
+            );
+            return;
+          }
+        }
+        if (ctaType === "URL" && target) {
+          window.location.href = target;
+          return;
+        }
+        router.push(buildPathWithAttribution("/store", attribution, { focus: "auto" }));
+      }
+    },
+    [router],
+  );
+
   const notificationStats = useMemo(() => {
     const total = notifications.length;
     const unread = notifications.filter((item) => !item.read).length;
@@ -68,6 +156,91 @@ export default function NotificationsPage() {
       },
     ];
   }, [isAdultMode, loading, notifications]);
+
+  const notificationEventCards = useMemo(() => {
+    const unreadEpisode = notifications.find(
+      (item) => !item.read && (item.type === "NEW_EPISODE" || item.type === "TTF_READY"),
+    );
+    const unreadOffer = notifications.find(
+      (item) => !item.read && (item.type === "PROMO" || item.type === "SUB_VOUCHER"),
+    );
+    const unreadCount = notifications.filter((item) => !item.read).length;
+    const episodeCount = notifications.filter(
+      (item) => item.type === "NEW_EPISODE" || item.type === "TTF_READY",
+    ).length;
+    const offerCount = notifications.filter(
+      (item) => item.type === "PROMO" || item.type === "SUB_VOUCHER",
+    ).length;
+
+    return [
+      unreadEpisode
+        ? {
+            id: "episode-return",
+            eyebrow: "Reader return",
+            title: `${unreadEpisode.title} is still waiting to pull this session back into reading.`,
+            description:
+              "A top-tier inbox should make the strongest episode return obvious instead of burying it inside a long message list.",
+            signalLabel: "Unread",
+            signalValue: unreadCount.toLocaleString(),
+            signalHint: "Messages still waiting in this inbox",
+            ctaLabel: unreadEpisode.ctaLabel || "Open episode",
+            onClick: () => handleNavigate(unreadEpisode),
+            accentClass:
+              "group border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+          }
+        : {
+            id: "library-return",
+            eyebrow: "Reader return",
+            title: "No urgent episode alert right now, so library should carry the return visit.",
+            description:
+              "When the inbox is quiet, the best fallback is a clean handoff back into saved titles and unfinished chapters.",
+            signalLabel: "Episode alerts",
+            signalValue: episodeCount.toLocaleString(),
+            signalHint: "Loaded episode-related messages",
+            ctaLabel: "Open library",
+            onClick: () => router.push("/library"),
+            accentClass:
+              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          },
+      {
+        id: "offer-return",
+        eyebrow: "Value path",
+        title: unreadOffer
+          ? `${unreadOffer.title} should surface as the cleanest offer handoff.`
+          : "Keep wallet and membership value visible when the inbox leans promotional.",
+        description: unreadOffer
+          ? "Offer messages only help if they route cleanly into store or membership without making the reader hunt."
+          : "Promotion-heavy inboxes still need a single obvious value path so the page does not feel like loose system mail.",
+        signalLabel: "Offers",
+        signalValue: offerCount.toLocaleString(),
+        signalHint: "Promo and voucher messages loaded",
+        ctaLabel: unreadOffer?.ctaLabel || "Open point packs",
+        onClick: () => {
+          if (unreadOffer) {
+            handleNavigate(unreadOffer);
+            return;
+          }
+          router.push(buildPathWithAttribution("/store", { entryPoint: "NOTIFICATION_EVENT_HUB", sourcePath: "/notifications", returnTo: "/notifications" }, { focus: "auto" }));
+        },
+        accentClass:
+          "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "chart-backup",
+        eyebrow: "Discovery backup",
+        title: "If the inbox is thin, hand the reader back to a live chart instead of a dead end.",
+        description:
+          "Notifications work best as a return lane, but rankings should stay one tap away when the inbox cannot carry the whole session.",
+        signalLabel: "Discovery",
+        signalValue: "Charts",
+        signalHint: "Weekly and free-start boards stay live",
+        ctaLabel: "Open rankings",
+        onClick: () => router.push("/rankings?type=popular&window=week"),
+        accentClass:
+          "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+    ];
+  }, [handleNavigate, notifications, router]);
 
   return (
     <main className="min-h-screen bg-transparent text-neutral-100">
@@ -99,6 +272,15 @@ export default function NotificationsPage() {
           }
         />
 
+        {!loading && !error ? (
+          <StorefrontEventHub
+            eyebrow="Return moments"
+            title="Treat the inbox like a return engine, not a dead stack of alerts."
+            description="The best comic inboxes do more than list messages. They surface the clearest reading return, the next value path, and a backup discovery route before the session fades."
+            events={notificationEventCards}
+          />
+        ) : null}
+
         {loading ? (
           <SurfacePanel>
             <p className="text-sm text-neutral-400">Loading notifications...</p>
@@ -123,50 +305,7 @@ export default function NotificationsPage() {
             <NotificationList
               notifications={notifications}
               onMarkRead={handleMarkRead}
-              onNavigate={(item) => {
-                if (item.seriesId && item.episodeId) {
-                  router.push(`/read/${item.seriesId}/${item.episodeId}`);
-                  return;
-                }
-                if (item.seriesId) {
-                  router.push(`/series/${item.seriesId}`);
-                  return;
-                }
-                if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
-                  const ctaType = item.ctaType || "STORE";
-                  const target = item.ctaTarget || "";
-                  const promotionId =
-                    item.type === "PROMO" && typeof item.id === "string" && item.id.startsWith("PROMO_")
-                      ? item.id.replace(/^PROMO_/, "")
-                      : undefined;
-                  const attribution = {
-                    promotionId,
-                    entryPoint: item.type === "PROMO" ? "NOTIFICATION_PROMO" : "NOTIFICATION_SUB_VOUCHER",
-                    sourcePath: "/notifications",
-                    returnTo: "/notifications",
-                  };
-                  if (ctaType === "SUBSCRIBE") {
-                    router.push(buildPathWithAttribution("/subscribe", attribution));
-                    return;
-                  }
-                  if (ctaType === "SERIES" && target) {
-                    router.push(`/series/${target}`);
-                    return;
-                  }
-                  if (ctaType === "READ" && target) {
-                    const [seriesId, episodeId] = target.split("/");
-                    if (seriesId && episodeId) {
-                      router.push(`/read/${seriesId}/${episodeId}`);
-                      return;
-                    }
-                  }
-                  if (ctaType === "URL" && target) {
-                    window.location.href = target;
-                    return;
-                  }
-                  router.push(buildPathWithAttribution("/store", attribution, { focus: "auto" }));
-                }
-              }}
+              onNavigate={handleNavigate}
               workingId={workingId}
             />
           </SurfacePanel>

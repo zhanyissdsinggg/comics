@@ -15,6 +15,7 @@ describe("AdminSeriesController", () => {
         {
           provide: PrismaService,
           useValue: {
+            $queryRawUnsafe: jest.fn().mockResolvedValue([]),
             series: {
               findMany: jest.fn(),
               findUnique: jest.fn(),
@@ -25,6 +26,12 @@ describe("AdminSeriesController", () => {
             },
             episode: {
               deleteMany: jest.fn(),
+            },
+            follow: {
+              groupBy: jest.fn().mockResolvedValue([]),
+            },
+            seriesViewStat: {
+              groupBy: jest.fn().mockResolvedValue([]),
             },
           },
         },
@@ -52,8 +59,8 @@ describe("AdminSeriesController", () => {
 
     await expect(controller.list()).resolves.toEqual({
       series: [
-        { id: "series-1", title: "A Title", _count: { episodes: 3 }, episodeCount: 3 },
-        { id: "series-2", title: "B Title", _count: { episodes: 0 }, episodeCount: 0 },
+        expect.objectContaining({ id: "series-1", title: "A Title", _count: { episodes: 3 }, episodeCount: 3 }),
+        expect.objectContaining({ id: "series-2", title: "B Title", _count: { episodes: 0 }, episodeCount: 0 }),
       ],
     });
     expect(prisma.series.findMany).toHaveBeenCalledWith({
@@ -86,7 +93,7 @@ describe("AdminSeriesController", () => {
       },
     });
 
-    expect(result).toEqual({ series: createdSeries });
+    expect(result).toEqual({ series: expect.objectContaining(createdSeries) });
     expect(prisma.series.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         id: "test-series",
@@ -94,6 +101,7 @@ describe("AdminSeriesController", () => {
         isPublished: false,
       }),
     });
+    expect(prisma.series.findUnique).toHaveBeenCalled();
   });
 
   it("throws when series id is missing during create", async () => {
@@ -121,7 +129,7 @@ describe("AdminSeriesController", () => {
     });
 
     expect(result.series).toEqual([
-      { id: "series-1", title: "Published", isPublished: true, _count: { episodes: 5 }, episodeCount: 5 },
+      expect.objectContaining({ id: "series-1", title: "Published", isPublished: true, _count: { episodes: 5 }, episodeCount: 5 }),
     ]);
     expect(prisma.series.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -165,7 +173,10 @@ describe("AdminSeriesController", () => {
       isPublished: false,
     };
 
-    jest.spyOn(prisma.series, "findUnique").mockResolvedValue(existingSeries as never);
+    jest
+      .spyOn(prisma.series, "findUnique")
+      .mockResolvedValueOnce(existingSeries as never)
+      .mockResolvedValueOnce({ ...updatedSeries, _count: { episodes: 0 } } as never);
     jest.spyOn(prisma.series, "update").mockResolvedValue(updatedSeries as never);
 
     const result = await controller.update(
@@ -173,7 +184,7 @@ describe("AdminSeriesController", () => {
       { params: { id: "series-1" } } as never,
     );
 
-    expect(result).toEqual({ series: updatedSeries });
+    expect(result).toEqual({ series: expect.objectContaining(updatedSeries) });
     expect(prisma.series.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: "series-1" },

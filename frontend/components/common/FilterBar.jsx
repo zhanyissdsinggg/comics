@@ -16,6 +16,7 @@ export default function FilterBar({
   status = "all",
   onStatusChange,
   totalCount = 0,
+  loading = false,
 }) {
   const [showAllGenres, setShowAllGenres] = useState(false);
 
@@ -48,7 +49,7 @@ export default function FilterBar({
     <div className="space-y-3 rounded-2xl bg-neutral-900/50 p-4 backdrop-blur-md border border-white/5">
       <div className="flex items-center justify-between">
         <p className="text-sm text-neutral-400">
-          {totalCount > 0 ? `${totalCount} series found` : "Loading..."}
+          {loading ? "Loading..." : `${totalCount} series found`}
         </p>
       </div>
 

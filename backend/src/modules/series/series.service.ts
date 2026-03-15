@@ -4,6 +4,7 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { CacheService } from "../../common/cache/cache.service";
 import { Cacheable, CacheEvict } from "../../common/cache/cache.decorator";
 import { isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
+import { enrichSeriesWithStorefrontFields } from "../../common/utils/series-storefront-fields";
 
 type SeriesEpisodeRow = {
   id: string;
@@ -47,6 +48,11 @@ export class SeriesService {
       rating: series.rating || 0,
       ratingCount: series.ratingCount || 0,
       description: series.description || "",
+      createdAt: series.createdAt || null,
+      updatedAt: series.updatedAt || null,
+      author: typeof series.author === "string" ? series.author : "",
+      followers: Number(series.followers || 0),
+      views: Number(series.views || 0),
       pricing: {
         currency: "POINTS",
         episodePrice: series.episodePrice || 0,
@@ -170,6 +176,8 @@ export class SeriesService {
       rating: this.asNumber(series.rating, 0),
       ratingCount: Math.max(0, Math.floor(this.asNumber(series.ratingCount, 0))),
       description: String(series.description || ""),
+      createdAt: series.createdAt ? new Date(series.createdAt) : null,
+      updatedAt: series.updatedAt ? new Date(series.updatedAt) : null,
       episodePrice: Math.max(0, Math.floor(this.asNumber(series.episodePrice, 0))),
       ttfEnabled: Boolean(series.ttfEnabled),
       ttfIntervalHours: Math.max(1, Math.floor(this.asNumber(series.ttfIntervalHours, 24))),
@@ -216,6 +224,8 @@ export class SeriesService {
         "rating",
         "ratingCount",
         "description",
+        "createdAt",
+        "updatedAt",
         "episodePrice",
         "ttfEnabled",
         "ttfIntervalHours",
@@ -350,7 +360,10 @@ export class SeriesService {
         where,
         orderBy: { title: "asc" },
       });
-      return list.map((item) => this.toSeriesView(item));
+      return enrichSeriesWithStorefrontFields(
+        this.prisma,
+        list.map((item) => this.toSeriesView(item)),
+      );
     } catch (error) {
       if (!this.isSchemaDriftError(error) && !isSeriesVisibilitySchemaDrift(error)) {
         throw error;
@@ -361,7 +374,10 @@ export class SeriesService {
         onlyPublished: true,
         orderBy: [{ field: "title", direction: "asc" }],
       });
-      return fallbackList.map((item) => this.toSeriesView(item));
+      return enrichSeriesWithStorefrontFields(
+        this.prisma,
+        fallbackList.map((item) => this.toSeriesView(item)),
+      );
     }
   }
 
@@ -376,6 +392,8 @@ export class SeriesService {
       ? data.episodes.map((ep) => this.applyTtfAcceleration(ep, data, subscription))
       : data.episodes;
 
-    return { series: this.toSeriesView(data), episodes: accelerated };
+    const [series] = await enrichSeriesWithStorefrontFields(this.prisma, [this.toSeriesView(data)]);
+
+    return { series: series || this.toSeriesView(data), episodes: accelerated };
   }
 }

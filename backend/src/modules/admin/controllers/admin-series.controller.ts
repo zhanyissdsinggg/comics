@@ -16,6 +16,10 @@ import { Request } from "express";
 import { logger } from "../../../common/logger/winston.init";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
+import {
+  enrichSeriesWithStorefrontFields,
+  syncSeriesAuthorField,
+} from "../../../common/utils/series-storefront-fields";
 
 @Controller("admin/series")
 @UseGuards(AdminAuthGuard)
@@ -31,6 +35,24 @@ export class AdminSeriesController {
       ...series,
       episodeCount: Number(series?._count?.episodes ?? 0),
     };
+  }
+
+  private async enrichSeriesSummaryList(series: any[]) {
+    return enrichSeriesWithStorefrontFields(
+      this.prisma,
+      series.map((item) => this.mapSeriesSummary(item)),
+    );
+  }
+
+  private async enrichSeriesSummary(series: any) {
+    if (!series) {
+      return null;
+    }
+
+    const [nextSeries] = await enrichSeriesWithStorefrontFields(this.prisma, [
+      this.mapSeriesSummary(series),
+    ]);
+    return nextSeries || this.mapSeriesSummary(series);
   }
 
   private toSeriesPayload(input: any, existing?: any) {
@@ -65,6 +87,10 @@ export class AdminSeriesController {
     };
   }
 
+  private async applyStorefrontMetadata(seriesId: string, input: any) {
+    await syncSeriesAuthorField(this.prisma, seriesId, input?.author);
+  }
+
   @Get()
   async list() {
     const series = await this.prisma.series.findMany({
@@ -77,7 +103,7 @@ export class AdminSeriesController {
         },
       },
     });
-    return { series: series.map((item) => this.mapSeriesSummary(item)) };
+    return { series: await this.enrichSeriesSummaryList(series) };
   }
 
   @Get("search/advanced")
@@ -139,7 +165,7 @@ export class AdminSeriesController {
     ]);
 
     return {
-      series: series.map((item) => this.mapSeriesSummary(item)),
+      series: await this.enrichSeriesSummaryList(series),
       pagination: {
         page,
         limit,
@@ -158,7 +184,18 @@ export class AdminSeriesController {
 
     try {
       const created = await this.prisma.series.create({ data: this.toSeriesPayload(series) });
-      return { series: created };
+      await this.applyStorefrontMetadata(created.id, series);
+      const nextSeries = await this.prisma.series.findUnique({
+        where: { id: created.id },
+        include: {
+          _count: {
+            select: {
+              episodes: true,
+            },
+          },
+        },
+      });
+      return { series: await this.enrichSeriesSummary(nextSeries || created) };
     } catch (error: any) {
       if (error?.code === "P2002") {
         logger.warn(`series id already exists: ${series.id}`);
@@ -184,7 +221,7 @@ export class AdminSeriesController {
     if (!series) {
       throw new NotFoundException("Series not found.");
     }
-    return { series: this.mapSeriesSummary(series) };
+    return { series: await this.enrichSeriesSummary(series) };
   }
 
   @Patch(":id")
@@ -200,7 +237,18 @@ export class AdminSeriesController {
       where: { id: seriesId },
       data: this.toSeriesPayload({ ...series, id: seriesId }, existing),
     });
-    return { series: updated };
+    await this.applyStorefrontMetadata(seriesId, series);
+    const nextSeries = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+      include: {
+        _count: {
+          select: {
+            episodes: true,
+          },
+        },
+      },
+    });
+    return { series: await this.enrichSeriesSummary(nextSeries || updated) };
   }
 
   @Delete(":id")

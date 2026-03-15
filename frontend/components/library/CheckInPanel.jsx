@@ -24,9 +24,9 @@ export default function CheckInPanel({
             <Pill>Streak</Pill>
             <Pill>{rewards.streakCount} days</Pill>
           </div>
-          <h2 className="mt-3 text-xl font-semibold">Daily Check-in</h2>
+          <h2 className="mt-3 text-xl font-semibold">Daily check-in</h2>
           <p className="mt-2 text-sm text-neutral-400">
-            Today&apos;s reward: +{rewards.todayReward} bonus POINTS
+            Today&apos;s reward: +{rewards.todayReward} bonus points
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -44,7 +44,7 @@ export default function CheckInPanel({
             disabled={rewards.makeUpUsedToday || working}
             className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200 disabled:opacity-50"
           >
-            Make up (-{rewards.makeUpCost} POINTS)
+            Restore streak (-{rewards.makeUpCost} points)
           </button>
         </div>
       </div>

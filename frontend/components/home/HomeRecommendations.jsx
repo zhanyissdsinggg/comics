@@ -1,11 +1,3 @@
-﻿/**
- * 
- * 
- * 
- * 
- * 
- */
-
 "use client";
 
 import { useMemo } from "react";
@@ -17,106 +9,116 @@ import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { recommendRails } from "../../lib/reco/recommender";
 import { getRecommendations } from "../../lib/recommendation/engine";
+import { buildHomeRail } from "../../lib/storefrontRecommendations";
 import { useHomeData } from "./HomeDataProvider";
-import { usePersonalizedRecommendations } from "../../hooks/useAIRecommendations"; // 
+import { usePersonalizedRecommendations } from "../../hooks/useAIRecommendations";
 
 function parseLatestNumber(value) {
   if (!value) {
     return 0;
   }
+
   const match = String(value).match(/(\d+)/);
   if (!match) {
     return 0;
   }
+
   return Number.parseInt(match[1], 10) || 0;
+}
+
+function createRailItem(series, overrides = {}) {
+  return {
+    id: series.id,
+    seriesId: series.id,
+    title: series.title,
+    author: series.author || "",
+    subtitle: series.status || "Series",
+    coverTone: series.coverTone,
+    coverUrl: series.coverUrl,
+    badge: series.badge,
+    ...overrides,
+  };
 }
 
 export function useHomeRecommendations() {
   const { seriesList } = useHomeData();
   const { isSignedIn, user } = useAuthStore();
   const { followedSeriesIds } = useFollowStore();
-  const { progressMap } = useProgressStore();
+  const { bySeriesId: progressMap } = useProgressStore();
   const { historyItems } = useHistoryStore();
   const { behavior } = useBehaviorStore();
   const { isAdultMode } = useAdultGateStore();
 
   const { data: aiRecommendations, loading: aiLoading } = usePersonalizedRecommendations(
     isSignedIn ? user?.id : null,
-    10
+    10,
   );
 
-  // Following updates rail
   const followingUpdates = useMemo(() => {
     if (!followedSeriesIds || followedSeriesIds.length === 0) {
       return [];
     }
+
     const catalog = seriesList.length > 0 ? seriesList : [];
-    const candidates = catalog.filter((series) =>
-      followedSeriesIds.includes(series.id)
-    );
+    const candidates = catalog.filter((series) => followedSeriesIds.includes(series.id));
+
     return candidates
-      .map((series) => ({
-        id: series.id,
-        title: series.title,
-        subtitle: series.latest || "New episode",
-        coverTone: series.coverTone,
-        coverUrl: series.coverUrl,
-        badge: series.badge,
-      }))
+      .map((series) =>
+        createRailItem(series, {
+          subtitle: series.latest || "New episode",
+        }),
+      )
       .sort((a, b) => parseLatestNumber(b.subtitle) - parseLatestNumber(a.subtitle));
   }, [followedSeriesIds, seriesList]);
 
-  // History rail
   const historyRail = useMemo(() => {
     if (!isSignedIn || !Array.isArray(historyItems) || historyItems.length === 0) {
       return [];
     }
+
     return historyItems
       .map((entry) => {
         const series = seriesList.find((item) => item.id === entry.seriesId);
         if (!series) {
           return null;
         }
-        return {
+
+        return createRailItem(series, {
           id: `${entry.seriesId}-${entry.episodeId}`,
-          title: series.title,
           subtitle: `Last read ${entry.episodeId}`,
-          coverTone: series.coverTone,
-          coverUrl: series.coverUrl,
-          badge: series.badge,
-        };
+          resumeEpisodeId: entry.episodeId,
+        });
       })
       .filter(Boolean)
       .slice(0, 10);
-  }, [isSignedIn, historyItems, seriesList]);
+  }, [historyItems, isSignedIn, seriesList]);
 
-  // Progress-based series IDs
   const progressSeriesIds = useMemo(() => {
     if (!progressMap || typeof progressMap !== "object") {
       return [];
     }
+
     return Object.keys(progressMap);
   }, [progressMap]);
 
-  // History series IDs
   const historySeriesIds = useMemo(() => {
     if (!Array.isArray(historyItems)) {
       return [];
     }
+
     return historyItems.map((item) => item.seriesId);
   }, [historyItems]);
 
-  // Recommendation rails from recommender
   const reco = useMemo(
     () => recommendRails(seriesList, behavior, progressMap, { isAdultMode }),
-    [behavior, progressMap, isAdultMode, seriesList]
+    [behavior, isAdultMode, progressMap, seriesList],
   );
 
-  // Content-based recommendations
   const recommendedRail = useMemo(() => {
     if (!isSignedIn || seriesList.length === 0) {
       return [];
     }
+
     const recommendations = getRecommendations({
       allSeries: seriesList,
       historySeriesIds,
@@ -125,173 +127,152 @@ export function useHomeRecommendations() {
       limit: 10,
       strategy: "content",
     });
-    return recommendations.map((series) => ({
-      id: series.id,
-      title: series.title,
-      subtitle: series.genres?.join(", ") || "",
-      coverTone: series.coverTone,
-      coverUrl: series.coverUrl,
-      badge: series.badge,
-    }));
-  }, [seriesList, historySeriesIds, followedSeriesIds, progressSeriesIds, isSignedIn]);
 
-  // Check if user is new (no history or progress)
-  const isNewUser = useMemo(() => {
-    return (
-      (!historyItems || historyItems.length === 0) &&
-      (!progressMap || Object.keys(progressMap).length === 0)
+    return recommendations.map((series) =>
+      createRailItem(series, {
+        subtitle: series.genres?.join(", ") || "",
+      }),
     );
-  }, [historyItems, progressMap]);
+  }, [followedSeriesIds, historySeriesIds, isSignedIn, progressSeriesIds, seriesList]);
 
-  // Starter items for new users
+  const isNewUser = useMemo(
+    () => (!historyItems || historyItems.length === 0) && (!progressMap || Object.keys(progressMap).length === 0),
+    [historyItems, progressMap],
+  );
+
   const starterItems = useMemo(() => {
     if (!isNewUser || seriesList.length === 0) {
       return [];
     }
+
     return seriesList
-      .filter((s) => s.badge === "Hot" || s.rating >= 4.5)
+      .filter((series) => series.badge === "Hot" || series.rating >= 4.5)
       .slice(0, 10)
-      .map((series) => ({
-        id: series.id,
-        title: series.title,
-        subtitle: series.genres?.join(", ") || "",
-        coverTone: series.coverTone,
-        coverUrl: series.coverUrl,
-        badge: series.badge,
-      }));
+      .map((series) =>
+        createRailItem(series, {
+          subtitle: series.genres?.join(", ") || "",
+        }),
+      );
   }, [isNewUser, seriesList]);
 
-  // Assemble active rails
   const activeRails = useMemo(() => {
     const rails = [];
-
-    // Following updates (if user follows any series)
-    if (followingUpdates.length > 0) {
-      rails.push({
-        id: "following",
-        title: "Following Updates",
-        items: followingUpdates,
-      });
-    }
-
-    // Add recommendation rails from recommender
-    if (reco && typeof reco === "object") {
-      // Continue reading rail
-      if (reco.continueRail && reco.continueRail.length > 0) {
-        rails.push({
-          id: "continue",
-          title: "Continue Reading",
-          items: reco.continueRail,
-        });
+    const pushRail = (rail) => {
+      if (rail) {
+        rails.push(rail);
       }
+    };
 
-      // Because you read rail
-      if (reco.becauseYouReadRail && reco.becauseYouReadRail.length > 0) {
-        rails.push({
+    pushRail(
+      buildHomeRail({
+        id: "following",
+        items: followingUpdates,
+      }),
+    );
+
+    if (reco && typeof reco === "object") {
+      pushRail(
+        buildHomeRail({
+          id: "continue",
+          items: reco.continueRail,
+        }),
+      );
+
+      pushRail(
+        buildHomeRail({
           id: "because-you-read",
           title: reco.becauseYouReadTitle || "Because You Read",
           items: reco.becauseYouReadRail,
-        });
-      }
+        }),
+      );
 
-      // Trending rail
-      if (reco.trendingRail && reco.trendingRail.length > 0) {
-        rails.push({
+      pushRail(
+        buildHomeRail({
           id: "trending",
-          title: "Trending Now",
           items: reco.trendingRail,
-        });
-      }
+        }),
+      );
 
-      // New releases rail
-      if (reco.newRail && reco.newRail.length > 0) {
-        rails.push({
+      pushRail(
+        buildHomeRail({
           id: "new",
-          title: "New Releases",
           items: reco.newRail,
-        });
-      }
+        }),
+      );
 
-      // Completed rail
-      if (reco.completedRail && reco.completedRail.length > 0) {
-        rails.push({
+      pushRail(
+        buildHomeRail({
           id: "completed",
-          title: "Completed Series",
           items: reco.completedRail,
-        });
-      }
+        }),
+      );
 
-      // TTF rail
-      if (reco.ttfRail && reco.ttfRail.length > 0) {
-        rails.push({
+      pushRail(
+        buildHomeRail({
           id: "ttf",
-          title: "Free Soon",
           items: reco.ttfRail,
-        });
-      }
+        }),
+      );
 
-      // Adult rail (if in adult mode)
-      if (reco.adultRail && reco.adultRail.length > 0) {
-        rails.push({
+      pushRail(
+        buildHomeRail({
           id: "adult",
-          title: "Adult Content",
           items: reco.adultRail,
-        });
-      }
+        }),
+      );
     }
 
     if (historyRail.length > 0 && !reco?.continueRail?.length) {
-      rails.push({
-        id: "history",
-        title: "Continue Reading",
-        items: historyRail,
-      });
+      pushRail(
+        buildHomeRail({
+          id: "history",
+          items: historyRail,
+        }),
+      );
     }
 
-    // For new users, add starter rail
-    if (isNewUser && starterItems.length > 0) {
-      rails.push({
-        id: "starter",
-        title: "Start Here",
-        items: starterItems,
-      });
+    if (isNewUser) {
+      pushRail(
+        buildHomeRail({
+          id: "starter",
+          items: starterItems,
+        }),
+      );
     }
-    // AI recommendations rail
+
     if (isSignedIn && !aiLoading && aiRecommendations && aiRecommendations.length > 0) {
-      rails.push({
-        id: "ai-recommended",
-        title: "AI Picks for You",
-        items: aiRecommendations.map((series) => ({
-          id: series.id,
-          title: series.title,
-          subtitle: `Rating ${series.rating?.toFixed(1) || "N/A"} | ${series.genres?.join(", ") || ""}`,
-          coverTone: series.coverTone,
-          coverUrl: series.coverUrl,
-          badge: series.badge,
-        })),
-      });
+      pushRail(
+        buildHomeRail({
+          id: "ai-recommended",
+          items: aiRecommendations.map((series) =>
+            createRailItem(series, {
+              subtitle: `Rating ${series.rating?.toFixed(1) || "N/A"} | ${series.genres?.join(", ") || ""}`,
+            }),
+          ),
+        }),
+      );
     }
 
-    // Recommended rail (if signed in)
-    if (isSignedIn && recommendedRail.length > 0) {
-      rails.push({
-        id: "recommended",
-        title: "Recommended for You",
-        items: recommendedRail,
-      });
+    if (isSignedIn) {
+      pushRail(
+        buildHomeRail({
+          id: "recommended",
+          items: recommendedRail,
+        }),
+      );
     }
 
     return rails;
   }, [
-    reco,
+    aiLoading,
+    aiRecommendations,
+    followingUpdates,
     historyRail,
     isNewUser,
-    starterItems,
     isSignedIn,
+    reco,
     recommendedRail,
-    followingUpdates,
-    aiRecommendations, // AI recommendations dependency
-    aiLoading,
+    starterItems,
   ]);
 
   return {

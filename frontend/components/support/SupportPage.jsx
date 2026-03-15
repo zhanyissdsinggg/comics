@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import InfoPageNav from "../layout/InfoPageNav";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
+import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import { apiPost } from "../../lib/apiClient";
+import {
+  consumeCommerceSuccessForPath,
+  getCommerceSuccessPresentation,
+} from "../../lib/commerceSuccess";
+import { focusInteractiveTarget } from "../../lib/focusTarget";
 import { useAuthStore } from "../../store/useAuthStore";
 import { siteConfig } from "../../lib/siteConfig";
 
@@ -27,7 +34,16 @@ function buildSupportDraft(subject, body, supportEmail) {
   return `To: ${supportEmail}\nSubject: ${subject}\n\n${body}`;
 }
 
+const SUPPORT_TOPIC_PRESETS = [
+  { id: "billing", label: "Billing issue", subject: "Billing issue" },
+  { id: "refund", label: "Refund follow-up", subject: "Refund follow-up" },
+  { id: "account", label: "Account access", subject: "Account access" },
+  { id: "reader", label: "Reader bug", subject: "Reader bug" },
+  { id: "content", label: "Content report", subject: "Content report" },
+];
+
 export default function SupportPage() {
+  const router = useRouter();
   const { hydrated, isSignedIn, user } = useAuthStore();
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
@@ -35,12 +51,26 @@ export default function SupportPage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const [commerceNotice, setCommerceNotice] = useState(null);
+  const orderIdInputRef = useRef(null);
 
   useEffect(() => {
     if (hydrated && isSignedIn) {
       setEmail(user?.email || "");
     }
   }, [hydrated, isSignedIn, user?.email]);
+
+  useEffect(() => {
+    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/support")));
+  }, []);
+
+  useEffect(() => {
+    if (!commerceNotice) {
+      return undefined;
+    }
+
+    return focusInteractiveTarget(orderIdInputRef);
+  }, [commerceNotice]);
 
   const trimmedEmail = email.trim();
   const trimmedSubject = subject.trim();
@@ -190,6 +220,13 @@ export default function SupportPage() {
           stats={supportStats}
         />
 
+        {commerceNotice ? (
+          <CommerceSuccessBanner
+            notice={commerceNotice}
+            onDismiss={() => setCommerceNotice(null)}
+          />
+        ) : null}
+
         <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <SurfacePanel className="space-y-5">
             <div className="space-y-2">
@@ -199,6 +236,24 @@ export default function SupportPage() {
               <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
                 Submit issue details
               </h2>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
+                Quick topics
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {SUPPORT_TOPIC_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => setSubject(preset.subject)}
+                    className="rounded-full border border-white/10 bg-black/10 px-3 py-1.5 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {feedback.text ? (
@@ -234,6 +289,7 @@ export default function SupportPage() {
               <div>
                 <label className={fieldLabelClass}>Order ID</label>
                 <input
+                  ref={orderIdInputRef}
                   id="support-order-id"
                   type="text"
                   value={orderId}
@@ -313,6 +369,31 @@ export default function SupportPage() {
                 <li>Add an order ID for payment issues so the receipt can be traced faster.</li>
                 <li>Signed-in users can submit tickets directly without leaving the site.</li>
               </ul>
+            </SurfacePanel>
+
+            <SurfacePanel className="space-y-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                Billing path
+              </p>
+              <p className="text-sm leading-6 text-neutral-300">
+                Start from Orders when you need a receipt, payment status, or a refund reference. Then move to Support if the issue needs human review or billing follow-up.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/orders")}
+                  className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                >
+                  View orders
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/faq")}
+                  className={secondaryButtonClass}
+                >
+                  Open FAQ
+                </button>
+              </div>
             </SurfacePanel>
 
             <SurfacePanel className="space-y-4">

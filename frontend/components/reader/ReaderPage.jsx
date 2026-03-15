@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
 import { useEntitlementStore } from "../../store/useEntitlementStore";
@@ -20,8 +20,21 @@ import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
 import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAutoSaveProgress } from "../../hooks/useAutoSaveProgress";
-import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import {
+  buildPathWithAttribution,
+  loadPersistedPaymentAttribution,
+  mergePaymentAttribution,
+  persistPaymentAttribution,
+  readPaymentAttributionFromSearchParams,
+} from "../../lib/paymentAttribution";
+import { focusInteractiveTarget } from "../../lib/focusTarget";
 import { parallelRequests2 } from "../../lib/parallelRequests";
+import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
+import {
+  consumeCommerceSuccessForPath,
+  getCommerceSuccessPresentation,
+} from "../../lib/commerceSuccess";
+import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 
 const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
   ssr: false,
@@ -64,6 +77,7 @@ function createPricingFallback(basePrice = 0) {
 
 export default function ReaderPage({ seriesId, episodeId }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [episodeData, setEpisodeData] = useState(null);
   const [seriesData, setSeriesData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -76,6 +90,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const [prefetchCount, setPrefetchCount] = useState(3);
   const [resumeMessage, setResumeMessage] = useState("");
   const [uiToast, setUiToast] = useState("");
+  const [commerceNotice, setCommerceNotice] = useState(null);
+  const [commerceEntryPoint, setCommerceEntryPoint] = useState("");
   const [pendingResume, setPendingResume] = useState(null);
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [scrollPercent, setScrollPercent] = useState(0);
@@ -101,6 +117,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const gateReportedRef = useRef(false);
   const requestRef = useRef(0);
   const commerceExposureRef = useRef(new Set());
+  const unlockCurrentButtonRef = useRef(null);
+  const endOverlayPrimaryActionRef = useRef(null);
 
   const { bySeriesId, loadEntitlement, unlockEpisode, unlockPack, claimTTF } =
     useEntitlementStore();
@@ -143,6 +161,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
   } = useReaderSettingsStore();
   const { bookmarksBySeries, addBookmark, removeBookmark } = useBookmarkStore();
   const reportedRef = useRef(false);
+  const routeAttribution = useMemo(
+    () => readPaymentAttributionFromSearchParams(searchParams),
+    [searchParams],
+  );
 
   const { restoreProgress } = useAutoSaveProgress(seriesId, episodeId, {
     enabled: isSignedIn, // 
@@ -157,9 +179,23 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const nextUnlocked = nextEpisode
     ? entitlement.unlockedEpisodeIds.includes(nextEpisode.id)
     : false;
+  const walletBalance = paidPts + bonusPts;
   const bookmarks = bookmarksBySeries[seriesId] || [];
   const isComic = episodeData?.type === "comic";
   const layoutModeForView = isComic ? layoutMode : "vertical";
+  const upcomingEpisodes = useMemo(
+    () =>
+      currentIndex >= 0
+        ? episodes.slice(currentIndex + 1, currentIndex + 4).map((episode) => ({
+            id: episode.id,
+            title: episode.title,
+            pricePts: Number(episode.pricePts || 0),
+            unlocked: entitlement.unlockedEpisodeIds.includes(episode.id),
+            ttfEligible: Boolean(episode.ttfEligible),
+          }))
+        : [],
+    [currentIndex, entitlement.unlockedEpisodeIds, episodes],
+  );
 
   const previewCount = useMemo(() => {
     if (unlocked) {
@@ -185,6 +221,50 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const nextPricing =
     commerceState.nextPricing || createPricingFallback(nextEpisode?.pricePts || 0);
   const packPricing = commerceState.packPricing;
+
+  useEffect(() => {
+    const payload = consumeCommerceSuccessForPath(`/read/${seriesId}/${episodeId}`);
+    setCommerceNotice(getCommerceSuccessPresentation(payload));
+    setCommerceEntryPoint(String(payload?.entryPoint || ""));
+  }, [episodeId, seriesId]);
+
+  useEffect(() => {
+    if (
+      loading ||
+      !commerceNotice ||
+      commerceEntryPoint !== "READER_END" ||
+      !nextEpisode ||
+      showPaywall ||
+      showEndOverlay
+    ) {
+      return;
+    }
+
+    setShowEndOverlay(true);
+  }, [
+    commerceEntryPoint,
+    commerceNotice,
+    loading,
+    nextEpisode,
+    showEndOverlay,
+    showPaywall,
+  ]);
+
+  useEffect(() => {
+    if (!commerceNotice || !showPaywall) {
+      return undefined;
+    }
+
+    return focusInteractiveTarget(unlockCurrentButtonRef);
+  }, [commerceNotice, showPaywall]);
+
+  useEffect(() => {
+    if (!commerceNotice || !showEndOverlay) {
+      return undefined;
+    }
+
+    return focusInteractiveTarget(endOverlayPrimaryActionRef);
+  }, [commerceNotice, showEndOverlay]);
 
   useEffect(() => {
     if (!commerceActive) {
@@ -461,6 +541,20 @@ export default function ReaderPage({ seriesId, episodeId }) {
       restoreProgress();
     }
   }, [loading, episodeData, isSignedIn, restoreProgress]);
+
+  useEffect(() => {
+    if (!routeAttribution) {
+      return;
+    }
+
+    const attribution = mergePaymentAttribution(
+      loadPersistedPaymentAttribution(),
+      routeAttribution,
+    );
+    if (attribution) {
+      persistPaymentAttribution(attribution);
+    }
+  }, [routeAttribution]);
 
   useEffect(() => {
     fetchEpisode();
@@ -1196,6 +1290,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
         Shortcuts: N = night mode, T = contents, B = bookmark, Left/Right = prev/next, A = auto scroll
       </div>
 
+      {commerceNotice && !showPaywall ? (
+        <div className="mx-auto max-w-5xl px-4 pt-4">
+          <CommerceSuccessBanner
+            notice={commerceNotice}
+            onDismiss={() => setCommerceNotice(null)}
+          />
+        </div>
+      ) : null}
+
       <div style={{ filter: `brightness(${brightness || 100}%)` }}>
         <PageStream
           pages={episodeData?.pages || []}
@@ -1216,6 +1319,26 @@ export default function ReaderPage({ seriesId, episodeId }) {
       {showPaywall ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-4">
           <div className="w-full max-w-md rounded-3xl border border-neutral-800 bg-neutral-900/95 p-6 text-center">
+            {commerceNotice ? (
+              <div className="mb-4 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-4 text-left">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
+                      {commerceNotice.eyebrow}
+                    </p>
+                    <p className="mt-2 text-base font-semibold text-white">{commerceNotice.title}</p>
+                    <p className="mt-2 text-xs leading-6 text-neutral-300">{commerceNotice.description}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCommerceNotice(null)}
+                    className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-semibold text-neutral-200"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            ) : null}
             <h2 className="text-xl font-semibold">Unlock this episode</h2>
             <p className="mt-2 text-sm text-neutral-400">
               Continue reading with a one-tap unlock, points pack, or member perk.
@@ -1229,6 +1352,39 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 Free preview reached: {previewParagraphs} sections.
               </p>
             ) : null}
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-left">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+                  Wallet
+                </p>
+                <p className="mt-2 text-lg font-semibold text-white">{walletBalance} points</p>
+                <p className="mt-1 text-xs text-neutral-500">Current balance across this account.</p>
+              </div>
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-left">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+                  Unlock price
+                </p>
+                <p className="mt-2 text-lg font-semibold text-white">
+                  {currentPricing.finalPrice === 0 ? "Free" : `${currentPricing.finalPrice} points`}
+                </p>
+                <p className="mt-1 text-xs text-neutral-500">
+                  {currentPricing.appliedDailyFree
+                    ? "Daily free unlock is ready."
+                    : currentPricing.discountPct
+                      ? `Subscriber ${currentPricing.discountPct}% off is active.`
+                      : "Standard wallet pricing."}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-left">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+                  Reading mode
+                </p>
+                <p className="mt-2 text-lg font-semibold text-white">{isSubscriber ? "Member" : "Standard"}</p>
+                <p className="mt-1 text-xs text-neutral-500">
+                  {isSubscriber ? "Discounts and daily perks are available." : "Points and packs are available."}
+                </p>
+              </div>
+            </div>
             {currentPricing.appliedDailyFree ? (
               <p className="mt-3 text-xs text-emerald-300">Daily free unlock available</p>
             ) : currentPricing.discountPct ? (
@@ -1236,10 +1392,42 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 Subscriber {currentPricing.discountPct}% off
               </p>
             ) : null}
+            {upcomingEpisodes.length > 0 ? (
+              <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4 text-left">
+                <p className="text-sm font-semibold text-neutral-100">What opens up next</p>
+                <div className="mt-3 space-y-2">
+                  {upcomingEpisodes.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-neutral-800 bg-black/20 px-3 py-3 text-sm"
+                    >
+                      <div>
+                        <p className="font-medium text-white">{item.title}</p>
+                        <p className="mt-1 text-xs text-neutral-500">
+                          {item.unlocked
+                            ? "Already unlocked"
+                            : item.ttfEligible
+                              ? "Timed free unlock supported"
+                              : "Premium chapter"}
+                        </p>
+                      </div>
+                      <span className="text-xs font-semibold text-neutral-300">
+                        {item.unlocked ? "Ready" : item.pricePts ? `${item.pricePts} pts` : "Locked"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <button
+              ref={unlockCurrentButtonRef}
               type="button"
               onClick={handleUnlockCurrent}
-              className="mt-6 w-full min-h-[44px] rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition-all hover:bg-emerald-50 active:scale-95 active:bg-emerald-100"
+              className={`mt-6 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold text-neutral-900 transition-all active:scale-95 ${
+                commerceNotice
+                  ? "bg-emerald-200 shadow-[0_0_0_1px_rgba(110,231,183,0.35),0_24px_60px_rgba(16,185,129,0.24)] motion-safe:animate-pulse hover:bg-emerald-100 active:bg-emerald-200"
+                  : "bg-white hover:bg-emerald-50 active:bg-emerald-100"
+              }`}
               style={{ willChange: "transform" }}
             >
               {currentPricing.finalPrice === 0
@@ -1252,6 +1440,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 <div>- Unlocking keeps this episode in your library.</div>
                 <div>- Episode packs lower your cost per chapter.</div>
                 <div>- Membership adds daily free unlocks and shorter wait timers.</div>
+                <div>- Orders and Support stay available if billing follow-up is needed.</div>
               </div>
             </div>
             <button
@@ -1270,7 +1459,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               }}
               className="mt-3 w-full rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-100"
             >
-              See member perks
+              {STOREFRONT_TERMS.compareMembership}
             </button>
             <button
               type="button"
@@ -1292,7 +1481,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
               }}
               className="mt-2 w-full rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300"
             >
-              Buy points
+              {STOREFRONT_TERMS.viewPointPacks}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(`/series/${seriesId}`)}
+              className="mt-2 w-full rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300"
+            >
+              Back to series details
             </button>
           </div>
         </div>
@@ -1301,6 +1497,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
       {showEndOverlay ? (
         <EndOfEpisodeOverlay
           open
+          seriesId={seriesId}
+          series={seriesData?.series}
+          sourcePath={`/read/${seriesId}/${episodeId}`}
+          returnTo={`/read/${seriesId}/${episodeId}`}
           nextEpisode={nextEpisode}
           nextUnlocked={nextUnlocked}
           decision={offerDecision}
@@ -1331,6 +1531,28 @@ export default function ReaderPage({ seriesId, episodeId }) {
             trackEvent("offer_click", { offerId, entry: "READER_END" })
           }
           onPackOffer={handlePackOffer}
+          walletBalance={walletBalance}
+          isSubscriber={isSubscriber}
+          upcomingEpisodes={upcomingEpisodes}
+          onOpenStore={() =>
+            router.push(
+              buildPathWithAttribution(
+                "/store",
+                {
+                  entryPoint: "READER_END",
+                  sourcePath: `/read/${seriesId}/${episodeId}`,
+                  sourceSeriesId: seriesId,
+                  sourceEpisodeId: nextEpisode?.id || episodeId,
+                  returnTo: `/read/${seriesId}/${episodeId}`,
+                },
+                { returnTo: `/read/${seriesId}/${episodeId}`, focus: "auto" }
+              )
+            )
+          }
+          onViewSeries={() => router.push(`/series/${seriesId}`)}
+          onOpenSupport={() => router.push("/support")}
+          primaryActionRef={endOverlayPrimaryActionRef}
+          highlightPrimaryAction={Boolean(commerceNotice)}
           onNotify={() =>
             setModalState({
               type: "INFO",
@@ -1401,9 +1623,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     label: `${offerDecision.recommendedUnlockOffer.episodes}-episode pack`,
                     value: `${offerDecision.recommendedUnlockOffer.pricePts} points`,
                   },
+                  {
+                    label: "Membership",
+                    value: isSubscriber ? "Already active" : "Daily free + lower unlock cost",
+                  },
                 ]
               : []
           }
+          compareTitle="Single, pack, or membership"
           tips={
             modalState?.type === "SHORTFALL"
               ? [
@@ -1414,11 +1641,12 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 ]
               : []
           }
+          tipsTitle="What changes after each choice"
           actions={
             modalState?.type === "SHORTFALL"
               ? [
                   {
-                    label: "Buy points",
+                    label: STOREFRONT_TERMS.viewPointPacks,
                     onClick: () => {
                       router.push(
                         buildPathWithAttribution(
@@ -1442,7 +1670,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     variant: "secondary",
                   },
                   {
-                    label: "See member perks",
+                    label: STOREFRONT_TERMS.compareMembership,
                     onClick: () => {
                       trackEvent("click_subscribe_from_shortfall", {
                         seriesId,
@@ -1463,8 +1691,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   },
                   {
                     label: offerDecision?.recommendedTopupOffer?.name
-                      ? `Quick top up (${offerDecision.recommendedTopupOffer.name})`
-                      : "Quick top up",
+                      ? `Top up ${offerDecision.recommendedTopupOffer.name}`
+                      : "Top up recommended pack",
                     onClick: async () => {
                       const packageId =
                         offerDecision?.recommendedTopupOffer?.id?.replace(
@@ -1516,7 +1744,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       });
                       setModalState({
                         type: "ERROR",
-                        title: "Top up failed",
+                        title: "Couldn't top up",
                         description: "We couldn't complete the top-up and unlock flow.",
                       });
                     },

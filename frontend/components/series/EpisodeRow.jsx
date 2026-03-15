@@ -13,6 +13,7 @@ import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { calculatePrice } from "../../lib/pricing";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 
 function createIdempotencyKey() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -91,6 +92,7 @@ function EpisodeRow({
   const formatted = isReady ? null : formatCountdown(remainingMs);
 
   const isSubscriber = Boolean(subscription?.active);
+  const walletBalance = (paidPts || 0) + (bonusPts || 0);
   const isNewPayer =
     typeof window !== "undefined"
       ? window.localStorage.getItem("mn_has_purchased") !== "1"
@@ -170,6 +172,87 @@ function EpisodeRow({
     (pricing.discountPct ? `Subscriber ${pricing.discountPct}% off` : "");
   const dailyFreeLabel =
     !unlocked && subscriptionUsage?.remaining ? "Daily free unlock available" : "";
+  const episodeDisplayTitle =
+    episode?.title && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title)
+      ? ["Ep ", episode?.number, " - ", episode.title].join("")
+      : `Episode ${episode?.number}`;
+  const shortfallValue =
+    !ttfStatus?.eligible && effectivePrice > 0 ? Math.max(0, effectivePrice - walletBalance) : 0;
+  const episodeSignals = useMemo(() => {
+    const list = [];
+
+    if (unlocked) {
+      list.push({
+        id: "access",
+        label:
+          progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
+            ? `${Math.round(progress.percent * 100)}% read`
+            : "Unlocked now",
+        tone: "emerald",
+      });
+    } else if (ttfStatus?.eligible && isReady) {
+      list.push({ id: "free-ready", label: "Free unlock ready", tone: "emerald" });
+      list.push({ id: "points", label: "No points needed", tone: "neutral" });
+    } else if (ttfStatus?.eligible && !isReady) {
+      list.push({
+        id: "countdown",
+        label: `Unlock in ${formatted || "--:--:--"}`,
+        tone: "neutral",
+      });
+      list.push({
+        id: "member",
+        label: isSubscriber ? "Member timers active" : "Membership can shorten wait",
+        tone: isSubscriber ? "emerald" : "neutral",
+      });
+    } else {
+      list.push({
+        id: "price",
+        label: effectivePrice === 0 ? "Free today" : `${effectivePrice} points`,
+        tone: effectivePrice === 0 ? "emerald" : "neutral",
+      });
+      if (dailyFreeLabel) {
+        list.push({ id: "daily-free", label: dailyFreeLabel, tone: "emerald" });
+      } else if (discountLabel) {
+        list.push({ id: "discount", label: discountLabel, tone: "neutral" });
+      }
+
+      if (effectivePrice > 0) {
+        list.push({
+          id: "wallet",
+          label:
+            walletBalance >= effectivePrice
+              ? `Wallet covers it (${walletBalance} pts)`
+              : `Short ${shortfallValue} points`,
+          tone: walletBalance >= effectivePrice ? "emerald" : "neutral",
+        });
+      }
+    }
+
+    if (episode?.previewFreePages) {
+      list.push({
+        id: "preview",
+        label: `${episode.previewFreePages} preview page${episode.previewFreePages === 1 ? "" : "s"}`,
+        tone: "neutral",
+      });
+    }
+
+    return list.slice(0, 4);
+  }, [
+    dailyFreeLabel,
+    discountLabel,
+    effectivePrice,
+    episode?.id,
+    episode?.previewFreePages,
+    formatted,
+    isReady,
+    isSubscriber,
+    progress?.lastEpisodeId,
+    progress?.percent,
+    shortfallValue,
+    ttfStatus?.eligible,
+    unlocked,
+    walletBalance,
+  ]);
   const compareItems =
     modalState?.type === "SHORTFALL" && recommendedUnlockOffer?.episodes > 1
       ? [
@@ -177,6 +260,10 @@ function EpisodeRow({
           {
             label: formatPackLabel(recommendedUnlockOffer.episodes),
             value: formatPointsLabel(recommendedUnlockOffer.pricePts),
+          },
+          {
+            label: "Membership",
+            value: isSubscriber ? "Already active" : "Daily free + lower unlock cost",
           },
         ]
       : [];
@@ -387,11 +474,12 @@ function EpisodeRow({
       </div>
       <div className="episode-info">
         <div className="episode-title">
-          <strong>
+          <strong className="hidden">
             {episode?.title && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title)
               ? `Ep ${episode?.number} — ${episode.title}`
               : `Episode ${episode?.number}`}
           </strong>
+          <strong>{episodeDisplayTitle}</strong>
           {unlocked ? <Pill>Unlocked</Pill> : null}
           {ttfStatus?.eligible && isReady ? <Pill>Free to Read</Pill> : null}
           {progress?.lastEpisodeId === episode?.id ? <Pill>Last read</Pill> : null}
@@ -399,9 +487,25 @@ function EpisodeRow({
         <div className="episode-subtitle">
           <span>{formatDate(episode?.releasedAt)}</span>
           {episode?.previewFreePages ? (
-            <span>Preview {episode.previewFreePages} pages free</span>
+            <span>Free preview: {episode.previewFreePages} pages</span>
           ) : null}
         </div>
+        {episodeSignals.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {episodeSignals.map((signal) => (
+              <span
+                key={signal.id}
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+                  signal.tone === "emerald"
+                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+                    : "border-white/10 bg-white/[0.04] text-neutral-300"
+                }`}
+              >
+                {signal.label}
+              </span>
+            ))}
+          </div>
+        ) : null}
         {progress?.lastEpisodeId === episode?.id ? (
           <div className="mt-2 h-1 w-full rounded-full bg-neutral-900">
             <div
@@ -425,12 +529,14 @@ function EpisodeRow({
         offerBadge={modalState?.type === "SHORTFALL" ? recommendedTopup?.tag : offerBadge}
         offerSavingsText={modalState?.type === "SHORTFALL" ? null : savingsText}
         compareItems={compareItems}
+        compareTitle="Single, pack, or membership"
         tips={[...unlockTips, ...subscribeUpsellTips]}
+        tipsTitle="What changes after each choice"
         actions={
           modalState?.type === "SHORTFALL"
             ? [
                 {
-                    label: "Buy points",
+                  label: STOREFRONT_TERMS.viewPointPacks,
                   onClick: () => {
                     router.push(
                       buildPathWithAttribution(
@@ -454,7 +560,7 @@ function EpisodeRow({
                   variant: "secondary",
                 },
                 {
-                    label: "See member perks",
+                    label: STOREFRONT_TERMS.compareMembership,
                   onClick: () => {
                     trackEvent("click_subscribe_from_shortfall", {
                       seriesId,
@@ -475,8 +581,8 @@ function EpisodeRow({
                 },
                 {
                   label: recommendedTopup?.name
-                    ? `Quick top up (${recommendedTopup.name})`
-                    : "Quick top up",
+                    ? `Top up ${recommendedTopup.name}`
+                    : "Top up recommended pack",
                   onClick: async () => {
                     const packageId =
                       recommendedTopup?.id?.replace("points_pack_", "") ||
@@ -542,7 +648,7 @@ function EpisodeRow({
                     });
                     setModalState({
                       type: "ERROR",
-                      title: "Top up failed",
+                      title: "Couldn't top up",
                       description: "We couldn't complete the top-up and unlock flow.",
                     });
                   },

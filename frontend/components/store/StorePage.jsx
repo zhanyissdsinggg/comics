@@ -17,14 +17,47 @@ import { getCookie } from "../../lib/cookies";
 import { apiGet } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
+import { formatUSNumber } from "../../lib/localization";
 import {
   buildPathWithAttribution,
   mergePaymentAttribution,
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
 import { getPlanCatalog } from "../../lib/subscriptions";
+import { persistCommerceSuccess } from "../../lib/commerceSuccess";
+import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 
 const PromoBanner = dynamic(() => import("./PromoBanner"));
+
+function openAuthPrompt() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(new CustomEvent("auth:open"));
+}
+
+function getReturnLabel(returnTo, sourceEntry) {
+  if (/^\/(read|series)\//.test(returnTo) || sourceEntry.includes("READER")) {
+    return "Back to reading";
+  }
+  if (returnTo.startsWith("/library")) {
+    return "Back to library";
+  }
+  if (returnTo.startsWith("/account")) {
+    return "Back to account";
+  }
+  if (returnTo.startsWith("/search")) {
+    return "Back to search";
+  }
+  if (returnTo.startsWith("/rankings")) {
+    return "Back to rankings";
+  }
+  if (returnTo.startsWith("/subscribe")) {
+    return "Back to membership";
+  }
+  return "Back to browse";
+}
 
 export default function StorePage() {
   const router = useRouter();
@@ -55,10 +88,7 @@ export default function StorePage() {
   const sourceEpisodeId = routeAttribution?.sourceEpisodeId || "";
   const sourcePath = routeAttribution?.sourcePath || returnTo || "/store";
   const isSubscriber = Boolean(subscription?.active);
-  const returnLabel =
-    /^\/(read|series)\//.test(returnTo) || sourceEntry.includes("READER")
-      ? "Back to reading"
-      : "Go back";
+  const returnLabel = getReturnLabel(returnTo, sourceEntry);
 
   useEffect(() => {
     trackEvent("store_view", {
@@ -198,8 +228,40 @@ export default function StorePage() {
 
   const purchaseActionsEnabled = billingAvailability?.purchaseActionsEnabled === true;
   const purchasePreviewOnly = billingAvailability?.purchaseActionsEnabled === false;
+  const packageDecisionSummary = useMemo(() => {
+    if (!orderedPackages.length) {
+      return null;
+    }
+
+    return orderedPackages.reduce(
+      (summary, pkg) => {
+        const totalPts = Number(pkg.paidPts || 0) + Number(pkg.bonusPts || 0);
+        const price = Number(pkg.price || 0);
+        const bonusPct = pkg.paidPts ? Math.round((Number(pkg.bonusPts || 0) / Number(pkg.paidPts || 1)) * 100) : 0;
+
+        if (!summary.cheapest || (price > 0 && price < Number(summary.cheapest.price || 0))) {
+          summary.cheapest = pkg;
+        }
+        if (!summary.largest || totalPts > summary.largest.totalPts) {
+          summary.largest = { ...pkg, totalPts };
+        }
+        if (!summary.highestBonus || Number(pkg.bonusPts || 0) > Number(summary.highestBonus.bonusPts || 0)) {
+          summary.highestBonus = { ...pkg, bonusPct };
+        }
+
+        return summary;
+      },
+      { cheapest: null, largest: null, highestBonus: null },
+    );
+  }, [orderedPackages]);
 
   const handleBuy = async (packageId) => {
+    if (!isSignedIn) {
+      setErrorMessage("Sign in to buy points and keep your wallet synced across devices.");
+      openAuthPrompt();
+      return;
+    }
+
     if (!purchaseActionsEnabled) {
       setErrorMessage(
         "Checkout is temporarily unavailable while secure billing is being configured. You can still review packages here.",
@@ -239,13 +301,24 @@ export default function StorePage() {
         entry: sourceEntry,
         orderId: response.data?.order?.orderId,
       });
+      persistCommerceSuccess({
+        kind: "topup",
+        packageId,
+        packageLabel: selectedPackage?.name,
+        paidPts: selectedPackage?.paidPts,
+        bonusPts: selectedPackage?.bonusPts,
+        orderId: response.data?.order?.orderId,
+        entryPoint: sourceEntry || undefined,
+        targetPath: returnTo,
+      });
       router.replace(returnTo);
       setErrorMessage("");
       return;
     }
 
     if (response.status === 401) {
-      setErrorMessage("Please sign in to purchase POINTS.");
+      setErrorMessage("Sign in to buy points and keep your wallet synced across devices.");
+      openAuthPrompt();
       return;
     }
 
@@ -258,10 +331,16 @@ export default function StorePage() {
       return;
     }
 
+    if (!isSignedIn) {
+      setCouponMessage("Sign in to redeem coupons and keep them synced to your wallet.");
+      openAuthPrompt();
+      return;
+    }
+
     const response = await claimCoupon(code);
     if (response.ok) {
       trackEvent("coupon_claim", { code });
-      setCouponMessage("Coupon applied.");
+      setCouponMessage("Coupon applied to your wallet.");
       setCouponCode("");
       return;
     }
@@ -290,7 +369,7 @@ export default function StorePage() {
         value: coupons.length.toLocaleString(),
         hint: isSignedIn
           ? "Stored to the signed-in account wallet."
-          : "Sign in to keep redeemed coupons synced.",
+          : "Sign in before redeeming wallet codes.",
       },
       {
         label: "Promos",
@@ -344,7 +423,7 @@ export default function StorePage() {
                   }
                   className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
                 >
-                  View plans
+                  {STOREFRONT_TERMS.compareMembership}
                 </button>
               ) : null}
               <button
@@ -370,7 +449,7 @@ export default function StorePage() {
               <div className="space-y-1">
                 <p className="text-sm font-semibold">Checkout preview only</p>
                 <p className="text-sm text-amber-100/85">
-                  Package pricing is live, but purchase actions stay disabled until secure billing is fully enabled on the backend.
+                  Package pricing is live, but purchase actions stay disabled until secure billing is fully enabled.
                 </p>
               </div>
               <button
@@ -378,7 +457,7 @@ export default function StorePage() {
                 onClick={() => router.push("/support")}
                 className={secondaryButtonClass}
               >
-                Contact support
+                Open support
               </button>
             </div>
           </SurfacePanel>
@@ -396,6 +475,29 @@ export default function StorePage() {
 
         <div className="grid gap-6 xl:grid-cols-[0.84fr_1.16fr]">
           <div className="space-y-6">
+            {!isSignedIn ? (
+              <SurfacePanel className="space-y-4">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                    Account gate
+                  </p>
+                  <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
+                    Sign in before you top up or redeem wallet codes.
+                  </h2>
+                  <p className="text-sm leading-6 text-neutral-400">
+                    Purchases, coupons, and balance changes should land on a real account, not a disposable session.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={openAuthPrompt}
+                  className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                >
+                  Sign in
+                </button>
+              </SurfacePanel>
+            ) : null}
+
             <SurfacePanel className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
                 Tax and region
@@ -434,7 +536,7 @@ export default function StorePage() {
                   }
                   className={secondaryButtonClass}
                 >
-                  View plans
+                  {STOREFRONT_TERMS.compareMembership}
                 </button>
               </SurfacePanel>
             ) : null}
@@ -455,7 +557,7 @@ export default function StorePage() {
                 <input
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value)}
-                  placeholder="Enter coupon code"
+                  placeholder="Enter wallet or coupon code"
                   className={fieldClass}
                 />
                 <button
@@ -463,7 +565,7 @@ export default function StorePage() {
                   onClick={handleClaim}
                   className={secondaryButtonClass}
                 >
-                  Redeem
+                  {isSignedIn ? "Redeem" : "Sign in to redeem"}
                 </button>
               </div>
               {couponMessage ? <p className="text-xs text-neutral-400">{couponMessage}</p> : null}
@@ -483,13 +585,13 @@ export default function StorePage() {
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Point packages
+                  Point packs
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  Purchase packs with the featured offer surfaced first
+                  Pick a pack with the featured offer already surfaced.
                 </h2>
               </div>
-              <p className="text-xs text-neutral-500">{orderedPackages.length} packages ready</p>
+              <p className="text-xs text-neutral-500">{orderedPackages.length} packages available</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {orderedPackages.map((pkg) => (
@@ -499,13 +601,162 @@ export default function StorePage() {
                     highlighted={pkg.id === focusId}
                     onSelect={handleBuy}
                     disabled={!purchaseActionsEnabled}
-                    ctaLabel={purchaseActionsEnabled ? "Buy points" : "Checkout coming soon"}
+                    ctaLabel={
+                      !purchaseActionsEnabled
+                        ? "Checkout unavailable"
+                        : isSignedIn
+                          ? "Buy points"
+                          : "Sign in to buy"
+                    }
                   />
                 </div>
               ))}
             </div>
           </SurfacePanel>
         </div>
+
+        <SurfacePanel className="space-y-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                Buying guide
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                Choose points, membership, and support paths with less guesswork.
+              </h2>
+            </div>
+            <p className="text-xs text-neutral-500">
+              The storefront should answer value, delivery, and support questions before checkout starts.
+            </p>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-3">
+            <div className="rounded-[24px] border border-white/10 bg-black/10 p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+                Points packs
+              </p>
+              <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+                Best for selective spending
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-neutral-300">
+                Buy points when you want one-off unlocks, promo flexibility, or a wallet that does not auto-renew.
+              </p>
+              <div className="mt-4 space-y-2 text-sm text-neutral-400">
+                <p>
+                  Entry pack:{" "}
+                  <span className="text-white">
+                    {packageDecisionSummary?.cheapest?.name || "Starter"}
+                    {packageDecisionSummary?.cheapest?.priceLabel
+                      ? ` · ${packageDecisionSummary.cheapest.priceLabel}`
+                      : ""}
+                  </span>
+                </p>
+                <p>
+                  Largest wallet load:{" "}
+                  <span className="text-white">
+                    {packageDecisionSummary?.largest
+                      ? `${packageDecisionSummary.largest.name} · ${formatUSNumber(packageDecisionSummary.largest.totalPts)} pts`
+                      : "Catalog unavailable"}
+                  </span>
+                </p>
+                <p>
+                  Highest bonus:{" "}
+                  <span className="text-white">
+                    {packageDecisionSummary?.highestBonus
+                      ? `${packageDecisionSummary.highestBonus.name} · ${packageDecisionSummary.highestBonus.bonusPct}% extra`
+                      : "Catalog unavailable"}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-white/10 bg-black/10 p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+                Membership
+              </p>
+              <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+                Best for repeat readers
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-neutral-300">
+                Membership works better when you read every week, want discounts on unlocks, and care about predictable monthly perks.
+              </p>
+              <div className="mt-4 space-y-2 text-sm text-neutral-400">
+                <p>
+                  Unlock savings:{" "}
+                  <span className="text-white">
+                    Up to {subscriptionStats?.maxDiscount ?? 0}% off premium unlocks
+                  </span>
+                </p>
+                <p>
+                  Daily access:{" "}
+                  <span className="text-white">
+                    Up to {subscriptionStats?.maxDailyFree ?? 0} free episodes each day
+                  </span>
+                </p>
+                <p>
+                  Wait reduction:{" "}
+                  <span className="text-white">
+                    As low as {subscriptionStats ? Math.round(subscriptionStats.bestTtf * 100) : 100}% of the standard timer
+                  </span>
+                </p>
+              </div>
+              {subscriptionStats ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      buildPathWithAttribution("/subscribe", {
+                        promotionId: promotionId || undefined,
+                        campaignId: campaignId || undefined,
+                        entryPoint: "STORE_VALUE_COMPARE",
+                        sourcePath,
+                        sourceSeriesId: sourceSeriesId || undefined,
+                        sourceEpisodeId: sourceEpisodeId || undefined,
+                        returnTo,
+                      }),
+                    )
+                  }
+                  className="mt-5 rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                >
+                  {STOREFRONT_TERMS.compareMembership}
+                </button>
+              ) : null}
+            </div>
+
+            <div className="rounded-[24px] border border-white/10 bg-black/10 p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+                Checkout safeguards
+              </p>
+              <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+                Receipts and help stay visible
+              </h3>
+              <ul className="mt-4 space-y-3 text-sm leading-6 text-neutral-300">
+                <li>Points are attached to the signed-in wallet so purchases stay synced across devices.</li>
+                <li>Region pricing and tax notes stay visible before checkout instead of appearing after the fact.</li>
+                <li>Orders keeps the receipt trail, while Support handles billing follow-up and manual escalation.</li>
+                <li>
+                  Self-serve refunds depend on billing availability and order state, so this page points users to the right path early.
+                </li>
+              </ul>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/orders")}
+                  className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                >
+                  View orders
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/support")}
+                  className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                >
+                  Billing support
+                </button>
+              </div>
+            </div>
+          </div>
+        </SurfacePanel>
       </main>
     </div>
   );

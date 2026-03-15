@@ -9,6 +9,7 @@ const footerSections = [
     links: [
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
+      { label: "Creators", href: "/creators" },
       { label: "Library", href: "/library" },
     ],
   },
@@ -29,7 +30,7 @@ const footerSections = [
   },
 ];
 
-const footerHighlights = ["Fast pages", "Clean storefront", "Age-gated catalog"];
+const footerHighlights = ["Fast pages", "Clean storefront", "Creator discovery", "Age-gated catalog"];
 
 const socialLinks = [
   { label: "GitHub", href: siteConfig.githubUrl },

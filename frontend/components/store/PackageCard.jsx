@@ -36,7 +36,7 @@ export default function PackageCard({
         <h2 className="text-lg font-semibold transition-colors group-hover:text-emerald-400">
           {pkg.name}
         </h2>
-        {highlighted ? <Pill>Recommended</Pill> : null}
+        {highlighted ? <Pill>Best value</Pill> : null}
       </div>
 
       <p className="mt-2 text-sm text-neutral-400">
@@ -64,7 +64,7 @@ export default function PackageCard({
               />
             </svg>
             <p className="text-xs text-emerald-300">
-              Save {bonusPct}% and use your points right after purchase
+              Get {bonusPct}% extra points in this wallet top-up
             </p>
           </div>
         </div>
@@ -78,9 +78,10 @@ export default function PackageCard({
       ) : null}
 
       <div className="mt-3 space-y-1 text-[10px] text-neutral-500">
-        <BenefitRow>Permanent access</BenefitRow>
-        <BenefitRow>Support creators</BenefitRow>
-        {bonusPct > 0 ? <BenefitRow>Best value deal</BenefitRow> : null}
+        <BenefitRow>Wallet balance stays ready for future unlocks</BenefitRow>
+        <BenefitRow>Use points on premium episodes</BenefitRow>
+        <BenefitRow>Supports creators directly</BenefitRow>
+        {bonusPct > 0 ? <BenefitRow>Extra bonus points included</BenefitRow> : null}
       </div>
 
       <button

@@ -39,6 +39,15 @@ export const EmptyState = memo(function EmptyState({
   className = ""
 }) {
   const Icon = iconMap[icon] || Inbox;
+  const resolvedAction =
+    typeof action === "function"
+      ? { onClick: action, label: actionText }
+      : action && typeof action === "object"
+        ? {
+            onClick: typeof action.onClick === "function" ? action.onClick : null,
+            label: action.label || actionText,
+          }
+        : null;
 
   return (
     <div className={`flex flex-col items-center justify-center py-12 px-4 ${className}`}>
@@ -58,13 +67,13 @@ export const EmptyState = memo(function EmptyState({
       )}
 
       {/* 老王注释：操作按钮 */}
-      {action && actionText && (
+      {resolvedAction?.onClick && resolvedAction?.label && (
         <button
           type="button"
-          onClick={action}
+          onClick={resolvedAction.onClick}
           className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-emerald-600 active:scale-95"
         >
-          {actionText}
+          {resolvedAction.label}
         </button>
       )}
     </div>

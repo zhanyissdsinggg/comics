@@ -1,51 +1,20 @@
 import SeriesPage from "../../../components/series/SeriesPage";
+import StructuredDataScript from "../../../components/common/StructuredDataScript";
 import { CouponProvider } from "../../../store/useCouponStore";
 import { EntitlementProvider } from "../../../store/useEntitlementStore";
 import { RewardsProvider } from "../../../store/useRewardsStore";
 import { createPageMetadata } from "../../../lib/seo";
 import { siteConfig } from "../../../lib/siteConfig";
+import { buildSeriesStructuredData } from "../../../lib/structuredData";
+import { loadSeriesSeoPayload } from "../../../lib/storefrontSeo";
 
 export const revalidate = 300;
-
-function normalizeBaseUrl(value) {
-  return String(value || "").trim().replace(/\/$/, "");
-}
-
-async function loadSeriesForMetadata(seriesId) {
-  if (!seriesId) {
-    return null;
-  }
-
-  const apiBaseUrl = normalizeBaseUrl(
-    process.env.API_BASE_URL ||
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      "http://localhost:4000"
-  );
-
-  try {
-    const response = await fetch(`${apiBaseUrl}/api/series/${encodeURIComponent(seriesId)}`, {
-      next: { revalidate },
-      headers: {
-        "x-gush-seo": "series-metadata",
-      },
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const payload = await response.json();
-    return payload?.series || null;
-  } catch {
-    return null;
-  }
-}
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const seriesId = resolvedParams?.id;
-  const series = await loadSeriesForMetadata(seriesId);
+  const payload = await loadSeriesSeoPayload(seriesId);
+  const series = payload?.series || null;
 
   if (!series) {
     return createPageMetadata({
@@ -63,19 +32,26 @@ export async function generateMetadata({ params }) {
     title: series.title,
     description,
     path: `/series/${seriesId}`,
+    image: series.coverUrl || null,
+    openGraphType: String(series.type || "").toLowerCase() === "novel" ? "book" : "website",
   });
 }
 
 export default async function SeriesRoutePage({ params }) {
   const resolvedParams = await Promise.resolve(params);
+  const payload = await loadSeriesSeoPayload(resolvedParams.id);
+  const structuredData = payload ? buildSeriesStructuredData(payload) : [];
 
   return (
-    <RewardsProvider>
-      <EntitlementProvider>
-        <CouponProvider>
-          <SeriesPage seriesId={resolvedParams.id} />
-        </CouponProvider>
-      </EntitlementProvider>
-    </RewardsProvider>
+    <>
+      <StructuredDataScript id={`series-jsonld-${resolvedParams.id}`} data={structuredData} />
+      <RewardsProvider>
+        <EntitlementProvider>
+          <CouponProvider>
+            <SeriesPage seriesId={resolvedParams.id} />
+          </CouponProvider>
+        </EntitlementProvider>
+      </RewardsProvider>
+    </>
   );
 }

@@ -1,10 +1,12 @@
 import { absoluteUrl } from "../lib/siteConfig";
+import { normalizeCreatorName, slugifyCreatorName } from "../lib/creators";
 
 const STATIC_SITEMAP_PATHS = [
   "/",
   "/about",
   "/comics",
   "/novels",
+  "/creators",
   "/adult",
   "/library",
   "/store",
@@ -26,6 +28,7 @@ const ROUTE_PRIORITIES = {
   "/rankings": 0.9,
   "/comics": 0.9,
   "/novels": 0.9,
+  "/creators": 0.85,
   "/store": 0.8,
   "/search": 0.8,
   "/support": 0.8,
@@ -43,6 +46,7 @@ const ROUTE_CHANGE_FREQUENCIES = {
   "/library": "daily",
   "/search": "daily",
   "/rankings": "daily",
+  "/creators": "weekly",
   "/notifications": "daily",
   "/store": "weekly",
   "/subscribe": "weekly",
@@ -54,13 +58,57 @@ const ROUTE_CHANGE_FREQUENCIES = {
   "/terms-of-service": "yearly",
 };
 
-export default function sitemap() {
-  const currentDate = new Date().toISOString();
+const CREATOR_SITEMAP_REVALIDATE_SECONDS = 60 * 60;
 
-  return STATIC_SITEMAP_PATHS.map((path) => ({
+function buildSitemapEntry(path, currentDate) {
+  return {
     url: absoluteUrl(path),
     lastModified: currentDate,
-    changeFrequency: ROUTE_CHANGE_FREQUENCIES[path] || "monthly",
-    priority: ROUTE_PRIORITIES[path] || 0.7,
-  }));
+    changeFrequency: path.startsWith("/creators/")
+      ? "weekly"
+      : ROUTE_CHANGE_FREQUENCIES[path] || "monthly",
+    priority: path.startsWith("/creators/") ? 0.7 : ROUTE_PRIORITIES[path] || 0.7,
+  };
+}
+
+async function loadCreatorPaths() {
+  try {
+    const response = await fetch(absoluteUrl("/api/series?adult=0"), {
+      next: { revalidate: CREATOR_SITEMAP_REVALIDATE_SECONDS },
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = await response.json();
+    const seriesList = Array.isArray(payload?.series)
+      ? payload.series
+      : Array.isArray(payload?.data?.series)
+        ? payload.data.series
+        : [];
+
+    const creatorPaths = new Set();
+
+    seriesList.forEach((series) => {
+      const author = normalizeCreatorName(series?.author);
+      if (!author) {
+        return;
+      }
+
+      creatorPaths.add(`/creators/${encodeURIComponent(slugifyCreatorName(author))}`);
+    });
+
+    return Array.from(creatorPaths);
+  } catch {
+    return [];
+  }
+}
+
+export default async function sitemap() {
+  const currentDate = new Date().toISOString();
+  const creatorPaths = await loadCreatorPaths();
+  const allPaths = [...new Set([...STATIC_SITEMAP_PATHS, ...creatorPaths])];
+
+  return allPaths.map((path) => buildSitemapEntry(path, currentDate));
 }

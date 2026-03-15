@@ -12,6 +12,8 @@ import { ensureArray } from "../../lib/validators";
 import { trackEvent } from "../../lib/trackEvent";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
+import { getReadingCadenceLabel, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
 
 function normalizeBannerUrl(url) {
   if (!url) return url;
@@ -57,6 +59,16 @@ export default function HeroCarousel({ items }) {
   const bannerUrl = normalizeBannerUrl(rawBannerUrl);
   const coverUrl = normalizeBannerUrl(active?.coverUrl);
   const gradient = TONE_GRADIENTS[active?.coverTone] || TONE_GRADIENTS.default;
+  const campaign = getStorefrontCampaign(active);
+  const heroSignals = [
+    active?.hasFreeEpisodes
+      ? `${STOREFRONT_TERMS.freeStart}${
+          active?.freeEpisodeCount ? ` | ${active.freeEpisodeCount} free episodes` : ""
+        }`
+      : null,
+    active?.status ? getReadingCadenceLabel(active.status) : null,
+    campaign?.eyebrow && !active?.hasFreeEpisodes ? campaign.eyebrow : null,
+  ].filter(Boolean);
 
   const handlePrev = useCallback(() => {
     setIndex((prev) => (prev - 1 + safeItems.length) % safeItems.length);
@@ -187,13 +199,36 @@ export default function HeroCarousel({ items }) {
                 </p>
               ) : null}
 
+              {campaign?.heroNote ? (
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/85">
+                  {campaign.heroNote}
+                </p>
+              ) : null}
+
+              {heroSignals.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {heroSignals.map((signal) => (
+                    <span
+                      key={signal}
+                      className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-100 backdrop-blur-sm"
+                    >
+                      {signal}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+
               <div className="flex items-center gap-3 pt-1">
                 <button
                   type="button"
                   onClick={handleReadNow}
                   className="rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-400 hover:shadow-emerald-400/40 active:scale-95"
                 >
-                  Read Now
+                  {active?.hasFreeEpisodes
+                    ? "Read free start"
+                    : campaign?.id === "binge-ready"
+                      ? "Open binge pick"
+                      : "Open series"}
                 </button>
                 <button
                   type="button"

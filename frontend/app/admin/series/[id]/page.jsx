@@ -31,10 +31,15 @@ const PRICING_FIELDS = new Set(['episodePrice']);
 const TTF_FIELDS = new Set(['ttfEnabled', 'ttfIntervalHours']);
 const SECTION_CONFIGS = [
   { id: 'basic', title: '基础信息', fields: ['title', 'type', 'status', 'description', 'genres', 'badge'] },
+  { id: 'creator', title: '作者与前台信号', fields: ['author'] },
   { id: 'distribution', title: '发布与限制', fields: ['isPublished', 'adult'] },
   { id: 'commerce', title: '商业设置', fields: ['episodePrice', 'ttfEnabled', 'ttfIntervalHours'] },
   { id: 'cover', title: '封面资源', fields: ['coverUrl', 'coverTone'] },
 ];
+
+function getSectionConfig(sectionId) {
+  return SECTION_CONFIGS.find((section) => section.id === sectionId) || SECTION_CONFIGS[0];
+}
 
 function createEmptyForm() {
   return {
@@ -44,6 +49,7 @@ function createEmptyForm() {
     adult: false,
     isPublished: true,
     description: '',
+    author: '',
     genres: '',
     coverUrl: '',
     coverTone: '',
@@ -62,6 +68,7 @@ function buildFormState(series) {
     adult: Boolean(series?.adult),
     isPublished: series?.isPublished !== undefined ? Boolean(series.isPublished) : true,
     description: series?.description || '',
+    author: series?.author || '',
     genres: Array.isArray(series?.genres) ? series.genres.join(', ') : '',
     coverUrl: series?.coverUrl || '',
     coverTone: series?.coverTone || '',
@@ -85,6 +92,7 @@ function buildSeriesPayload(formData, fields = null) {
   if (shouldInclude('adult')) payload.adult = Boolean(formData.adult);
   if (shouldInclude('isPublished')) payload.isPublished = Boolean(formData.isPublished);
   if (shouldInclude('description')) payload.description = formData.description.trim();
+  if (shouldInclude('author')) payload.author = formData.author.trim();
   if (shouldInclude('genres')) payload.genres = String(formData.genres || '').split(',').map((genre) => genre.trim()).filter(Boolean);
   if (shouldInclude('coverUrl')) payload.coverUrl = formData.coverUrl.trim();
   if (shouldInclude('coverTone')) payload.coverTone = formData.coverTone.trim();
@@ -138,6 +146,15 @@ function formatDateTime(value) {
     minute: '2-digit',
   }).format(date);
 }
+
+function formatCompactNumber(value) {
+  const safeValue = Number(value || 0);
+  if (!Number.isFinite(safeValue)) return '0';
+  return new Intl.NumberFormat('zh-CN', {
+    notation: safeValue >= 10000 ? 'compact' : 'standard',
+    maximumFractionDigits: safeValue >= 10000 ? 1 : 0,
+  }).format(safeValue);
+}
 function isNonNegativeIntegerString(value, { allowEmpty = false } = {}) {
   const normalized = String(value ?? '').trim();
   if (!normalized) return allowEmpty;
@@ -150,6 +167,9 @@ function validateSeriesDraft(formData, fields = null) {
 
   if (shouldValidate('title') && !formData.title.trim()) {
     return '标题不能为空。';
+  }
+  if (shouldValidate('author') && formData.author.trim().length > 120) {
+    return '作者 / 工作室名称请控制在 120 个字符以内。';
   }
   if (shouldValidate('episodePrice') && !isNonNegativeIntegerString(formData.episodePrice, { allowEmpty: true })) {
     return '章节价格必须是整数金币。';
@@ -410,6 +430,7 @@ export default function AdminSeriesDetailPage() {
   const summaryCards = [
     { label: '章节数量', value: String(series.episodeCount || 0), helper: series.latestEpisodeId ? `最新章节 ${series.latestEpisodeId}` : '还没有章节' },
     { label: '发布状态', value: formData.isPublished ? '已发布' : '草稿', helper: formData.adult ? '18+ 内容' : '全年龄内容' },
+    { label: '作者信息', value: formData.author || '未填写', helper: `关注 ${formatCompactNumber(series.followers || 0)} · 浏览 ${formatCompactNumber(series.views || 0)}` },
     { label: '默认价格', value: `${formData.episodePrice || '0'} 金币`, helper: formData.ttfEnabled ? `免费券每 ${formData.ttfIntervalHours} 小时恢复` : '未开启免费券' },
     { label: '封面资源', value: formData.coverUrl ? '已配置' : '待补充', helper: formData.coverTone || '未设置色调' },
   ];
@@ -514,7 +535,7 @@ export default function AdminSeriesDetailPage() {
 
         <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {summaryCards.map((card) => (
             <article
               key={card.label}
@@ -535,7 +556,7 @@ export default function AdminSeriesDetailPage() {
               dirty={dirtyBySection.basic}
               isEditing={isEditing}
               isSaving={saveMutation.isPending && savingSectionId === 'basic'}
-              onSave={() => handleSaveSection(SECTION_CONFIGS[0])}
+              onSave={() => handleSaveSection(getSectionConfig('basic'))}
             >
               <div className="grid gap-5 md:grid-cols-2">
                 <FormField label="作品标题">
@@ -615,12 +636,59 @@ export default function AdminSeriesDetailPage() {
             </SectionCard>
 
             <SectionCard
+              id="creator"
+              title="作者与前台信号"
+              dirty={dirtyBySection.creator}
+              isEditing={isEditing}
+              isSaving={saveMutation.isPending && savingSectionId === 'creator'}
+              onSave={() => handleSaveSection(getSectionConfig('creator'))}
+            >
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr),minmax(0,0.9fr)]">
+                <div className="space-y-5">
+                  <FormField
+                    label="作者 / 工作室"
+                    helperText="前台作品页、信任模块和 creator 聚合页都会使用这个名称。尽量保持命名稳定，避免同一作者出现多个写法；如果保存后刷新仍为空，说明当前数据库还没开作者字段。"
+                  >
+                    <input
+                      type="text"
+                      value={formData.author}
+                      onChange={handleFieldChange('author')}
+                      disabled={!isEditing}
+                      className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    />
+                  </FormField>
+
+                  <div className="rounded-[28px] border border-cyan-500/15 bg-cyan-500/[0.06] px-5 py-5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">前台用途</p>
+                    <p className="mt-3 text-sm leading-7 text-neutral-300">
+                      这里维护的作者名会直接进入前台作者卡和 creator 页面，是美国漫画站里非常关键的发现入口，不建议随意改名。
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                  <div className="rounded-[28px] border border-neutral-800 bg-neutral-950/70 p-5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">当前关注</p>
+                    <p className="mt-4 text-2xl font-semibold text-white">{formatCompactNumber(series.followers || 0)}</p>
+                    <p className="mt-2 text-sm leading-7 text-neutral-400">来自用户关注 / 收藏关系，前台会把它作为读者证明信号。</p>
+                  </div>
+
+                  <div className="rounded-[28px] border border-neutral-800 bg-neutral-950/70 p-5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">累计浏览</p>
+                    <p className="mt-4 text-2xl font-semibold text-white">{formatCompactNumber(series.views || 0)}</p>
+                    <p className="mt-2 text-sm leading-7 text-neutral-400">来自现有浏览统计，用于前台 trust 文案和策展排序参考。</p>
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard
               id="distribution"
               title="发布与限制"
               dirty={dirtyBySection.distribution}
               isEditing={isEditing}
               isSaving={saveMutation.isPending && savingSectionId === 'distribution'}
-              onSave={() => handleSaveSection(SECTION_CONFIGS[1])}
+              onSave={() => handleSaveSection(getSectionConfig('distribution'))}
             >
               <div className="grid gap-4 lg:grid-cols-2">
                 <div className="rounded-[28px] border border-neutral-800 bg-neutral-950/70 p-5">
@@ -669,7 +737,7 @@ export default function AdminSeriesDetailPage() {
               dirty={dirtyBySection.commerce}
               isEditing={isEditing}
               isSaving={saveMutation.isPending && savingSectionId === 'commerce'}
-              onSave={() => handleSaveSection(SECTION_CONFIGS[2])}
+              onSave={() => handleSaveSection(getSectionConfig('commerce'))}
             >
               <div className="grid gap-5 md:grid-cols-2">
                 <FormField label="默认章节价格" helperText="单位为金币，0 表示免费章节。">
@@ -722,7 +790,7 @@ export default function AdminSeriesDetailPage() {
               dirty={dirtyBySection.cover}
               isEditing={isEditing}
               isSaving={saveMutation.isPending && savingSectionId === 'cover'}
-              onSave={() => handleSaveSection(SECTION_CONFIGS[3])}
+              onSave={() => handleSaveSection(getSectionConfig('cover'))}
             >
               <div className="grid gap-6 lg:grid-cols-[280px,minmax(0,1fr)]">
                 <div className="overflow-hidden rounded-[28px] border border-neutral-800 bg-neutral-950">
@@ -849,6 +917,9 @@ export default function AdminSeriesDetailPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">作品信息</p>
               <div className="mt-3">
                 <DetailRow label="作品 ID" value={series.id} />
+                <DetailRow label="作者 / 工作室" value={formData.author || '未填写'} />
+                <DetailRow label="关注人数" value={formatCompactNumber(series.followers || 0)} />
+                <DetailRow label="累计浏览" value={formatCompactNumber(series.views || 0)} />
                 <DetailRow label="最新章节" value={series.latestEpisodeId || '暂无'} />
                 <DetailRow label="创建时间" value={formatDateTime(series.createdAt)} />
                 <DetailRow label="更新时间" value={formatDateTime(series.updatedAt)} />

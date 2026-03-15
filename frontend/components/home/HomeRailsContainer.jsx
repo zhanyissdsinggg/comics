@@ -1,31 +1,41 @@
 /**
- * HomeRailsContainer renders the personalized rails for the home page.
+ * HomeRailsContainer renders personalized discovery rails on the home page.
  */
 
 "use client";
 
-import { useEffect, useRef, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Rail from "./Rail";
 import EmptyState from "../common/EmptyState";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 import { useHomeRecommendations } from "./HomeRecommendations";
 import { useHomeData } from "./HomeDataProvider";
 
-export default function HomeRailsContainer({ activeGenre = "all" }) {
+function getSeriesId(item) {
+  if (item?.seriesId) {
+    return item.seriesId;
+  }
+
+  return typeof item?.id === "string" ? item.id.split("-")[0] : "";
+}
+
+export default function HomeRailsContainer({ activeGenre = "all", onResetGenre = null }) {
   const router = useRouter();
   const { activeRails } = useHomeRecommendations();
   const { seriesList } = useHomeData();
   const recoImpressionRef = useRef(new Set());
 
-  // Build a map for efficient genre filtering.
   const seriesGenresMap = useMemo(() => {
     const map = new Map();
+
     seriesList.forEach((series) => {
-      if (series.genres && Array.isArray(series.genres)) {
+      if (Array.isArray(series.genres)) {
         map.set(series.id, series.genres);
       }
     });
+
     return map;
   }, [seriesList]);
 
@@ -37,16 +47,13 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
     return activeRails
       .map((rail) => {
         const filteredItems = rail.items.filter((item) => {
-          // Item ids can be in the form seriesId-episodeId.
-          const seriesId = item.id.split("-")[0];
-          const genres = seriesGenresMap.get(seriesId);
+          const genres = seriesGenresMap.get(getSeriesId(item));
 
           if (!genres || genres.length === 0) {
             return false;
           }
 
-          // Keep items whose genre matches the active chip.
-          return genres.some((g) => g.toLowerCase() === activeGenre.toLowerCase());
+          return genres.some((genre) => genre.toLowerCase() === activeGenre.toLowerCase());
         });
 
         return {
@@ -55,63 +62,79 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
         };
       })
       .filter((rail) => rail.items.length > 0);
-  }, [activeRails, activeGenre, seriesGenresMap]);
+  }, [activeGenre, activeRails, seriesGenresMap]);
 
-  // Track rail impressions
   useEffect(() => {
     filteredRails.forEach((rail) => {
       rail.items.forEach((item) => {
+        const seriesId = getSeriesId(item);
         const key = `${rail.id}:${item.id}`;
-        if (recoImpressionRef.current.has(key)) {
+
+        if (!seriesId || recoImpressionRef.current.has(key)) {
           return;
         }
+
         recoImpressionRef.current.add(key);
-        trackEvent("reco_impression", { railName: rail.title, seriesId: item.id });
+        trackEvent("reco_impression", { railName: rail.title, seriesId });
       });
     });
   }, [filteredRails]);
 
-  const handleItemClick = useCallback((rail, item) => {
-    trackEvent("reco_click", {
-      railName: rail.title,
-      seriesId: item.id,
-    });
-    router.push(`/series/${item.id}`);
-  }, [router]);
+  const handleItemClick = useCallback(
+    (rail, item) => {
+      const seriesId = getSeriesId(item);
+      if (!seriesId) {
+        return;
+      }
 
-  const getRailReason = useCallback((rail) => {
-    const title = rail.title.toLowerCase();
-    if (title.includes("trending") || title.includes("popular")) {
-      return "Most popular this week";
-    }
-    if (title.includes("new") || title.includes("latest")) {
-      return "Recently added";
-    }
-    if (title.includes("recommended") || title.includes("for you")) {
-      return "Based on your reading history";
-    }
-    if (title.includes("completed") || title.includes("finished")) {
-      return "Binge-worthy completed series";
-    }
-    if (title.includes("free")) {
-      return "Free to read";
-    }
-    return "Recommended for you";
-  }, []);
+      const targetPath = item.resumeEpisodeId
+        ? `/read/${seriesId}/${item.resumeEpisodeId}`
+        : `/series/${seriesId}`;
 
-  // Show a friendly empty state for the active filter.
+      trackEvent("reco_click", {
+        railName: rail.title,
+        railId: rail.id,
+        seriesId,
+      });
+
+      router.push(
+        buildPathWithAttribution(targetPath, {
+          entryPoint: "HOME_RAIL",
+          campaignId: rail.id,
+          sourcePath: "/",
+          sourceSeriesId: seriesId,
+          sourceEpisodeId: item.resumeEpisodeId || undefined,
+          returnTo: targetPath,
+        }),
+      );
+    },
+    [router],
+  );
+
   if (filteredRails.length === 0) {
     return (
       <EmptyState
         icon={activeGenre === "all" ? "inbox" : "search"}
         title={activeGenre === "all" ? "No content available" : `No ${activeGenre} series found`}
-        description={activeGenre === "all"
-          ? "Check back later for new content."
-          : `Try browsing all genres or adjust your filters.`}
-        action={activeGenre !== "all" ? {
-          label: "Show All",
-          onClick: () => router.push("/"),
-        } : undefined}
+        description={
+          activeGenre === "all"
+            ? "Check back later for new content."
+            : "Try browsing all genres or adjust your filters."
+        }
+        action={
+          activeGenre !== "all"
+            ? {
+                label: "Show All",
+                onClick: () => {
+                  if (typeof onResetGenre === "function") {
+                    onResetGenre();
+                    return;
+                  }
+                  router.push("/");
+                },
+              }
+            : undefined
+        }
       />
     );
   }
@@ -121,9 +144,16 @@ export default function HomeRailsContainer({ activeGenre = "all" }) {
       {filteredRails.map((rail) => (
         <Rail
           key={rail.id}
+          eyebrow={rail.eyebrow}
           title={rail.title}
           items={rail.items}
-          reason={getRailReason(rail)}
+          reason={rail.reason}
+          href={rail.href}
+          ctaLabel={rail.ctaLabel}
+          showCreatorShelfLinks
+          creatorEntryPoint="HOME_CREATOR_CHIP"
+          creatorCampaignId={`${rail.id}_creator`}
+          creatorSourcePath="/"
           onItemClick={(item) => handleItemClick(rail, item)}
         />
       ))}

@@ -5,6 +5,9 @@ import React, { useCallback, useMemo, useState } from "react";
 const ShareButton = React.memo(function ShareButton({ url, title, description, className = "" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const buttonClassName = className
+    ? `flex items-center gap-2 ${className}`
+    : "flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700";
 
   const platforms = useMemo(
     () => [
@@ -98,7 +101,7 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
       <button
         type="button"
         onClick={handleNativeShare}
-        className={`flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700 ${className}`}
+        className={buttonClassName}
         aria-label="Share"
       >
         <span>Share</span>

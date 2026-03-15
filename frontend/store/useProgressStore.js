@@ -167,7 +167,7 @@ export function ProgressProvider({ children }) {
   );
 
   const value = useMemo(
-    () => ({ bySeriesId, setProgress, getProgress, loadProgress, loaded }),
+    () => ({ bySeriesId, progressMap: bySeriesId, setProgress, getProgress, loadProgress, loaded }),
     [bySeriesId, getProgress, setProgress, loadProgress, loaded]
   );
 

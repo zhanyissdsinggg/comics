@@ -5,11 +5,15 @@ import { X, LogIn, Sparkles, Gift, BookOpen } from "lucide-react";
 const LoginPrompt = memo(function LoginPrompt({
   isOpen = false,
   onClose,
+  eyebrow = "Member access",
   title = "Sign in to continue",
   message = "Unlock all features and start your reading journey!",
+  returnTo = "/",
+  primaryLabel = "Sign In",
+  secondaryLabel = "Create Account",
   features = [
     { icon: BookOpen, text: "Save your reading progress" },
-    { icon: Gift, text: "Get daily free Points" },
+    { icon: Gift, text: "Claim daily rewards and bonus points" },
     { icon: Sparkles, text: "Personalized recommendations" }
   ],
   showFeatures = true
@@ -35,7 +39,7 @@ const LoginPrompt = memo(function LoginPrompt({
     handleClose();
     setTimeout(() => {
       const event = new CustomEvent("auth:open", {
-        detail: { returnTo: "/" }
+        detail: { returnTo }
       });
       window.dispatchEvent(event);
     }, 300);
@@ -45,7 +49,7 @@ const LoginPrompt = memo(function LoginPrompt({
     handleClose();
     setTimeout(() => {
       const event = new CustomEvent("auth:open", {
-        detail: { returnTo: "/", mode: "register" }
+        detail: { returnTo, mode: "register" }
       });
       window.dispatchEvent(event);
     }, 300);
@@ -87,7 +91,7 @@ const LoginPrompt = memo(function LoginPrompt({
           type="button"
           onClick={handleClose}
           className="absolute right-4 top-4 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full p-2 text-neutral-400 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
-          aria-label="Close"
+          aria-label="Close sign-in prompt"
         >
           <X size={20} />
         </button>
@@ -100,6 +104,9 @@ const LoginPrompt = memo(function LoginPrompt({
           </div>
 
           <div className="mb-6 text-center">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+              {eyebrow}
+            </p>
             <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
             <p className="text-sm text-neutral-400">{message}</p>
           </div>
@@ -129,14 +136,14 @@ const LoginPrompt = memo(function LoginPrompt({
               onClick={handleLogin}
               className="w-full min-h-[48px] rounded-full bg-emerald-500 px-6 py-3 text-base font-bold text-white transition-all duration-300 hover:bg-emerald-600 active:scale-[0.98] shadow-lg shadow-emerald-500/20"
             >
-              Sign In
+              {primaryLabel}
             </button>
             <button
               type="button"
               onClick={handleSignup}
               className="w-full min-h-[48px] rounded-full border border-neutral-700 px-6 py-3 text-base font-medium text-neutral-200 transition-all duration-300 hover:border-neutral-600 hover:bg-white/5 active:scale-[0.98]"
             >
-              Create Account
+              {secondaryLabel}
             </button>
           </div>
 

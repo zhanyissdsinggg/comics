@@ -8,6 +8,7 @@ import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
+import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
 import { apiGet } from "../../lib/apiClient";
@@ -21,6 +22,18 @@ import { useHistoryStore } from "../../store/useHistoryStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import {
+  consumeCommerceSuccessForPath,
+  getCommerceSuccessPresentation,
+} from "../../lib/commerceSuccess";
+
+function getSeriesPriorityScore(series) {
+  const followers = Number(series?.followers || 0);
+  const views = Number(series?.views || 0);
+  const ratingCount = Number(series?.ratingCount || 0);
+  const rating = Number(series?.rating || 0);
+  return followers + views + ratingCount + Math.round(rating * 100);
+}
 
 function PanelLoadingSkeleton({ rows = 3 }) {
   return (
@@ -109,8 +122,10 @@ export default function LibraryPage() {
   const [seriesResponse, setSeriesResponse] = useState(null);
   const [showCollectionManager, setShowCollectionManager] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [commerceNotice, setCommerceNotice] = useState(null);
   const showStale = useStaleNotice(seriesResponse);
   const { shouldRetry } = useRetryPolicy();
+  const openAuthPrompt = () => window.dispatchEvent(new CustomEvent("auth:open"));
   const seriesById = useMemo(
     () => new Map(seriesList.map((series) => [series.id, series])),
     [seriesList],
@@ -175,6 +190,10 @@ export default function LibraryPage() {
 
   useEffect(() => {
     trackEvent("view_library", {});
+  }, []);
+
+  useEffect(() => {
+    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/library")));
   }, []);
 
   useEffect(() => {
@@ -339,18 +358,22 @@ export default function LibraryPage() {
     () =>
       seriesList
         .filter((series) => !visibleLibraryItems.some((item) => item.seriesId === series.id))
+        .sort((left, right) => getSeriesPriorityScore(right) - getSeriesPriorityScore(left))
         .slice(0, 8)
         .map((series) => ({
           id: series.id,
           seriesId: series.id,
           title: series.title,
-          subtitle: series.badge || series.status,
+          subtitle: series.genres?.slice(0, 2).join(" | ") || series.badge || series.status,
           coverTone: series.coverTone,
           coverUrl: series.coverUrl,
+          badge: series.badge,
           isAdult: Boolean(series.adult),
         })),
     [seriesList, visibleLibraryItems],
   );
+  const hasLibrarySignals =
+    continueRailItems.length > 0 || historyRail.length > 0 || visibleLibraryItems.length > 0;
   const libraryStats = useMemo(
     () => [
       {
@@ -376,6 +399,86 @@ export default function LibraryPage() {
     ],
     [continueRailItems.length, historyRail.length, isAdultMode, isSignedIn, visibleLibraryItems.length],
   );
+  const resumeSpotlight = continueRailItems[0] || historyRail[0] || null;
+  const completedShelfCount = visibleLibraryItems.filter((item) => {
+    const status = String(seriesById.get(item.seriesId)?.status || "");
+    return status.toLowerCase() === "completed";
+  }).length;
+  const returnConsoleCards = [
+    {
+      id: "resume-thread",
+      eyebrow: "Resume thread",
+      title: resumeSpotlight ? resumeSpotlight.title : "No active thread yet",
+      description: resumeSpotlight
+        ? `${resumeSpotlight.subtitle}. Re-open the latest unlocked chapter before the reading thread goes cold.`
+        : "Start a series and the fastest return path will surface here automatically.",
+      ctaLabel: resumeSpotlight ? "Resume now" : "Open weekly chart",
+      onClick: () => {
+        if (resumeSpotlight?.seriesId && resumeSpotlight?.episodeId) {
+          router.push(`/read/${resumeSpotlight.seriesId}/${resumeSpotlight.episodeId}`);
+          return;
+        }
+        if (resumeSpotlight?.seriesId) {
+          router.push(`/series/${resumeSpotlight.seriesId}`);
+          return;
+        }
+        router.push("/rankings?type=popular&window=week");
+      },
+      accentClass:
+        "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+    },
+    {
+      id: "unfinished-stack",
+      eyebrow: "Unfinished stack",
+      title: `${continueRailItems.length} active thread${continueRailItems.length === 1 ? "" : "s"}`,
+      description:
+        continueRailItems.length > 0
+          ? "These series already have a last-read episode waiting, so the next click can go straight back into the story."
+          : "Once the reader leaves mid-session, unfinished titles should stack up here instead of disappearing.",
+      ctaLabel: continueRailItems.length > 0 ? "Continue reading" : "Search titles",
+      onClick: () => {
+        const firstContinue = continueRailItems[0];
+        if (firstContinue?.seriesId && firstContinue?.episodeId) {
+          router.push(`/read/${firstContinue.seriesId}/${firstContinue.episodeId}`);
+          return;
+        }
+        router.push("/search");
+      },
+      accentClass:
+        "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+    },
+    {
+      id: "binge-ready",
+      eyebrow: "Ready to binge",
+      title: `${completedShelfCount} completed shelf pick${completedShelfCount === 1 ? "" : "s"}`,
+      description:
+        completedShelfCount > 0
+          ? "Finished runs are the cleanest long-session return path because there is no release gap to interrupt momentum."
+          : "Completed series convert well for returning readers, so this lane should never stay empty for long.",
+      ctaLabel: "Browse completed",
+      onClick: () => router.push("/search?status=Completed&sort=popular"),
+      accentClass:
+        "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+    },
+    {
+      id: "shelf-sync",
+      eyebrow: "Shelf sync",
+      title: isSignedIn ? "Account connected" : "Local shelf only",
+      description: isSignedIn
+        ? "Followed titles, rewards, missions, and reading history stay tied to this account."
+        : "Sign in so follows, check-ins, mission payouts, and reading progress survive device changes.",
+      ctaLabel: isSignedIn ? (showCollectionManager ? "Collections open" : "Manage collections") : "Sign in",
+      onClick: () => {
+        if (!isSignedIn) {
+          openAuthPrompt();
+          return;
+        }
+        setShowCollectionManager(true);
+      },
+      accentClass:
+        "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -397,10 +500,17 @@ export default function LibraryPage() {
               onClick={() => setShowCollectionManager((value) => !value)}
               className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-semibold text-neutral-100 transition-colors hover:border-emerald-400/30 hover:bg-emerald-400/10"
             >
-              {showCollectionManager ? "Close Collections" : "Manage Collections"}
+              {showCollectionManager ? "Close collections" : "Manage collections"}
             </button>
           }
         />
+
+        {commerceNotice ? (
+          <CommerceSuccessBanner
+            notice={commerceNotice}
+            onDismiss={() => setCommerceNotice(null)}
+          />
+        ) : null}
 
         {showStale ? (
           <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
@@ -447,7 +557,7 @@ export default function LibraryPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => window.dispatchEvent(new CustomEvent("auth:open"))}
+                      onClick={openAuthPrompt}
                       className="inline-flex rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
                     >
                       Sign in
@@ -503,28 +613,100 @@ export default function LibraryPage() {
               </SurfacePanel>
             ) : null}
 
-            <div className="grid gap-6">
-              <SurfacePanel>
-                <Rail
-                  title="Continue Reading"
-                  items={continueRailItems}
-                  onItemClick={(item) => {
-                    if (item.seriesId && item.episodeId) {
-                      router.push(`/read/${item.seriesId}/${item.episodeId}`);
-                      return;
-                    }
-                    if (item.seriesId) {
-                      router.push(`/series/${item.seriesId}`);
-                    }
-                  }}
-                />
-              </SurfacePanel>
+            <SurfacePanel className="space-y-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                    Returning reader console
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                    Turn saved titles into clear return paths.
+                  </h2>
+                  <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
+                    A strong library should tell the reader what to resume, what is ready for binge reading, and where
+                    sync or account value kicks in next.
+                  </p>
+                </div>
+                <p className="text-sm text-neutral-500">
+                  {hasLibrarySignals ? "Live return signals available" : "Starter shelf mode"}
+                </p>
+              </div>
 
-              {historyRail.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {returnConsoleCards.map((card) => (
+                  <button
+                    key={card.id}
+                    type="button"
+                    onClick={card.onClick}
+                    className={`rounded-[24px] border p-5 text-left transition hover:-translate-y-1 ${card.accentClass}`}
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-current opacity-75">
+                      {card.eyebrow}
+                    </p>
+                    <h3 className="mt-4 font-display text-xl font-semibold leading-tight text-white">
+                      {card.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-7 text-neutral-300">{card.description}</p>
+                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-current">
+                      {card.ctaLabel}
+                      <span aria-hidden="true">&gt;</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </SurfacePanel>
+
+            {!hasLibrarySignals ? (
+              <SurfacePanel className="space-y-4">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                    Shelf starter
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                    This library needs a first follow, bookmark, or chapter.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-neutral-400">
+                    Start a title, save a series, or jump into the weekly chart so this space becomes a real return
+                    lane instead of an empty shell.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/search")}
+                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  >
+                    Search titles
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/rankings?type=popular&window=week")}
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  >
+                    Open weekly chart
+                  </button>
+                  {!isSignedIn ? (
+                    <button
+                      type="button"
+                      onClick={openAuthPrompt}
+                      className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                    >
+                      Sign in for sync
+                    </button>
+                  ) : null}
+                </div>
+              </SurfacePanel>
+            ) : null}
+
+            <div className="grid gap-6">
+              {continueRailItems.length > 0 ? (
                 <SurfacePanel>
                   <Rail
-                    title="Reading History"
-                    items={historyRail}
+                    title="Continue Reading"
+                    items={continueRailItems}
+                    reason="Jump back into unlocked chapters before the reading thread goes cold."
+                    ctaLabel="Resume reading"
+                    href="/library"
                     onItemClick={(item) => {
                       if (item.seriesId && item.episodeId) {
                         router.push(`/read/${item.seriesId}/${item.episodeId}`);
@@ -538,25 +720,57 @@ export default function LibraryPage() {
                 </SurfacePanel>
               ) : null}
 
-              <SurfacePanel>
-                <Rail
-                  title="Your Library"
-                  items={visibleLibraryItems}
-                  onItemClick={(item) => {
-                    if (item.seriesId) {
-                      router.push(`/series/${item.seriesId}`);
-                    }
-                  }}
-                />
-              </SurfacePanel>
+              {historyRail.length > 0 ? (
+                <SurfacePanel>
+                  <Rail
+                    title="Reading History"
+                    items={historyRail}
+                    reason="Recent sessions stay one tap away when you want to retrace a title."
+                    ctaLabel="Review History"
+                    href="/library"
+                    onItemClick={(item) => {
+                      if (item.seriesId && item.episodeId) {
+                        router.push(`/read/${item.seriesId}/${item.episodeId}`);
+                        return;
+                      }
+                      if (item.seriesId) {
+                        router.push(`/series/${item.seriesId}`);
+                      }
+                    }}
+                  />
+                </SurfacePanel>
+              ) : null}
 
-              <SurfacePanel>
-                <Rail
-                  title="Recommended for you"
-                  items={recommendedItems}
-                  onItemClick={(item) => router.push(`/series/${item.id}`)}
-                />
-              </SurfacePanel>
+              {visibleLibraryItems.length > 0 ? (
+                <SurfacePanel>
+                  <Rail
+                    title="Your Library"
+                    items={visibleLibraryItems}
+                    reason="Followed and bookmarked titles gathered into the current storefront mode."
+                    ctaLabel="Manage Shelf"
+                    href="/library"
+                    onItemClick={(item) => {
+                      if (item.seriesId) {
+                        router.push(`/series/${item.seriesId}`);
+                      }
+                    }}
+                  />
+                </SurfacePanel>
+              ) : null}
+
+              {recommendedItems.length > 0 ? (
+                <SurfacePanel>
+                  <Rail
+                    title="Recommended for You"
+                    items={recommendedItems}
+                    reason="Strong titles that are not saved yet, so the next follow stays easy."
+                    ctaLabel="View Chart"
+                    href="/rankings?type=popular&window=week"
+                    onItemClick={(item) => router.push(`/series/${item.id}`)}
+                  />
+                </SurfacePanel>
+              ) : null}
+
             </div>
           </>
         )}
@@ -572,7 +786,7 @@ export default function LibraryPage() {
           makeupModal
             ? [
                 {
-                  label: "Buy points",
+                  label: "View point packs",
                   onClick: () => {
                     router.push(
                       buildPathWithAttribution(
@@ -591,7 +805,7 @@ export default function LibraryPage() {
                   variant: "secondary",
                 },
                 {
-                  label: "Quick buy (Starter)",
+                  label: "Top up starter pack",
                   onClick: async () => {
                     const topupResponse = await topup("starter", {
                       attribution: {
@@ -611,8 +825,8 @@ export default function LibraryPage() {
                     }
                     setMakeupModal({
                       type: "ERROR",
-                      title: "Top up failed",
-                      description: "Unable to top up and make up today.",
+                      title: "Couldn't top up",
+                      description: "We couldn't top up the starter pack and restore today's streak.",
                     });
                   },
                   variant: "primary",

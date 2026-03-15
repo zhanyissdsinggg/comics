@@ -10,7 +10,9 @@ export default function ActionModal({
   offerBadge,
   offerSavingsText,
   compareItems,
+  compareTitle = "Compare options",
   tips,
+  tipsTitle = "Why this helps",
   actions,
   onClose,
 }) {
@@ -59,6 +61,9 @@ export default function ActionModal({
         ) : null}
         {Array.isArray(compareItems) && compareItems.length > 0 ? (
           <div className="mt-3 rounded-xl border border-neutral-800 bg-neutral-900/40 p-3 text-[11px] text-neutral-300">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+              {compareTitle}
+            </p>
             {compareItems.map((item) => (
               <div key={item.label} className="flex items-center justify-between">
                 <span>{item.label}</span>
@@ -69,6 +74,9 @@ export default function ActionModal({
         ) : null}
         {Array.isArray(tips) && tips.length > 0 ? (
           <div className="mt-3 space-y-1 text-[11px] text-neutral-400">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+              {tipsTitle}
+            </p>
             {tips.map((tip) => (
               <div key={tip}>- {tip}</div>
             ))}

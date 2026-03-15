@@ -2,11 +2,14 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import SeriesHeader from "./SeriesHeader";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
 import SiteHeader from "../layout/SiteHeader";
 import Skeleton from "../common/Skeleton";
+import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
+import SeriesTrustPanel from "./SeriesTrustPanel";
+import StorefrontCampaignPanel from "../common/StorefrontCampaignPanel";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
@@ -18,7 +21,19 @@ import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useCouponStore } from "../../store/useCouponStore";
 import { useProgressStore } from "../../store/useProgressStore";
-import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import {
+  buildPathWithAttribution,
+  loadPersistedPaymentAttribution,
+  mergePaymentAttribution,
+  persistPaymentAttribution,
+  readPaymentAttributionFromSearchParams,
+} from "../../lib/paymentAttribution";
+import { focusInteractiveTarget } from "../../lib/focusTarget";
+import {
+  consumeCommerceSuccessForPath,
+  getCommerceSuccessPresentation,
+} from "../../lib/commerceSuccess";
+import { buildCreatorHref, slugifyCreatorName } from "../../lib/creators";
 
 function EpisodeListSkeleton() {
   return (
@@ -100,6 +115,7 @@ function syncSeriesRatingCache(seriesId, nextRating, nextCount) {
 
 export default function SeriesPage({ seriesId }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -107,9 +123,12 @@ export default function SeriesPage({ seriesId }) {
   const [activeModal, setActiveModal] = useState(null);
   const [showSecondarySections, setShowSecondarySections] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [commerceNotice, setCommerceNotice] = useState(null);
   const gateReportedRef = useRef(false);
   const requestRef = useRef(0);
   const secondarySectionsRef = useRef(null);
+  const desktopPrimaryActionRef = useRef(null);
+  const mobilePrimaryActionRef = useRef(null);
 
   const walletStore = useWalletStore();
   const { loadWallet } = walletStore;
@@ -130,6 +149,10 @@ export default function SeriesPage({ seriesId }) {
     forceDisableAdultMode,
   } = useAdultGateStore();
   const { bySeriesId: progressBySeriesId, getProgress, loadProgress } = useProgressStore();
+  const routeAttribution = useMemo(
+    () => readPaymentAttributionFromSearchParams(searchParams),
+    [searchParams],
+  );
 
   const series = data?.series || {};
   const episodes = useMemo(
@@ -271,6 +294,20 @@ export default function SeriesPage({ seriesId }) {
   }, [fetchSeries]);
 
   useEffect(() => {
+    if (!routeAttribution) {
+      return;
+    }
+
+    const attribution = mergePaymentAttribution(
+      loadPersistedPaymentAttribution(),
+      routeAttribution,
+    );
+    if (attribution) {
+      persistPaymentAttribution(attribution);
+    }
+  }, [routeAttribution]);
+
+  useEffect(() => {
     gateReportedRef.current = false;
   }, [seriesId]);
 
@@ -334,6 +371,26 @@ export default function SeriesPage({ seriesId }) {
   useEffect(() => {
     setShowSecondarySections(false);
   }, [seriesId]);
+
+  useEffect(() => {
+    setCommerceNotice(
+      getCommerceSuccessPresentation(consumeCommerceSuccessForPath(`/series/${seriesId}`)),
+    );
+  }, [seriesId]);
+
+  useEffect(() => {
+    if (!commerceNotice) {
+      return undefined;
+    }
+
+    return focusInteractiveTarget(() => {
+      const prefersDesktop =
+        typeof window !== "undefined" &&
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(min-width: 640px)").matches;
+      return prefersDesktop ? desktopPrimaryActionRef.current : mobilePrimaryActionRef.current;
+    });
+  }, [commerceNotice]);
 
   useEffect(() => {
     if (showSecondarySections || loading || error) {
@@ -440,9 +497,19 @@ export default function SeriesPage({ seriesId }) {
   const handleContinue = lastReadEpisodeId
     ? () => handleRead(seriesId, lastReadEpisodeId)
     : null;
-  const handleStart = !lastReadEpisodeId && firstEpisodeId
+  const handleStart = firstEpisodeId
     ? () => handleRead(seriesId, firstEpisodeId)
     : null;
+  const creatorHref = useMemo(() => {
+    const targetPath = buildCreatorHref(series?.author || "Studio");
+    return buildPathWithAttribution(targetPath, {
+      entryPoint: "SERIES_CREATOR",
+      campaignId: slugifyCreatorName(series?.author || "Studio"),
+      sourcePath: `/series/${seriesId}`,
+      sourceSeriesId: seriesId,
+      returnTo: `/series/${seriesId}`,
+    });
+  }, [series?.author, seriesId]);
 
   const isFollowing = followedSeriesIds.includes(seriesId);
 
@@ -524,7 +591,7 @@ export default function SeriesPage({ seriesId }) {
                 onClick={() => router.push("/")}
                 className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
               >
-                Back to Home
+                Back to home
               </button>
             </div>
           </div>
@@ -568,6 +635,16 @@ export default function SeriesPage({ seriesId }) {
       <SiteHeader />
 
       <div className="mx-auto max-w-[1280px] px-4 pb-24 sm:px-6 sm:pb-8 lg:px-8">
+        {commerceNotice ? (
+          <div className="pt-6">
+            <CommerceSuccessBanner
+              notice={commerceNotice}
+              onDismiss={() => setCommerceNotice(null)}
+              className="mb-6"
+            />
+          </div>
+        ) : null}
+
         <SeriesHeader
           series={series}
           previewHint={previewHint}
@@ -577,6 +654,25 @@ export default function SeriesPage({ seriesId }) {
           onStart={handleStart}
           onFollowToggle={handleFollowToggle}
           isFollowing={isFollowing}
+          desktopPrimaryActionRef={desktopPrimaryActionRef}
+          mobilePrimaryActionRef={mobilePrimaryActionRef}
+          highlightPrimaryAction={Boolean(commerceNotice)}
+          creatorHref={creatorHref}
+        />
+
+        <SeriesTrustPanel
+          series={series}
+          episodes={episodes}
+          isFollowing={isFollowing}
+          onFollowToggle={handleFollowToggle}
+          sharePath={`/series/${seriesId}`}
+          creatorHref={creatorHref}
+        />
+
+        <StorefrontCampaignPanel
+          series={series}
+          sourcePath={`/series/${seriesId}`}
+          returnTo={`/series/${seriesId}`}
         />
 
         <EpisodeList
@@ -594,13 +690,21 @@ export default function SeriesPage({ seriesId }) {
         <div ref={secondarySectionsRef} className="mt-8 h-px w-full" />
         {showSecondarySections ? (
           <>
-            <SimilarSeriesSection seriesId={seriesId} />
+            <SimilarSeriesSection seriesId={seriesId} series={series} />
             <div className="mt-8 border-t border-neutral-800 pt-6" />
             <CommentsSection
               seriesId={seriesId}
               rating={series.rating}
               ratingCount={series.ratingCount}
               onRatingUpdate={handleRatingUpdate}
+              seriesTitle={series.title}
+              author={series.author}
+              status={series.status}
+              genres={series.genres}
+              followers={series.followers}
+              isFollowing={isFollowing}
+              onFollowToggle={handleFollowToggle}
+              sharePath={`/series/${seriesId}`}
             />
           </>
         ) : (

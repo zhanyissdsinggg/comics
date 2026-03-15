@@ -1,9 +1,11 @@
 ﻿"use client";
 
+import { useRouter } from "next/navigation";
 import { BookOpen, Heart, Star } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
+import { getReadingCadenceLabel, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 
 function capitalize(value) {
   if (!value) {
@@ -37,18 +39,62 @@ export default function SeriesHeader({
   onStart,
   onFollowToggle,
   isFollowing,
+  desktopPrimaryActionRef,
+  mobilePrimaryActionRef,
+  highlightPrimaryAction = false,
+  creatorHref = "",
 }) {
+  const router = useRouter();
   const genres = series.genres || [];
   const badges = series.badges || [];
   const isAdult = Boolean(series.adult);
   const hasFreeEpisodes = series.hasFreeEpisodes || series.freeEpisodeCount > 0;
   const ratingValue = series.rating ? Number(series.rating).toFixed(1) : "New";
   const lastEpisodeLabel = formatEpisodeNumber(progress?.lastEpisodeId);
+  const primaryAction = onContinue || onStart || null;
   const primaryActionLabel = onContinue
     ? lastEpisodeLabel
       ? `Continue Episode ${lastEpisodeLabel}`
       : "Continue reading"
-    : "Start reading";
+    : hasFreeEpisodes
+      ? "Read free preview"
+      : "Start reading";
+  const secondaryAction = onContinue && onStart ? onStart : null;
+  const secondaryActionLabel = secondaryAction ? "Start from Episode 1" : "";
+  const primaryActionClassName = [
+    "inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition-colors",
+    highlightPrimaryAction
+      ? "border-emerald-300/60 bg-emerald-400/18 text-emerald-50 shadow-[0_0_0_1px_rgba(110,231,183,0.28),0_22px_60px_rgba(16,185,129,0.22)] motion-safe:animate-pulse"
+      : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100 hover:border-emerald-300/50 hover:bg-emerald-400/18",
+  ].join(" ");
+  const journeyCards = [
+    {
+      label: "Entry path",
+      value: onContinue ? "Resume now" : hasFreeEpisodes ? STOREFRONT_TERMS.freeStart : "Episode 1",
+      hint: onContinue
+        ? lastEpisodeLabel
+          ? `Jump back into Episode ${lastEpisodeLabel} without hunting through the list.`
+          : "Jump back into the latest unlocked chapter without hunting through the list."
+        : hasFreeEpisodes
+          ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"} can warm up the session before any spend.`
+          : "Open the first episode and unlock forward from the beginning.",
+    },
+    {
+      label: "Reading fit",
+      value: getReadingCadenceLabel(series.status),
+      hint:
+        String(series.status || "").toLowerCase() === "completed"
+          ? "Finished runs are ideal for long sessions because there is no release gap."
+          : "Ongoing series work best when the reader comes back for fresh drops and steady follow-up.",
+    },
+    {
+      label: "Shelf status",
+      value: isFollowing ? "Saved" : "Open shelf",
+      hint: isFollowing
+        ? "This series already sits in your library for fast return visits."
+        : "Add it to your library so the next visit starts from a stronger returning-reader lane.",
+    },
+  ];
   const metadataCards = [
     {
       label: "Rating",
@@ -70,7 +116,10 @@ export default function SeriesHeader({
     {
       label: "Author",
       value: series.author || "Studio",
-      hint: previewHint || "Open any episode to start reading",
+      hint: creatorHref
+        ? "Open the creator shelf and compare related titles."
+        : previewHint || "Open any episode to start reading",
+      onClick: creatorHref ? () => router.push(creatorHref) : null,
     },
   ];
 
@@ -86,15 +135,32 @@ export default function SeriesHeader({
               </div>
             </div>
 
-            {onContinue || onStart ? (
-              <button
-                type="button"
-                onClick={onContinue || onStart}
-                className="hidden w-full items-center justify-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/12 px-4 py-3 text-sm font-semibold text-emerald-100 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/18 sm:inline-flex"
-              >
-                <BookOpen size={18} />
-                <span>{primaryActionLabel}</span>
-              </button>
+            {primaryAction ? (
+              <div className="hidden w-full gap-3 sm:flex sm:flex-col">
+                {highlightPrimaryAction ? (
+                  <p className="text-center text-xs font-semibold text-emerald-200">
+                    Purchase synced. Jump back in from the clearest next step.
+                  </p>
+                ) : null}
+                <button
+                  ref={desktopPrimaryActionRef}
+                  type="button"
+                  onClick={primaryAction}
+                  className={primaryActionClassName}
+                >
+                  <BookOpen size={18} />
+                  <span>{primaryActionLabel}</span>
+                </button>
+                {secondaryAction ? (
+                  <button
+                    type="button"
+                    onClick={secondaryAction}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  >
+                    <span>{secondaryActionLabel}</span>
+                  </button>
+                ) : null}
+              </div>
             ) : null}
           </div>
 
@@ -124,20 +190,40 @@ export default function SeriesHeader({
             </p>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {metadataCards.map((card) => (
-                <div
-                  key={card.label}
-                  className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 backdrop-blur-lg"
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-                    {card.label}
-                  </p>
-                  <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                    {card.value}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
-                </div>
-              ))}
+              {metadataCards.map((card) =>
+                card.onClick ? (
+                  <button
+                    key={card.label}
+                    type="button"
+                    onClick={card.onClick}
+                    className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-left backdrop-blur-lg transition hover:border-emerald-300/30 hover:bg-white/[0.06]"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+                      {card.label}
+                    </p>
+                    <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+                      {card.value}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                      Open creator page
+                    </p>
+                  </button>
+                ) : (
+                  <div
+                    key={card.label}
+                    className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 backdrop-blur-lg"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+                      {card.label}
+                    </p>
+                    <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+                      {card.value}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
+                  </div>
+                ),
+              )}
             </div>
 
             {badges.length > 0 || genres.length > 0 ? (
@@ -172,6 +258,23 @@ export default function SeriesHeader({
               </div>
             ) : null}
 
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              {journeyCards.map((card) => (
+                <div
+                  key={card.label}
+                  className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+                    {card.label}
+                  </p>
+                  <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+                    {card.value}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
+                </div>
+              ))}
+            </div>
+
             <div className="mt-5 flex flex-wrap items-center gap-3">
               {onFollowToggle ? (
                 <button
@@ -198,16 +301,31 @@ export default function SeriesHeader({
           </div>
         </div>
 
-        {onContinue || onStart ? (
-          <div className="px-5 pb-5 sm:hidden">
+        {primaryAction ? (
+          <div className="grid gap-3 px-5 pb-5 sm:hidden">
+            {highlightPrimaryAction ? (
+              <p className="text-center text-xs font-semibold text-emerald-200">
+                Purchase synced. Jump back in from the clearest next step.
+              </p>
+            ) : null}
             <button
+              ref={mobilePrimaryActionRef}
               type="button"
-              onClick={onContinue || onStart}
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/12 px-4 py-3 text-sm font-semibold text-emerald-100 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/18"
+              onClick={primaryAction}
+              className={`flex ${primaryActionClassName}`}
             >
               <BookOpen size={18} />
               <span>{primaryActionLabel}</span>
             </button>
+            {secondaryAction ? (
+              <button
+                type="button"
+                onClick={secondaryAction}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                <span>{secondaryActionLabel}</span>
+              </button>
+            ) : null}
           </div>
         ) : null}
       </SurfacePanel>

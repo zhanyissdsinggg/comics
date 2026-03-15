@@ -12,7 +12,9 @@ function parseLatestNumber(value) {
 function mapSeriesCard(series, subtitle, badgeOverride, extra = {}) {
   return {
     id: series.id,
+    seriesId: series.id,
     title: series.title,
+    author: series.author || "",
     subtitle: subtitle || series.status || "Series",
     coverTone: series.coverTone,
     coverUrl: series.coverUrl,
@@ -50,6 +52,7 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
       const lastEpisodeId = progress?.lastEpisodeId || "";
       return mapSeriesCard(series, `Continue ${lastEpisodeId}`, "Continue", {
         progressPercent: progress?.percent || 0,
+        resumeEpisodeId: lastEpisodeId || null,
       });
     })
     .filter(Boolean)

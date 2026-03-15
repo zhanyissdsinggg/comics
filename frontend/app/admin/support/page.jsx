@@ -228,7 +228,7 @@ export default function AdminSupportPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">后台</p>
           <h1 className="text-3xl font-semibold tracking-tight text-white">工单支持</h1>
           <p className="max-w-2xl text-sm text-neutral-400">
-            在此页面直接处理在线工单。可按邮箱、主题或消息内容搜索，并在当前流程内回复或关闭问题。
+            在这里统一处理站内工单。你可以按邮箱、主题、用户或消息内容搜索，并在当前页面直接回复、关闭或删除工单。
           </p>
         </div>
 
@@ -237,7 +237,11 @@ export default function AdminSupportPage() {
         </div>
       </div>
 
-      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback({ type: '', message: '' })} />
+      <AdminFeedbackBanner
+        feedback={feedback}
+        onDismiss={() => setFeedback({ type: '', message: '' })}
+        dismissLabel="关闭"
+      />
 
       <section className="rounded-3xl border border-neutral-800 bg-neutral-950/80 p-4 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.7)]">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_220px_auto]">
@@ -246,7 +250,7 @@ export default function AdminSupportPage() {
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="搜索工单 ID、用户 ID、邮箱、主题或消息"
+              placeholder="搜索工单 ID、用户 ID、邮箱、主题或消息内容"
               className="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-500"
             />
           </label>
@@ -301,7 +305,7 @@ export default function AdminSupportPage() {
               <Trash2 className="h-4 w-4" />
               删除所选
             </button>
-        </div>
+          </div>
         </div>
       </section>
 
@@ -328,104 +332,104 @@ export default function AdminSupportPage() {
             'rounded-xl border border-neutral-700 px-3 py-2 text-sm text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50',
         }}
       >
-            <table className="min-w-full divide-y divide-neutral-800 text-sm">
-              <thead className="bg-neutral-900/90 text-left text-xs uppercase tracking-[0.16em] text-neutral-500">
-                <tr>
-                  <th className="px-4 py-4">
-                    <input
-                      type="checkbox"
-                      aria-label="选择全部工单"
-                      checked={tickets.length > 0 && selectedIds.length === tickets.length}
-                      onChange={(event) => {
-                        if (event.target.checked) {
-                          selectAll(tickets);
-                          return;
-                        }
+        <table className="min-w-full divide-y divide-neutral-800 text-sm">
+          <thead className="bg-neutral-900/90 text-left text-xs uppercase tracking-[0.16em] text-neutral-500">
+            <tr>
+              <th className="px-4 py-4">
+                <input
+                  type="checkbox"
+                  aria-label="选择全部工单"
+                  checked={tickets.length > 0 && selectedIds.length === tickets.length}
+                  onChange={(event) => {
+                    if (event.target.checked) {
+                      selectAll(tickets);
+                      return;
+                    }
 
-                        clearSelection();
-                      }}
-                      className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
-                    />
-                  </th>
-                  <th className="px-4 py-4">工单</th>
-                  <th className="px-4 py-4">用户</th>
-                  <th className="px-4 py-4">状态</th>
-                  <th className="px-4 py-4">创建时间</th>
-                  <th className="px-4 py-4">更新时间</th>
-                  <th className="px-4 py-4">操作</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-800">
-                {tickets.map((ticket) => (
-                  <tr key={ticket.id} className="align-top transition hover:bg-neutral-900/80">
-                    <td className="px-4 py-4">
-                      <input
-                        type="checkbox"
-                        aria-label={`选择工单 ${ticket.id}`}
-                        checked={selectedIdsSet.has(ticket.id)}
-                        onChange={() => toggleSelect(ticket.id)}
-                        className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
-                      />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="space-y-2">
-                        <div className="font-medium text-white">{ticket.subject || '未命名工单'}</div>
-                        <div className="text-xs text-neutral-500">#{ticket.id}</div>
-                        <p className="max-w-xl text-sm leading-6 text-neutral-300">{getMessagePreview(ticket.message)}</p>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="space-y-2">
-                        <div className="inline-flex items-center gap-2 text-sm font-medium text-white">
-                          <Mail className="h-4 w-4 text-neutral-500" />
-                          <span>{ticket.userEmail || '未绑定邮箱'}</span>
-                        </div>
-                        <div className="text-xs text-neutral-500">用户 ID：{ticket.userId || '-'}</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(ticket.status)}`}>
-                        {getStatusLabel(ticket.status)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-neutral-300">{formatDateTime(ticket.createdAt)}</td>
-                    <td className="px-4 py-4 text-neutral-300">{formatDateTime(ticket.updatedAt)}</td>
-                    <td className="px-4 py-4">
-                      <div className="flex flex-col items-start gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openReplyModal(ticket)}
-                          disabled={replyTicketMutation.isPending}
-                          className="inline-flex items-center gap-2 rounded-full border border-neutral-700 px-3 py-1.5 text-xs font-medium text-white transition hover:border-neutral-600 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          <MessageSquare className="h-3.5 w-3.5" />
-                          回复
-                        </button>
+                    clearSelection();
+                  }}
+                  className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
+                />
+              </th>
+              <th className="px-4 py-4">工单</th>
+              <th className="px-4 py-4">用户</th>
+              <th className="px-4 py-4">状态</th>
+              <th className="px-4 py-4">创建时间</th>
+              <th className="px-4 py-4">更新时间</th>
+              <th className="px-4 py-4">操作</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-800">
+            {tickets.map((ticket) => (
+              <tr key={ticket.id} className="align-top transition hover:bg-neutral-900/80">
+                <td className="px-4 py-4">
+                  <input
+                    type="checkbox"
+                    aria-label={`选择工单 ${ticket.id}`}
+                    checked={selectedIdsSet.has(ticket.id)}
+                    onChange={() => toggleSelect(ticket.id)}
+                    className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
+                  />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="space-y-2">
+                    <div className="font-medium text-white">{ticket.subject || '未命名工单'}</div>
+                    <div className="text-xs text-neutral-500">#{ticket.id}</div>
+                    <p className="max-w-xl text-sm leading-6 text-neutral-300">{getMessagePreview(ticket.message)}</p>
+                  </div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="space-y-2">
+                    <div className="inline-flex items-center gap-2 text-sm font-medium text-white">
+                      <Mail className="h-4 w-4 text-neutral-500" />
+                      <span>{ticket.userEmail || '未绑定邮箱'}</span>
+                    </div>
+                    <div className="text-xs text-neutral-500">用户 ID：{ticket.userId || '-'}</div>
+                  </div>
+                </td>
+                <td className="px-4 py-4">
+                  <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(ticket.status)}`}>
+                    {getStatusLabel(ticket.status)}
+                  </span>
+                </td>
+                <td className="px-4 py-4 text-neutral-300">{formatDateTime(ticket.createdAt)}</td>
+                <td className="px-4 py-4 text-neutral-300">{formatDateTime(ticket.updatedAt)}</td>
+                <td className="px-4 py-4">
+                  <div className="flex flex-col items-start gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openReplyModal(ticket)}
+                      disabled={replyTicketMutation.isPending}
+                      className="inline-flex items-center gap-2 rounded-full border border-neutral-700 px-3 py-1.5 text-xs font-medium text-white transition hover:border-neutral-600 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      回复
+                    </button>
 
-                        {String(ticket.status || '').toLowerCase() !== 'closed' ? (
-                          <button
-                            type="button"
-                            onClick={() => handleCloseTicket(ticket.id)}
-                            disabled={closeTicketMutation.isPending}
-                            className="rounded-full border border-emerald-500/30 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            关闭工单
-                          </button>
-                        ) : (
-                          <span className="text-xs text-neutral-500">工单已关闭</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    {String(ticket.status || '').toLowerCase() !== 'closed' ? (
+                      <button
+                        type="button"
+                        onClick={() => handleCloseTicket(ticket.id)}
+                        disabled={closeTicketMutation.isPending}
+                        className="rounded-full border border-emerald-500/30 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        关闭工单
+                      </button>
+                    ) : (
+                      <span className="text-xs text-neutral-500">工单已关闭</span>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </AdminTableShell>
 
       <Modal
         isOpen={isReplyModalOpen}
         title="回复工单"
-        subtitle={selectedTicket ? `${selectedTicket.subject || '未命名工单'} - ${selectedTicket.userEmail || selectedTicket.userId}` : ''}
+        subtitle={selectedTicket ? `${selectedTicket.subject || '未命名工单'} · ${selectedTicket.userEmail || selectedTicket.userId}` : ''}
         onClose={() => {
           setIsReplyModalOpen(false);
           setSelectedTicket(null);
@@ -462,7 +466,7 @@ export default function AdminSupportPage() {
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
         title="删除所选工单"
-        message={`确定删除 ${selectedIds.length} 个选中工单吗？此操作无法撤销。`}
+        message={`确认删除 ${selectedIds.length} 个选中工单吗？此操作无法撤销。`}
         confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除'}
         cancelText="取消"
         isDangerous={true}

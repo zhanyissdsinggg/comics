@@ -10,7 +10,7 @@ function getPromoCopy(promotion, offer) {
       tag: "First top up",
       title: promotion.title || "Starter Double Bonus",
       description:
-        promotion.description || "Double bonus POINTS for your first purchase.",
+        promotion.description || "Double bonus points for your first purchase.",
     };
   }
   if (promotion?.type === "RETURNING") {
@@ -32,7 +32,7 @@ function getPromoCopy(promotion, offer) {
   return {
     tag: "Promo",
     title: offer?.title || "Starter Double Bonus",
-    description: "Limited-time bonus POINTS available.",
+    description: "Limited-time bonus points available.",
   };
 }
 
@@ -48,7 +48,7 @@ export default function PromoBanner({ offer, promotion }) {
   }, [promotion?.endAt]);
   const { formatted } = useCountdown(endAt);
   const copy = getPromoCopy(promotion, offer);
-  const badge = promotion?.coupon?.label || offer?.tag || promotion?.type || "Promo";
+  const badge = promotion?.coupon?.label || offer?.tag || copy.tag;
 
   return (
     <section className="rounded-3xl border border-neutral-900 bg-gradient-to-br from-neutral-900/70 via-neutral-950 to-neutral-900/70 p-6">

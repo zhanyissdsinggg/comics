@@ -117,7 +117,7 @@ export default function AdminBrandingPage() {
       setDraft((prev) => ({ ...prev, [data.field]: data.url }));
       const label =
         data.keyName === "logo"
-          ? "站点 Logo"
+          ? "站点标识"
           : data.keyName === "favicon"
             ? "站点图标"
             : "首页横幅";
@@ -206,14 +206,14 @@ export default function AdminBrandingPage() {
       <header className="space-y-2">
         <h2 className="text-lg font-semibold text-slate-900">品牌设置</h2>
         <p className="text-sm text-slate-500">
-          配置站点 Logo、图标和首页横幅资源。
+          配置站点标识、图标和首页横幅资源。
         </p>
       </header>
 
       <div className="space-y-6">
         <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-slate-800">站点 Logo 地址</h3>
+            <h3 className="text-sm font-semibold text-slate-800">站点标识地址</h3>
             <p className="mt-1 text-xs text-slate-400">
               建议使用透明背景的 PNG 或 SVG。
             </p>
@@ -233,7 +233,7 @@ export default function AdminBrandingPage() {
                   className="flex items-center gap-2 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-purple-700 disabled:opacity-50"
                 >
                   <ImageIcon className="h-3 w-3" />
-                  {uploadMutation.isPending ? "上传中..." : "上传 Logo"}
+                  {uploadMutation.isPending ? "上传中..." : "上传站点标识"}
                 </button>
                 {draft.siteLogoUrl ? (
                   <a
@@ -258,11 +258,11 @@ export default function AdminBrandingPage() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-slate-800">Logo 预览</h3>
+            <h3 className="text-sm font-semibold text-slate-800">站点标识预览</h3>
             <PreviewBox
               value={draft.siteLogoUrl}
-              alt="站点 Logo"
-              emptyText="尚未选择 Logo"
+              alt="站点标识"
+              emptyText="尚未选择站点标识"
               className="h-10 w-auto"
             />
           </div>

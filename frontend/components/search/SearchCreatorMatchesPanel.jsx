@@ -1,0 +1,337 @@
+"use client";
+
+import { useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Cover from "../common/Cover";
+import Pill from "../common/Pill";
+import SurfacePanel from "../common/SurfacePanel";
+import { buildCreatorDirectory } from "../../lib/creatorDirectory";
+import { normalizeCreatorName } from "../../lib/creators";
+import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import { trackEvent } from "../../lib/trackEvent";
+
+function formatCompactCount(value) {
+  const safeValue = Math.max(0, Number(value) || 0);
+  return new Intl.NumberFormat("en-US", {
+    notation: safeValue >= 1000 ? "compact" : "standard",
+    maximumFractionDigits: safeValue >= 1000 ? 1 : 0,
+  }).format(safeValue);
+}
+
+function normalizeSearchValue(value) {
+  return normalizeCreatorName(String(value || "")).toLowerCase();
+}
+
+function includesNormalized(value, normalizedQuery) {
+  if (!normalizedQuery) {
+    return false;
+  }
+
+  return normalizeSearchValue(value).includes(normalizedQuery);
+}
+
+function highlight(text, query) {
+  if (!query) {
+    return text;
+  }
+
+  const source = String(text || "");
+  const normalizedQuery = String(query).toLowerCase();
+  const index = source.toLowerCase().indexOf(normalizedQuery);
+
+  if (index < 0) {
+    return source;
+  }
+
+  const before = source.slice(0, index);
+  const match = source.slice(index, index + normalizedQuery.length);
+  const after = source.slice(index + normalizedQuery.length);
+
+  return (
+    <>
+      {before}
+      <mark className="rounded bg-amber-400/30 px-1 text-amber-200">{match}</mark>
+      {after}
+    </>
+  );
+}
+
+export default function SearchCreatorMatchesPanel({
+  catalog = [],
+  query = "",
+  loading = false,
+  resultsLength = 0,
+  searchPath = "/search",
+}) {
+  const router = useRouter();
+  const matchedCreators = useMemo(() => {
+    const creatorDirectory = buildCreatorDirectory(catalog);
+    const normalizedQuery = normalizeSearchValue(query);
+
+    if (!normalizedQuery || creatorDirectory.length === 0) {
+      return [];
+    }
+
+    const relaxMatchRules = !loading && resultsLength < 4;
+
+    return creatorDirectory
+      .map((creator) => {
+        const normalizedName = normalizeSearchValue(creator.name);
+        const exactNameMatch = normalizedName === normalizedQuery;
+        const prefixNameMatch = normalizedName.startsWith(normalizedQuery);
+        const includesNameMatch =
+          normalizedName.includes(normalizedQuery) || normalizedQuery.includes(normalizedName);
+        const spotlightTitleMatch = includesNormalized(creator.spotlightSeries?.title, normalizedQuery);
+        const genreMatches = (Array.isArray(creator.topGenres) ? creator.topGenres : []).filter((genre) =>
+          includesNormalized(genre, normalizedQuery),
+        );
+        const relatedTitleCount = (Array.isArray(creator.series) ? creator.series : []).filter((series) =>
+          includesNormalized(series?.title, normalizedQuery),
+        ).length;
+        const hasPrimaryMatch = exactNameMatch || prefixNameMatch || includesNameMatch;
+        const hasSecondaryMatch = spotlightTitleMatch || genreMatches.length > 0 || relatedTitleCount > 0;
+
+        if (!hasPrimaryMatch && !(relaxMatchRules && hasSecondaryMatch)) {
+          return null;
+        }
+
+        let matchLabel = "Creator match";
+        let matchDescription =
+          "This query maps cleanly to a creator shelf, which is usually the fastest way to compare related titles.";
+        let matchScore = 0;
+
+        if (exactNameMatch) {
+          matchLabel = "Exact creator";
+          matchDescription = "The query is an exact creator-name hit, so the creator page is the strongest next click.";
+          matchScore += 1200;
+        } else if (prefixNameMatch) {
+          matchLabel = "Creator name";
+          matchDescription =
+            "The query starts by creator name, which makes the creator shelf a stronger hub than a narrow title grid.";
+          matchScore += 900;
+        } else if (includesNameMatch) {
+          matchLabel = "Creator name";
+          matchDescription = "The query still overlaps the creator name enough to justify opening the creator shelf first.";
+          matchScore += 700;
+        }
+
+        if (spotlightTitleMatch) {
+          if (!hasPrimaryMatch) {
+            matchLabel = "Lead title";
+            matchDescription =
+              "The strongest title match belongs to this creator shelf, so opening the creator page widens the next choice.";
+          }
+          matchScore += 220;
+        }
+
+        if (!hasPrimaryMatch && genreMatches.length > 0) {
+          matchLabel = "Genre bridge";
+          matchDescription =
+            "This query aligns more with the creator's top genres, which makes the creator shelf a better rescue path.";
+        }
+
+        matchScore += genreMatches.length * 80;
+        matchScore += relatedTitleCount * 45;
+        matchScore += Math.min(creator.titleCount, 8) * 8;
+        matchScore += Math.min(Math.log10(Math.max(creator.readerProof, 1)) * 40, 120);
+
+        return {
+          ...creator,
+          matchedGenres: genreMatches.slice(0, 3),
+          matchLabel,
+          matchDescription,
+          matchScore,
+          relatedTitleCount,
+        };
+      })
+      .filter(Boolean)
+      .sort((left, right) => {
+        if (right.matchScore !== left.matchScore) {
+          return right.matchScore - left.matchScore;
+        }
+        if (right.readerProof !== left.readerProof) {
+          return right.readerProof - left.readerProof;
+        }
+        if (right.titleCount !== left.titleCount) {
+          return right.titleCount - left.titleCount;
+        }
+        return left.name.localeCompare(right.name);
+      })
+      .slice(0, 3);
+  }, [catalog, loading, query, resultsLength]);
+
+  const handleCreatorClick = useCallback(
+    (creator, entryPoint = "SEARCH_CREATOR_MATCH", campaignId = "creator_match_panel") => {
+      if (!creator?.path) {
+        return;
+      }
+
+      trackEvent("search_creator_match_click", {
+        creatorName: creator.name,
+        creatorSlug: creator.slug,
+        entryPoint,
+        campaignId,
+        query: query || undefined,
+        sourceSeriesId: creator.spotlightSeries?.id || undefined,
+      });
+
+      router.push(
+        buildPathWithAttribution(creator.path, {
+          entryPoint,
+          campaignId,
+          sourcePath: searchPath,
+          sourceSeriesId: creator.spotlightSeries?.id || undefined,
+          returnTo: creator.path,
+        }),
+      );
+    },
+    [query, router, searchPath],
+  );
+
+  const handleSeriesClick = useCallback(
+    (seriesId, entryPoint = "SEARCH_CREATOR_MATCH_SERIES", campaignId = "creator_match_panel") => {
+      if (!seriesId) {
+        return;
+      }
+
+      const targetPath = `/series/${seriesId}`;
+      trackEvent("search_result_click", {
+        seriesId,
+        entryPoint,
+        campaignId,
+        query: query || undefined,
+      });
+
+      router.push(
+        buildPathWithAttribution(targetPath, {
+          entryPoint,
+          campaignId,
+          sourcePath: searchPath,
+          sourceSeriesId: seriesId,
+          returnTo: targetPath,
+        }),
+      );
+    },
+    [query, router, searchPath],
+  );
+
+  if (!query || matchedCreators.length === 0) {
+    return null;
+  }
+
+  const leadCreatorMatch = matchedCreators[0] || null;
+  const creatorPanelTitle =
+    resultsLength === 0
+      ? "This query looks closer to a creator shelf than a direct title hit."
+      : resultsLength > 0 && resultsLength < 4
+        ? "Creator shelves can widen a narrow result set before the session stalls."
+        : "Open the creator behind this search before locking into a single title.";
+  const creatorPanelHint =
+    resultsLength === 0
+      ? "When title search misses, a strong creator page is the cleanest rescue path because it keeps related works, genres, and lead titles together."
+      : resultsLength > 0 && resultsLength < 4
+        ? "Top-tier comic storefronts do not make readers restart their search. They surface the creator hub so one narrow query can still branch into multiple high-confidence reads."
+        : "If the reader is searching by author or studio, the creator hub should be visible before the result grid becomes the only option.";
+
+  return (
+    <SurfacePanel className="space-y-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+            Creator matches
+          </p>
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+            {creatorPanelTitle}
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">{creatorPanelHint}</p>
+        </div>
+        {leadCreatorMatch ? (
+          <button
+            type="button"
+            onClick={() => handleCreatorClick(leadCreatorMatch)}
+            className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+          >
+            Open {leadCreatorMatch.name}
+          </button>
+        ) : null}
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-3">
+        {matchedCreators.map((creator) => (
+          <article
+            key={creator.slug}
+            className="rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.18)]"
+          >
+            <Cover
+              tone={creator.spotlightSeries?.coverTone}
+              coverUrl={creator.spotlightSeries?.coverUrl}
+              className="h-56 rounded-[22px]"
+            />
+            <div className="mt-4 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
+                    {creator.matchLabel}
+                  </p>
+                  <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                    {highlight(creator.name, query)}
+                  </h3>
+                </div>
+                <Pill>
+                  {creator.titleCount} title{creator.titleCount === 1 ? "" : "s"}
+                </Pill>
+              </div>
+
+              <p className="text-sm leading-6 text-neutral-400">{creator.matchDescription}</p>
+
+              {creator.spotlightSeries?.title ? (
+                <p className="text-sm leading-6 text-neutral-300">
+                  Lead title:{" "}
+                  <span className="font-medium text-white">
+                    {highlight(creator.spotlightSeries.title, query)}
+                  </span>
+                </p>
+              ) : null}
+
+              <div className="flex flex-wrap gap-2">
+                {(creator.matchedGenres.length > 0 ? creator.matchedGenres : creator.topGenres).map((genre) => (
+                  <span
+                    key={`${creator.slug}-${genre}`}
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-neutral-300"
+                  >
+                    {highlight(genre, query)}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap gap-3 text-xs text-neutral-400">
+                <span>{formatCompactCount(creator.readerProof)} reader proof</span>
+                <span>{creator.completedCount} completed</span>
+                {creator.relatedTitleCount > 0 ? <span>{creator.relatedTitleCount} related title matches</span> : null}
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleCreatorClick(creator)}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  Open creator page
+                </button>
+                {creator.spotlightSeries?.id ? (
+                  <button
+                    type="button"
+                    onClick={() => handleSeriesClick(creator.spotlightSeries.id)}
+                    className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                  >
+                    Open lead title
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </SurfacePanel>
+  );
+}

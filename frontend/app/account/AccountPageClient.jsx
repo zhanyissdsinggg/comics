@@ -6,6 +6,7 @@ import SiteHeader from "../../components/layout/SiteHeader";
 import ReadingStats from "../../components/account/ReadingStats";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
+import CommerceSuccessBanner from "../../components/common/CommerceSuccessBanner";
 import { LANGUAGE_OPTIONS, REGION_KEYS, getRegionConfig } from "../../lib/region/config";
 import { setCookie } from "../../lib/cookies";
 import { applyPreferencesToStorage } from "../../lib/preferencesClient";
@@ -15,6 +16,10 @@ import { apiGet, apiPost } from "../../lib/apiClient";
 import SocialAuthButton from "../../components/auth/SocialAuthButton";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { isGoogleAuthEnabled } from "../../lib/socialAuthConfig";
+import {
+  consumeCommerceSuccessForPath,
+  getCommerceSuccessPresentation,
+} from "../../lib/commerceSuccess";
 
 const REGION_KEY = "mn_region";
 const LANG_KEY = "mn_lang";
@@ -52,6 +57,7 @@ export default function AccountPage() {
   const [providersLoading, setProvidersLoading] = useState(false);
   const [providerStatus, setProviderStatus] = useState("");
   const [providerBusy, setProviderBusy] = useState(false);
+  const [commerceNotice, setCommerceNotice] = useState(null);
   const googleAuthEnabled = isGoogleAuthEnabled();
 
   useEffect(() => {
@@ -155,6 +161,10 @@ export default function AccountPage() {
   useEffect(() => {
     loadAuthProviders();
   }, [loadAuthProviders]);
+
+  useEffect(() => {
+    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/account")));
+  }, []);
 
   const applySetting = (nextRegion, nextLang, nextHide, nextName, nextNotify) => {
     if (typeof window !== "undefined") {
@@ -324,6 +334,13 @@ export default function AccountPage() {
             </>
           }
         />
+
+        {commerceNotice ? (
+          <CommerceSuccessBanner
+            notice={commerceNotice}
+            onDismiss={() => setCommerceNotice(null)}
+          />
+        ) : null}
 
         {message ? (
           <SurfacePanel className="border border-white/10 bg-emerald-500/10">

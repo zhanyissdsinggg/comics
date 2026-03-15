@@ -92,6 +92,7 @@ function normalizeSeries(entry, index) {
   return {
     id: String(source.id || `series-${index + 1}`),
     title: String(source.title || "未命名作品"),
+    author: String(source.author || ""),
     type: source.type === "novel" ? "novel" : "comic",
     status: STATUS_OPTIONS.includes(source.status) ? source.status : "Ongoing",
     adult: Boolean(source.adult),
@@ -177,6 +178,17 @@ function sortSeries(list, sortBy) {
     return 0;
   });
 }
+function extractSeriesCollection(payload) {
+  if (Array.isArray(payload?.series)) {
+    return payload.series;
+  }
+
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+
+  return [];
+}
 function Feedback({ feedback, onDismiss }) {
   return feedback?.message ? <AdminFeedbackBanner feedback={feedback} onDismiss={onDismiss} /> : null;
 }
@@ -234,6 +246,12 @@ function SeriesCard(props) {
             <div className="space-y-1">
               <button type="button" onClick={() => onOpenDetails(series.id)} className="text-left text-lg font-semibold text-white transition hover:text-ios-blue">{series.title}</button>
               <p className="text-xs uppercase tracking-wide text-ios-gray-500">{series.id}</p>
+              <p className="text-sm text-ios-gray-400">
+                作者：
+                <span className={series.author ? "text-white" : "text-amber-300"}>
+                  {series.author || "未填写"}
+                </span>
+              </p>
               <p className="line-clamp-2 text-sm text-ios-gray-300">{series.description || "暂无简介。"}</p>
               <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-medium">
                 <span className="rounded-full bg-ios-gray-800/80 px-2.5 py-1 text-ios-gray-300">
@@ -307,6 +325,9 @@ export default function AdminSeriesPageNew() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading } = useAdminAuth();
+  const scopedCreatorQuery = useMemo(() => String(searchParams.get("q") || "").trim(), [searchParams]);
+  const paramSearchQuery = useMemo(() => String(searchParams.get("q") || searchParams.get("search") || "").trim(), [searchParams]);
+  const hasScopedCreatorFilter = Boolean(scopedCreatorQuery);
   const [seriesList, setSeriesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState(EMPTY_FEEDBACK);
@@ -336,7 +357,9 @@ export default function AdminSeriesPageNew() {
   useEffect(() => {
     const nextType = searchParams.get("type");
     setTypeFilter(nextType === "comic" || nextType === "novel" ? nextType : "all");
-  }, [searchParams]);
+    setSearchQuery(paramSearchQuery);
+    setDebouncedSearchQuery(paramSearchQuery);
+  }, [paramSearchQuery, searchParams]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push("/admin/login");
@@ -346,10 +369,11 @@ export default function AdminSeriesPageNew() {
 
   const loadSeries = useCallback(async () => {
     setLoading(true);
-    const queryString = buildQueryString(debouncedSearchQuery, typeFilter, advancedFilters);
-    const response = await apiGet(`/api/admin/series/search/advanced${queryString ? `?${queryString}` : ""}`);
+    const response = hasScopedCreatorFilter
+      ? await apiGet("/api/admin/series")
+      : await apiGet(`/api/admin/series/search/advanced?${buildQueryString(debouncedSearchQuery, typeFilter, advancedFilters)}`);
     if (response.ok) {
-      const nextSeries = Array.isArray(response.data?.series) ? response.data.series.filter(Boolean).map(normalizeSeries) : [];
+      const nextSeries = extractSeriesCollection(response.data).filter(Boolean).map(normalizeSeries);
       setSeriesList(nextSeries);
       setSelectedSeries((current) => current.filter((id) => nextSeries.some((series) => series.id === id)));
     } else {
@@ -357,7 +381,7 @@ export default function AdminSeriesPageNew() {
       setFeedback({ type: "error", message: response.error || "作品加载失败。" });
     }
     setLoading(false);
-  }, [advancedFilters, debouncedSearchQuery, typeFilter]);
+  }, [advancedFilters, debouncedSearchQuery, hasScopedCreatorFilter, typeFilter]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -370,7 +394,17 @@ export default function AdminSeriesPageNew() {
   const filteredSeries = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const items = seriesList.filter((series) => {
-      const matchesSearch = !normalizedQuery || series.title.toLowerCase().includes(normalizedQuery) || series.id.toLowerCase().includes(normalizedQuery);
+      const matchesSearch =
+        !normalizedQuery ||
+        series.title.toLowerCase().includes(normalizedQuery) ||
+        series.id.toLowerCase().includes(normalizedQuery) ||
+        series.author.toLowerCase().includes(normalizedQuery);
+      const matchesType = typeFilter === "all" || series.type === typeFilter;
+      const matchesStatus = advancedFilters.status === "all" || series.status === advancedFilters.status;
+      const matchesAdult =
+        advancedFilters.adultContent === "all" ||
+        (advancedFilters.adultContent === "adult" && series.adult) ||
+        (advancedFilters.adultContent === "general" && !series.adult);
       const matchesPublish = advancedFilters.publishStatus === "all" || (advancedFilters.publishStatus === "published" && series.isPublished) || (advancedFilters.publishStatus === "unpublished" && !series.isPublished);
       const matchesQuick =
         quickFilter === "all" ||
@@ -378,10 +412,10 @@ export default function AdminSeriesPageNew() {
         (quickFilter === "noCover" && !series.coverUrl) ||
         (quickFilter === "draft" && !series.isPublished) ||
         (quickFilter === "adult" && series.adult);
-      return matchesSearch && matchesPublish && matchesQuick;
+      return matchesSearch && matchesType && matchesStatus && matchesAdult && matchesPublish && matchesQuick;
     });
     return sortSeries(items, advancedFilters.sortBy);
-  }, [advancedFilters.publishStatus, advancedFilters.sortBy, quickFilter, searchQuery, seriesList]);
+  }, [advancedFilters.adultContent, advancedFilters.publishStatus, advancedFilters.sortBy, advancedFilters.status, quickFilter, searchQuery, seriesList, typeFilter]);
 
   const seriesStats = useMemo(() => {
     const total = seriesList.length;
@@ -669,12 +703,28 @@ export default function AdminSeriesPageNew() {
 
       <section className="rounded-5xl border border-ios-gray-800 bg-neutral-900/60 p-5 shadow-ios">
         <div className="flex flex-col gap-4">
+          {hasScopedCreatorFilter ? (
+            <div className="flex flex-col gap-3 rounded-4xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-4 text-sm text-emerald-100 md:flex-row md:items-center md:justify-between">
+              <p>
+                当前正按创作者关键词筛选作品库：
+                <span className="font-semibold text-white">{scopedCreatorQuery}</span>
+                。本页会在当前作品列表内匹配标题、ID 和作者字段，方便你直接修作品归因。
+              </p>
+              <button
+                type="button"
+                onClick={() => router.push("/admin/series")}
+                className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white transition hover:border-white/25 hover:bg-white/[0.1]"
+              >
+                清除创作者筛选
+              </button>
+            </div>
+          ) : null}
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex flex-wrap gap-2">
               {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "bg-ios-blue text-white" : "bg-ios-gray-900 text-ios-gray-300 hover:bg-ios-gray-800"}`}>{tab.label}</button>)}
             </div>
             <div className="flex flex-1 flex-wrap items-center gap-2 xl:justify-end">
-              <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-ios-gray-800 bg-ios-gray-950/80 px-4 py-3 xl:max-w-md"><Search size={16} className="text-ios-gray-500" /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、ID、发布草稿..." className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ios-gray-500" /></label>
+              <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-ios-gray-800 bg-ios-gray-950/80 px-4 py-3 xl:max-w-md"><Search size={16} className="text-ios-gray-500" /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、ID、作者、发布草稿..." className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ios-gray-500" /></label>
               <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
               <button type="button" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0} className="rounded-full border border-ios-gray-800 bg-ios-gray-950/80 px-4 py-3 text-sm font-semibold text-ios-gray-200 transition hover:bg-ios-gray-900 disabled:cursor-not-allowed disabled:opacity-50">{allVisibleSelected ? "清空选择" : "全选"}</button>
               <div className="flex items-center overflow-hidden rounded-full border border-ios-gray-800 bg-ios-gray-950/80">

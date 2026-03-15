@@ -53,6 +53,11 @@ export class SeriesController {
       rating: Number(base?.rating || 0),
       ratingCount: Number(base?.ratingCount || 0),
       description: String(base?.description || ""),
+      createdAt: base?.createdAt || null,
+      updatedAt: base?.updatedAt || null,
+      author: String(base?.author || ""),
+      followers: Number(base?.followers || 0),
+      views: Number(base?.views || 0),
       pricing: {
         currency: String(base?.pricing?.currency || "POINTS"),
         episodePrice: Number(base?.pricing?.episodePrice || 0),

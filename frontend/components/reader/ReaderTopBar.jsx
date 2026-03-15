@@ -61,7 +61,7 @@ export default function ReaderTopBar({
             onClick={onOpenToc}
             className="shrink-0 rounded-full border border-neutral-800 px-2 py-1 text-xs text-neutral-200 md:px-3"
           >
-            TOC
+            Chapters
           </button>
           <button
             type="button"
@@ -84,7 +84,7 @@ export default function ReaderTopBar({
               title="Reader Settings"
               aria-label="Reader Settings"
             >
-              Prefs
+              Settings
             </button>
           ) : null}
           <button
@@ -128,7 +128,7 @@ export default function ReaderTopBar({
             onClick={onPrev}
             className="shrink-0 rounded-full border border-neutral-800 px-2 py-1 text-xs text-neutral-200 md:px-3"
           >
-            Prev
+            Previous
           </button>
           <button
             type="button"

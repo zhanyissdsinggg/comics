@@ -18,6 +18,7 @@ import {
   MailCheck,
   Megaphone,
   MessageSquare,
+  PenSquare,
   Radar,
   Receipt,
   Search,
@@ -64,6 +65,7 @@ const NAV_GROUPS = [
     items: [
       { label: "用户", href: "/admin/users", icon: Users, match: ["/admin/users"] },
       { label: "工单", href: "/admin/support", icon: LifeBuoy, match: ["/admin/support"] },
+      { label: "创作者", href: "/admin/creators", icon: PenSquare, match: ["/admin/creators"] },
     ],
   },
   {
@@ -90,6 +92,7 @@ const BREADCRUMB_MAP = [
   { match: "/admin/email-jobs", label: "邮件任务" },
   { match: "/admin/regions", label: "地区设置" },
   { match: "/admin/support", label: "工单" },
+  { match: "/admin/creators", label: "创作者" },
   { match: "/admin/users", label: "用户" },
   { match: "/admin/tracking", label: "追踪设置" },
   { match: "/admin/notifications", label: "通知" },
@@ -229,10 +232,20 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                             }`}
                             title={isCollapsed ? item.label : undefined}
                           >
-                            <Icon size={20} className={`flex-shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110 group-hover:rotate-12"}`} />
+                            <Icon
+                              size={20}
+                              className={`flex-shrink-0 transition-transform duration-300 ${
+                                isActive ? "scale-110" : "group-hover:scale-110 group-hover:rotate-12"
+                              }`}
+                            />
                             {!isCollapsed ? <span className="flex-1 truncate text-left">{item.label}</span> : null}
                             {!isCollapsed ? (
-                              <ChevronDown size={16} className={`flex-shrink-0 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
+                              <ChevronDown
+                                size={16}
+                                className={`flex-shrink-0 transition-transform duration-300 ${
+                                  isExpanded ? "rotate-180" : ""
+                                }`}
+                              />
                             ) : null}
                           </button>
                         ) : (
@@ -245,9 +258,16 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                             }`}
                             title={isCollapsed ? item.label : undefined}
                           >
-                            <Icon size={20} className={`flex-shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110 group-hover:rotate-12"}`} />
+                            <Icon
+                              size={20}
+                              className={`flex-shrink-0 transition-transform duration-300 ${
+                                isActive ? "scale-110" : "group-hover:scale-110 group-hover:rotate-12"
+                              }`}
+                            />
                             {!isCollapsed ? <span className="truncate">{item.label}</span> : null}
-                            {isActive && !isCollapsed ? <div className="ml-auto h-2 w-2 rounded-full bg-ios-green animate-pulse shadow-ios-glow" /> : null}
+                            {isActive && !isCollapsed ? (
+                              <div className="ml-auto h-2 w-2 rounded-full bg-ios-green animate-pulse shadow-ios-glow" />
+                            ) : null}
                           </Link>
                         )}
 
@@ -267,7 +287,9 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                                   }`}
                                 >
                                   <span className="truncate">{child.label}</span>
-                                  {childIsActive ? <div className="ml-auto h-1.5 w-1.5 rounded-full bg-ios-green animate-pulse" /> : null}
+                                  {childIsActive ? (
+                                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-ios-green animate-pulse" />
+                                  ) : null}
                                 </Link>
                               );
                             })}

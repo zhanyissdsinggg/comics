@@ -7,27 +7,60 @@ export const defaultSocialImage = {
   alt: `${siteConfig.companyName} preview image`,
 };
 
-export function createPageMetadata({ title, description, path = "/" }) {
+function resolveSocialImage(image) {
+  if (!image) {
+    return defaultSocialImage;
+  }
+
+  if (typeof image === "string") {
+    return {
+      ...defaultSocialImage,
+      url: /^https?:\/\//i.test(image) ? image : absoluteUrl(image),
+    };
+  }
+
+  if (typeof image === "object" && image.url) {
+    return {
+      ...defaultSocialImage,
+      ...image,
+      url: /^https?:\/\//i.test(String(image.url)) ? String(image.url) : absoluteUrl(String(image.url)),
+    };
+  }
+
+  return defaultSocialImage;
+}
+
+export function createPageMetadata({
+  title,
+  description,
+  path = "/",
+  image = null,
+  openGraphType = "website",
+}) {
   const pageTitle = title ? `${title} | ${siteConfig.siteName}` : siteConfig.siteName;
   const summary = description || siteConfig.defaultDescription;
+  const socialImage = resolveSocialImage(image);
 
   return {
     title,
     description: summary,
+    alternates: {
+      canonical: absoluteUrl(path),
+    },
     openGraph: {
       title: pageTitle,
       description: summary,
       url: absoluteUrl(path),
       siteName: siteConfig.companyName,
-      type: "website",
+      type: openGraphType,
       locale: "en_US",
-      images: [defaultSocialImage],
+      images: [socialImage],
     },
     twitter: {
       card: "summary_large_image",
       title: pageTitle,
       description: summary,
-      images: [defaultSocialImage.url],
+      images: [socialImage.url],
       creator: siteConfig.twitterHandle || undefined,
     },
   };

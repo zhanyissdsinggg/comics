@@ -43,28 +43,48 @@ function formatDate(value) {
 
   return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
-    month: 'short',
+    month: '2-digit',
     day: '2-digit',
   }).format(date);
 }
 
-function getStatusLabel(status) {
-  const statusMap = {
-    PENDING: '待支付',
-    PAID: '已支付',
-    COMPLETED: '已完成',
-    REFUNDED: '已退款',
-    FAILED: '失败',
-    CHARGEBACK: '拒付',
-    pending: '待支付',
-    paid: '已支付',
-    completed: '已完成',
-    refunded: '已退款',
-    failed: '失败',
-    chargeback: '拒付',
-  };
+function formatAmount(amount, currency = 'USD') {
+  const numericAmount = Number(amount || 0);
+  const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
 
-  return statusMap[status] || status || '-';
+  try {
+    return new Intl.NumberFormat('zh-CN', {
+      style: 'currency',
+      currency: normalizedCurrency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numericAmount);
+  } catch {
+    return `${normalizedCurrency} ${numericAmount.toFixed(2)}`;
+  }
+}
+
+function getStatusLabel(status) {
+  const normalized = String(status || '').toUpperCase();
+
+  switch (normalized) {
+    case 'PENDING':
+      return '待支付';
+    case 'PAID':
+      return '已支付';
+    case 'COMPLETED':
+      return '已完成';
+    case 'REFUNDED':
+      return '已退款';
+    case 'FAILED':
+      return '失败';
+    case 'CHARGEBACK':
+      return '拒付';
+    case 'TIMEOUT':
+      return '超时';
+    default:
+      return status || '-';
+  }
 }
 
 function getStatusColor(status) {
@@ -79,6 +99,8 @@ function getStatusColor(status) {
     case 'FAILED':
     case 'CHARGEBACK':
       return 'bg-red-900/30 text-red-400';
+    case 'TIMEOUT':
+      return 'bg-neutral-700 text-neutral-300';
     default:
       return 'bg-neutral-700 text-neutral-300';
   }
@@ -131,13 +153,13 @@ export default function AdminOrdersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setFeedback({ type: 'success', message: '已为所选订单执行退款。' });
+        setFeedback({ type: 'success', message: '已为所选订单发起退款。' });
         refetch();
       },
       onError: (mutationError) => {
         setFeedback({ type: 'error', message: `退款失败：${mutationError.message}` });
       },
-    }
+    },
   );
 
   const bulkDeleteMutation = useBulkMutation(
@@ -155,7 +177,7 @@ export default function AdminOrdersPage() {
       onError: (mutationError) => {
         setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
       },
-    }
+    },
   );
 
   const handleBulkRefund = () => bulkRefundMutation.mutate(selectedIds);
@@ -173,11 +195,11 @@ export default function AdminOrdersPage() {
       ...exportData.map((order) =>
         [
           order.id,
-          order.userId,
+          order.userId || '',
           Number(order.amount || 0).toFixed(2),
-          order.status,
+          getStatusLabel(order.status),
           formatDate(order.createdAt),
-        ].join(',')
+        ].join(','),
       ),
     ].join('\n');
 
@@ -195,13 +217,16 @@ export default function AdminOrdersPage() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-neutral-100">订单管理</h1>
-          <p className="mt-2 text-neutral-400">在同一队列中统一处理交易、退款与批量清理操作。</p>
+          <p className="mt-2 text-neutral-400">
+            在同一个列表里查看订单、退款状态和批量处理动作，方便你快速定位支付问题。
+          </p>
         </div>
 
         <AdminFeedbackBanner
           feedback={feedback}
           onDismiss={() => setFeedback({ type: '', message: '' })}
           className="mb-6"
+          dismissLabel="关闭"
         />
 
         <AdminListToolbar
@@ -213,14 +238,14 @@ export default function AdminOrdersPage() {
           onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
         />
 
-        <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+        <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection} clearLabel="清空选择">
           <button
             type="button"
             onClick={handleBulkRefund}
             disabled={selectedIds.length === 0 || bulkRefundMutation.isPending}
             className="rounded-lg bg-orange-600 px-4 py-2 text-sm text-white transition hover:bg-orange-700 disabled:opacity-50"
           >
-            {bulkRefundMutation.isPending ? '退款中...' : '退款'}
+            {bulkRefundMutation.isPending ? '退款中...' : '批量退款'}
           </button>
           <button
             type="button"
@@ -293,7 +318,9 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-4 py-3 font-medium text-neutral-300">{order.id}</td>
                   <td className="px-4 py-3 text-neutral-300">{order.userId || '-'}</td>
-                  <td className="px-4 py-3 font-medium text-emerald-400">${Number(order.amount || 0).toFixed(2)}</td>
+                  <td className="px-4 py-3 font-medium text-emerald-400">
+                    {formatAmount(order.amount, order.currency)}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`rounded px-2 py-1 text-xs font-medium ${getStatusColor(order.status)}`}>
                       {getStatusLabel(order.status)}
@@ -308,9 +335,11 @@ export default function AdminOrdersPage() {
                         disabled={bulkRefundMutation.isPending}
                         className="text-sm text-orange-400 transition hover:text-orange-300 disabled:opacity-50"
                       >
-                        退款
+                        发起退款
                       </button>
-                    ) : null}
+                    ) : (
+                      <span className="text-xs text-neutral-500">已退款</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -325,12 +354,15 @@ export default function AdminOrdersPage() {
         sortBy={sortBy}
         onSortByChange={setSortBy}
         options={sortOptions}
+        title="订单排序"
+        label="排序字段"
+        actionLabel="应用排序"
       />
 
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
         title="删除所选订单"
-        message={`确定删除 ${selectedIds.length} 个选中订单吗？此操作无法撤销。`}
+        message={`确认删除 ${selectedIds.length} 个选中订单吗？此操作无法撤销。`}
         confirmText="删除"
         cancelText="取消"
         isDangerous={true}

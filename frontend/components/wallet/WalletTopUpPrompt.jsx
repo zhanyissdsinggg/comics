@@ -191,7 +191,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                 <Wallet size={32} />
               </div>
             </div>
-            <h2 className="mb-2 text-2xl font-bold text-white">Top up points</h2>
+            <h2 className="mb-2 text-2xl font-bold text-white">Top up your wallet</h2>
             <p className="text-sm text-neutral-400">
               Balance: <span className="font-semibold text-emerald-400">{formatUSNumber(currentPoints)} points</span>
             </p>
@@ -260,7 +260,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                       <div className="text-right">
                         <div className="text-xl font-bold text-white">{formatPackagePrice(pkg)}</div>
                         <div className="text-xs text-neutral-500">
-                          {purchaseActionsEnabled ? "Open checkout" : "View in store"}
+                          {purchaseActionsEnabled ? "Open in store" : "Review in store"}
                         </div>
                       </div>
                     </div>
@@ -293,11 +293,11 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
               </div>
               <div>
                 <p className="mb-1 text-sm font-semibold text-emerald-400">
-                  {purchaseActionsEnabled ? "Checkout ready" : "Checkout preview only"}
+                  {purchaseActionsEnabled ? "Store checkout ready" : "Store preview only"}
                 </p>
                 <p className="text-xs text-neutral-400">
                   {purchaseActionsEnabled
-                    ? "Choose a pack to jump into the store with the matching offer already focused."
+                    ? "Choose a pack here to open the store with the matching offer already focused."
                     : "You can review the live pack mix now, and checkout will unlock once secure billing is enabled."}
                 </p>
               </div>

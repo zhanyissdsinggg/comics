@@ -5,6 +5,7 @@ import { Sparkles, Star } from "lucide-react";
 import { useSimilarRecommendations } from "../../hooks/useAIRecommendations";
 import Skeleton from "../common/Skeleton";
 import SurfacePanel from "../common/SurfacePanel";
+import StorefrontContinuationStrip from "../common/StorefrontContinuationStrip";
 
 function getToneClass(tone) {
   if (tone === "warm") {
@@ -22,7 +23,7 @@ function getToneClass(tone) {
   return "from-white/10 via-white/5 to-neutral-950";
 }
 
-export default function SimilarSeriesSection({ seriesId }) {
+export default function SimilarSeriesSection({ seriesId, series }) {
   const router = useRouter();
   const { data: similarSeries, loading, error } = useSimilarRecommendations(seriesId, 6);
 
@@ -66,6 +67,14 @@ export default function SimilarSeriesSection({ seriesId }) {
           <span>AI-assisted recommendations</span>
         </div>
       </div>
+
+      <StorefrontContinuationStrip
+        series={series}
+        similarItems={similarSeries}
+        sourcePath={`/series/${seriesId}`}
+        returnTo={`/series/${seriesId}`}
+        entryPoint="SERIES_SIMILAR"
+      />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {similarSeries.map((series) => (

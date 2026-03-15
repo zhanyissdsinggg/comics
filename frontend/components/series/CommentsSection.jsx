@@ -1,6 +1,8 @@
 ﻿"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import ShareButton from "../common/ShareButton";
 import LoginGateModal from "../layout/LoginGateModal";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -49,7 +51,58 @@ function getCommentLikedByUser(entry) {
   return false;
 }
 
-export default function CommentsSection({ seriesId, rating, ratingCount, onRatingUpdate }) {
+function formatCount(value) {
+  return Number(value || 0).toLocaleString("en-US");
+}
+
+function buildPromptSuggestions({ seriesTitle, author, status, genres }) {
+  const safeTitle = seriesTitle || "this series";
+  const leadGenre = Array.isArray(genres) && genres.length > 0 ? genres[0] : "character-driven stories";
+  const isCompleted = String(status || "").toLowerCase() === "completed";
+
+  return [
+    {
+      id: "hook",
+      label: "Opening hook",
+      text: `The first thing that hooked me in ${safeTitle} was `,
+    },
+    {
+      id: "moment",
+      label: isCompleted ? "Ending payoff" : "Latest episode",
+      text: isCompleted
+        ? `The ending of ${safeTitle} worked for me because `
+        : `The latest episode of ${safeTitle} changed the momentum because `,
+    },
+    {
+      id: "craft",
+      label: author ? `${author} style` : "Art or writing",
+      text: author
+        ? `The strongest part of ${author}'s work in ${safeTitle} is `
+        : `The strongest part of ${safeTitle}'s art or writing is `,
+    },
+    {
+      id: "recommend",
+      label: "Recommend?",
+      text: `I'd recommend ${safeTitle} to readers who like ${leadGenre} because `,
+    },
+  ];
+}
+
+export default function CommentsSection({
+  seriesId,
+  rating,
+  ratingCount,
+  onRatingUpdate,
+  seriesTitle = "",
+  author = "",
+  status = "",
+  genres = [],
+  followers = 0,
+  isFollowing = false,
+  onFollowToggle = null,
+  sharePath = "",
+}) {
+  const router = useRouter();
   const { isSignedIn, signIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
   const [comments, setComments] = useState([]);
@@ -62,6 +115,7 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
   const [ratingPending, setRatingPending] = useState(false);
   const [sortKey, setSortKey] = useState("latest");
   const requestRef = useRef(0);
+  const inputRef = useRef(null);
 
   const displayRating = useMemo(() => {
     if (!rating || !ratingCount) {
@@ -188,6 +242,82 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
     );
   }, [comments, sortKey]);
 
+  const replyCount = useMemo(
+    () =>
+      comments.reduce(
+        (total, comment) => total + (Array.isArray(comment?.replies) ? comment.replies.length : 0),
+        0,
+      ),
+    [comments],
+  );
+
+  const topLikeCount = useMemo(
+    () => comments.reduce((max, comment) => Math.max(max, getCommentLikeCount(comment)), 0),
+    [comments],
+  );
+
+  const promptSuggestions = useMemo(
+    () => buildPromptSuggestions({ seriesTitle, author, status, genres }),
+    [author, genres, seriesTitle, status],
+  );
+
+  const shareUrl = useMemo(() => {
+    if (sharePath) {
+      if (typeof window !== "undefined") {
+        return new URL(sharePath, window.location.origin).toString();
+      }
+      return sharePath;
+    }
+    if (typeof window !== "undefined") {
+      return window.location.href;
+    }
+    return "";
+  }, [sharePath]);
+
+  const commentStats = useMemo(
+    () => [
+      {
+        label: "Readers talking",
+        value: formatCount(comments.length),
+        hint: comments.length > 0 ? "Visible comments in the current thread." : "No public comments yet.",
+      },
+      {
+        label: "Replies",
+        value: formatCount(replyCount),
+        hint: replyCount > 0 ? "Back-and-forth discussion already started." : "No reply chains yet.",
+      },
+      {
+        label: "Top likes",
+        value: formatCount(topLikeCount),
+        hint: topLikeCount > 0 ? "Most likes on a single comment so far." : "No liked comments yet.",
+      },
+      {
+        label: "Library saves",
+        value: formatCount(followers),
+        hint: Number(followers || 0) > 0 ? "Readers who already saved this title." : "First saves are still up for grabs.",
+      },
+    ],
+    [comments.length, followers, replyCount, topLikeCount],
+  );
+
+  const focusComposer = useCallback(
+    (seedText = "") => {
+      if (!isSignedIn) {
+        setActiveModal(true);
+        return;
+      }
+
+      if (seedText) {
+        setInput((prev) => (prev.trim() ? prev : seedText));
+      }
+
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+    },
+    [isSignedIn],
+  );
+
   return (
     <section data-comments-section className="mt-8 rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-6 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -214,6 +344,74 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
               *
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {commentStats.map((item) => (
+          <div
+            key={item.label}
+            className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+              {item.label}
+            </p>
+            <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+              {item.value}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-neutral-400">{item.hint}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 rounded-[24px] border border-white/10 bg-black/20 p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+              Community moves
+            </p>
+            <h4 className="mt-2 text-lg font-semibold text-white">
+              Give readers a reason to react, save, and share before they leave the page.
+            </h4>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-400">
+              Strong series pages turn comments into a return reason instead of hiding discussion under a plain text box.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {onFollowToggle ? (
+              <button
+                type="button"
+                onClick={onFollowToggle}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  isFollowing
+                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                    : "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]"
+                }`}
+              >
+                {isFollowing ? "Saved to library" : "Save to library"}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => focusComposer()}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+            >
+              Write a comment
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(isFollowing ? "/notifications" : "/library")}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+            >
+              {isFollowing ? "Open notifications" : "Open library"}
+            </button>
+            <ShareButton
+              url={shareUrl}
+              title={seriesTitle || "Check out this series"}
+              description={`Join the discussion around ${seriesTitle || "this series"}.`}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+            />
+          </div>
         </div>
       </div>
 
@@ -249,11 +447,30 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
         ) : null}
       </div>
 
+      <div className="mt-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
+          Conversation starters
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {promptSuggestions.map((prompt) => (
+            <button
+              key={prompt.id}
+              type="button"
+              onClick={() => focusComposer(prompt.text)}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08]"
+            >
+              {prompt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="mt-6 flex gap-3">
         <input
+          ref={inputRef}
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Write a comment..."
+          placeholder={`Write a comment about ${seriesTitle || "this series"}...`}
           className="flex-1 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm"
         />
         <button
@@ -269,7 +486,7 @@ export default function CommentsSection({ seriesId, rating, ratingCount, onRatin
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-black/50 p-4 text-sm text-neutral-500">
-            Be the first to comment.
+            Be the first to comment. Strong series pages feel more alive once readers leave a reaction, recommendation, or latest-episode take.
           </div>
         ) : (
           sortedComments.map((comment) => (
