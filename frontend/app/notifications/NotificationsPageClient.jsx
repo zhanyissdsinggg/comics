@@ -283,7 +283,7 @@ export default function NotificationsPage() {
 
         {loading ? (
           <SurfacePanel>
-            <p className="text-sm text-neutral-400">Loading notifications...</p>
+            <p className="text-sm text-neutral-400">Checking your inbox...</p>
           </SurfacePanel>
         ) : error ? (
           <SurfacePanel className="border border-red-500/40 bg-red-500/10 text-red-100">

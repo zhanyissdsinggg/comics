@@ -541,10 +541,10 @@ export default function LibraryPage() {
     {
       id: "shelf-sync",
       eyebrow: "Sync",
-      title: isSignedIn ? "Synced to your account" : "This device only",
+      title: isSignedIn ? "Saved to this account" : "Local to this device",
       description: isSignedIn
         ? "Saved series, rewards, missions, and reading history stay tied to this account."
-        : "Sign in so your saved series, check-ins, and reading progress follow you across devices.",
+        : "Sign in so your saved series, rewards, and reading progress travel across devices.",
       ctaLabel: isSignedIn ? (showCollectionManager ? "Collections open" : "Manage collections") : "Sign in",
       onClick: () => {
         if (!isSignedIn) {
@@ -565,10 +565,10 @@ export default function LibraryPage() {
         <EditorialHero
           eyebrow="Library"
           title="Everything you've saved, followed, or started."
-          description="Jump back into chapters, review your history, and keep all your saved series in one place."
+          description="Resume chapters, scan recent visits, and keep your saved series from feeling scattered."
           secondary={
             isSignedIn
-              ? "Rewards, missions, and reading history stay tied to the current account."
+              ? "Rewards, missions, and reading history stay tied to the current account, so getting back into a story takes less hunting."
               : "Sign in to unlock check-in rewards, mission payouts, and a library that follows you across sessions."
           }
           stats={libraryStats}
@@ -627,10 +627,10 @@ export default function LibraryPage() {
                         Account sync
                       </p>
                       <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                        Turn this into a persistent library.
+                        Turn this into a real cross-device library.
                       </h2>
                       <p className="mt-3 text-sm leading-7 text-neutral-400">
-                        Sign in to unlock daily check-ins, mission payouts, and reading progress that survives device changes.
+                        Sign in to unlock daily rewards, mission payouts, and reading progress that survives device changes.
                       </p>
                     </div>
                     <button
@@ -647,19 +647,19 @@ export default function LibraryPage() {
               <SurfacePanel className="space-y-4">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                    Library settings
+                    Reading mode
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    Match your library to the current mode.
+                    Keep this shelf matched to the catalog you're browsing.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-neutral-400">
-                    Your library follows the current catalog mode and only shows titles available there.
+                    Your library follows the current catalog mode, so what appears here always matches what you can browse right now.
                   </p>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                   <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
-                      Catalog mode
+                      Catalog
                     </p>
                     <p className="mt-3 font-display text-2xl font-semibold text-white">
                       {isAdultMode ? "18+ enabled" : "Standard mode"}
@@ -670,7 +670,7 @@ export default function LibraryPage() {
                   </div>
                   <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
-                      Reading sync
+                      Sync status
                     </p>
                     <p className="mt-3 font-display text-2xl font-semibold text-white">
                       {isSignedIn ? "Connected" : "Local only"}

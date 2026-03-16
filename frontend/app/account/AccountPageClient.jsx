@@ -244,19 +244,19 @@ export default function AccountPage() {
   const accountHeroStats = useMemo(
     () => [
       {
-        label: "Account",
-        value: !hydrated ? "Checking" : isSignedIn ? "Signed in" : "Guest",
+        label: "Account status",
+        value: !hydrated ? "Checking..." : isSignedIn ? "Active" : "Guest mode",
         hint: !hydrated
           ? "Session status is still loading."
           : isSignedIn
             ? user?.emailVerified
-              ? "Email verified and ready for billing changes."
+              ? "Signed in and ready for billing changes."
               : "Verification is still pending."
             : "Sign in to sync history, billing, and alerts.",
       },
       {
-        label: "Plan",
-        value: subscription?.active ? "Subscriber" : "Free",
+        label: "Membership",
+        value: subscription?.active ? "Member" : "Free",
         hint: subscription?.renewAt
           ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
           : "Upgrade to unlock membership perks.",
@@ -264,10 +264,10 @@ export default function AccountPage() {
       {
         label: "Region",
         value: regionConfig.label,
-        hint: `${language.toUpperCase()} interface - ${regionConfig.legalAge}+ age gate`,
+        hint: `${language.toUpperCase()} reading experience | ${regionConfig.legalAge}+ age gate`,
       },
       {
-        label: "Orders",
+        label: "Receipts",
         value: hydrated && isSignedIn ? orders.length.toLocaleString() : "0",
         hint: ordersLoading
           ? "Loading recent receipts."
@@ -303,9 +303,9 @@ export default function AccountPage() {
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Account"
-          title="Manage your profile, plan, and reading settings."
-          description="Update your display name, check orders, and control the settings that affect reading and billing."
-          secondary="Everything here stays in one place so account tasks feel simple instead of scattered."
+          title="Keep billing, sign-in, and reading settings in one place."
+          description="Update your display name, review receipts, and control the settings that shape reading and billing."
+          secondary="The goal here is simple: fewer dead ends, faster account fixes, and one clear home for plan changes."
           stats={accountHeroStats}
           actions={
             <>
@@ -322,14 +322,14 @@ export default function AccountPage() {
                 }
                 className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Manage plan
+                Manage membership
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/orders")}
                 className={secondaryButtonClass}
               >
-                View orders
+                Order history
               </button>
             </>
           }
@@ -358,10 +358,10 @@ export default function AccountPage() {
                   Profile
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Profile and support
+                  Profile, verification, and help
                 </h2>
                 <p className="text-sm leading-6 text-neutral-400">
-                  Keep your display name, verification status, and help links easy to reach.
+                  Keep your display name, verification status, and support shortcuts easy to reach.
                 </p>
               </div>
 
@@ -381,8 +381,8 @@ export default function AccountPage() {
                     {!hydrated
                       ? "Checking session..."
                       : isSignedIn
-                        ? user?.email || user?.id || "Signed in"
-                        : "Guest"}
+                        ? user?.email || user?.id || "Active account"
+                        : "Browsing as guest"}
                   </div>
                 </div>
               </div>
@@ -391,7 +391,7 @@ export default function AccountPage() {
                 <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-xs text-neutral-300">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      Email verification:{" "}
+                      Verification status:{" "}
                       <span className="text-white">
                         {user?.emailVerified ? "Verified" : "Not verified"}
                       </span>
@@ -413,7 +413,7 @@ export default function AccountPage() {
                       }}
                       className={secondaryButtonClass}
                     >
-                      Send verification
+                      Send verification email
                     </button>
                   </div>
                   {verifyStatus ? <div className="mt-2 text-[11px]">{verifyStatus}</div> : null}
@@ -426,21 +426,21 @@ export default function AccountPage() {
                   onClick={() => router.push("/orders")}
                   className={secondaryButtonClass}
                 >
-                  View Orders
+                  Order history
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/notifications")}
                   className={secondaryButtonClass}
                 >
-                  Notifications
+                  Notification center
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/faq")}
                   className={secondaryButtonClass}
                 >
-                  Help & FAQ
+                  Help center
                 </button>
                 <button
                   type="button"
@@ -458,10 +458,10 @@ export default function AccountPage() {
                   Preferences
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Region and reading preferences
+                  Reading preferences
                 </h2>
                 <p className="text-sm leading-6 text-neutral-400">
-                  Choose your region, language, and mature-content history settings in one place.
+                  Keep region, language, and mature-history controls together so the reading experience stays predictable.
                 </p>
               </div>
 
@@ -515,7 +515,7 @@ export default function AccountPage() {
                   Alerts
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Notification preferences
+                  Alerts and reminders
                 </h2>
               </div>
 
@@ -556,7 +556,7 @@ export default function AccountPage() {
                   Billing
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Subscription controls
+                  Membership and billing
                 </h2>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-neutral-400">
@@ -612,7 +612,7 @@ export default function AccountPage() {
                   Security
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Login providers and recovery
+                  Sign-in methods and recovery
                 </h2>
                 <p className="text-sm leading-6 text-neutral-400">
                   Audit which sign-in methods are connected and trigger password recovery without hunting through separate dialogs.
@@ -705,7 +705,7 @@ export default function AccountPage() {
               </div>
               {!hydrated || ordersLoading ? (
                 <div className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-sm text-neutral-400">
-                  Loading orders...
+                  Pulling your recent receipts.
                 </div>
               ) : !isSignedIn ? (
                 <div className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-sm text-neutral-300">
@@ -713,7 +713,7 @@ export default function AccountPage() {
                 </div>
               ) : orders.length === 0 ? (
                 <div className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-sm text-neutral-400">
-                  No orders yet.
+                  No purchases yet. Top-ups and membership charges will appear here.
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -741,7 +741,7 @@ export default function AccountPage() {
                   Settings sync
                 </p>
                 <p className="mt-2 text-sm leading-6 text-neutral-400">
-                  Persist the current device and account preferences to storage and, when signed in, to the backend profile record.
+                  Save the current preferences to this device and, when signed in, to your account profile.
                 </p>
               </div>
               <button
@@ -749,7 +749,7 @@ export default function AccountPage() {
                 onClick={handleSave}
                 className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Save settings
+                Save account settings
               </button>
             </SurfacePanel>
           </div>

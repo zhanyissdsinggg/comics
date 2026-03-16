@@ -90,6 +90,14 @@ function isPayloadRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function formatErrorToastMessage(path: string, friendly: string, requestId?: string): string {
+  if (path.startsWith("/api/admin") && requestId) {
+    return `${friendly} Request ID: ${requestId}`;
+  }
+
+  return friendly;
+}
+
 function readPayloadString(payload: unknown, key: string): string | undefined {
   if (!isPayloadRecord(payload)) {
     return undefined;
@@ -489,8 +497,9 @@ async function requestJson(
           });
         }
         if (response.status >= 500) {
+          const requestId = readPayloadString(payloadRecord, "requestId");
           emitToast({
-            message: `${friendly} RequestId: ${readPayloadString(payloadRecord, "requestId") || "N/A"}`,
+            message: formatErrorToastMessage(path, friendly, requestId),
           });
         } else if (response.status >= 400) {
           emitToast({ message: friendly });
@@ -523,7 +532,7 @@ async function requestJson(
         path.startsWith("/api/bookmarks") ||
         path.startsWith("/api/missions");
       if (!isSilentNetworkPath) {
-        emitToast({ message: getFriendlyMessage("NETWORK_ERROR", "Network error. Check backend.") });
+        emitToast({ message: getFriendlyMessage("NETWORK_ERROR", "Network issue. Please try again.") });
       }
       if (!path.startsWith("/api/events")) {
         trackEvent("api_error", { path, status: 0, errorCode: "NETWORK_ERROR" });

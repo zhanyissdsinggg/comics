@@ -11,7 +11,7 @@ export default function CheckInPanel({
   if (!rewards) {
     return (
       <section className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-6">
-        <p className="text-sm text-neutral-400">Loading check-in...</p>
+        <p className="text-sm text-neutral-400">Checking today's reward...</p>
       </section>
     );
   }
@@ -24,9 +24,9 @@ export default function CheckInPanel({
             <Pill>Streak</Pill>
             <Pill>{rewards.streakCount} days</Pill>
           </div>
-          <h2 className="mt-3 text-xl font-semibold">Daily check-in</h2>
+          <h2 className="mt-3 text-xl font-semibold">Daily rewards</h2>
           <p className="mt-2 text-sm text-neutral-400">
-            Today&apos;s reward: +{rewards.todayReward} bonus points
+            Claim today&apos;s check-in for +{rewards.todayReward} bonus points.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -36,7 +36,7 @@ export default function CheckInPanel({
             disabled={!rewards.canCheckIn || working}
             className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-neutral-900 disabled:opacity-50"
           >
-            {rewards.canCheckIn ? "Check in" : "Checked in"}
+            {rewards.canCheckIn ? "Claim today" : "Already claimed"}
           </button>
           <button
             type="button"

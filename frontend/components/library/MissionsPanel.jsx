@@ -4,7 +4,7 @@ export default function MissionsPanel({ missions, onClaim, workingId }) {
   if (!missions) {
     return (
       <section className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-6">
-        <p className="text-sm text-neutral-400">Loading missions...</p>
+        <p className="text-sm text-neutral-400">Loading reward missions...</p>
       </section>
     );
   }
@@ -20,7 +20,7 @@ export default function MissionsPanel({ missions, onClaim, workingId }) {
           <p className="text-sm font-semibold">{mission.title}</p>
           <p className="text-xs text-neutral-400">{mission.desc}</p>
           <p className="mt-1 text-xs text-neutral-500">
-            {mission.progress}/{mission.target} · +{mission.reward} bonus
+            {mission.progress}/{mission.target} complete | +{mission.reward} bonus points
           </p>
         </div>
         <button
@@ -37,7 +37,7 @@ export default function MissionsPanel({ missions, onClaim, workingId }) {
 
   return (
     <section className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-6">
-      <h2 className="text-lg font-semibold">Missions</h2>
+      <h2 className="text-lg font-semibold">Reward missions</h2>
       <div className="mt-4 space-y-3">
         <p className="text-xs uppercase text-neutral-500">Daily</p>
         {missions.daily.map(renderMission)}

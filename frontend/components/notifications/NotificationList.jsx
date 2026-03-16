@@ -50,7 +50,7 @@ export default function NotificationList({
   if (!notifications) {
     return (
       <section className="rounded-[24px] border border-white/10 bg-black/10 p-6">
-        <p className="text-sm text-neutral-400">Loading notifications...</p>
+        <p className="text-sm text-neutral-400">Checking your inbox...</p>
       </section>
     );
   }
@@ -60,7 +60,7 @@ export default function NotificationList({
       <section className="rounded-[24px] border border-white/10 bg-black/10 p-6">
         <p className="text-sm text-neutral-400">No notifications yet.</p>
         <p className="mt-2 text-xs text-neutral-500">
-          Follow series and keep alerts enabled to populate this inbox.
+          Follow series and keep alerts enabled so this inbox can actually help you get back to reading.
         </p>
       </section>
     );

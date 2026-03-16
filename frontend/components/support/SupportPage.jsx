@@ -85,8 +85,8 @@ export default function SupportPage() {
     () => [
       {
         label: "Channel",
-        value: hydrated && isSignedIn ? "In-app" : "Email",
-        hint: hydrated && isSignedIn ? "Signed-in users can submit tickets directly." : "Guests fall back to their mail client.",
+        value: hydrated && isSignedIn ? "In-app ticket" : "Email reply",
+        hint: hydrated && isSignedIn ? "Signed-in readers can send tickets without leaving the site." : "If you're browsing without signing in, we prepare an email-ready handoff.",
       },
       {
         label: "Reply SLA",
@@ -216,7 +216,7 @@ export default function SupportPage() {
           eyebrow="Support"
           title="Support"
           description="Get help with billing, account, or reading issues."
-          secondary="Send a support request here, or use email if you are browsing as a guest. Add a reply address, include an order ID when it helps, and keep the details in one clear message."
+          secondary="Send a support request here, or use email if you are browsing as a guest. Add a reply address, include an order ID when it helps, and keep everything in one clear message."
           stats={supportStats}
         />
 
@@ -283,7 +283,7 @@ export default function SupportPage() {
                 <p className="mt-2 text-xs text-neutral-500">
                   {hydrated && isSignedIn
                     ? "We prefill your account email, but you can change the best reply address."
-                    : "Guests are handled by email. Add the inbox you want us to reply to."}
+                    : "If you are browsing without signing in, add the inbox you want us to reply to."}
                 </p>
               </div>
               <div>

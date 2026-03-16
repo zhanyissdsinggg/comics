@@ -11,11 +11,77 @@ const toneMap = {
   default: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)",
 };
 
+function readPlaceholdLabel(url) {
+  if (!url) {
+    return "";
+  }
+
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== "placehold.co") {
+      return "";
+    }
+
+    return String(parsed.searchParams.get("text") || "")
+      .replace(/\+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  } catch {
+    return "";
+  }
+}
+
+function CoverFallback({ background, label = "", className = "", style = {} }) {
+  const title = label
+    .replace(/\bEp\s*\d+\b/gi, "")
+    .replace(/\bP\s*\d+\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return (
+    <div
+      className={`relative overflow-hidden ${className}`.trim()}
+      style={{ background, ...style }}
+      aria-hidden="true"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.2),transparent_30%),radial-gradient(circle_at_82%_16%,rgba(255,255,255,0.12),transparent_22%),linear-gradient(180deg,rgba(0,0,0,0.02)_0%,rgba(0,0,0,0.46)_100%)]" />
+      <div className="absolute -right-10 top-5 h-28 w-28 rounded-full border border-white/10 bg-white/5" />
+      <div className="absolute left-4 top-4 rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">
+        Series pick
+      </div>
+      <div className="absolute inset-x-0 bottom-0 p-4">
+        <div className="h-px w-12 bg-white/35" />
+        {title ? (
+          <p className="mt-3 max-w-[12ch] text-lg font-semibold leading-tight text-white drop-shadow-[0_10px_28px_rgba(0,0,0,0.42)]">
+            {title}
+          </p>
+        ) : (
+          <p className="mt-3 text-sm font-semibold uppercase tracking-[0.18em] text-white/75">
+            Editorial cover
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Cover({ tone = "default", coverUrl, className = "", style = {} }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const background = toneMap[tone] || toneMap.default;
   const resolvedUrl = normalizePlaceholdImageUrl(coverUrl);
+  const placeholdLabel = readPlaceholdLabel(coverUrl);
+
+  if (placeholdLabel) {
+    return (
+      <CoverFallback
+        background={background}
+        label={placeholdLabel}
+        className={className}
+        style={style}
+      />
+    );
+  }
 
   if (resolvedUrl) {
     return (
@@ -53,10 +119,10 @@ export default function Cover({ tone = "default", coverUrl, className = "", styl
   }
 
   return (
-    <div
+    <CoverFallback
+      background={background}
       className={`cover ${className}`.trim()}
-      style={{ background, ...style }}
-      aria-hidden="true"
+      style={style}
     />
   );
 }

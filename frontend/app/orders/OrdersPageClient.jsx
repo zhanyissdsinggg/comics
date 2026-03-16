@@ -479,7 +479,7 @@ export default function OrdersPageClient() {
 
         {!hydrated || loading ? (
           <SurfacePanel>
-            <p className="text-sm text-neutral-400">Loading orders...</p>
+            <p className="text-sm text-neutral-400">Pulling your receipts...</p>
           </SurfacePanel>
         ) : !isSignedIn ? (
           <SurfacePanel className="space-y-4">
@@ -499,7 +499,7 @@ export default function OrdersPageClient() {
           </SurfacePanel>
         ) : orders.length === 0 ? (
           <SurfacePanel>
-            <p className="text-sm text-neutral-400">No purchases yet.</p>
+            <p className="text-sm text-neutral-400">No purchases yet. When you buy points or membership, the receipts will appear here.</p>
           </SurfacePanel>
         ) : (
           <SurfacePanel className="space-y-5">
