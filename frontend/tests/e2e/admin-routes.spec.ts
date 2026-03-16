@@ -173,6 +173,7 @@ async function installAdminApiMocks(
     marketingSegmentsBody?: unknown;
     marketingTypesBody?: unknown;
     recommendationSlotsBody?: unknown;
+    recommendationSlotPerformanceById?: Record<string, unknown>;
     recommendationRankingsBody?: unknown;
     recommendationAnalyticsBody?: unknown;
     hotKeywordsBody?: unknown;
@@ -317,6 +318,21 @@ async function installAdminApiMocks(
       }
 
       await fulfillJson(route, { slots: recommendationSlotsState, total: recommendationSlotsState.length });
+      return;
+    }
+
+    if (/\/api\/admin\/recommendations\/slots\/[^/]+\/performance$/.test(pathname)) {
+      const pathnameParts = pathname.split("/");
+      const slotId = pathnameParts[pathnameParts.length - 2] || "";
+      await fulfillJson(route, {
+        performance: options.recommendationSlotPerformanceById?.[slotId] ?? {
+          totalImpressions: 0,
+          totalClicks: 0,
+          totalConversions: 0,
+          avgCtr: "0.00",
+          avgConversionRate: "0.00",
+        },
+      });
       return;
     }
 
@@ -494,6 +510,74 @@ test.describe("Admin route regression", () => {
     });
     await expect(heroSlotCard.getByText("已对齐", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(heroSlotCard.getByText("Midnight Signal", { exact: true }).first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
+  });
+
+  test("should show merchandising performance for active homepage slots", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminApiMocks(page, {
+      seriesBody: MERCH_SERIES_BODY,
+      recommendationSlotsBody: {
+        slots: [
+          {
+            id: "slot-home-hero",
+            slot: "home-hero",
+            name: "home-hero",
+            seriesIds: ["series-hero-001", "series-hero-002"],
+            createdAt: "2026-03-12T08:00:00.000Z",
+            updatedAt: "2026-03-12T08:00:00.000Z",
+          },
+          {
+            id: "slot-home-free-start",
+            slot: "home-free-start",
+            name: "home-free-start",
+            seriesIds: ["series-hero-001"],
+            createdAt: "2026-03-12T08:00:00.000Z",
+            updatedAt: "2026-03-12T08:00:00.000Z",
+          },
+        ],
+        total: 2,
+      },
+      recommendationSlotPerformanceById: {
+        "slot-home-hero": {
+          totalImpressions: 4200,
+          totalClicks: 105,
+          totalConversions: 15,
+          avgCtr: "2.50",
+          avgConversionRate: "14.29",
+        },
+        "slot-home-free-start": {
+          totalImpressions: 2800,
+          totalClicks: 84,
+          totalConversions: 13,
+          avgCtr: "3.00",
+          avgConversionRate: "15.48",
+        },
+      },
+      hotKeywordsBody: {
+        keywords: [{ keyword: "romance", count: 1820, growthLabel: "今日热搜" }],
+      },
+    });
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const performanceSection = page.locator("section").filter({
+      has: page.getByRole("heading", { name: "首页位表现" }),
+    });
+
+    await expect(performanceSection.getByText("总曝光", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(performanceSection.getByText("7,000", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(performanceSection.getByText("2.70%", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(performanceSection.getByText("当前重点作品：Midnight Signal / Neon Contract", { exact: true })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(performanceSection.getByText("表现健康", { exact: true }).first()).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 

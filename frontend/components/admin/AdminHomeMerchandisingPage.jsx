@@ -87,6 +87,71 @@ function formatCompactNumber(value) {
   }).format(Math.max(0, toNumber(value)));
 }
 
+function formatPercentValue(value) {
+  return `${toNumber(value).toFixed(2)}%`;
+}
+
+function normalizePerformance(entry) {
+  const source = entry && typeof entry === "object" ? entry : {};
+  return {
+    totalImpressions: toNumber(source.totalImpressions),
+    totalClicks: toNumber(source.totalClicks),
+    totalConversions: toNumber(source.totalConversions),
+    avgCtr: toNumber(source.avgCtr),
+    avgConversionRate: toNumber(source.avgConversionRate),
+  };
+}
+
+function buildPerformanceQuery(windowKey) {
+  if (windowKey === "all") {
+    return "";
+  }
+
+  const endDate = new Date();
+  const startDate = new Date(endDate);
+  startDate.setHours(0, 0, 0, 0);
+
+  if (windowKey === "7d") {
+    startDate.setDate(startDate.getDate() - 6);
+  } else {
+    startDate.setDate(startDate.getDate() - 29);
+  }
+
+  const params = new URLSearchParams();
+  params.set("startDate", startDate.toISOString());
+  params.set("endDate", endDate.toISOString());
+  return params.toString();
+}
+
+function getPerformanceState(performance) {
+  if (performance.totalImpressions <= 0) {
+    return { tone: "rose", label: "暂无归因" };
+  }
+  if (performance.totalConversions > 0 || performance.avgCtr >= 2) {
+    return { tone: "emerald", label: "表现健康" };
+  }
+  if (performance.totalClicks > 0) {
+    return { tone: "amber", label: "需要优化" };
+  }
+  return { tone: "rose", label: "响应偏弱" };
+}
+
+function MiniMetric({ label, value, hint }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+      <p className="text-xs text-neutral-500">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+      {hint ? <p className="mt-1 text-xs text-neutral-500">{hint}</p> : null}
+    </div>
+  );
+}
+
+const PERFORMANCE_WINDOWS = [
+  { id: "7d", label: "近 7 天" },
+  { id: "30d", label: "近 30 天" },
+  { id: "all", label: "全部" },
+];
+
 function getToneClasses(tone) {
   if (tone === "emerald") {
     return "border-emerald-500/25 bg-emerald-500/10 text-emerald-200";
@@ -155,6 +220,10 @@ export default function AdminHomeMerchandisingPage() {
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [savingSlot, setSavingSlot] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [performanceWindow, setPerformanceWindow] = useState("30d");
+  const [slotPerformanceMap, setSlotPerformanceMap] = useState({});
+  const [performanceLoading, setPerformanceLoading] = useState(false);
+  const [performanceNotice, setPerformanceNotice] = useState("");
 
   const loadSlotsOnly = async () => {
     const { response, data } = await adminFetchJson("/api/admin/recommendations/slots?limit=100", {
@@ -344,10 +413,136 @@ export default function AdminHomeMerchandisingPage() {
     () => slotCards.filter((item) => !item.aligned).length,
     [slotCards],
   );
+  const trackedCurrentSlots = useMemo(
+    () => slotCards.filter((slot) => slot.current?.id),
+    [slotCards],
+  );
+  const slotPerformanceCards = useMemo(
+    () =>
+      trackedCurrentSlots.map((slot) => ({
+        ...slot,
+        performance: slot.current?.id
+          ? slotPerformanceMap[slot.current.id] || normalizePerformance(null)
+          : normalizePerformance(null),
+      })),
+    [slotPerformanceMap, trackedCurrentSlots],
+  );
+  const performanceSummary = useMemo(
+    () =>
+      slotPerformanceCards.reduce(
+        (summary, slot) => ({
+          totalImpressions: summary.totalImpressions + slot.performance.totalImpressions,
+          totalClicks: summary.totalClicks + slot.performance.totalClicks,
+          totalConversions: summary.totalConversions + slot.performance.totalConversions,
+        }),
+        {
+          totalImpressions: 0,
+          totalClicks: 0,
+          totalConversions: 0,
+        },
+      ),
+    [slotPerformanceCards],
+  );
+  const summaryCtr = useMemo(
+    () =>
+      performanceSummary.totalImpressions > 0
+        ? (performanceSummary.totalClicks / performanceSummary.totalImpressions) * 100
+        : 0,
+    [performanceSummary],
+  );
+  const summaryConversionRate = useMemo(
+    () =>
+      performanceSummary.totalClicks > 0
+        ? (performanceSummary.totalConversions / performanceSummary.totalClicks) * 100
+        : 0,
+    [performanceSummary],
+  );
   const readyHeroCount = useMemo(
     () => heroCandidates.filter(({ series }) => getAdminSeriesReadiness(series).isReady).length,
     [heroCandidates],
   );
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSlotPerformanceMap({});
+      setPerformanceNotice("");
+      setPerformanceLoading(false);
+      return;
+    }
+
+    if (trackedCurrentSlots.length === 0) {
+      setSlotPerformanceMap({});
+      setPerformanceNotice("");
+      setPerformanceLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadSlotPerformance() {
+      try {
+        setPerformanceLoading(true);
+        setPerformanceNotice("");
+
+        const query = buildPerformanceQuery(performanceWindow);
+        const results = await Promise.allSettled(
+          trackedCurrentSlots.map((slot) =>
+            adminFetchJson(
+              `/api/admin/recommendations/slots/${slot.current.id}/performance${query ? `?${query}` : ""}`,
+              { cache: "no-store" },
+            ),
+          ),
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        const nextPerformanceMap = {};
+        let failedCount = 0;
+
+        results.forEach((result, index) => {
+          const slotId = trackedCurrentSlots[index]?.current?.id;
+          if (!slotId) {
+            return;
+          }
+
+          if (result.status === "fulfilled" && result.value.response.ok) {
+            nextPerformanceMap[slotId] = normalizePerformance(result.value.data?.performance);
+            return;
+          }
+
+          nextPerformanceMap[slotId] = normalizePerformance(null);
+          failedCount += 1;
+        });
+
+        setSlotPerformanceMap(nextPerformanceMap);
+
+        if (failedCount === trackedCurrentSlots.length) {
+          setPerformanceNotice("首页位表现暂时没有加载成功，先继续完成编排。");
+        } else if (failedCount > 0) {
+          setPerformanceNotice("部分首页位表现数据加载失败，其余数据仍可作为参考。");
+        }
+      } catch (loadError) {
+        if (cancelled) {
+          return;
+        }
+        setSlotPerformanceMap({});
+        setPerformanceNotice(
+          loadError instanceof Error ? loadError.message : "首页位表现数据加载失败。",
+        );
+      } finally {
+        if (!cancelled) {
+          setPerformanceLoading(false);
+        }
+      }
+    }
+
+    void loadSlotPerformance();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, performanceWindow, trackedCurrentSlots]);
 
   const handleCopyIds = async (label, ids) => {
     if (!Array.isArray(ids) || ids.length === 0) {
@@ -662,6 +857,128 @@ export default function AdminHomeMerchandisingPage() {
               </div>
             </section>
           </div>
+        </section>
+
+        <section className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 backdrop-blur-xl">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-white">首页位表现</h2>
+              <p className="mt-2 max-w-3xl text-sm text-neutral-400">
+                别只看首页位排了什么，还要看这些位置最近到底有没有带来曝光、点击和转化。
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {PERFORMANCE_WINDOWS.map((window) => (
+                <button
+                  key={window.id}
+                  type="button"
+                  onClick={() => setPerformanceWindow(window.id)}
+                  className={`rounded-full border px-3.5 py-2 text-sm font-semibold transition ${
+                    performanceWindow === window.id
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                      : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08]"
+                  }`}
+                >
+                  {window.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {performanceNotice ? (
+            <div className="mt-5 rounded-3xl border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-sm text-amber-100">
+              {performanceNotice}
+            </div>
+          ) : null}
+
+          {trackedCurrentSlots.length === 0 ? (
+            <div className="mt-5">
+              <EmptyPanel
+                title="先配置首页位，再看表现"
+                description="当前还没有首页推荐位在跑，等关键位补齐后，这里会显示最近的曝光、点击和转化。"
+              />
+            </div>
+          ) : performanceLoading ? (
+            <div className="mt-5 space-y-4">
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton key={`merchandising-performance-stat-${index}`} className="h-32 rounded-3xl" />
+                ))}
+              </div>
+              <div className="grid gap-4 xl:grid-cols-2">
+                {Array.from({ length: Math.min(2, trackedCurrentSlots.length) }).map((_, index) => (
+                  <Skeleton key={`merchandising-performance-card-${index}`} className="h-64 rounded-3xl" />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                <StatCard
+                  label="活跃首页位"
+                  value={trackedCurrentSlots.length.toLocaleString()}
+                  hint="当前已配置并正在追踪表现的首页位"
+                  tone="cyan"
+                />
+                <StatCard
+                  label="总曝光"
+                  value={formatCompactNumber(performanceSummary.totalImpressions)}
+                  hint="所选时间窗口内首页位累计曝光"
+                />
+                <StatCard
+                  label="总点击"
+                  value={formatCompactNumber(performanceSummary.totalClicks)}
+                  hint="首页位带来的累计点击"
+                />
+                <StatCard
+                  label="总转化"
+                  value={formatCompactNumber(performanceSummary.totalConversions)}
+                  hint="点击后发生的目标动作"
+                  tone={performanceSummary.totalConversions > 0 ? "emerald" : "amber"}
+                />
+                <StatCard
+                  label="综合 CTR"
+                  value={formatPercentValue(summaryCtr)}
+                  hint={`综合转化率 ${formatPercentValue(summaryConversionRate)}`}
+                  tone={summaryCtr >= 2 ? "emerald" : summaryCtr > 0 ? "amber" : "rose"}
+                />
+              </div>
+
+              <div className="mt-5 grid gap-4 xl:grid-cols-2">
+                {slotPerformanceCards.map((slot) => {
+                  const performanceState = getPerformanceState(slot.performance);
+                  const linkedTitles = slot.currentSeries.slice(0, 2).map((series) => series.title);
+
+                  return (
+                    <article key={`${slot.id}-performance`} className="rounded-3xl border border-white/10 bg-black/10 p-5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-lg font-semibold text-white">{slot.label}</h3>
+                        <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${getToneClasses(performanceState.tone)}`}>
+                          {performanceState.label}
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-neutral-300">
+                          {slot.currentIds.length} 个作品 ID
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm text-neutral-400">
+                        {linkedTitles.length > 0
+                          ? `当前重点作品：${linkedTitles.join(" / ")}${slot.currentSeries.length > linkedTitles.length ? ` 等 ${slot.currentSeries.length} 部` : ""}`
+                          : "当前位已配置，但暂时没有匹配到可识别的作品信息。"}
+                      </p>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <MiniMetric label="曝光" value={formatCompactNumber(slot.performance.totalImpressions)} />
+                        <MiniMetric label="点击" value={formatCompactNumber(slot.performance.totalClicks)} />
+                        <MiniMetric label="转化" value={formatCompactNumber(slot.performance.totalConversions)} />
+                        <MiniMetric label="CTR" value={formatPercentValue(slot.performance.avgCtr)} />
+                        <MiniMetric label="转化率" value={formatPercentValue(slot.performance.avgConversionRate)} />
+                        <MiniMetric label="状态" value={performanceState.label} hint={slot.id} />
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </section>
 
         <section className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 backdrop-blur-xl">
