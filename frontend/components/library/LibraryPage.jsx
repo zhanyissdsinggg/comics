@@ -22,18 +22,12 @@ import { useHistoryStore } from "../../store/useHistoryStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import { parallelRequests2 } from "../../lib/parallelRequests";
+import { getLibraryReturnCandidates } from "../../lib/homeMerchandising";
 import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
-
-function getSeriesPriorityScore(series) {
-  const followers = Number(series?.followers || 0);
-  const views = Number(series?.views || 0);
-  const ratingCount = Number(series?.ratingCount || 0);
-  const rating = Number(series?.rating || 0);
-  return followers + views + ratingCount + Math.round(rating * 100);
-}
 
 function PanelLoadingSkeleton({ rows = 3 }) {
   return (
@@ -120,10 +114,13 @@ export default function LibraryPage() {
   const [makeupModal, setMakeupModal] = useState(null);
   const [seriesList, setSeriesList] = useState([]);
   const [seriesResponse, setSeriesResponse] = useState(null);
+  const [homepageSlots, setHomepageSlots] = useState([]);
+  const [homepageSlotsResponse, setHomepageSlotsResponse] = useState(null);
   const [showCollectionManager, setShowCollectionManager] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const showStale = useStaleNotice(seriesResponse);
+  const showHomepageSlotsStale = useStaleNotice(homepageSlotsResponse);
   const { shouldRetry } = useRetryPolicy();
   const openAuthPrompt = () => window.dispatchEvent(new CustomEvent("auth:open"));
   const seriesById = useMemo(
@@ -232,11 +229,14 @@ export default function LibraryPage() {
 
   useEffect(() => {
     const adultFlag = isAdultMode ? "1" : "0";
-    apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }).then((response) => {
-      setSeriesResponse(response);
-      if (response.ok) {
-        setSeriesList(response.data?.series || []);
-        if (response.stale) {
+    parallelRequests2(
+      () => apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }),
+      () => apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, { cacheMs: 60000 }),
+    ).then(([seriesCatalogResponse, storefrontSlotsResponse]) => {
+      setSeriesResponse(seriesCatalogResponse);
+      if (seriesCatalogResponse.ok) {
+        setSeriesList(seriesCatalogResponse.data?.series || []);
+        if (seriesCatalogResponse.stale) {
           apiGet(`/api/series?adult=${adultFlag}`, {
             cacheMs: 30000,
             bust: true,
@@ -248,7 +248,7 @@ export default function LibraryPage() {
             }
           });
         }
-      } else if (response.status === 0 || response.status >= 500) {
+      } else if (seriesCatalogResponse.status === 0 || seriesCatalogResponse.status >= 500) {
         if (shouldRetry(`library_series_${adultFlag}`)) {
           setTimeout(() => {
             apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000, bust: true }).then(
@@ -262,6 +262,26 @@ export default function LibraryPage() {
           }, 600);
         }
       }
+
+      setHomepageSlotsResponse(storefrontSlotsResponse);
+      if (storefrontSlotsResponse.ok) {
+        setHomepageSlots(storefrontSlotsResponse.data?.slots || []);
+        if (storefrontSlotsResponse.stale) {
+          apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, {
+            cacheMs: 60000,
+            bust: true,
+            dedupeMs: 0,
+          }).then((freshResponse) => {
+            setHomepageSlotsResponse(freshResponse);
+            if (freshResponse.ok) {
+              setHomepageSlots(freshResponse.data?.slots || []);
+            }
+          });
+        }
+      } else {
+        setHomepageSlots([]);
+      }
+
       setInitialLoading(false);
     });
   }, [isAdultMode, shouldRetry]);
@@ -380,22 +400,36 @@ export default function LibraryPage() {
 
   const recommendedItems = useMemo(
     () =>
-      seriesList
-        .filter((series) => !visibleLibraryItems.some((item) => item.seriesId === series.id))
-        .sort((left, right) => getSeriesPriorityScore(right) - getSeriesPriorityScore(left))
-        .slice(0, 8)
-        .map((series) => ({
-          id: series.id,
-          seriesId: series.id,
-          title: series.title,
-          subtitle: series.genres?.slice(0, 2).join(" | ") || series.badge || series.status,
-          coverTone: series.coverTone,
-          coverUrl: series.coverUrl,
-          badge: series.badge,
-          isAdult: Boolean(series.adult),
-        })),
-    [seriesList, visibleLibraryItems],
+      getLibraryReturnCandidates(seriesList, {
+        homepageSlots,
+        excludeSeriesIds: visibleLibraryItems.map((item) => item.seriesId),
+        limit: 8,
+      }).map(({ series, sourceSlot, sourceLabel, entryPoint, campaignId }) => ({
+        id: series.id,
+        seriesId: series.id,
+        title: series.title,
+        subtitle:
+          sourceLabel || series.genres?.slice(0, 2).join(" | ") || series.badge || series.status,
+        coverTone: series.coverTone,
+        coverUrl: series.coverUrl,
+        badge: series.badge,
+        isAdult: Boolean(series.adult),
+        sourceSlot,
+        entryPoint,
+        campaignId,
+      })),
+    [homepageSlots, seriesList, visibleLibraryItems],
   );
+  const recommendedRailReason = useMemo(() => {
+    if (recommendedItems.some((item) => item.sourceSlot === "library-return")) {
+      return "The merchandising desk is actively backing these saved-shelf return picks.";
+    }
+    if (recommendedItems.some((item) => Boolean(item.sourceSlot))) {
+      return "The next follow is being filled from live storefront lanes before the chart fallback kicks in.";
+    }
+    return "Strong titles that are not saved yet, so the next follow stays easy.";
+  }, [recommendedItems]);
+  const showLibraryStale = showStale || showHomepageSlotsStale;
   const hasLibrarySignals =
     continueRailItems.length > 0 || historyRail.length > 0 || visibleLibraryItems.length > 0;
   const libraryStats = useMemo(
@@ -556,7 +590,7 @@ export default function LibraryPage() {
           />
         ) : null}
 
-        {showStale ? (
+        {showLibraryStale ? (
           <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
             Showing cached data. Reconnect to refresh your latest shelves.
           </div>
@@ -839,15 +873,15 @@ export default function LibraryPage() {
                   <Rail
                     title="Recommended for You"
                     items={recommendedItems}
-                    reason="Strong titles that are not saved yet, so the next follow stays easy."
+                    reason={recommendedRailReason}
                     ctaLabel="View Chart"
                     href="/rankings?type=popular&window=week"
                     onItemClick={(item) =>
                       router.push(
                         buildLibrarySeriesHref(
                           item.id,
-                          "LIBRARY_RECOMMENDED_RAIL",
-                          "recommended_rail",
+                          item.entryPoint || "LIBRARY_RECOMMENDED_RAIL",
+                          item.campaignId || "recommended_rail",
                         ),
                       )
                     }

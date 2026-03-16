@@ -12,6 +12,7 @@ import {
   buildHomeHeroItems,
   getHomeEditorialSnapshot,
   getHomeHeroCandidates,
+  getLibraryReturnCandidates,
   getReaderProof,
 } from "../../lib/homeMerchandising";
 import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
@@ -54,6 +55,7 @@ function normalizeSlot(entry, index) {
   const source = entry && typeof entry === "object" ? entry : {};
   return {
     id: String(source.id || `slot-${index + 1}`),
+    slot: String(source.slot || source.name || source.id || `slot-${index + 1}`),
     name: String(source.name || source.slot || source.id || `slot-${index + 1}`),
     seriesIds: Array.isArray(source.seriesIds)
       ? source.seriesIds.map((item) => String(item || "").trim()).filter(Boolean)
@@ -497,6 +499,15 @@ export default function AdminHomeMerchandisingPage() {
   const editorialSnapshot = useMemo(() => getHomeEditorialSnapshot(publishedSeries), [publishedSeries]);
   const heroItems = useMemo(() => buildHomeHeroItems(publishedSeries).slice(0, 6), [publishedSeries]);
   const heroCandidates = useMemo(() => getHomeHeroCandidates(publishedSeries, { limit: 6 }), [publishedSeries]);
+  const libraryReturnCandidates = useMemo(
+    () =>
+      getLibraryReturnCandidates(publishedSeries, {
+        homepageSlots: slots,
+        includeLibraryReturnSlot: false,
+        limit: 6,
+      }),
+    [publishedSeries, slots],
+  );
 
   const hotSignals = useMemo(
     () =>
@@ -537,8 +548,14 @@ export default function AdminHomeMerchandisingPage() {
         hint: "热度承接位",
         recommendedIds: editorialSnapshot.breakoutPick?.id ? [editorialSnapshot.breakoutPick.id] : [],
       },
+      {
+        id: "library-return",
+        label: "Library return slot",
+        hint: "Saved-shelf return lane",
+        recommendedIds: libraryReturnCandidates.map((entry) => entry.series?.id).filter(Boolean),
+      },
     ],
-    [editorialSnapshot, heroItems],
+    [editorialSnapshot, heroItems, libraryReturnCandidates],
   );
 
   const slotCards = useMemo(
@@ -546,7 +563,7 @@ export default function AdminHomeMerchandisingPage() {
       slotBlueprints.map((slot) => {
         const current =
           slots.find((item) =>
-            [item.id, item.name].map(normalizeSlotToken).includes(normalizeSlotToken(slot.id)),
+            [item.id, item.slot, item.name].map(normalizeSlotToken).includes(normalizeSlotToken(slot.id)),
           ) || null;
         const currentIds = Array.isArray(current?.seriesIds) ? current.seriesIds : [];
         const recommendedSeries = slot.recommendedIds.map((id) => seriesById.get(id)).filter(Boolean);

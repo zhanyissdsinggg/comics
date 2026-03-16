@@ -96,6 +96,113 @@ export function getReaderProof(series) {
   );
 }
 
+function getLibraryReturnScore(series) {
+  const badges = getBadgeTokens(series);
+  return (
+    getSeriesScore(series) +
+    getReaderProof(series) +
+    toNumber(series?.episodeCount) * 3 +
+    toNumber(series?.freeEpisodeCount) * 18 +
+    (String(series?.status || "").toLowerCase() === "completed" ? 140 : 0) +
+    (badges.includes("HOT") ? 120 : 0) +
+    (badges.includes("NEW") ? 60 : 0) +
+    (series?.coverUrl ? 30 : 0)
+  );
+}
+
+const LIBRARY_RETURN_SLOT_PRIORITIES = [
+  {
+    slotId: "library-return",
+    sourceLabel: "Merchandising return pick",
+    entryPoint: "LIBRARY_RETURN_SLOT",
+    campaignId: "library_return_slot",
+    limit: 8,
+  },
+  {
+    slotId: "home-breakout",
+    sourceLabel: "Momentum pick",
+    entryPoint: "LIBRARY_BREAKOUT_FILL",
+    campaignId: "library_breakout_fill",
+    limit: 2,
+  },
+  {
+    slotId: "home-binge-ready",
+    sourceLabel: "Binge-ready favorite",
+    entryPoint: "LIBRARY_BINGE_FILL",
+    campaignId: "library_binge_fill",
+    limit: 2,
+  },
+  {
+    slotId: "home-free-start",
+    sourceLabel: "Easy re-entry pick",
+    entryPoint: "LIBRARY_FREE_START_FILL",
+    campaignId: "library_free_start_fill",
+    limit: 2,
+  },
+  {
+    slotId: "home-hero",
+    sourceLabel: "Front-page spotlight",
+    entryPoint: "LIBRARY_HERO_FILL",
+    campaignId: "library_hero_fill",
+    limit: 4,
+  },
+];
+
+export function getLibraryReturnCandidates(seriesList, options = {}) {
+  const limit = Math.max(1, Number(options.limit || 8));
+  const visibleCatalog = getVisibleCatalog(seriesList);
+  const excludedIds = new Set(
+    (Array.isArray(options.excludeSeriesIds) ? options.excludeSeriesIds : [])
+      .map((seriesId) => String(seriesId || "").trim())
+      .filter(Boolean),
+  );
+  const includeLibraryReturnSlot = options.includeLibraryReturnSlot !== false;
+  const seenIds = new Set();
+
+  const slotCandidates = LIBRARY_RETURN_SLOT_PRIORITIES.filter(
+    (source) => includeLibraryReturnSlot || source.slotId !== "library-return",
+  ).flatMap((source) =>
+    resolveHomepageSlotSeries(visibleCatalog, options.homepageSlots, source.slotId, source.limit).map(
+      (series) => ({
+        series,
+        sourceSlot: source.slotId,
+        sourceLabel: source.sourceLabel,
+        entryPoint: source.entryPoint,
+        campaignId: source.campaignId,
+      }),
+    ),
+  );
+
+  const prioritizedEntries = slotCandidates.filter((entry) => {
+    const seriesId = String(entry?.series?.id || "").trim();
+    if (!seriesId || excludedIds.has(seriesId) || seenIds.has(seriesId)) {
+      return false;
+    }
+    seenIds.add(seriesId);
+    return true;
+  });
+
+  const fallbackEntries = [...visibleCatalog]
+    .sort((left, right) => getLibraryReturnScore(right) - getLibraryReturnScore(left))
+    .filter((series) => {
+      const seriesId = String(series?.id || "").trim();
+      if (!seriesId || excludedIds.has(seriesId) || seenIds.has(seriesId)) {
+        return false;
+      }
+      seenIds.add(seriesId);
+      return true;
+    })
+    .map((series) => ({
+      series,
+      sourceSlot: null,
+      sourceLabel: null,
+      entryPoint: "LIBRARY_RECOMMENDED_RAIL",
+      campaignId: "recommended_rail",
+    }));
+
+  return [...prioritizedEntries, ...fallbackEntries].slice(0, limit);
+}
+
 export function buildHomeHeroItems(seriesList, options = {}) {
   const visibleCatalog = getVisibleCatalog(seriesList);
   if (visibleCatalog.length === 0) {

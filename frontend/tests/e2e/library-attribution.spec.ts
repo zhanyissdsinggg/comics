@@ -107,6 +107,11 @@ test.describe("Library attribution", () => {
         return;
       }
 
+      if (pathname === "/api/recommendations/homepage") {
+        await fulfillJson(route, { slots: [], count: 0 });
+        return;
+      }
+
       if (pathname === "/api/series") {
         await fulfillJson(route, seriesPayload);
         return;

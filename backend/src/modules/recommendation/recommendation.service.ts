@@ -2,7 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { findSeriesVisibilityCompat, isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
 
-const HOME_SLOT_IDS = ["home-hero", "home-free-start", "home-binge-ready", "home-breakout"] as const;
+const STOREFRONT_SLOT_IDS = [
+  "home-hero",
+  "home-free-start",
+  "home-binge-ready",
+  "home-breakout",
+  "library-return",
+] as const;
 
 export interface HomepageRecommendationSlot {
   id: string;
@@ -249,11 +255,11 @@ export class RecommendationService {
   }
 
   async getHomepageSlots(): Promise<HomepageRecommendationSlot[]> {
-    const orderMap = new Map<string, number>(HOME_SLOT_IDS.map((slot, index) => [slot, index]));
+    const orderMap = new Map<string, number>(STOREFRONT_SLOT_IDS.map((slot, index) => [slot, index]));
     const slots = await this.prisma.recommendationSlot.findMany({
       where: {
         slot: {
-          in: [...HOME_SLOT_IDS],
+          in: [...STOREFRONT_SLOT_IDS],
         },
       },
       orderBy: {

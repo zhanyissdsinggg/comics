@@ -271,6 +271,8 @@ const TEXT_MAP = new Map([
   ["new", "新用户"],
   ["at-risk", "流失风险"],
   ["high-value", "高价值用户"],
+  ["Library return slot", "书架回流位"],
+  ["Saved-shelf return lane", "书架推荐回流位"],
 ]);
 
 const PATTERNS = [

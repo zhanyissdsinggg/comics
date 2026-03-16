@@ -9,6 +9,9 @@ describe("RecommendationService", () => {
       findUnique: jest.fn(),
       findMany: jest.fn(),
     },
+    recommendationSlot: {
+      findMany: jest.fn(),
+    },
     progress: {
       findMany: jest.fn(),
     },
@@ -155,5 +158,65 @@ describe("RecommendationService", () => {
       }),
     );
     expect(result.map((item) => item.id)).toEqual(["series-1"]);
+  });
+
+  it("returns storefront slots in curated order, including the library return lane", async () => {
+    prisma.recommendationSlot.findMany.mockResolvedValue([
+      {
+        id: "slot-library-return",
+        slot: "library-return",
+        seriesIds: ["series-9", "series-8"],
+      },
+      {
+        id: "slot-home-hero",
+        slot: "home-hero",
+        seriesIds: ["series-1", "series-2"],
+      },
+      {
+        id: "slot-home-breakout",
+        slot: "home-breakout",
+        seriesIds: ["series-7"],
+      },
+    ]);
+
+    await expect(service.getHomepageSlots()).resolves.toEqual([
+      {
+        id: "slot-home-hero",
+        slot: "home-hero",
+        seriesIds: ["series-1", "series-2"],
+      },
+      {
+        id: "slot-home-breakout",
+        slot: "home-breakout",
+        seriesIds: ["series-7"],
+      },
+      {
+        id: "slot-library-return",
+        slot: "library-return",
+        seriesIds: ["series-9", "series-8"],
+      },
+    ]);
+
+    expect(prisma.recommendationSlot.findMany).toHaveBeenCalledWith({
+      where: {
+        slot: {
+          in: [
+            "home-hero",
+            "home-free-start",
+            "home-binge-ready",
+            "home-breakout",
+            "library-return",
+          ],
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      select: {
+        id: true,
+        slot: true,
+        seriesIds: true,
+      },
+    });
   });
 });
