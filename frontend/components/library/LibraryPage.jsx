@@ -422,12 +422,12 @@ export default function LibraryPage() {
   );
   const recommendedRailReason = useMemo(() => {
     if (recommendedItems.some((item) => item.sourceSlot === "library-return")) {
-      return "Editors are actively backing these return-session picks for library readers right now.";
+      return "Editors are highlighting these as strong next reads for library users.";
     }
     if (recommendedItems.some((item) => Boolean(item.sourceSlot))) {
-      return "These picks are being filled from live storefront lanes before the chart fallback takes over.";
+      return "These picks come from the site's featured spots before the default recommendations take over.";
     }
-    return "Strong titles that are not saved yet, so the next follow stays easy.";
+    return "Popular series you have not saved yet.";
   }, [recommendedItems]);
   const showLibraryStale = showStale || showHomepageSlotsStale;
   const hasLibrarySignals =
@@ -465,11 +465,11 @@ export default function LibraryPage() {
   const returnConsoleCards = [
     {
       id: "resume-thread",
-      eyebrow: "Resume thread",
-      title: resumeSpotlight ? resumeSpotlight.title : "No active thread yet",
+      eyebrow: "Resume",
+      title: resumeSpotlight ? resumeSpotlight.title : "Nothing in progress yet",
       description: resumeSpotlight
-        ? `${resumeSpotlight.subtitle}. Re-open the latest unlocked chapter before the reading thread goes cold.`
-        : "Start a series and the fastest return path will surface here automatically.",
+        ? `${resumeSpotlight.subtitle}. Jump back into the latest unlocked chapter with one tap.`
+        : "Start a series and your quickest way back will appear here automatically.",
       ctaLabel: resumeSpotlight ? "Resume now" : "Open weekly chart",
       onClick: () => {
         if (resumeSpotlight?.seriesId && resumeSpotlight?.episodeId) {
@@ -500,13 +500,13 @@ export default function LibraryPage() {
     },
     {
       id: "unfinished-stack",
-      eyebrow: "Unfinished stack",
-      title: `${continueRailItems.length} active thread${continueRailItems.length === 1 ? "" : "s"}`,
+      eyebrow: "In progress",
+      title: `${continueRailItems.length} series in progress`,
       description:
         continueRailItems.length > 0
-          ? "These series already have a last-read episode waiting, so the next click can go straight back into the story."
-          : "Once the reader leaves mid-session, unfinished titles should stack up here instead of disappearing.",
-      ctaLabel: continueRailItems.length > 0 ? "Continue reading" : "Search titles",
+          ? "These series already have a saved reading spot, so you can jump right back into the story."
+          : "As soon as you stop mid-series, your unfinished reads will start showing up here.",
+      ctaLabel: continueRailItems.length > 0 ? "Continue reading" : "Search all series",
       onClick: () => {
         const firstContinue = continueRailItems[0];
         if (firstContinue?.seriesId && firstContinue?.episodeId) {
@@ -527,12 +527,12 @@ export default function LibraryPage() {
     },
     {
       id: "binge-ready",
-      eyebrow: "Ready to binge",
-      title: `${completedShelfCount} completed shelf pick${completedShelfCount === 1 ? "" : "s"}`,
+      eyebrow: "Completed",
+      title: `${completedShelfCount} completed series`,
       description:
         completedShelfCount > 0
-          ? "Finished runs are the cleanest long-session return path because there is no release gap to interrupt momentum."
-          : "Completed series convert well for returning readers, so this lane should never stay empty for long.",
+          ? "Finished runs are perfect when you want to keep reading without waiting for the next update."
+          : "Completed series will show up here once you save a few binge-ready reads.",
       ctaLabel: "Browse completed",
       onClick: () => router.push("/search?status=Completed&sort=popular"),
       accentClass:
@@ -540,11 +540,11 @@ export default function LibraryPage() {
     },
     {
       id: "shelf-sync",
-      eyebrow: "Shelf sync",
-      title: isSignedIn ? "Account connected" : "Local shelf only",
+      eyebrow: "Sync",
+      title: isSignedIn ? "Synced to your account" : "This device only",
       description: isSignedIn
-        ? "Followed titles, rewards, missions, and reading history stay tied to this account."
-        : "Sign in so follows, check-ins, mission payouts, and reading progress survive device changes.",
+        ? "Saved series, rewards, missions, and reading history stay tied to this account."
+        : "Sign in so your saved series, check-ins, and reading progress follow you across devices.",
       ctaLabel: isSignedIn ? (showCollectionManager ? "Collections open" : "Manage collections") : "Sign in",
       onClick: () => {
         if (!isSignedIn) {
@@ -563,9 +563,9 @@ export default function LibraryPage() {
       <SiteHeader />
       <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Library desk"
-          title="Your library, arranged for fast return visits."
-          description="Resume chapters, review history, and manage collection surfaces without digging through cluttered shelves."
+          eyebrow="Library"
+          title="Everything you've saved, followed, or started."
+          description="Jump back into chapters, review your history, and keep all your saved series in one place."
           secondary={
             isSignedIn
               ? "Rewards, missions, and reading history stay tied to the current account."
@@ -647,13 +647,13 @@ export default function LibraryPage() {
               <SurfacePanel className="space-y-4">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                    Library controls
+                    Library settings
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    Keep the shelf clean and mode-aware.
+                    Match your library to the current mode.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-neutral-400">
-                    The library follows the current storefront mode and surfaces only the titles that belong in it.
+                    Your library follows the current catalog mode and only shows titles available there.
                   </p>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -665,7 +665,7 @@ export default function LibraryPage() {
                       {isAdultMode ? "18+ enabled" : "Standard mode"}
                     </p>
                     <p className="mt-2 text-sm text-neutral-400">
-                      Only titles allowed in the active storefront lane are shown below.
+                      Only titles allowed in the current mode appear below.
                     </p>
                   </div>
                   <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
@@ -695,18 +695,17 @@ export default function LibraryPage() {
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                    Returning reader console
+                    Pick up where you left off
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    Turn saved titles into clear return paths.
+                    Your next read should be obvious.
                   </h2>
                   <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                    A strong library should tell the reader what to resume, what is ready for binge reading, and where
-                    sync or account value kicks in next.
+                    A good library should show what to resume, what to binge, and what still needs account sync.
                   </p>
                 </div>
                 <p className="text-sm text-neutral-500">
-                  {hasLibrarySignals ? "Live return signals available" : "Starter shelf mode"}
+                  {hasLibrarySignals ? "Ready to resume" : "Start saving series"}
                 </p>
               </div>
 
@@ -738,14 +737,14 @@ export default function LibraryPage() {
               <SurfacePanel className="space-y-4">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                    Shelf starter
+                    Get started
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    This library needs a first follow, bookmark, or chapter.
+                    Start a series or save a favorite.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-neutral-400">
-                    Start a title, save a series, or jump into the weekly chart so this space becomes a real return
-                    lane instead of an empty shell.
+                    Read a chapter, follow a series, or open this week's chart so your library has something to bring
+                    you back to.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -754,14 +753,14 @@ export default function LibraryPage() {
                     onClick={() => router.push("/search")}
                     className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
                   >
-                    Search titles
+                    Search all series
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/rankings?type=popular&window=week")}
                     className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
                   >
-                    Open weekly chart
+                    See weekly chart
                   </button>
                   {!isSignedIn ? (
                     <button

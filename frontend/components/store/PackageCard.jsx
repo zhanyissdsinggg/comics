@@ -64,7 +64,7 @@ export default function PackageCard({
               />
             </svg>
             <p className="text-xs text-emerald-300">
-              Get {bonusPct}% extra points in this wallet top-up
+              Get {bonusPct}% extra points with this pack
             </p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default function PackageCard({
       ) : null}
 
       <div className="mt-3 space-y-1 text-[10px] text-neutral-500">
-        <BenefitRow>Wallet balance stays ready for future unlocks</BenefitRow>
+        <BenefitRow>Points stay ready for future unlocks</BenefitRow>
         <BenefitRow>Use points on premium episodes</BenefitRow>
         <BenefitRow>Supports creators directly</BenefitRow>
         {bonusPct > 0 ? <BenefitRow>Extra bonus points included</BenefitRow> : null}

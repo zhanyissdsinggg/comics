@@ -17,55 +17,55 @@ function getReturnConfig(sourcePath) {
   if (path === "/") {
     return {
       label: "Back to homepage",
-      title: "Homepage lane",
-      hint: "Return to the main storefront and compare the current lead shelf before committing here.",
+      title: "Home",
+      hint: "Go back home if you want to compare more featured picks before choosing this series.",
     };
   }
 
   if (path.startsWith("/search")) {
     return {
-      label: "Back to search desk",
-      title: "Search desk",
-      hint: "Go back to the current search lane if the reader still wants a broader compare set before locking in.",
+      label: "Back to search",
+      title: "Search",
+      hint: "Go back to search if you want to compare more results before committing.",
     };
   }
 
   if (path.startsWith("/rankings")) {
     return {
       label: "Back to rankings",
-      title: "Rankings board",
-      hint: "Return to the chart and compare this title against the rest of the live board without losing context.",
+      title: "Charts",
+      hint: "Go back to the chart and compare this series with the other top picks.",
     };
   }
 
   if (path.startsWith("/creators")) {
     return {
-      label: "Back to creator shelf",
-      title: "Creator shelf",
-      hint: "Step back into the creator lane and compare adjacent titles from the same body of work.",
+      label: "Back to creator page",
+      title: "Creator page",
+      hint: "Go back to the creator page and browse more work from the same creator.",
     };
   }
 
   if (path.startsWith("/library")) {
     return {
       label: "Back to library",
-      title: "Library return",
-      hint: "Return to the saved shelf and keep the session anchored in previously qualified titles.",
+      title: "Library",
+      hint: "Go back to your library and keep reading from the series you have already saved.",
     };
   }
 
   if (path.startsWith("/adult")) {
     return {
-      label: "Back to 18+ desk",
-      title: "Protected desk",
-      hint: "Return to the protected shelf and compare this title against the rest of the gated lane.",
+      label: "Back to 18+ page",
+      title: "18+ section",
+      hint: "Go back to the 18+ section and compare more unlocked titles.",
     };
   }
 
   return {
-    label: "Back to previous lane",
-    title: "Discovery lane",
-    hint: "Return to the surface that delivered this session and compare the current title against that broader lane.",
+    label: "Back to previous page",
+    title: "Discovery",
+    hint: "Go back to the page that led you here and keep browsing.",
   };
 }
 
@@ -78,123 +78,113 @@ function getLaneReason({ entryPoint, campaignId, series }) {
   if (entryPoint.startsWith("search_")) {
     if (campaignId.includes("free") || entryPoint.includes("free")) {
       return {
-        sourceLabel: "Search desk",
-        laneValue: "Free-start rescue",
-        title: `${series?.title || "This title"} is the low-friction handoff the search desk is pushing right now.`,
+        sourceLabel: "Search",
+        laneValue: "Free to start",
+        title: `${series?.title || "This title"} is an easy place to start from search.`,
         description:
           freeEpisodeCount > 0
-            ? `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} make it easier to rescue a weak query with a concrete next click instead of another generic filter pass.`
-            : "Search is using this title as a lower-friction recovery path when the reader needs a stronger first commitment.",
+            ? `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} make it easy to try before spending points.`
+            : "This title gives search users a lower-commitment place to begin.",
       };
     }
 
     if (campaignId.includes("binge") || campaignId.includes("completed") || status === "completed") {
       return {
-        sourceLabel: "Search desk",
-        laneValue: "Binge-ready rescue",
-        title: `${series?.title || "This title"} is the binge-ready handoff search is using to save narrow result sets.`,
-        description:
-          "Completed runs reduce uncertainty fast, which makes them a stronger rescue path than sending the reader back into a dead-end query lane.",
+        sourceLabel: "Search",
+        laneValue: "Completed pick",
+        title: `${series?.title || "This title"} is a finished series search is surfacing right now.`,
+        description: "Completed runs are easier to commit to because you can read straight through without waiting.",
       };
     }
 
     if (campaignId.includes("breakout") || campaignId.includes("editorial") || isNewOrHot) {
       return {
-        sourceLabel: "Search desk",
-        laneValue: "Breakout push",
-        title: `${series?.title || "This title"} is the breakout push currently carrying the search desk.`,
-        description:
-          "When search intent is still soft, a breakout title gives the session a clearer handoff than a blank grid, especially when editorial is already backing the shelf.",
+        sourceLabel: "Search",
+        laneValue: "Breakout pick",
+        title: `${series?.title || "This title"} is one of the standout picks from search right now.`,
+        description: "When a reader is still deciding, a strong breakout title makes the next click easier.",
       };
     }
 
     return {
-      sourceLabel: "Search desk",
-      laneValue: "Search handoff",
-      title: `${series?.title || "This title"} is the strongest next click from the current search lane.`,
-      description:
-        "The search experience should not die at the results count. This title is being used as the handoff that keeps the session moving.",
+      sourceLabel: "Search",
+      laneValue: "Top result",
+      title: `${series?.title || "This title"} is one of the clearest next picks from search.`,
+      description: "Search should help readers move forward, not stop at a result count.",
     };
   }
 
   if (entryPoint.startsWith("home_")) {
     if (campaignId.includes("free")) {
       return {
-        sourceLabel: "Homepage desk",
-        laneValue: "Free-start lead",
-        title: `${series?.title || "This title"} is leading the homepage free-start lane.`,
+        sourceLabel: "Home",
+        laneValue: "Free to start",
+        title: `${series?.title || "This title"} is being featured on home as an easy place to start.`,
         description:
           freeEpisodeCount > 0
-            ? `Homepage is using its ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} to convert a cold visit into chapter one with less bounce risk.`
-            : "Homepage is using this title as a low-friction first click before the reader commits to premium unlocks.",
+            ? `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} make it easy for new readers to jump in.`
+            : "This title is being featured on home as a low-commitment first click.",
       };
     }
 
     if (campaignId.includes("resume")) {
       return {
-        sourceLabel: "Homepage desk",
-        laneValue: "Return spotlight",
-        title: `${series?.title || "This title"} is being surfaced as a return-session spotlight on the homepage.`,
-        description:
-          "Homepage is using this title to pull the reader back into an active reading habit instead of forcing them to rediscover the catalog from zero.",
+        sourceLabel: "Home",
+        laneValue: "Return pick",
+        title: `${series?.title || "This title"} is being featured on home for returning readers.`,
+        description: "Home is surfacing this series to make it easier to jump back into reading.",
       };
     }
 
     return {
-      sourceLabel: "Homepage desk",
-      laneValue: "Editorial shelf",
-      title: `${series?.title || "This title"} is currently being pushed from the homepage discovery desk.`,
-      description:
-        "The storefront is already giving this title premium surface area, so the series page should explain the handoff and keep the user inside the same lane.",
+      sourceLabel: "Home",
+      laneValue: "Featured pick",
+      title: `${series?.title || "This title"} is one of the featured picks on home right now.`,
+      description: "Home is already giving this series premium placement, so the page should keep that context clear.",
     };
   }
 
   if (entryPoint.startsWith("rankings_")) {
     return {
-      sourceLabel: "Rankings board",
-      laneValue: "Chart momentum",
-      title: `${series?.title || "This title"} is part of the live rankings conversation right now.`,
-      description:
-        "Chart traffic converts better when the series page acknowledges the live board behind the click instead of pretending the visit arrived in a vacuum.",
+      sourceLabel: "Charts",
+      laneValue: "Chart pick",
+      title: `${series?.title || "This title"} is trending on the charts right now.`,
+      description: "Chart traffic works best when readers can still feel the momentum behind the click.",
     };
   }
 
   if (entryPoint.startsWith("creator_")) {
     return {
-      sourceLabel: "Creator shelf",
-      laneValue: "Body-of-work compare",
-      title: `${series?.title || "This title"} came through the creator shelf as part of a broader comparison set.`,
-      description:
-        "Readers coming from a creator page are evaluating range and fit, so the series page should keep that comparison context visible.",
+      sourceLabel: "Creator page",
+      laneValue: "More from this creator",
+      title: `${series?.title || "This title"} was opened from the creator page during a broader browse session.`,
+      description: "Readers coming from a creator page are usually comparing more than one title at once.",
     };
   }
 
   if (entryPoint.startsWith("library_")) {
     return {
-      sourceLabel: "Library return",
-      laneValue: "Return-session pick",
-      title: `${series?.title || "This title"} came back into view through the reader's saved shelf.`,
-      description:
-        "Library visits already carry high intent, so the right job here is to remove friction and keep the return session moving.",
+      sourceLabel: "Library",
+      laneValue: "Resume pick",
+      title: `${series?.title || "This title"} is ready for a quick return from your library.`,
+      description: "Library visits already show strong intent, so the goal here is to keep the return smooth.",
     };
   }
 
   if (entryPoint.startsWith("adult_")) {
     return {
-      sourceLabel: "Protected desk",
-      laneValue: "Protected discovery",
-      title: `${series?.title || "This title"} was surfaced through the protected 18+ desk.`,
-      description:
-        "Protected discovery works best when the reader still gets a clear why-now explanation after clearing access rules.",
+      sourceLabel: "18+ section",
+      laneValue: "18+ pick",
+      title: `${series?.title || "This title"} was opened from the 18+ section.`,
+      description: "After clearing access rules, readers should still get a clear reason to keep browsing.",
     };
   }
 
   return {
-    sourceLabel: "Discovery lane",
-    laneValue: "Editorial handoff",
+    sourceLabel: "Discovery",
+    laneValue: "Featured pick",
     title: `${series?.title || "This title"} arrived through a live discovery surface.`,
-    description:
-      "The click came from an editorial or merchandising path, so the page should acknowledge that context instead of acting like a direct visit.",
+    description: "This click came from a featured surface, not a random direct visit.",
   };
 }
 

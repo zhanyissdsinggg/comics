@@ -135,11 +135,11 @@ export default function OrdersPageClient() {
         id: "resume",
         eyebrow: latestOrderGuide.eyebrow,
         title: hasRecentPaidOrder
-          ? "Use the fresh wallet load while the session is still warm."
-          : "Move the latest receipt back into reading instead of stopping on the ledger.",
+          ? "Use your latest purchase while it is still fresh."
+          : "Jump back into reading from your latest order.",
         description: latestPaidOrder
           ? latestOrderGuide.description
-          : "Recent purchases should point back into reading, not just sit in account history.",
+          : "Your latest order should help you get back to reading, not just sit in your history.",
         cta: latestOrderGuide.nextCta,
         onClick: () => router.push(latestOrderGuide.nextHref),
         accentClass:
@@ -147,10 +147,10 @@ export default function OrdersPageClient() {
       },
       {
         id: "membership",
-        eyebrow: "Spend-smart path",
-        title: "Use Orders to compare one-off wallet spending against membership value.",
+        eyebrow: "Plans",
+        title: "Compare plans before you buy more points.",
         description:
-          "Receipts tell you what you already paid. Membership comparison tells you whether repeat reading should switch to a recurring plan.",
+          "If you read often, compare membership against one-off spending before your next purchase.",
         cta: STOREFRONT_TERMS.compareMembership,
         onClick: () =>
           router.push(
@@ -165,10 +165,10 @@ export default function OrdersPageClient() {
       },
       {
         id: "store",
-        eyebrow: "Wallet route",
-        title: "Keep point-pack decisions and receipt history connected.",
+        eyebrow: "Point packs",
+        title: "Need more points? Start here.",
         description:
-          "If the reader needs more balance, the path back to point packs should stay close to the receipts that justify the next spend.",
+          "Keep point packs close to your receipts so it is easy to top up when you are ready.",
         cta: STOREFRONT_TERMS.viewPointPacks,
         onClick: () =>
           router.push(
@@ -187,12 +187,12 @@ export default function OrdersPageClient() {
       },
       {
         id: "support",
-        eyebrow: "Billing follow-up",
+        eyebrow: "Help",
         title: latestPaidOrder
-          ? `Keep ${latestPaidOrder.orderId} attached if billing needs a human follow-up.`
-          : "Receipts and support should stay attached to each other.",
+          ? `Need help with ${latestPaidOrder.orderId}?`
+          : "Need help with an order?",
         description:
-          "Support works better when the order ID travels with the ticket instead of forcing the user to restate the billing context from scratch.",
+          "Contact support with the order ID so billing questions start with the right receipt.",
         cta: STOREFRONT_TERMS.billingSupport,
         onClick: () => router.push("/support"),
         accentClass:
@@ -222,7 +222,7 @@ export default function OrdersPageClient() {
       {
         label: "Orders",
         value: loading ? "..." : orders.length.toLocaleString(),
-        hint: isSignedIn ? "Purchase history loaded from the account ledger." : "Sign in to load receipts and refunds.",
+        hint: isSignedIn ? "Purchase history loaded from your account." : "Sign in to load receipts and refunds.",
       },
       {
         label: "Paid",
@@ -256,17 +256,17 @@ export default function OrdersPageClient() {
           eyebrow="Orders"
           title={
             latestPaidOrder
-              ? "Receipts, refund status, and post-purchase next steps in one place."
+              ? "See receipts, refund status, and what to do next."
               : "View receipts, payment status, and refund requests in one place."
           }
           description={
             latestPaidOrder
-              ? "A strong orders page does more than list charges. It should tell the reader what the latest purchase unlocked, where to go next, and how billing support stays attached."
-              : "Scan recent purchases quickly, refresh the latest payment state, and review refunds without bouncing through account settings."
+              ? "Check your latest purchase, compare plans, and get billing help without leaving the order page."
+              : "Scan recent purchases quickly, refresh payment status, and review refunds without jumping through settings."
           }
           secondary={
             latestPaidOrder
-              ? `Latest paid receipt: ${latestPaidOrder.orderId} - ${formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)}`
+              ? `Latest paid receipt: ${latestPaidOrder.orderId} | ${formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)}`
               : "Order status refreshes are available here whenever you want to check for updates."
           }
           stats={orderStats}
@@ -306,7 +306,7 @@ export default function OrdersPageClient() {
                 onClick={() => router.push(isSignedIn ? "/account" : "/signin?returnTo=/orders")}
                 className={secondaryButtonClass}
               >
-                {isSignedIn ? "Account Overview" : "Sign in"}
+                {isSignedIn ? "Account" : "Sign in"}
               </button>
             </>
           }
@@ -358,14 +358,14 @@ export default function OrdersPageClient() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                      Post-purchase desk
+                      What to do next
                     </p>
                     <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                      Do not end the session on the receipt.
+                      Use your latest purchase right away.
                     </h2>
                     <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                      Once a purchase lands, the site should point the reader back into content, value comparison, or
-                      billing help without making them dig.
+                      After checkout, readers should be able to jump back into reading, compare plans, or get help
+                      without digging through settings.
                     </p>
                   </div>
                   <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">
@@ -430,30 +430,31 @@ export default function OrdersPageClient() {
             <SurfacePanel className="space-y-4">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Refund routing
+                  Refunds
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Keep refund expectations explicit.
+                  Know what can be refunded.
                 </h2>
               </div>
               <ul className="space-y-3 text-sm leading-6 text-neutral-300">
-                <li>Only paid orders can move into refund review.</li>
-                <li>Self-serve refunds depend on billing availability and the current wallet state for the purchased points.</li>
-                <li>When self-serve is unavailable, Support becomes the escalation path instead of leaving users in a dead end.</li>
+                <li>Only paid orders can be reviewed for refunds.</li>
+                <li>Self-serve refunds depend on billing availability and whether the purchased points have already been used.</li>
+                <li>If self-serve refunds are unavailable, support is the next step.</li>
               </ul>
             </SurfacePanel>
 
             <SurfacePanel className="space-y-4">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Support handoff
+                  Need help?
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Order IDs should travel with the support ticket.
+                  Keep the order ID with your message.
                 </h2>
               </div>
               <p className="text-sm leading-6 text-neutral-300">
-                Refresh the ledger after checkout, then include the order ID when you contact Support so billing follow-up starts with the correct receipt.
+                Refresh this page after checkout, then include the order ID when you contact support so the team can
+                start from the right receipt.
               </p>
               <div className="flex flex-wrap gap-3">
                 <button
@@ -468,7 +469,7 @@ export default function OrdersPageClient() {
                   onClick={() => router.push("/account")}
                   className={secondaryButtonClass}
                 >
-                  Account overview
+                  Account
                 </button>
               </div>
             </SurfacePanel>
@@ -505,7 +506,7 @@ export default function OrdersPageClient() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Ledger
+                  Order history
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
                   Order timeline
@@ -552,9 +553,9 @@ export default function OrdersPageClient() {
                     <p className="mt-3 text-sm leading-6 text-neutral-400">
                       {order.status === "PAID"
                         ? refundActionsEnabled
-                          ? "Refund review can start here while secure billing is active, but approval still depends on the current order and wallet state."
-                          : "This receipt is still valid, but refund follow-up currently routes through Support until secure billing actions are enabled."
-                        : "Status changes stay attached to this receipt so payment history remains readable over time."}
+                          ? "You can request a refund here while secure billing is active. Approval still depends on the order status and whether the purchased points have been used."
+                          : "This receipt is still valid, but refund requests currently go through support until secure billing actions are enabled."
+                        : "Any status changes stay attached to this receipt so you can track the order over time."}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {order.status === "PAID" && refundActionsEnabled ? (

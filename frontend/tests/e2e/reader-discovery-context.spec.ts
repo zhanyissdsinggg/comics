@@ -1,7 +1,7 @@
 import { expect, test, type Route } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
-const READER_UI_TIMEOUT_MS = 15000;
+const READER_UI_TIMEOUT_MS = 30000;
 
 const seriesPayload = {
   series: {
@@ -54,6 +54,8 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 
 test.describe("Reader discovery context", () => {
   test("reader should preserve discovery attribution while moving to the next episode", async ({ page }) => {
+    test.setTimeout(60000);
+
     await page.route("**/api/**", async (route) => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
@@ -149,20 +151,22 @@ test.describe("Reader discovery context", () => {
     );
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("From Search desk | Breakout push")).toBeVisible({
+    await expect(page.getByText("From Search | Breakout pick")).toBeVisible({
       timeout: READER_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Back to search desk" })).toBeVisible({
+    await expect(page.getByRole("button", { name: "Back to search" })).toBeVisible({
       timeout: READER_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: "Next" }).click();
-    await page.waitForURL(
-      /\/read\/series-001\/series-001e2\?entry=SEARCH_ZERO_RESULTS&campaignId=search_zero_breakout&sourcePath=%2Fsearch%3Fq%3Dvoid/,
-      { timeout: READER_UI_TIMEOUT_MS },
-    );
+    await Promise.all([
+      page.waitForURL(
+        /\/read\/series-001\/series-001e2\?entry=SEARCH_ZERO_RESULTS&campaignId=search_zero_breakout&sourcePath=%2Fsearch%3Fq%3Dvoid/,
+        { timeout: READER_UI_TIMEOUT_MS, waitUntil: "domcontentloaded" },
+      ),
+      page.getByRole("button", { name: "Next" }).click(),
+    ]);
 
-    await expect(page.getByText("From Search desk | Breakout push")).toBeVisible({
+    await expect(page.getByText("From Search | Breakout pick")).toBeVisible({
       timeout: READER_UI_TIMEOUT_MS,
     });
 

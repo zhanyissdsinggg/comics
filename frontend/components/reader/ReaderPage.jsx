@@ -1392,7 +1392,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
           <div className="flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-left shadow-[0_20px_70px_rgba(0,0,0,0.18)] sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-300/85">
-                Discovery lane
+                Picked from
               </p>
               <p className="mt-2 font-semibold text-white">
                 From {discoveryContext.sourceLabel} | {discoveryContext.laneValue}

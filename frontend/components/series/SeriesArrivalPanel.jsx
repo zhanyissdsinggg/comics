@@ -24,7 +24,7 @@ export default function SeriesArrivalPanel({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-            Arrival context
+            Why you're seeing this
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
             {context.title}
@@ -33,7 +33,7 @@ export default function SeriesArrivalPanel({
         </div>
         <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Return path
+            Back where you came from
           </p>
           <p className="mt-3 text-sm leading-6 text-neutral-300">{context.returnHint}</p>
         </div>
@@ -64,7 +64,7 @@ export default function SeriesArrivalPanel({
         </div>
         <div className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Best next move
+            Best next step
           </p>
           <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
             {context.returnTitle}
@@ -110,7 +110,7 @@ export default function SeriesArrivalPanel({
           onClick={() => router.push("/rankings?type=popular&window=week")}
           className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
         >
-          Compare with weekly chart
+          See weekly chart
         </button>
       </div>
     </SurfacePanel>

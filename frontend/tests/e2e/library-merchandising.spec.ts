@@ -221,7 +221,7 @@ test.describe("Library merchandising", () => {
       has: page.getByRole("heading", { name: "Recommended for You" }),
     });
 
-    await expect(page.getByRole("heading", { name: "Turn saved titles into clear return paths." })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Your next read should be obvious." })).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(recommendedRail.getByRole("button", { name: /Midnight Ledger/i })).toBeVisible({
@@ -240,7 +240,7 @@ test.describe("Library merchandising", () => {
       { timeout: LIBRARY_UI_TIMEOUT_MS },
     );
 
-    await expect(page.getByText("Library return").first()).toBeVisible({ timeout: LIBRARY_UI_TIMEOUT_MS });
+    await expect(page.getByText("Library").first()).toBeVisible({ timeout: LIBRARY_UI_TIMEOUT_MS });
     await expect(page.getByRole("button", { name: "Back to library" })).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });

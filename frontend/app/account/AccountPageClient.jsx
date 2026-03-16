@@ -302,10 +302,10 @@ export default function AccountPage() {
       <SiteHeader />
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Account desk"
-          title="Control identity, billing, and reading preferences from one surface."
-          description="Tighten profile data, review order history, and keep the account state clear without bouncing through disconnected settings screens."
-          secondary="Everything below preserves the existing account logic, but the information hierarchy now reads like a single operator console instead of scattered forms."
+          eyebrow="Account"
+          title="Manage your profile, plan, and reading settings."
+          description="Update your display name, check orders, and control the settings that affect reading and billing."
+          secondary="Everything here stays in one place so account tasks feel simple instead of scattered."
           stats={accountHeroStats}
           actions={
             <>
@@ -329,7 +329,7 @@ export default function AccountPage() {
                 onClick={() => router.push("/orders")}
                 className={secondaryButtonClass}
               >
-                Review Orders
+                View orders
               </button>
             </>
           }
@@ -358,10 +358,10 @@ export default function AccountPage() {
                   Profile
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Identity and support routing
+                  Profile and support
                 </h2>
                 <p className="text-sm leading-6 text-neutral-400">
-                  Keep the display name, session identity, verification state, and support shortcuts visible in one place.
+                  Keep your display name, verification status, and help links easy to reach.
                 </p>
               </div>
 
@@ -458,10 +458,10 @@ export default function AccountPage() {
                   Preferences
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Regional and catalog behavior
+                  Region and reading preferences
                 </h2>
                 <p className="text-sm leading-6 text-neutral-400">
-                  Region, language, and mature-history controls stay grouped so legal rules and browsing preferences remain easy to audit.
+                  Choose your region, language, and mature-content history settings in one place.
                 </p>
               </div>
 

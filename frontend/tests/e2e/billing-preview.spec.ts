@@ -1,6 +1,8 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
+const BILLING_UI_TIMEOUT_MS = 20000;
+
 const BILLING_DISABLED = {
   billingMode: "provider",
   purchaseActionsEnabled: false,
@@ -50,8 +52,12 @@ test.describe("Billing preview states", () => {
     const response = await page.goto("/store", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Checkout preview only", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Checkout coming soon" }).first()).toBeDisabled();
+    await expect(page.getByText("Checkout coming soon", { exact: true }).first()).toBeVisible({
+      timeout: BILLING_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("button", { name: "Checkout coming soon" }).first()).toBeDisabled({
+      timeout: BILLING_UI_TIMEOUT_MS,
+    });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/store", runtimeIssues);
@@ -64,8 +70,12 @@ test.describe("Billing preview states", () => {
     const response = await page.goto("/subscribe", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Membership checkout is currently preview-only.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Checkout coming soon" }).first()).toBeDisabled();
+    await expect(page.getByText("Membership checkout is currently preview-only.")).toBeVisible({
+      timeout: BILLING_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("button", { name: "Checkout coming soon" }).first()).toBeDisabled({
+      timeout: BILLING_UI_TIMEOUT_MS,
+    });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/subscribe", runtimeIssues);

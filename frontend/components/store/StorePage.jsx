@@ -257,14 +257,14 @@ export default function StorePage() {
 
   const handleBuy = async (packageId) => {
     if (!isSignedIn) {
-      setErrorMessage("Sign in to buy points and keep your wallet synced across devices.");
+      setErrorMessage("Sign in to buy points and keep your balance synced across devices.");
       openAuthPrompt();
       return;
     }
 
     if (!purchaseActionsEnabled) {
       setErrorMessage(
-        "Checkout is temporarily unavailable while secure billing is being configured. You can still review packages here.",
+        "Checkout is currently preview-only. You can still compare point packs here.",
       );
       return;
     }
@@ -317,7 +317,7 @@ export default function StorePage() {
     }
 
     if (response.status === 401) {
-      setErrorMessage("Sign in to buy points and keep your wallet synced across devices.");
+      setErrorMessage("Sign in to buy points and keep your balance synced across devices.");
       openAuthPrompt();
       return;
     }
@@ -332,7 +332,7 @@ export default function StorePage() {
     }
 
     if (!isSignedIn) {
-      setCouponMessage("Sign in to redeem coupons and keep them synced to your wallet.");
+      setCouponMessage("Sign in to redeem codes and keep them synced to your account.");
       openAuthPrompt();
       return;
     }
@@ -361,15 +361,15 @@ export default function StorePage() {
         label: "Mode",
         value: isSubscriber ? "Subscriber" : "Standard",
         hint: isSubscriber
-          ? "Membership perks are already active on this wallet."
+          ? "Membership perks are already active on this account."
           : "Upgrade to cut unlock costs and add daily free reads.",
       },
       {
         label: "Coupons",
         value: coupons.length.toLocaleString(),
         hint: isSignedIn
-          ? "Stored to the signed-in account wallet."
-          : "Sign in before redeeming wallet codes.",
+          ? "Stored on your signed-in account."
+          : "Sign in before redeeming codes.",
       },
       {
         label: "Promos",
@@ -391,16 +391,16 @@ export default function StorePage() {
       <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Points store"
-          title="Buy points with clear pricing and fewer checkout surprises."
+          title="Buy points with clear pricing."
           description={
             purchasePreviewOnly
-              ? "Review live point-pack pricing, coupons, and regional tax notes in one place while checkout is temporarily unavailable."
-              : "Balance, coupons, promotions, and point packs stay in one place, with checkout ready when you are."
+              ? "Compare live pack pricing, coupons, and regional tax notes here while checkout stays preview-only."
+              : "See your balance, coupons, promos, and point packs in one place before you buy."
           }
           secondary={
             purchasePreviewOnly
-              ? `${regionConfig.label} pricing - checkout preview only right now`
-              : `${regionConfig.label} pricing - ${regionConfig.taxHint}`
+              ? `${regionConfig.label} pricing | checkout preview only`
+              : `${regionConfig.label} pricing | ${regionConfig.taxHint}`
           }
           stats={storeHeroStats}
           actions={
@@ -447,9 +447,9 @@ export default function StorePage() {
           <SurfacePanel className="border border-amber-500/30 bg-amber-500/10 text-amber-50">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <p className="text-sm font-semibold">Checkout preview only</p>
+                <p className="text-sm font-semibold">Checkout coming soon</p>
                 <p className="text-sm text-amber-100/85">
-                  Package pricing is live, but purchase actions stay disabled until secure billing is fully enabled.
+                  Pack pricing is live, but purchases stay disabled until secure billing is fully enabled.
                 </p>
               </div>
               <button
@@ -457,7 +457,7 @@ export default function StorePage() {
                 onClick={() => router.push("/support")}
                 className={secondaryButtonClass}
               >
-                Open support
+                Contact support
               </button>
             </div>
           </SurfacePanel>
@@ -479,13 +479,13 @@ export default function StorePage() {
               <SurfacePanel className="space-y-4">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                    Account gate
+                    Sign in
                   </p>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                    Sign in before you top up or redeem wallet codes.
+                    Sign in to buy points or redeem codes.
                   </h2>
                   <p className="text-sm leading-6 text-neutral-400">
-                    Purchases, coupons, and balance changes should land on a real account, not a disposable session.
+                    Purchases, coupons, and balance changes should stay attached to a real account.
                   </p>
                 </div>
                 <button
@@ -500,10 +500,10 @@ export default function StorePage() {
 
             <SurfacePanel className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Tax and region
+                Taxes and pricing
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                Checkout policy snapshot
+                See your region before checkout.
               </h2>
               <p className="text-sm leading-6 text-neutral-400">{regionConfig.taxHint}</p>
             </SurfacePanel>
@@ -511,13 +511,13 @@ export default function StorePage() {
             {subscriptionStats ? (
               <SurfacePanel className="space-y-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Membership upsell
+                  Also compare membership
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Subscriber savings
+                  Want better value for weekly reading?
                 </h2>
                 <p className="text-sm leading-6 text-neutral-400">
-                  Save up to {subscriptionStats.maxDiscount}% on unlocks, receive up to {subscriptionStats.maxDailyFree} daily free episodes, and cut free-unlock wait times down to {Math.round(subscriptionStats.bestTtf * 100)}% of the standard timer.
+                  Save up to {subscriptionStats.maxDiscount}% on unlocks, get up to {subscriptionStats.maxDailyFree} daily free episodes, and cut free-unlock wait times down to {Math.round(subscriptionStats.bestTtf * 100)}% of the standard timer.
                 </p>
                 <button
                   type="button"
@@ -545,10 +545,10 @@ export default function StorePage() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                    Coupons
+                    Codes
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    Redeem wallet codes
+                    Redeem a wallet or promo code
                   </h2>
                 </div>
                 <span className="text-xs text-neutral-500">{coupons.length} available</span>
@@ -557,7 +557,7 @@ export default function StorePage() {
                 <input
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value)}
-                  placeholder="Enter wallet or coupon code"
+                  placeholder="Enter a wallet or promo code"
                   className={fieldClass}
                 />
                 <button
@@ -588,7 +588,7 @@ export default function StorePage() {
                   Point packs
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  Pick a pack with the featured offer already surfaced.
+                  Choose a pack and keep reading.
                 </h2>
               </div>
               <p className="text-xs text-neutral-500">{orderedPackages.length} packages available</p>
@@ -619,14 +619,14 @@ export default function StorePage() {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Buying guide
+                Points or membership?
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                Choose points, membership, and support paths with less guesswork.
+                Pick the option that fits how you read.
               </h2>
             </div>
             <p className="text-xs text-neutral-500">
-              This page should answer value, delivery, and support questions before checkout starts.
+              Compare one-time point packs, recurring plans, and support options before checkout starts.
             </p>
           </div>
 
@@ -636,10 +636,10 @@ export default function StorePage() {
                 Points packs
               </p>
               <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                Best for selective spending
+                Best for one-off unlocks
               </h3>
               <p className="mt-3 text-sm leading-6 text-neutral-300">
-                Buy points when you want one-off unlocks, promo flexibility, or a wallet that does not auto-renew.
+                Buy points when you want flexibility, promo codes, or no monthly renewal.
               </p>
               <div className="mt-4 space-y-2 text-sm text-neutral-400">
                 <p>
@@ -647,23 +647,23 @@ export default function StorePage() {
                   <span className="text-white">
                     {packageDecisionSummary?.cheapest?.name || "Starter"}
                     {packageDecisionSummary?.cheapest?.priceLabel
-                      ? ` · ${packageDecisionSummary.cheapest.priceLabel}`
+                      ? ` | ${packageDecisionSummary.cheapest.priceLabel}`
                       : ""}
                   </span>
                 </p>
                 <p>
-                  Largest wallet load:{" "}
+                  Largest pack:{" "}
                   <span className="text-white">
                     {packageDecisionSummary?.largest
-                      ? `${packageDecisionSummary.largest.name} · ${formatUSNumber(packageDecisionSummary.largest.totalPts)} pts`
+                      ? `${packageDecisionSummary.largest.name} | ${formatUSNumber(packageDecisionSummary.largest.totalPts)} pts`
                       : "Catalog unavailable"}
                   </span>
                 </p>
                 <p>
-                  Highest bonus:{" "}
+                  Best bonus:{" "}
                   <span className="text-white">
                     {packageDecisionSummary?.highestBonus
-                      ? `${packageDecisionSummary.highestBonus.name} · ${packageDecisionSummary.highestBonus.bonusPct}% extra`
+                      ? `${packageDecisionSummary.highestBonus.name} | ${packageDecisionSummary.highestBonus.bonusPct}% extra`
                       : "Catalog unavailable"}
                   </span>
                 </p>
@@ -675,10 +675,10 @@ export default function StorePage() {
                 Membership
               </p>
               <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                Best for repeat readers
+                Best for regular reading
               </h3>
               <p className="mt-3 text-sm leading-6 text-neutral-300">
-                Membership works better when you read every week, want discounts on unlocks, and care about predictable monthly perks.
+                Membership works best when you read every week, want discounts on unlocks, and like predictable monthly perks.
               </p>
               <div className="mt-4 space-y-2 text-sm text-neutral-400">
                 <p>
@@ -694,7 +694,7 @@ export default function StorePage() {
                   </span>
                 </p>
                 <p>
-                  Wait reduction:{" "}
+                  Wait times:{" "}
                   <span className="text-white">
                     As low as {subscriptionStats ? Math.round(subscriptionStats.bestTtf * 100) : 100}% of the standard timer
                   </span>
@@ -725,18 +725,16 @@ export default function StorePage() {
 
             <div className="rounded-[24px] border border-white/10 bg-black/10 p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
-                Checkout safeguards
+                After purchase
               </p>
               <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                Receipts and help stay visible
+                Receipts and help stay easy to find
               </h3>
               <ul className="mt-4 space-y-3 text-sm leading-6 text-neutral-300">
-                <li>Points are attached to the signed-in wallet so purchases stay synced across devices.</li>
-                <li>Region pricing and tax notes stay visible before checkout instead of appearing after the fact.</li>
-                <li>Orders keeps the receipt trail, while Support handles billing follow-up and manual escalation.</li>
-                <li>
-                  Self-serve refunds depend on billing availability and order state, so this page points users to the right path early.
-                </li>
+                <li>Points stay attached to the signed-in account across devices.</li>
+                <li>Region pricing and tax notes stay visible before checkout.</li>
+                <li>Orders keeps your receipts in one place, and support handles billing questions.</li>
+                <li>Refund options depend on billing availability and order status.</li>
               </ul>
               <div className="mt-5 flex flex-wrap gap-3">
                 <button
@@ -751,7 +749,7 @@ export default function StorePage() {
                   onClick={() => router.push("/support")}
                   className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
                 >
-                  Billing support
+                  {STOREFRONT_TERMS.billingSupport}
                 </button>
               </div>
             </div>
@@ -761,4 +759,5 @@ export default function StorePage() {
     </div>
   );
 }
+
 
