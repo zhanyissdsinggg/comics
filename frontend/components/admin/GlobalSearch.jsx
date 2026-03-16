@@ -40,6 +40,13 @@ const SEARCH_ITEMS = [
     keywords: ["作品", "漫画", "小说", "内容", "series", "content"],
   },
   {
+    id: "storefront",
+    label: "前台体检",
+    href: "/admin/storefront",
+    icon: Search,
+    keywords: ["前台体检", "前台", "就绪度", "审核", "审计", "storefront", "audit", "readiness"],
+  },
+  {
     id: "users",
     label: "用户",
     href: "/admin/users",

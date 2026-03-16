@@ -48,6 +48,12 @@ const NAV_GROUPS = [
           { label: "小说", href: "/admin/series?type=novel" },
         ],
       },
+      {
+        label: "前台体检",
+        href: "/admin/storefront",
+        icon: Search,
+        match: ["/admin/storefront"],
+      },
       { label: "评论", href: "/admin/comments", icon: MessageSquare, match: ["/admin/comments"] },
     ],
   },
@@ -84,6 +90,7 @@ const NAV_GROUPS = [
 const BREADCRUMB_MAP = [
   { match: "/admin", label: "仪表盘", exact: true },
   { match: "/admin/series", label: "作品" },
+  { match: "/admin/storefront", label: "前台体检" },
   { match: "/admin/promotions", label: "活动" },
   { match: "/admin/orders", label: "订单" },
   { match: "/admin/billing", label: "计费" },
