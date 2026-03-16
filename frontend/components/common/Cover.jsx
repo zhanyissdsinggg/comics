@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
+import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
 
 const toneMap = {
   warm: "linear-gradient(135deg, #ffb347 0%, #ff5f6d 100%)",
@@ -10,24 +11,11 @@ const toneMap = {
   default: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)",
 };
 
-// Ensure placehold.co URLs include a real image extension when needed.
-function normalizeCoverUrl(url) {
-  if (!url) return url;
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname === "placehold.co" && !parsed.pathname.match(/\.(png|jpg|jpeg|webp|gif)$/i)) {
-      parsed.pathname = parsed.pathname + ".png";
-      return parsed.toString();
-    }
-  } catch {}
-  return url;
-}
-
 export default function Cover({ tone = "default", coverUrl, className = "", style = {} }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const background = toneMap[tone] || toneMap.default;
-  const resolvedUrl = normalizeCoverUrl(coverUrl);
+  const resolvedUrl = normalizePlaceholdImageUrl(coverUrl);
 
   if (resolvedUrl) {
     return (

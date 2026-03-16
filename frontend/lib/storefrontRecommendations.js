@@ -25,7 +25,7 @@ const HOME_RAIL_PRESETS = {
   trending: {
     eyebrow: "Top now",
     title: "What Readers Are Unlocking",
-    reason: "High-engagement titles climbing across the storefront.",
+    reason: "Popular titles readers are opening right now.",
     href: "/rankings?type=popular&window=week",
     ctaLabel: "View Chart",
   },
@@ -51,11 +51,11 @@ const HOME_RAIL_PRESETS = {
     ctaLabel: "View Free Unlocks",
   },
   adult: {
-    eyebrow: "18+ shelf",
+    eyebrow: "18+ picks",
     title: "18+ After Hours",
-    reason: "Mature titles surfaced inside the protected catalog.",
+    reason: "Mature titles surfaced inside the 18+ catalog.",
     href: "/adult",
-    ctaLabel: "Open 18+ Hub",
+    ctaLabel: "Open 18+ page",
   },
   history: {
     eyebrow: STOREFRONT_TERMS.readingDesk,
@@ -79,9 +79,9 @@ const HOME_RAIL_PRESETS = {
     ctaLabel: "Keep Exploring",
   },
   recommended: {
-    eyebrow: "More in your lane",
-    title: "More In Your Lane",
-    reason: "Genre overlap and behavior patterns point to these next.",
+    eyebrow: "More to try",
+    title: "More To Try",
+    reason: "Genre overlap and reading behavior point to these next.",
     href: "/search",
     ctaLabel: "Explore More",
   },

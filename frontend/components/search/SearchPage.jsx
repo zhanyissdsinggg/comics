@@ -757,14 +757,14 @@ export default function SearchPage() {
           },
       {
         id: isAdultMode ? "adult-desk" : "broad-browse",
-        eyebrow: isAdultMode ? "18+ hub" : "Open browse",
+        eyebrow: isAdultMode ? "18+ page" : "Open browse",
         title: isAdultMode
-          ? "The 18+ section should feel easy to find, not hidden."
+          ? "Go straight to the 18+ section."
           : `If "${backupLabel}" feels like a better fit, start there instead.`,
         description: isAdultMode
-          ? "Use the dedicated 18+ hub, then come back to search when you know what you want."
+          ? "Use the dedicated 18+ page, then come back to search once you know what you want."
           : "Broad browse still helps when you want to compare genre, mood, and popularity before choosing a series.",
-        ctaLabel: isAdultMode ? "Open adult hub" : `Search ${backupLabel}`,
+        ctaLabel: isAdultMode ? "Open 18+ page" : `Search ${backupLabel}`,
         onClick: () =>
           isAdultMode
             ? router.push("/adult")
@@ -886,7 +886,7 @@ export default function SearchPage() {
               "Free unlocks and previews are the easiest way to keep browsing without paying up front.",
             signalLabel: "Chart",
             signalValue: "TTF",
-            signalHint: "Timed free unlock momentum",
+            signalHint: "Timed free unlocks available now",
             ctaLabel: "Open free unlock chart",
             onClick: () => router.push("/rankings?type=ttf&window=all"),
             accentClass:
@@ -914,12 +914,12 @@ export default function SearchPage() {
               ? "The 18+ catalog should be clear and easy to browse."
               : "Completed series are the easiest backup when search is too narrow.",
             description: isAdultMode
-              ? "If a mature search misses, go to the 18+ hub and browse from there."
+              ? "If a mature search misses, go to the 18+ page and browse from there."
               : "Finished stories give you payoff right away without waiting for another update.",
             signalLabel: isAdultMode ? "Mode" : "Finished",
             signalValue: isAdultMode ? "18+" : "Runs",
-            signalHint: isAdultMode ? "Age-gated catalog available" : "Ready for long-session reading",
-            ctaLabel: isAdultMode ? "Open adult hub" : "Browse completed",
+            signalHint: isAdultMode ? "18+ titles are available" : "Ready for a longer read",
+            ctaLabel: isAdultMode ? "Open 18+ page" : "Browse completed",
             onClick: () =>
               isAdultMode
                 ? router.push("/adult")
@@ -962,7 +962,7 @@ export default function SearchPage() {
       <SiteHeader />
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Search desk"
+          eyebrow="Search"
           title={heroTitle}
           description={heroDescription}
           secondary={heroSecondary}
@@ -993,7 +993,7 @@ export default function SearchPage() {
 
         {resultsStale || catalogStale || homepageSlotsStale ? (
           <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-            Showing cached data. Reconnect to refresh live search surfaces.
+            Showing cached data. Reconnect to refresh the latest search results.
           </div>
         ) : null}
 
@@ -1037,7 +1037,7 @@ export default function SearchPage() {
         ) : null}
 
         <StorefrontEventHub
-          eyebrow={query ? "Search moments" : "Discovery moments"}
+          eyebrow={query ? "Search picks" : "Start here"}
           title={
             query
               ? "Keep going after the first result."
@@ -1078,7 +1078,7 @@ export default function SearchPage() {
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
               >
-                Open weekly chart
+                See weekly chart
               </button>
             </div>
             {browsePathGrid}
@@ -1090,7 +1090,7 @@ export default function SearchPage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                  Discovery rails
+                  More to try
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                   {recoPanelTitle}

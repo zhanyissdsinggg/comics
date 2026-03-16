@@ -1,5 +1,5 @@
 /**
- * Generic editorial listing page used for comics and novels.
+ * Generic listing page used for comics and novels.
  */
 
 "use client";
@@ -19,20 +19,20 @@ import { apiGet } from "../../lib/apiClient";
 const PAGE_CONFIG = {
   comic: {
     title: "Comics",
-    description: "Follow weekly hits, completed binge picks, and polished creator-led comic releases in one clean shelf.",
-    secondary: "Use editorial filters instead of endless category pages and jump into a series the moment the fit feels right.",
+    description: "Browse weekly hits, completed binge picks, and standout comic series in one place.",
+    secondary: "Use filters to narrow by genre, popularity, or completion status and jump in when something clicks.",
     emptyIcon: "search",
     emptyTitle: "No comics match this filter set",
-    emptyDescription: "Reset the current filters or move to rankings to widen the shelf.",
+    emptyDescription: "Reset the current filters or open the charts to widen the selection.",
     pathname: "/comics",
   },
   novel: {
     title: "Novels",
-    description: "Browse serialized novels, premium web fiction, and long-form story lanes without losing the storefront rhythm.",
-    secondary: "Sort for momentum, tighten by genre, and surface finished reads before the browsing session cools off.",
+    description: "Browse serialized novels, premium web fiction, and long-form stories in one place.",
+    secondary: "Sort by popularity or latest updates, narrow by genre, and find finished reads faster.",
     emptyIcon: "book",
     emptyTitle: "No novels match this filter set",
-    emptyDescription: "Reset the current filters or move to rankings to reopen discovery.",
+    emptyDescription: "Reset the current filters or open the charts to find more to read.",
     pathname: "/novels",
   },
 };
@@ -172,22 +172,22 @@ export default function SeriesPage({ type = "comic" }) {
       {
         label: "Titles",
         value: loading ? "--" : series.length.toLocaleString(),
-        hint: type === "comic" ? "Comic series live in this storefront lane" : "Novel series live in this storefront lane",
+        hint: type === "comic" ? "Comic series available right now" : "Novel series available right now",
       },
       {
         label: "Visible",
         value: loading ? "--" : filteredAndSortedSeries.length.toLocaleString(),
-        hint: activeFilterCount > 0 ? "Titles left after the active filter set" : "Full shelf visible right now",
+        hint: activeFilterCount > 0 ? "Titles left after the current filters" : "Full catalog visible right now",
       },
       {
         label: "Filters",
         value: String(activeFilterCount),
-        hint: activeFilterCount > 0 ? "Genre, status, or sort is shaping the list" : "Broad browse mode",
+        hint: activeFilterCount > 0 ? "Genre, status, or sort is shaping the list" : "Browsing all titles",
       },
       {
         label: "Mode",
         value: isAdultMode ? "18+" : "Standard",
-        hint: isAdultMode ? "Protected catalog slice can appear here" : "Age-gated titles are hidden",
+        hint: isAdultMode ? "18+ titles can appear here" : "18+ titles are hidden",
       },
     ],
     [activeFilterCount, filteredAndSortedSeries.length, isAdultMode, loading, series.length, type],
@@ -210,8 +210,8 @@ export default function SeriesPage({ type = "comic" }) {
 
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow={type === "comic" ? "Comic desk" : "Novel desk"}
-          title={`Browse ${config.title.toLowerCase()} with a cleaner editorial lane.`}
+          eyebrow={type === "comic" ? "Comics" : "Novels"}
+          title={`Browse ${config.title.toLowerCase()} in one place.`}
           description={config.description}
           secondary={config.secondary}
           stats={heroStats}
@@ -222,14 +222,14 @@ export default function SeriesPage({ type = "comic" }) {
                 onClick={() => router.push("/search")}
                 className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Search titles
+                Search all series
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/rankings")}
                 className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
               >
-                Open rankings
+                See charts
               </button>
             </>
           }
@@ -239,10 +239,10 @@ export default function SeriesPage({ type = "comic" }) {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Shelf controls
+                Filters
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                Tighten the browse lane without losing momentum.
+                Narrow the list without losing your place.
               </h2>
             </div>
             <p className="text-xs text-neutral-500">

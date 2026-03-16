@@ -176,10 +176,10 @@ export default function NotificationsPage() {
       unreadEpisode
         ? {
             id: "episode-return",
-            eyebrow: "Reader return",
-            title: `${unreadEpisode.title} is still waiting to pull this session back into reading.`,
+            eyebrow: "Read next",
+            title: `${unreadEpisode.title} is ready when you want to jump back in.`,
             description:
-              "A top-tier inbox should make the strongest episode return obvious instead of burying it inside a long message list.",
+              "A strong inbox should make the clearest reading return obvious instead of hiding it in a long list.",
             signalLabel: "Unread",
             signalValue: unreadCount.toLocaleString(),
             signalHint: "Messages still waiting in this inbox",
@@ -190,10 +190,10 @@ export default function NotificationsPage() {
           }
         : {
             id: "library-return",
-            eyebrow: "Reader return",
-            title: "No urgent episode alert right now, so library should carry the return visit.",
+            eyebrow: "Back to reading",
+            title: "No urgent episode alert right now? Go back to your library.",
             description:
-              "When the inbox is quiet, the best fallback is a clean handoff back into saved titles and unfinished chapters.",
+              "When the inbox is quiet, the easiest next step is your saved and unfinished series.",
             signalLabel: "Episode alerts",
             signalValue: episodeCount.toLocaleString(),
             signalHint: "Loaded episode-related messages",
@@ -204,17 +204,17 @@ export default function NotificationsPage() {
           },
       {
         id: "offer-return",
-        eyebrow: "Value path",
+        eyebrow: "Offers",
         title: unreadOffer
-          ? `${unreadOffer.title} should surface as the cleanest offer handoff.`
-          : "Keep wallet and membership value visible when the inbox leans promotional.",
+          ? `${unreadOffer.title} is the easiest offer to open next.`
+          : "If promotions are all that's left, keep plans and point packs easy to reach.",
         description: unreadOffer
-          ? "Offer messages only help if they route cleanly into store or membership without making the reader hunt."
-          : "Promotion-heavy inboxes still need a single obvious value path so the page does not feel like loose system mail.",
+          ? "Offer messages only help when they send readers to the right plan or point pack without extra hunting."
+          : "An offer-heavy inbox still needs one clear next step so it does not feel like random system mail.",
         signalLabel: "Offers",
         signalValue: offerCount.toLocaleString(),
         signalHint: "Promo and voucher messages loaded",
-        ctaLabel: unreadOffer?.ctaLabel || "Open point packs",
+        ctaLabel: unreadOffer?.ctaLabel || "See point packs",
         onClick: () => {
           if (unreadOffer) {
             handleNavigate(unreadOffer);
@@ -227,14 +227,14 @@ export default function NotificationsPage() {
       },
       {
         id: "chart-backup",
-        eyebrow: "Discovery backup",
-        title: "If the inbox is thin, hand the reader back to a live chart instead of a dead end.",
+        eyebrow: "Keep browsing",
+        title: "If the inbox is light, go straight to the charts.",
         description:
-          "Notifications work best as a return lane, but rankings should stay one tap away when the inbox cannot carry the whole session.",
+          "Notifications should help readers return, but the charts should always be one tap away when the inbox is quiet.",
         signalLabel: "Discovery",
         signalValue: "Charts",
-        signalHint: "Weekly and free-start boards stay live",
-        ctaLabel: "Open rankings",
+        signalHint: "Weekly and free unlock charts stay live",
+        ctaLabel: "See charts",
         onClick: () => router.push("/rankings?type=popular&window=week"),
         accentClass:
           "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
@@ -247,10 +247,10 @@ export default function NotificationsPage() {
       <SiteHeader />
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Inbox desk"
-          title="Keep episode updates, promos, and voucher alerts in one clean queue."
-          description="Notification routing still works the same, but the page now reads like a usable inbox instead of a loose stack of system messages."
-          secondary="Open a title, jump to an offer, or mark items read without losing scan speed."
+          eyebrow="Inbox"
+          title="Keep episode updates, promos, and vouchers in one place."
+          description="Open a title, jump to an offer, or mark messages read without losing your place."
+          secondary="Your inbox should help you get back to reading fast, not feel like a pile of system mail."
           stats={notificationStats}
           actions={
             <>
@@ -259,14 +259,14 @@ export default function NotificationsPage() {
                 onClick={() => router.push("/library")}
                 className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Open Library
+                Library
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/rankings")}
                 className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
               >
-                View Rankings
+                Charts
               </button>
             </>
           }
@@ -274,9 +274,9 @@ export default function NotificationsPage() {
 
         {!loading && !error ? (
           <StorefrontEventHub
-            eyebrow="Return moments"
-            title="Treat the inbox like a return engine, not a dead stack of alerts."
-            description="The best comic inboxes do more than list messages. They surface the clearest reading return, the next value path, and a backup discovery route before the session fades."
+            eyebrow="From your inbox"
+            title="Notifications should help you jump back in."
+            description="A good comic inbox does more than list messages. It should point to the clearest reading return, the best offer, and one easy backup path."
             events={notificationEventCards}
           />
         ) : null}
@@ -297,7 +297,7 @@ export default function NotificationsPage() {
                   Feed
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  Notification queue
+                  All notifications
                 </h2>
               </div>
               <p className="text-xs text-neutral-500">{notifications.length} items loaded</p>

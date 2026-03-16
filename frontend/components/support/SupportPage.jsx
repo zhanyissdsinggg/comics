@@ -131,7 +131,7 @@ export default function SupportPage() {
         await navigator.clipboard.writeText(draft);
         setFeedback({
           type: "success",
-          text: `Support details copied. Paste them into an email to ${siteConfig.supportEmail}, or use Open Email App.`,
+          text: `Support details copied. Paste them into an email to ${siteConfig.supportEmail}, or use the Open email app button.`,
         });
         return true;
       }
@@ -141,7 +141,7 @@ export default function SupportPage() {
 
     setFeedback({
       type: "success",
-      text: `Your message is ready. Send it to ${siteConfig.supportEmail}, or use Open Email App if your device supports it.`,
+      text: `Your message is ready. Send it to ${siteConfig.supportEmail}, or use the Open email app button if your device supports it.`,
     });
     return true;
   };
@@ -213,10 +213,10 @@ export default function SupportPage() {
       <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <InfoPageNav current="support" />
         <EditorialHero
-          eyebrow="Support desk"
-          title="Send billing, account, and reading issues through a cleaner support console."
-          description="Support now sits inside the same visual system as the rest of the site while preserving direct email fallback for guests and in-app ticket submission for signed-in users."
-          secondary="Add reply context, include an order reference when needed, and keep the expectation window visible before you submit."
+          eyebrow="Support"
+          title="Support"
+          description="Get help with billing, account, or reading issues."
+          secondary="Send a support request here, or use email if you are browsing as a guest. Add a reply address, include an order ID when it helps, and keep the details in one clear message."
           stats={supportStats}
         />
 
@@ -234,7 +234,7 @@ export default function SupportPage() {
                 Ticket form
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                Submit issue details
+                Tell us what happened
               </h2>
             </div>
 
@@ -331,7 +331,7 @@ export default function SupportPage() {
                 disabled={submitting}
                 className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {submitting ? "Submitting..." : hydrated && isSignedIn ? "Submit Ticket" : "Copy Email Details"}
+                {submitting ? "Submitting..." : hydrated && isSignedIn ? "Send ticket" : "Copy email details"}
               </button>
               {!isSignedIn ? (
                 <button
@@ -340,7 +340,7 @@ export default function SupportPage() {
                   disabled={!canPrepareGuestEmail}
                   className={secondaryButtonClass}
                 >
-                  Open Email App
+                  Open email app
                 </button>
               ) : null}
               {hydrated && !isSignedIn ? (
@@ -353,7 +353,7 @@ export default function SupportPage() {
                   }}
                   className={secondaryButtonClass}
                 >
-                  Sign in to submit in app
+                  Sign in to send in app
                 </button>
               ) : null}
             </div>
@@ -373,10 +373,10 @@ export default function SupportPage() {
 
             <SurfacePanel className="space-y-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Billing path
+                Billing help
               </p>
               <p className="text-sm leading-6 text-neutral-300">
-                Start from Orders when you need a receipt, payment status, or a refund reference. Then move to Support if the issue needs human review or billing follow-up.
+                Start from Orders when you need a receipt, payment status, or refund reference. Then use Support if the issue still needs a person to review it.
               </p>
               <div className="flex flex-wrap gap-3">
                 <button
@@ -391,7 +391,7 @@ export default function SupportPage() {
                   onClick={() => router.push("/faq")}
                   className={secondaryButtonClass}
                 >
-                  Open FAQ
+                  FAQ
                 </button>
               </div>
             </SurfacePanel>

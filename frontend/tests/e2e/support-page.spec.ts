@@ -17,8 +17,8 @@ test.describe("Support page", () => {
     await page.fill("#support-subject", "Billing question");
     await page.fill("#support-message", "Need a receipt for yesterday's purchase.");
 
-    await expect(page.getByRole("button", { name: "Copy Email Details" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Open Email App" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Copy email details" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open email app" })).toBeVisible();
     await expectNoRuntimeIssues("/support", runtimeIssues);
   });
 });

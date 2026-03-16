@@ -244,7 +244,7 @@ export default function AdultHubPage() {
       {
         label: "Mode",
         value: isAdultMode ? "18+ enabled" : "Gate locked",
-        hint: isAdultMode ? "Protected browsing is currently active." : "Sign in and confirm age to unlock this lane.",
+        hint: isAdultMode ? "18+ browsing is currently active." : "Sign in and confirm age to unlock 18+ access.",
       },
     ],
     [completedItems.length, freeUnlockItems.length, isAdultMode, loading, seriesList.length],
@@ -256,9 +256,9 @@ export default function AdultHubPage() {
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="After hours"
-          title="A protected 18+ shelf should feel curated, not hidden behind a dead-end gate."
-          description="This lane is reserved for mature readers and keeps premium discovery intact once access is confirmed."
-          secondary="Unlock the gate, browse real titles, and jump straight into completed reads or free-unlock picks without switching storefronts."
+          title="Browse the 18+ catalog in one place."
+          description="This section is reserved for mature readers and should feel easy to browse once access is confirmed."
+          secondary="Unlock access, compare real titles, and jump straight into completed reads or free unlocks."
           stats={adultStats}
           actions={
             isAdultMode ? (
@@ -268,14 +268,14 @@ export default function AdultHubPage() {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
                 >
-                  Open 18+ chart
+                  See 18+ chart
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
                   className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
                 >
-                  Free unlock chart
+                  See free unlocks
                 </button>
               </>
             ) : (
@@ -292,7 +292,7 @@ export default function AdultHubPage() {
 
         {showStale ? (
           <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-            Showing cached adult catalog data. Reconnect to refresh the live shelf.
+            Showing cached 18+ catalog data. Reconnect to refresh the latest titles.
           </div>
         ) : null}
 
@@ -312,9 +312,9 @@ export default function AdultHubPage() {
             <EmptyState
               icon="search"
               title="No adult titles are currently available"
-              description="Try the weekly chart or switch back to the standard storefront until the protected shelf fills out."
+              description="Try the weekly chart or switch back to the standard catalog until more 18+ titles are available."
               action={{
-                label: "Open rankings",
+                label: "See charts",
                 onClick: () => router.push("/rankings?type=popular&window=week"),
               }}
             />
@@ -323,11 +323,11 @@ export default function AdultHubPage() {
           <div className="space-y-6">
             <SurfacePanel>
               <Rail
-                title="Adult Spotlight"
+                title="18+ Spotlight"
                 items={spotlightItems}
-                reason="The strongest-performing 18+ titles in the current protected catalog."
+                reason="Popular 18+ titles worth opening first."
                 href="/rankings?type=popular&window=week"
-                ctaLabel="Open Chart"
+                ctaLabel="See chart"
                 onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
               />
             </SurfacePanel>
@@ -335,11 +335,11 @@ export default function AdultHubPage() {
             {completedItems.length > 0 ? (
               <SurfacePanel>
                 <Rail
-                  title="Completed 18+ Picks"
+                  title="Completed 18+ Series"
                   items={completedItems}
-                  reason="Finished mature series for readers who want a full binge lane."
+                  reason="Finished 18+ series for readers who want a full binge."
                   href="/rankings?type=completed&window=all"
-                  ctaLabel="View Completed"
+                  ctaLabel="Browse completed"
                   onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
                 />
               </SurfacePanel>
@@ -348,11 +348,11 @@ export default function AdultHubPage() {
             {freeUnlockItems.length > 0 ? (
               <SurfacePanel>
                 <Rail
-                  title="Free Unlock After Dark"
+                  title="Free Unlock 18+ Picks"
                   items={freeUnlockItems}
-                  reason="Adult titles with free unlock value that can delay a points purchase."
+                  reason="18+ titles with free unlock value before you spend points."
                   href="/rankings?type=ttf&window=all"
-                  ctaLabel="View Free Unlocks"
+                  ctaLabel="See free unlocks"
                   onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
                 />
               </SurfacePanel>

@@ -12,22 +12,9 @@ import { ensureArray } from "../../lib/validators";
 import { trackEvent } from "../../lib/trackEvent";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
+import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
 import { getReadingCadenceLabel, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
-
-function normalizeBannerUrl(url) {
-  if (!url) return url;
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname === "placehold.co" && !parsed.pathname.match(/\.(png|jpg|jpeg|webp|gif)$/i)) {
-      parsed.pathname = parsed.pathname + ".png";
-      return parsed.toString();
-    }
-  } catch {
-    // ignore malformed urls from legacy content
-  }
-  return url;
-}
 
 const TONE_GRADIENTS = {
   warm: "from-orange-900/90 via-red-900/60",
@@ -56,8 +43,8 @@ export default function HeroCarousel({ items }) {
   const activeSeriesId = String(active?.seriesId || "").trim();
   const isFollowing = activeSeriesId ? followedSeriesIds.includes(activeSeriesId) : false;
   const rawBannerUrl = active?.bannerUrl || active?.coverUrl;
-  const bannerUrl = normalizeBannerUrl(rawBannerUrl);
-  const coverUrl = normalizeBannerUrl(active?.coverUrl);
+  const bannerUrl = normalizePlaceholdImageUrl(rawBannerUrl);
+  const coverUrl = normalizePlaceholdImageUrl(active?.coverUrl);
   const gradient = TONE_GRADIENTS[active?.coverTone] || TONE_GRADIENTS.default;
   const campaign = getStorefrontCampaign(active);
   const heroSignals = [

@@ -27,10 +27,10 @@ function getMaxPreviewPages(episodes) {
 
 function getStatusAnswer(seriesTitle, statusLabel) {
   if (String(statusLabel).toLowerCase() === "completed") {
-    return `${seriesTitle} is currently completed. That means the visible run is positioned as a binge-ready shelf instead of a weekly catch-up title.`;
+    return `${seriesTitle} is currently completed. That means you can read the full run now instead of waiting for weekly updates.`;
   }
 
-  return `${seriesTitle} is currently ${statusLabel.toLowerCase()}. That means new episodes may continue to arrive, and saving it to your library helps returning-reader flow stay fast.`;
+  return `${seriesTitle} is currently ${statusLabel.toLowerCase()}. New episodes may still arrive, and saving it to your library makes it easier to come back later.`;
 }
 
 function getFreeAccessAnswer(seriesTitle, freeEpisodeCount, maxPreviewPages) {
@@ -46,7 +46,7 @@ function getFreeAccessAnswer(seriesTitle, freeEpisodeCount, maxPreviewPages) {
     return `${seriesTitle} currently exposes preview access up to ${maxPreviewPages} pages on eligible chapters, so readers can inspect pacing and art before they spend.`;
   }
 
-  return `${seriesTitle} does not currently advertise a free-start lane on this shelf, but the episode list, pricing, and membership paths are still visible before checkout.`;
+  return `${seriesTitle} does not currently offer a clear free start, but you can still review the episode list, pricing, and membership options before checkout.`;
 }
 
 export function getSiteFaqItems() {
@@ -112,16 +112,16 @@ export function getSeriesFaqItems({ series, episodes }) {
       question: `Who created ${seriesTitle}?`,
       answer:
         creatorLabel === "the credited studio"
-          ? `${seriesTitle} is grouped under its credited studio lane on this storefront, so the creator shelf is the fastest way to compare adjacent titles.`
-          : `${seriesTitle} is credited to ${creatorLabel}. Opening the creator shelf is the fastest way to compare other titles from the same creative lane.`,
+          ? `${seriesTitle} is grouped under its credited studio on this site, so the creator page is the fastest way to compare related titles.`
+          : `${seriesTitle} is credited to ${creatorLabel}. Opening the creator page is the fastest way to compare other titles from the same creator.`,
     },
     {
       id: "series-episodes",
       question: `How much content is already available for ${seriesTitle}?`,
       answer:
         episodeCount > 0
-          ? `${seriesTitle} currently shows ${episodeCount} episode${episodeCount === 1 ? "" : "s"} on the shelf${leadGenre ? `, with the clearest genre fit currently sitting in ${leadGenre}` : ""}.`
-          : `${seriesTitle} is live on the storefront, and the episode list will show the currently visible release set as chapters publish.`,
+          ? `${seriesTitle} currently shows ${episodeCount} episode${episodeCount === 1 ? "" : "s"}${leadGenre ? `, and the strongest genre fit right now is ${leadGenre}` : ""}.`
+          : `${seriesTitle} is live on the site, and the episode list will show the currently available chapters as new ones are published.`,
     },
     {
       id: "series-support",
