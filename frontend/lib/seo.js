@@ -36,6 +36,7 @@ export function createPageMetadata({
   path = "/",
   image = null,
   openGraphType = "website",
+  robots = undefined,
 }) {
   const pageTitle = title ? `${title} | ${siteConfig.siteName}` : siteConfig.siteName;
   const summary = description || siteConfig.defaultDescription;
@@ -44,6 +45,7 @@ export function createPageMetadata({
   return {
     title,
     description: summary,
+    ...(robots ? { robots } : {}),
     alternates: {
       canonical: absoluteUrl(path),
     },

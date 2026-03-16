@@ -94,7 +94,7 @@ export default function SeriesTrustPanel({
       label: "Creator",
       value: creatorLabel,
       hint: creatorHref
-        ? "Open the creator or studio shelf and compare related titles."
+        ? "View the creator page and browse related series."
         : "The credited creator or studio attached to this title.",
       onClick: creatorHref ? () => router.push(creatorHref) : null,
     },
@@ -103,12 +103,12 @@ export default function SeriesTrustPanel({
       value: followers > 0 ? formatCompactCount(followers) : formatCompactCount(Math.max(views, ratingCount)),
       hint:
         followers > 0
-          ? "Readers who already saved this title to their shelf."
+          ? "Readers who already saved this series."
           : views > 0
-            ? "Views already pulling this title into circulation."
+            ? "Reader interest already building around this series."
             : ratingCount > 0
-              ? "Ratings already attached to this series."
-              : "Early readers can set the first visible signal.",
+              ? "Ratings from readers who already tried it."
+              : "Early readers can shape the first impression.",
     },
     {
       label: "Release pulse",
@@ -123,14 +123,14 @@ export default function SeriesTrustPanel({
 
   const trustNarrative = useMemo(() => {
     if (status === "completed") {
-      return "Completed series earn trust faster because the reader can commit knowing the payoff is already on the shelf.";
+      return "Completed series are easier to commit to because the full story is already there to read.";
     }
 
     if (latestEpisode) {
-      return `${formatEpisodeLabel(latestEpisode)} is the newest visible release keeping this title active for returning readers.`;
+      return `${formatEpisodeLabel(latestEpisode)} is the latest visible chapter, so readers can see this series is still active.`;
     }
 
-    return "Live titles earn trust when updates, reader signals, and a clear return path stay visible near the top of the page.";
+    return "Ongoing series feel more trustworthy when updates and reader activity are easy to spot.";
   }, [latestEpisode, status]);
 
   const genreLaneHref = leadGenre
@@ -142,18 +142,18 @@ export default function SeriesTrustPanel({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-            Creator & trust
+            What to know
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Give the reader proof before the first paid chapter ever becomes a question.
+            Why readers stick with this series.
           </h2>
           <p className="mt-3 text-sm leading-7 text-neutral-300">
-            Top comic platforms do not leave a series page as just a cover, a blurb, and a paywall. They explain who made the title, why readers return, and why this shelf deserves attention right now.
+            Before you unlock more chapters, it helps to know who made the series, how active it is, and how many readers are already following along.
           </p>
         </div>
         <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Why now
+            Quick take
           </p>
           <p className="mt-3 text-sm leading-6 text-neutral-300">{trustNarrative}</p>
         </div>
@@ -176,7 +176,7 @@ export default function SeriesTrustPanel({
               </p>
               <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
               <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">
-                View creator shelf
+                More by this creator
               </p>
             </button>
           ) : (
@@ -199,7 +199,7 @@ export default function SeriesTrustPanel({
       <div className="grid gap-3 lg:grid-cols-[1.12fr_0.88fr]">
         <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Shelf read
+            Good if you want
           </p>
           <p className="mt-3 text-sm leading-7 text-neutral-300">
             {series?.title || "This title"} is positioned best for readers who want
@@ -211,10 +211,10 @@ export default function SeriesTrustPanel({
         </div>
         <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Word of mouth
+            Easy to recommend
           </p>
           <p className="mt-3 text-sm leading-7 text-neutral-300">
-            Sharing works better when the landing page already shows creator credit, update freshness, reader proof, and a clear path back into reading.
+            This page is easier to share when it already shows the creator, latest update, reader interest, and a clear way to start reading.
           </p>
         </div>
       </div>

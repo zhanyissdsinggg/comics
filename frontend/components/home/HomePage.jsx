@@ -50,7 +50,7 @@ const GENRE_CHIPS = [
   { id: "horror", label: "Horror" },
 ];
 
-const HOME_PILLARS = ["Fast discovery", "Reliable 18+ controls", "Editorial shelves"];
+const HOME_PILLARS = ["Start free", "Find your next binge", "Pick up fast"];
 
 function toTimestamp(value) {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -351,7 +351,7 @@ function HomeContent() {
         id: "adult-hub",
         eyebrow: "Protected 18+ lane",
         title: adultCount > 0 ? `${adultCount} mature titles behind the gate` : "18+ titles stay protected",
-        description: "Mature browsing is split from the main storefront so discovery stays clean while access rules stay explicit.",
+        description: "Browse mature titles in a separate lane with clear access rules and less accidental friction.",
         meta: "Sign-in and age confirmation required",
         cta: "Open 18+ hub",
         onClick: () => router.push("/adult"),
@@ -398,13 +398,13 @@ function HomeContent() {
     return [
       {
         id: "weekend-desk",
-        eyebrow: "Weekend desk",
+        eyebrow: "Weekend binge",
         title: completedPick
-          ? `${completedPick.title} is carrying the binge-ready desk.`
-          : "Completed runs should stay visible before a weekend reading session starts.",
+          ? `Binge ${completedPick.title} without waiting on the next update.`
+          : "Completed series are the easiest way into a long reading session.",
         description: completedPick
-          ? "A premium storefront should show at least one finished title with enough proof to justify a long-session read in one sitting."
-          : "Finished runs are a high-confidence entry point when readers want depth, payoff, and zero waiting between chapters.",
+          ? "Finished stories are a great pick when you want payoff, momentum, and no release gap between chapters."
+          : "Completed runs are the cleanest entry point when readers want depth, payoff, and no waiting.",
         signalLabel: "Completed",
         signalValue: completedSeriesCount.toLocaleString(),
         signalHint: "Finished runs ready for full-session reading",
@@ -417,11 +417,11 @@ function HomeContent() {
         id: "free-start-desk",
         eyebrow: STOREFRONT_TERMS.freeStart,
         title: freeStartPick
-          ? `${freeStartPick.title} is leading the free-start lane right now.`
-          : "First-time readers should see a free-start lane before they ever see a wallet choice.",
+          ? `${freeStartPick.title} is an easy place to start for free.`
+          : "Free episodes should be the first click for brand-new readers.",
         description: freeStartPick
-          ? "Free-start titles cut friction for first clicks and give the storefront a cleaner path into premium chapters later."
-          : "Surface free episodes early so new readers can sample the product before any spend decision shows up.",
+          ? "Free episodes make the first click easier and let readers decide whether they want more."
+          : "Put free chapters up front so readers can sample the story before they spend.",
         signalLabel: "Openers",
         signalValue: freeStartSeriesCount.toLocaleString(),
         signalHint: "Series with free episodes available",
@@ -448,13 +448,13 @@ function HomeContent() {
       },
       {
         id: "breakout-radar",
-        eyebrow: "Breakout radar",
+        eyebrow: "Trending now",
         title: breakoutPick
-          ? `${breakoutPick.title} is the breakout to watch before the shelf catches up.`
-          : "Search momentum should feed a breakout watchlist instead of dying inside a blank grid.",
+          ? `${breakoutPick.title} is climbing fast this week.`
+          : "See what's gaining heat before the rest of the catalog catches up.",
         description: leadSignal
-          ? `Readers are already circling ${leadSignal.label}. A strong storefront turns that energy into a chart, a series page, and a faster return visit.`
-          : "Front-page heat should bridge search, rankings, and direct series discovery instead of living in isolated widgets.",
+          ? `Readers are already searching for ${leadSignal.label}. This is the moment to jump into what's hot.`
+          : "Fresh momentum works best when it leads straight into a chart, a series page, or your next follow.",
         signalLabel: "Live signal",
         signalValue: leadSignal?.label || "HOT",
         signalHint: leadSignal?.hint || "Trending search momentum",
@@ -477,8 +477,8 @@ function HomeContent() {
         eyebrow: "New reader path",
         title: freeStartCard ? `Start with ${freeStartCard.title}` : "Start with a free preview lane",
         description: freeStartCard
-          ? "A strong homepage should give first-time readers a low-friction first click before they ever think about topping up."
-          : "Lead with free-to-start titles so first-time visitors can sample the product before spending.",
+          ? "Free episodes give new readers a clean first click before they have to think about points or plans."
+          : "Free-to-start titles let first-time visitors sample the product before spending.",
         cta: freeStartCard ? "Open free preview" : "Browse free-start titles",
         onClick: freeStartCard?.onClick || (() => router.push("/search?sort=popular")),
         accentClass:
@@ -487,10 +487,10 @@ function HomeContent() {
       {
         id: "keep-progress",
         eyebrow: isSignedIn ? "Return path" : "Account perks",
-        title: isSignedIn ? "Your shelf should be one tap away" : "Save progress and unlock daily rewards",
+        title: isSignedIn ? "Jump back in without searching" : "Save progress, rewards, and your library",
         description: isSignedIn
-          ? "Returning readers should be able to jump straight back into library, rewards, and unfinished chapters without extra searching."
-          : "The first sign-in ask should explain the upside clearly: sync, rewards, missions, and faster return visits.",
+          ? "Returning readers should be able to reach unfinished chapters, rewards, and their saved shelf in one tap."
+          : "Signing in should clearly pay off: synced progress, daily rewards, and faster return visits.",
         cta: isSignedIn ? "Open library" : "Sign in free",
         onClick: isSignedIn ? () => router.push("/library") : () => setShowLoginPrompt(true),
         accentClass:
@@ -499,10 +499,10 @@ function HomeContent() {
       {
         id: "momentum",
         eyebrow: "Live momentum",
-        title: breakoutCard ? `Watch ${breakoutCard.title} before the shelf cools off` : "Use the weekly chart as proof, not guesswork",
+        title: breakoutCard ? `See why ${breakoutCard.title} is trending` : "See what's trending this week",
         description: breakoutCard
-          ? "Breakout titles are strong homepage material because they turn broad attention into quick intent."
-          : "Charts are the cleanest way to show visitors what the storefront is actually responding to right now.",
+          ? "A fast-rising title is often the easiest way to turn casual browsing into a confident first read."
+          : "Charts are the fastest way to show readers what everyone is opening right now.",
         cta: "Open weekly chart",
         onClick: () => router.push("/rankings?type=popular&window=week"),
         accentClass:
@@ -511,9 +511,9 @@ function HomeContent() {
       {
         id: "value-path",
         eyebrow: "Spend-smart path",
-        title: completedCard ? `Compare binge value before you pay for ${completedCard.title}` : "Compare membership before the paywall shows up",
+        title: completedCard ? `Compare plans before you unlock more of ${completedCard.title}` : "Compare plans before you unlock more",
         description:
-          "A premium storefront should surface points, free unlock value, and membership tradeoffs before the reader hits friction.",
+          "Show points, free unlock value, and membership savings before the paywall becomes a surprise.",
         cta: STOREFRONT_TERMS.compareMembership,
         onClick: () => router.push("/subscribe"),
         accentClass:
@@ -545,10 +545,10 @@ function HomeContent() {
             <div className="grid gap-6 xl:grid-cols-[1.02fr_0.98fr] xl:items-start">
               <div className="max-w-3xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-                  Return lane
+                  Continue reading
                 </p>
                 <h2 className="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
-                  Pick up {resumeSeries.title} before the storefront gets noisy again.
+                  Jump back into {resumeSeries.title}.
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
                   {resumeSpotlight?.progressPercent > 0
@@ -666,32 +666,32 @@ function HomeContent() {
           <div className="relative grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
             <div className="max-w-3xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-                Editor&apos;s desk
+                Featured this week
               </p>
               <h1 className="mt-4 font-display text-4xl font-semibold leading-[0.95] tracking-tight text-white sm:text-5xl lg:text-[3.65rem]">
-                Premium comics and novels, arranged like a real storefront.
+                Start free, find your next binge, and pick up right where you left off.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
-                {siteConfig.tagline}
+                Official comics and novels with cleaner discovery, faster return paths, and less storefront clutter.
               </p>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-400">
-                {siteConfig.defaultDescription}
+                Browse weekly hits, free starts, creator pages, and premium series without losing the thread of what you want to read next.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={() => router.push("/search")}
-                  className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
-                >
-                  {STOREFRONT_TERMS.startHere}
+                onClick={() => router.push("/search")}
+                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+              >
+                  Browse all series
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
-                >
-                  Open weekly chart
+                onClick={() => router.push("/rankings?type=popular&window=week")}
+                className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                  See what's trending
                 </button>
               </div>
 
@@ -727,9 +727,9 @@ function HomeContent() {
         </section>
 
         <StorefrontEventHub
-          eyebrow="Storefront moments"
-          title="Turn live storefront signals into a stronger first click."
-          description="Top comic platforms do not just stack shelves. They frame live moments, show social proof, and route readers into the right lane before the session cools off."
+          eyebrow="Happening now"
+          title="Start with what's hot right now."
+          description="Fresh updates, free starts, and breakout hits make the first click easier when you do not know where to begin."
           events={homeEventCards}
           className="mb-10"
         />
@@ -737,14 +737,13 @@ function HomeContent() {
         <section className="mb-10 grid gap-4 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
           <div className="min-w-0 rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-5 backdrop-blur-xl sm:px-6 sm:py-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-              Browse by mood
+              Browse by genre
             </p>
             <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Move from spotlight to shelf in one tap.
+              Pick a mood and let the shelf do the rest.
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-7 text-neutral-400">
-              Pick a lane and the rails below tighten around it. No filler categories, no cluttered storefront,
-              no dead-end navigation.
+              Jump from romance to thriller to fantasy without losing your place or falling into a dead-end browse.
             </p>
           </div>
 
@@ -781,10 +780,10 @@ function HomeContent() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-                  Search momentum
+                  Trending searches
                 </p>
                 <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                  Watch what readers are searching before you scroll the shelves.
+                  See what readers are searching right now.
                 </h2>
               </div>
               <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/20 p-1">
@@ -811,7 +810,7 @@ function HomeContent() {
             </div>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-400">
-              Hot keywords give the homepage a live pulse. They are one of the fastest ways to jump from broad browsing into intent-driven discovery.
+              Hot keywords are one of the fastest ways to jump from casual browsing into a stronger first read.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2.5">
@@ -831,7 +830,7 @@ function HomeContent() {
                 ))
               ) : (
                 <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-sm text-neutral-400">
-                  Hot searches are still loading.
+                  Trending searches are still loading.
                 </div>
               )}
             </div>
@@ -869,11 +868,10 @@ function HomeContent() {
                 {STOREFRONT_TERMS.startHere}
               </p>
               <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Give first-time visitors and returning readers a clear next move.
+                Give every reader an easy next step.
               </h2>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                The best homepages do not just show shelves. They explain how to enter, where to return, and what
-                reading value looks like before the first point purchase.
+                Whether someone is brand new or halfway through a binge, the next click should feel obvious.
               </p>
             </div>
             <button
@@ -881,7 +879,7 @@ function HomeContent() {
               onClick={() => router.push("/search")}
               className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
             >
-              Open full catalog
+              Browse full catalog
             </button>
           </div>
 
@@ -903,8 +901,8 @@ function HomeContent() {
         isOpen={showLoginPrompt}
         onClose={() => setShowLoginPrompt(false)}
         eyebrow={STOREFRONT_TERMS.readerBenefits}
-        title="Save your shelf and keep every reading streak alive"
-        message="Sign in to sync your library, claim daily rewards, unlock missions, and make every return visit faster."
+        title="Save your library and pick up where you left off"
+        message="Sign in to sync your shelf, keep your progress, claim rewards, and make every return visit faster."
         returnTo="/"
         primaryLabel="Sign in and sync"
         secondaryLabel="Create free account"

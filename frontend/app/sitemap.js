@@ -18,7 +18,6 @@ const STATIC_SITEMAP_PATHS = [
   "/faq",
   "/privacy-policy",
   "/terms-of-service",
-  "/events",
 ];
 
 const ROUTE_PRIORITIES = {
@@ -34,7 +33,6 @@ const ROUTE_PRIORITIES = {
   "/support": 0.8,
   "/faq": 0.8,
   "/subscribe": 0.7,
-  "/events": 0.7,
   "/notifications": 0.6,
   "/privacy-policy": 0.5,
   "/terms-of-service": 0.5,
@@ -50,7 +48,6 @@ const ROUTE_CHANGE_FREQUENCIES = {
   "/notifications": "daily",
   "/store": "weekly",
   "/subscribe": "weekly",
-  "/events": "weekly",
   "/support": "monthly",
   "/faq": "monthly",
   "/about": "monthly",

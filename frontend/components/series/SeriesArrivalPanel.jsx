@@ -48,7 +48,7 @@ export default function SeriesArrivalPanel({
             {context.sourceLabel}
           </p>
           <p className="mt-2 text-sm leading-6 text-neutral-400">
-            The discovery surface that delivered this visit into the series page.
+            Where this visit started before you landed on the series page.
           </p>
         </div>
         <div className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4">
@@ -59,7 +59,7 @@ export default function SeriesArrivalPanel({
             {context.laneValue}
           </p>
           <p className="mt-2 text-sm leading-6 text-neutral-400">
-            Why this title was allowed to take the next click instead of another generic browse step.
+            Why this title stood out enough to earn the next click.
           </p>
         </div>
         <div className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4">
@@ -102,7 +102,7 @@ export default function SeriesArrivalPanel({
             }}
             className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
           >
-            Open creator shelf
+            More by this creator
           </button>
         ) : null}
         <button

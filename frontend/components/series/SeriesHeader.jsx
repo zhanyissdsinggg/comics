@@ -69,30 +69,30 @@ export default function SeriesHeader({
   ].join(" ");
   const journeyCards = [
     {
-      label: "Entry path",
+      label: "How to start",
       value: onContinue ? "Resume now" : hasFreeEpisodes ? STOREFRONT_TERMS.freeStart : "Episode 1",
       hint: onContinue
         ? lastEpisodeLabel
           ? `Jump back into Episode ${lastEpisodeLabel} without hunting through the list.`
           : "Jump back into the latest unlocked chapter without hunting through the list."
         : hasFreeEpisodes
-          ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"} can warm up the session before any spend.`
-          : "Open the first episode and unlock forward from the beginning.",
+          ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"} let you try the series before you spend.`
+          : "Start at Episode 1 and unlock more as you go.",
     },
     {
-      label: "Reading fit",
+      label: "Update pace",
       value: getReadingCadenceLabel(series.status),
       hint:
         String(series.status || "").toLowerCase() === "completed"
           ? "Finished runs are ideal for long sessions because there is no release gap."
-          : "Ongoing series work best when the reader comes back for fresh drops and steady follow-up.",
+          : "Ongoing series work best if you like coming back for fresh chapters.",
     },
     {
-      label: "Shelf status",
-      value: isFollowing ? "Saved" : "Open shelf",
+      label: "Library",
+      value: isFollowing ? "Saved" : "Not saved",
       hint: isFollowing
-        ? "This series already sits in your library for fast return visits."
-        : "Add it to your library so the next visit starts from a stronger returning-reader lane.",
+        ? "This series is already in your library for a quick return."
+        : "Save it to your library so it is easy to find later.",
     },
   ];
   const metadataCards = [
@@ -114,10 +114,10 @@ export default function SeriesHeader({
       hint: series.type ? formatSeriesKind(series.type) : "Series availability and release pace",
     },
     {
-      label: "Author",
+      label: "Creator",
       value: series.author || "Studio",
       hint: creatorHref
-        ? "Open the creator shelf and compare related titles."
+        ? "View the creator page and browse related series."
         : previewHint || "Open any episode to start reading",
       onClick: creatorHref ? () => router.push(creatorHref) : null,
     },
@@ -206,7 +206,7 @@ export default function SeriesHeader({
                     </p>
                     <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
                     <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">
-                      Open creator page
+                      More by this creator
                     </p>
                   </button>
                 ) : (

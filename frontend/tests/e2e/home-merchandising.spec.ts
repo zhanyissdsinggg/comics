@@ -184,16 +184,16 @@ test.describe("Homepage merchandising sync", () => {
     });
 
     const eventHub = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Turn live storefront signals into a stronger first click." }),
+      has: page.getByRole("heading", { name: "Start with what's hot right now." }),
     });
 
-    await expect(eventHub).toContainText("Last Ember Files is carrying the binge-ready desk.", {
+    await expect(eventHub).toContainText("Binge Last Ember Files without waiting on the next update.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(eventHub).toContainText("Soft Launch Kiss is leading the free-start lane right now.", {
+    await expect(eventHub).toContainText("Soft Launch Kiss is an easy place to start for free.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(eventHub).toContainText("Rocket Choir is the breakout to watch before the shelf catches up.", {
+    await expect(eventHub).toContainText("Rocket Choir is climbing fast this week.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
 

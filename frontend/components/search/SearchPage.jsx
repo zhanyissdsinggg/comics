@@ -605,15 +605,15 @@ export default function SearchPage() {
     .length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasSparseResults = Boolean(query) && !loading && results.length > 0 && results.length < 4;
-  const heroTitle = query ? `Results for "${query}"` : "Search the catalog with intent.";
+  const heroTitle = query ? `Results for "${query}"` : "Find your next read.";
   const heroDescription = query
-    ? "Refine the current match set by type, status, genre, and ranking without losing your place in the catalog."
-    : "Move from trending terms to a focused result grid with recommendation rails, remembered searches, and filter-first browsing.";
+    ? "Narrow the results by type, status, genre, and ranking without losing your place."
+    : "Start with trending searches, recent history, and quick filters to get to the right series faster.";
   const heroSecondary = query
     ? loading
-      ? "Refreshing live matches from the current storefront."
-      : `${total.toLocaleString()} result${total === 1 ? "" : "s"} available for the current query.`
-    : "Use the header search or the shortcut surfaces below to jump straight into a series page.";
+      ? "Refreshing results..."
+      : `${total.toLocaleString()} result${total === 1 ? "" : "s"} for this search.`
+    : "Use the header search or start with the shortcuts below.";
   const heroStats = useMemo(
     () => [
       {
@@ -624,12 +624,12 @@ export default function SearchPage() {
       {
         label: "Filters",
         value: String(activeFilterCount),
-        hint: activeFilterCount > 0 ? "Type, status, genre, and sort are active" : "Broad storefront browse",
+        hint: activeFilterCount > 0 ? "Type, status, genre, and sort are active" : "Browsing the full catalog",
       },
       {
         label: "Mode",
         value: isAdultMode ? "18+" : "Standard",
-        hint: isAdultMode ? "Age-gated catalog visible" : "Standard storefront only",
+        hint: isAdultMode ? "Age-gated catalog visible" : "Main catalog",
       },
       {
         label: "History",
@@ -643,15 +643,15 @@ export default function SearchPage() {
   const shouldShowSearchTools =
     suggestions.length > 0 || (!query && (history.length > 0 || keywords.length > 0 || hotKeywords.length > 0));
   const recoPanelTitle = !query
-    ? "Editorial shelves stay live even when search is quiet."
+    ? "Good picks should stay visible even before you search."
     : results.length === 0
-      ? "No clean hit yet. Keep browsing without starting over."
-      : "A slim match set should still open up better options.";
+      ? "No exact match yet. Try a better next click."
+      : "Only a few matches? Here are some better options.";
   const recoPanelHint = !query
-    ? "Move from trending terms into curated rails while the storefront stays warm."
+    ? "Start with trending titles, free previews, and completed reads."
     : results.length === 0
-      ? "These shelves help rescue dead-end searches with relevant alternatives and live charts."
-      : "The result grid is narrow, so these rails widen discovery before the session stalls.";
+      ? "These picks keep you moving when a search comes up empty."
+      : "A short result list is a good time to branch into something similar.";
   const editorialBrowsePaths = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const backupKeyword = hotKeywords[1] || keywords[1] || null;
@@ -666,11 +666,11 @@ export default function SearchPage() {
         ? {
             id: "free-unlock-slot",
             eyebrow: "Free start",
-            title: `Open ${freeStartPick.title} before the session hits payment friction.`,
+            title: `Start free with ${freeStartPick.title}.`,
             description:
               freeStartCount > 0
-                ? `${freeStartPick.title} already has ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}, which makes it a cleaner first click than a generic chart.`
-                : `${freeStartPick.title} is the sample-friendly title the storefront is already using to pull cold readers forward.`,
+                ? `${freeStartPick.title} already has ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}, so it is easy to try before you spend.`
+                : `${freeStartPick.title} is an easy sample pick if you want something simple to try first.`,
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_PATH_FREE_START", "search_path_free_start"),
             accentClass:
@@ -679,9 +679,9 @@ export default function SearchPage() {
         : {
             id: "free-unlock",
             eyebrow: "Free start",
-            title: "Open the chart built for readers who want forward motion before they spend.",
+            title: "Start with a free chapter before you commit.",
             description:
-              "Free-unlock momentum is one of the easiest ways to keep a cold session moving without dropping out of the storefront.",
+              "Free unlocks are one of the easiest ways to test a series before spending.",
             ctaLabel: "Open free unlock chart",
             onClick: () => router.push("/rankings?type=ttf&window=all"),
             accentClass:
@@ -691,9 +691,9 @@ export default function SearchPage() {
         ? {
             id: "completed-binge-slot",
             eyebrow: "Binge path",
-            title: `Jump into ${completedPick.title} when the reader wants a full-session payoff.`,
+            title: `Binge ${completedPick.title} from start to finish.`,
             description:
-              `${completedPick.title} is already finished, so the next click trades waiting and uncertainty for depth, closure, and stronger session time.`,
+              `${completedPick.title} is complete, so you can read straight through without waiting for updates.`,
             ctaLabel: `Open ${completedPick.title}`,
             onClick: () => handleSeriesClick(completedPick.id, "SEARCH_PATH_BINGE", "search_path_binge"),
             accentClass:
@@ -702,9 +702,9 @@ export default function SearchPage() {
         : {
             id: "completed-binge",
             eyebrow: "Binge path",
-            title: "Jump straight into completed series that can hold a full-session read.",
+            title: "Browse completed series for a full binge.",
             description:
-              "Finished runs convert well when the reader wants commitment, closure, and zero waiting between chapters.",
+              "Finished stories are the easiest choice when you want payoff without waiting.",
             ctaLabel: "Browse completed",
             onClick: () =>
               updateParams(
@@ -724,11 +724,11 @@ export default function SearchPage() {
         ? {
             id: "breakout-watch-slot",
             eyebrow: "Breakout watch",
-            title: `${breakoutPick.title} is the breakout the storefront is pushing right now.`,
+            title: `${breakoutPick.title} is trending right now.`,
             description:
               leadHotKeyword?.label
-                ? `${breakoutPick.title} gives the search desk a concrete handoff while "${leadHotLabel}" is still pulling live interest.`
-                : `${breakoutPick.title} is the kind of editorial breakout that keeps discovery moving even before the reader knows what to type.`,
+                ? `${breakoutPick.title} is getting attention alongside "${leadHotLabel}", so it is a strong place to jump in.`
+                : `${breakoutPick.title} is a fast-rising pick if you want something readers are finding right now.`,
             ctaLabel: `Open ${breakoutPick.title}`,
             onClick: () => handleSeriesClick(breakoutPick.id, "SEARCH_PATH_BREAKOUT", "search_path_breakout"),
             accentClass:
@@ -737,9 +737,9 @@ export default function SearchPage() {
         : {
             id: "breakout-watch",
             eyebrow: "Breakout watch",
-            title: `Use "${leadHotLabel}" as the quickest path into today's live discovery energy.`,
+            title: `Search "${leadHotLabel}" to see what is hot right now.`,
             description:
-              "When search intent is soft, a trending term gives the reader a stronger first click than a blank grid ever will.",
+              "A trending term is often the fastest way to find something new.",
             ctaLabel: `Search ${leadHotLabel}`,
             onClick: () =>
               updateParams(
@@ -757,13 +757,13 @@ export default function SearchPage() {
           },
       {
         id: isAdultMode ? "adult-desk" : "broad-browse",
-        eyebrow: isAdultMode ? "Protected desk" : "Open browse",
+        eyebrow: isAdultMode ? "18+ hub" : "Open browse",
         title: isAdultMode
-          ? "The 18+ shelf should feel like a premium lane, not a hidden switch."
-          : `If "${backupLabel}" feels too narrow, move back into the broad storefront.`,
+          ? "The 18+ section should feel easy to find, not hidden."
+          : `If "${backupLabel}" feels like a better fit, start there instead.`,
         description: isAdultMode
-          ? "Keep protected titles discoverable with a dedicated hub, then come back to search once the reader has stronger intent."
-          : "Broad browse is still useful when the user wants to compare mood, genre, and popularity before locking onto one title.",
+          ? "Use the dedicated 18+ hub, then come back to search when you know what you want."
+          : "Broad browse still helps when you want to compare genre, mood, and popularity before choosing a series.",
         ctaLabel: isAdultMode ? "Open adult hub" : `Search ${backupLabel}`,
         onClick: () =>
           isAdultMode
@@ -808,24 +808,24 @@ export default function SearchPage() {
       leadSearchResult && (hasDirectMatch || hasEditorialLead)
         ? {
             id: hasDirectMatch ? "lead-match" : query ? "lead-editorial-rescue" : "lead-editorial-push",
-            eyebrow: hasDirectMatch ? "Live match" : query ? "Editorial rescue" : "Editorial push",
+            eyebrow: hasDirectMatch ? "Top result" : query ? "Try this next" : "Featured pick",
             title: hasDirectMatch
-              ? `${leadSearchResult.title} is the strongest handoff from this search lane.`
+              ? `${leadSearchResult.title} is the best match to open first.`
               : query
-                ? `${leadSearchResult.title} is the strongest storefront rescue for this search right now.`
-                : `${leadSearchResult.title} is the storefront push worth surfacing before the reader even types.`,
+                ? `${leadSearchResult.title} is a strong next pick for this search.`
+                : `${leadSearchResult.title} is worth opening before you even type.`,
             description: hasDirectMatch
               ? hasSparseResults
-                ? "The result set is narrow, so the first click should feel confident while the rest of the storefront stays ready as backup."
-                : "Once intent appears, the search desk should move the reader into the right series page without killing context."
+                ? "There are only a few matches, so start with the strongest one and branch out from there."
+                : "This is the clearest match in the current results."
               : query
-                ? "The current query did not land cleanly, so the search desk should immediately hand off to a title the merchandising desk is already backing."
-                : "When intent is still soft, search should surface the same title the homepage is already pushing instead of making the reader start from a blank grid.",
-            signalLabel: hasDirectMatch ? "Matches" : "Storefront",
-            signalValue: hasDirectMatch ? (loading ? "--" : total.toLocaleString()) : breakoutPick ? "Breakout" : "Featured",
+                ? "Your search came up empty, so this is the closest strong pick to try next."
+                : "If you are still browsing, start with one strong pick instead of a blank search box.",
+            signalLabel: hasDirectMatch ? "Results" : "Featured",
+            signalValue: hasDirectMatch ? (loading ? "--" : total.toLocaleString()) : breakoutPick ? "Trending" : "Editors' pick",
             signalHint: hasDirectMatch
               ? `Sorted by ${sortLabel}`
-              : leadHotKeyword?.hint || "Admin-managed homepage slot",
+              : leadHotKeyword?.hint || "Picked from the homepage mix",
             ctaLabel: `Open ${leadSearchResult.title}`,
             onClick: () =>
               handleSeriesClick(
@@ -839,9 +839,9 @@ export default function SearchPage() {
         : {
             id: "lead-trend",
             eyebrow: "Live search heat",
-            title: `${leadHotLabel} is pulling readers into the catalog right now.`,
+            title: `${leadHotLabel} is trending right now.`,
             description:
-              "When intent is still soft, a trending term is a cleaner first click than a blank result grid or an over-filtered query.",
+              "Trending searches are a quick way to find something popular without guessing.",
             signalLabel: "Hot keyword",
             signalValue: leadHotLabel,
             signalHint:
@@ -865,11 +865,11 @@ export default function SearchPage() {
         ? {
             id: "free-start-desk-slot",
             eyebrow: "Free start",
-            title: `${freeStartPick.title} keeps the session moving before payment friction shows up.`,
+            title: `${freeStartPick.title} lets you start free.`,
             description:
               freeStartCount > 0
-                ? `${freeStartPick.title} already gives the reader ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}, so search can offer a concrete low-friction handoff instead of a generic chart.`
-                : `${freeStartPick.title} is the sample-friendly lane the storefront is using to keep cold readers engaged.`,
+                ? `${freeStartPick.title} gives you ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"} before you decide whether to unlock more.`
+                : `${freeStartPick.title} is a good sample pick if you want something easy to try first.`,
             signalLabel: "Free eps",
             signalValue: freeStartCount > 0 ? String(freeStartCount) : "Live",
             signalHint: "Ready before checkout",
@@ -881,9 +881,9 @@ export default function SearchPage() {
         : {
             id: "free-start-desk",
             eyebrow: "Free start",
-            title: "Keep the session moving before payment friction shows up.",
+            title: "Start with a free chapter first.",
             description:
-              "Free-unlock and sample-friendly lanes keep search alive even when the reader has not committed to a title yet.",
+              "Free unlocks and previews are the easiest way to keep browsing without paying up front.",
             signalLabel: "Chart",
             signalValue: "TTF",
             signalHint: "Timed free unlock momentum",
@@ -895,10 +895,10 @@ export default function SearchPage() {
       completedPick
         ? {
             id: "binge-desk-slot",
-            eyebrow: "Binge lane",
-            title: `${completedPick.title} is the cleanest long-session backup when search gets too narrow.`,
+            eyebrow: "Binge pick",
+            title: `${completedPick.title} is ready for a full binge.`,
             description:
-              `${completedPick.title} is already complete, which makes it a stronger rescue path than asking the reader to widen filters and start over.`,
+              `${completedPick.title} is complete, so it is easier to commit to than restarting your search from scratch.`,
             signalLabel: "Status",
             signalValue: "Completed",
             signalHint: completedPick?.episodeCount ? `${completedPick.episodeCount} episodes ready` : "Ready for a full-session read",
@@ -909,13 +909,13 @@ export default function SearchPage() {
           }
         : {
             id: isAdultMode ? "protected-desk" : "binge-desk",
-            eyebrow: isAdultMode ? "Protected desk" : "Binge lane",
+            eyebrow: isAdultMode ? "18+ pick" : "Binge pick",
             title: isAdultMode
-              ? "The 18+ shelf should feel curated, not hidden behind guesswork."
-              : "Completed runs are the cleanest rescue path when a search lane feels too narrow.",
+              ? "The 18+ catalog should be clear and easy to browse."
+              : "Completed series are the easiest backup when search is too narrow.",
             description: isAdultMode
-              ? "If a mature search misses, the reader still needs a premium lane with explicit access rules and clear boundaries."
-              : "Finished series widen discovery fast because they trade uncertainty for payoff, depth, and stronger return intent.",
+              ? "If a mature search misses, go to the 18+ hub and browse from there."
+              : "Finished stories give you payoff right away without waiting for another update.",
             signalLabel: isAdultMode ? "Mode" : "Finished",
             signalValue: isAdultMode ? "18+" : "Runs",
             signalHint: isAdultMode ? "Age-gated catalog available" : "Ready for long-session reading",
@@ -1040,13 +1040,13 @@ export default function SearchPage() {
           eyebrow={query ? "Search moments" : "Discovery moments"}
           title={
             query
-              ? "Keep the search desk warm after the first result appears."
-              : "Turn vague search intent into a stronger storefront route."
+              ? "Keep going after the first result."
+              : "Start with a better first click."
           }
           description={
             query
-              ? "Top-tier search pages do not stop at a result count. They keep the session alive with a best next click, a backup lane, and a value path before the reader stalls."
-              : "When the reader has not typed much yet, the search desk should behave like a discovery engine with live momentum and cleaner first clicks."
+              ? "A good search page does more than count results. It helps you open something worth reading next."
+              : "If you have not typed anything yet, start with trending picks, free previews, and popular completed series."
           }
           events={searchEventCards}
         />
@@ -1067,11 +1067,10 @@ export default function SearchPage() {
                   Browse paths
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Give the reader an editorial next step before they even type.
+                  Start with a genre, a trend, or a free preview.
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                  The strongest search desks act like discovery engines. These paths keep the session warm when intent
-                  is still fuzzy.
+                  These shortcuts help when you want something good to read but do not have the exact title yet.
                 </p>
               </div>
               <button
@@ -1129,7 +1128,7 @@ export default function SearchPage() {
                 <section key={rail.id} className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Recommended shelf</p>
+                      <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Recommended row</p>
                       <h3 className="mt-1 text-lg font-semibold text-white">{rail.title}</h3>
                     </div>
                   </div>
@@ -1138,7 +1137,7 @@ export default function SearchPage() {
                     entryPoint="SEARCH_CREATOR_CHIP"
                     campaignId={`${rail.id}_creator`}
                     sourcePath={searchPath}
-                    label="Creators behind this shelf"
+                    label="Creators in this row"
                     compact
                   />
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1166,7 +1165,7 @@ export default function SearchPage() {
                 Live filters
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Refine the current search lane.
+                Refine this search.
               </h2>
             </div>
             <p className="text-sm text-neutral-400">
@@ -1253,10 +1252,10 @@ export default function SearchPage() {
                 No direct matches
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                The catalog did not return a clean hit.
+                No exact matches for this search.
               </h2>
               <p className="mt-3 text-sm leading-7 text-neutral-400">
-                Try a broader keyword, clear the current filters, or jump into a stronger storefront lane below.
+                Try a broader keyword, clear the current filters, or jump into one of the picks below.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
@@ -1371,7 +1370,7 @@ export default function SearchPage() {
                   Live result grid
                 </p>
                 <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-white">
-                  {total.toLocaleString()} titles in the current lane.
+                  {total.toLocaleString()} titles found.
                 </h2>
               </div>
               <p className="text-sm text-neutral-400">
@@ -1387,11 +1386,11 @@ export default function SearchPage() {
                       Discovery backup
                     </p>
                     <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-white">
-                      A narrow result set should not become a dead end.
+                      Only a few results? Try a wider pick.
                     </h3>
                   </div>
                   <p className="text-sm text-neutral-400">
-                    Keep the current query, then widen the next click with a stronger shelf.
+                    Keep this search if you want, or branch into something with a similar vibe.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">

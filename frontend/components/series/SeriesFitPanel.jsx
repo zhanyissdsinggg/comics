@@ -47,7 +47,7 @@ function getPrimaryAction({ continueHref, startHref, freeEpisodeCount }) {
     return {
       label: "Continue reading",
       href: continueHref,
-      hint: "Jump back into the active reading session without hunting through the episode list.",
+      hint: "Jump straight back in from where you left off.",
     };
   }
 
@@ -55,7 +55,7 @@ function getPrimaryAction({ continueHref, startHref, freeEpisodeCount }) {
     return {
       label: "Start free preview",
       href: startHref,
-      hint: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} are already available before the first spend decision.`,
+      hint: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} let you try the series before unlocking more.`,
     };
   }
 
@@ -63,7 +63,7 @@ function getPrimaryAction({ continueHref, startHref, freeEpisodeCount }) {
     return {
       label: "Read episode 1",
       href: startHref,
-      hint: "Open the first episode and let the rest of the page handle comparison, pricing, and unlock decisions.",
+      hint: "Start at Episode 1 and see if the story clicks.",
     };
   }
 
@@ -93,22 +93,22 @@ function getStarterLane(series, leadGenre) {
   if (freeEpisodeCount > 0) {
     return {
       label: "Low-friction start",
-      body: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} make this an easier first click for new readers who still want proof before they spend.`,
+      body: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} make this easy to sample before you commit.`,
     };
   }
 
   if (status === "completed") {
     return {
       label: "Binge-first pick",
-      body: "A completed run works best when the reader wants payoff and continuity without waiting for the next update.",
+      body: "A completed run is best if you want the full story without waiting for another update.",
     };
   }
 
   return {
     label: "Return habit pick",
     body: leadGenre
-      ? `This title fits readers who are happy to come back for ${leadGenre}-driven momentum over time.`
-      : "This title fits readers who want an ongoing shelf they can return to instead of a one-session binge.",
+      ? `This title works well for readers who like coming back for more ${leadGenre.toLowerCase()} over time.`
+      : "This title works well for readers who like coming back over time instead of finishing everything in one sitting.",
   };
 }
 
@@ -149,11 +149,11 @@ export default function SeriesFitPanel({
         status === "completed"
           ? `Readers who want ${leadGenre ? `${leadGenre.toLowerCase()}-driven` : "story-driven"} payoff without release gaps.`
           : `Readers who want ${leadGenre ? `${leadGenre.toLowerCase()} momentum` : "an ongoing title"} they can save and come back to.`,
-      commitment: `${getCommitmentLabel(status, episodeCount)} - ${episodeCount > 0 ? `${episodeCount} episode${episodeCount === 1 ? "" : "s"}` : "live shelf"}`,
+      commitment: `${getCommitmentLabel(status, episodeCount)} - ${episodeCount > 0 ? `${episodeCount} episode${episodeCount === 1 ? "" : "s"}` : "ongoing run"}`,
       socialProof:
         readerProof > 0
           ? `${formatCompactCount(readerProof)} visible reader signals and an update trail from ${formatDateLabel(series?.updatedAt)}.`
-          : `Fresh shelf with its current update trail landing ${formatDateLabel(series?.updatedAt)}.`,
+          : `Fresh pick with updates as recent as ${formatDateLabel(series?.updatedAt)}.`,
       genrePath: leadGenre ? `/search?genre=${encodeURIComponent(leadGenre)}&sort=popular` : "/search?sort=popular",
     };
   }, [continueHref, episodes, series, startHref]);
@@ -175,7 +175,7 @@ export default function SeriesFitPanel({
     },
     {
       label: "Reader proof",
-      value: fitModel.readerProof > 0 ? formatCompactCount(fitModel.readerProof) : "New lane",
+      value: fitModel.readerProof > 0 ? formatCompactCount(fitModel.readerProof) : "New",
       body: fitModel.socialProof,
     },
   ];
@@ -188,16 +188,15 @@ export default function SeriesFitPanel({
             Reader fit
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Tell the reader exactly why this series deserves the next click.
+            See if this series fits your mood.
           </h2>
           <p className="mt-3 text-sm leading-7 text-neutral-300">
-            Headline, trust, and pricing help, but premium series pages convert harder when they also explain audience fit,
-            reading commitment, and the easiest way to start.
+            Good series pages help you understand the vibe, commitment, and easiest way to start before you unlock more.
           </p>
         </div>
         <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Start strategy
+            Best way in
           </p>
           <p className="mt-3 text-sm leading-6 text-neutral-300">
             <span className="font-semibold text-white">{fitModel.starterLane.label}.</span> {fitModel.starterLane.body}
@@ -225,7 +224,7 @@ export default function SeriesFitPanel({
       <div className="grid gap-3 lg:grid-cols-[1.08fr_0.92fr]">
         <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Ideal session
+            Best reading mood
           </p>
           <p className="mt-3 text-sm leading-7 text-neutral-300">
             {series?.title || "This title"} works best when the reader wants{" "}
@@ -235,12 +234,12 @@ export default function SeriesFitPanel({
         </div>
         <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Compare lane
+            Similar vibe
           </p>
           <p className="mt-3 text-sm leading-7 text-neutral-300">
             {fitModel.secondaryGenre
-              ? `If the reader likes ${fitModel.leadGenre} but wants one more angle, ${fitModel.secondaryGenre} is the easiest adjacent lane to compare before committing.`
-              : "If the reader still needs more proof, compare this shelf against the genre lane or creator shelf instead of dropping the session."}
+              ? `If you like ${fitModel.leadGenre}, ${fitModel.secondaryGenre} is the easiest adjacent genre to compare next.`
+              : "If you want more proof, compare this series with the genre page or the creator page before committing."}
           </p>
         </div>
       </div>
@@ -283,7 +282,7 @@ export default function SeriesFitPanel({
             onClick={() => router.push(creatorHref)}
             className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
           >
-            Open creator shelf
+            More by this creator
           </button>
         ) : null}
         <button

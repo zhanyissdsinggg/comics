@@ -21,11 +21,10 @@ export default function SeriesFAQPanel({ series, episodes = [], creatorHref = ""
             Reader FAQ
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Answer the questions cautious readers ask before they commit.
+            Questions readers ask before they start.
           </h2>
           <p className="mt-3 text-sm leading-7 text-neutral-300">
-            Top-tier series pages do not assume the reader already understands pricing, release cadence, creator context,
-            or support paths. They answer the objections directly while intent is still warm.
+            Pricing, update pace, creator credit, and support should be easy to understand before someone commits to a long read.
           </p>
         </div>
         <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-left">
@@ -33,8 +32,7 @@ export default function SeriesFAQPanel({ series, episodes = [], creatorHref = ""
             Why this matters
           </p>
           <p className="mt-3 text-sm leading-6 text-neutral-300">
-            When the page explains access, creator credit, content depth, and support clearly, readers are less likely to
-            bounce at the first moment of uncertainty.
+            Clear answers help readers decide faster and bounce less when they hit their first question.
           </p>
         </div>
       </div>
@@ -61,7 +59,7 @@ export default function SeriesFAQPanel({ series, episodes = [], creatorHref = ""
             onClick={() => router.push(creatorHref)}
             className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
           >
-            Open creator shelf
+            More by this creator
           </button>
         ) : null}
         <button

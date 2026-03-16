@@ -97,21 +97,21 @@ export default function SearchCreatorMatchesPanel({
 
         let matchLabel = "Creator match";
         let matchDescription =
-          "This query maps cleanly to a creator shelf, which is usually the fastest way to compare related titles.";
+          "This search lines up with a creator page, which is often the fastest way to find related series.";
         let matchScore = 0;
 
         if (exactNameMatch) {
           matchLabel = "Exact creator";
-          matchDescription = "The query is an exact creator-name hit, so the creator page is the strongest next click.";
+          matchDescription = "You searched for the creator directly, so their page is the best next click.";
           matchScore += 1200;
         } else if (prefixNameMatch) {
           matchLabel = "Creator name";
           matchDescription =
-            "The query starts by creator name, which makes the creator shelf a stronger hub than a narrow title grid.";
+            "This search starts with the creator name, so opening their page should help faster than a narrow title list.";
           matchScore += 900;
         } else if (includesNameMatch) {
           matchLabel = "Creator name";
-          matchDescription = "The query still overlaps the creator name enough to justify opening the creator shelf first.";
+          matchDescription = "This search still matches the creator name closely enough that their page is worth opening first.";
           matchScore += 700;
         }
 
@@ -119,7 +119,7 @@ export default function SearchCreatorMatchesPanel({
           if (!hasPrimaryMatch) {
             matchLabel = "Lead title";
             matchDescription =
-              "The strongest title match belongs to this creator shelf, so opening the creator page widens the next choice.";
+              "The best title match comes from this creator, so their page gives you more good options right away.";
           }
           matchScore += 220;
         }
@@ -127,7 +127,7 @@ export default function SearchCreatorMatchesPanel({
         if (!hasPrimaryMatch && genreMatches.length > 0) {
           matchLabel = "Genre bridge";
           matchDescription =
-            "This query aligns more with the creator's top genres, which makes the creator shelf a better rescue path.";
+            "This search overlaps the creator's main genres, so their page is a better next stop than starting over.";
         }
 
         matchScore += genreMatches.length * 80;
@@ -222,16 +222,16 @@ export default function SearchCreatorMatchesPanel({
   const leadCreatorMatch = matchedCreators[0] || null;
   const creatorPanelTitle =
     resultsLength === 0
-      ? "This query looks closer to a creator shelf than a direct title hit."
+      ? "This search looks closer to a creator than a title."
       : resultsLength > 0 && resultsLength < 4
-        ? "Creator shelves can widen a narrow result set before the session stalls."
-        : "Open the creator behind this search before locking into a single title.";
+        ? "A creator page can widen a short result list."
+        : "Open the creator behind this search before picking just one title.";
   const creatorPanelHint =
     resultsLength === 0
-      ? "When title search misses, a strong creator page is the cleanest rescue path because it keeps related works, genres, and lead titles together."
+      ? "When a title search misses, a creator page is often the quickest way to find related works, genres, and lead series."
       : resultsLength > 0 && resultsLength < 4
-        ? "Top-tier comic storefronts do not make readers restart their search. They surface the creator hub so one narrow query can still branch into multiple high-confidence reads."
-        : "If the reader is searching by author or studio, the creator hub should be visible before the result grid becomes the only option.";
+        ? "If only a few results match, the creator page gives you a wider set of strong options without restarting the search."
+        : "If you are searching by author or studio, the creator page should be visible before the grid becomes your only option.";
 
   return (
     <SurfacePanel className="space-y-6">
@@ -251,7 +251,7 @@ export default function SearchCreatorMatchesPanel({
             onClick={() => handleCreatorClick(leadCreatorMatch)}
             className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
           >
-            Open {leadCreatorMatch.name}
+            View {leadCreatorMatch.name}
           </button>
         ) : null}
       </div>
@@ -305,7 +305,7 @@ export default function SearchCreatorMatchesPanel({
               </div>
 
               <div className="flex flex-wrap gap-3 text-xs text-neutral-400">
-                <span>{formatCompactCount(creator.readerProof)} reader proof</span>
+                <span>{formatCompactCount(creator.readerProof)} reader signals</span>
                 <span>{creator.completedCount} completed</span>
                 {creator.relatedTitleCount > 0 ? <span>{creator.relatedTitleCount} related title matches</span> : null}
               </div>
@@ -316,7 +316,7 @@ export default function SearchCreatorMatchesPanel({
                   onClick={() => handleCreatorClick(creator)}
                   className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
                 >
-                  Open creator page
+                  View creator page
                 </button>
                 {creator.spotlightSeries?.id ? (
                   <button
@@ -324,7 +324,7 @@ export default function SearchCreatorMatchesPanel({
                     onClick={() => handleSeriesClick(creator.spotlightSeries.id)}
                     className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
                   >
-                    Open lead title
+                    Read lead title
                   </button>
                 ) : null}
               </div>
