@@ -54,6 +54,23 @@ function getErrorMessage(data, response) {
   return data?.message || data?.error || `请求失败，状态码 ${response.status}。`;
 }
 
+function formatSeriesStatusLabel(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "completed") {
+    return "已完结";
+  }
+  if (normalized === "ongoing") {
+    return "连载中";
+  }
+  if (normalized === "hiatus") {
+    return "暂停中";
+  }
+  if (normalized === "cancelled") {
+    return "已停更";
+  }
+  return String(value || "未设置状态").trim() || "未设置状态";
+}
+
 function LoadingView() {
   return (
     <AdminShell title="创作者管理" subtitle="聚合作者、工作室与作品归因，方便运营统一维护。">
@@ -264,7 +281,7 @@ export default function AdminCreatorsPage() {
   const handleCopyCreatorName = async (creator) => {
     const canonicalName = String(creator?.name || "").trim();
     if (!canonicalName) {
-      setCopyFeedback({ slug: String(creator?.slug || ""), type: "error", message: "没有可复制的作者名。" });
+      setCopyFeedback({ slug: String(creator?.slug || ""), type: "error", message: "没有可复制的创作者名。" });
       return;
     }
 
@@ -275,7 +292,7 @@ export default function AdminCreatorsPage() {
 
     try {
       await navigator.clipboard.writeText(canonicalName);
-      setCopyFeedback({ slug: String(creator?.slug || ""), type: "success", message: `已复制规范作者名：${canonicalName}` });
+      setCopyFeedback({ slug: String(creator?.slug || ""), type: "success", message: `已复制规范创作者名：${canonicalName}` });
     } catch {
       setCopyFeedback({ slug: String(creator?.slug || ""), type: "error", message: "复制失败，请稍后再试。" });
     }
@@ -288,7 +305,7 @@ export default function AdminCreatorsPage() {
   return (
     <AdminShell
       title="创作者管理"
-      subtitle="把作者名、工作室名和作品归因统一起来，前台 creator 页面才能稳定、好用、可运营。"
+      subtitle="把创作者名、工作室名和作品归因统一起来，前台创作者页面才能稳定、好用、可运营。"
       actions={
         <div className="flex flex-wrap gap-2">
           <button
@@ -331,13 +348,13 @@ export default function AdminCreatorsPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-300/80">运营重点</p>
-              <h2 className="text-2xl font-semibold text-white">先补齐作者，再统一命名，前台 creator 体系才会真正稳定。</h2>
+              <h2 className="text-2xl font-semibold text-white">先补齐创作者归因，再统一命名，前台创作者体系才会真正稳定。</h2>
               <p className="max-w-3xl text-sm leading-7 text-neutral-400">
-                这个页面会把作品库里的作者字段聚合成一个运营视图。你可以先抓缺作者作品，再清理同一作者的多种写法，最后回看前台 creator 页是否自然。
+                这个页面会把作品库里的作者 / 工作室字段聚合成一个运营视图。你可以先抓缺作者作品，再清理同一位创作者的多种写法，最后回看前台创作者页是否自然。
               </p>
             </div>
             <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200">作者覆盖率</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200">创作者归因覆盖率</p>
               <p className="mt-2 text-3xl font-semibold text-white">{coverageRate}%</p>
               <p className="mt-1 text-xs text-neutral-300">
                 {audit.stats.attributedSeriesCount} / {audit.stats.totalSeries} 部作品已接入创作者归因
@@ -350,19 +367,19 @@ export default function AdminCreatorsPage() {
           <StatCard
             title="创作者总数"
             value={audit.stats.creatorCount.toLocaleString()}
-            hint="当前作品库里已经能聚合成 creator 页的作者 / 工作室数量。"
+            hint="当前作品库里已经能聚合成创作者页的作者 / 工作室数量。"
             tone="emerald"
           />
           <StatCard
             title="已归因作品"
             value={audit.stats.attributedSeriesCount.toLocaleString()}
-            hint="已经填了作者字段的作品数，前台 creator 入口会直接使用这些数据。"
+            hint="已经填了作者字段的作品数，前台创作者入口会直接使用这些数据。"
             tone="blue"
           />
           <StatCard
             title="缺作者作品"
             value={audit.stats.missingAuthorSeriesCount.toLocaleString()}
-            hint="这些作品前台没法稳定进入 creator 发现链路，建议优先补齐。"
+            hint="这些作品前台没法稳定进入创作者发现链路，建议优先补齐。"
             tone="amber"
           />
           <StatCard
@@ -377,7 +394,7 @@ export default function AdminCreatorsPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-white">筛选创作者目录</h2>
-              <p className="text-sm text-neutral-400">按关键词和运营状态过滤，优先处理风险最大的 creator 归因问题。</p>
+              <p className="text-sm text-neutral-400">按关键词和运营状态过滤，优先处理风险最大的创作者归因问题。</p>
             </div>
             <p className="text-sm text-neutral-400">当前可见 {filteredCreators.length.toLocaleString()} 个创作者聚合项</p>
           </div>
@@ -426,7 +443,7 @@ export default function AdminCreatorsPage() {
               <div>
                 <h2 className="text-xl font-semibold text-white">命名待清理</h2>
                 <p className="mt-2 text-sm text-neutral-400">
-                  同一作者如果出现多种写法，前台 creator 聚合页会被拆散，这里优先列出需要统一命名的项。
+                  同一作者如果出现多种写法，前台创作者聚合页会被拆散，这里优先列出需要统一命名的项。
                 </p>
               </div>
               <AlertTriangle className="mt-1 h-5 w-5 text-amber-300" />
@@ -436,7 +453,7 @@ export default function AdminCreatorsPage() {
               {namingRiskPreview.length === 0 ? (
                 <EmptyPanel
                   title="当前没有命名冲突"
-                  description="作者命名目前比较干净，前台 creator 聚合不容易被拆散。"
+                  description="作者命名目前比较干净，前台创作者聚合不容易被拆散。"
                 />
               ) : (
                 namingRiskPreview.map((creator) => (
@@ -484,7 +501,7 @@ export default function AdminCreatorsPage() {
                         }`}
                       >
                         <Copy className="h-4 w-4" />
-                        {copyFeedback.slug === creator.slug && copyFeedback.type === "success" ? "已复制规范名" : "复制规范作者名"}
+                        {copyFeedback.slug === creator.slug && copyFeedback.type === "success" ? "已复制规范名" : "复制规范创作者名"}
                       </button>
                     </div>
                   </div>
@@ -498,7 +515,7 @@ export default function AdminCreatorsPage() {
               <div>
                 <h2 className="text-xl font-semibold text-white">待补作者作品</h2>
                 <p className="mt-2 text-sm text-neutral-400">
-                  这些作品还没填作者字段，前台作品页、creator 页和作者发现入口都吃不到完整信息。
+                  这些作品还没填作者字段，前台作品页、创作者页和作者发现入口都吃不到完整信息。
                 </p>
               </div>
               <Users className="mt-1 h-5 w-5 text-sky-300" />
@@ -533,7 +550,7 @@ export default function AdminCreatorsPage() {
                         </span>
                       </div>
                       <p className="text-sm text-neutral-400">
-                        {series.type === "novel" ? "小说" : "漫画"} · {series.status || "未设置状态"} · 更新于 {formatDateLabel(series.updatedAt)}
+                        {series.type === "novel" ? "小说" : "漫画"} · {formatSeriesStatusLabel(series.status)} · 更新于 {formatDateLabel(series.updatedAt)}
                       </p>
                     </div>
                     <button
@@ -556,7 +573,7 @@ export default function AdminCreatorsPage() {
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-white">创作者目录</h2>
               <p className="text-sm text-neutral-400">
-                这里是后台运营视角下的 creator 聚合。你可以同时看作品覆盖、发布状态、命名风险和前台落地页。
+                这里是后台运营视角下的创作者聚合。你可以同时看作品覆盖、发布状态、命名风险和前台落地页。
               </p>
             </div>
             <p className="text-sm text-neutral-400">
@@ -569,7 +586,7 @@ export default function AdminCreatorsPage() {
               <div className="xl:col-span-2">
                 <EmptyPanel
                   title="当前筛选下没有创作者项"
-                  description="可以清空关键词，或者切回“全部”查看完整 creator 目录。"
+                  description="可以清空关键词，或者切回“全部”查看完整创作者目录。"
                 />
               </div>
             ) : (
@@ -634,7 +651,7 @@ export default function AdminCreatorsPage() {
 
                   {creator.variants.length > 1 ? (
                     <div className="mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-4">
-                      <p className="text-sm font-semibold text-amber-100">同一作者当前存在多种写法，建议统一：</p>
+                      <p className="text-sm font-semibold text-amber-100">同一位创作者当前存在多种写法，建议统一：</p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {creator.variants.map((variant) => (
                           <span
@@ -675,7 +692,7 @@ export default function AdminCreatorsPage() {
                       }`}
                     >
                       <Copy className="h-4 w-4" />
-                      {copyFeedback.slug === creator.slug && copyFeedback.type === "success" ? "已复制规范名" : "复制规范作者名"}
+                      {copyFeedback.slug === creator.slug && copyFeedback.type === "success" ? "已复制规范名" : "复制规范创作者名"}
                     </button>
                     <button
                       type="button"
@@ -683,7 +700,7 @@ export default function AdminCreatorsPage() {
                       className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 text-sm font-semibold text-emerald-200 transition hover:border-emerald-400/50 hover:bg-emerald-500/15"
                     >
                       <Eye className="h-4 w-4" />
-                      打开前台 creator 页
+                      打开前台创作者页
                     </button>
                     {creator.spotlightSeries?.id ? (
                       <button
@@ -746,7 +763,7 @@ export default function AdminCreatorsPage() {
                                 </span>
                               </div>
                               <p className="text-sm text-neutral-400">
-                                {series.type === "novel" ? "小说" : "漫画"} · {series.status || "未设置状态"} · 更新于 {formatDateLabel(series.updatedAt)}
+                                {series.type === "novel" ? "小说" : "漫画"} · {formatSeriesStatusLabel(series.status)} · 更新于 {formatDateLabel(series.updatedAt)}
                               </p>
                               <p className="text-xs text-neutral-500">
                                 当前作者字段：
@@ -791,7 +808,7 @@ export default function AdminCreatorsPage() {
             <div className="mt-5">
               <EmptyPanel
                 title="当前还没有创作者数据"
-                description="先去作品详情页补作者字段，前台和后台的 creator 体系才会逐步建立起来。"
+                description="先去作品详情页补作者字段，前台和后台的创作者体系才会逐步建立起来。"
               />
             </div>
           ) : null}
@@ -801,7 +818,7 @@ export default function AdminCreatorsPage() {
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-white">运营建议</p>
                 <p className="text-sm leading-6 text-neutral-400">
-                  先处理“缺作者作品”，再处理“命名待清理”，最后抽样检查前台 creator 聚合页是否自然。这样投入最少，前台改善最快。
+                  先处理“缺作者作品”，再处理“命名待清理”，最后抽样检查前台创作者聚合页是否自然。这样投入最少，前台改善最快。
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">

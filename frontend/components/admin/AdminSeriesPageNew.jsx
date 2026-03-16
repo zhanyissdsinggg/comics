@@ -854,7 +854,7 @@ export default function AdminSeriesPageNew() {
                     placeholder="例如：Studio LICO"
                     className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue"
                   />
-                  <span className="text-xs text-ios-gray-500">建议在创建时就补齐，前台 creator 页面和信任模块会直接依赖这个字段。</span>
+                  <span className="text-xs text-ios-gray-500">建议在创建时就补齐，前台创作者页面和信任模块会直接依赖这个字段。</span>
                 </label>
 
                 <div className="space-y-2">

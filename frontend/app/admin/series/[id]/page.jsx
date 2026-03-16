@@ -32,7 +32,7 @@ const PRICING_FIELDS = new Set(['episodePrice']);
 const TTF_FIELDS = new Set(['ttfEnabled', 'ttfIntervalHours']);
 const SECTION_CONFIGS = [
   { id: 'basic', title: '基础信息', fields: ['title', 'type', 'status', 'description', 'genres', 'badge'] },
-  { id: 'creator', title: '作者与前台信号', fields: ['author'] },
+  { id: 'creator', title: '作者与创作者信号', fields: ['author'] },
   { id: 'distribution', title: '发布与限制', fields: ['isPublished', 'adult'] },
   { id: 'commerce', title: '商业设置', fields: ['episodePrice', 'ttfEnabled', 'ttfIntervalHours'] },
   { id: 'cover', title: '封面资源', fields: ['coverUrl', 'coverTone'] },
@@ -676,7 +676,7 @@ export default function AdminSeriesDetailPage() {
 
             <SectionCard
               id="creator"
-              title="作者与前台信号"
+              title="作者与创作者信号"
               dirty={dirtyBySection.creator}
               isEditing={isEditing}
               isSaving={saveMutation.isPending && savingSectionId === 'creator'}
@@ -686,7 +686,7 @@ export default function AdminSeriesDetailPage() {
                 <div className="space-y-5">
                   <FormField
                     label="作者 / 工作室"
-                    helperText="前台作品页、信任模块和 creator 聚合页都会使用这个名称。尽量保持命名稳定，避免同一作者出现多个写法；如果保存后刷新仍为空，说明当前数据库还没开作者字段。"
+                    helperText="前台作品页、信任模块和创作者聚合页都会使用这个名称。尽量保持命名稳定，避免同一位创作者出现多个写法；如果保存后刷新仍为空，说明当前数据库还没开作者字段。"
                   >
                     <input
                       type="text"
@@ -700,7 +700,7 @@ export default function AdminSeriesDetailPage() {
                   <div className="rounded-[28px] border border-cyan-500/15 bg-cyan-500/[0.06] px-5 py-5">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">前台用途</p>
                     <p className="mt-3 text-sm leading-7 text-neutral-300">
-                      这里维护的作者名会直接进入前台作者卡和 creator 页面，是美国漫画站里非常关键的发现入口，不建议随意改名。
+                      这里维护的名称会直接进入前台创作者卡和创作者页面，是美国漫画站里非常关键的发现入口，不建议随意改名。
                     </p>
                   </div>
                 </div>

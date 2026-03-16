@@ -492,6 +492,24 @@ test.describe("Admin route regression", () => {
     await expectNoRuntimeIssues("/admin/storefront", runtimeIssues);
   });
 
+  test("should render creators workspace with chinese operator copy", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminApiMocks(page, {
+      seriesBody: MERCH_SERIES_BODY,
+    });
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/creators", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "创作者管理" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("创作者归因问题", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "筛选创作者目录" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/creators", runtimeIssues);
+  });
+
   test("should sync merchandising recommendations into an existing slot", async ({ page }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
