@@ -152,6 +152,172 @@ const PERFORMANCE_WINDOWS = [
   { id: "all", label: "全部" },
 ];
 
+function dedupeSeriesPool(seriesPool) {
+  const seen = new Set();
+  return (Array.isArray(seriesPool) ? seriesPool : []).filter((series) => {
+    const seriesId = String(series?.id || "").trim();
+    if (!seriesId || seen.has(seriesId)) {
+      return false;
+    }
+    seen.add(seriesId);
+    return true;
+  });
+}
+
+function getSlotReplacementCandidates(slot, heroCandidates) {
+  const currentIds = new Set(Array.isArray(slot?.currentIds) ? slot.currentIds : []);
+  const heroSeriesPool = (Array.isArray(heroCandidates) ? heroCandidates : []).map((entry) => entry.series).filter(Boolean);
+  const slotRecommended = Array.isArray(slot?.recommendedSeries) ? slot.recommendedSeries : [];
+
+  let specializedPool = [];
+  if (slot?.id === "home-free-start") {
+    specializedPool = heroSeriesPool.filter(
+      (series) => Boolean(series?.hasFreeEpisodes) || toNumber(series?.freeEpisodeCount) > 0,
+    );
+  } else if (slot?.id === "home-binge-ready") {
+    specializedPool = heroSeriesPool.filter(
+      (series) => String(series?.status || "").toLowerCase() === "completed",
+    );
+  } else if (slot?.id === "home-breakout") {
+    specializedPool = heroSeriesPool.filter((series) => {
+      const badges = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
+        .filter(Boolean)
+        .map((badge) => String(badge).trim().toUpperCase());
+      return badges.includes("HOT") || badges.includes("NEW");
+    });
+  } else {
+    specializedPool = heroSeriesPool;
+  }
+
+  return dedupeSeriesPool([...slotRecommended, ...specializedPool])
+    .filter((series) => !currentIds.has(series.id))
+    .slice(0, 3);
+}
+
+function buildSlotOptimizationPlan(slot, replacementCandidates) {
+  const replacementIds = replacementCandidates.map((series) => series.id).filter(Boolean);
+  const readinessEntries = (Array.isArray(slot?.currentSeries) ? slot.currentSeries : []).map((series) => ({
+    series,
+    readiness: getAdminSeriesReadiness(series),
+  }));
+  const weakestEntry = [...readinessEntries].sort((left, right) => left.readiness.score - right.readiness.score)[0] || null;
+  const hasReplacementCandidates = replacementCandidates.length > 0;
+  const performanceLoaded = !slot?.current?.id || Boolean(slot?.performanceLoaded);
+  const impressions = toNumber(slot?.performance?.totalImpressions);
+  const ctr = toNumber(slot?.performance?.avgCtr);
+  const conversionRate = toNumber(slot?.performance?.avgConversionRate);
+
+  if (!slot?.current) {
+    return {
+      priority: 100,
+      tone: "rose",
+      title: "这个首页位还没上线",
+      detail: "先把关键位补上，避免首页流量入口空转。",
+      actionType: "apply",
+      actionLabel: "一键补位",
+      actionIds: Array.isArray(slot?.recommendedIds) ? slot.recommendedIds : [],
+      replacementCandidates,
+      replacementIds,
+    };
+  }
+
+  if (!slot?.aligned) {
+    return {
+      priority: 90,
+      tone: "amber",
+      title: "当前配置偏离首页建议",
+      detail: "先同步到当前首页建议，再判断是内容问题还是位置问题。",
+      actionType: "apply",
+      actionLabel: "一键对齐",
+      actionIds: Array.isArray(slot?.recommendedIds) ? slot.recommendedIds : [],
+      replacementCandidates,
+      replacementIds,
+    };
+  }
+
+  if (weakestEntry && !weakestEntry.readiness.isReady) {
+    return {
+      priority: 80,
+      tone: "amber",
+      title: "当前在跑的作品素材还没补齐",
+      detail: `${weakestEntry.series.title} 还缺 ${weakestEntry.readiness.topIssues.join("、")}，会直接拖累首页点击和转化。`,
+      actionType: "edit",
+      actionLabel: "去补作品素材",
+      actionSeriesId: weakestEntry.series.id,
+      replacementCandidates,
+      replacementIds,
+    };
+  }
+
+  if (!performanceLoaded) {
+    return {
+      priority: 40,
+      tone: "cyan",
+      title: "表现数据还在同步",
+      detail: "配置和素材已经就位，等归因数据返回后，再判断是否需要换稿或调位。",
+      actionType: "review",
+      actionLabel: "等待数据",
+      actionIds: [],
+      replacementCandidates,
+      replacementIds,
+    };
+  }
+
+  if (impressions <= 0) {
+    return {
+      priority: 70,
+      tone: "amber",
+      title: "这个首页位还没拿到曝光",
+      detail: "先确认推荐位是否已真正上屏，或检查追踪归因是否正常返回。",
+      actionType: hasReplacementCandidates ? "copy" : "review",
+      actionLabel: hasReplacementCandidates ? "复制替换候选 ID" : "继续观察",
+      actionIds: replacementIds,
+      replacementCandidates,
+      replacementIds,
+    };
+  }
+
+  if (ctr < 2 && hasReplacementCandidates) {
+    return {
+      priority: 60,
+      tone: "amber",
+      title: "点击率偏低，建议准备替换候选",
+      detail: `当前 CTR 只有 ${formatPercentValue(ctr)}，可以准备更强候选做下一轮测试。`,
+      actionType: "copy",
+      actionLabel: "复制替换候选 ID",
+      actionIds: replacementIds,
+      replacementCandidates,
+      replacementIds,
+    };
+  }
+
+  if (conversionRate > 0 && conversionRate < 10 && hasReplacementCandidates) {
+    return {
+      priority: 50,
+      tone: "amber",
+      title: "点击还行，但转化偏弱",
+      detail: `当前转化率 ${formatPercentValue(conversionRate)}，可以优先测试更适合承接付费或免费开篇的作品。`,
+      actionType: "copy",
+      actionLabel: "复制替换候选 ID",
+      actionIds: replacementIds,
+      replacementCandidates,
+      replacementIds,
+    };
+  }
+
+  return {
+    priority: 10,
+    tone: "emerald",
+    title: "当前状态稳定",
+    detail: "这个首页位当前表现和配置都比较稳，可以继续观察。",
+    actionType: "review",
+    actionLabel: "保持观察",
+    actionIds: [],
+    replacementCandidates,
+    replacementIds,
+  };
+}
+
 function getToneClasses(tone) {
   if (tone === "emerald") {
     return "border-emerald-500/25 bg-emerald-500/10 text-emerald-200";
@@ -456,6 +622,36 @@ export default function AdminHomeMerchandisingPage() {
         ? (performanceSummary.totalConversions / performanceSummary.totalClicks) * 100
         : 0,
     [performanceSummary],
+  );
+  const slotOptimizationCards = useMemo(
+    () =>
+      slotCards
+        .map((slot) => {
+          const performanceLoaded =
+            !slot.current?.id || Object.prototype.hasOwnProperty.call(slotPerformanceMap, slot.current.id);
+          const performance =
+            slot.current?.id && performanceLoaded
+              ? slotPerformanceMap[slot.current.id] || normalizePerformance(null)
+              : normalizePerformance(null);
+          const enrichedSlot = {
+            ...slot,
+            performance,
+            performanceLoaded,
+          };
+          return {
+            ...enrichedSlot,
+            plan: buildSlotOptimizationPlan(
+              enrichedSlot,
+              getSlotReplacementCandidates(enrichedSlot, heroCandidates),
+            ),
+          };
+        })
+        .sort((left, right) => right.plan.priority - left.plan.priority),
+    [heroCandidates, slotCards, slotPerformanceMap],
+  );
+  const urgentOptimizationCount = useMemo(
+    () => slotOptimizationCards.filter((slot) => slot.plan.priority >= 60).length,
+    [slotOptimizationCards],
   );
   const readyHeroCount = useMemo(
     () => heroCandidates.filter(({ series }) => getAdminSeriesReadiness(series).isReady).length,
@@ -979,6 +1175,124 @@ export default function AdminHomeMerchandisingPage() {
               </div>
             </>
           )}
+        </section>
+
+        <section className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 backdrop-blur-xl">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-white">首页位优化建议</h2>
+              <p className="mt-2 max-w-3xl text-sm text-neutral-400">
+                把当前配置、作品素材和最近表现放在一起看，先处理最容易拖累首页点击和转化的坑位。
+              </p>
+            </div>
+            <span className="inline-flex w-fit items-center rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-sm font-semibold text-neutral-200">
+              优先处理 {urgentOptimizationCount} 个
+            </span>
+          </div>
+
+          <div className="mt-5 grid gap-4 xl:grid-cols-2">
+            {slotOptimizationCards.map((slot) => {
+              const plan = slot.plan;
+              const currentTitles = slot.currentSeries.map((series) => series.title).filter(Boolean);
+
+              return (
+                <article key={`${slot.id}-optimization`} className="rounded-3xl border border-white/10 bg-black/10 p-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-semibold text-white">{slot.label}</h3>
+                    <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${getToneClasses(plan.tone)}`}>
+                      {plan.title}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-neutral-300">
+                      优先级 {plan.priority}
+                    </span>
+                  </div>
+
+                  <p className="mt-3 text-sm leading-6 text-neutral-400">{plan.detail}</p>
+
+                  {slot.current ? (
+                    <>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                        <MiniMetric label="曝光" value={formatCompactNumber(slot.performance.totalImpressions)} />
+                        <MiniMetric label="CTR" value={formatPercentValue(slot.performance.avgCtr)} />
+                        <MiniMetric label="转化率" value={formatPercentValue(slot.performance.avgConversionRate)} />
+                      </div>
+                      <p className="mt-4 text-xs uppercase tracking-[0.2em] text-neutral-500">当前配置</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {currentTitles.length > 0 ? currentTitles.map((title) => (
+                          <span key={`${slot.id}-optimization-current-${title}`} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-neutral-300">
+                            {title}
+                          </span>
+                        )) : (
+                          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-neutral-400">
+                            当前已上线，但暂时没有匹配到作品资料
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mt-4 rounded-2xl border border-dashed border-rose-500/30 bg-rose-500/10 px-4 py-4 text-sm text-rose-100">
+                      这个首页位当前还没上屏，建议先补位，别让首页入口继续空着。
+                    </div>
+                  )}
+
+                  {plan.replacementCandidates.length > 0 ? (
+                    <>
+                      <p className="mt-4 text-xs uppercase tracking-[0.2em] text-neutral-500">替换候选</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {plan.replacementCandidates.map((series) => (
+                          <span key={`${slot.id}-replacement-${series.id}`} className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-200">
+                            {series.title}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {plan.actionType === "apply" ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleApplyRecommendation(slot)}
+                        disabled={savingSlot === slot.id || !slot.canApplyRecommendation}
+                        className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 text-sm font-semibold text-emerald-200 transition hover:border-emerald-400/50 hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <RefreshCw className={`h-4 w-4 ${savingSlot === slot.id ? "animate-spin" : ""}`} />
+                        {savingSlot === slot.id ? (slot.current ? "同步中..." : "创建中...") : plan.actionLabel}
+                      </button>
+                    ) : null}
+
+                    {plan.actionType === "edit" && plan.actionSeriesId ? (
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/admin/series/${plan.actionSeriesId}`)}
+                        className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-2 text-sm font-semibold text-amber-100 transition hover:border-amber-400/50 hover:bg-amber-500/15"
+                      >
+                        <BookOpen className="h-4 w-4" />
+                        {plan.actionLabel}
+                      </button>
+                    ) : null}
+
+                    {plan.actionType === "copy" ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleCopyIds(`${slot.label} 替换候选`, plan.actionIds)}
+                        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+                      >
+                        <Copy className="h-4 w-4" />
+                        {plan.actionLabel}
+                      </button>
+                    ) : null}
+
+                    {plan.actionType === "review" ? (
+                      <span className={`inline-flex items-center rounded-full border px-3.5 py-2 text-sm font-semibold ${getToneClasses(plan.tone)}`}>
+                        {plan.actionLabel}
+                      </span>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </section>
 
         <section className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 backdrop-blur-xl">

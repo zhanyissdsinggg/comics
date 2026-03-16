@@ -498,7 +498,10 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const heroSlotCard = page.locator("article").filter({
+    const slotHealthSection = page.locator("section").filter({
+      has: page.getByRole("heading", { name: "关键首页位体检" }),
+    });
+    const heroSlotCard = slotHealthSection.locator("article").filter({
       has: page.getByRole("heading", { name: "首页英雄位" }),
     });
 
@@ -580,6 +583,56 @@ test.describe("Admin route regression", () => {
     await expect(performanceSection.getByText("表现健康", { exact: true }).first()).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
+  });
+
+  test("should show merchandising optimization guidance for low-performing slots", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminApiMocks(page, {
+      seriesBody: MERCH_SERIES_BODY,
+      recommendationSlotsBody: {
+        slots: [
+          {
+            id: "slot-home-free-start",
+            slot: "home-free-start",
+            name: "home-free-start",
+            seriesIds: ["series-hero-001"],
+            createdAt: "2026-03-12T08:00:00.000Z",
+            updatedAt: "2026-03-12T08:00:00.000Z",
+          },
+        ],
+        total: 1,
+      },
+      recommendationSlotPerformanceById: {
+        "slot-home-free-start": {
+          totalImpressions: 3200,
+          totalClicks: 35,
+          totalConversions: 4,
+          avgCtr: "1.09",
+          avgConversionRate: "11.43",
+        },
+      },
+      hotKeywordsBody: {
+        keywords: [{ keyword: "romance", count: 1820, growthLabel: "今日热搜" }],
+      },
+    });
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const optimizationSection = page.locator("section").filter({
+      has: page.getByRole("heading", { name: "首页位优化建议" }),
+    });
+    const lowCtrCard = optimizationSection.locator("article").filter({
+      hasText: "点击率偏低，建议准备替换候选",
+    });
+
+    await expect(lowCtrCard).toContainText("复制替换候选 ID", { timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(lowCtrCard).toContainText("Neon Contract", { timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(lowCtrCard).toContainText("1.09%", { timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
