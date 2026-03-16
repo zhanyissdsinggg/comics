@@ -9,6 +9,7 @@ import SiteHeader from "../layout/SiteHeader";
 import Skeleton from "../common/Skeleton";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import SeriesTrustPanel from "./SeriesTrustPanel";
+import SeriesArrivalPanel from "./SeriesArrivalPanel";
 import StorefrontCampaignPanel from "../common/StorefrontCampaignPanel";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
@@ -126,6 +127,7 @@ export default function SeriesPage({ seriesId }) {
   const [showSecondarySections, setShowSecondarySections] = useState(false);
   const [authError, setAuthError] = useState("");
   const [commerceNotice, setCommerceNotice] = useState(null);
+  const [activeAttribution, setActiveAttribution] = useState(null);
   const gateReportedRef = useRef(false);
   const requestRef = useRef(0);
   const secondarySectionsRef = useRef(null);
@@ -297,6 +299,7 @@ export default function SeriesPage({ seriesId }) {
 
   useEffect(() => {
     if (!routeAttribution) {
+      setActiveAttribution(null);
       return;
     }
 
@@ -304,6 +307,7 @@ export default function SeriesPage({ seriesId }) {
       loadPersistedPaymentAttribution(),
       routeAttribution,
     );
+    setActiveAttribution(attribution);
     if (attribution) {
       persistPaymentAttribution(attribution);
     }
@@ -665,6 +669,12 @@ export default function SeriesPage({ seriesId }) {
           desktopPrimaryActionRef={desktopPrimaryActionRef}
           mobilePrimaryActionRef={mobilePrimaryActionRef}
           highlightPrimaryAction={Boolean(commerceNotice)}
+          creatorHref={creatorHref}
+        />
+
+        <SeriesArrivalPanel
+          series={series}
+          attribution={activeAttribution}
           creatorHref={creatorHref}
         />
 
