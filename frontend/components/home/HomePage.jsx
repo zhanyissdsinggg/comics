@@ -319,7 +319,7 @@ function HomeContent() {
             id: "completed-pick",
             eyebrow: "Weekend binge",
             title: completedPick.title,
-            description: "Completed series with enough momentum to carry a full-session read.",
+            description: "Completed series that are easy to binge in one sitting.",
             meta: `${completedPick.status || "Completed"} · ${Number(completedPick.rating || 0).toFixed(1)} rating`,
             cta: "Open binge pick",
             onClick: () => router.push(`/series/${completedPick.id}`),
@@ -349,11 +349,11 @@ function HomeContent() {
         : null,
       {
         id: "adult-hub",
-        eyebrow: "Protected 18+ lane",
-        title: adultCount > 0 ? `${adultCount} mature titles behind the gate` : "18+ titles stay protected",
-        description: "Browse mature titles in a separate lane with clear access rules and less accidental friction.",
+        eyebrow: "18+ section",
+        title: adultCount > 0 ? `${adultCount} mature titles in the 18+ section` : "18+ titles are available behind the age gate",
+        description: "Browse mature titles in a separate section with clear access rules and less friction once access is confirmed.",
         meta: "Sign-in and age confirmation required",
-        cta: "Open 18+ hub",
+        cta: "Open 18+ page",
         onClick: () => router.push("/adult"),
       },
     ].filter(Boolean);
@@ -403,7 +403,7 @@ function HomeContent() {
           ? `Binge ${completedPick.title} without waiting on the next update.`
           : "Completed series are the easiest way into a long reading session.",
         description: completedPick
-          ? "Finished stories are a great pick when you want payoff, momentum, and no release gap between chapters."
+          ? "Finished stories are a great pick when you want payoff and no gap between chapters."
           : "Completed runs are the cleanest entry point when readers want depth, payoff, and no waiting.",
         signalLabel: "Completed",
         signalValue: completedSeriesCount.toLocaleString(),
@@ -454,10 +454,10 @@ function HomeContent() {
           : "See what's gaining heat before the rest of the catalog catches up.",
         description: leadSignal
           ? `Readers are already searching for ${leadSignal.label}. This is the moment to jump into what's hot.`
-          : "Fresh momentum works best when it leads straight into a chart, a series page, or your next follow.",
+          : "Fresh interest works best when it leads straight into a chart, a series page, or your next follow.",
         signalLabel: "Live signal",
         signalValue: leadSignal?.label || "HOT",
-        signalHint: leadSignal?.hint || "Trending search momentum",
+        signalHint: leadSignal?.hint || "Trending searches right now",
         ctaLabel: "Open weekly chart",
         onClick: () => router.push("/rankings?type=popular&window=week"),
         accentClass:
@@ -475,7 +475,7 @@ function HomeContent() {
       {
         id: "start-free",
         eyebrow: "New reader path",
-        title: freeStartCard ? `Start with ${freeStartCard.title}` : "Start with a free preview lane",
+        title: freeStartCard ? `Start with ${freeStartCard.title}` : "Start with a free preview",
         description: freeStartCard
           ? "Free episodes give new readers a clean first click before they have to think about points or plans."
           : "Free-to-start titles let first-time visitors sample the product before spending.",
@@ -489,7 +489,7 @@ function HomeContent() {
         eyebrow: isSignedIn ? "Return path" : "Account perks",
         title: isSignedIn ? "Jump back in without searching" : "Save progress, rewards, and your library",
         description: isSignedIn
-          ? "Returning readers should be able to reach unfinished chapters, rewards, and their saved shelf in one tap."
+          ? "Returning readers should be able to reach unfinished chapters, rewards, and their saved library in one tap."
           : "Signing in should clearly pay off: synced progress, daily rewards, and faster return visits.",
         cta: isSignedIn ? "Open library" : "Sign in free",
         onClick: isSignedIn ? () => router.push("/library") : () => setShowLoginPrompt(true),
@@ -498,7 +498,7 @@ function HomeContent() {
       },
       {
         id: "momentum",
-        eyebrow: "Live momentum",
+        eyebrow: "Trending now",
         title: breakoutCard ? `See why ${breakoutCard.title} is trending` : "See what's trending this week",
         description: breakoutCard
           ? "A fast-rising title is often the easiest way to turn casual browsing into a confident first read."
@@ -510,7 +510,7 @@ function HomeContent() {
       },
       {
         id: "value-path",
-        eyebrow: "Spend-smart path",
+        eyebrow: "Plans & points",
         title: completedCard ? `Compare plans before you unlock more of ${completedCard.title}` : "Compare plans before you unlock more",
         description:
           "Show points, free unlock value, and membership savings before the paywall becomes a surprise.",
@@ -552,8 +552,8 @@ function HomeContent() {
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
                   {resumeSpotlight?.progressPercent > 0
-                    ? `${formatEpisodeLabel(resumeSpotlight.episodeId)} is already ${resumeSpotlight.progressPercent}% complete. The best return experience is one tap back into the exact chapter where momentum was building.`
-                    : `${formatEpisodeLabel(resumeSpotlight?.episodeId)} is still your freshest thread. Resume first, then widen discovery after the story has you again.`}
+                    ? `${formatEpisodeLabel(resumeSpotlight.episodeId)} is already ${resumeSpotlight.progressPercent}% complete. One tap gets you back to the exact chapter where you stopped.`
+                    : `${formatEpisodeLabel(resumeSpotlight?.episodeId)} is still the easiest place to pick back up before you browse for something new.`}
                 </p>
 
                 <div className="mt-6 flex flex-wrap gap-3">
@@ -613,7 +613,7 @@ function HomeContent() {
 
                   <div className="min-w-0">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                      Reading thread
+                      Next up
                     </p>
                     <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
                       {resumeSeries.title}
@@ -624,7 +624,7 @@ function HomeContent() {
                     <p className="mt-3 text-sm leading-7 text-neutral-400">
                       {Array.isArray(resumeSeries.genres) && resumeSeries.genres.length > 0
                         ? resumeSeries.genres.slice(0, 3).join(" · ")
-                        : "Creator-led premium reading thread"}
+                        : "Premium series ready to resume"}
                     </p>
 
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -672,7 +672,7 @@ function HomeContent() {
                 Start free, find your next binge, and pick up right where you left off.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
-                Official comics and novels with cleaner discovery, faster return paths, and less storefront clutter.
+                Official comics and novels with cleaner discovery, faster return paths, and less clutter.
               </p>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-400">
                 Browse weekly hits, free starts, creator pages, and premium series without losing the thread of what you want to read next.
@@ -681,16 +681,16 @@ function HomeContent() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   type="button"
-                onClick={() => router.push("/search")}
-                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
-              >
+                  onClick={() => router.push("/search")}
+                  className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                >
                   Browse all series
                 </button>
                 <button
                   type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
-              >
+                  onClick={() => router.push("/rankings?type=popular&window=week")}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+                >
                   See what's trending
                 </button>
               </div>
@@ -740,10 +740,10 @@ function HomeContent() {
               Browse by genre
             </p>
             <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Pick a mood and let the shelf do the rest.
+              Pick a mood and start there.
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-7 text-neutral-400">
-              Jump from romance to thriller to fantasy without losing your place or falling into a dead-end browse.
+              Jump from romance to thriller to fantasy without losing your place.
             </p>
           </div>
 
@@ -897,21 +897,21 @@ function HomeContent() {
         )}
       </main>
 
-      <LoginPrompt
-        isOpen={showLoginPrompt}
-        onClose={() => setShowLoginPrompt(false)}
-        eyebrow={STOREFRONT_TERMS.readerBenefits}
-        title="Save your library and pick up where you left off"
-        message="Sign in to sync your shelf, keep your progress, claim rewards, and make every return visit faster."
-        returnTo="/"
-        primaryLabel="Sign in and sync"
-        secondaryLabel="Create free account"
-        features={[
-          { icon: BookOpen, text: "Resume chapters and keep your shelf synced across devices" },
-          { icon: Gift, text: "Claim daily rewards, mission payouts, and bonus points" },
-          { icon: Sparkles, text: "Get stronger discovery rails based on what you actually read" },
-        ]}
-      />
+        <LoginPrompt
+          isOpen={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
+          eyebrow={STOREFRONT_TERMS.readerBenefits}
+          title="Save your library and pick up where you left off"
+          message="Sign in to sync your library, keep your progress, claim rewards, and make every return visit faster."
+          returnTo="/"
+          primaryLabel="Sign in and sync"
+          secondaryLabel="Create free account"
+          features={[
+            { icon: BookOpen, text: "Resume chapters and keep your library synced across devices" },
+            { icon: Gift, text: "Claim daily rewards, mission payouts, and bonus points" },
+            { icon: Sparkles, text: "Get better picks based on what you actually read" },
+          ]}
+        />
     </div>
   );
 }

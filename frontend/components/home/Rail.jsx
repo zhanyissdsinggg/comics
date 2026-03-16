@@ -19,7 +19,7 @@ export default function Rail({
   creatorEntryPoint = "CREATOR_CHIP",
   creatorCampaignId = "",
   creatorSourcePath = "/",
-  creatorLabel = "Creators behind this shelf",
+  creatorLabel = "More from these creators",
 }) {
   const router = useRouter();
   const safeItems = ensureArray(items);

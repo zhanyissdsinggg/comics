@@ -1,4 +1,5 @@
 import { expect, test, type Route } from "@playwright/test";
+import { createPosterPlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const LIBRARY_UI_TIMEOUT_MS = 15000;
@@ -20,7 +21,7 @@ const catalogPayload = {
       badge: "HOT",
       badges: ["HOT"],
       genres: ["Action", "Sci-Fi"],
-      coverUrl: "https://placehold.co/600x800/png",
+      coverUrl: createPosterPlaceholder("Saved Comet"),
       isPublished: true,
       updatedAt: "2026-03-15T08:00:00.000Z",
     },
@@ -39,7 +40,7 @@ const catalogPayload = {
       badge: "NEW",
       badges: ["NEW"],
       genres: ["Mystery", "Drama"],
-      coverUrl: "https://placehold.co/600x800/png",
+      coverUrl: createPosterPlaceholder("Midnight Ledger"),
       isPublished: true,
       updatedAt: "2026-03-15T10:00:00.000Z",
     },
@@ -58,7 +59,7 @@ const catalogPayload = {
       badge: "HOT",
       badges: ["HOT"],
       genres: ["Thriller", "Action"],
-      coverUrl: "https://placehold.co/600x800/png",
+      coverUrl: createPosterPlaceholder("Shadow Relay"),
       isPublished: true,
       updatedAt: "2026-03-15T11:00:00.000Z",
     },

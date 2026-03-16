@@ -48,7 +48,7 @@ export default function AboutPage() {
             eyebrow="About"
             title={siteConfig.companyName}
             description={siteConfig.aboutSummary}
-            secondary="We focus on fast page loads, dependable reading progress, and a storefront that keeps the buying flow straightforward."
+            secondary="We focus on fast page loads, dependable reading progress, and a buying flow that stays straightforward."
             actions={
               <>
                 <Link

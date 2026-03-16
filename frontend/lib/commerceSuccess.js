@@ -116,7 +116,7 @@ export function getCommerceSuccessPresentation(payload) {
       eyebrow: "Membership active",
       title: `${payload.planTitle || guide.title || "Membership"} is now active`,
       description:
-        "Your recurring perks are attached to this account now, so the best next move is to head back into reading while the value path is still clear.",
+        "Your recurring perks are active now, so the next step should take you back to reading instead of leaving you on a purchase screen.",
       metaItems: [
         payload.planTitle || "Membership",
         "Discounts + daily free reads",
@@ -139,7 +139,7 @@ export function getCommerceSuccessPresentation(payload) {
     eyebrow: guide.eyebrow || STOREFRONT_TERMS.freeStart,
     title: `${totalPts.toLocaleString()} points added to your wallet`,
     description:
-      "The wallet is loaded now, so the site should point you back into content, not strand you on a receipt or pricing screen.",
+      "Your wallet is ready, so the site should point you back to something worth reading instead of leaving you on a receipt screen.",
     metaItems: [
       `${paidPts.toLocaleString()} paid pts`,
       `${bonusPts.toLocaleString()} bonus pts`,

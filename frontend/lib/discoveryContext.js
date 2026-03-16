@@ -145,12 +145,12 @@ function getLaneReason({ entryPoint, campaignId, series }) {
   }
 
   if (entryPoint.startsWith("rankings_")) {
-    return {
-      sourceLabel: "Charts",
-      laneValue: "Chart pick",
-      title: `${series?.title || "This title"} is trending on the charts right now.`,
-      description: "Chart traffic works best when readers can still feel the momentum behind the click.",
-    };
+      return {
+        sourceLabel: "Charts",
+        laneValue: "Chart pick",
+        title: `${series?.title || "This title"} is trending on the charts right now.`,
+        description: "Chart traffic works best when readers still understand why this title is hot right now.",
+      };
   }
 
   if (entryPoint.startsWith("creator_")) {

@@ -1,4 +1,5 @@
 import { expect, test, type Route } from "@playwright/test";
+import { createReaderPagePlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const READER_UI_TIMEOUT_MS = 30000;
@@ -36,9 +37,9 @@ const episodePayload = (episodeId: string) => ({
     pricePts: 0,
     previewFreePages: 3,
     pages: [
-      { url: `https://placehold.co/800x1200/1a1a2e/ffffff.png?text=${episodeId}+P1`, w: 800, h: 1200 },
-      { url: `https://placehold.co/800x1200/1a1a2e/ffffff.png?text=${episodeId}+P2`, w: 800, h: 1200 },
-      { url: `https://placehold.co/800x1200/1a1a2e/ffffff.png?text=${episodeId}+P3`, w: 800, h: 1200 },
+      { url: createReaderPagePlaceholder(`${episodeId} P1`), w: 800, h: 1200 },
+      { url: createReaderPagePlaceholder(`${episodeId} P2`), w: 800, h: 1200 },
+      { url: createReaderPagePlaceholder(`${episodeId} P3`), w: 800, h: 1200 },
     ],
     paragraphs: [],
   },

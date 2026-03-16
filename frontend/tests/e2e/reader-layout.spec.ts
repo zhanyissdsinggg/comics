@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createReaderPagePlaceholder } from "./support/placeholders";
 
 const seriesPayload = {
   series: {
@@ -27,9 +28,9 @@ const episodePayload = {
     pricePts: 0,
     previewFreePages: 3,
     pages: [
-      { url: "https://placehold.co/800x1200/1a1a2e/ffffff.png?text=The+Last+Kingdom+Ep1+P1", w: 800, h: 1200 },
-      { url: "https://placehold.co/800x1200/1a1a2e/ffffff.png?text=The+Last+Kingdom+Ep1+P2", w: 800, h: 1200 },
-      { url: "https://placehold.co/800x1200/1a1a2e/ffffff.png?text=The+Last+Kingdom+Ep1+P3", w: 800, h: 1200 },
+      { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P1"), w: 800, h: 1200 },
+      { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P2"), w: 800, h: 1200 },
+      { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P3"), w: 800, h: 1200 },
     ],
     paragraphs: [],
   },

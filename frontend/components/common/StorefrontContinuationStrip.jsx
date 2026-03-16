@@ -7,12 +7,12 @@ import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
 
 function getDiscoveryLaneTitle(campaignId) {
   if (campaignId === "free-start") {
-    return "Keep the session inside a free-start lane.";
+    return "Keep browsing with free-start picks.";
   }
   if (campaignId === "binge-ready") {
-    return "Keep the session inside a binge-ready shelf.";
+    return "Keep going with completed series.";
   }
-  return "Keep the session inside a live return lane.";
+  return "Keep reading with one easy next step.";
 }
 
 function getSimilarDescription(series) {
@@ -66,7 +66,7 @@ export default function StorefrontContinuationStrip({
         eyebrow: "Switch title",
         title: `Try ${leadSimilar.title} next.`,
         description:
-          "Move into a nearby series without resetting discovery from scratch, then decide whether this session should widen or stay focused.",
+          "Move into a nearby series without starting over, then decide whether you want to stay focused or branch out.",
         cta: "Open similar pick",
         onClick: () => router.push(`/series/${leadSimilar.id}`),
         meta: getSimilarDescription(leadSimilar),
@@ -78,8 +78,8 @@ export default function StorefrontContinuationStrip({
     if (includeValueCard) {
       nextCards.push({
         id: "value",
-        eyebrow: "Value path",
-        title: `Use ${campaign.valueCta.toLowerCase()} before the session cools off.`,
+        eyebrow: "Plans & points",
+        title: "See your best payment option before you unlock more.",
         description: campaign.value,
         cta: campaign.valueCta,
         onClick: () => {

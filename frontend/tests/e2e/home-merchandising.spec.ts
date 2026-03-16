@@ -1,4 +1,5 @@
 import { expect, test, type Route } from "@playwright/test";
+import { createBannerPlaceholder, createPosterPlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const HOME_UI_TIMEOUT_MS = 15000;
@@ -12,8 +13,8 @@ const HOME_SERIES_BODY = {
       status: "Completed",
       adult: false,
       description: "The default chart monster that would win without homepage overrides.",
-      coverUrl: "https://placehold.co/600x800/png",
-      bannerUrl: "https://placehold.co/1600x900/png",
+      coverUrl: createPosterPlaceholder("Atlas Prime"),
+      bannerUrl: createBannerPlaceholder("Atlas Prime"),
       badge: "HOT",
       badges: ["HOT"],
       genres: ["Action", "Sci-Fi"],
@@ -36,8 +37,8 @@ const HOME_SERIES_BODY = {
       status: "Ongoing",
       adult: false,
       description: "Manual hero pick that should lead the homepage carousel.",
-      coverUrl: "https://placehold.co/600x800/png",
-      bannerUrl: "https://placehold.co/1600x900/png",
+      coverUrl: createPosterPlaceholder("Velvet Voltage"),
+      bannerUrl: createBannerPlaceholder("Velvet Voltage"),
       badge: "",
       badges: [],
       genres: ["Romance", "Drama"],
@@ -60,7 +61,7 @@ const HOME_SERIES_BODY = {
       status: "Ongoing",
       adult: false,
       description: "Manual free-start pick for first-time readers.",
-      coverUrl: "https://placehold.co/600x800/png",
+      coverUrl: createPosterPlaceholder("Soft Launch Kiss"),
       badge: "",
       badges: [],
       genres: ["Romance", "Comedy"],
@@ -83,7 +84,7 @@ const HOME_SERIES_BODY = {
       status: "Completed",
       adult: false,
       description: "Manual binge-ready pick that should replace the default chart leader.",
-      coverUrl: "https://placehold.co/600x800/png",
+      coverUrl: createPosterPlaceholder("Last Ember Files"),
       badge: "",
       badges: [],
       genres: ["Thriller", "Mystery"],
@@ -106,7 +107,7 @@ const HOME_SERIES_BODY = {
       status: "Ongoing",
       adult: false,
       description: "Manual breakout pick tied to live search momentum.",
-      coverUrl: "https://placehold.co/600x800/png",
+      coverUrl: createPosterPlaceholder("Rocket Choir"),
       badge: "NEW",
       badges: ["NEW"],
       genres: ["Fantasy", "Action"],

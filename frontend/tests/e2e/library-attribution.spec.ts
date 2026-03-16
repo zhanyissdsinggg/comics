@@ -1,4 +1,5 @@
 import { expect, test, type Route } from "@playwright/test";
+import { createPosterPlaceholder, createReaderPagePlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const LIBRARY_UI_TIMEOUT_MS = 15000;
@@ -20,7 +21,7 @@ const seriesPayload = {
       badge: "NEW",
       badges: ["NEW"],
       genres: ["Fantasy", "Action"],
-      coverUrl: "https://placehold.co/600x800/png",
+      coverUrl: createPosterPlaceholder("Rocket Choir"),
       isPublished: true,
       updatedAt: "2026-03-15T08:00:00.000Z",
     },
@@ -59,9 +60,9 @@ const episodePayload = {
     pricePts: 0,
     previewFreePages: 3,
     pages: [
-      { url: "https://placehold.co/800x1200/1a1a2e/ffffff.png?text=Rocket+Choir+Ep1+P1", w: 800, h: 1200 },
-      { url: "https://placehold.co/800x1200/1a1a2e/ffffff.png?text=Rocket+Choir+Ep1+P2", w: 800, h: 1200 },
-      { url: "https://placehold.co/800x1200/1a1a2e/ffffff.png?text=Rocket+Choir+Ep1+P3", w: 800, h: 1200 },
+      { url: createReaderPagePlaceholder("Rocket Choir Ep1 P1"), w: 800, h: 1200 },
+      { url: createReaderPagePlaceholder("Rocket Choir Ep1 P2"), w: 800, h: 1200 },
+      { url: createReaderPagePlaceholder("Rocket Choir Ep1 P3"), w: 800, h: 1200 },
     ],
     paragraphs: [],
   },

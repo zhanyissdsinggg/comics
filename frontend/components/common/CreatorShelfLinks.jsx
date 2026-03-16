@@ -66,7 +66,7 @@ export default function CreatorShelfLinks({
   sourcePath = "/",
   title = "",
   description = "",
-  label = "Creators behind this shelf",
+  label = "More from these creators",
   maxCreators = 6,
   compact = false,
   className = "",
