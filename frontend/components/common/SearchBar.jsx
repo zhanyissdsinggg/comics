@@ -17,7 +17,7 @@ const DEFAULT_DISCOVERY_LANES = [
   {
     id: "popular-week",
     label: "Popular this week",
-    hint: "Open the live chart",
+    hint: "Open this week's chart",
     href: "/rankings?type=popular&window=week",
   },
   {
@@ -35,7 +35,7 @@ const DEFAULT_DISCOVERY_LANES = [
   {
     id: "romance",
     label: "Romance",
-    hint: "Jump into a proven lane",
+    hint: "Jump into a popular genre",
     query: "Romance",
   },
 ];

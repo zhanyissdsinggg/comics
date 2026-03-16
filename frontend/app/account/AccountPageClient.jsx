@@ -738,7 +738,7 @@ export default function AccountPage() {
             <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Save queue
+                  Settings sync
                 </p>
                 <p className="mt-2 text-sm leading-6 text-neutral-400">
                   Persist the current device and account preferences to storage and, when signed in, to the backend profile record.

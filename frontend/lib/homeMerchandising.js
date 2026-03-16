@@ -113,14 +113,14 @@ function getLibraryReturnScore(series) {
 const LIBRARY_RETURN_SLOT_PRIORITIES = [
   {
     slotId: "library-return",
-    sourceLabel: "Editor-backed return pick",
+    sourceLabel: "Staff pick to resume",
     entryPoint: "LIBRARY_RETURN_SLOT",
     campaignId: "library_return_slot",
     limit: 8,
   },
   {
     slotId: "home-breakout",
-    sourceLabel: "Breakout momentum pick",
+    sourceLabel: "Trending breakout pick",
     entryPoint: "LIBRARY_BREAKOUT_FILL",
     campaignId: "library_breakout_fill",
     limit: 2,
@@ -311,7 +311,7 @@ export function getHomeEditorialStats(seriesList, options = {}) {
     return [
       { label: "Series live", value: "--", hint: "Across comics and novels" },
       { label: "Fresh drops", value: "--", hint: "Recently tagged new" },
-      { label: "Genre lanes", value: "--", hint: "Filter without dead ends" },
+      { label: "Genres", value: "--", hint: "Browse without losing your place" },
       { label: "18+ catalog", value: "--", hint: "Protected behind sign-in" },
     ];
   }
@@ -320,7 +320,7 @@ export function getHomeEditorialStats(seriesList, options = {}) {
   return [
     { label: "Series live", value: snapshot.seriesCount.toLocaleString(), hint: "Across comics and novels" },
     { label: "Fresh drops", value: snapshot.newCount.toLocaleString(), hint: "Recently tagged new" },
-    { label: "Genre lanes", value: snapshot.genreCount.toLocaleString(), hint: "Filter without dead ends" },
+    { label: "Genres", value: snapshot.genreCount.toLocaleString(), hint: "Browse without losing your place" },
     { label: "18+ catalog", value: snapshot.adultCount.toLocaleString(), hint: "Protected behind sign-in" },
   ];
 }

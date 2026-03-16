@@ -180,7 +180,7 @@ export default function EndOfEpisodeOverlay({
                   {singlePrice === 0 ? "Free" : formatPointsLabel(singlePrice)}
                 </p>
                 <p className="mt-1 text-xs text-neutral-500">
-                  {pricingNote || "Unlock this chapter and keep the queue moving."}
+                  {pricingNote || "Unlock this chapter and keep the story moving."}
                 </p>
               </div>
               <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3">

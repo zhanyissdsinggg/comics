@@ -148,7 +148,7 @@ export default function SeriesFitPanel({
       bestFor:
         status === "completed"
           ? `Readers who want ${leadGenre ? `${leadGenre.toLowerCase()}-driven` : "story-driven"} payoff without release gaps.`
-          : `Readers who want ${leadGenre ? `${leadGenre.toLowerCase()} momentum` : "an ongoing title"} they can save and come back to.`,
+          : `Readers who want ${leadGenre ? `an ongoing ${leadGenre.toLowerCase()} title` : "an ongoing title"} they can save and come back to.`,
       commitment: `${getCommitmentLabel(status, episodeCount)} - ${episodeCount > 0 ? `${episodeCount} episode${episodeCount === 1 ? "" : "s"}` : "ongoing run"}`,
       socialProof:
         readerProof > 0
@@ -174,7 +174,7 @@ export default function SeriesFitPanel({
       body: fitModel.starterLane.body,
     },
     {
-      label: "Reader proof",
+      label: "Reader signals",
       value: fitModel.readerProof > 0 ? formatCompactCount(fitModel.readerProof) : "New",
       body: fitModel.socialProof,
     },
@@ -239,7 +239,7 @@ export default function SeriesFitPanel({
           <p className="mt-3 text-sm leading-7 text-neutral-300">
             {fitModel.secondaryGenre
               ? `If you like ${fitModel.leadGenre}, ${fitModel.secondaryGenre} is the easiest adjacent genre to compare next.`
-              : "If you want more proof, compare this series with the genre page or the creator page before committing."}
+              : "If you want more to compare, open the genre page or the creator page before committing."}
           </p>
         </div>
       </div>

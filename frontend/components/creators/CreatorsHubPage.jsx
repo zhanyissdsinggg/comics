@@ -295,7 +295,7 @@ export default function CreatorsHubPage() {
             eyebrow="Creator directory"
             title="No creator pages are visible in this catalog mode yet."
             description="Once published titles expose stable creator or studio names, they will appear here automatically."
-            secondary="Go back to search, charts, or home so discovery never dead-ends."
+            secondary="Go back to search, charts, or home so browsing never stalls."
             stats={heroStats}
             actions={
               <>

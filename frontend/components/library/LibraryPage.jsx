@@ -849,7 +849,7 @@ export default function LibraryPage() {
                   <Rail
                     title="Your Library"
                     items={visibleLibraryItems}
-                    reason="Followed and bookmarked titles gathered into the current storefront mode."
+                    reason="Followed and bookmarked titles gathered into your current catalog view."
                     ctaLabel="Manage Shelf"
                     href="/library"
                     onItemClick={(item) => {

@@ -484,7 +484,7 @@ export default function CreatorPage({ creatorSlug }) {
             eyebrow="Creator page"
             title={`No published titles are visible for ${creatorName} yet.`}
             description="This creator or studio does not currently expose any visible titles in the active catalog mode."
-            secondary="Go back to search, charts, or the source series so discovery never dead-ends."
+            secondary="Go back to search, charts, or the source series so browsing never stalls."
             stats={[
               {
                 label: "Creator",

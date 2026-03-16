@@ -99,7 +99,7 @@ export default function SeriesTrustPanel({
       onClick: creatorHref ? () => router.push(creatorHref) : null,
     },
     {
-      label: "Reader proof",
+      label: "Reader signals",
       value: followers > 0 ? formatCompactCount(followers) : formatCompactCount(Math.max(views, ratingCount)),
       hint:
         followers > 0

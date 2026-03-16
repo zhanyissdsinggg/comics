@@ -11,7 +11,7 @@ const HOME_RAIL_PRESETS = {
   continue: {
     eyebrow: STOREFRONT_TERMS.readingDesk,
     title: "Pick Up Where You Left Off",
-    reason: "Unlocked episodes waiting in your current reading queue.",
+    reason: "Unlocked episodes waiting in your recent reading list.",
     href: "/library",
     ctaLabel: "Resume Reading",
   },

@@ -30,7 +30,7 @@ const footerSections = [
   },
 ];
 
-const footerHighlights = ["Fast pages", "Clean storefront", "Creator discovery", "Age-gated catalog"];
+const footerHighlights = ["Fast pages", "Clean browse", "Creator discovery", "Age-gated catalog"];
 
 const socialLinks = [
   { label: "GitHub", href: siteConfig.githubUrl },

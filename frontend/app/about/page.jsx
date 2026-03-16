@@ -105,7 +105,7 @@ export default function AboutPage() {
                   return to across both comics and novels.
                 </p>
                 <p>
-                  That means less interface clutter, fewer dead-end flows, and clearer support paths when billing,
+                  That means less interface clutter, fewer confusing dead ends, and clearer support paths when billing,
                   account, or catalog issues happen.
                 </p>
                 <p>

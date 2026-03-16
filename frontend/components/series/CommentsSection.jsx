@@ -71,7 +71,7 @@ function buildPromptSuggestions({ seriesTitle, author, status, genres }) {
       label: isCompleted ? "Ending payoff" : "Latest episode",
       text: isCompleted
         ? `The ending of ${safeTitle} worked for me because `
-        : `The latest episode of ${safeTitle} changed the momentum because `,
+        : `The latest episode of ${safeTitle} stood out to me because `,
     },
     {
       id: "craft",

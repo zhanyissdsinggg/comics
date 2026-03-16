@@ -845,7 +845,7 @@ export default function SearchPage() {
             signalLabel: "Hot keyword",
             signalValue: leadHotLabel,
             signalHint:
-              leadHotKeyword?.hint || (hotWindow === "week" ? "This week's momentum" : "Today's momentum"),
+              leadHotKeyword?.hint || (hotWindow === "week" ? "Most searched this week" : "Most searched today"),
             ctaLabel: `Search ${leadHotLabel}`,
             onClick: () =>
               updateParams(
