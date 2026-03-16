@@ -683,6 +683,38 @@ test.describe("Admin route regression", () => {
     await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
   });
 
+  test("should create a library return slot from the preset form", async ({ page }) => {
+    let createdSlotPayload: Record<string, unknown> | null = null;
+
+    page.on("request", (request) => {
+      const pathname = new URL(request.url()).pathname;
+      if (pathname.endsWith("/api/admin/recommendations/slots") && request.method() === "POST") {
+        createdSlotPayload = JSON.parse(request.postData() || "{}") as Record<string, unknown>;
+      }
+    });
+
+    await primeAdminSession(page);
+    await installAdminApiMocks(page);
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.locator("button.rounded-2xl.bg-emerald-500").first().click();
+
+    await expect(page.locator("#slot-preset")).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.locator("#slot-token")).toHaveValue("library-return");
+    await page.locator("#slot-series-ids").fill("series-hero-001\nseries-hero-002");
+    await page.locator('[role="dialog"] button[type="submit"]').click();
+
+    await expect.poll(() => createdSlotPayload?.slot).toBe("library-return");
+    await expect.poll(() => createdSlotPayload?.seriesIds).toEqual(["series-hero-001", "series-hero-002"]);
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
+  });
+
   test("should filter logs by fallback user identity", async ({ page }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {

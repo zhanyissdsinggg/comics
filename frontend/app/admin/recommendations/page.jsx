@@ -39,8 +39,42 @@ const SERIES_TYPE_OPTIONS = [
 
 const EMPTY_FEEDBACK = { type: '', message: '' };
 
+const STOREFRONT_SLOT_PRESETS = [
+  {
+    token: 'library-return',
+    label: '书架回流位',
+    hint: '给高意图回访用户安排下一本最该继续打开的作品。',
+  },
+  {
+    token: 'home-hero',
+    label: '首页英雄位',
+    hint: '首页首屏轮播位，承担最大流量入口。',
+  },
+  {
+    token: 'home-free-start',
+    label: '免费开篇位',
+    hint: '适合承接新客首读和低门槛转化。',
+  },
+  {
+    token: 'home-binge-ready',
+    label: '完结 binge 位',
+    hint: '适合周末长阅读和高完成度作品。',
+  },
+  {
+    token: 'home-breakout',
+    label: '爆款新作位',
+    hint: '适合承接热度上涨和新作爆发期。',
+  },
+  {
+    token: 'custom',
+    label: '自定义推荐位',
+    hint: '手动输入机器标识，用于特殊活动或实验位。',
+  },
+];
+
 const INITIAL_SLOT_FORM = {
-  name: '',
+  preset: 'library-return',
+  slotToken: 'library-return',
   seriesIdsText: '',
 };
 
@@ -69,9 +103,38 @@ function parseSeriesIds(value) {
     .filter(Boolean);
 }
 
-function buildSlotPayload(form) {
+function normalizeSlotToken(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function getSlotPreset(token) {
+  return STOREFRONT_SLOT_PRESETS.find((item) => item.token === token) || null;
+}
+
+function getSlotDisplayMeta(value) {
+  const normalized = normalizeSlotToken(value);
+  const preset = STOREFRONT_SLOT_PRESETS.find((item) => item.token === normalized);
+
+  if (preset) {
+    return preset;
+  }
+
   return {
-    name: String(form.name || '').trim(),
+    token: normalized || 'custom',
+    label: String(value || '未命名推荐位').trim() || '未命名推荐位',
+    hint: '自定义推荐位，建议保持机器标识稳定，避免前台联动失效。',
+  };
+}
+
+function buildSlotPayload(form) {
+  const presetToken = String(form.preset || '').trim();
+  const slotToken =
+    presetToken && presetToken !== 'custom'
+      ? presetToken
+      : String(form.slotToken || '').trim();
+
+  return {
+    slot: slotToken,
     seriesIds: parseSeriesIds(form.seriesIdsText),
   };
 }
@@ -314,7 +377,7 @@ export default function AdminRecommendationsPage() {
     mutationFn: async () => {
       const payload = buildSlotPayload(slotForm);
 
-      if (!payload.name) {
+      if (!payload.slot) {
         throw new Error('推荐位名称不能为空。');
       }
 
@@ -427,6 +490,10 @@ export default function AdminRecommendationsPage() {
   const slots = slotsQuery.data?.items || [];
   const rankings = rankingsQuery.data?.items || [];
   const analytics = analyticsQuery.data?.items || [];
+  const selectedSlotMeta = useMemo(
+    () => getSlotDisplayMeta(slotForm.preset === 'custom' ? slotForm.slotToken : slotForm.preset),
+    [slotForm.preset, slotForm.slotToken],
+  );
 
   const analyticsSummary = useMemo(() => {
     return analytics.reduce(
@@ -457,7 +524,25 @@ export default function AdminRecommendationsPage() {
 
   const openCreateModal = (target) => {
     setFeedback(EMPTY_FEEDBACK);
+    if (target === 'slot') {
+      setSlotForm(INITIAL_SLOT_FORM);
+    }
+    if (target === 'ranking') {
+      setRankingForm(INITIAL_RANKING_FORM);
+    }
     setCreateTarget(target);
+  };
+
+  const handleSlotPresetChange = (nextPreset) => {
+    const preset = getSlotPreset(nextPreset);
+    setSlotForm((current) => ({
+      ...current,
+      preset: nextPreset,
+      slotToken:
+        preset && preset.token !== 'custom'
+          ? preset.token
+          : current.slotToken,
+    }));
   };
 
   const openDeleteModal = (kind, item) => {
@@ -499,6 +584,7 @@ export default function AdminRecommendationsPage() {
         <div className="grid gap-4 xl:grid-cols-2">
           {slots.map((slot) => {
             const seriesIds = Array.isArray(slot.seriesIds) ? slot.seriesIds : [];
+            const slotMeta = getSlotDisplayMeta(slot.slot || slot.name);
 
             return (
               <article key={slot.id} className="rounded-3xl border border-neutral-800 bg-neutral-950/70 p-5">
@@ -507,6 +593,7 @@ export default function AdminRecommendationsPage() {
                     <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">推荐位</p>
                     <h3 className="mt-2 text-lg font-semibold text-neutral-50">{slot.name || slot.slot || '未命名推荐位'}</h3>
                     <p className="mt-2 font-mono text-xs text-neutral-400">{slot.id}</p>
+                    <p className="mt-2 text-sm text-neutral-400">{slotMeta.hint}</p>
                   </div>
                   <button
                     type="button"
@@ -768,16 +855,37 @@ export default function AdminRecommendationsPage() {
           }}
         >
           <div>
-            <label className="text-sm font-medium text-neutral-300" htmlFor="slot-name">
+            <label className="text-sm font-medium text-neutral-300" htmlFor="slot-preset">
+              推荐位模板
+            </label>
+            <select
+              id="slot-preset"
+              value={slotForm.preset}
+              onChange={(event) => handleSlotPresetChange(event.target.value)}
+              className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+            >
+              {STOREFRONT_SLOT_PRESETS.map((preset) => (
+                <option key={preset.token} value={preset.token}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-neutral-500">
+              {selectedSlotMeta.hint || '选择一个常用推荐位模板，减少手动输错标识的风险。'}
+            </p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-neutral-300" htmlFor="slot-token">
               推荐位名称
             </label>
             <input
-              id="slot-name"
+              id="slot-token"
               type="text"
-              value={slotForm.name}
-              onChange={(event) => setSlotForm((current) => ({ ...current, name: event.target.value }))}
+              value={slotForm.slotToken}
+              readOnly={slotForm.preset !== 'custom'}
+              onChange={(event) => setSlotForm((current) => ({ ...current, slotToken: event.target.value }))}
               placeholder="例如：home-featured"
-              className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+              className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 font-mono text-neutral-100 outline-none transition focus:border-emerald-400 read-only:cursor-not-allowed read-only:opacity-80"
             />
           </div>
           <div>
