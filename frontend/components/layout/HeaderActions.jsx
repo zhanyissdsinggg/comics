@@ -1,26 +1,31 @@
 "use client";
 
-import { Bell, User } from "lucide-react";
+import { Bell, Coins, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "../common/ThemeToggle";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 function AuthSkeleton() {
   return (
     <>
       <div
-        className="hidden h-11 w-24 animate-pulse rounded-full border border-white/5 bg-white/5 sm:block"
+        className="hidden h-10 w-24 animate-pulse rounded-full border border-white/10 bg-white/[0.04] sm:block"
         aria-hidden="true"
       />
       <div
-        className="h-11 w-11 animate-pulse rounded-full border border-white/5 bg-white/5 sm:hidden"
+        className="h-10 w-10 animate-pulse rounded-full border border-white/10 bg-white/[0.04] sm:hidden"
         aria-hidden="true"
       />
     </>
   );
 }
+
+const ICON_BUTTON_CLASS =
+  "relative h-10 w-10 rounded-full border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white";
 
 export default function HeaderActions({
   onWalletClick,
@@ -33,127 +38,105 @@ export default function HeaderActions({
   const { hydrated, isSignedIn } = useAuthStore();
   const { paidPts, bonusPts } = useWalletStore();
   const { unreadCount } = useNotificationsStore();
+  const walletTotal = paidPts + bonusPts;
 
   return (
     <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-      <button
+      <Button
         type="button"
+        size="sm"
+        variant="outline"
         onClick={onWalletClick}
-        className="group relative hidden min-h-[44px] items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-emerald-500/50 hover:bg-emerald-500/20 hover:shadow-ios-glow active:scale-95 sm:flex touch-manipulation"
+        className="hidden h-10 rounded-full border-emerald-400/25 bg-emerald-400/[0.08] px-4 text-emerald-200 hover:border-emerald-300/40 hover:bg-emerald-400/[0.12] sm:inline-flex"
         aria-label="Points store"
-        style={{ WebkitTapHighlightColor: "transparent" }}
       >
-        <svg
-          className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <span className="text-xs font-bold text-emerald-400 tabular-nums">
-          {(paidPts + bonusPts).toLocaleString()}
-        </span>
-      </button>
+        <Coins className="size-4" />
+        <span className="text-xs font-semibold tabular-nums">{walletTotal.toLocaleString()}</span>
+      </Button>
 
-      <button
+      <Button
         type="button"
+        size="icon"
+        variant="outline"
         onClick={() => router.push("/notifications")}
-        className="group relative min-h-[44px] min-w-[44px] rounded-full border border-white/10 bg-white/5 p-2.5 text-neutral-300 backdrop-blur-xl transition-all duration-300 hover:scale-110 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-white hover:shadow-ios active:scale-95 touch-manipulation"
+        className={ICON_BUTTON_CLASS}
         aria-label="Notifications"
-        style={{ WebkitTapHighlightColor: "transparent" }}
       >
-        <Bell
-          size={18}
-          className="transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110"
-        />
+        <Bell className="size-4" />
         {unreadCount > 0 ? (
-          <>
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 animate-ping rounded-full bg-red-500 opacity-75" />
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-rose-500 px-1 text-[10px] font-bold text-white shadow-lg shadow-red-500/50">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          </>
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-[0_10px_24px_rgba(239,68,68,0.35)]">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
         ) : null}
-      </button>
+      </Button>
 
-      <div className="flex">
-        <ThemeToggle />
-      </div>
+      <ThemeToggle />
 
-      <button
+      <Button
         type="button"
+        size="sm"
+        variant="outline"
         onClick={onAdultToggleClick}
-        className={`flex min-h-[44px] items-center gap-1 rounded-full border px-3 py-2.5 text-[11px] font-bold backdrop-blur-xl transition-all duration-300 touch-manipulation hover:scale-105 active:scale-95 sm:gap-2 sm:px-5 sm:text-xs ${
+        className={cn(
+          "h-10 rounded-full px-3 text-xs font-semibold sm:px-4",
           isAdultMode
-            ? "border-red-500/40 bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-300 shadow-lg shadow-red-500/30"
-            : "border-white/10 bg-white/5 text-neutral-300 hover:border-red-500/30 hover:bg-red-500/10"
-        }`}
-        style={{ WebkitTapHighlightColor: "transparent" }}
+            ? "border-red-400/30 bg-red-500/[0.12] text-red-200 hover:border-red-300/45 hover:bg-red-500/[0.18]"
+            : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-white",
+        )}
         aria-label="Adult content"
         aria-pressed={isAdultMode}
         title={`Adult content ${legalAge}+ ${isAdultMode ? "on" : "off"}`}
         data-testid="adult-toggle-button"
       >
         <span
-          className={`rounded-full border px-2 py-0.5 text-[10px] font-extrabold transition-transform duration-300 ${
+          className={cn(
+            "rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-[0.12em]",
             isAdultMode
-              ? "border-red-300/40 bg-red-400/10 text-red-100"
-              : "border-white/10 bg-white/[0.04] text-neutral-200"
-          } ${isAdultMode ? "scale-110" : ""}`}
+              ? "border-red-300/30 bg-red-400/10 text-red-100"
+              : "border-white/10 bg-white/[0.04] text-neutral-200",
+          )}
         >
           {legalAge}+
         </span>
-        <span
-          className={`hidden text-[10px] font-bold sm:inline ${
-            isAdultMode ? "text-red-200" : "text-neutral-300"
-          }`}
-        >
-          {isAdultMode ? "Mature on" : "Mature"}
-        </span>
-      </button>
+        <span className="hidden sm:inline">{isAdultMode ? "Mature on" : "Mature"}</span>
+      </Button>
 
       {!hydrated ? (
         <AuthSkeleton />
       ) : isSignedIn ? (
-        <button
+        <Button
           type="button"
+          size="icon"
+          variant="outline"
           onClick={() => router.push("/account")}
-          className="group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 backdrop-blur-xl transition-all duration-300 hover:scale-110 hover:border-emerald-500/50 hover:bg-emerald-500/20 hover:shadow-ios-glow active:scale-95"
+          className="h-10 w-10 rounded-full border-emerald-400/25 bg-emerald-400/[0.08] text-emerald-200 hover:border-emerald-300/40 hover:bg-emerald-400/[0.12]"
           aria-label="Profile"
-          title="Open Account"
+          title="Open account"
         >
-          <User
-            size={20}
-            className="text-emerald-400 transition-transform duration-300 group-hover:scale-110"
-          />
-        </button>
+          <User className="size-4" />
+        </Button>
       ) : (
         <>
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="outline"
             onClick={onLoginClick}
-            className="hidden rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-bold text-neutral-200 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-white hover:shadow-ios active:scale-95 sm:inline-flex"
+            className="hidden h-10 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-neutral-100 hover:border-white/20 hover:bg-white/[0.08] sm:inline-flex"
           >
             Sign in
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            size="icon"
+            variant="outline"
             onClick={onLoginClick}
-            className="group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-300 hover:scale-110 hover:border-emerald-500/30 hover:bg-emerald-500/10 active:scale-95 sm:hidden"
+            className={cn(ICON_BUTTON_CLASS, "sm:hidden")}
             aria-label="Sign in"
             title="Sign in"
           >
-            <User
-              size={18}
-              className="text-neutral-200 transition-transform duration-300 group-hover:scale-110"
-            />
-          </button>
+            <User className="size-4" />
+          </Button>
         </>
       )}
     </div>

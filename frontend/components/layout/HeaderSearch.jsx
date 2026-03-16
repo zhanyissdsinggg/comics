@@ -9,7 +9,7 @@ const SearchBar = dynamic(() => import("../common/SearchBar"), {
 export default function HeaderSearch({ onSearch }) {
   return (
     <div className="flex items-center gap-3">
-      <SearchBar onSearch={onSearch} placeholder="Search series" />
+      <SearchBar onSearch={onSearch} placeholder="Search titles, genres, or creators" />
     </div>
   );
 }

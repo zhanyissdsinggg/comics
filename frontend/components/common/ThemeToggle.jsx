@@ -1,26 +1,24 @@
-/**
- * 老王的主题切换按钮 - 欧美用户必备功能
- * 支持深色/浅色模式切换
- */
 "use client";
 
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function ThemeToggle() {
   const { theme, setTheme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // 老王注释：避免服务端渲染时的hydration错误
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) {
-    // 老王注释：服务端渲染时返回占位符
     return (
-      <div className="w-10 h-10 rounded-lg bg-gray-800/50 animate-pulse" />
+      <div
+        aria-hidden="true"
+        className="h-10 w-10 animate-pulse rounded-full border border-white/10 bg-white/[0.04]"
+      />
     );
   }
 
@@ -28,31 +26,25 @@ export default function ThemeToggle() {
   const isDark = currentTheme === "dark";
 
   return (
-    <button
+    <Button
+      type="button"
+      size="icon"
+      variant="outline"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="relative p-2.5 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-200 group"
+      className="relative h-10 w-10 rounded-full border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
       title={`Switch to ${isDark ? "light" : "dark"} mode`}
     >
-      {/* 老王注释：太阳和月亮图标切换动画 */}
-      <div className="relative w-5 h-5">
-        <Sun
-          size={20}
-          className={`absolute inset-0 transition-all duration-300 ${
-            isDark
-              ? "rotate-90 scale-0 opacity-0"
-              : "rotate-0 scale-100 opacity-100"
-          } text-amber-400 group-hover:text-amber-300`}
-        />
-        <Moon
-          size={20}
-          className={`absolute inset-0 transition-all duration-300 ${
-            isDark
-              ? "rotate-0 scale-100 opacity-100"
-              : "-rotate-90 scale-0 opacity-0"
-          } text-blue-400 group-hover:text-blue-300`}
-        />
-      </div>
-    </button>
+      <Sun
+        className={`absolute size-4 transition-all duration-300 ${
+          isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100 text-amber-300"
+        }`}
+      />
+      <Moon
+        className={`absolute size-4 transition-all duration-300 ${
+          isDark ? "rotate-0 scale-100 opacity-100 text-sky-300" : "-rotate-90 scale-0 opacity-0"
+        }`}
+      />
+    </Button>
   );
 }

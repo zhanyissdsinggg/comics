@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import Script from "next/script";
-import { Manrope, Space_Grotesk, Geist } from "next/font/google";
+import { Fraunces, Geist, Manrope } from "next/font/google";
 import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
 import ErrorBoundary from "../components/common/ErrorBoundary";
@@ -8,7 +8,7 @@ import { defaultSocialImage } from "../lib/seo";
 import { siteConfig } from "../lib/siteConfig";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const CookieConsent = dynamic(() => import("../components/common/CookieConsent"));
 
@@ -21,7 +21,7 @@ const bodyFont = Manrope({
   display: "swap",
 });
 
-const displayFont = Space_Grotesk({
+const displayFont = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",

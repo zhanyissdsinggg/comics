@@ -149,18 +149,18 @@ export default function SiteHeader({ onSearch }) {
         data-site-header="1"
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
           scrolled
-            ? "border-white/10 bg-neutral-950/92 shadow-ios-lg backdrop-blur-2xl"
-            : "border-white/5 bg-neutral-950/72 backdrop-blur-xl"
+            ? "border-white/10 bg-neutral-950/90 shadow-[0_18px_60px_rgba(0,0,0,0.22)] backdrop-blur-2xl"
+            : "border-white/6 bg-neutral-950/78 backdrop-blur-xl"
         }`}
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.10),transparent_32%),radial-gradient(circle_at_85%_0%,rgba(34,211,238,0.08),transparent_24%)] opacity-90" />
-        <div className="relative mx-auto flex min-h-[72px] max-w-[1280px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 lg:px-8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_32%),radial-gradient(circle_at_85%_0%,rgba(34,211,238,0.06),transparent_24%)] opacity-90" />
+        <div className="relative mx-auto flex min-h-[72px] max-w-[1320px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 lg:px-8">
           <HeaderLogo />
           <HomeProvider>
             <HeaderNav />
           </HomeProvider>
-          <div className="min-w-0 flex-1 md:max-w-xs lg:max-w-sm xl:max-w-md">
+          <div className="min-w-0 flex-1 md:max-w-sm lg:max-w-md xl:max-w-lg">
             <HeaderSearch onSearch={onSearch} />
           </div>
           <HeaderActions
