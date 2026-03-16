@@ -37,6 +37,7 @@ const mockSeries = [
   {
     id: "series-1",
     title: "Alpha Comic",
+    author: "",
     type: "comic",
     status: "Ongoing",
     adult: false,
@@ -55,6 +56,7 @@ const mockSeries = [
   {
     id: "series-2",
     title: "Bravo Novel",
+    author: "Studio Bravo",
     type: "novel",
     status: "Completed",
     adult: true,
@@ -151,6 +153,30 @@ describe("AdminSeriesPageNew", () => {
           series: expect.objectContaining({
             id: "series-1",
             isPublished: true,
+          }),
+        })
+      );
+    });
+  });
+
+  it("includes author in the create payload", async () => {
+    const user = userEvent.setup();
+    render(<AdminSeriesPageNew />);
+
+    await screen.findByText("Alpha Comic");
+
+    await user.click(screen.getByRole("button", { name: "新增作品" }));
+    await user.type(screen.getByRole("textbox", { name: /作品标题/i }), "Creator Launch");
+    await user.type(screen.getByRole("textbox", { name: /作者 \/ 工作室/i }), "Studio LICO");
+    await user.click(screen.getByRole("button", { name: "创建" }));
+
+    await waitFor(() => {
+      expect(adminPost).toHaveBeenCalledWith(
+        "/api/admin/series",
+        expect.objectContaining({
+          series: expect.objectContaining({
+            title: "Creator Launch",
+            author: "Studio LICO",
           }),
         })
       );

@@ -26,6 +26,7 @@ import { ConfirmModal } from "../common/Modal";
 import { AdminFeedbackBanner } from "./common/AdminFeedbackBanner";
 import BulkActionsToolbar from "./BulkActionsToolbar";
 import AdvancedFilters from "./AdvancedFilters";
+import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
 
 const TYPE_TABS = [
   { value: "all", label: "全部" },
@@ -38,6 +39,8 @@ const EMPTY_FEEDBACK = { type: "", message: "" };
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const QUICK_FILTERS = [
   { value: "all", label: "全部" },
+  { value: "needsMetadata", label: "前台待补" },
+  { value: "noAuthor", label: "缺作者" },
   { value: "needsEpisodes", label: "待补章节" },
   { value: "noCover", label: "缺封面" },
   { value: "draft", label: "未发布" },
@@ -52,6 +55,7 @@ const CREATE_FLOW_OPTIONS = [
 function createEmptyCreateForm() {
   return {
     title: "",
+    author: "",
     type: "comic",
     status: "Ongoing",
     adult: false,
@@ -119,6 +123,7 @@ function buildSeriesPayload(series, overrides = {}) {
   return {
     id: merged.id,
     title: String(merged.title || "").trim(),
+    author: String(merged.author || "").trim(),
     type: merged.type === "novel" ? "novel" : "comic",
     status: STATUS_OPTIONS.includes(merged.status) ? merged.status : "Ongoing",
     adult: Boolean(merged.adult),
@@ -192,6 +197,23 @@ function extractSeriesCollection(payload) {
 function Feedback({ feedback, onDismiss }) {
   return feedback?.message ? <AdminFeedbackBanner feedback={feedback} onDismiss={onDismiss} /> : null;
 }
+
+function getReadinessToneClasses(tone) {
+  if (tone === "emerald") {
+    return "border-emerald-500/25 bg-emerald-500/10 text-emerald-200";
+  }
+
+  if (tone === "cyan") {
+    return "border-cyan-500/25 bg-cyan-500/10 text-cyan-200";
+  }
+
+  if (tone === "amber") {
+    return "border-amber-500/25 bg-amber-500/10 text-amber-200";
+  }
+
+  return "border-rose-500/25 bg-rose-500/10 text-rose-200";
+}
+
 function SeriesCard(props) {
   const {
     series,
@@ -213,6 +235,7 @@ function SeriesCard(props) {
     onDelete,
   } = props;
   const isList = viewMode === "list";
+  const readiness = getAdminSeriesReadiness(series);
   return (
     <article className={`rounded-5xl border bg-neutral-900/60 p-4 shadow-ios transition ${isSelected ? "border-ios-blue/50 ring-1 ring-ios-blue/40" : "border-ios-gray-800"}`}>
       <div className={`grid gap-4 ${isList ? "lg:grid-cols-[auto,84px,1.6fr,1fr,auto] lg:items-center" : ""}`}>
@@ -226,6 +249,9 @@ function SeriesCard(props) {
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
             <span className="rounded-full bg-ios-gray-800 px-2.5 py-1 text-ios-gray-200">{formatSeriesTypeLabel(series.type)}</span>
             <span className="rounded-full bg-ios-blue/10 px-2.5 py-1 text-ios-blue">{formatSeriesStatusLabel(series.status)}</span>
+            <span className={`rounded-full border px-2.5 py-1 ${getReadinessToneClasses(readiness.tone)}`}>
+              {readiness.statusLabel}
+            </span>
             {series.adult ? <span className="rounded-full bg-rose-500/15 px-2.5 py-1 text-rose-300">18+</span> : null}
             {!series.isPublished ? <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-amber-300">未发布</span> : null}
           </div>
@@ -253,12 +279,25 @@ function SeriesCard(props) {
                 </span>
               </p>
               <p className="line-clamp-2 text-sm text-ios-gray-300">{series.description || "暂无简介。"}</p>
+              <p className="text-xs text-ios-gray-500">
+                前台就绪度 {readiness.score} 分
+                {readiness.missingCount > 0 ? ` · 待补 ${readiness.topIssues.join("、")}` : " · 可直接承接前台分发"}
+              </p>
               <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-medium">
                 <span className="rounded-full bg-ios-gray-800/80 px-2.5 py-1 text-ios-gray-300">
                   {series.episodePrice > 0 ? `${series.episodePrice} 金币/章` : "免费章节"}
                 </span>
+                {!series.author ? (
+                  <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-amber-300">缺作者</span>
+                ) : null}
                 {!series.coverUrl ? (
                   <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-amber-300">缺少封面</span>
+                ) : null}
+                {!series.description?.trim() ? (
+                  <span className="rounded-full bg-white/10 px-2.5 py-1 text-ios-gray-300">缺简介</span>
+                ) : null}
+                {!series.genres.length ? (
+                  <span className="rounded-full bg-white/10 px-2.5 py-1 text-ios-gray-300">缺标签</span>
                 ) : null}
                 {series.episodeCount === 0 ? (
                   <span className="rounded-full bg-orange-500/15 px-2.5 py-1 text-orange-300">还没有章节</span>
@@ -394,6 +433,7 @@ export default function AdminSeriesPageNew() {
   const filteredSeries = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const items = seriesList.filter((series) => {
+      const readiness = getAdminSeriesReadiness(series);
       const matchesSearch =
         !normalizedQuery ||
         series.title.toLowerCase().includes(normalizedQuery) ||
@@ -408,6 +448,8 @@ export default function AdminSeriesPageNew() {
       const matchesPublish = advancedFilters.publishStatus === "all" || (advancedFilters.publishStatus === "published" && series.isPublished) || (advancedFilters.publishStatus === "unpublished" && !series.isPublished);
       const matchesQuick =
         quickFilter === "all" ||
+        (quickFilter === "needsMetadata" && readiness.missingCount > 0) ||
+        (quickFilter === "noAuthor" && !series.author.trim()) ||
         (quickFilter === "needsEpisodes" && series.episodeCount === 0) ||
         (quickFilter === "noCover" && !series.coverUrl) ||
         (quickFilter === "draft" && !series.isPublished) ||
@@ -421,6 +463,8 @@ export default function AdminSeriesPageNew() {
     const total = seriesList.length;
     const comics = seriesList.filter((item) => item.type === "comic").length;
     const novels = seriesList.filter((item) => item.type === "novel").length;
+    const readyCount = seriesList.filter((item) => getAdminSeriesReadiness(item).missingCount === 0).length;
+    const noAuthor = seriesList.filter((item) => !item.author.trim()).length;
     const drafts = seriesList.filter((item) => !item.isPublished).length;
     const noEpisodes = seriesList.filter((item) => item.episodeCount === 0).length;
     const noCover = seriesList.filter((item) => !item.coverUrl).length;
@@ -428,6 +472,7 @@ export default function AdminSeriesPageNew() {
     return [
       { label: "全部作品", value: total, hint: "当前作品库总量" },
       { label: "漫画作品", value: comics, hint: `小说 ${novels} 部` },
+      { label: "前台已就绪", value: readyCount, hint: `缺作者 ${noAuthor} 部` },
       { label: "待补章节", value: noEpisodes, hint: "适合优先处理新作" },
       { label: "待补封面", value: noCover, hint: `草稿 ${drafts} 部` },
     ];
@@ -528,6 +573,7 @@ export default function AdminSeriesPageNew() {
         series: buildSeriesPayload({
           id: nextSeriesId,
           title: createForm.title,
+          author: createForm.author.trim(),
           type: createForm.type,
           adult: createForm.adult,
           coverUrl,
@@ -691,7 +737,7 @@ export default function AdminSeriesPageNew() {
 
       <Feedback feedback={feedback} onDismiss={dismissFeedback} />
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {seriesStats.map((item) => (
           <article key={item.label} className="rounded-4xl border border-ios-gray-800 bg-neutral-900/60 p-5 shadow-ios">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-ios-gray-500">{item.label}</p>
@@ -798,6 +844,17 @@ export default function AdminSeriesPageNew() {
                   <span className="text-sm font-semibold text-ios-gray-300">作品标题 *</span>
                   <input value={createForm.title} onChange={(event) => setCreateForm((current) => ({ ...current, title: event.target.value }))} placeholder="例如：午夜契约" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
                   <span className="text-xs text-ios-gray-500">预计作品 ID：{suggestedSeriesId}</span>
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-ios-gray-300">作者 / 工作室</span>
+                  <input
+                    value={createForm.author}
+                    onChange={(event) => setCreateForm((current) => ({ ...current, author: event.target.value }))}
+                    placeholder="例如：Studio LICO"
+                    className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue"
+                  />
+                  <span className="text-xs text-ios-gray-500">建议在创建时就补齐，前台 creator 页面和信任模块会直接依赖这个字段。</span>
                 </label>
 
                 <div className="space-y-2">

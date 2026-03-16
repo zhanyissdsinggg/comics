@@ -12,6 +12,7 @@ import { ArrowUpRight, BookOpen, Image as ImageIcon, PencilLine, Save } from 'lu
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { LoadingState } from '@/components/admin/common/LoadingState';
 import { adminFetchJson, adminUpload } from '@/lib/adminApiClient';
+import { getAdminSeriesReadiness } from '@/lib/adminSeriesReadiness';
 
 const TYPE_OPTIONS = [
   { value: 'comic', label: '漫画' },
@@ -77,6 +78,13 @@ function buildFormState(series) {
     ttfEnabled: Boolean(series?.ttfEnabled),
     ttfIntervalHours: String(series?.ttfIntervalHours ?? 24),
   };
+}
+
+function normalizeGenresInput(value) {
+  return String(value || '')
+    .split(',')
+    .map((genre) => genre.trim())
+    .filter(Boolean);
 }
 
 function buildSeriesPayload(formData, fields = null) {
@@ -155,6 +163,23 @@ function formatCompactNumber(value) {
     maximumFractionDigits: safeValue >= 10000 ? 1 : 0,
   }).format(safeValue);
 }
+
+function getReadinessToneClasses(tone) {
+  if (tone === 'emerald') {
+    return 'border-emerald-500/25 bg-emerald-500/10 text-emerald-200';
+  }
+
+  if (tone === 'cyan') {
+    return 'border-cyan-500/25 bg-cyan-500/10 text-cyan-200';
+  }
+
+  if (tone === 'amber') {
+    return 'border-amber-500/25 bg-amber-500/10 text-amber-200';
+  }
+
+  return 'border-rose-500/25 bg-rose-500/10 text-rose-200';
+}
+
 function isNonNegativeIntegerString(value, { allowEmpty = false } = {}) {
   const normalized = String(value ?? '').trim();
   if (!normalized) return allowEmpty;
@@ -281,6 +306,20 @@ export default function AdminSeriesDetailPage() {
   );
 
   const overallDirty = useMemo(() => Object.values(dirtyBySection).some(Boolean), [dirtyBySection]);
+  const readiness = useMemo(
+    () =>
+      getAdminSeriesReadiness({
+        ...(series || {}),
+        author: formData.author,
+        coverUrl: formData.coverUrl,
+        description: formData.description,
+        genres: normalizeGenresInput(formData.genres),
+        isPublished: formData.isPublished,
+        episodePrice: Number.parseInt(String(formData.episodePrice || '0'), 10),
+        ttfEnabled: formData.ttfEnabled,
+      }),
+    [formData.author, formData.coverUrl, formData.description, formData.episodePrice, formData.genres, formData.isPublished, formData.ttfEnabled, series],
+  );
 
   const saveMutation = useMutation({
     mutationFn: async ({ draft, fields, sectionId }) => {
@@ -910,6 +949,39 @@ export default function AdminSeriesDetailPage() {
                   </span>
                   <ArrowUpRight size={16} />
                 </button>
+              </div>
+            </section>
+
+            <section className="rounded-[28px] border border-neutral-800 bg-neutral-900/80 px-5 py-5 shadow-[0_24px_70px_-44px_rgba(0,0,0,0.75)]">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">前台就绪度</p>
+                  <p className="mt-3 text-3xl font-semibold text-white">{readiness.score}</p>
+                </div>
+                <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getReadinessToneClasses(readiness.tone)}`}>
+                  {readiness.statusLabel}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-7 text-neutral-400">{readiness.summary}</p>
+              <div className="mt-4 space-y-2">
+                {readiness.checks.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`rounded-2xl border px-4 py-3 ${
+                      item.ok
+                        ? 'border-emerald-500/20 bg-emerald-500/5'
+                        : 'border-amber-500/20 bg-amber-500/5'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-white">{item.label}</p>
+                      <span className={`text-xs font-semibold ${item.ok ? 'text-emerald-200' : 'text-amber-200'}`}>
+                        {item.ok ? '已就绪' : '待补'}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs leading-6 text-neutral-400">{item.hint}</p>
+                  </div>
+                ))}
               </div>
             </section>
 
