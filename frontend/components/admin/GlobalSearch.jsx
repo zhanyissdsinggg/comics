@@ -18,6 +18,7 @@ import {
   Receipt,
   Search,
   Settings,
+  Sparkles,
   Users,
   X,
 } from "lucide-react";
@@ -45,6 +46,20 @@ const SEARCH_ITEMS = [
     href: "/admin/storefront",
     icon: Search,
     keywords: ["前台体检", "前台", "就绪度", "审核", "审计", "storefront", "audit", "readiness"],
+  },
+  {
+    id: "merchandising",
+    label: "首页编排",
+    href: "/admin/merchandising",
+    icon: Sparkles,
+    keywords: ["首页编排", "首页", "英雄位", "爆款位", "免费开篇", "merchandising", "hero", "curation"],
+  },
+  {
+    id: "recommendations",
+    label: "推荐管理",
+    href: "/admin/recommendations",
+    icon: Sparkles,
+    keywords: ["推荐管理", "推荐位", "榜单", "推荐分析", "slot", "ranking", "recommendations"],
   },
   {
     id: "users",

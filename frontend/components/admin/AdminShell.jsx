@@ -23,6 +23,7 @@ import {
   Receipt,
   Search,
   Settings,
+  Sparkles,
   Users,
 } from "lucide-react";
 
@@ -53,6 +54,12 @@ const NAV_GROUPS = [
         href: "/admin/storefront",
         icon: Search,
         match: ["/admin/storefront"],
+      },
+      {
+        label: "首页编排",
+        href: "/admin/merchandising",
+        icon: Sparkles,
+        match: ["/admin/merchandising"],
       },
       { label: "评论", href: "/admin/comments", icon: MessageSquare, match: ["/admin/comments"] },
     ],
@@ -91,6 +98,7 @@ const BREADCRUMB_MAP = [
   { match: "/admin", label: "仪表盘", exact: true },
   { match: "/admin/series", label: "作品" },
   { match: "/admin/storefront", label: "前台体检" },
+  { match: "/admin/merchandising", label: "首页编排" },
   { match: "/admin/promotions", label: "活动" },
   { match: "/admin/orders", label: "订单" },
   { match: "/admin/billing", label: "计费" },

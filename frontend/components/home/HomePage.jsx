@@ -22,6 +22,13 @@ import {
 } from "../../lib/commerceSuccess";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+import {
+  buildHomeHeroItems,
+  getHomeEditorialSnapshot,
+  getHomeEditorialStats,
+  getReaderProof,
+  getSeriesScore,
+} from "../../lib/homeMerchandising";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
   ssr: false,
@@ -43,15 +50,7 @@ const GENRE_CHIPS = [
   { id: "horror", label: "Horror" },
 ];
 
-const HOME_PILLARS = [
-  "Fast discovery",
-  "Reliable 18+ controls",
-  "Editorial shelves",
-];
-
-function getSeriesScore(series) {
-  return Number(series?.rating || 0) * Math.max(1, Number(series?.ratingCount || 1));
-}
+const HOME_PILLARS = ["Fast discovery", "Reliable 18+ controls", "Editorial shelves"];
 
 function toTimestamp(value) {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -60,15 +59,6 @@ function toTimestamp(value) {
 
   const parsed = Date.parse(value || "");
   return Number.isNaN(parsed) ? 0 : parsed;
-}
-
-function getReaderProof(series) {
-  return Math.max(
-    Number(series?.followers || 0),
-    Number(series?.views || 0),
-    Number(series?.ratingCount || 0),
-    Math.round(Number(series?.rating || 0) * 100),
-  );
 }
 
 function formatEpisodeLabel(episodeId) {
@@ -174,51 +164,12 @@ function HomeContent() {
     setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/")));
   }, []);
 
-  const heroItems = useMemo(() => {
-    if (!seriesList || seriesList.length === 0) {
-      return [];
-    }
+  const heroItems = useMemo(
+    () => buildHomeHeroItems(seriesList, { bannerUrl: branding?.homeBannerUrl }),
+    [seriesList, branding?.homeBannerUrl],
+  );
 
-    const featured = seriesList
-      .filter((series) => series.badge === "HOT" || series.badge === "Hot" || (series.rating || 0) >= 4.5)
-      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-      .slice(0, 6)
-      .map((series) => ({
-        id: `hero-${series.id}`,
-        seriesId: series.id,
-        latestEpisodeId: series.latestEpisodeId || null,
-        title: series.title,
-        description: series.description || `${series.genres?.join(" | ") || ""}`,
-        coverTone: series.coverTone || "default",
-        coverUrl: series.coverUrl,
-        bannerUrl: series.bannerUrl || null,
-        badge: series.badge,
-        status: series.status,
-        freeEpisodeCount: Number(series.freeEpisodeCount || 0),
-        hasFreeEpisodes: Boolean(series.hasFreeEpisodes || Number(series.freeEpisodeCount || 0) > 0),
-      }));
-
-    if (branding?.homeBannerUrl && featured.length > 0) {
-      featured[0] = { ...featured[0], bannerUrl: branding.homeBannerUrl };
-    }
-
-    return featured.length > 0
-      ? featured
-      : seriesList.slice(0, 4).map((series) => ({
-          id: `hero-${series.id}`,
-          seriesId: series.id,
-          latestEpisodeId: series.latestEpisodeId || null,
-          title: series.title,
-          description: series.description || "",
-          coverTone: series.coverTone || "default",
-          coverUrl: series.coverUrl,
-          bannerUrl: null,
-          badge: series.badge,
-          status: series.status,
-          freeEpisodeCount: Number(series.freeEpisodeCount || 0),
-          hasFreeEpisodes: Boolean(series.hasFreeEpisodes || Number(series.freeEpisodeCount || 0) > 0),
-        }));
-  }, [seriesList, branding?.homeBannerUrl]);
+  const editorialSnapshot = useMemo(() => getHomeEditorialSnapshot(seriesList), [seriesList]);
 
   const seriesById = useMemo(
     () => new Map(seriesList.map((series) => [series.id, series])),
@@ -348,74 +299,16 @@ function HomeContent() {
     );
   };
 
-  const editorialStats = useMemo(() => {
-    if (loading) {
-      return [
-        { label: "Series live", value: "--", hint: "Across comics and novels" },
-        { label: "Fresh drops", value: "--", hint: "Recently tagged new" },
-        { label: "Genre lanes", value: "--", hint: "Filter without dead ends" },
-        { label: "18+ catalog", value: "--", hint: "Protected behind sign-in" },
-      ];
-    }
-
-    const safeSeries = Array.isArray(seriesList) ? seriesList : [];
-    const genres = new Set();
-    let newCount = 0;
-    let adultCount = 0;
-
-    safeSeries.forEach((series) => {
-      if (series?.adult) {
-        adultCount += 1;
-      }
-
-      const badges = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
-        .filter(Boolean)
-        .map((badge) => String(badge).toUpperCase());
-
-      if (badges.includes("NEW")) {
-        newCount += 1;
-      }
-
-      if (Array.isArray(series?.genres)) {
-        series.genres.forEach((genre) => genres.add(genre));
-      }
-    });
-
-    return [
-      { label: "Series live", value: safeSeries.length.toLocaleString(), hint: "Across comics and novels" },
-      { label: "Fresh drops", value: newCount.toLocaleString(), hint: "Recently tagged new" },
-      { label: "Genre lanes", value: genres.size.toLocaleString(), hint: "Filter without dead ends" },
-      { label: "18+ catalog", value: adultCount.toLocaleString(), hint: "Protected behind sign-in" },
-    ];
-  }, [loading, seriesList]);
+  const editorialStats = useMemo(
+    () => getHomeEditorialStats(seriesList, { loading }),
+    [loading, seriesList],
+  );
 
   const editorialCards = useMemo(() => {
     if (!Array.isArray(seriesList) || seriesList.length === 0) {
       return [];
     }
-
-    const safeCatalog = seriesList.filter((series) => !series?.adult);
-    const completedPick = [...safeCatalog]
-      .filter((series) => String(series?.status || "").toLowerCase() === "completed")
-      .sort((left, right) => getSeriesScore(right) - getSeriesScore(left))[0];
-    const freeStartPick = [...safeCatalog]
-      .filter((series) => Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes)
-      .sort((left, right) => {
-        const freeDelta = Number(right?.freeEpisodeCount || 0) - Number(left?.freeEpisodeCount || 0);
-        if (freeDelta !== 0) {
-          return freeDelta;
-        }
-        return getSeriesScore(right) - getSeriesScore(left);
-      })[0];
-    const breakoutPick = [...safeCatalog]
-      .filter((series) => {
-        const badges = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
-          .filter(Boolean)
-          .map((badge) => String(badge).toUpperCase());
-        return badges.includes("NEW") || badges.includes("HOT");
-      })
-      .sort((left, right) => getSeriesScore(right) - getSeriesScore(left))[0];
-    const adultCount = seriesList.filter((series) => series?.adult).length;
+    const { completedPick, freeStartPick, breakoutPick, adultCount } = editorialSnapshot;
 
     return [
       completedPick
@@ -461,7 +354,7 @@ function HomeContent() {
         onClick: () => router.push("/adult"),
       },
     ].filter(Boolean);
-  }, [router, seriesList]);
+  }, [editorialSnapshot, router, seriesList]);
 
   const discoverySignals = useMemo(() => {
     const keywordItems = Array.isArray(hotKeywords) ? hotKeywords.filter(Boolean).slice(0, 8) : [];
@@ -490,30 +383,13 @@ function HomeContent() {
     if (!Array.isArray(seriesList) || seriesList.length === 0) {
       return [];
     }
-
-    const safeCatalog = seriesList.filter((series) => !series?.adult);
-    const completedSeries = safeCatalog.filter(
-      (series) => String(series?.status || "").toLowerCase() === "completed",
-    );
-    const freeStartSeries = safeCatalog.filter(
-      (series) => Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes,
-    );
-    const breakoutSeries = safeCatalog.filter((series) => {
-      const badges = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
-        .filter(Boolean)
-        .map((badge) => String(badge).toUpperCase());
-      return badges.includes("NEW") || badges.includes("HOT");
-    });
-
-    const completedPick = [...completedSeries].sort((left, right) => getSeriesScore(right) - getSeriesScore(left))[0];
-    const freeStartPick = [...freeStartSeries].sort((left, right) => {
-      const freeDelta = Number(right?.freeEpisodeCount || 0) - Number(left?.freeEpisodeCount || 0);
-      if (freeDelta !== 0) {
-        return freeDelta;
-      }
-      return getSeriesScore(right) - getSeriesScore(left);
-    })[0];
-    const breakoutPick = [...breakoutSeries].sort((left, right) => getSeriesScore(right) - getSeriesScore(left))[0];
+    const {
+      completedPick,
+      freeStartPick,
+      breakoutPick,
+      completedSeriesCount,
+      freeStartSeriesCount,
+    } = editorialSnapshot;
     const leadSignal = discoverySignals[0] || null;
 
     return [
@@ -527,7 +403,7 @@ function HomeContent() {
           ? "A premium storefront should show at least one finished title with enough proof to justify a long-session read in one sitting."
           : "Finished runs are a high-confidence entry point when readers want depth, payoff, and zero waiting between chapters.",
         signalLabel: "Completed",
-        signalValue: completedSeries.length.toLocaleString(),
+        signalValue: completedSeriesCount.toLocaleString(),
         signalHint: "Finished runs ready for full-session reading",
         ctaLabel: "Browse completed",
         onClick: () => router.push("/search?status=Completed&sort=popular"),
@@ -544,7 +420,7 @@ function HomeContent() {
           ? "Free-start titles cut friction for first clicks and give the storefront a cleaner path into premium chapters later."
           : "Surface free episodes early so new readers can sample the product before any spend decision shows up.",
         signalLabel: "Openers",
-        signalValue: freeStartSeries.length.toLocaleString(),
+        signalValue: freeStartSeriesCount.toLocaleString(),
         signalHint: "Series with free episodes available",
         ctaLabel: freeStartPick ? "Open free-start pick" : "Open free unlock chart",
         onClick: () => {
@@ -585,7 +461,7 @@ function HomeContent() {
           "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
       },
     ];
-  }, [discoverySignals, router, seriesList]);
+  }, [discoverySignals, editorialSnapshot, router, seriesList]);
 
   const onboardingCards = useMemo(() => {
     const freeStartCard = editorialCards.find((card) => card.id === "free-start-pick");

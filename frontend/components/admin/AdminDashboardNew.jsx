@@ -76,6 +76,7 @@ const RANGE_OPTIONS = [
 const QUICK_ACTIONS = [
   { href: "/admin/series", label: "新增作品", icon: BookOpen, color: "text-ios-blue" },
   { href: "/admin/storefront", label: "前台体检", icon: Eye, color: "text-ios-cyan" },
+  { href: "/admin/merchandising", label: "首页编排", icon: TrendingUp, color: "text-ios-orange" },
   { href: "/admin/creators", label: "创作者管理", icon: Award, color: "text-ios-orange" },
   { href: "/admin/promotions", label: "创建活动", icon: Megaphone, color: "text-ios-orange" },
   { href: "/admin/users", label: "管理用户", icon: Users, color: "text-ios-purple" },

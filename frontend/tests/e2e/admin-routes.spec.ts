@@ -79,6 +79,7 @@ async function installAdminApiMocks(
   options: {
     supportBody?: unknown;
     usersBody?: unknown;
+    seriesBody?: unknown;
     ordersBody?: unknown;
     commentsBody?: unknown;
     notificationsBody?: unknown;
@@ -94,6 +95,7 @@ async function installAdminApiMocks(
     recommendationSlotsBody?: unknown;
     recommendationRankingsBody?: unknown;
     recommendationAnalyticsBody?: unknown;
+    hotKeywordsBody?: unknown;
     logsBody?: unknown;
     revenueStatsBody?: unknown;
     revenueTrendBody?: unknown;
@@ -105,6 +107,10 @@ async function installAdminApiMocks(
 ): Promise<void> {
   await page.route("**/api/health", async (route) => {
     await fulfillJson(route, { ok: true });
+  });
+
+  await page.route("**/api/search/hot**", async (route) => {
+    await fulfillJson(route, options.hotKeywordsBody ?? { keywords: [] });
   });
 
   await page.route("**/api/admin/**", async (route) => {
@@ -125,6 +131,11 @@ async function installAdminApiMocks(
 
     if (pathname.endsWith("/api/admin/users")) {
       await fulfillJson(route, options.usersBody ?? { data: [], pagination: EMPTY_PAGINATION });
+      return;
+    }
+
+    if (pathname.endsWith("/api/admin/series")) {
+      await fulfillJson(route, options.seriesBody ?? { series: [] });
       return;
     }
 
@@ -272,6 +283,84 @@ test.describe("Admin route regression", () => {
       await expectNoRuntimeIssues(scenario.route, runtimeIssues);
     });
   }
+
+  test("should render merchandising workspace with homepage recommendations", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminApiMocks(page, {
+      seriesBody: {
+        series: [
+          {
+            id: "series-hero-001",
+            title: "Midnight Signal",
+            author: "Studio Orion",
+            type: "comic",
+            status: "Completed",
+            adult: false,
+            description: "A binge-ready romance thriller built for homepage rotation.",
+            coverUrl: "https://cdn.example.com/series-hero-001-cover.jpg",
+            bannerUrl: "https://cdn.example.com/series-hero-001-banner.jpg",
+            badge: "HOT",
+            badges: ["HOT", "NEW"],
+            genres: ["Romance", "Thriller"],
+            episodeCount: 48,
+            latestEpisodeId: "episode-48",
+            freeEpisodeCount: 4,
+            hasFreeEpisodes: true,
+            rating: 4.9,
+            ratingCount: 1680,
+            followers: 24500,
+            views: 102400,
+            isPublished: true,
+            updatedAt: "2026-03-12T08:00:00.000Z",
+          },
+          {
+            id: "series-hero-002",
+            title: "Neon Contract",
+            author: "Blue Harbor",
+            type: "comic",
+            status: "Ongoing",
+            adult: false,
+            description: "Fast-start fantasy with strong click appeal.",
+            coverUrl: "https://cdn.example.com/series-hero-002-cover.jpg",
+            badge: "NEW",
+            badges: ["NEW"],
+            genres: ["Fantasy", "Action"],
+            episodeCount: 21,
+            latestEpisodeId: "episode-21",
+            freeEpisodeCount: 3,
+            hasFreeEpisodes: true,
+            rating: 4.7,
+            ratingCount: 920,
+            followers: 9800,
+            views: 35600,
+            isPublished: true,
+            updatedAt: "2026-03-10T08:00:00.000Z",
+          },
+        ],
+      },
+      recommendationSlotsBody: { slots: [], total: 0 },
+      hotKeywordsBody: {
+        keywords: [
+          { keyword: "romance", count: 1820, growthLabel: "今日热搜" },
+          { keyword: "fantasy", count: 1210, growthLabel: "上升中" },
+        ],
+      },
+    });
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "首页编排" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "关键首页位体检" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "英雄位候选" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "Midnight Signal" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("今日热搜", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("button", { name: "一键补位" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
+  });
 
   test("should defer recommendation requests until each tab is opened", async ({ page }) => {
     let slotsRequests = 0;
