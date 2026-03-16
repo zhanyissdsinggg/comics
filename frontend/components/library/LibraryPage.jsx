@@ -164,6 +164,30 @@ export default function LibraryPage() {
     [progressEntries, seriesById],
   );
 
+  const buildLibrarySeriesHref = (seriesId, entryPoint = "LIBRARY_SHELF", campaignId = "library_shelf") =>
+    buildPathWithAttribution(`/series/${seriesId}`, {
+      entryPoint,
+      campaignId,
+      sourcePath: "/library",
+      sourceSeriesId: seriesId,
+      returnTo: `/series/${seriesId}`,
+    });
+
+  const buildLibraryReadHref = (
+    seriesId,
+    episodeId,
+    entryPoint = "LIBRARY_RESUME",
+    campaignId = "library_resume",
+  ) =>
+    buildPathWithAttribution(`/read/${seriesId}/${episodeId}`, {
+      entryPoint,
+      campaignId,
+      sourcePath: "/library",
+      sourceSeriesId: seriesId,
+      sourceEpisodeId: episodeId,
+      returnTo: `/read/${seriesId}/${episodeId}`,
+    });
+
   const historyRail = useMemo(
     () =>
       historyItems
@@ -415,11 +439,24 @@ export default function LibraryPage() {
       ctaLabel: resumeSpotlight ? "Resume now" : "Open weekly chart",
       onClick: () => {
         if (resumeSpotlight?.seriesId && resumeSpotlight?.episodeId) {
-          router.push(`/read/${resumeSpotlight.seriesId}/${resumeSpotlight.episodeId}`);
+          router.push(
+            buildLibraryReadHref(
+              resumeSpotlight.seriesId,
+              resumeSpotlight.episodeId,
+              "LIBRARY_RESUME_SPOTLIGHT",
+              "resume_spotlight",
+            ),
+          );
           return;
         }
         if (resumeSpotlight?.seriesId) {
-          router.push(`/series/${resumeSpotlight.seriesId}`);
+          router.push(
+            buildLibrarySeriesHref(
+              resumeSpotlight.seriesId,
+              "LIBRARY_RESUME_SPOTLIGHT",
+              "resume_spotlight",
+            ),
+          );
           return;
         }
         router.push("/rankings?type=popular&window=week");
@@ -439,7 +476,14 @@ export default function LibraryPage() {
       onClick: () => {
         const firstContinue = continueRailItems[0];
         if (firstContinue?.seriesId && firstContinue?.episodeId) {
-          router.push(`/read/${firstContinue.seriesId}/${firstContinue.episodeId}`);
+          router.push(
+            buildLibraryReadHref(
+              firstContinue.seriesId,
+              firstContinue.episodeId,
+              "LIBRARY_CONTINUE_STACK",
+              "continue_stack",
+            ),
+          );
           return;
         }
         router.push("/search");
@@ -709,11 +753,24 @@ export default function LibraryPage() {
                     href="/library"
                     onItemClick={(item) => {
                       if (item.seriesId && item.episodeId) {
-                        router.push(`/read/${item.seriesId}/${item.episodeId}`);
+                        router.push(
+                          buildLibraryReadHref(
+                            item.seriesId,
+                            item.episodeId,
+                            "LIBRARY_CONTINUE_RAIL",
+                            "continue_rail",
+                          ),
+                        );
                         return;
                       }
                       if (item.seriesId) {
-                        router.push(`/series/${item.seriesId}`);
+                        router.push(
+                          buildLibrarySeriesHref(
+                            item.seriesId,
+                            "LIBRARY_CONTINUE_RAIL",
+                            "continue_rail",
+                          ),
+                        );
                       }
                     }}
                   />
@@ -730,11 +787,24 @@ export default function LibraryPage() {
                     href="/library"
                     onItemClick={(item) => {
                       if (item.seriesId && item.episodeId) {
-                        router.push(`/read/${item.seriesId}/${item.episodeId}`);
+                        router.push(
+                          buildLibraryReadHref(
+                            item.seriesId,
+                            item.episodeId,
+                            "LIBRARY_HISTORY_RAIL",
+                            "history_rail",
+                          ),
+                        );
                         return;
                       }
                       if (item.seriesId) {
-                        router.push(`/series/${item.seriesId}`);
+                        router.push(
+                          buildLibrarySeriesHref(
+                            item.seriesId,
+                            "LIBRARY_HISTORY_RAIL",
+                            "history_rail",
+                          ),
+                        );
                       }
                     }}
                   />
@@ -751,7 +821,13 @@ export default function LibraryPage() {
                     href="/library"
                     onItemClick={(item) => {
                       if (item.seriesId) {
-                        router.push(`/series/${item.seriesId}`);
+                        router.push(
+                          buildLibrarySeriesHref(
+                            item.seriesId,
+                            "LIBRARY_SHELF_RAIL",
+                            "library_shelf",
+                          ),
+                        );
                       }
                     }}
                   />
@@ -766,7 +842,15 @@ export default function LibraryPage() {
                     reason="Strong titles that are not saved yet, so the next follow stays easy."
                     ctaLabel="View Chart"
                     href="/rankings?type=popular&window=week"
-                    onItemClick={(item) => router.push(`/series/${item.id}`)}
+                    onItemClick={(item) =>
+                      router.push(
+                        buildLibrarySeriesHref(
+                          item.id,
+                          "LIBRARY_RECOMMENDED_RAIL",
+                          "recommended_rail",
+                        ),
+                      )
+                    }
                   />
                 </SurfacePanel>
               ) : null}
