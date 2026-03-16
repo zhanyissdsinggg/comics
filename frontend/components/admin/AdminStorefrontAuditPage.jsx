@@ -119,7 +119,7 @@ function isDraftLaunchReady(series, readiness) {
 
 function getRecommendedAction(series, readiness) {
   if (!series.author.trim()) {
-    return "先补作者归因，打通 creator 入口";
+    return "先补创作者归因，打通创作者入口";
   }
 
   if (series.episodeCount <= 0) {
@@ -461,7 +461,7 @@ export default function AdminStorefrontAuditPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                Storefront audit
+                前台体检
               </p>
               <h2 className="text-2xl font-semibold text-white">
                 先修会直接影响前台点击、发现和转化的缺口。
@@ -510,7 +510,7 @@ export default function AdminStorefrontAuditPage() {
           <StatCard
             label="缺作者归因"
             value={overview.creatorGapCount.toLocaleString()}
-            hint="这会直接切断 creator 发现链路"
+            hint="这会直接切断创作者发现链路"
             tone="amber"
           />
         </section>
@@ -722,7 +722,7 @@ export default function AdminStorefrontAuditPage() {
               <div className="mt-5 space-y-3">
                 {[
                   "先修已发布但资料不完整的作品，这些最直接影响首页、搜索和系列页转化。",
-                  "作者字段优先级很高，因为它同时影响 creator 页面、搜索救援链路和信任模块。",
+                  "作者字段优先级很高，因为它同时影响创作者页面、搜索救援链路和信任模块。",
                   "草稿里只差发布状态的一批作品适合尽快上线，能最快扩充前台可运营库存。",
                   "封面、简介、标签如果同时缺失，说明这部作品还不具备头部站的基础承接能力。",
                 ].map((item) => (

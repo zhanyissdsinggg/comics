@@ -8,6 +8,12 @@ import { AdminDataState } from '@/components/admin/common/AdminDataState';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { Modal } from '@/components/admin/common/Modal';
 import { adminFetchJson } from '@/lib/adminApiClient';
+import {
+  STOREFRONT_SLOT_PRESETS,
+  getStorefrontSlotDisplayMeta as getSlotDisplayMeta,
+  getStorefrontSlotPreset as getSlotPreset,
+  normalizeStorefrontSlotToken as normalizeSlotToken,
+} from '@/lib/storefrontSlots';
 
 const VIEW_TABS = [
   { key: 'slots', label: '推荐位' },
@@ -38,39 +44,6 @@ const SERIES_TYPE_OPTIONS = [
 ];
 
 const EMPTY_FEEDBACK = { type: '', message: '' };
-
-const STOREFRONT_SLOT_PRESETS = [
-  {
-    token: 'library-return',
-    label: '书架回流位',
-    hint: '给高意图回访用户安排下一本最该继续打开的作品。',
-  },
-  {
-    token: 'home-hero',
-    label: '首页英雄位',
-    hint: '首页首屏轮播位，承担最大流量入口。',
-  },
-  {
-    token: 'home-free-start',
-    label: '免费开篇位',
-    hint: '适合承接新客首读和低门槛转化。',
-  },
-  {
-    token: 'home-binge-ready',
-    label: '完结 binge 位',
-    hint: '适合周末长阅读和高完成度作品。',
-  },
-  {
-    token: 'home-breakout',
-    label: '爆款新作位',
-    hint: '适合承接热度上涨和新作爆发期。',
-  },
-  {
-    token: 'custom',
-    label: '自定义推荐位',
-    hint: '手动输入机器标识，用于特殊活动或实验位。',
-  },
-];
 
 const ANALYTICS_SLOT_FILTER_OPTIONS = [
   { value: 'all', label: '全部推荐位' },
@@ -109,29 +82,6 @@ function parseSeriesIds(value) {
     .split(/[\n,]/)
     .map((entry) => entry.trim())
     .filter(Boolean);
-}
-
-function normalizeSlotToken(value) {
-  return String(value || '').trim().toLowerCase();
-}
-
-function getSlotPreset(token) {
-  return STOREFRONT_SLOT_PRESETS.find((item) => item.token === token) || null;
-}
-
-function getSlotDisplayMeta(value) {
-  const normalized = normalizeSlotToken(value);
-  const preset = STOREFRONT_SLOT_PRESETS.find((item) => item.token === normalized);
-
-  if (preset) {
-    return preset;
-  }
-
-  return {
-    token: normalized || 'custom',
-    label: String(value || '未命名推荐位').trim() || '未命名推荐位',
-    hint: '自定义推荐位，建议保持机器标识稳定，避免前台联动失效。',
-  };
 }
 
 function buildSlotPayload(form) {
@@ -302,7 +252,7 @@ function AnalyticsTable({ analytics }) {
               <th className="px-4 py-3 font-medium">浏览</th>
               <th className="px-4 py-3 font-medium">点击</th>
               <th className="px-4 py-3 font-medium">转化</th>
-              <th className="px-4 py-3 font-medium">CTR</th>
+              <th className="px-4 py-3 font-medium">点击率</th>
               <th className="px-4 py-3 font-medium">转化率</th>
             </tr>
           </thead>
@@ -797,7 +747,7 @@ export default function AdminRecommendationsPage() {
           <StatCard label="转化" value={formatNumber(analyticsSummary.conversions)} hint="已完成动作" />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <StatCard label="平均 CTR" value={formatPercent(averageCtr)} hint="点击数除以曝光数" />
+          <StatCard label="平均点击率" value={formatPercent(averageCtr)} hint="点击数除以曝光数" />
           <StatCard
             label="平均转化率"
             value={formatPercent(averageConversionRate)}

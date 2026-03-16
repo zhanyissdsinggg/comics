@@ -16,6 +16,10 @@ import {
   getReaderProof,
 } from "../../lib/homeMerchandising";
 import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
+import {
+  getStorefrontSlotDisplayMeta,
+  normalizeStorefrontSlotToken,
+} from "../../lib/storefrontSlots";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -63,10 +67,6 @@ function normalizeSlot(entry, index) {
   };
 }
 
-function normalizeSlotToken(value) {
-  return String(value || "").trim().toLowerCase();
-}
-
 function formatDateLabel(value) {
   if (!value) {
     return "暂无";
@@ -91,6 +91,23 @@ function formatCompactNumber(value) {
 
 function formatPercentValue(value) {
   return `${toNumber(value).toFixed(2)}%`;
+}
+
+function formatSeriesStatusLabel(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "completed") {
+    return "已完结";
+  }
+  if (normalized === "ongoing") {
+    return "连载中";
+  }
+  if (normalized === "hiatus") {
+    return "暂停中";
+  }
+  if (normalized === "cancelled") {
+    return "已停更";
+  }
+  return String(value || "状态未知").trim() || "状态未知";
 }
 
 function normalizePerformance(entry) {
@@ -284,7 +301,7 @@ function buildSlotOptimizationPlan(slot, replacementCandidates) {
       priority: 60,
       tone: "amber",
       title: "点击率偏低，建议准备替换候选",
-      detail: `当前 CTR 只有 ${formatPercentValue(ctr)}，可以准备更强候选做下一轮测试。`,
+      detail: `当前点击率只有 ${formatPercentValue(ctr)}，可以准备更强候选做下一轮测试。`,
       actionType: "copy",
       actionLabel: "复制替换候选 ID",
       actionIds: replacementIds,
@@ -523,38 +540,25 @@ export default function AdminHomeMerchandisingPage() {
   );
 
   const slotBlueprints = useMemo(
-    () => [
-      {
-        id: "home-hero",
-        label: "首页英雄位",
-        hint: "首屏轮播位",
-        recommendedIds: heroItems.map((item) => item.seriesId).filter(Boolean),
-      },
-      {
-        id: "home-free-start",
-        label: "免费开篇位",
-        hint: "新客首点位",
-        recommendedIds: editorialSnapshot.freeStartPick?.id ? [editorialSnapshot.freeStartPick.id] : [],
-      },
-      {
-        id: "home-binge-ready",
-        label: "完结 binge 位",
-        hint: "周末长阅读位",
-        recommendedIds: editorialSnapshot.completedPick?.id ? [editorialSnapshot.completedPick.id] : [],
-      },
-      {
-        id: "home-breakout",
-        label: "爆款新作位",
-        hint: "热度承接位",
-        recommendedIds: editorialSnapshot.breakoutPick?.id ? [editorialSnapshot.breakoutPick.id] : [],
-      },
-      {
-        id: "library-return",
-        label: "书架回流位",
-        hint: "给高意图回访用户安排下一本最该继续打开的作品。",
-        recommendedIds: libraryReturnCandidates.map((entry) => entry.series?.id).filter(Boolean),
-      },
-    ],
+    () => {
+      const slotRecommendationMap = {
+        "home-hero": heroItems.map((item) => item.seriesId).filter(Boolean),
+        "home-free-start": editorialSnapshot.freeStartPick?.id ? [editorialSnapshot.freeStartPick.id] : [],
+        "home-binge-ready": editorialSnapshot.completedPick?.id ? [editorialSnapshot.completedPick.id] : [],
+        "home-breakout": editorialSnapshot.breakoutPick?.id ? [editorialSnapshot.breakoutPick.id] : [],
+        "library-return": libraryReturnCandidates.map((entry) => entry.series?.id).filter(Boolean),
+      };
+
+      return Object.entries(slotRecommendationMap).map(([slotId, recommendedIds]) => {
+        const slotMeta = getStorefrontSlotDisplayMeta(slotId);
+        return {
+          id: slotId,
+          label: slotMeta.label,
+          hint: slotMeta.hint,
+          recommendedIds,
+        };
+      });
+    },
     [editorialSnapshot, heroItems, libraryReturnCandidates],
   );
 
@@ -563,7 +567,9 @@ export default function AdminHomeMerchandisingPage() {
       slotBlueprints.map((slot) => {
         const current =
           slots.find((item) =>
-            [item.id, item.slot, item.name].map(normalizeSlotToken).includes(normalizeSlotToken(slot.id)),
+            [item.id, item.slot, item.name]
+              .map(normalizeStorefrontSlotToken)
+              .includes(normalizeStorefrontSlotToken(slot.id)),
           ) || null;
         const currentIds = Array.isArray(current?.seriesIds) ? current.seriesIds : [];
         const recommendedSeries = slot.recommendedIds.map((id) => seriesById.get(id)).filter(Boolean);
@@ -902,10 +908,10 @@ export default function AdminHomeMerchandisingPage() {
         ))}
 
         <section className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 backdrop-blur-xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-300/80">Home merchandising</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-300/80">首页编排</p>
           <h2 className="mt-3 text-2xl font-semibold text-white">把首页最赚钱、最影响点击的几个位先收口。</h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-            头部美国漫画站的首页不是简单堆作品，而是每个入口都有明确任务。英雄位抓眼球，免费开篇位拉首点，完结位承接 binge，爆款位负责把热度留在站内。
+            头部美国漫画站的首页不是简单堆作品，而是每个入口都有明确任务。英雄位抓眼球，免费开篇位拉首点，完结追读位承接长阅读，爆款位负责把热度留在站内。
           </p>
           <button
             type="button"
@@ -1011,14 +1017,14 @@ export default function AdminHomeMerchandisingPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-xl font-semibold text-white">首页重点卡位</h2>
-                  <p className="mt-2 text-sm text-neutral-400">免费开篇、完结 binge、爆款新作，是最值得长期盯住的三刀。</p>
+                  <p className="mt-2 text-sm text-neutral-400">免费开篇、完结追读、爆款新作，是最值得长期盯住的三刀。</p>
                 </div>
                 <Sparkles className="mt-1 h-5 w-5 text-cyan-300" />
               </div>
               <div className="mt-5 space-y-3">
                 {[
                   { id: "free", label: "免费开篇", icon: Zap, series: editorialSnapshot.freeStartPick },
-                  { id: "binge", label: "完结 binge", icon: BookOpen, series: editorialSnapshot.completedPick },
+                  { id: "binge", label: "完结追读", icon: BookOpen, series: editorialSnapshot.completedPick },
                   { id: "breakout", label: "爆款新作", icon: Flame, series: editorialSnapshot.breakoutPick },
                 ].map((item) => {
                   const Icon = item.icon;
@@ -1151,7 +1157,7 @@ export default function AdminHomeMerchandisingPage() {
                   tone={performanceSummary.totalConversions > 0 ? "emerald" : "amber"}
                 />
                 <StatCard
-                  label="综合 CTR"
+                  label="综合点击率"
                   value={formatPercentValue(summaryCtr)}
                   hint={`综合转化率 ${formatPercentValue(summaryConversionRate)}`}
                   tone={summaryCtr >= 2 ? "emerald" : summaryCtr > 0 ? "amber" : "rose"}
@@ -1183,7 +1189,7 @@ export default function AdminHomeMerchandisingPage() {
                         <MiniMetric label="曝光" value={formatCompactNumber(slot.performance.totalImpressions)} />
                         <MiniMetric label="点击" value={formatCompactNumber(slot.performance.totalClicks)} />
                         <MiniMetric label="转化" value={formatCompactNumber(slot.performance.totalConversions)} />
-                        <MiniMetric label="CTR" value={formatPercentValue(slot.performance.avgCtr)} />
+                        <MiniMetric label="点击率" value={formatPercentValue(slot.performance.avgCtr)} />
                         <MiniMetric label="转化率" value={formatPercentValue(slot.performance.avgConversionRate)} />
                         <MiniMetric label="状态" value={performanceState.label} hint={slot.id} />
                       </div>
@@ -1231,7 +1237,7 @@ export default function AdminHomeMerchandisingPage() {
                     <>
                       <div className="mt-4 grid gap-3 sm:grid-cols-3">
                         <MiniMetric label="曝光" value={formatCompactNumber(slot.performance.totalImpressions)} />
-                        <MiniMetric label="CTR" value={formatPercentValue(slot.performance.avgCtr)} />
+                        <MiniMetric label="点击率" value={formatPercentValue(slot.performance.avgCtr)} />
                         <MiniMetric label="转化率" value={formatPercentValue(slot.performance.avgConversionRate)} />
                       </div>
                       <p className="mt-4 text-xs uppercase tracking-[0.2em] text-neutral-500">当前配置</p>
@@ -1340,7 +1346,7 @@ export default function AdminHomeMerchandisingPage() {
                       </span>
                     </div>
                     <p className="mt-3 text-sm text-neutral-400">
-                      {series.author ? `作者 / 工作室：${series.author}` : "作者 / 工作室：未填写"} · {series.type === "novel" ? "小说" : "漫画"} · {series.status || "状态未知"} · 最近更新 {formatDateLabel(series.updatedAt)}
+                      {series.author ? `作者 / 工作室：${series.author}` : "作者 / 工作室：未填写"} · {series.type === "novel" ? "小说" : "漫画"} · {formatSeriesStatusLabel(series.status)} · 最近更新 {formatDateLabel(series.updatedAt)}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {reasons.map((reason) => (

@@ -465,12 +465,31 @@ test.describe("Admin route regression", () => {
     await expect(page.getByRole("heading", { name: "关键首页位体检" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByRole("heading", { name: "英雄位候选" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByRole("heading", { name: "书架回流位" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "完结追读位" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByRole("heading", { name: "Midnight Signal" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("今日热搜", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByRole("button", { name: "一键补位" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
+  });
+
+  test("should render storefront audit workspace with chinese operator copy", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminApiMocks(page, {
+      seriesBody: MERCH_SERIES_BODY,
+    });
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/storefront", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "前台体检" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("创作者发现链路", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "运营动作顺序" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/storefront", runtimeIssues);
   });
 
   test("should sync merchandising recommendations into an existing slot", async ({ page }) => {
