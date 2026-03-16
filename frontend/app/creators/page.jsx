@@ -13,7 +13,7 @@ export async function generateMetadata() {
   return createPageMetadata({
     title: "Creators & Studios",
     description:
-      "Browse creators and studios behind the catalog. Compare creator shelves, discover multi-title teams, and open the strongest series faster.",
+      "Browse the creators and studios behind the catalog, discover multi-title teams, and find more from the same people faster.",
     path: "/creators",
     image: leadCover,
   });

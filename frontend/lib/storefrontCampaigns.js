@@ -18,28 +18,28 @@ export function getStorefrontCampaign(series) {
     return {
       id: "free-start",
       eyebrow: STOREFRONT_TERMS.freeStart,
-      title: "Built to convert a cold visit into chapter one.",
+      title: "Easy to try before you spend.",
       description:
         freeEpisodeCount > 0
           ? `${freeEpisodeCount} free episode${
               freeEpisodeCount === 1 ? "" : "s"
-            } make this the kind of title that can pull a new reader into the first premium decision without forcing an immediate spend.`
-          : "This title has the low-friction shape that works best when a new reader still needs a clean first click.",
+            } give new readers a simple way to try the story before unlocking more.`
+          : "This title has the kind of low-friction start that works well for first-time readers.",
       heroNote: isHot
-        ? "Hot title with a low-friction first-chapter path."
-        : "Low-friction sampling lane for first-time readers.",
-      reasonLabel: "Why it fits",
+        ? "Hot title with an easy free start."
+        : "Free-sample pick for first-time readers.",
+      reasonLabel: "Why it works",
       reason: isHot
-        ? "Free access plus visible momentum lowers bounce risk on the first visit."
-        : "Sample-friendly series work best when discovery still feels tentative.",
-      nextMoveLabel: "Editorial next move",
+        ? "Free access plus visible buzz makes it easier to start reading right away."
+        : "A free sample works best when a reader is still deciding what to try.",
+      nextMoveLabel: "Try next",
       nextMove:
-        "Keep similar free-start titles and the unlock chart close by so curiosity turns into a reading run instead of a one-click exit.",
-      discoveryCta: "Open free unlock chart",
+        "Keep similar free-start titles and free unlock picks nearby so one sample can turn into a longer read.",
+      discoveryCta: "See free unlock picks",
       discoveryHref: "/rankings?type=ttf&window=all",
-      valueLabel: "Value path",
+      valueLabel: "Keep reading",
       value:
-        "When the free path ends, membership should already be visible so the reader never hits a dead stop.",
+        "When the free chapters run out, membership should already be easy to compare.",
       valueCta: STOREFRONT_TERMS.compareMembership,
       valueKind: "subscribe",
     };
@@ -49,23 +49,23 @@ export function getStorefrontCampaign(series) {
     return {
       id: "binge-ready",
       eyebrow: STOREFRONT_TERMS.bingeReady,
-      title: "Built for long-session reading without release gaps.",
+      title: "Ready for a full binge.",
       description:
-        "Completed runs convert when readers want depth, payoff, and fewer interruptions between unlock decisions.",
+        "Completed series are easiest to commit to when you want the whole story without waiting for updates.",
       heroNote: isHot
-        ? "Hot completed series built for binge momentum."
-        : "Finished run ready for a longer reading session.",
-      reasonLabel: "Why it fits",
+        ? "Popular completed series built for a binge."
+        : "Finished run ready to read straight through.",
+      reasonLabel: "Why it works",
       reason:
-        "Complete availability makes it easier to justify deeper wallet use because the payoff path is already visible.",
-      nextMoveLabel: "Editorial next move",
+        "A finished story feels safer to invest in because the payoff is already there.",
+      nextMoveLabel: "Try next",
       nextMove:
-        "Compare this title against the completed shelf so the reader can commit to a longer binge instead of stalling after one sample.",
-      discoveryCta: "Browse completed desk",
+        "Compare this title with other completed series if you want a full binge instead of a one-chapter sample.",
+      discoveryCta: "Browse completed series",
       discoveryHref: "/search?status=Completed&sort=popular",
-      valueLabel: "Value path",
+      valueLabel: "Unlock value",
       value:
-        "Binge readers respond best when point-pack value stays close to the title page and the next unlock feels obvious.",
+        "Point packs make the most sense when you know you want to keep reading for a while.",
       valueCta: STOREFRONT_TERMS.viewPointPacks,
       valueKind: "store",
     };
@@ -75,25 +75,25 @@ export function getStorefrontCampaign(series) {
     id: "return-weekly",
     eyebrow: STOREFRONT_TERMS.returnWeekly,
     title: isNew
-      ? "Built for readers who want to catch a live release curve early."
-      : "Built for readers who come back on a weekly rhythm.",
+      ? "Catch this one early."
+      : "Easy to follow week after week.",
     description: isNew
-      ? "Fresh launches and active ongoing series work best when the next return visit is already part of the pitch."
-      : "Ongoing series convert best when the site frames them as a habit, not a one-off click.",
+      ? "Fresh launches feel best when you can jump in early and follow the release curve as it grows."
+      : "Ongoing series work best when they feel worth coming back to every week.",
     heroNote: isNew
-      ? "Fresh ongoing lane with live-release momentum."
-      : "Ongoing lane designed for return visits.",
-    reasonLabel: "Why it fits",
+      ? "Fresh ongoing pick with early buzz."
+      : "Ongoing series built for return visits.",
+    reasonLabel: "Why it works",
     reason:
-      "A return-worthy title needs library, follow, and membership value close to the first read so the habit forms early.",
-    nextMoveLabel: "Editorial next move",
+      "A return-worthy title needs follow, library, and membership value close to the first read so the habit can stick.",
+    nextMoveLabel: "Try next",
     nextMove:
-      "Use charts and latest-release browse to keep readers inside the live-release conversation instead of losing them between updates.",
-    discoveryCta: "Open weekly chart",
+      "Use charts and latest releases to keep following this kind of series instead of dropping off between updates.",
+    discoveryCta: "See weekly chart",
     discoveryHref: "/rankings?type=popular&window=week",
-    valueLabel: "Value path",
+    valueLabel: "Best value",
     value:
-      "Membership is the cleanest upsell when the reader expects to come back regularly and wants lower unlock friction over time.",
+      "Membership usually makes the most sense if you plan to keep coming back for new chapters.",
     valueCta: STOREFRONT_TERMS.compareMembership,
     valueKind: "subscribe",
   };

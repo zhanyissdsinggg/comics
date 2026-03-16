@@ -5,7 +5,7 @@ import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
   title: "Subscribe",
-  description: "Compare plans, keep bonus savings active, and unlock subscription benefits.",
+  description: "Compare membership plans, discounts, and daily perks before you subscribe.",
   path: "/subscribe",
 });
 

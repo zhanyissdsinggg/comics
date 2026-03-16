@@ -129,18 +129,18 @@ function getCreatorHeroCopy(creatorName, isStudioShelf, topGenres) {
 
   if (isStudioShelf) {
     return {
-      title: "Browse the studio shelf without losing the return path.",
+      title: "Browse everything from this studio in one place.",
       description: genreLabel
-        ? `Move across this studio lane, surface the strongest ${genreLabel} picks first, and keep a clean way back into the title that started the session.`
-        : "Move across the studio lane, surface the strongest titles first, and keep a clean way back into the title that started the session.",
+        ? `Compare this studio's ${genreLabel} titles, start with the strongest pick, and keep a clear way back to where you came from.`
+        : "Compare this studio's titles, start with the strongest pick, and keep a clear way back to where you came from.",
     };
   }
 
   return {
-    title: `Explore ${creatorName}'s published shelf with clearer momentum.`,
+    title: `Read more from ${creatorName}.`,
     description: genreLabel
-      ? `See how ${creatorName}'s ${genreLabel} titles stack up, open the strongest spotlight first, and keep the return trip to the originating series obvious.`
-      : `See how ${creatorName}'s published titles stack up, open the strongest spotlight first, and keep the return trip to the originating series obvious.`,
+      ? `Compare ${creatorName}'s ${genreLabel} titles, open the strongest starting point first, and keep your route back easy.`
+      : `Compare ${creatorName}'s published titles, open the strongest starting point first, and keep your route back easy.`,
   };
 }
 
@@ -332,26 +332,26 @@ export default function CreatorPage({ creatorSlug }) {
       {
         label: "Titles",
         value: formatTitleCountLabel(creatorItems.length),
-        hint: "Everything currently visible inside this creator or studio lane.",
+        hint: "Everything currently visible on this creator page.",
       },
       {
         label: "Completed",
         value: String(completedCount),
         hint: completedCount > 0
-          ? "Finished runs are ready for uninterrupted reading sessions."
-          : "Live titles dominate this shelf right now.",
+          ? "Finished series are ready to binge."
+          : "Ongoing series lead this page right now.",
       },
       {
-        label: "Reader proof",
+        label: "Reader signals",
         value: formatCompactCount(readerProof),
-        hint: "Combined momentum signals gathered from ratings, followers, and views.",
+        hint: "Combined reader activity from ratings, followers, and views.",
       },
       {
-        label: "Lead lane",
+        label: "Top genre",
         value: strongestGenre,
         hint: topGenres.length > 1
-          ? `${topGenres.slice(0, 2).join(" | ")} define the clearest genre fit.`
-          : "Use the strongest genre signal to keep discovery focused.",
+          ? `${topGenres.slice(0, 2).join(" | ")} are the clearest genre signals here.`
+          : "Use the strongest genre signal to keep browsing focused.",
       },
     ];
   }, [creatorItems, topGenres]);
@@ -368,27 +368,27 @@ export default function CreatorPage({ creatorSlug }) {
 
     return [
       {
-        label: "Reader proof",
+        label: "Reader signals",
         value: formatCompactCount(getPopularityScore(spotlightSeries)),
-        hint: "The strongest visible signal attached to this title right now.",
+        hint: "The strongest visible reader activity on this title right now.",
       },
       {
-        label: "Release pulse",
+        label: "Latest update",
         value: releaseLabel,
         hint:
           String(spotlightSeries?.status || "").toLowerCase() === "completed"
             ? "A finished run with no wait between chapters."
-            : "Keeps the title looking active for returning readers.",
+            : "Shows that the series is still active.",
       },
       {
-        label: "Shelf fit",
+        label: "Best for",
         value:
           String(spotlightSeries?.status || "").toLowerCase() === "completed"
             ? "Binge-ready"
             : "Return weekly",
         hint: Array.isArray(spotlightSeries?.genres) && spotlightSeries.genres.length > 0
           ? spotlightSeries.genres.slice(0, 2).join(" | ")
-          : "Editorially adjacent title inside this creator shelf.",
+          : "A strong pick from this creator page.",
       },
     ];
   }, [spotlightSeries]);
@@ -463,7 +463,7 @@ export default function CreatorPage({ creatorSlug }) {
             <EmptyState
               icon="alert"
               title="Creator page unavailable"
-              description="We could not load this creator shelf right now. Retry or move back into search."
+              description="We could not load this creator page right now. Retry or go back to search."
               action={{
                 label: "Retry",
                 onClick: () => window.location.reload(),
@@ -483,13 +483,13 @@ export default function CreatorPage({ creatorSlug }) {
           <EditorialHero
             eyebrow="Creator page"
             title={`No published titles are visible for ${creatorName} yet.`}
-            description="This creator or studio shelf does not currently expose any live titles in the active catalog mode."
-            secondary="Move back to search, rankings, or the source series so discovery never dead-ends."
+            description="This creator or studio does not currently expose any visible titles in the active catalog mode."
+            secondary="Go back to search, charts, or the source series so discovery never dead-ends."
             stats={[
               {
                 label: "Creator",
                 value: creatorName,
-                hint: "Slug resolved successfully, but the public shelf is empty right now.",
+                hint: "The creator page resolved correctly, but no public titles are visible right now.",
               },
               {
                 label: "Mode",
@@ -511,14 +511,14 @@ export default function CreatorPage({ creatorSlug }) {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
                 >
-                  Open weekly chart
+                  See weekly chart
                 </button>
                 <button
                   type="button"
                   onClick={handleReturn}
                   className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
                 >
-                  Return to series
+                  Back to series
                 </button>
               </>
             }
@@ -528,7 +528,7 @@ export default function CreatorPage({ creatorSlug }) {
             <EmptyState
               icon="book"
               title="No creator titles available"
-              description="Try search, rankings, or head back to the originating series to keep the session moving."
+              description="Try search, charts, or head back to the originating series to keep browsing."
               action={{
                 label: "Browse search",
                 onClick: () => router.push("/search"),
@@ -553,13 +553,13 @@ export default function CreatorPage({ creatorSlug }) {
         ) : null}
 
         <EditorialHero
-          eyebrow={isStudioShelf ? "Studio shelf" : "Creator page"}
+          eyebrow={isStudioShelf ? "Studio page" : "Creator page"}
           title={heroCopy.title}
           description={heroCopy.description}
           secondary={
             originSeries
-              ? `Started from ${originSeries.title}. Use this shelf to branch out without losing the route back.`
-              : "Use this shelf to compare titles from the same creative lane before you commit to the next reading session."
+              ? `Started from ${originSeries.title}. Explore more here without losing your way back.`
+              : "Compare titles from the same creator before you pick your next read."
           }
           stats={creatorStats}
           actions={
@@ -569,21 +569,21 @@ export default function CreatorPage({ creatorSlug }) {
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Open weekly chart
+                See weekly chart
               </button>
               <button
                 type="button"
                 onClick={handleBrowseGenre}
                 className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
               >
-                {topGenres[0] ? `Browse ${topGenres[0]}` : "Browse related titles"}
+                {topGenres[0] ? `Browse ${topGenres[0]}` : "Browse similar series"}
               </button>
               <button
                 type="button"
                 onClick={handleReturn}
                 className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
               >
-                {originSeries ? `Return to ${originSeries.title}` : "Return to series"}
+                {originSeries ? `Back to ${originSeries.title}` : "Back to series"}
               </button>
             </>
           }
@@ -611,7 +611,7 @@ export default function CreatorPage({ creatorSlug }) {
                 </h2>
                 <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-300 sm:text-base">
                   {spotlightSeries.description ||
-                    `Start with ${spotlightSeries.title} if you want the clearest read on how this creator lane hooks, updates, and converts curiosity into a longer session.`}
+                    `Start with ${spotlightSeries.title} if you want the clearest introduction to this creator's work.`}
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -653,21 +653,21 @@ export default function CreatorPage({ creatorSlug }) {
                     onClick={() => handleOpenTitle(spotlightSeries)}
                     className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
                   >
-                    Open series
+                    Read series
                   </button>
                   <button
                     type="button"
                     onClick={handleBrowseGenre}
                     className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
                   >
-                    {topGenres[0] ? `Search ${topGenres[0]}` : "Browse related genres"}
+                    {topGenres[0] ? `Search ${topGenres[0]}` : "Browse similar genres"}
                   </button>
                   <button
                     type="button"
                     onClick={handleReturn}
                     className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
                   >
-                    {originSeries ? `Return to ${originSeries.title}` : "Return to series"}
+                    {originSeries ? `Back to ${originSeries.title}` : "Back to series"}
                   </button>
                 </div>
               </div>
@@ -687,10 +687,10 @@ export default function CreatorPage({ creatorSlug }) {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-                More from this lane
+                More from this creator
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Compare every visible title before the session cools off.
+                Browse every visible title in one place.
               </h2>
             </div>
             <p className="text-sm text-neutral-400">

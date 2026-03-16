@@ -105,7 +105,7 @@ export default function SubscribePage() {
   const handleSubscribe = async (planId) => {
     if (!subscriptionActionsEnabled) {
       setFeedback(
-        "Membership checkout is temporarily unavailable while secure billing is being finalized. Plan comparison is still available below.",
+        "Membership checkout is currently preview-only. You can still compare plans below.",
       );
       return;
     }
@@ -233,16 +233,16 @@ export default function SubscribePage() {
       <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Membership"
-          title="Choose a plan with clear perks, clear pricing, and no storefront noise."
+          title="Pick the plan that fits how you read."
           description={
             subscriptionPreviewOnly
-              ? "Review every tier, discount, and monthly bonus before checkout opens, without guessing what each plan will include later."
-              : "Compare every tier, perk, and monthly bonus in one place, then start the plan that fits your reading pace."
+              ? "Compare every tier, discount, and monthly bonus now, then come back to activate when secure billing is ready."
+              : "Compare every tier, perk, and monthly bonus in one place, then start the plan that matches your reading pace."
           }
           secondary={
             subscriptionPreviewOnly
-              ? "Plan comparison stays live, but activation remains disabled until secure billing is fully available."
-              : "Each tier keeps the same benefit math from comparison through activation."
+              ? "Plan comparison stays live, but activation is still disabled for now."
+              : "Each tier keeps the same value from comparison through activation."
           }
           stats={subscriptionHeroStats}
           actions={
@@ -252,7 +252,7 @@ export default function SubscribePage() {
                 onClick={() => router.push("/account")}
                 className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Account Overview
+                Account
               </button>
               <button
                 type="button"
@@ -273,7 +273,7 @@ export default function SubscribePage() {
           ) : null}
           {subscriptionPreviewOnly ? (
             <div className="rounded-[24px] border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-50">
-              Membership checkout is preview-only right now. Compare tiers here, then activate or cancel once secure billing is enabled.
+              Membership checkout is currently preview-only.
             </div>
           ) : null}
           <div className="flex flex-wrap items-end justify-between gap-3">
@@ -282,7 +282,7 @@ export default function SubscribePage() {
                 Plans
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                Three tiers built for different reading habits
+                Three tiers for different reading habits
               </h2>
             </div>
             <p className="text-xs text-neutral-500">
@@ -418,7 +418,7 @@ export default function SubscribePage() {
                       {isCurrent
                         ? "Current plan"
                         : !subscriptionActionsEnabled
-                          ? "Checkout unavailable"
+                          ? "Checkout coming soon"
                           : workingId === key
                             ? "Processing..."
                             : "Choose plan"}

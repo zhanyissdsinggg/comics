@@ -225,14 +225,14 @@ export default function CreatorsHubPage() {
         hint: "Published titles currently mapped back into creator discovery.",
       },
       {
-        label: "Reader proof",
+        label: "Reader signals",
         value: formatCompactCount(stats.readerProof),
-        hint: "Combined rating, follow, and view signals attached to creator shelves.",
+        hint: "Combined reader activity across creator pages.",
       },
       {
         label: "Mode",
         value: isAdultMode ? "18+" : "Standard",
-        hint: isAdultMode ? "Age-gated creator shelves are eligible here." : "Protected shelves stay hidden.",
+        hint: isAdultMode ? "18+ creator pages can appear here." : "18+ creator pages stay hidden.",
       },
     ],
     [isAdultMode, stats.creators, stats.readerProof, stats.titles],
@@ -274,7 +274,7 @@ export default function CreatorsHubPage() {
             <EmptyState
               icon="alert"
               title="Creator directory unavailable"
-              description="We could not load the creator index right now. Retry or move back into the storefront."
+              description="We could not load the creator directory right now. Retry or go back to search."
               action={{
                 label: "Retry",
                 onClick: () => window.location.reload(),
@@ -293,9 +293,9 @@ export default function CreatorsHubPage() {
         <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
           <EditorialHero
             eyebrow="Creator directory"
-            title="No creator shelves are visible in this catalog mode yet."
-            description="Once published titles expose stable author or studio names, they will appear here as browsable creator hubs."
-            secondary="Move back into search, rankings, or the home rails so discovery never dead-ends."
+            title="No creator pages are visible in this catalog mode yet."
+            description="Once published titles expose stable creator or studio names, they will appear here automatically."
+            secondary="Go back to search, charts, or home so discovery never dead-ends."
             stats={heroStats}
             actions={
               <>
@@ -311,7 +311,7 @@ export default function CreatorsHubPage() {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
                 >
-                  Open weekly chart
+                  See weekly chart
                 </button>
               </>
             }
@@ -335,9 +335,9 @@ export default function CreatorsHubPage() {
 
         <EditorialHero
           eyebrow="Creator directory"
-          title="Browse creators and studios like a real discovery desk."
-          description="Top comic storefronts do not bury creator identity inside one title page. They let readers jump from a hit series into the wider shelf behind it."
-          secondary="Use this directory to compare creator momentum, spot multi-title studios, and widen discovery without losing the path back into reading."
+          title="Meet the creators behind your next read."
+          description="Jump from a hit series to the writer, artist, or studio behind it, then browse everything else they have published."
+          secondary="Use this directory to compare creators, spot multi-title studios, and find more from the same team."
           stats={heroStats}
           actions={
             <>
@@ -346,14 +346,14 @@ export default function CreatorsHubPage() {
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Open weekly chart
+                See weekly chart
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
                 className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
               >
-                Search titles
+                Search all series
               </button>
             </>
           }
@@ -366,7 +366,7 @@ export default function CreatorsHubPage() {
                 Filter the directory
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Narrow creator discovery without losing the shelf.
+                Search creators without losing the full directory.
               </h2>
             </div>
             <p className="text-sm text-neutral-400">
@@ -412,11 +412,11 @@ export default function CreatorsHubPage() {
                   Creator spotlight
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Start with the strongest shelves, then branch outward.
+                  Start with the strongest creator pages.
                 </h2>
               </div>
               <p className="text-sm text-neutral-400">
-                Ranked by title count, reader proof, and freshness.
+                Sorted by title count, reader activity, and recent updates.
               </p>
             </div>
 
@@ -437,7 +437,7 @@ export default function CreatorsHubPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
-                          Creator shelf
+                          Creator page
                         </p>
                         <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
                           {creator.name}
@@ -449,8 +449,8 @@ export default function CreatorsHubPage() {
                     </div>
                     <p className="text-sm leading-6 text-neutral-400">
                       {creator.spotlightSeries?.title
-                        ? `${creator.spotlightSeries.title} currently leads this creator lane.`
-                        : "Open this shelf to compare the strongest published titles from the same creative lane."}
+                        ? `${creator.spotlightSeries.title} is a good place to start with this creator.`
+                        : "Open this page to compare the strongest published titles from this creator or studio."}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {creator.topGenres.map((genre) => (
@@ -465,7 +465,7 @@ export default function CreatorsHubPage() {
                     <div className="grid gap-3 sm:grid-cols-3">
                       <div className="rounded-[20px] border border-white/10 bg-black/20 px-3 py-3">
                         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                          Reader proof
+                          Reader signals
                         </p>
                         <p className="mt-2 text-lg font-semibold text-white">{formatCompactCount(creator.readerProof)}</p>
                       </div>
@@ -512,7 +512,7 @@ export default function CreatorsHubPage() {
                   Full directory
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Compare creator shelves before you commit to the next title.
+                  Compare creators before you pick the next title.
                 </h2>
               </div>
               <p className="text-sm text-neutral-400">
@@ -551,8 +551,8 @@ export default function CreatorsHubPage() {
 
                       <p className="mt-3 text-sm leading-6 text-neutral-400">
                         {creator.spotlightSeries?.title
-                          ? `${creator.spotlightSeries.title} is the current lead title on this shelf.`
-                          : "Open the shelf to compare related titles from this creator or studio."}
+                          ? `${creator.spotlightSeries.title} is the current lead title on this creator page.`
+                          : "Open the page to compare related titles from this creator or studio."}
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-2">
@@ -567,7 +567,7 @@ export default function CreatorsHubPage() {
                       </div>
 
                       <div className="mt-4 flex flex-wrap gap-3 text-xs text-neutral-400">
-                        <span>{formatCompactCount(creator.readerProof)} reader proof</span>
+                        <span>{formatCompactCount(creator.readerProof)} reader signals</span>
                         <span>{creator.completedCount} completed</span>
                         <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
                       </div>

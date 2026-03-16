@@ -5,7 +5,7 @@ import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
   title: "Rankings",
-  description: "Track popular, new, completed, and time-ticket-free charts across comics and novels.",
+  description: "Browse popular, new, completed, and free unlock charts across comics and novels.",
   path: "/rankings",
 });
 

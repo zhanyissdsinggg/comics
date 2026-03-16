@@ -41,7 +41,7 @@ export default function StorefrontCampaignPanel({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-            Campaign fit
+            Why this title works
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
             {campaign.title}

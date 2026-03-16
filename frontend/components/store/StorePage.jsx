@@ -395,12 +395,12 @@ export default function StorePage() {
           description={
             purchasePreviewOnly
               ? "Review live point-pack pricing, coupons, and regional tax notes in one place while checkout is temporarily unavailable."
-              : "Balance, coupons, promotions, and point packs stay in one storefront, with checkout available as soon as you are ready."
+              : "Balance, coupons, promotions, and point packs stay in one place, with checkout ready when you are."
           }
           secondary={
             purchasePreviewOnly
-              ? `${regionConfig.label} storefront - checkout preview only right now`
-              : `${regionConfig.label} storefront - ${regionConfig.taxHint}`
+              ? `${regionConfig.label} pricing - checkout preview only right now`
+              : `${regionConfig.label} pricing - ${regionConfig.taxHint}`
           }
           stats={storeHeroStats}
           actions={
@@ -603,7 +603,7 @@ export default function StorePage() {
                     disabled={!purchaseActionsEnabled}
                     ctaLabel={
                       !purchaseActionsEnabled
-                        ? "Checkout unavailable"
+                        ? "Checkout coming soon"
                         : isSignedIn
                           ? "Buy points"
                           : "Sign in to buy"
@@ -626,7 +626,7 @@ export default function StorePage() {
               </h2>
             </div>
             <p className="text-xs text-neutral-500">
-              The storefront should answer value, delivery, and support questions before checkout starts.
+              This page should answer value, delivery, and support questions before checkout starts.
             </p>
           </div>
 

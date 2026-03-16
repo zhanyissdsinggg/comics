@@ -20,7 +20,7 @@ export async function generateMetadata({ params }) {
 
   return createPageMetadata({
     title: `Creator: ${creatorName}`,
-    description: `Browse titles from ${creatorName} on ${siteConfig.siteName}. Compare the shelf, open the lead series, and keep discovery moving.`,
+    description: `Browse titles from ${creatorName} on ${siteConfig.siteName}. Find the best place to start and discover more from the same creator.`,
     path: buildCreatorPathFromSlug(creatorSlug),
     image: creatorPayload?.items?.[0]?.coverUrl || null,
   });

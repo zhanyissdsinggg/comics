@@ -24,30 +24,30 @@ const TABS = [
   {
     id: "popular",
     label: "Popular",
-    title: "Watch the hottest titles move without digging through stale shelves.",
-    description: "This chart tracks the series pulling the most momentum across the active storefront.",
-    hint: "High-engagement titles rising fastest right now.",
+    title: "See what readers are opening most right now.",
+    description: "The biggest hits across the active catalog, all in one chart.",
+    hint: "Popular series readers are opening now.",
   },
   {
     id: "new",
     label: "New",
-    title: "Catch fresh launches before the rest of the shelf catches up.",
-    description: "Use the new chart to spot recent releases, returning titles, and early-breakout series.",
-    hint: "Recent arrivals worth checking before they flatten out.",
+    title: "Catch fresh releases before they blow up.",
+    description: "New and recently updated series worth trying early.",
+    hint: "Fresh launches and rising picks.",
   },
   {
     id: "completed",
     label: "Completed",
-    title: "Find finished series built for long-session binge reading.",
-    description: "Completed charts help readers move straight into stories that are already fully available.",
-    hint: "Finished runs that convert well for binge readers.",
+    title: "Find finished stories you can binge now.",
+    description: "Completed charts surface series you can read straight through.",
+    hint: "Full runs ready to binge.",
   },
   {
     id: "ttf",
     label: "Free Unlocks",
-    title: "See where free-unlock momentum is strongest across the storefront.",
-    description: "These charts surface titles with active free unlock value, so readers can keep moving without an immediate top up.",
-    hint: "Free unlock lanes worth checking before you spend points.",
+    title: "See which series you can keep reading for free.",
+    description: "These charts highlight the best free unlock value before you spend.",
+    hint: "Free unlock picks worth checking now.",
   },
 ];
 
@@ -59,32 +59,32 @@ const WINDOWS = [
 
 const CHART_GUIDES = {
   popular: {
-    audience: "Readers who want social proof before they commit time or points.",
-    signal: "This board surfaces the strongest engagement gravity across the active storefront.",
-    nextMove: "Open the top title first, then widen into search if you want adjacent series instead of one winner.",
+    audience: "Readers who want a hit with strong social proof.",
+    signal: "This chart surfaces the titles getting the most attention right now.",
+    nextMove: "Start with the top title, then open search if you want something similar instead of just one winner.",
     searchHref: "/search?sort=popular",
-    searchLabel: "Search popular catalog",
+    searchLabel: "Search popular series",
   },
   new: {
-    audience: "Readers looking for fresh launches, returners, and early-breakout releases.",
-    signal: "Use this chart to catch momentum before the shelf settles and the breakout story becomes obvious.",
-    nextMove: "Compare the top launch against search results sorted by latest so discovery stays current.",
+    audience: "Readers looking for fresh launches and early breakouts.",
+    signal: "Use this chart to catch new series before they become obvious to everyone else.",
+    nextMove: "Compare the top launch against the latest search results to keep discovery fresh.",
     searchHref: "/search?sort=latest",
     searchLabel: "Browse latest releases",
   },
   completed: {
-    audience: "Readers who want long-session immersion and zero waiting between chapters.",
-    signal: "Completed charts cut straight to finished runs that are already ready for binge behavior.",
-    nextMove: "Open the top pick, then use completed search to compare depth, genre, and payoff.",
+    audience: "Readers who want a full binge with no waiting.",
+    signal: "Completed charts go straight to finished stories that are ready to read now.",
+    nextMove: "Open the top pick, then use completed search to compare genre, depth, and payoff.",
     searchHref: "/search?status=Completed&sort=popular",
-    searchLabel: "Browse completed catalog",
+    searchLabel: "Browse completed series",
   },
   ttf: {
-    audience: "Readers who want to keep moving through chapters before topping up.",
-    signal: "This board highlights where free-unlock value is strongest right now.",
-    nextMove: "Use the chart for momentum, then hand off to membership or store surfaces before the session hits friction.",
+    audience: "Readers who want to keep reading before they spend.",
+    signal: "This chart highlights where the free unlock value is strongest right now.",
+    nextMove: "Use the chart to start free, then compare membership or points when you want to keep going.",
     searchHref: "/search?sort=popular",
-    searchLabel: "Search free-start titles",
+    searchLabel: "Browse free-start picks",
   },
 };
 
@@ -161,17 +161,17 @@ export default function RankingsPage() {
       {
         label: "Window",
         value: activeWindow.label,
-        hint: "Time range applied to the visible leaderboard.",
+        hint: "Time range applied to this chart.",
       },
       {
         label: "Titles",
         value: loading ? "..." : list.length.toLocaleString(),
-        hint: "Series loaded into the current board.",
+        hint: "Series loaded into the current chart.",
       },
       {
         label: "Mode",
         value: isAdultMode ? "18+" : "Standard",
-        hint: isAdultMode ? "Protected catalog slice is eligible here." : "Age-gated titles are excluded.",
+        hint: isAdultMode ? "18+ titles can appear here." : "18+ titles are hidden here.",
       },
     ],
     [activeTab.hint, activeTab.label, activeWindow.label, isAdultMode, list.length, loading],
@@ -209,12 +209,13 @@ export default function RankingsPage() {
       {
         id: "board-winner",
         eyebrow: "Board winner",
-        title: `${leadEntry.title} owns the ${activeWindow.label.toLowerCase()} ${activeTab.label.toLowerCase()} board.`,
+        title: `${leadEntry.title} is #1 on the ${activeWindow.label.toLowerCase()} ${activeTab.label.toLowerCase()} chart.`,
         description:
-          "The chart winner should feel like a live event with social proof, not just row one in a static leaderboard.",
+          "Start with the top pick on the chart, then branch out if you want more like it.",
         signalLabel: "Rank",
         signalValue: "#1",
         signalHint: `${activeTab.label} · ${activeWindow.label}`,
+        ["signalHint"]: `${activeTab.label} | ${activeWindow.label}`,
         ctaLabel: "Open rank #1",
         onClick: () =>
           handleSeriesClick(leadEntry.id, "RANKINGS_EVENT_HUB", `winner_${tab}_${selectedWindow}`),
@@ -224,9 +225,9 @@ export default function RankingsPage() {
       {
         id: "search-handoff",
         eyebrow: "Compare next",
-        title: "Widen the signal in search before the board goes stale.",
+        title: "Want more like this? Open the full search.",
         description: chartGuide.nextMove,
-        signalLabel: "Desk",
+        signalLabel: "Search",
         signalValue: activeTab.label,
         signalHint: chartGuide.searchLabel,
         ctaLabel: chartGuide.searchLabel,
@@ -240,13 +241,13 @@ export default function RankingsPage() {
         title:
           leadCampaign?.title ||
           (tab === "ttf"
-            ? "Free-start momentum still needs a clean membership handoff."
-            : "Hot chart traffic still needs a clear spend path."),
+            ? "When the free chapters end, compare plans before you pay."
+            : "Need more chapters? Compare points and plans first."),
         description:
           leadCampaign?.value ||
           (tab === "ttf"
-            ? "When free chapters slow down, the membership route should already be visible."
-            : "Readers hitting high-intent chart titles should not have to hunt for wallet or membership value."),
+            ? "If the free reads slow down, membership should already be easy to compare."
+            : "Readers landing on high-intent chart titles should not have to hunt for points or plan value."),
         signalLabel: "Offer fit",
         signalValue: valueKind === "store" ? "Wallet" : "Member",
         signalHint: valueCta,
@@ -285,10 +286,10 @@ export default function RankingsPage() {
       <SiteHeader />
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Ranking desk"
+          eyebrow="Charts"
           title={activeTab.title}
           description={activeTab.description}
-          secondary={`Switch between ${activeWindow.label.toLowerCase()} and other windows without losing your place in the board.`}
+          secondary={`Switch between ${activeWindow.label.toLowerCase()} and other time windows without losing your place.`}
           stats={rankingStats}
           actions={
             <>
@@ -297,7 +298,7 @@ export default function RankingsPage() {
                 onClick={() => router.push("/search")}
                 className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
               >
-                Search titles
+                Search all series
               </button>
               <button
                 type="button"
@@ -326,7 +327,7 @@ export default function RankingsPage() {
                 Chart controls
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                Move from leaderboard to series page in one clean pass.
+                Choose a chart and time range.
               </h2>
             </div>
             <p className="text-xs text-neutral-500">
@@ -375,7 +376,7 @@ export default function RankingsPage() {
                 No ranked titles are available for this chart window.
               </h2>
               <p className="mt-3 text-sm leading-7 text-neutral-400">
-                Reset the time range or move back into search so the session does not end on a dead board.
+                Try another time range or go back to search to keep browsing.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -407,10 +408,10 @@ export default function RankingsPage() {
                       Top 3 spotlight
                     </p>
                     <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                      The first click off this board should feel editorial, not random.
+                      Start with the strongest pick on the board.
                     </h2>
                   </div>
-                  <p className="text-xs text-neutral-500">{activeTab.label} desk</p>
+                  <p className="text-xs text-neutral-500">{activeTab.label} chart</p>
                 </div>
 
                 {leadEntry ? (
@@ -440,7 +441,7 @@ export default function RankingsPage() {
                                 {leadCampaign.eyebrow}
                               </p>
                               <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-300">
-                                Campaign fit
+                                Good next step
                               </span>
                             </div>
                             <p className="mt-3 text-sm font-semibold text-white">{leadCampaign.title}</p>
@@ -508,7 +509,7 @@ export default function RankingsPage() {
                             onClick={() => handleSeriesClick(leadEntry.id)}
                             className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
                           >
-                            Open series
+                            Read series
                           </button>
                           {leadEntry.genres?.[0] ? (
                             <button
@@ -518,7 +519,7 @@ export default function RankingsPage() {
                               }}
                               className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
                             >
-                              Search similar
+                              Find similar
                             </button>
                           ) : null}
                         </div>
@@ -559,15 +560,15 @@ export default function RankingsPage() {
                   sourcePath={rankingsPath}
                   label="Chart creators"
                   title="Creators shaping this board"
-                  description="Top-ranking charts should expose creator discovery, not just title order. These links turn leaderboard heat into author-level exploration."
+                  description="A strong chart should also help readers discover the creators behind the biggest series."
                   maxCreators={5}
                 />
               </SurfacePanel>
 
               <StorefrontEventHub
-                eyebrow="Chart room"
-                title="Use the board like a live storefront room, not a static score list."
-                description="Strong ranking pages turn social proof into a series click, a comparison route, and a value path before momentum cools off."
+                eyebrow="On the chart"
+                title="Turn the chart into your next read."
+                description="A strong ranking page should help you open a hit, compare similar series, and choose the best way to keep reading."
                 events={rankingEventCards}
               />
             </div>
