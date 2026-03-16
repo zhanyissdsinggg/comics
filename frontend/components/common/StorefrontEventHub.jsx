@@ -1,63 +1,81 @@
 "use client";
 
+import { ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 function EventCard({ event, priority = "secondary" }) {
-  const baseClassName =
-    priority === "lead"
-      ? "rounded-[30px] border p-6 text-left transition-all duration-300 hover:-translate-y-1"
-      : "rounded-[24px] border p-5 text-left transition-all duration-300 hover:-translate-y-1";
-
   return (
-    <button
-      type="button"
-      onClick={event.onClick}
-      className={`group ${baseClassName} ${event.accentClass}`.trim()}
+    <Card
+      className={cn(
+        "h-full rounded-[28px] border py-0 shadow-none transition-transform duration-300 hover:-translate-y-1",
+        priority === "lead" ? "min-h-[280px]" : "",
+        event.accentClass || "border-white/10 bg-white/[0.03]",
+      )}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-current opacity-75">
-            {event.eyebrow}
-          </p>
-          <h3
-            className={`mt-3 font-display font-semibold tracking-tight text-white ${
-              priority === "lead" ? "text-3xl leading-tight sm:text-[2.2rem]" : "text-xl leading-tight"
-            }`}
-          >
-            {event.title}
-          </h3>
-        </div>
-        {event.signalValue ? (
-          <div className="min-w-[120px] rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 text-left">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
-              {event.signalLabel || "Signal"}
-            </p>
-            <p className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-              {event.signalValue}
-            </p>
-            {event.signalHint ? (
-              <p className="mt-2 text-xs leading-5 text-neutral-400">{event.signalHint}</p>
-            ) : null}
+      <CardContent className="flex h-full flex-col p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-3xl">
+            <Badge
+              variant="outline"
+              className="rounded-full border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current"
+            >
+              {event.eyebrow}
+            </Badge>
+            <CardTitle
+              className={cn(
+                "mt-4 font-display font-semibold tracking-tight text-white",
+                priority === "lead"
+                  ? "text-3xl leading-tight sm:text-[2.2rem]"
+                  : "text-2xl leading-tight",
+              )}
+            >
+              {event.title}
+            </CardTitle>
+            <CardDescription
+              className={cn(
+                "mt-4 text-neutral-200/90",
+                priority === "lead" ? "max-w-3xl text-sm leading-7" : "text-sm leading-6",
+              )}
+            >
+              {event.description}
+            </CardDescription>
           </div>
-        ) : null}
-      </div>
 
-      <p
-        className={`mt-4 text-neutral-300 ${
-          priority === "lead" ? "max-w-3xl text-sm leading-7" : "text-sm leading-6"
-        }`}
-      >
-        {event.description}
-      </p>
+          {event.signalValue ? (
+            <div className="min-w-[144px] rounded-[22px] border border-white/10 bg-black/25 px-4 py-3 text-left">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                {event.signalLabel || "Signal"}
+              </p>
+              <p className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                {event.signalValue}
+              </p>
+              {event.signalHint ? (
+                <p className="mt-2 text-xs leading-5 text-neutral-400">{event.signalHint}</p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
 
-      <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-current">
-        <span>{event.ctaLabel}</span>
-        <span
-          aria-hidden="true"
-          className="transition-transform duration-300 group-hover:translate-x-1"
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={event.onClick}
+          className="mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold text-white hover:bg-transparent hover:text-emerald-200"
         >
-          &gt;
-        </span>
-      </div>
-    </button>
+          {event.ctaLabel}
+          <ArrowUpRight className="size-4" />
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -75,32 +93,39 @@ export default function StorefrontEventHub({
   const [leadEvent, ...secondaryEvents] = events;
 
   return (
-    <section
-      className={`relative overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.2)] backdrop-blur-xl sm:p-6 ${className}`.trim()}
-    >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(56,189,248,0.12),transparent_22%)]" />
-      <div className="relative">
-        <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-            {eyebrow}
-          </p>
-          <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            {title}
-          </h2>
-          <p className="mt-3 text-sm leading-7 text-neutral-300">{description}</p>
-        </div>
+    <section className={className}>
+      <Card className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(10,14,22,0.98))] py-0 shadow-[0_26px_90px_rgba(0,0,0,0.28)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(56,189,248,0.12),transparent_22%)]" />
+        <CardHeader className="relative p-5 pb-0 sm:p-6 sm:pb-0">
+          <div className="max-w-3xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+              {eyebrow}
+            </p>
+            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
+              {title}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-neutral-300">{description}</p>
+          </div>
+        </CardHeader>
 
-        <div className="mt-6 grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
-          <EventCard event={leadEvent} priority="lead" />
-          {secondaryEvents.length > 0 ? (
-            <div className={`grid gap-4 ${secondaryEvents.length > 1 ? "md:grid-cols-2 xl:grid-cols-1" : ""}`.trim()}>
-              {secondaryEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </div>
+        <CardContent className="relative p-5 pt-6 sm:p-6 sm:pt-6">
+          <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
+            <EventCard event={leadEvent} priority="lead" />
+            {secondaryEvents.length > 0 ? (
+              <div
+                className={cn(
+                  "grid gap-4",
+                  secondaryEvents.length > 1 ? "md:grid-cols-2 xl:grid-cols-1" : "",
+                )}
+              >
+                {secondaryEvents.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

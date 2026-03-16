@@ -2,8 +2,13 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowUpRight } from "lucide-react";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 function getDiscoveryLaneTitle(campaignId) {
   if (campaignId === "free-start") {
@@ -18,11 +23,12 @@ function getDiscoveryLaneTitle(campaignId) {
 function getSimilarDescription(series) {
   const rating = Number(series?.rating);
   const ratingLabel = Number.isFinite(rating) ? `${rating.toFixed(1)} rating` : "Fresh pick";
-  const genreLabel = Array.isArray(series?.genres) && series.genres.length > 0
-    ? series.genres.slice(0, 2).join(" | ")
-    : "Editorially adjacent";
+  const genreLabel =
+    Array.isArray(series?.genres) && series.genres.length > 0
+      ? series.genres.slice(0, 2).join(" · ")
+      : "Editorially adjacent";
 
-  return `${genreLabel} | ${ratingLabel}`;
+  return `${genreLabel} · ${ratingLabel}`;
 }
 
 export default function StorefrontContinuationStrip({
@@ -55,8 +61,7 @@ export default function StorefrontContinuationStrip({
         description: campaign.nextMove,
         cta: campaign.discoveryCta,
         onClick: () => router.push(campaign.discoveryHref),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+        accentClass: "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
       },
     ];
 
@@ -70,8 +75,7 @@ export default function StorefrontContinuationStrip({
         cta: "Open similar pick",
         onClick: () => router.push(`/series/${leadSimilar.id}`),
         meta: getSimilarDescription(leadSimilar),
-        accentClass:
-          "border-white/10 bg-black/20 text-neutral-100 hover:border-white/20 hover:bg-white/[0.06]",
+        accentClass: "border-white/10 bg-black/20 hover:border-white/20 hover:bg-white/[0.05]",
       });
     }
 
@@ -99,7 +103,7 @@ export default function StorefrontContinuationStrip({
           router.push(buildPathWithAttribution("/subscribe", attribution));
         },
         accentClass:
-          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+          "border-emerald-400/25 bg-emerald-400/[0.08] hover:border-emerald-300/45 hover:bg-emerald-400/[0.12]",
       });
     }
 
@@ -118,38 +122,54 @@ export default function StorefrontContinuationStrip({
         : "";
 
   return (
-    <div className={`grid gap-3 ${gridClassName} ${className}`.trim()}>
+    <div className={cn("grid gap-3", gridClassName, className)}>
       {cards.map((card) => (
-        <button
+        <Card
           key={card.id}
-          type="button"
-          onClick={card.onClick}
-          className={`group rounded-[22px] border px-4 text-left transition-all duration-300 hover:-translate-y-0.5 ${
-            compact ? "py-4" : "py-5"
-          } ${card.accentClass}`}
+          className={cn(
+            "rounded-[22px] border py-0 shadow-none transition-transform duration-300 hover:-translate-y-0.5",
+            card.accentClass,
+          )}
         >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-current opacity-75">
-            {card.eyebrow}
-          </p>
-          <h3 className={`${compact ? "mt-3 text-base" : "mt-4 text-lg"} font-semibold leading-tight text-white`}>
-            {card.title}
-          </h3>
-          <p className={`${compact ? "mt-2 text-xs leading-6" : "mt-3 text-sm leading-7"} text-neutral-300`}>
-            {card.description}
-          </p>
-          {card.meta ? (
-            <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-neutral-500">{card.meta}</p>
-          ) : null}
-          <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-current">
-            <span>{card.cta}</span>
-            <span
-              aria-hidden="true"
-              className="transition-transform duration-300 group-hover:translate-x-1"
+          <CardContent className={cn(compact ? "p-4" : "p-5")}>
+            <Badge
+              variant="outline"
+              className="w-fit rounded-full border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current"
             >
-              &gt;
-            </span>
-          </div>
-        </button>
+              {card.eyebrow}
+            </Badge>
+            <h3
+              className={cn(
+                "mt-4 font-semibold leading-tight text-white",
+                compact ? "text-base" : "text-lg",
+              )}
+            >
+              {card.title}
+            </h3>
+            <p
+              className={cn(
+                "mt-3 text-neutral-200/90",
+                compact ? "text-xs leading-6" : "text-sm leading-7",
+              )}
+            >
+              {card.description}
+            </p>
+            {card.meta ? (
+              <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-neutral-500">
+                {card.meta}
+              </p>
+            ) : null}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={card.onClick}
+              className="mt-4 h-9 justify-start gap-2 px-0 text-sm font-semibold text-white hover:bg-transparent hover:text-emerald-200"
+            >
+              {card.cta}
+              <ArrowUpRight className="size-4" />
+            </Button>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

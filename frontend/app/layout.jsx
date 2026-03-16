@@ -1,11 +1,14 @@
 import dynamic from "next/dynamic";
 import Script from "next/script";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Manrope, Space_Grotesk, Geist } from "next/font/google";
 import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import { defaultSocialImage } from "../lib/seo";
 import { siteConfig } from "../lib/siteConfig";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const CookieConsent = dynamic(() => import("../components/common/CookieConsent"));
 
@@ -86,7 +89,7 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${bodyFont.variable} ${displayFont.variable}`}
+      className={cn(bodyFont.variable, displayFont.variable, "font-sans", geist.variable)}
     >
       <body className="min-h-screen bg-neutral-950 font-sans text-neutral-100 antialiased">
         {GOOGLE_CLIENT_ID ? (

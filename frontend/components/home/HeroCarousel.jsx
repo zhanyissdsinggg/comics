@@ -1,13 +1,12 @@
 /**
- * HeroCarousel - ?? Webtoon/Lezhin ??? Hero Banner
- * ?? + ?????? + ??????????
- * ?????? + ???? + ?????
+ * Hero carousel: editorial storefront lead with clearer CTA hierarchy.
  */
 "use client";
 
-import { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { ensureArray } from "../../lib/validators";
 import { trackEvent } from "../../lib/trackEvent";
 import { useFollowStore } from "../../store/useFollowStore";
@@ -15,15 +14,30 @@ import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
 import { getReadingCadenceLabel, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const TONE_GRADIENTS = {
-  warm: "from-orange-900/90 via-red-900/60",
-  cool: "from-blue-900/90 via-cyan-900/60",
-  dusk: "from-purple-900/90 via-indigo-900/60",
-  neon: "from-emerald-900/90 via-teal-900/60",
-  noir: "from-neutral-900/90 via-neutral-800/60",
-  default: "from-neutral-900/90 via-neutral-800/60",
+  warm: "from-orange-950/95 via-rose-900/70 to-neutral-950",
+  cool: "from-sky-950/95 via-cyan-900/60 to-neutral-950",
+  dusk: "from-violet-950/95 via-indigo-900/60 to-neutral-950",
+  neon: "from-emerald-950/95 via-teal-900/60 to-neutral-950",
+  noir: "from-neutral-950 via-neutral-900/75 to-black",
+  default: "from-neutral-950 via-neutral-900/75 to-black",
 };
+
+const META_PANEL_CLASS =
+  "rounded-[20px] border border-white/10 bg-black/30 px-4 py-3 backdrop-blur-sm";
+
+function formatCount(value) {
+  const numeric = Number(value || 0);
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return "Fresh";
+  }
+
+  return numeric >= 1000 ? `${(numeric / 1000).toFixed(1)}k` : numeric.toLocaleString();
+}
 
 export default function HeroCarousel({ items }) {
   const router = useRouter();
@@ -50,11 +64,11 @@ export default function HeroCarousel({ items }) {
   const heroSignals = [
     active?.hasFreeEpisodes
       ? `${STOREFRONT_TERMS.freeStart}${
-          active?.freeEpisodeCount ? ` | ${active.freeEpisodeCount} free episodes` : ""
+          active?.freeEpisodeCount ? ` · ${active.freeEpisodeCount} free episodes` : ""
         }`
-      : null,
-    active?.status ? getReadingCadenceLabel(active.status) : null,
-    campaign?.eyebrow && !active?.hasFreeEpisodes ? campaign.eyebrow : null,
+      : "Premium unlock",
+    active?.status ? getReadingCadenceLabel(active.status) : "Staff pick",
+    campaign?.eyebrow || "Featured now",
   ].filter(Boolean);
 
   const handlePrev = useCallback(() => {
@@ -71,11 +85,11 @@ export default function HeroCarousel({ items }) {
     if (!activeSeriesId) {
       return;
     }
-    const target = "/series/" + activeSeriesId;
+
     trackEvent("hero_read_now", {
       seriesId: activeSeriesId,
     });
-    router.push(target);
+    router.push(`/series/${activeSeriesId}`);
   }, [activeSeriesId, router]);
 
   const handleFollowToggle = useCallback(async () => {
@@ -87,6 +101,7 @@ export default function HeroCarousel({ items }) {
       trackEvent("hero_unfollow", { seriesId: activeSeriesId });
       return;
     }
+
     const response = await follow(activeSeriesId);
     if (response?.ok) {
       followSeries(activeSeriesId);
@@ -119,16 +134,19 @@ export default function HeroCarousel({ items }) {
     if (safeItems.length <= 1 || isPaused) {
       return undefined;
     }
+
     progressIntervalRef.current = setInterval(() => {
       setProgress((value) => {
         const nextValue = value + (50 / AUTO_PLAY_INTERVAL) * 100;
         return nextValue >= 100 ? 100 : nextValue;
       });
     }, 50);
+
     autoPlayTimeoutRef.current = setTimeout(() => {
       setIndex((prev) => (prev + 1) % safeItems.length);
       setProgress(0);
     }, AUTO_PLAY_INTERVAL);
+
     return () => {
       clearInterval(progressIntervalRef.current);
       clearTimeout(autoPlayTimeoutRef.current);
@@ -141,159 +159,256 @@ export default function HeroCarousel({ items }) {
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl bg-neutral-900"
+      className="relative overflow-hidden rounded-[32px] border border-white/10 bg-neutral-950 shadow-[0_28px_120px_rgba(0,0,0,0.3)]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="relative aspect-[21/9] w-full overflow-hidden sm:aspect-[21/8] md:aspect-[21/7]">
+      <div className="absolute inset-0">
         {bannerUrl ? (
           <div
             className="absolute inset-0 scale-105 bg-cover bg-center transition-transform duration-700"
-            style={{ backgroundImage: "url(" + bannerUrl + ")" }}
+            style={{ backgroundImage: `url(${bannerUrl})` }}
             aria-hidden="true"
           />
         ) : (
-          <div className={"absolute inset-0 bg-gradient-to-br " + gradient + " to-neutral-950"} />
+          <div className={cn("absolute inset-0 bg-gradient-to-br", gradient)} />
         )}
+        <div className={cn("absolute inset-0 bg-gradient-to-r", gradient)} />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_20%),linear-gradient(180deg,rgba(7,10,16,0.08),rgba(7,10,16,0.78))]" />
+      </div>
 
-        <div className={"absolute inset-0 bg-gradient-to-r " + gradient + " to-transparent"} />
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-transparent to-transparent" />
-
-        <div className="absolute inset-0 z-20 flex items-end p-5 md:items-center md:p-10">
-          <div className="flex w-full items-end justify-between gap-6 md:items-center">
-            <div className="max-w-xs space-y-3 md:max-w-sm lg:max-w-md">
-              <div className="flex items-center gap-2">
-                <span className="rounded-sm bg-emerald-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
-                  Featured
-                </span>
-                {active?.badge ? (
-                  <span className="rounded-sm bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white/80 backdrop-blur-sm">
-                    {active.badge}
-                  </span>
-                ) : null}
-              </div>
-
-              <h2 className="text-2xl font-black leading-tight tracking-tight text-white drop-shadow-lg md:text-4xl lg:text-5xl">
-                {active?.title}
-              </h2>
-
-              {active?.description ? (
-                <p className="line-clamp-2 text-sm leading-relaxed text-white/70 md:text-base">
-                  {active.description}
-                </p>
-              ) : null}
-
-              {campaign?.heroNote ? (
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/85">
-                  {campaign.heroNote}
-                </p>
-              ) : null}
-
-              {heroSignals.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {heroSignals.map((signal) => (
-                    <span
-                      key={signal}
-                      className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-100 backdrop-blur-sm"
-                    >
-                      {signal}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-
-              <div className="flex items-center gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={handleReadNow}
-                  className="rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-400 hover:shadow-emerald-400/40 active:scale-95"
+      <div className="relative z-10 grid min-h-[430px] gap-6 p-5 sm:p-6 lg:min-h-[520px] lg:grid-cols-[1.12fr_0.88fr] lg:p-8">
+        <div className="flex flex-col justify-end">
+          <div className="max-w-2xl">
+            <div className="flex flex-wrap gap-2">
+              <Badge className="rounded-full bg-white px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-950">
+                Featured
+              </Badge>
+              {active?.badge ? (
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-white/15 bg-black/30 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white"
                 >
-                  {active?.hasFreeEpisodes
-                    ? "Read free start"
-                    : campaign?.id === "binge-ready"
-                      ? "Open binge pick"
-                      : "Open series"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void handleFollowToggle();
-                  }}
-                  className="rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20 active:scale-95"
+                  {active.badge}
+                </Badge>
+              ) : null}
+              {heroSignals.slice(0, 2).map((signal) => (
+                <Badge
+                  key={signal}
+                  variant="outline"
+                  className="rounded-full border-white/15 bg-black/30 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-100"
                 >
-                  {isFollowing ? "Following" : "+ Follow"}
-                </button>
-              </div>
+                  {signal}
+                </Badge>
+              ))}
             </div>
 
-            {coverUrl ? (
-              <div className="hidden shrink-0 md:block">
-                <div className="relative h-48 w-32 overflow-hidden rounded-xl shadow-2xl shadow-black/60 ring-1 ring-white/10 lg:h-56 lg:w-40">
-                  <Image
-                    src={coverUrl}
-                    alt={active?.title || ""}
-                    fill
-                    className="object-cover"
-                    sizes="160px"
-                    priority
-                  />
-                </div>
-              </div>
+            <h2 className="mt-4 max-w-2xl font-display text-4xl font-semibold leading-[0.96] tracking-tight text-white sm:text-5xl lg:text-[3.8rem]">
+              {active?.title}
+            </h2>
+
+            {active?.description ? (
+              <p className="mt-4 max-w-xl text-sm leading-7 text-neutral-200 sm:text-base">
+                {active.description}
+              </p>
             ) : null}
+
+            <div className="mt-4 flex flex-wrap gap-3 text-sm text-neutral-200/85">
+              {active?.author ? <span>By {active.author}</span> : null}
+              {Array.isArray(active?.genres) && active.genres.length > 0 ? (
+                <span>{active.genres.slice(0, 3).join(" · ")}</span>
+              ) : null}
+            </div>
+
+            {campaign?.heroNote ? (
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200/90">
+                {campaign.heroNote}
+              </p>
+            ) : null}
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button
+                type="button"
+                size="lg"
+                onClick={handleReadNow}
+                className="h-11 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 hover:bg-neutral-200"
+              >
+                {active?.hasFreeEpisodes
+                  ? "Read free start"
+                  : campaign?.id === "binge-ready"
+                    ? "Open binge pick"
+                    : "Open series"}
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                onClick={() => {
+                  void handleFollowToggle();
+                }}
+                className="h-11 rounded-full border-white/15 bg-white/[0.06] px-5 text-sm font-semibold text-white hover:border-white/25 hover:bg-white/[0.1]"
+              >
+                {isFollowing ? <Check className="size-4" /> : null}
+                {isFollowing ? "Following" : "+ Follow"}
+              </Button>
+            </div>
           </div>
         </div>
 
-        {safeItems.length > 1 ? (
-          <>
-            <button
-              type="button"
-              onClick={handlePrev}
-              aria-label="Previous"
-              className="absolute left-0 top-0 z-10 h-full w-14 cursor-w-resize md:w-20"
-            />
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="Next"
-              className="absolute right-0 top-0 z-10 h-full w-14 cursor-e-resize md:w-20"
-            />
-          </>
-        ) : null}
+        <div className="flex flex-col justify-between gap-4">
+          {safeItems.length > 1 ? (
+            <div className="hidden justify-end gap-2 lg:flex">
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                onClick={handlePrev}
+                aria-label="Previous slide"
+                className="rounded-full border-white/15 bg-black/25 text-white hover:border-white/25 hover:bg-white/[0.08]"
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                onClick={handleNext}
+                aria-label="Next slide"
+                className="rounded-full border-white/15 bg-black/25 text-white hover:border-white/25 hover:bg-white/[0.08]"
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+          ) : (
+            <div />
+          )}
+
+          <div className="ml-auto w-full max-w-[360px]">
+            <div className="rounded-[28px] border border-white/10 bg-black/35 p-4 shadow-[0_22px_80px_rgba(0,0,0,0.26)] backdrop-blur-md">
+              <div className="grid gap-4 sm:grid-cols-[132px_1fr] lg:grid-cols-1">
+                {coverUrl ? (
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-[22px] border border-white/10 bg-neutral-900">
+                    <Image
+                      src={coverUrl}
+                      alt={active?.title || ""}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 132px, 320px"
+                      priority
+                    />
+                  </div>
+                ) : null}
+
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                      Series snapshot
+                    </p>
+                    <p className="mt-2 text-xl font-semibold text-white">{active?.title}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className={META_PANEL_CLASS}>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                        Rating
+                      </p>
+                      <p className="mt-2 text-lg font-semibold text-white">
+                        {Number(active?.rating || 0).toFixed(1)}
+                      </p>
+                    </div>
+                    <div className={META_PANEL_CLASS}>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                        Audience
+                      </p>
+                      <p className="mt-2 text-lg font-semibold text-white">
+                        {formatCount(active?.followers || active?.views)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm leading-6 text-neutral-300">
+                    {active?.hasFreeEpisodes
+                      ? `${active?.freeEpisodeCount || 0} free episodes available before unlock.`
+                      : "Premium unlock path ready for committed readers."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {safeItems.length > 1 ? (
-        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5">
-          {safeItems.map((_, itemIndex) => (
-            <button
-              key={itemIndex}
-              type="button"
-              onClick={() => {
-                setIndex(itemIndex);
-                setProgress(0);
-              }}
-              aria-label={"Slide " + (itemIndex + 1)}
-              className="relative overflow-hidden rounded-full transition-all duration-300"
-              style={{
-                width: itemIndex === index ? "24px" : "6px",
-                height: "6px",
-                background: itemIndex === index ? "transparent" : "rgba(255,255,255,0.3)",
-              }}
-            >
-              {itemIndex === index ? (
-                <span className="absolute inset-0 rounded-full bg-white/30">
-                  <span
-                    className="absolute left-0 top-0 h-full rounded-full bg-white"
-                    style={{ width: progress + "%", transition: "width 50ms linear" }}
-                  />
-                </span>
-              ) : null}
-            </button>
-          ))}
+      <div className="relative z-10 border-t border-white/10 bg-black/30 px-5 py-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="grid gap-3 md:grid-cols-3 lg:flex-1">
+            {heroSignals.map((signal) => (
+              <div key={signal} className={META_PANEL_CLASS}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                  Signal
+                </p>
+                <p className="mt-2 text-sm font-semibold text-white">{signal}</p>
+              </div>
+            ))}
+          </div>
+
+          {safeItems.length > 1 ? (
+            <div className="flex items-center justify-between gap-3 lg:justify-end">
+              <div className="flex items-center gap-1.5">
+                {safeItems.map((_, itemIndex) => (
+                  <button
+                    key={itemIndex}
+                    type="button"
+                    onClick={() => {
+                      setIndex(itemIndex);
+                      setProgress(0);
+                    }}
+                    aria-label={`Slide ${itemIndex + 1}`}
+                    className="relative h-2 overflow-hidden rounded-full transition-all duration-300"
+                    style={{
+                      width: itemIndex === index ? 36 : 8,
+                      background:
+                        itemIndex === index ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.26)",
+                    }}
+                  >
+                    {itemIndex === index ? (
+                      <span
+                        className="absolute inset-y-0 left-0 rounded-full bg-white"
+                        style={{ width: `${progress}%`, transition: "width 50ms linear" }}
+                      />
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex gap-2 lg:hidden">
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="outline"
+                  onClick={handlePrev}
+                  aria-label="Previous slide"
+                  className="rounded-full border-white/15 bg-black/25 text-white hover:border-white/25 hover:bg-white/[0.08]"
+                >
+                  <ChevronLeft className="size-4" />
+                </Button>
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="outline"
+                  onClick={handleNext}
+                  aria-label="Next slide"
+                  className="rounded-full border-white/15 bg-black/25 text-white hover:border-white/25 hover:bg-white/[0.08]"
+                >
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </div>
-      ) : null}
+      </div>
     </section>
   );
 }

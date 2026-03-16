@@ -1,3 +1,5 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -328,7 +330,6 @@ main {
   }
 }
 
-
 /* 老王说：Toast动画 */
 @keyframes slide-in-right {
   from {
@@ -401,4 +402,90 @@ a,
 /* 老王添加：图片加载优化 */
 img {
   content-visibility: auto;
+}
+/*
+ ---break---
+ */
+@layer base {
+  :root {
+    --background: oklch(0.17 0.015 260);
+    --foreground: oklch(0.97 0.01 255);
+    --card: oklch(0.2 0.015 258);
+    --card-foreground: oklch(0.97 0.01 255);
+    --popover: oklch(0.19 0.015 258);
+    --popover-foreground: oklch(0.97 0.01 255);
+    --primary: oklch(0.97 0.01 255);
+    --primary-foreground: oklch(0.19 0.015 258);
+    --secondary: oklch(0.26 0.012 258);
+    --secondary-foreground: oklch(0.97 0.01 255);
+    --muted: oklch(0.24 0.012 258);
+    --muted-foreground: oklch(0.77 0.01 255);
+    --accent: oklch(0.3 0.055 165);
+    --accent-foreground: oklch(0.98 0.01 255);
+    --destructive: oklch(0.69 0.18 24);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 14%);
+    --ring: oklch(0.74 0.045 165 / 0.7);
+    --chart-1: oklch(0.72 0.13 162);
+    --chart-2: oklch(0.68 0.1 224);
+    --chart-3: oklch(0.76 0.13 74);
+    --chart-4: oklch(0.62 0.17 15);
+    --chart-5: oklch(0.66 0.14 300);
+    --radius: 0.875rem;
+    --sidebar: oklch(0.18 0.015 258);
+    --sidebar-foreground: oklch(0.97 0.01 255);
+    --sidebar-primary: oklch(0.74 0.045 165);
+    --sidebar-primary-foreground: oklch(0.18 0.015 258);
+    --sidebar-accent: oklch(0.26 0.012 258);
+    --sidebar-accent-foreground: oklch(0.97 0.01 255);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.74 0.045 165 / 0.7);
+  }
+  .dark {
+    --background: oklch(0.17 0.015 260);
+    --foreground: oklch(0.97 0.01 255);
+    --card: oklch(0.2 0.015 258);
+    --card-foreground: oklch(0.97 0.01 255);
+    --popover: oklch(0.19 0.015 258);
+    --popover-foreground: oklch(0.97 0.01 255);
+    --primary: oklch(0.97 0.01 255);
+    --primary-foreground: oklch(0.19 0.015 258);
+    --secondary: oklch(0.26 0.012 258);
+    --secondary-foreground: oklch(0.97 0.01 255);
+    --muted: oklch(0.24 0.012 258);
+    --muted-foreground: oklch(0.77 0.01 255);
+    --accent: oklch(0.3 0.055 165);
+    --accent-foreground: oklch(0.98 0.01 255);
+    --destructive: oklch(0.69 0.18 24);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 14%);
+    --ring: oklch(0.74 0.045 165 / 0.7);
+    --chart-1: oklch(0.72 0.13 162);
+    --chart-2: oklch(0.68 0.1 224);
+    --chart-3: oklch(0.76 0.13 74);
+    --chart-4: oklch(0.62 0.17 15);
+    --chart-5: oklch(0.66 0.14 300);
+    --sidebar: oklch(0.18 0.015 258);
+    --sidebar-foreground: oklch(0.97 0.01 255);
+    --sidebar-primary: oklch(0.74 0.045 165);
+    --sidebar-primary-foreground: oklch(0.18 0.015 258);
+    --sidebar-accent: oklch(0.26 0.012 258);
+    --sidebar-accent-foreground: oklch(0.97 0.01 255);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.74 0.045 165 / 0.7);
+  }
+  .theme {
+    --font-sans: var(--font-sans);
+  }
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  html {
+    font-family: var(--font-sans);
+  }
 }

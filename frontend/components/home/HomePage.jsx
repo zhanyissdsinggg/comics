@@ -1,5 +1,5 @@
-﻿/**
- * Home page shell: hero, genre chips and recommendation rails.
+/**
+ * Home page shell: hero, discovery desk, return lane, and recommendation rails.
  */
 
 "use client";
@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BookOpen, Gift, Sparkles } from "lucide-react";
+import { ArrowUpRight, BookOpen, Compass, Gift, Sparkles } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
@@ -29,6 +29,17 @@ import {
   getReaderProof,
   getSeriesScore,
 } from "../../lib/homeMerchandising";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
   ssr: false,
@@ -51,6 +62,12 @@ const GENRE_CHIPS = [
 ];
 
 const HOME_PILLARS = ["Start free", "Find your next binge", "Pick up fast"];
+const SECTION_CARD_CLASS =
+  "relative overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(10,14,22,0.98))] shadow-[0_26px_90px_rgba(0,0,0,0.28)]";
+const INNER_CARD_CLASS =
+  "rounded-[26px] border border-white/10 bg-white/[0.03] shadow-[0_18px_60px_rgba(0,0,0,0.18)]";
+const SECTION_EYEBROW_CLASS =
+  "text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85";
 
 function toTimestamp(value) {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -69,6 +86,19 @@ function formatEpisodeLabel(episodeId) {
 
   const match = raw.match(/(\d+)(?!.*\d)/);
   return match ? `Episode ${match[1]}` : raw;
+}
+
+function formatPercent(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return "0%";
+  }
+
+  return `${Math.round((numeric <= 1 ? numeric : numeric / 100) * 100)}%`;
+}
+
+function SectionEyebrow({ children, className = "" }) {
+  return <p className={cn(SECTION_EYEBROW_CLASS, className)}>{children}</p>;
 }
 
 function SkeletonRail() {
@@ -90,7 +120,59 @@ function SkeletonRail() {
 
 function HeroBannerSkeleton() {
   return (
-    <div className="aspect-[21/9] w-full animate-pulse rounded-2xl bg-neutral-800 sm:aspect-[21/8] md:aspect-[21/7]" />
+    <div className="aspect-[21/9] w-full animate-pulse rounded-[32px] bg-neutral-800 sm:aspect-[21/8] md:aspect-[21/7]" />
+  );
+}
+
+function StatTile({ stat, accent = false, compact = false }) {
+  return (
+    <Card
+      className={cn(
+        "rounded-[24px] border py-0 shadow-none",
+        accent
+          ? "border-emerald-400/20 bg-emerald-400/[0.08]"
+          : "border-white/10 bg-black/20",
+      )}
+    >
+      <CardContent className={cn(compact ? "p-4" : "p-5")}>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+          {stat.label}
+        </p>
+        <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-white">
+          {stat.value}
+        </p>
+        <p className="mt-2 text-sm leading-6 text-neutral-400">{stat.hint}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function EditorialPickCard({ card }) {
+  return (
+    <Card className={cn(INNER_CARD_CLASS, "h-full py-0 transition-transform duration-300 hover:-translate-y-1 hover:border-white/20")}>
+      <CardContent className="flex h-full flex-col p-6">
+        <Badge
+          variant="outline"
+          className="w-fit rounded-full border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-200"
+        >
+          {card.eyebrow}
+        </Badge>
+        <h3 className="mt-4 font-display text-2xl font-semibold tracking-tight text-white">
+          {card.title}
+        </h3>
+        <p className="mt-3 text-sm leading-7 text-neutral-300">{card.description}</p>
+        <p className="mt-4 text-xs uppercase tracking-[0.2em] text-neutral-500">{card.meta}</p>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={card.onClick}
+          className="mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold text-white hover:bg-transparent hover:text-emerald-200"
+        >
+          {card.cta}
+          <ArrowUpRight className="size-4" />
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -264,17 +346,26 @@ function HomeContent() {
       {
         label: "Continue",
         value: continueItems.length.toLocaleString(),
-        hint: continueItems.length > 0 ? "Active reading threads ready to resume." : "Your next active thread will surface here.",
+        hint:
+          continueItems.length > 0
+            ? "Active reading threads ready to resume."
+            : "Your next active thread will surface here.",
       },
       {
         label: "History",
         value: recentHistoryItems.length.toLocaleString(),
-        hint: recentHistoryItems.length > 0 ? "Recent reading visits still warm." : "Recent visits appear once you open chapters.",
+        hint:
+          recentHistoryItems.length > 0
+            ? "Recent reading visits still warm."
+            : "Recent visits appear once you open chapters.",
       },
       {
         label: "Following",
         value: followedSeriesIds.length.toLocaleString(),
-        hint: followedSeriesIds.length > 0 ? "Saved series that can pull you back in." : "Followed titles will stack here once saved.",
+        hint:
+          followedSeriesIds.length > 0
+            ? "Saved series that can pull you back in."
+            : "Followed titles will stack here once saved.",
       },
     ],
     [continueItems.length, followedSeriesIds.length, recentHistoryItems.length],
@@ -350,8 +441,12 @@ function HomeContent() {
       {
         id: "adult-hub",
         eyebrow: "18+ section",
-        title: adultCount > 0 ? `${adultCount} mature titles in the 18+ section` : "18+ titles are available behind the age gate",
-        description: "Browse mature titles in a separate section with clear access rules and less friction once access is confirmed.",
+        title:
+          adultCount > 0
+            ? `${adultCount} mature titles in the 18+ section`
+            : "18+ titles are available behind the age gate",
+        description:
+          "Browse mature titles in a separate section with clear access rules and less friction once access is confirmed.",
         meta: "Sign-in and age confirmation required",
         cta: "Open 18+ page",
         onClick: () => router.push("/adult"),
@@ -377,7 +472,9 @@ function HomeContent() {
         hint:
           item.growthLabel ||
           item.badge ||
-          (typeof item.count === "number" ? `${item.count.toLocaleString()} searches` : "Trending search"),
+          (typeof item.count === "number"
+            ? `${item.count.toLocaleString()} searches`
+            : "Trending search"),
       };
     });
   }, [hotKeywords]);
@@ -410,8 +507,7 @@ function HomeContent() {
         signalHint: "Finished runs ready for full-session reading",
         ctaLabel: "Browse completed",
         onClick: () => router.push("/search?status=Completed&sort=popular"),
-        accentClass:
-          "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+        accentClass: "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
       },
       {
         id: "free-start-desk",
@@ -444,7 +540,7 @@ function HomeContent() {
           );
         },
         accentClass:
-          "group border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+          "border-emerald-400/25 bg-emerald-400/[0.08] hover:border-emerald-300/45 hover:bg-emerald-400/[0.12]",
       },
       {
         id: "breakout-radar",
@@ -461,7 +557,7 @@ function HomeContent() {
         ctaLabel: "Open weekly chart",
         onClick: () => router.push("/rankings?type=popular&window=week"),
         accentClass:
-          "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          "border-sky-400/20 bg-sky-400/[0.07] hover:border-sky-300/35 hover:bg-sky-400/[0.11]",
       },
     ];
   }, [discoverySignals, editorialSnapshot, router, seriesList]);
@@ -482,7 +578,7 @@ function HomeContent() {
         cta: freeStartCard ? "Open free preview" : "Browse free-start titles",
         onClick: freeStartCard?.onClick || (() => router.push("/search?sort=popular")),
         accentClass:
-          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+          "border-emerald-400/25 bg-emerald-400/[0.08] hover:border-emerald-300/45 hover:bg-emerald-400/[0.12]",
       },
       {
         id: "keep-progress",
@@ -493,8 +589,7 @@ function HomeContent() {
           : "Signing in should clearly pay off: synced progress, daily rewards, and faster return visits.",
         cta: isSignedIn ? "Open library" : "Sign in free",
         onClick: isSignedIn ? () => router.push("/library") : () => setShowLoginPrompt(true),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+        accentClass: "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
       },
       {
         id: "momentum",
@@ -506,18 +601,19 @@ function HomeContent() {
         cta: "Open weekly chart",
         onClick: () => router.push("/rankings?type=popular&window=week"),
         accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          "border-sky-400/20 bg-sky-400/[0.07] hover:border-sky-300/35 hover:bg-sky-400/[0.11]",
       },
       {
         id: "value-path",
         eyebrow: "Plans & points",
-        title: completedCard ? `Compare plans before you unlock more of ${completedCard.title}` : "Compare plans before you unlock more",
+        title: completedCard
+          ? `Compare plans before you unlock more of ${completedCard.title}`
+          : "Compare plans before you unlock more",
         description:
           "Show points, free unlock value, and membership savings before the paywall becomes a surprise.",
         cta: STOREFRONT_TERMS.compareMembership,
         onClick: () => router.push("/subscribe"),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+        accentClass: "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
       },
     ];
   }, [editorialCards, isSignedIn, router]);
@@ -526,10 +622,10 @@ function HomeContent() {
     <div className="min-h-screen bg-transparent">
       <SiteHeader />
 
-      <main className="mx-auto max-w-[1280px] px-4 pb-24 sm:px-6 sm:pb-8 lg:px-8">
-        <div className="py-4 md:py-6">
+      <main className="mx-auto max-w-[1320px] px-4 pb-24 sm:px-6 sm:pb-10 lg:px-8">
+        <section className="py-4 md:py-6">
           {loading ? <HeroBannerSkeleton /> : <HeroCarousel items={heroItems} />}
-        </div>
+        </section>
 
         {commerceNotice ? (
           <div className="mb-8">
@@ -541,189 +637,270 @@ function HomeContent() {
         ) : null}
 
         {isSignedIn && resumeSeries ? (
-          <section className="mb-8 overflow-hidden rounded-[32px] border border-emerald-400/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(255,255,255,0.03))] px-5 py-6 shadow-[0_24px_100px_rgba(0,0,0,0.2)] backdrop-blur-xl sm:px-7 sm:py-8 lg:px-10">
-            <div className="grid gap-6 xl:grid-cols-[1.02fr_0.98fr] xl:items-start">
-              <div className="max-w-3xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-                  Continue reading
-                </p>
-                <h2 className="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
-                  Jump back into {resumeSeries.title}.
-                </h2>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
-                  {resumeSpotlight?.progressPercent > 0
-                    ? `${formatEpisodeLabel(resumeSpotlight.episodeId)} is already ${resumeSpotlight.progressPercent}% complete. One tap gets you back to the exact chapter where you stopped.`
-                    : `${formatEpisodeLabel(resumeSpotlight?.episodeId)} is still the easiest place to pick back up before you browse for something new.`}
-                </p>
+          <section className="mb-10">
+            <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_85%_10%,rgba(56,189,248,0.12),transparent_24%)]" />
+              <CardContent className="relative grid gap-5 p-5 sm:p-6 xl:grid-cols-[1.06fr_0.94fr] xl:items-start">
+                <div className="max-w-3xl">
+                  <SectionEyebrow>Return lane</SectionEyebrow>
+                  <h2 className="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
+                    Jump back into {resumeSeries.title}.
+                  </h2>
+                  <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
+                    {resumeSpotlight?.progressPercent > 0
+                      ? `${formatEpisodeLabel(resumeSpotlight.episodeId)} is already ${formatPercent(resumeSpotlight.progressPercent)} complete. One tap gets you back to the exact chapter where you stopped.`
+                      : `${formatEpisodeLabel(resumeSpotlight?.episodeId)} is still the easiest place to pick back up before you browse for something new.`}
+                  </p>
 
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={handleResumeSpotlight}
-                    className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
-                  >
-                    Continue {formatEpisodeLabel(resumeSpotlight?.episodeId)}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/series/${resumeSeries.id}`)}
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
-                  >
-                    Open series page
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/library")}
-                    className="rounded-full border border-white/10 bg-black/20 px-5 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.06]"
-                  >
-                    Open library
-                  </button>
-                </div>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                  {returnLaneStats.map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.14)] backdrop-blur-lg"
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <Button
+                      type="button"
+                      size="lg"
+                      onClick={handleResumeSpotlight}
+                      className="h-11 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 hover:bg-neutral-200"
                     >
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
-                        {stat.label}
-                      </p>
-                      <p className="mt-2 font-display text-3xl font-semibold tracking-tight text-white">
-                        {stat.value}
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-neutral-400">{stat.hint}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                      Continue {formatEpisodeLabel(resumeSpotlight?.episodeId)}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="lg"
+                      variant="outline"
+                      onClick={() => router.push(`/series/${resumeSeries.id}`)}
+                      className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
+                    >
+                      Open series page
+                    </Button>
+                    <Button
+                      type="button"
+                      size="lg"
+                      variant="outline"
+                      onClick={() => router.push("/library")}
+                      className="h-11 rounded-full border-white/10 bg-black/20 px-5 text-sm font-semibold text-neutral-200 hover:border-white/20 hover:bg-white/[0.06]"
+                    >
+                      Open library
+                    </Button>
+                  </div>
 
-              <div className="rounded-[28px] border border-white/10 bg-black/20 p-5 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:p-6">
-                <div className="grid gap-4 sm:grid-cols-[132px_1fr]">
-                  <div
-                    className="aspect-[3/4] rounded-[24px] border border-white/10 bg-neutral-900 bg-cover bg-center shadow-[0_20px_60px_rgba(0,0,0,0.24)]"
-                    style={
-                      resumeSeries.coverUrl
-                        ? {
-                            backgroundImage: `linear-gradient(180deg,rgba(12,18,24,0.04),rgba(12,18,24,0.24)), url(${resumeSeries.coverUrl})`,
-                          }
-                        : undefined
-                    }
-                  />
-
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                      Next up
-                    </p>
-                    <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                      {resumeSeries.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-7 text-neutral-300">
-                      {formatEpisodeLabel(resumeSpotlight?.episodeId)}{resumeSpotlight?.progressPercent > 0 ? ` · ${resumeSpotlight.progressPercent}% complete` : " · Ready to reopen"}
-                    </p>
-                    <p className="mt-3 text-sm leading-7 text-neutral-400">
-                      {Array.isArray(resumeSeries.genres) && resumeSeries.genres.length > 0
-                        ? resumeSeries.genres.slice(0, 3).join(" · ")
-                        : "Premium series ready to resume"}
-                    </p>
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {resumeSeries.badge ? (
-                        <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white">
-                          {resumeSeries.badge}
-                        </span>
-                      ) : null}
-                      {followedSeriesIds.includes(resumeSeries.id) ? (
-                        <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
-                          Following
-                        </span>
-                      ) : null}
-                      {resumeSeries.status ? (
-                        <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-300">
-                          {resumeSeries.status}
-                        </span>
-                      ) : null}
-                    </div>
+                  <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                    {returnLaneStats.map((stat, index) => (
+                      <StatTile
+                        key={stat.label}
+                        stat={stat}
+                        compact
+                        accent={index === 0}
+                      />
+                    ))}
                   </div>
                 </div>
 
-                <StorefrontContinuationStrip
-                  series={resumeSeries}
-                  similarItems={returnLaneCompanions}
-                  sourcePath="/"
-                  returnTo="/"
-                  entryPoint="HOME_RETURN_LANE"
-                  compact
-                  className="mt-6"
-                />
-              </div>
-            </div>
+                <Card className={cn(INNER_CARD_CLASS, "py-0")}>
+                  <CardContent className="p-5 sm:p-6">
+                    <div className="grid gap-4 sm:grid-cols-[132px_1fr]">
+                      <div
+                        className="aspect-[3/4] rounded-[24px] border border-white/10 bg-neutral-900 bg-cover bg-center shadow-[0_20px_50px_rgba(0,0,0,0.22)]"
+                        style={
+                          resumeSeries.coverUrl
+                            ? {
+                                backgroundImage: `linear-gradient(180deg,rgba(12,18,24,0.04),rgba(12,18,24,0.24)), url(${resumeSeries.coverUrl})`,
+                              }
+                            : undefined
+                        }
+                      />
+
+                      <div className="min-w-0">
+                        <SectionEyebrow className="text-emerald-200/90">Next up</SectionEyebrow>
+                        <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+                          {resumeSeries.title}
+                        </h3>
+                        <p className="mt-3 text-sm leading-7 text-neutral-300">
+                          {formatEpisodeLabel(resumeSpotlight?.episodeId)}
+                          {resumeSpotlight?.progressPercent > 0
+                            ? ` · ${formatPercent(resumeSpotlight.progressPercent)} complete`
+                            : " · Ready to reopen"}
+                        </p>
+                        <p className="mt-3 text-sm leading-7 text-neutral-400">
+                          {Array.isArray(resumeSeries.genres) && resumeSeries.genres.length > 0
+                            ? resumeSeries.genres.slice(0, 3).join(" · ")
+                            : "Premium series ready to resume"}
+                        </p>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {resumeSeries.badge ? (
+                            <Badge
+                              variant="outline"
+                              className="rounded-full border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white"
+                            >
+                              {resumeSeries.badge}
+                            </Badge>
+                          ) : null}
+                          {followedSeriesIds.includes(resumeSeries.id) ? (
+                            <Badge
+                              variant="outline"
+                              className="rounded-full border-emerald-400/20 bg-emerald-400/[0.1] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-emerald-200"
+                            >
+                              Following
+                            </Badge>
+                          ) : null}
+                          {resumeSeries.status ? (
+                            <Badge
+                              variant="outline"
+                              className="rounded-full border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-neutral-300"
+                            >
+                              {resumeSeries.status}
+                            </Badge>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator className="my-6 bg-white/10" />
+
+                    <StorefrontContinuationStrip
+                      series={resumeSeries}
+                      similarItems={returnLaneCompanions}
+                      sourcePath="/"
+                      returnTo="/"
+                      entryPoint="HOME_RETURN_LANE"
+                      compact
+                    />
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
           </section>
         ) : null}
 
-        <section className="relative mb-8 overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] px-5 py-6 shadow-[0_24px_100px_rgba(0,0,0,0.2)] backdrop-blur-xl sm:px-7 sm:py-8 lg:px-10 lg:py-10">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(34,211,238,0.12),transparent_22%)]" />
-          <div className="relative grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-            <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-                Featured this week
-              </p>
-              <h1 className="mt-4 font-display text-4xl font-semibold leading-[0.95] tracking-tight text-white sm:text-5xl lg:text-[3.65rem]">
-                Start free, find your next binge, and pick up right where you left off.
+        <section className="mb-10 grid gap-4 xl:grid-cols-[1.02fr_0.98fr]">
+          <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white"
+                >
+                  Featured this week
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-emerald-400/20 bg-emerald-400/[0.1] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200"
+                >
+                  {siteConfig.siteName}
+                </Badge>
+              </div>
+
+              <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[0.96] tracking-tight text-white sm:text-5xl">
+                A cleaner storefront for official comics, novels, and premium drops.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
-                Official comics and novels with cleaner discovery, faster return paths, and less clutter.
+                Start free, catch breakout launches, and pick up unfinished chapters without
+                digging through clutter.
               </p>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-400">
-                Browse weekly hits, free starts, creator pages, and premium series without losing the thread of what you want to read next.
+                The homepage now behaves more like a modern American content platform: clearer
+                hierarchy, stronger merchandising, and fewer decorative layers fighting for
+                attention.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
-                <button
+                <Button
                   type="button"
+                  size="lg"
                   onClick={() => router.push("/search")}
-                  className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  className="h-11 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 hover:bg-neutral-200"
                 >
+                  <Compass className="size-4" />
                   Browse all series
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  size="lg"
+                  variant="outline"
                   onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+                  className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
                 >
                   See what's trending
-                </button>
+                  <ArrowUpRight className="size-4" />
+                </Button>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-2.5">
+              <Separator className="my-6 bg-white/10" />
+
+              <div className="flex flex-wrap gap-2.5">
                 {HOME_PILLARS.map((item) => (
-                  <span
+                  <Badge
                     key={item}
-                    className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-200"
+                    variant="outline"
+                    className="rounded-full border-white/10 bg-white/[0.04] px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-neutral-200"
                   >
                     {item}
-                  </span>
+                  </Badge>
                 ))}
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              {editorialStats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.14)] backdrop-blur-lg"
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
-                    {stat.label}
+          <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
+            <CardContent className="p-5 sm:p-6">
+              <SectionEyebrow>Discovery desk</SectionEyebrow>
+              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
+                Browse like a storefront, not a spreadsheet.
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-300">
+                Use live genre shortcuts to focus the recommendation rails below while the desk
+                stats keep the catalog readable at a glance.
+              </p>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {editorialStats.map((stat, index) => (
+                  <StatTile
+                    key={stat.label}
+                    stat={stat}
+                    accent={index === 0}
+                  />
+                ))}
+              </div>
+
+              <Separator className="my-6 bg-white/10" />
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-white">Catalog filters</p>
+                  <p className="mt-1 text-sm text-neutral-400">
+                    Pick a mood and the rails below will narrow in real time.
                   </p>
-                  <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-white">
-                    {stat.value}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-neutral-400">{stat.hint}</p>
                 </div>
-              ))}
-            </div>
-          </div>
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-300"
+                >
+                  {GENRE_CHIPS.find((chip) => chip.id === activeGenre)?.label || "All"} active
+                </Badge>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {GENRE_CHIPS.map((chip) => {
+                  const isActive = activeGenre === chip.id;
+
+                  return (
+                    <Button
+                      key={chip.id}
+                      type="button"
+                      variant={isActive ? "default" : "outline"}
+                      onClick={() => setActiveGenre(chip.id)}
+                      className={cn(
+                        "h-10 rounded-full px-4 text-sm font-semibold",
+                        isActive
+                          ? "bg-white text-neutral-950 hover:bg-neutral-200"
+                          : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
+                      )}
+                    >
+                      {chip.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
         <StorefrontEventHub
@@ -734,157 +911,106 @@ function HomeContent() {
           className="mb-10"
         />
 
-        <section className="mb-10 grid gap-4 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
-          <div className="min-w-0 rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-5 backdrop-blur-xl sm:px-6 sm:py-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-              Browse by genre
-            </p>
-            <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Pick a mood and start there.
-            </h2>
-            <p className="mt-3 max-w-xl text-sm leading-7 text-neutral-400">
-              Jump from romance to thriller to fantasy without losing your place.
-            </p>
-          </div>
-
-          <div className="min-w-0 rounded-[28px] border border-white/10 bg-black/20 px-4 py-4 backdrop-blur-xl sm:px-5">
-            <div className="flex items-center justify-between gap-3 px-2">
-              <p className="text-sm font-semibold text-white">Shortcut filters</p>
-              <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Live catalog</p>
-            </div>
-            <div className="mt-4 flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              {GENRE_CHIPS.map((chip) => {
-                const isActive = activeGenre === chip.id;
-
-                return (
-                  <button
-                    key={chip.id}
-                    type="button"
-                    onClick={() => setActiveGenre(chip.id)}
-                    className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
-                      isActive
-                        ? "bg-white text-neutral-950 shadow-[0_12px_40px_rgba(255,255,255,0.16)]"
-                        : "border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-                    }`}
-                  >
-                    {chip.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
         <section className="mb-10 grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
-          <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-                  Trending searches
-                </p>
-                <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                  See what readers are searching right now.
-                </h2>
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/20 p-1">
-                {[
-                  { id: "day", label: "Today" },
-                  { id: "week", label: "This week" },
-                ].map((option) => {
-                  const isActive = hotWindow === option.id;
+          <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
+            <CardContent className="p-5 sm:p-6">
+              <Tabs value={hotWindow} onValueChange={setHotWindow} className="w-full">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="max-w-2xl">
+                    <SectionEyebrow>Trending searches</SectionEyebrow>
+                    <CardTitle className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
+                      See what readers are searching right now.
+                    </CardTitle>
+                    <CardDescription className="mt-3 text-sm leading-7 text-neutral-300">
+                      Search momentum is one of the fastest ways to turn casual browsing into a
+                      stronger first read.
+                    </CardDescription>
+                  </div>
 
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => setHotWindow(option.id)}
-                      className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                        isActive ? "bg-white text-neutral-950" : "text-neutral-300 hover:text-white"
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-400">
-              Hot keywords are one of the fastest ways to jump from casual browsing into a stronger first read.
-            </p>
-
-            <div className="mt-5 flex flex-wrap gap-2.5">
-              {discoverySignals.length > 0 ? (
-                discoverySignals.map((keyword) => (
-                  <button
-                    key={keyword.id}
-                    type="button"
-                    onClick={() => router.push(`/search?q=${encodeURIComponent(keyword.label)}`)}
-                    className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-left transition hover:border-white/20 hover:bg-white/[0.08]"
+                  <TabsList
+                    variant="line"
+                    className="h-auto rounded-full border border-white/10 bg-white/[0.04] p-1"
                   >
-                    <span className="block text-sm font-semibold text-white">{keyword.label}</span>
-                    <span className="mt-1 block text-[11px] uppercase tracking-[0.2em] text-neutral-500">
-                      {keyword.hint}
-                    </span>
-                  </button>
-                ))
-              ) : (
-                <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-sm text-neutral-400">
-                  Trending searches are still loading.
+                    <TabsTrigger
+                      value="day"
+                      className="h-8 flex-none rounded-full px-3 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-300 after:hidden data-[active]:bg-white data-[active]:text-neutral-950"
+                    >
+                      Today
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="week"
+                      className="h-8 flex-none rounded-full px-3 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-300 after:hidden data-[active]:bg-white data-[active]:text-neutral-950"
+                    >
+                      This week
+                    </TabsTrigger>
+                  </TabsList>
                 </div>
-              )}
-            </div>
-          </div>
+
+                <TabsContent value="day" className="hidden" />
+                <TabsContent value="week" className="hidden" />
+              </Tabs>
+
+              <div className="mt-6 flex flex-wrap gap-2.5">
+                {discoverySignals.length > 0 ? (
+                  discoverySignals.map((keyword) => (
+                    <Button
+                      key={keyword.id}
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.push(`/search?q=${encodeURIComponent(keyword.label)}`)}
+                      className="h-auto rounded-[22px] border-white/10 bg-white/[0.04] px-4 py-3 text-left hover:border-white/20 hover:bg-white/[0.08]"
+                    >
+                      <span className="block text-sm font-semibold text-white">{keyword.label}</span>
+                      <span className="mt-1 block text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                        {keyword.hint}
+                      </span>
+                    </Button>
+                  ))
+                ) : (
+                  <Card className="w-full rounded-[24px] border border-white/10 bg-black/20 py-0 shadow-none">
+                    <CardContent className="p-4 text-sm text-neutral-400">
+                      Trending searches are still loading.
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="grid gap-4 md:grid-cols-2">
             {editorialCards.map((card) => (
-              <button
-                key={card.id}
-                type="button"
-                onClick={card.onClick}
-                className="rounded-[28px] border border-white/10 bg-black/20 p-5 text-left shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl transition hover:border-white/20 hover:bg-white/[0.04]"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  {card.eyebrow}
-                </p>
-                <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                  {card.title}
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-neutral-300">{card.description}</p>
-                <p className="mt-4 text-xs uppercase tracking-[0.2em] text-neutral-500">{card.meta}</p>
-                <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">
-                  <span>{card.cta}</span>
-                  <span aria-hidden="true">&gt;</span>
-                </div>
-              </button>
+              <EditorialPickCard key={card.id} card={card} />
             ))}
           </div>
         </section>
 
-        <section className="mb-10 rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:p-6">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-                {STOREFRONT_TERMS.startHere}
-              </p>
-              <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Give every reader an easy next step.
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                Whether someone is brand new or halfway through a binge, the next click should feel obvious.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => router.push("/search")}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
-            >
-              Browse full catalog
-            </button>
-          </div>
+        <Card className={cn(SECTION_CARD_CLASS, "mb-10 py-0")}>
+          <CardContent className="p-5 sm:p-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <SectionEyebrow>{STOREFRONT_TERMS.startHere}</SectionEyebrow>
+                <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
+                  Give every reader an easy next step.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  Whether someone is brand new or halfway through a binge, the next click should
+                  feel obvious and worth taking.
+                </p>
+              </div>
 
-          <StorefrontPathwaysGrid cards={onboardingCards} className="mt-6" />
-        </section>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/search")}
+                className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                Browse full catalog
+              </Button>
+            </div>
+
+            <StorefrontPathwaysGrid cards={onboardingCards} className="mt-6" />
+          </CardContent>
+        </Card>
 
         {loading ? (
           <div className="space-y-10">
@@ -897,21 +1023,21 @@ function HomeContent() {
         )}
       </main>
 
-        <LoginPrompt
-          isOpen={showLoginPrompt}
-          onClose={() => setShowLoginPrompt(false)}
-          eyebrow={STOREFRONT_TERMS.readerBenefits}
-          title="Save your library and pick up where you left off"
-          message="Sign in to sync your library, keep your progress, claim rewards, and make every return visit faster."
-          returnTo="/"
-          primaryLabel="Sign in and sync"
-          secondaryLabel="Create free account"
-          features={[
-            { icon: BookOpen, text: "Resume chapters and keep your library synced across devices" },
-            { icon: Gift, text: "Claim daily rewards, mission payouts, and bonus points" },
-            { icon: Sparkles, text: "Get better picks based on what you actually read" },
-          ]}
-        />
+      <LoginPrompt
+        isOpen={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
+        eyebrow={STOREFRONT_TERMS.readerBenefits}
+        title="Save your library and pick up where you left off"
+        message="Sign in to sync your library, keep your progress, claim rewards, and make every return visit faster."
+        returnTo="/"
+        primaryLabel="Sign in and sync"
+        secondaryLabel="Create free account"
+        features={[
+          { icon: BookOpen, text: "Resume chapters and keep your library synced across devices" },
+          { icon: Gift, text: "Claim daily rewards, mission payouts, and bonus points" },
+          { icon: Sparkles, text: "Get better picks based on what you actually read" },
+        ]}
+      />
     </div>
   );
 }
