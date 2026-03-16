@@ -66,6 +66,7 @@ const AdultAgeModal = dynamic(() => import("./AdultAgeModal"), {
 const CommentsSection = dynamic(() => import("./CommentsSection"), {
   ssr: false,
 });
+const SeriesFitPanel = dynamic(() => import("./SeriesFitPanel"));
 const SimilarSeriesSection = dynamic(() => import("./SimilarSeriesSection"), {
   ssr: false,
 });
@@ -501,6 +502,12 @@ export default function SeriesPage({ seriesId }) {
   const handleStart = firstEpisodeId
     ? () => handleRead(seriesId, firstEpisodeId)
     : null;
+  const continueHref = lastReadEpisodeId
+    ? `/read/${seriesId}/${lastReadEpisodeId}`
+    : "";
+  const startHref = firstEpisodeId
+    ? `/read/${seriesId}/${firstEpisodeId}`
+    : "";
   const creatorHref = useMemo(() => {
     const targetPath = buildCreatorHref(series?.author || "Studio");
     return buildPathWithAttribution(targetPath, {
@@ -669,6 +676,16 @@ export default function SeriesPage({ seriesId }) {
           sharePath={`/series/${seriesId}`}
           creatorHref={creatorHref}
         />
+
+        <div className="mt-8">
+          <SeriesFitPanel
+            series={series}
+            episodes={episodes}
+            creatorHref={creatorHref}
+            continueHref={continueHref}
+            startHref={startHref}
+          />
+        </div>
 
         <StorefrontCampaignPanel
           series={series}

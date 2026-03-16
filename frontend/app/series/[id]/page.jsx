@@ -24,9 +24,21 @@ export async function generateMetadata({ params }) {
     });
   }
 
-  const description =
-    String(series.description || "").trim() ||
-    `Read ${series.title} on ${siteConfig.siteName}. Explore episodes, pricing, and release details.`;
+  const freeEpisodeCount = Number(series.freeEpisodeCount || 0);
+  const statusLabel = String(series.status || "").trim() || "Ongoing";
+  const authorLabel = String(series.author || "").trim();
+  const genreLabel = Array.isArray(series.genres) && series.genres.length > 0 ? series.genres.slice(0, 2).join(" / ") : "";
+  const baseDescription = String(series.description || "").trim();
+  const generatedDescription = [
+    `Read ${series.title} on ${siteConfig.siteName}.`,
+    authorLabel ? `By ${authorLabel}.` : "",
+    genreLabel ? `${genreLabel}.` : "",
+    freeEpisodeCount > 0 ? `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} available.` : "",
+    `Status: ${statusLabel}.`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const description = baseDescription || generatedDescription;
 
   return createPageMetadata({
     title: series.title,
