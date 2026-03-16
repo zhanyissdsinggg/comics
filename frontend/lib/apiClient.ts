@@ -236,6 +236,9 @@ function getDefaultCacheMs(path: string): number {
   if (/^\/api\/rankings(\?|$)/.test(path)) {
     return 600_000;
   }
+  if (/^\/api\/recommendations\/homepage(\?|$)/.test(path)) {
+    return 60_000;
+  }
   if (/^\/api\/search(\?|$)/.test(path)) {
     return 120_000;
   }

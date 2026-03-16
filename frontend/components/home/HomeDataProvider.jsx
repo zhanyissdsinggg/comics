@@ -6,7 +6,7 @@
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { apiGet } from "../../lib/apiClient";
-import { parallelRequests2 } from "../../lib/parallelRequests";
+import { parallelRequests3 } from "../../lib/parallelRequests";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -29,6 +29,7 @@ export function HomeDataProvider({ children }) {
   const [seriesList, setSeriesList] = useState([]);
   const [seriesResponse, setSeriesResponse] = useState(null);
   const [hotKeywords, setHotKeywords] = useState([]);
+  const [homepageSlots, setHomepageSlots] = useState([]);
   const [hotWindow, setHotWindow] = useState("day");
   const [loading, setLoading] = useState(true);
 
@@ -42,11 +43,12 @@ export function HomeDataProvider({ children }) {
 
     const isCurrentRequest = () => requestRef.current === requestId;
 
-    parallelRequests2(
+    parallelRequests3(
       () => apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }),
       () => apiGet(`/api/search/hot?adult=${adultFlag}&window=${hotWindow}`, { cacheMs: 60000 }),
+      () => apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, { cacheMs: 60000 }),
     )
-      .then(([nextSeriesResponse, nextHotKeywordsResponse]) => {
+      .then(([nextSeriesResponse, nextHotKeywordsResponse, nextHomepageSlotsResponse]) => {
         if (!isCurrentRequest()) {
           return;
         }
@@ -109,6 +111,27 @@ export function HomeDataProvider({ children }) {
           forceDisableAdultMode();
           setHotKeywords([]);
         }
+
+        if (nextHomepageSlotsResponse.ok) {
+          setHomepageSlots(nextHomepageSlotsResponse.data?.slots || []);
+          if (nextHomepageSlotsResponse.stale) {
+            apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, {
+              cacheMs: 60000,
+              bust: true,
+              dedupeMs: 0,
+            }).then((freshResponse) => {
+              if (!isCurrentRequest() || !freshResponse.ok) {
+                return;
+              }
+              setHomepageSlots(freshResponse.data?.slots || []);
+            });
+          }
+        } else if (nextHomepageSlotsResponse.error === "ADULT_GATED") {
+          forceDisableAdultMode();
+          setHomepageSlots([]);
+        } else {
+          setHomepageSlots([]);
+        }
       })
       .finally(() => {
         if (isCurrentRequest()) {
@@ -122,6 +145,7 @@ export function HomeDataProvider({ children }) {
       value={{
         seriesList,
         hotKeywords,
+        homepageSlots,
         hotWindow,
         setHotWindow,
         loading,

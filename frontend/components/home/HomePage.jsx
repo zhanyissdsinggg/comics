@@ -121,7 +121,7 @@ function HomeContent() {
   const { items: historyItems, loadHistory } = useHistoryStore();
   const { bySeriesId: progressMap, loadProgress } = useProgressStore();
   const { isSignedIn } = useAuthStore();
-  const { loading, seriesList, hotKeywords, hotWindow, setHotWindow } = useHomeData();
+  const { loading, seriesList, hotKeywords, homepageSlots, hotWindow, setHotWindow } = useHomeData();
 
   const [activeGenre, setActiveGenre] = useState("all");
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
@@ -165,11 +165,14 @@ function HomeContent() {
   }, []);
 
   const heroItems = useMemo(
-    () => buildHomeHeroItems(seriesList, { bannerUrl: branding?.homeBannerUrl }),
-    [seriesList, branding?.homeBannerUrl],
+    () => buildHomeHeroItems(seriesList, { bannerUrl: branding?.homeBannerUrl, homepageSlots }),
+    [homepageSlots, seriesList, branding?.homeBannerUrl],
   );
 
-  const editorialSnapshot = useMemo(() => getHomeEditorialSnapshot(seriesList), [seriesList]);
+  const editorialSnapshot = useMemo(
+    () => getHomeEditorialSnapshot(seriesList, { homepageSlots }),
+    [homepageSlots, seriesList],
+  );
 
   const seriesById = useMemo(
     () => new Map(seriesList.map((series) => [series.id, series])),

@@ -1,34 +1,52 @@
-// 老王注释：AI智能推荐控制器
-import { Controller, Get, Param, Query, Req, Header } from '@nestjs/common';
-import { RecommendationService } from './recommendation.service';
-import { Request } from 'express';
-import { getUserIdFromRequest } from '../../common/utils/auth';
+import { Controller, Get, Header, Param, Query, Req, Res } from "@nestjs/common";
+import type { Request, Response } from "express";
+import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { getUserIdFromRequest } from "../../common/utils/auth";
+import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
+import { RecommendationService } from "./recommendation.service";
 
-@Controller('recommendations')
+@Controller("recommendations")
 export class RecommendationController {
   constructor(private readonly recommendationService: RecommendationService) {}
 
-  /**
-   * 老王注释：获取相似作品推荐
-   * GET /api/recommendations/similar/:seriesId
-   * 缓存10分钟 - 基于内容的推荐变化很少
-   */
-  @Get('similar/:seriesId')
-  @Header('Cache-Control', 'public, max-age=600, s-maxage=600')
+  @Get("homepage")
+  @Header("Cache-Control", "public, max-age=60, s-maxage=60")
+  async getHomepageSlots(
+    @Query("adult") adultParam: string,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const adult = parseBool(adultParam);
+    if (adult === true) {
+      const gate = checkAdultGate(req.cookies || {});
+      if (!gate.ok) {
+        res.status(403);
+        return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+      }
+    }
+
+    const slots = await this.recommendationService.getHomepageSlots();
+    return {
+      slots,
+      count: slots.length,
+    };
+  }
+
+  @Get("similar/:seriesId")
+  @Header("Cache-Control", "public, max-age=600, s-maxage=600")
   async getSimilarSeries(
-    @Param('seriesId') seriesId: string,
-    @Query('limit') limit?: string,
+    @Param("seriesId") seriesId: string,
+    @Query("limit") limit?: string,
     @Req() req?: Request,
   ) {
     const userId = (req ? getUserIdFromRequest(req, true) : null) || undefined;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
-    const recommendations =
-      await this.recommendationService.getContentBasedRecommendations(
-        seriesId,
-        limitNum,
-        userId,
-      );
+    const recommendations = await this.recommendationService.getContentBasedRecommendations(
+      seriesId,
+      limitNum,
+      userId,
+    );
 
     return {
       seriesId,
@@ -37,32 +55,18 @@ export class RecommendationController {
     };
   }
 
-  /**
-   * 老王注释：获取个性化推荐（基于用户阅读历史）
-   * GET /api/recommendations/personalized
-   * 缓存1分钟 - 个性化推荐需要较新的数据
-   */
-  @Get('personalized')
-  @Header('Cache-Control', 'private, max-age=60, s-maxage=60')
+  @Get("personalized")
+  @Header("Cache-Control", "private, max-age=60, s-maxage=60")
   async getPersonalizedRecommendations(
-    @Query('limit') limit?: string,
+    @Query("limit") limit?: string,
     @Req() req?: Request,
   ) {
     const userId = (req ? getUserIdFromRequest(req, true) : null) || undefined;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
-    let recommendations;
-    if (userId) {
-      recommendations =
-        await this.recommendationService.getPersonalizedRecommendations(
-          userId,
-          limitNum,
-        );
-    } else {
-      // 老王注释：未登录用户返回热门作品
-      recommendations =
-        await this.recommendationService.getPopularSeries(limitNum);
-    }
+    const recommendations = userId
+      ? await this.recommendationService.getPersonalizedRecommendations(userId, limitNum)
+      : await this.recommendationService.getPopularSeries(limitNum);
 
     return {
       recommendations,
@@ -71,14 +75,9 @@ export class RecommendationController {
     };
   }
 
-  /**
-   * 老王注释：获取热门作品
-   * GET /api/recommendations/popular
-   * 缓存5分钟 - 热门作品变化不频繁
-   */
-  @Get('popular')
-  @Header('Cache-Control', 'public, max-age=300, s-maxage=300')
-  async getPopularSeries(@Query('limit') limit?: string) {
+  @Get("popular")
+  @Header("Cache-Control", "public, max-age=300, s-maxage=300")
+  async getPopularSeries(@Query("limit") limit?: string) {
     const limitNum = limit ? parseInt(limit, 10) : 10;
     const series = await this.recommendationService.getPopularSeries(limitNum);
 

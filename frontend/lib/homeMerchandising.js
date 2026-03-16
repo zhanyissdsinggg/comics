@@ -16,6 +16,56 @@ function getVisibleCatalog(seriesList) {
   );
 }
 
+function normalizeSlotToken(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function dedupeSeries(seriesList) {
+  const seen = new Set();
+  return (Array.isArray(seriesList) ? seriesList : []).filter((series) => {
+    const seriesId = String(series?.id || "").trim();
+    if (!seriesId || seen.has(seriesId)) {
+      return false;
+    }
+    seen.add(seriesId);
+    return true;
+  });
+}
+
+function buildSeriesById(seriesList) {
+  return new Map(
+    (Array.isArray(seriesList) ? seriesList : [])
+      .map((series) => [String(series?.id || "").trim(), series])
+      .filter(([seriesId, series]) => Boolean(seriesId) && Boolean(series)),
+  );
+}
+
+function buildHomepageSlotMap(homepageSlots) {
+  const slotMap = new Map();
+  (Array.isArray(homepageSlots) ? homepageSlots : []).forEach((slot) => {
+    const slotId = normalizeSlotToken(slot?.slot || slot?.name || slot?.id);
+    if (!slotId) {
+      return;
+    }
+    slotMap.set(
+      slotId,
+      Array.isArray(slot?.seriesIds)
+        ? slot.seriesIds.map((item) => String(item || "").trim()).filter(Boolean)
+        : [],
+    );
+  });
+  return slotMap;
+}
+
+function resolveHomepageSlotSeries(seriesPool, homepageSlots, slotId, limit = Infinity) {
+  const slotIds = buildHomepageSlotMap(homepageSlots).get(normalizeSlotToken(slotId)) || [];
+  if (slotIds.length === 0) {
+    return [];
+  }
+  const seriesById = buildSeriesById(seriesPool);
+  return slotIds.map((seriesId) => seriesById.get(seriesId)).filter(Boolean).slice(0, limit);
+}
+
 function mapHeroSeries(series, index, bannerUrl = null) {
   return {
     id: `hero-${series.id || index + 1}`,
@@ -53,12 +103,21 @@ export function buildHomeHeroItems(seriesList, options = {}) {
   }
 
   const bannerUrl = String(options.bannerUrl || "").trim() || null;
-  const featured = visibleCatalog
-    .filter((series) => {
-      const badges = getBadgeTokens(series);
-      return badges.includes("HOT") || toNumber(series?.rating) >= 4.5;
-    })
-    .sort((left, right) => toNumber(right?.rating) - toNumber(left?.rating))
+  const slotDrivenHeroSeries = resolveHomepageSlotSeries(
+    visibleCatalog,
+    options.homepageSlots,
+    "home-hero",
+    6,
+  );
+  const featured = dedupeSeries([
+    ...slotDrivenHeroSeries,
+    ...visibleCatalog
+      .filter((series) => {
+        const badges = getBadgeTokens(series);
+        return badges.includes("HOT") || toNumber(series?.rating) >= 4.5;
+      })
+      .sort((left, right) => toNumber(right?.rating) - toNumber(left?.rating)),
+  ])
     .slice(0, 6)
     .map((series, index) => mapHeroSeries(series, index, index === 0 ? bannerUrl : null));
 
@@ -72,7 +131,7 @@ export function buildHomeHeroItems(seriesList, options = {}) {
   return visibleCatalog.slice(0, 4).map((series, index) => mapHeroSeries(series, index));
 }
 
-export function getHomeEditorialSnapshot(seriesList) {
+export function getHomeEditorialSnapshot(seriesList, options = {}) {
   const visibleCatalog = getVisibleCatalog(seriesList);
   const safeCatalog = visibleCatalog.filter((series) => !series?.adult);
   const genres = new Set();
@@ -117,6 +176,12 @@ export function getHomeEditorialSnapshot(seriesList) {
   const breakoutPick = [...breakoutSeries].sort(
     (left, right) => getSeriesScore(right) - getSeriesScore(left),
   )[0] || null;
+  const slotDrivenFreeStartPick =
+    resolveHomepageSlotSeries(safeCatalog, options.homepageSlots, "home-free-start", 1)[0] || null;
+  const slotDrivenCompletedPick =
+    resolveHomepageSlotSeries(safeCatalog, options.homepageSlots, "home-binge-ready", 1)[0] || null;
+  const slotDrivenBreakoutPick =
+    resolveHomepageSlotSeries(safeCatalog, options.homepageSlots, "home-breakout", 1)[0] || null;
 
   return {
     visibleCatalog,
@@ -128,9 +193,9 @@ export function getHomeEditorialSnapshot(seriesList) {
     completedSeriesCount: completedSeries.length,
     freeStartSeriesCount: freeStartSeries.length,
     breakoutSeriesCount: breakoutSeries.length,
-    completedPick,
-    freeStartPick,
-    breakoutPick,
+    completedPick: slotDrivenCompletedPick || completedPick,
+    freeStartPick: slotDrivenFreeStartPick || freeStartPick,
+    breakoutPick: slotDrivenBreakoutPick || breakoutPick,
   };
 }
 

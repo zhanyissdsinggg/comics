@@ -2,6 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { findSeriesVisibilityCompat, isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
 
+const HOME_SLOT_IDS = ["home-hero", "home-free-start", "home-binge-ready", "home-breakout"] as const;
+
+export interface HomepageRecommendationSlot {
+  id: string;
+  slot: string;
+  seriesIds: string[];
+}
+
 @Injectable()
 export class RecommendationService {
   constructor(private readonly prisma: PrismaService) {}
@@ -238,6 +246,39 @@ export class RecommendationService {
         statusNot: "draft",
       });
     }
+  }
+
+  async getHomepageSlots(): Promise<HomepageRecommendationSlot[]> {
+    const orderMap = new Map<string, number>(HOME_SLOT_IDS.map((slot, index) => [slot, index]));
+    const slots = await this.prisma.recommendationSlot.findMany({
+      where: {
+        slot: {
+          in: [...HOME_SLOT_IDS],
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      select: {
+        id: true,
+        slot: true,
+        seriesIds: true,
+      },
+    });
+
+    return slots
+      .map((slot) => ({
+        id: slot.id,
+        slot: slot.slot,
+        seriesIds: Array.isArray(slot.seriesIds)
+          ? slot.seriesIds.map((item) => String(item || "").trim()).filter(Boolean)
+          : [],
+      }))
+      .sort(
+        (left, right) =>
+          (orderMap.get(left.slot) ?? Number.MAX_SAFE_INTEGER) -
+          (orderMap.get(right.slot) ?? Number.MAX_SAFE_INTEGER),
+      );
   }
 
   private countMatches(left: string[], right: string[]): number {
