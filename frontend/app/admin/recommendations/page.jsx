@@ -72,6 +72,14 @@ const STOREFRONT_SLOT_PRESETS = [
   },
 ];
 
+const ANALYTICS_SLOT_FILTER_OPTIONS = [
+  { value: 'all', label: '全部推荐位' },
+  ...STOREFRONT_SLOT_PRESETS.filter((item) => item.token !== 'custom').map((item) => ({
+    value: item.token,
+    label: item.label,
+  })),
+];
+
 const INITIAL_SLOT_FORM = {
   preset: 'library-return',
   slotToken: 'library-return',
@@ -254,6 +262,32 @@ function SectionHeader({ title, description, action }) {
   );
 }
 
+function SlotIdentity({ slotKey, itemId = '', hint = '', compact = false, showHint = true }) {
+  const slotMeta = getSlotDisplayMeta(slotKey);
+  const resolvedHint = hint || slotMeta.hint;
+
+  return (
+    <div className={compact ? 'space-y-1' : 'space-y-2'}>
+      <div className={compact ? 'font-medium text-neutral-50' : 'text-lg font-semibold text-neutral-50'}>
+        {slotMeta.label}
+      </div>
+      <div className="flex flex-wrap gap-2 text-xs">
+        <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 font-mono text-neutral-300">
+          {slotMeta.token}
+        </span>
+        {itemId ? (
+          <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 font-mono text-neutral-500">
+            {itemId}
+          </span>
+        ) : null}
+      </div>
+      {showHint && resolvedHint ? (
+        <p className="text-sm text-neutral-400">{resolvedHint}</p>
+      ) : null}
+    </div>
+  );
+}
+
 function AnalyticsTable({ analytics }) {
   return (
     <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-950/70">
@@ -276,7 +310,14 @@ function AnalyticsTable({ analytics }) {
             {analytics.map((item) => (
               <tr key={item.id} className="bg-neutral-950/30 transition hover:bg-neutral-900/60">
                 <td className="px-4 py-3">{formatDateTime(item.date)}</td>
-                <td className="px-4 py-3 font-medium text-neutral-50">{item.slot || item.slotId || '未知'}</td>
+                <td className="px-4 py-3 align-top">
+                  <SlotIdentity
+                    slotKey={item.slot || item.slotId}
+                    itemId={item.slotId || ''}
+                    compact
+                    showHint={false}
+                  />
+                </td>
                 <td className="px-4 py-3 font-mono text-xs text-neutral-300">{item.seriesId || '未知'}</td>
                 <td className="px-4 py-3">{formatNumber(item.impressions)}</td>
                 <td className="px-4 py-3">{formatNumber(item.views)}</td>
@@ -305,6 +346,7 @@ export default function AdminRecommendationsPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [slotForm, setSlotForm] = useState(INITIAL_SLOT_FORM);
   const [rankingForm, setRankingForm] = useState(INITIAL_RANKING_FORM);
+  const [analyticsSlotFilter, setAnalyticsSlotFilter] = useState('all');
 
   const handleTabChange = (nextTab) => {
     setActiveTab(nextTab);
@@ -356,11 +398,17 @@ export default function AdminRecommendationsPage() {
   });
 
   const analyticsQuery = useQuery({
-    queryKey: ['admin', 'recommendations', 'analytics'],
+    queryKey: ['admin', 'recommendations', 'analytics', analyticsSlotFilter],
     enabled: loadedTabs.analytics,
     staleTime: 60_000,
     queryFn: async () => {
-      const { response, data } = await adminFetchJson('/api/admin/recommendations/analytics?limit=50');
+      const params = new URLSearchParams();
+      params.set('limit', '50');
+      if (analyticsSlotFilter !== 'all') {
+        params.set('slot', analyticsSlotFilter);
+      }
+
+      const { response, data } = await adminFetchJson(`/api/admin/recommendations/analytics?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error(data?.message || data?.error || '推荐分析加载失败。');
@@ -378,7 +426,7 @@ export default function AdminRecommendationsPage() {
       const payload = buildSlotPayload(slotForm);
 
       if (!payload.slot) {
-        throw new Error('推荐位名称不能为空。');
+        throw new Error('推荐位标识不能为空。');
       }
 
       const { response, data } = await adminFetchJson('/api/admin/recommendations/slots', {
@@ -494,6 +542,10 @@ export default function AdminRecommendationsPage() {
     () => getSlotDisplayMeta(slotForm.preset === 'custom' ? slotForm.slotToken : slotForm.preset),
     [slotForm.preset, slotForm.slotToken],
   );
+  const selectedAnalyticsSlotMeta = useMemo(
+    () => (analyticsSlotFilter === 'all' ? null : getSlotDisplayMeta(analyticsSlotFilter)),
+    [analyticsSlotFilter],
+  );
 
   const analyticsSummary = useMemo(() => {
     return analytics.reduce(
@@ -591,9 +643,9 @@ export default function AdminRecommendationsPage() {
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">推荐位</p>
-                    <h3 className="mt-2 text-lg font-semibold text-neutral-50">{slot.name || slot.slot || '未命名推荐位'}</h3>
-                    <p className="mt-2 font-mono text-xs text-neutral-400">{slot.id}</p>
-                    <p className="mt-2 text-sm text-neutral-400">{slotMeta.hint}</p>
+                    <div className="mt-2">
+                      <SlotIdentity slotKey={slotMeta.token} itemId={slot.id} hint={slotMeta.hint} />
+                    </div>
                   </div>
                   <button
                     type="button"
@@ -706,6 +758,38 @@ export default function AdminRecommendationsPage() {
 
     return (
       <div className="space-y-6">
+        <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-neutral-50">分析筛选</h3>
+              <p className="mt-2 text-sm text-neutral-400">
+                先按推荐位筛选，再看曝光、点击和转化，别把不同入口的表现混在一起。
+              </p>
+            </div>
+            <div className="w-full max-w-sm">
+              <label className="text-sm font-medium text-neutral-300" htmlFor="analytics-slot-filter">
+                推荐位
+              </label>
+              <select
+                id="analytics-slot-filter"
+                value={analyticsSlotFilter}
+                onChange={(event) => setAnalyticsSlotFilter(event.target.value)}
+                className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+              >
+                {ANALYTICS_SLOT_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {selectedAnalyticsSlotMeta ? (
+            <div className="mt-4">
+              <SlotIdentity slotKey={selectedAnalyticsSlotMeta.token} hint={selectedAnalyticsSlotMeta.hint} />
+            </div>
+          ) : null}
+        </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard label="曝光" value={formatNumber(analyticsSummary.impressions)} hint="当前已加载数据汇总" />
           <StatCard label="浏览" value={formatNumber(analyticsSummary.views)} hint="作品详情访问量" />
@@ -876,7 +960,7 @@ export default function AdminRecommendationsPage() {
           </div>
           <div>
             <label className="text-sm font-medium text-neutral-300" htmlFor="slot-token">
-              推荐位名称
+              机器标识
             </label>
             <input
               id="slot-token"
@@ -884,9 +968,14 @@ export default function AdminRecommendationsPage() {
               value={slotForm.slotToken}
               readOnly={slotForm.preset !== 'custom'}
               onChange={(event) => setSlotForm((current) => ({ ...current, slotToken: event.target.value }))}
-              placeholder="例如：home-featured"
+              placeholder="例如：library-return"
               className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 font-mono text-neutral-100 outline-none transition focus:border-emerald-400 read-only:cursor-not-allowed read-only:opacity-80"
             />
+            <p className="mt-2 text-xs text-neutral-500">
+              {slotForm.preset === 'custom'
+                ? '这个标识会用于前台联动、归因统计和实验筛选，建议只使用小写英文、数字与连字符。'
+                : '模板会自动带入稳定标识；如需手动输入，请切换到“自定义推荐位”。'}
+            </p>
           </div>
           <div>
             <label className="text-sm font-medium text-neutral-300" htmlFor="slot-series-ids">

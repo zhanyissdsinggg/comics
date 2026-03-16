@@ -683,6 +683,35 @@ test.describe("Admin route regression", () => {
     await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
   });
 
+  test("should filter recommendation analytics by slot token", async ({ page }) => {
+    const analyticsRequests: string[] = [];
+
+    page.on("request", (request) => {
+      const requestUrl = new URL(request.url());
+      if (requestUrl.pathname.endsWith("/api/admin/recommendations/analytics")) {
+        analyticsRequests.push(request.url());
+      }
+    });
+
+    await primeAdminSession(page);
+    await installAdminApiMocks(page);
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await page.getByRole("button", { name: "分析" }).click();
+    await expect(page.locator("#analytics-slot-filter")).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.locator("#analytics-slot-filter").selectOption("library-return");
+
+    await expect.poll(() =>
+      analyticsRequests.some((requestUrl) => new URL(requestUrl).searchParams.get("slot") === "library-return"),
+    ).toBe(true);
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
+  });
+
   test("should create a library return slot from the preset form", async ({ page }) => {
     let createdSlotPayload: Record<string, unknown> | null = null;
 
