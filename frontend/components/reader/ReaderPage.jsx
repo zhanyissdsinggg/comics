@@ -34,6 +34,7 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
+import { buildDiscoveryContext } from "../../lib/discoveryContext";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 
 const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
@@ -75,6 +76,17 @@ function createPricingFallback(basePrice = 0) {
   };
 }
 
+function shouldPreserveDiscoveryAttribution(entryPoint) {
+  const normalized = String(entryPoint || "").trim().toLowerCase();
+  return (
+    normalized.startsWith("reader_") ||
+    normalized.startsWith("store_") ||
+    normalized.startsWith("subscribe_") ||
+    normalized.startsWith("unlock_") ||
+    normalized.startsWith("series_")
+  );
+}
+
 export default function ReaderPage({ seriesId, episodeId }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -92,6 +104,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const [uiToast, setUiToast] = useState("");
   const [commerceNotice, setCommerceNotice] = useState(null);
   const [commerceEntryPoint, setCommerceEntryPoint] = useState("");
+  const [activeAttribution, setActiveAttribution] = useState(null);
   const [pendingResume, setPendingResume] = useState(null);
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [scrollPercent, setScrollPercent] = useState(0);
@@ -221,6 +234,74 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const nextPricing =
     commerceState.nextPricing || createPricingFallback(nextEpisode?.pricePts || 0);
   const packPricing = commerceState.packPricing;
+  const readerPath = useMemo(() => `/read/${seriesId}/${episodeId}`, [episodeId, seriesId]);
+  const seriesPath = useMemo(() => `/series/${seriesId}`, [seriesId]);
+  const discoveryContext = useMemo(
+    () => buildDiscoveryContext(seriesData?.series, activeAttribution),
+    [activeAttribution, seriesData?.series],
+  );
+
+  const buildEpisodeHref = useCallback(
+    (targetEpisodeId) => {
+      if (!targetEpisodeId) {
+        return readerPath;
+      }
+
+      const targetPath = `/read/${seriesId}/${targetEpisodeId}`;
+      const attribution = mergePaymentAttribution(activeAttribution, {
+        sourceSeriesId: seriesId,
+        sourceEpisodeId: targetEpisodeId,
+        returnTo: targetPath,
+      });
+
+      return attribution ? buildPathWithAttribution(targetPath, attribution) : targetPath;
+    },
+    [activeAttribution, readerPath, seriesId],
+  );
+
+  const buildSeriesHref = useCallback(() => {
+    const attribution = mergePaymentAttribution(activeAttribution, {
+      sourceSeriesId: seriesId,
+      returnTo: seriesPath,
+    });
+
+    return attribution ? buildPathWithAttribution(seriesPath, attribution) : seriesPath;
+  }, [activeAttribution, seriesId, seriesPath]);
+
+  const buildReaderCommerceAttribution = useCallback(
+    (entryPoint, targetEpisodeId = episodeId, extra = {}) =>
+      mergePaymentAttribution(activeAttribution, {
+        entryPoint,
+        sourcePath: readerPath,
+        sourceSeriesId: seriesId,
+        sourceEpisodeId: targetEpisodeId || episodeId,
+        returnTo: readerPath,
+        ...extra,
+      }),
+    [activeAttribution, episodeId, readerPath, seriesId],
+  );
+
+  const handleReturnToDiscovery = useCallback(() => {
+    if (!discoveryContext?.sourcePath) {
+      return;
+    }
+
+    trackEvent("reader_return_to_source", {
+      seriesId,
+      episodeId,
+      entryPoint: activeAttribution?.entryPoint,
+      campaignId: activeAttribution?.campaignId,
+      sourcePath: discoveryContext.sourcePath,
+    });
+    router.push(discoveryContext.sourcePath);
+  }, [
+    activeAttribution?.campaignId,
+    activeAttribution?.entryPoint,
+    discoveryContext?.sourcePath,
+    episodeId,
+    router,
+    seriesId,
+  ]);
 
   useEffect(() => {
     const payload = consumeCommerceSuccessForPath(`/read/${seriesId}/${episodeId}`);
@@ -544,13 +625,19 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   useEffect(() => {
     if (!routeAttribution) {
+      setActiveAttribution(null);
       return;
     }
 
-    const attribution = mergePaymentAttribution(
-      loadPersistedPaymentAttribution(),
-      routeAttribution,
-    );
+    const persistedAttribution = loadPersistedPaymentAttribution();
+    const attribution = shouldPreserveDiscoveryAttribution(routeAttribution?.entryPoint)
+      ? mergePaymentAttribution(routeAttribution, {
+          entryPoint: persistedAttribution?.entryPoint || routeAttribution?.entryPoint,
+          campaignId: persistedAttribution?.campaignId || routeAttribution?.campaignId,
+          sourcePath: persistedAttribution?.sourcePath || routeAttribution?.sourcePath,
+        })
+      : mergePaymentAttribution(persistedAttribution, routeAttribution);
+    setActiveAttribution(attribution);
     if (attribution) {
       persistPaymentAttribution(attribution);
     }
@@ -924,14 +1011,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
         handleToggleAutoScroll();
       }
       if (event.key === "ArrowLeft" && prevEpisode) {
-        router.push(`/read/${seriesId}/${prevEpisode.id}`);
+        router.push(buildEpisodeHref(prevEpisode.id));
       }
       if (event.key === "ArrowRight") {
         if (!nextEpisode) {
           return;
         }
         if (nextUnlocked) {
-          router.push(`/read/${seriesId}/${nextEpisode.id}`);
+          router.push(buildEpisodeHref(nextEpisode.id));
           return;
         }
         setShowEndOverlay(true);
@@ -941,6 +1028,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [
     handleAddBookmark,
+    buildEpisodeHref,
     handleToggleAutoScroll,
     nextEpisode,
     nextUnlocked,
@@ -1043,7 +1131,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     }
     const response = await handleUnlock(nextEpisode.id);
     if (response.ok) {
-      router.push(`/read/${seriesId}/${nextEpisode.id}`);
+      router.push(buildEpisodeHref(nextEpisode.id));
       return;
     }
     if (response.status === 401) {
@@ -1079,7 +1167,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     }
     const response = await handleClaim(nextEpisode.id);
     if (response.ok) {
-      router.push(`/read/${seriesId}/${nextEpisode.id}`);
+      router.push(buildEpisodeHref(nextEpisode.id));
       return;
     }
     if (response.status === 401) {
@@ -1129,12 +1217,12 @@ export default function ReaderPage({ seriesId, episodeId }) {
       title: "Pack unlocked",
       description: `${targets.length} episodes are now unlocked and ready to read.`,
     });
-    router.push(`/read/${seriesId}/${targets[0].id}`);
+    router.push(buildEpisodeHref(targets[0].id));
   };
 
   const handleGoBookmark = (bookmark) => {
     if (bookmark.episodeId && bookmark.episodeId !== episodeId) {
-      router.push(`/read/${seriesId}/${bookmark.episodeId}`);
+      router.push(buildEpisodeHref(bookmark.episodeId));
       return;
     }
     const total =
@@ -1155,7 +1243,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     }
     const isUnlocked = entitlement.unlockedEpisodeIds.includes(nextId);
     if (isUnlocked) {
-      router.push(`/read/${seriesId}/${nextId}`);
+      router.push(buildEpisodeHref(nextId));
       setDrawerOpen(false);
       return;
     }
@@ -1176,7 +1264,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         <ReaderTopBar
           title="Loading..."
           episodeLabel="..."
-          onBack={() => router.push(`/series/${seriesId}`)}
+          onBack={() => router.push(buildSeriesHref())}
         />
         <div className="mx-auto max-w-3xl px-4 py-10 text-sm text-neutral-400">
           Loading episode...
@@ -1191,7 +1279,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         <ReaderTopBar
           title="Adult content"
           episodeLabel="..."
-          onBack={() => router.push(`/series/${seriesId}`)}
+          onBack={() => router.push(buildSeriesHref())}
         />
         <AdultGateBlockingPanel status={gateStatus} onOpenModal={openGateModal} />
         {activeModal === "login" ? (
@@ -1224,7 +1312,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         <ReaderTopBar
           title="Error"
           episodeLabel="..."
-          onBack={() => router.push(`/series/${seriesId}`)}
+          onBack={() => router.push(buildSeriesHref())}
         />
         <div className="mx-auto max-w-3xl px-4 py-10">
           <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-6 text-center">
@@ -1240,7 +1328,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               </button>
               <button
                 type="button"
-                onClick={() => router.push(`/series/${seriesId}`)}
+                onClick={() => router.push(buildSeriesHref())}
                 className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
               >
                 Back to Series
@@ -1257,7 +1345,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       <ReaderTopBar
         title={seriesData?.series?.title || "Series"}
         episodeLabel={episodeData?.title || episodeId}
-        onBack={() => router.push(`/series/${seriesId}`)}
+        onBack={() => router.push(buildSeriesHref())}
         onOpenToc={() => setDrawerOpen(true)}
         onAddBookmark={handleAddBookmark}
         onToggleNight={toggleNightMode}
@@ -1271,7 +1359,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         progress={scrollPercent}
         onPrev={() =>
           prevEpisode
-            ? router.push(`/read/${seriesId}/${prevEpisode.id}`)
+            ? router.push(buildEpisodeHref(prevEpisode.id))
             : null
         }
         onNext={() => {
@@ -1279,7 +1367,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             return;
           }
           if (nextUnlocked) {
-            router.push(`/read/${seriesId}/${nextEpisode.id}`);
+            router.push(buildEpisodeHref(nextEpisode.id));
             return;
           }
           setShowEndOverlay(true);
@@ -1296,6 +1384,29 @@ export default function ReaderPage({ seriesId, episodeId }) {
             notice={commerceNotice}
             onDismiss={() => setCommerceNotice(null)}
           />
+        </div>
+      ) : null}
+
+      {discoveryContext ? (
+        <div className="mx-auto max-w-5xl px-4 pt-4">
+          <div className="flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-left shadow-[0_20px_70px_rgba(0,0,0,0.18)] sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-300/85">
+                Discovery lane
+              </p>
+              <p className="mt-2 font-semibold text-white">
+                From {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-neutral-400">{discoveryContext.returnHint}</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleReturnToDiscovery}
+              className="shrink-0 rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+            >
+              {discoveryContext.returnLabel}
+            </button>
+          </div>
         </div>
       ) : null}
 
@@ -1448,13 +1559,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
               onClick={() => {
                 trackEvent("click_subscribe_from_paywall", { seriesId, episodeId });
                 router.push(
-                  buildPathWithAttribution("/subscribe", {
-                    entryPoint: "READER_PAYWALL",
-                    sourcePath: `/read/${seriesId}/${episodeId}`,
-                    sourceSeriesId: seriesId,
-                    sourceEpisodeId: episodeId,
-                    returnTo: `/read/${seriesId}/${episodeId}`,
-                  })
+                  buildPathWithAttribution(
+                    "/subscribe",
+                    buildReaderCommerceAttribution("READER_PAYWALL", episodeId),
+                  )
                 );
               }}
               className="mt-3 w-full rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-100"
@@ -1468,14 +1576,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 router.push(
                   buildPathWithAttribution(
                     "/store",
-                    {
-                      entryPoint: "READER_PAYWALL",
-                      sourcePath: `/read/${seriesId}/${episodeId}`,
-                      sourceSeriesId: seriesId,
-                      sourceEpisodeId: episodeId,
-                      returnTo: `/read/${seriesId}/${episodeId}`,
-                    },
-                    { returnTo: `/read/${seriesId}/${episodeId}`, focus: "auto" }
+                    buildReaderCommerceAttribution("READER_PAYWALL", episodeId),
+                    { returnTo: readerPath, focus: "auto" }
                   )
                 );
               }}
@@ -1485,7 +1587,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             </button>
             <button
               type="button"
-              onClick={() => router.push(`/series/${seriesId}`)}
+              onClick={() => router.push(buildSeriesHref())}
               className="mt-2 w-full rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300"
             >
               Back to series details
@@ -1499,8 +1601,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
           open
           seriesId={seriesId}
           series={seriesData?.series}
-          sourcePath={`/read/${seriesId}/${episodeId}`}
-          returnTo={`/read/${seriesId}/${episodeId}`}
+          sourcePath={readerPath}
+          returnTo={readerPath}
+          discoveryContext={discoveryContext}
           nextEpisode={nextEpisode}
           nextUnlocked={nextUnlocked}
           decision={offerDecision}
@@ -1508,7 +1611,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
           packPricing={packPricing}
           seriesTitle={seriesData?.series?.title}
           episodeTitle={episodeData?.episode?.title}
-          onNext={() => router.push(`/read/${seriesId}/${nextEpisode?.id}`)}
+          onNext={() => router.push(buildEpisodeHref(nextEpisode?.id))}
           onUnlock={handleUnlockNext}
           onSubscribe={() => {
             trackEvent("click_subscribe_from_reader_end", {
@@ -1517,13 +1620,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
               nextEpisodeId: nextEpisode?.id || null,
             });
             router.push(
-              buildPathWithAttribution("/subscribe", {
-                entryPoint: "READER_END",
-                sourcePath: `/read/${seriesId}/${episodeId}`,
-                sourceSeriesId: seriesId,
-                sourceEpisodeId: episodeId,
-                returnTo: `/read/${seriesId}/${episodeId}`,
-              })
+              buildPathWithAttribution(
+                "/subscribe",
+                buildReaderCommerceAttribution("READER_END", nextEpisode?.id || episodeId),
+              )
             );
           }}
           onClaim={handleClaimNext}
@@ -1538,18 +1638,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
             router.push(
               buildPathWithAttribution(
                 "/store",
-                {
-                  entryPoint: "READER_END",
-                  sourcePath: `/read/${seriesId}/${episodeId}`,
-                  sourceSeriesId: seriesId,
-                  sourceEpisodeId: nextEpisode?.id || episodeId,
-                  returnTo: `/read/${seriesId}/${episodeId}`,
-                },
-                { returnTo: `/read/${seriesId}/${episodeId}`, focus: "auto" }
+                buildReaderCommerceAttribution("READER_END", nextEpisode?.id || episodeId),
+                { returnTo: readerPath, focus: "auto" }
               )
             )
           }
-          onViewSeries={() => router.push(`/series/${seriesId}`)}
+          onViewSeries={() => router.push(buildSeriesHref())}
+          onReturnToSource={handleReturnToDiscovery}
           onOpenSupport={() => router.push("/support")}
           primaryActionRef={endOverlayPrimaryActionRef}
           highlightPrimaryAction={Boolean(commerceNotice)}
@@ -1577,13 +1672,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
           onRemoveBookmark={(id) => removeBookmark(seriesId, id)}
           onSubscribe={() =>
             router.push(
-              buildPathWithAttribution("/subscribe", {
-                entryPoint: "READER_DRAWER",
-                sourcePath: `/read/${seriesId}/${episodeId}`,
-                sourceSeriesId: seriesId,
-                sourceEpisodeId: episodeId,
-                returnTo: `/read/${seriesId}/${episodeId}`,
-              })
+              buildPathWithAttribution(
+                "/subscribe",
+                buildReaderCommerceAttribution("READER_DRAWER", episodeId),
+              )
             )
           }
         />
@@ -1651,14 +1743,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       router.push(
                         buildPathWithAttribution(
                           "/store",
-                          {
-                            entryPoint: "READER_PAYWALL",
-                            sourcePath: `/read/${seriesId}/${episodeId}`,
-                            sourceSeriesId: seriesId,
-                            sourceEpisodeId: episodeId,
-                            returnTo: `/read/${seriesId}/${episodeId}`,
-                          },
-                          { returnTo: `/read/${seriesId}/${episodeId}`, focus: "auto" }
+                          buildReaderCommerceAttribution("READER_PAYWALL", episodeId),
+                          { returnTo: readerPath, focus: "auto" }
                         )
                       );
                       trackEvent("offer_click", {
@@ -1677,13 +1763,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
                         episodeId,
                       });
                       router.push(
-                        buildPathWithAttribution("/subscribe", {
-                          entryPoint: "READER_PAYWALL",
-                          sourcePath: `/read/${seriesId}/${episodeId}`,
-                          sourceSeriesId: seriesId,
-                          sourceEpisodeId: modalState?.targetEpisodeId || episodeId,
-                          returnTo: `/read/${seriesId}/${episodeId}`,
-                        })
+                        buildPathWithAttribution(
+                          "/subscribe",
+                          buildReaderCommerceAttribution(
+                            "READER_PAYWALL",
+                            modalState?.targetEpisodeId || episodeId,
+                          ),
+                        )
                       );
                       setModalState(null);
                     },
@@ -1704,20 +1790,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
                         entry: "READER_PAYWALL",
                       });
                       const topupResponse = await topup(packageId, {
-                        attribution: {
-                          entryPoint: "READER_PAYWALL",
+                        attribution: buildReaderCommerceAttribution("READER_PAYWALL", episodeId, {
                           offerId: offerDecision?.recommendedTopupOffer?.id || `points_pack_${packageId}`,
-                          sourcePath: `/read/${seriesId}/${episodeId}`,
-                          sourceSeriesId: seriesId,
-                          sourceEpisodeId: episodeId,
-                          returnTo: `/read/${seriesId}/${episodeId}`,
-                        },
+                        }),
                       });
                       if (topupResponse.ok) {
                         const retryId = modalState?.targetEpisodeId || episodeId;
                         const retry = await handleUnlock(retryId);
                         if (retry.ok && nextEpisode && retryId === nextEpisode.id) {
-                          router.push(`/read/${seriesId}/${nextEpisode.id}`);
+                          router.push(buildEpisodeHref(nextEpisode.id));
                           return;
                         }
                         trackEvent("offer_purchase_success", {

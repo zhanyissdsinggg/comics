@@ -40,10 +40,12 @@ export default function EndOfEpisodeOverlay({
   series,
   sourcePath = "/",
   returnTo = sourcePath,
+  discoveryContext = null,
   seriesTitle,
   episodeTitle,
   primaryActionRef,
   highlightPrimaryAction = false,
+  onReturnToSource,
 }) {
   const readyAtMs = nextEpisode?.ttfReadyAt
     ? Date.parse(nextEpisode.ttfReadyAt)
@@ -135,6 +137,31 @@ export default function EndOfEpisodeOverlay({
 
         {!nextUnlocked ? (
           <div className="mt-4 space-y-4">
+            {discoveryContext ? (
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
+                      Discovery lane
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-white">
+                      From {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-neutral-400">{discoveryContext.returnHint}</p>
+                  </div>
+                  {onReturnToSource ? (
+                    <button
+                      type="button"
+                      onClick={onReturnToSource}
+                      className="rounded-full border border-neutral-700 px-3 py-1.5 text-xs font-semibold text-neutral-100"
+                    >
+                      {discoveryContext.returnLabel}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">

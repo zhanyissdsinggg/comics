@@ -92,7 +92,11 @@ export function mergePaymentAttribution(...items) {
     if (!normalized) {
       return;
     }
-    Object.assign(merged, normalized);
+    Object.entries(normalized).forEach(([key, value]) => {
+      if (value !== undefined) {
+        merged[key] = value;
+      }
+    });
   });
   return normalizePaymentAttribution(merged);
 }
