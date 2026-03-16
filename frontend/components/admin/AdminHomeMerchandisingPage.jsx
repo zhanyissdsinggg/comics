@@ -550,8 +550,8 @@ export default function AdminHomeMerchandisingPage() {
       },
       {
         id: "library-return",
-        label: "Library return slot",
-        hint: "Saved-shelf return lane",
+        label: "书架回流位",
+        hint: "给高意图回访用户安排下一本最该继续打开的作品。",
         recommendedIds: libraryReturnCandidates.map((entry) => entry.series?.id).filter(Boolean),
       },
     ],
@@ -793,7 +793,8 @@ export default function AdminHomeMerchandisingPage() {
         method: requestMethod,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: slot.current?.name || slot.id,
+          slot: slot.current?.slot || slot.id,
+          name: slot.current?.name || slot.label,
           seriesIds: slot.recommendedIds,
         }),
       });

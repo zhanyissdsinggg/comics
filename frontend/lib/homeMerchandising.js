@@ -113,28 +113,28 @@ function getLibraryReturnScore(series) {
 const LIBRARY_RETURN_SLOT_PRIORITIES = [
   {
     slotId: "library-return",
-    sourceLabel: "Merchandising return pick",
+    sourceLabel: "Editor-backed return pick",
     entryPoint: "LIBRARY_RETURN_SLOT",
     campaignId: "library_return_slot",
     limit: 8,
   },
   {
     slotId: "home-breakout",
-    sourceLabel: "Momentum pick",
+    sourceLabel: "Breakout momentum pick",
     entryPoint: "LIBRARY_BREAKOUT_FILL",
     campaignId: "library_breakout_fill",
     limit: 2,
   },
   {
     slotId: "home-binge-ready",
-    sourceLabel: "Binge-ready favorite",
+    sourceLabel: "Binge-ready fallback",
     entryPoint: "LIBRARY_BINGE_FILL",
     campaignId: "library_binge_fill",
     limit: 2,
   },
   {
     slotId: "home-free-start",
-    sourceLabel: "Easy re-entry pick",
+    sourceLabel: "Easy-entry pick",
     entryPoint: "LIBRARY_FREE_START_FILL",
     campaignId: "library_free_start_fill",
     limit: 2,

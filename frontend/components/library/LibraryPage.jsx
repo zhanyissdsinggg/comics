@@ -408,8 +408,8 @@ export default function LibraryPage() {
         id: series.id,
         seriesId: series.id,
         title: series.title,
-        subtitle:
-          sourceLabel || series.genres?.slice(0, 2).join(" | ") || series.badge || series.status,
+        eyebrow: sourceLabel || "",
+        subtitle: series.genres?.slice(0, 2).join(" | ") || series.badge || series.status,
         coverTone: series.coverTone,
         coverUrl: series.coverUrl,
         badge: series.badge,
@@ -422,10 +422,10 @@ export default function LibraryPage() {
   );
   const recommendedRailReason = useMemo(() => {
     if (recommendedItems.some((item) => item.sourceSlot === "library-return")) {
-      return "The merchandising desk is actively backing these saved-shelf return picks.";
+      return "Editors are actively backing these return-session picks for library readers right now.";
     }
     if (recommendedItems.some((item) => Boolean(item.sourceSlot))) {
-      return "The next follow is being filled from live storefront lanes before the chart fallback kicks in.";
+      return "These picks are being filled from live storefront lanes before the chart fallback takes over.";
     }
     return "Strong titles that are not saved yet, so the next follow stays easy.";
   }, [recommendedItems]);

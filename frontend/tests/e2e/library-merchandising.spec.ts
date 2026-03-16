@@ -227,7 +227,7 @@ test.describe("Library merchandising", () => {
     await expect(recommendedRail.getByRole("button", { name: /Midnight Ledger/i })).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
-    await expect(recommendedRail.getByText("Merchandising return pick", { exact: true })).toBeVisible({
+    await expect(recommendedRail.getByText("Editor-backed return pick", { exact: true })).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(recommendedRail.getByRole("button", { name: /Shadow Relay/i })).toBeVisible({

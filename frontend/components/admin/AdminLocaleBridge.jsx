@@ -273,6 +273,11 @@ const TEXT_MAP = new Map([
   ["high-value", "高价值用户"],
   ["Library return slot", "书架回流位"],
   ["Saved-shelf return lane", "书架推荐回流位"],
+  ["home-hero", "首页英雄位"],
+  ["home-free-start", "免费开篇位"],
+  ["home-binge-ready", "完结 binge 位"],
+  ["home-breakout", "爆款新作位"],
+  ["library-return", "书架回流位"],
 ]);
 
 const PATTERNS = [

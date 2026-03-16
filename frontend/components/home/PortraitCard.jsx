@@ -71,6 +71,11 @@ function PortraitCard({ item, tone, onClick }) {
 
       {/* 老王优化：卡片下方文字 - 更大更清晰 */}
       <div className="mt-3 space-y-1 px-1">
+        {item.eyebrow ? (
+          <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300/85">
+            {item.eyebrow}
+          </p>
+        ) : null}
         <p className="truncate text-sm font-bold leading-tight text-neutral-100 transition-colors group-hover:text-white">
           {item.title}
         </p>
