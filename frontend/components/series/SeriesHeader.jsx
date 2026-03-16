@@ -30,6 +30,18 @@ function formatSeriesKind(value) {
   return `${capitalize(value)} series`;
 }
 
+function formatCompactCount(value) {
+  const count = Number(value || 0);
+  if (!Number.isFinite(count) || count <= 0) {
+    return "0";
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: count >= 1000 ? 1 : 0,
+  }).format(count);
+}
+
 export default function SeriesHeader({
   series,
   previewHint,
@@ -61,6 +73,27 @@ export default function SeriesHeader({
       : "Start reading";
   const secondaryAction = onContinue && onStart ? onStart : null;
   const secondaryActionLabel = secondaryAction ? "Start from Episode 1" : "";
+  const followers = Number(series.followers || 0);
+  const ratingCount = Number(series.ratingCount || 0);
+  const readerPulseItems = [
+    {
+      id: "rating",
+      label: `${ratingValue} rating`,
+      hint: ratingCount > 0 ? `${formatCompactCount(ratingCount)} ratings` : "Be the first to rate it",
+    },
+    {
+      id: "library",
+      label: followers > 0 ? `${formatCompactCount(followers)} saved` : isFollowing ? "Saved now" : "Add to library",
+      hint: followers > 0 ? "Readers already keeping up with this series" : "Save it for a faster return later",
+    },
+    {
+      id: "episodes",
+      label: episodeCount > 0 ? `${episodeCount} episodes` : "New series",
+      hint: hasFreeEpisodes
+        ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"} available`
+        : "Unlock more as you read",
+    },
+  ];
   const primaryActionClassName = [
     "inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition-colors",
     highlightPrimaryAction
@@ -69,7 +102,7 @@ export default function SeriesHeader({
   ].join(" ");
   const journeyCards = [
     {
-      label: "How to start",
+      label: "Start here",
       value: onContinue ? "Resume now" : hasFreeEpisodes ? STOREFRONT_TERMS.freeStart : "Episode 1",
       hint: onContinue
         ? lastEpisodeLabel
@@ -80,7 +113,7 @@ export default function SeriesHeader({
           : "Start at Episode 1 and unlock more as you go.",
     },
     {
-      label: "Update pace",
+      label: "Release schedule",
       value: getReadingCadenceLabel(series.status),
       hint:
         String(series.status || "").toLowerCase() === "completed"
@@ -88,7 +121,7 @@ export default function SeriesHeader({
           : "Ongoing series work best if you like coming back for fresh chapters.",
     },
     {
-      label: "Library",
+      label: "Save status",
       value: isFollowing ? "Saved" : "Not saved",
       hint: isFollowing
         ? "This series is already in your library for a quick return."
@@ -97,24 +130,24 @@ export default function SeriesHeader({
   ];
   const metadataCards = [
     {
-      label: "Rating",
+      label: "Reader rating",
       value: ratingValue,
       hint: series.ratingCount ? `${series.ratingCount} reader ratings` : "Be the first reader to rate it",
     },
     {
-      label: "Episodes",
+      label: "Episodes live",
       value: episodeCount ? String(episodeCount) : "--",
       hint: hasFreeEpisodes
         ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"} available`
         : "Unlock chapters as you read",
     },
     {
-      label: "Status",
+      label: "Release status",
       value: capitalize(series.status || "updating"),
       hint: series.type ? formatSeriesKind(series.type) : "Series availability and release pace",
     },
     {
-      label: "Creator",
+      label: "Created by",
       value: series.author || "Studio",
       hint: creatorHref
         ? "View the creator page and browse related series."
@@ -139,7 +172,7 @@ export default function SeriesHeader({
               <div className="hidden w-full gap-3 sm:flex sm:flex-col">
                 {highlightPrimaryAction ? (
                   <p className="text-center text-xs font-semibold text-emerald-200">
-                    Purchase synced. Jump back in from the clearest next step.
+                    Purchase confirmed. Your clearest next chapter is ready.
                   </p>
                 ) : null}
                 <button
@@ -188,6 +221,18 @@ export default function SeriesHeader({
             <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-300 sm:text-base">
               {series.description || "A polished reading experience with fast chapter access, clear unlock options, and progress that stays in sync."}
             </p>
+
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              {readerPulseItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2"
+                >
+                  <p className="text-sm font-semibold text-white">{item.label}</p>
+                  <p className="mt-0.5 text-[11px] text-neutral-400">{item.hint}</p>
+                </div>
+              ))}
+            </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {metadataCards.map((card) =>
@@ -251,7 +296,7 @@ export default function SeriesHeader({
               <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-neutral-300">
                 <div className="flex items-center gap-2 text-amber-200">
                   <Star size={16} className="fill-current" />
-                  <span className="font-semibold">Pick up where you left off</span>
+                  <span className="font-semibold">Ready when you are</span>
                 </div>
                 {lastEpisodeLabel ? <span>Last read: Episode {lastEpisodeLabel}.</span> : null}
                 {previewHint ? <span>{previewHint}.</span> : null}
@@ -305,7 +350,7 @@ export default function SeriesHeader({
           <div className="grid gap-3 px-5 pb-5 sm:hidden">
             {highlightPrimaryAction ? (
               <p className="text-center text-xs font-semibold text-emerald-200">
-                Purchase synced. Jump back in from the clearest next step.
+                Purchase confirmed. Your clearest next chapter is ready.
               </p>
             ) : null}
             <button

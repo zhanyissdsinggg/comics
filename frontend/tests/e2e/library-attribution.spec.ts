@@ -215,7 +215,7 @@ test.describe("Library attribution", () => {
       { timeout: LIBRARY_UI_TIMEOUT_MS },
     );
 
-    await expect(page.getByText("From Library | Resume pick")).toBeVisible({
+    await expect(page.getByText("Library | Saved in library")).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(page.getByRole("button", { name: "Back to library" })).toBeVisible({

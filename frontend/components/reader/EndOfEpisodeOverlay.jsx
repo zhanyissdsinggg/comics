@@ -94,6 +94,15 @@ export default function EndOfEpisodeOverlay({
   const upsellBadge = showSubscribe ? "Recommended" : "";
   const queuePreview = Array.isArray(upcomingEpisodes) ? upcomingEpisodes.slice(0, 3) : [];
   const { data: similarSeries } = useSimilarRecommendations(seriesId, 4);
+  const nextEpisodeStatusLabel = nextUnlocked
+    ? "Ready to read now"
+    : showTtf && isReady
+      ? "Free unlock ready"
+      : showTtf && !isReady
+        ? `Free unlock in ${formatted || "--:--:--"}`
+        : singlePrice === 0
+          ? "Free"
+          : formatPointsLabel(singlePrice);
   const handlePrimary = () => {
     const primaryId = showPackPrimary ? packOfferId : "unlock_single";
     onOfferClick?.(primaryId);
@@ -123,19 +132,124 @@ export default function EndOfEpisodeOverlay({
               description={`I just finished reading this episode! Check it out.`}
               className=""
             />
-            {nextUnlocked ? (
-              <button
-                type="button"
-                onClick={onNext}
-                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
-              >
-                Read next
-              </button>
-            ) : null}
           </div>
         </div>
 
-        {!nextUnlocked ? (
+        {nextUnlocked ? (
+          <div className="mt-4 space-y-4">
+            {discoveryContext ? (
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
+                      Opened from
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-white">
+                      {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-neutral-400">{discoveryContext.returnHint}</p>
+                  </div>
+                  {onReturnToSource ? (
+                    <button
+                      type="button"
+                      onClick={onReturnToSource}
+                      className="rounded-full border border-neutral-700 px-3 py-1.5 text-xs font-semibold text-neutral-100"
+                    >
+                      {discoveryContext.returnLabel}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="grid gap-3 sm:grid-cols-[1.12fr_0.88fr]">
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
+                  Next up
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-white">{nextEpisode.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-300">
+                  The next chapter is already open, so the cleanest next step is to keep reading while the story is still fresh.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                    {nextEpisodeStatusLabel}
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-neutral-200">
+                    {isSubscriber ? "Member perks active" : "Points ready when needed"}
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    ref={primaryActionRef}
+                    type="button"
+                    onClick={onNext}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                      highlightPrimaryAction
+                        ? "border-emerald-300/60 bg-emerald-400/14 text-emerald-50 shadow-[0_0_0_1px_rgba(110,231,183,0.26),0_20px_50px_rgba(16,185,129,0.2)] motion-safe:animate-pulse"
+                        : "border-white bg-white text-neutral-900 hover:bg-neutral-200"
+                    }`}
+                  >
+                    Read next
+                  </button>
+                  {onViewSeries ? (
+                    <button
+                      type="button"
+                      onClick={onViewSeries}
+                      className="rounded-full border border-neutral-700 px-4 py-2 text-sm font-semibold text-neutral-200"
+                    >
+                      View series
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+                  After this
+                </p>
+                <div className="mt-3 space-y-2">
+                  {queuePreview.length > 0 ? (
+                    queuePreview.map((episode, index) => (
+                      <div
+                        key={episode.id || `${episode.title}-${index}`}
+                        className="flex items-center justify-between gap-3 rounded-2xl border border-neutral-800 bg-black/20 px-3 py-3 text-sm"
+                      >
+                        <div>
+                          <p className="font-medium text-white">{episode.title}</p>
+                          <p className="mt-1 text-xs text-neutral-500">
+                            {episode.unlocked
+                              ? "Already unlocked"
+                              : episode.ttfEligible
+                                ? "Timed free unlock supported"
+                                : "Premium chapter"}
+                          </p>
+                        </div>
+                        <span className="text-xs font-semibold text-neutral-300">
+                          {episode.unlocked ? "Ready" : episode.pricePts ? `${episode.pricePts} pts` : "Locked"}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm leading-6 text-neutral-400">
+                      The series page has the full episode list if you want to plan the rest of the run.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <StorefrontContinuationStrip
+              series={series}
+              similarItems={similarSeries}
+              sourcePath={sourcePath}
+              returnTo={returnTo}
+              entryPoint="READER_CONTINUE"
+              includeValueCard={false}
+              compact
+            />
+          </div>
+        ) : (
           <div className="mt-4 space-y-4">
             {discoveryContext ? (
               <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
@@ -374,7 +488,7 @@ export default function EndOfEpisodeOverlay({
               ) : null}
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );

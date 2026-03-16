@@ -93,12 +93,12 @@ export default function EpisodeList({
   }, [needsCountdown]);
   const summaryCards = [
     {
-      label: "Unlocked",
+      label: "Ready now",
       value: unlockedEpisodeIds.length.toLocaleString(),
       hint: lockedCount > 0 ? `${lockedCount.toLocaleString()} chapter${lockedCount === 1 ? "" : "s"} still locked` : "Everything in this series is ready to read",
     },
     {
-      label: "Free paths",
+      label: "Free options",
       value: freeUnlockCount.toLocaleString(),
       hint: freePreviewCount > 0
         ? `${freePreviewCount.toLocaleString()} episode${freePreviewCount === 1 ? "" : "s"} offer preview pages`
@@ -110,7 +110,7 @@ export default function EpisodeList({
       hint: walletTotal > 0 ? "Points available right now" : "Top up when the next chapter needs points",
     },
     {
-      label: "Mode",
+      label: "Unlock mode",
       value: isSubscriber ? "Member" : "Points",
       hint: isSubscriber
         ? "Membership perks and daily free unlocks are active"
@@ -126,11 +126,11 @@ export default function EpisodeList({
             {STOREFRONT_TERMS.readingDesk}
           </p>
           <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-            Make the next chapter choice obvious before the list gets long.
+            See what is free, unlocked, and worth opening next.
           </h2>
           <p className="mt-3 text-sm leading-7 text-neutral-400">
-            Strong series pages explain what is already open, how free unlocks behave, and whether points or
-            membership make more sense before the reader hits friction.
+            Strong series pages make the next chapter feel obvious. You should be able to tell what is already open,
+            what can be tried for free, and when points or membership make more sense.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             {seriesProgress?.lastEpisodeId ? (
