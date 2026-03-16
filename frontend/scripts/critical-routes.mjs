@@ -5,6 +5,8 @@ export const CRITICAL_ROUTES = [
   "/search",
   "/creators",
   "/creators/studio",
+  "/auth/reset",
+  "/auth/verify",
   "/faq",
   "/support",
   "/store",
