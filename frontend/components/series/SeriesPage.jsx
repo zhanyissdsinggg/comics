@@ -69,6 +69,7 @@ const CommentsSection = dynamic(() => import("./CommentsSection"), {
 const SimilarSeriesSection = dynamic(() => import("./SimilarSeriesSection"), {
   ssr: false,
 });
+const SeriesFAQPanel = dynamic(() => import("./SeriesFAQPanel"));
 const EpisodeList = dynamic(() => import("./EpisodeList"), {
   loading: () => <EpisodeListSkeleton />,
 });
@@ -686,6 +687,14 @@ export default function SeriesPage({ seriesId }) {
           onClaim={handleClaim}
           onSubscribe={handleSubscribe}
         />
+
+        <div className="mt-8">
+          <SeriesFAQPanel
+            series={series}
+            episodes={episodes}
+            creatorHref={creatorHref}
+          />
+        </div>
 
         <div ref={secondarySectionsRef} className="mt-8 h-px w-full" />
         {showSecondarySections ? (

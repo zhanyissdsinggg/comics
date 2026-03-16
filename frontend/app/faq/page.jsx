@@ -1,10 +1,13 @@
 import Link from "next/link";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
+import StructuredDataScript from "../../components/common/StructuredDataScript";
 import InfoPageNav from "../../components/layout/InfoPageNav";
 import SiteHeader from "../../components/layout/SiteHeader";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
+import { buildBreadcrumbStructuredData, buildFaqStructuredData } from "../../lib/structuredData";
+import { getSiteFaqItems } from "../../lib/storefrontFaq";
 
 export const metadata = createPageMetadata({
   title: "Help & FAQ",
@@ -12,24 +15,10 @@ export const metadata = createPageMetadata({
   path: "/faq",
 });
 
-const FAQ = [
-  {
-    q: "How do I unlock episodes?",
-    a: "Use points to unlock an episode, or wait for a free unlock if the series offers one. Membership benefits may also reduce the cost on selected titles.",
-  },
-  {
-    q: "How do I cancel my subscription?",
-    a: "Open Account, review your subscription section, and cancel there. You can re-subscribe later without losing access to the rest of your account.",
-  },
-  {
-    q: "Where can I see my orders?",
-    a: "Visit Orders to review recent purchases, payment status, and refund eligibility from one place.",
-  },
-  {
-    q: "Why can't I see adult series?",
-    a: "Turn on mature content and complete the age gate flow for your current region. The catalog updates as soon as access is confirmed.",
-  },
-];
+const FAQ = getSiteFaqItems().map((item) => ({
+  q: item.question,
+  a: item.answer,
+}));
 
 const QUICK_LINKS = [
   {
@@ -53,8 +42,22 @@ const QUICK_LINKS = [
 ];
 
 export default function FAQPage() {
+  const structuredData = [
+    buildBreadcrumbStructuredData([
+      { name: "Home", path: "/" },
+      { name: "FAQ", path: "/faq" },
+    ]),
+    buildFaqStructuredData({
+      path: "/faq",
+      name: `Help & FAQ | ${siteConfig.siteName}`,
+      description: "Common questions about purchases, subscriptions, adult content, and account support.",
+      items: FAQ,
+    }),
+  ].filter(Boolean);
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <StructuredDataScript id="faq-jsonld" data={structuredData} />
       <SiteHeader />
       <main className="px-4 py-8 pb-14 sm:py-10">
         <div className="mx-auto max-w-6xl space-y-8">

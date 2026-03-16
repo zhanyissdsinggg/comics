@@ -1,5 +1,6 @@
 import { absoluteUrl, siteConfig } from "./siteConfig";
 import { buildCreatorHref, normalizeCreatorName } from "./creators";
+import { getSeriesFaqItems } from "./storefrontFaq";
 
 function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
@@ -206,6 +207,7 @@ export function buildSeriesStructuredData({ series, episodes }) {
     ...series,
     episodeCount: Array.isArray(episodes) ? episodes.length : Number(series?.episodeCount || 0),
   };
+  const faqItems = getSeriesFaqItems({ series: withEpisodeCount, episodes });
 
   return [
     buildBreadcrumbStructuredData([
@@ -216,6 +218,12 @@ export function buildSeriesStructuredData({ series, episodes }) {
     cleanObject({
       "@context": "https://schema.org",
       ...buildSeriesEntity(withEpisodeCount),
+    }),
+    buildFaqStructuredData({
+      path: seriesPath,
+      name: `${normalizeText(series.title)} FAQ`,
+      description: `Reader questions and quick answers for ${normalizeText(series.title)}.`,
+      items: faqItems,
     }),
   ].filter(Boolean);
 }
@@ -286,4 +294,36 @@ export function buildCreatorsDirectoryStructuredData({ creators }) {
       },
     }),
   ].filter(Boolean);
+}
+
+export function buildFaqStructuredData({ path = "/", name = "", description = "", items = [] }) {
+  const normalizedItems = (Array.isArray(items) ? items : [])
+    .map((item) => ({
+      question: normalizeText(item?.question || item?.q),
+      answer: normalizeText(item?.answer || item?.a),
+    }))
+    .filter((item) => item.question && item.answer);
+
+  if (normalizedItems.length === 0) {
+    return null;
+  }
+
+  const normalizedPath = String(path || "/").trim() || "/";
+
+  return cleanObject({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": `${absoluteUrl(normalizedPath)}#faq`,
+    url: absoluteUrl(normalizedPath),
+    name: normalizeText(name) || undefined,
+    description: normalizeText(description) || undefined,
+    mainEntity: normalizedItems.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  });
 }
