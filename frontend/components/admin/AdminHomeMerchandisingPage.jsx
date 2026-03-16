@@ -153,7 +153,7 @@ export default function AdminHomeMerchandisingPage() {
   const [error, setError] = useState("");
   const [warnings, setWarnings] = useState([]);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
-  const [creatingSlot, setCreatingSlot] = useState("");
+  const [savingSlot, setSavingSlot] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
   const loadSlotsOnly = async () => {
@@ -326,13 +326,24 @@ export default function AdminHomeMerchandisingPage() {
           currentIds,
           currentSeries,
           recommendedSeries,
+          aligned: Boolean(aligned),
           state: !current ? "rose" : aligned ? "emerald" : "amber",
           stateLabel: !current ? "缺失" : aligned ? "已对齐" : "待对齐",
+          canApplyRecommendation: slot.recommendedIds.length > 0,
+          actionLabel: !current ? "一键补位" : aligned ? "已与建议一致" : "一键对齐",
         };
       }),
     [seriesById, slotBlueprints, slots],
   );
 
+  const slotCoverageCount = useMemo(
+    () => slotCards.filter((item) => item.current).length,
+    [slotCards],
+  );
+  const slotIssueCount = useMemo(
+    () => slotCards.filter((item) => !item.aligned).length,
+    [slotCards],
+  );
   const readyHeroCount = useMemo(
     () => heroCandidates.filter(({ series }) => getAdminSeriesReadiness(series).isReady).length,
     [heroCandidates],
@@ -358,32 +369,45 @@ export default function AdminHomeMerchandisingPage() {
     }
   };
 
-  const handleCreateSlot = async (slot) => {
+  const handleApplyRecommendation = async (slot) => {
     if (!slot?.id || slot.recommendedIds.length === 0) {
-      setFeedback({ type: "error", message: `${slot?.label || "该推荐位"} 还没有可创建的作品。` });
+      setFeedback({ type: "error", message: `${slot?.label || "该推荐位"} 还没有可同步的作品。` });
       return;
     }
     try {
-      setCreatingSlot(slot.id);
+      setSavingSlot(slot.id);
       setFeedback({ type: "", message: "" });
-      const { response, data } = await adminFetchJson("/api/admin/recommendations/slots", {
-        method: "POST",
+      const targetUrl = slot.current
+        ? `/api/admin/recommendations/slots/${slot.current.id}`
+        : "/api/admin/recommendations/slots";
+      const requestMethod = slot.current ? "PATCH" : "POST";
+      const { response, data } = await adminFetchJson(targetUrl, {
+        method: requestMethod,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: slot.id, seriesIds: slot.recommendedIds }),
+        body: JSON.stringify({
+          name: slot.current?.name || slot.id,
+          seriesIds: slot.recommendedIds,
+        }),
       });
       if (!response.ok) {
-        setFeedback({ type: "error", message: data?.message || data?.error || `${slot.label} 创建失败。` });
+        setFeedback({
+          type: "error",
+          message: data?.message || data?.error || `${slot.label}${slot.current ? "同步" : "创建"}失败。`,
+        });
         return;
       }
       await loadSlotsOnly();
-      setFeedback({ type: "success", message: `${slot.label} 已创建。` });
-    } catch (createError) {
+      setFeedback({
+        type: "success",
+        message: slot.current ? `${slot.label} 已同步到建议配置。` : `${slot.label} 已创建。`,
+      });
+    } catch (saveError) {
       setFeedback({
         type: "error",
-        message: createError instanceof Error ? createError.message : `${slot.label} 创建失败。`,
+        message: saveError instanceof Error ? saveError.message : `${slot.label}${slot.current ? "同步" : "创建"}失败。`,
       });
     } finally {
-      setCreatingSlot("");
+      setSavingSlot("");
     }
   };
 
@@ -484,13 +508,19 @@ export default function AdminHomeMerchandisingPage() {
           </button>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <StatCard label="已发布作品" value={publishedSeries.length.toLocaleString()} hint="当前能进入首页编排池的作品" />
           <StatCard
             label="首页位覆盖"
-            value={`${slotCards.filter((item) => item.current).length}/${slotCards.length}`}
+            value={`${slotCoverageCount}/${slotCards.length}`}
             hint="四个关键首页位已配置的数量"
-            tone={slotCards.every((item) => item.current) ? "emerald" : "amber"}
+            tone={slotCoverageCount === slotCards.length ? "emerald" : "amber"}
+          />
+          <StatCard
+            label="待修复首页位"
+            value={slotIssueCount.toLocaleString()}
+            hint="缺失或未与建议配置对齐的首页位"
+            tone={slotIssueCount === 0 ? "emerald" : "amber"}
           />
           <StatCard label="英雄位候选" value={heroItems.length.toLocaleString()} hint="首屏轮播可用候选数" tone="cyan" />
           <StatCard label="就绪候选" value={readyHeroCount.toLocaleString()} hint="资料完整、适合强推的候选" tone={readyHeroCount > 0 ? "emerald" : "rose"} />
@@ -533,17 +563,26 @@ export default function AdminHomeMerchandisingPage() {
                       </span>
                     )) : <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-neutral-400">暂未配置</span>}
                   </div>
+                  {slot.current && !slot.aligned ? (
+                    <p className="mt-4 text-sm text-amber-200">
+                      当前推荐位内容和首页建议不一致，建议直接一键对齐，避免首页入口和实际运营目标脱节。
+                    </p>
+                  ) : null}
                   <div className="mt-5 flex flex-wrap gap-2">
-                    {!slot.current ? (
+                    {!slot.aligned ? (
                       <button
                         type="button"
-                        onClick={() => void handleCreateSlot(slot)}
-                        disabled={creatingSlot === slot.id || slot.recommendedIds.length === 0}
+                        onClick={() => void handleApplyRecommendation(slot)}
+                        disabled={savingSlot === slot.id || !slot.canApplyRecommendation}
                         className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 text-sm font-semibold text-emerald-200 transition hover:border-emerald-400/50 hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {creatingSlot === slot.id ? "创建中..." : "一键补位"}
+                        {savingSlot === slot.id ? (slot.current ? "同步中..." : "创建中...") : slot.actionLabel}
                       </button>
-                    ) : null}
+                    ) : (
+                      <span className="inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-2 text-sm font-semibold text-emerald-200">
+                        {slot.actionLabel}
+                      </span>
+                    )}
                     <button
                       type="button"
                       onClick={() => void handleCopyIds(slot.label, slot.recommendedIds)}

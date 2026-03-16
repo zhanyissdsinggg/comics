@@ -62,6 +62,58 @@ const ADMIN_ROUTE_CASES = [
   },
 ] as const;
 
+const MERCH_SERIES_BODY = {
+  series: [
+    {
+      id: "series-hero-001",
+      title: "Midnight Signal",
+      author: "Studio Orion",
+      type: "comic",
+      status: "Completed",
+      adult: false,
+      description: "A binge-ready romance thriller built for homepage rotation.",
+      coverUrl: "https://cdn.example.com/series-hero-001-cover.jpg",
+      bannerUrl: "https://cdn.example.com/series-hero-001-banner.jpg",
+      badge: "HOT",
+      badges: ["HOT", "NEW"],
+      genres: ["Romance", "Thriller"],
+      episodeCount: 48,
+      latestEpisodeId: "episode-48",
+      freeEpisodeCount: 4,
+      hasFreeEpisodes: true,
+      rating: 4.9,
+      ratingCount: 1680,
+      followers: 24500,
+      views: 102400,
+      isPublished: true,
+      updatedAt: "2026-03-12T08:00:00.000Z",
+    },
+    {
+      id: "series-hero-002",
+      title: "Neon Contract",
+      author: "Blue Harbor",
+      type: "comic",
+      status: "Ongoing",
+      adult: false,
+      description: "Fast-start fantasy with strong click appeal.",
+      coverUrl: "https://cdn.example.com/series-hero-002-cover.jpg",
+      badge: "NEW",
+      badges: ["NEW"],
+      genres: ["Fantasy", "Action"],
+      episodeCount: 21,
+      latestEpisodeId: "episode-21",
+      freeEpisodeCount: 3,
+      hasFreeEpisodes: true,
+      rating: 4.7,
+      ratingCount: 920,
+      followers: 9800,
+      views: 35600,
+      isPublished: true,
+      updatedAt: "2026-03-10T08:00:00.000Z",
+    },
+  ],
+} as const;
+
 async function fulfillJson(route: Route, body: unknown): Promise<void> {
   await route.fulfill({
     status: 200,
@@ -72,6 +124,34 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 
 async function primeAdminSession(page: Page): Promise<void> {
   await page.addInitScript(() => undefined);
+}
+
+function buildRecommendationSlotState(body: unknown): Array<Record<string, unknown>> {
+  if (!body || typeof body !== "object" || !Array.isArray((body as { slots?: unknown[] }).slots)) {
+    return [];
+  }
+
+  return (body as { slots?: unknown[] }).slots
+    .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === "object")
+    .map((entry, index) => {
+      const slotName =
+        typeof entry.slot === "string"
+          ? entry.slot
+          : typeof entry.name === "string"
+            ? entry.name
+            : `slot-${index + 1}`;
+
+      return {
+        id: typeof entry.id === "string" ? entry.id : `slot-${index + 1}`,
+        slot: slotName,
+        name: typeof entry.name === "string" ? entry.name : slotName,
+        seriesIds: Array.isArray(entry.seriesIds) ? entry.seriesIds.map((item) => String(item || "")) : [],
+        createdAt:
+          typeof entry.createdAt === "string" ? entry.createdAt : "2026-03-12T00:00:00.000Z",
+        updatedAt:
+          typeof entry.updatedAt === "string" ? entry.updatedAt : "2026-03-12T00:00:00.000Z",
+      };
+    });
 }
 
 async function installAdminApiMocks(
@@ -105,6 +185,8 @@ async function installAdminApiMocks(
     revenueOrderStatusBody?: unknown;
   } = {},
 ): Promise<void> {
+  let recommendationSlotsState = buildRecommendationSlotState(options.recommendationSlotsBody);
+
   await page.route("**/api/health", async (route) => {
     await fulfillJson(route, { ok: true });
   });
@@ -116,6 +198,7 @@ async function installAdminApiMocks(
   await page.route("**/api/admin/**", async (route) => {
     const requestUrl = new URL(route.request().url());
     const pathname = requestUrl.pathname;
+    const method = route.request().method();
 
     if (pathname.endsWith("/api/admin/auth/verify")) {
       await fulfillJson(route, { success: true, valid: true });
@@ -212,8 +295,69 @@ async function installAdminApiMocks(
     }
 
     if (pathname.endsWith("/api/admin/recommendations/slots")) {
-      await fulfillJson(route, options.recommendationSlotsBody ?? { slots: [], total: 0 });
+      if (method === "POST") {
+        const body = JSON.parse(route.request().postData() || "{}") as Record<string, unknown>;
+        const slotName =
+          typeof body.slot === "string"
+            ? body.slot
+            : typeof body.name === "string"
+              ? body.name
+              : `slot-${recommendationSlotsState.length + 1}`;
+        const nextSlot = {
+          id: `slot-${recommendationSlotsState.length + 1}`,
+          slot: slotName,
+          name: slotName,
+          seriesIds: Array.isArray(body.seriesIds) ? body.seriesIds.map((item) => String(item || "")) : [],
+          createdAt: "2026-03-12T00:00:00.000Z",
+          updatedAt: "2026-03-12T00:00:00.000Z",
+        };
+        recommendationSlotsState = [...recommendationSlotsState, nextSlot];
+        await fulfillJson(route, { slot: nextSlot });
+        return;
+      }
+
+      await fulfillJson(route, { slots: recommendationSlotsState, total: recommendationSlotsState.length });
       return;
+    }
+
+    if (/\/api\/admin\/recommendations\/slots\/[^/]+$/.test(pathname)) {
+      const slotId = pathname.split("/").pop() || "";
+
+      if (method === "PATCH") {
+        const body = JSON.parse(route.request().postData() || "{}") as Record<string, unknown>;
+        recommendationSlotsState = recommendationSlotsState.map((slot) => {
+          if (slot.id !== slotId) {
+            return slot;
+          }
+
+          const nextName =
+            typeof body.slot === "string"
+              ? body.slot
+              : typeof body.name === "string"
+                ? body.name
+                : String(slot.slot || slot.name || slotId);
+
+          return {
+            ...slot,
+            slot: nextName,
+            name: nextName,
+            seriesIds: Array.isArray(body.seriesIds)
+              ? body.seriesIds.map((item) => String(item || ""))
+              : slot.seriesIds,
+            updatedAt: "2026-03-13T00:00:00.000Z",
+          };
+        });
+
+        const updatedSlot = recommendationSlotsState.find((slot) => slot.id === slotId) || null;
+        await fulfillJson(route, { slot: updatedSlot });
+        return;
+      }
+
+      if (method === "DELETE") {
+        recommendationSlotsState = recommendationSlotsState.filter((slot) => slot.id !== slotId);
+        await fulfillJson(route, { success: true });
+        return;
+      }
     }
 
     if (pathname.endsWith("/api/admin/recommendations/rankings")) {
@@ -287,57 +431,7 @@ test.describe("Admin route regression", () => {
   test("should render merchandising workspace with homepage recommendations", async ({ page }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
-      seriesBody: {
-        series: [
-          {
-            id: "series-hero-001",
-            title: "Midnight Signal",
-            author: "Studio Orion",
-            type: "comic",
-            status: "Completed",
-            adult: false,
-            description: "A binge-ready romance thriller built for homepage rotation.",
-            coverUrl: "https://cdn.example.com/series-hero-001-cover.jpg",
-            bannerUrl: "https://cdn.example.com/series-hero-001-banner.jpg",
-            badge: "HOT",
-            badges: ["HOT", "NEW"],
-            genres: ["Romance", "Thriller"],
-            episodeCount: 48,
-            latestEpisodeId: "episode-48",
-            freeEpisodeCount: 4,
-            hasFreeEpisodes: true,
-            rating: 4.9,
-            ratingCount: 1680,
-            followers: 24500,
-            views: 102400,
-            isPublished: true,
-            updatedAt: "2026-03-12T08:00:00.000Z",
-          },
-          {
-            id: "series-hero-002",
-            title: "Neon Contract",
-            author: "Blue Harbor",
-            type: "comic",
-            status: "Ongoing",
-            adult: false,
-            description: "Fast-start fantasy with strong click appeal.",
-            coverUrl: "https://cdn.example.com/series-hero-002-cover.jpg",
-            badge: "NEW",
-            badges: ["NEW"],
-            genres: ["Fantasy", "Action"],
-            episodeCount: 21,
-            latestEpisodeId: "episode-21",
-            freeEpisodeCount: 3,
-            hasFreeEpisodes: true,
-            rating: 4.7,
-            ratingCount: 920,
-            followers: 9800,
-            views: 35600,
-            isPublished: true,
-            updatedAt: "2026-03-10T08:00:00.000Z",
-          },
-        ],
-      },
+      seriesBody: MERCH_SERIES_BODY,
       recommendationSlotsBody: { slots: [], total: 0 },
       hotKeywordsBody: {
         keywords: [
@@ -357,6 +451,51 @@ test.describe("Admin route regression", () => {
     await expect(page.getByRole("heading", { name: "Midnight Signal" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("今日热搜", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByRole("button", { name: "一键补位" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
+  });
+
+  test("should sync merchandising recommendations into an existing slot", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminApiMocks(page, {
+      seriesBody: MERCH_SERIES_BODY,
+      recommendationSlotsBody: {
+        slots: [
+          {
+            id: "slot-home-hero",
+            slot: "home-hero",
+            name: "home-hero",
+            seriesIds: ["series-hero-002"],
+            createdAt: "2026-03-12T08:00:00.000Z",
+            updatedAt: "2026-03-12T08:00:00.000Z",
+          },
+        ],
+        total: 1,
+      },
+      hotKeywordsBody: {
+        keywords: [{ keyword: "romance", count: 1820, growthLabel: "今日热搜" }],
+      },
+    });
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const heroSlotCard = page.locator("article").filter({
+      has: page.getByRole("heading", { name: "首页英雄位" }),
+    });
+
+    await expect(heroSlotCard.getByText("待对齐", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await heroSlotCard.getByRole("button", { name: "一键对齐" }).click();
+
+    await expect(page.getByText("首页英雄位 已同步到建议配置。", { exact: true })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(heroSlotCard.getByText("已对齐", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(heroSlotCard.getByText("Midnight Signal", { exact: true }).first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
