@@ -152,7 +152,7 @@ test.describe("Reader discovery context", () => {
     );
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("From Search | Breakout pick")).toBeVisible({
+    await expect(page.getByText("Search | Trending pick")).toBeVisible({
       timeout: READER_UI_TIMEOUT_MS,
     });
     await expect(page.getByRole("button", { name: "Back to search" })).toBeVisible({
@@ -167,7 +167,7 @@ test.describe("Reader discovery context", () => {
       page.getByRole("button", { name: "Next" }).click(),
     ]);
 
-    await expect(page.getByText("From Search | Breakout pick")).toBeVisible({
+    await expect(page.getByText("Search | Trending pick")).toBeVisible({
       timeout: READER_UI_TIMEOUT_MS,
     });
 

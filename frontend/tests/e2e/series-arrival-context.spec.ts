@@ -116,16 +116,16 @@ test.describe("Series arrival context", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: "Rocket Choir is one of the standout picks from search right now." }),
+      page.getByRole("heading", { name: "Rocket Choir is trending in search right now." }),
     ).toBeVisible({ timeout: SERIES_UI_TIMEOUT_MS });
     const arrivalPanel = page.locator("div").filter({
       has: page.getByRole("heading", {
-        name: "Rocket Choir is one of the standout picks from search right now.",
+        name: "Rocket Choir is trending in search right now.",
       }),
     }).first();
 
     await expect(arrivalPanel.getByText("Search").first()).toBeVisible({ timeout: SERIES_UI_TIMEOUT_MS });
-    await expect(arrivalPanel.getByText("Breakout pick").first()).toBeVisible({ timeout: SERIES_UI_TIMEOUT_MS });
+    await expect(arrivalPanel.getByText("Trending pick").first()).toBeVisible({ timeout: SERIES_UI_TIMEOUT_MS });
     await expect(arrivalPanel.getByRole("button", { name: "Back to search" })).toBeVisible({
       timeout: SERIES_UI_TIMEOUT_MS,
     });

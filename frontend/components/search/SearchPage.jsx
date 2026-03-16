@@ -808,7 +808,7 @@ export default function SearchPage() {
       leadSearchResult && (hasDirectMatch || hasEditorialLead)
         ? {
             id: hasDirectMatch ? "lead-match" : query ? "lead-editorial-rescue" : "lead-editorial-push",
-            eyebrow: hasDirectMatch ? "Top result" : query ? "Try this next" : "Featured pick",
+            eyebrow: hasDirectMatch ? "Best match" : query ? "Try this next" : "Featured",
             title: hasDirectMatch
               ? `${leadSearchResult.title} is the best match to open first.`
               : query
@@ -825,7 +825,7 @@ export default function SearchPage() {
             signalValue: hasDirectMatch ? (loading ? "--" : total.toLocaleString()) : breakoutPick ? "Trending" : "Editors' pick",
             signalHint: hasDirectMatch
               ? `Sorted by ${sortLabel}`
-              : leadHotKeyword?.hint || "Picked from the homepage mix",
+              : leadHotKeyword?.hint || "Picked from one of the strongest home recommendations",
             ctaLabel: `Open ${leadSearchResult.title}`,
             onClick: () =>
               handleSeriesClick(
@@ -838,7 +838,7 @@ export default function SearchPage() {
           }
         : {
             id: "lead-trend",
-            eyebrow: "Live search heat",
+            eyebrow: "Trending search",
             title: `${leadHotLabel} is trending right now.`,
             description:
               "Trending searches are a quick way to find something popular without guessing.",
@@ -909,7 +909,7 @@ export default function SearchPage() {
           }
         : {
             id: isAdultMode ? "protected-desk" : "binge-desk",
-            eyebrow: isAdultMode ? "18+ pick" : "Binge pick",
+            eyebrow: isAdultMode ? "18+ read" : "Completed pick",
             title: isAdultMode
               ? "The 18+ catalog should be clear and easy to browse."
               : "Completed series are the easiest backup when search is too narrow.",

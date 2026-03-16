@@ -18,7 +18,7 @@ function getReturnConfig(sourcePath) {
     return {
       label: "Back to homepage",
       title: "Home",
-      hint: "Go back home if you want to compare more featured picks before choosing this series.",
+      hint: "Go back home if you want to compare a few more picks before choosing this series.",
     };
   }
 
@@ -79,7 +79,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
     if (campaignId.includes("free") || entryPoint.includes("free")) {
       return {
         sourceLabel: "Search",
-        laneValue: "Free to start",
+        laneValue: "Started free",
         title: `${series?.title || "This title"} is an easy place to start from search.`,
         description:
           freeEpisodeCount > 0
@@ -91,7 +91,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
     if (campaignId.includes("binge") || campaignId.includes("completed") || status === "completed") {
       return {
         sourceLabel: "Search",
-        laneValue: "Completed pick",
+        laneValue: "Completed series",
         title: `${series?.title || "This title"} is a finished series search is surfacing right now.`,
         description: "Completed runs are easier to commit to because you can read straight through without waiting.",
       };
@@ -100,15 +100,15 @@ function getLaneReason({ entryPoint, campaignId, series }) {
     if (campaignId.includes("breakout") || campaignId.includes("editorial") || isNewOrHot) {
       return {
         sourceLabel: "Search",
-        laneValue: "Breakout pick",
-        title: `${series?.title || "This title"} is one of the standout picks from search right now.`,
+        laneValue: "Trending pick",
+        title: `${series?.title || "This title"} is trending in search right now.`,
         description: "When a reader is still deciding, a strong breakout title makes the next click easier.",
       };
     }
 
     return {
       sourceLabel: "Search",
-      laneValue: "Top result",
+      laneValue: "Best match",
       title: `${series?.title || "This title"} is one of the clearest next picks from search.`,
       description: "Search should help readers move forward, not stop at a result count.",
     };
@@ -118,7 +118,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
     if (campaignId.includes("free")) {
       return {
         sourceLabel: "Home",
-        laneValue: "Free to start",
+        laneValue: "Easy first read",
         title: `${series?.title || "This title"} is being featured on home as an easy place to start.`,
         description:
           freeEpisodeCount > 0
@@ -130,7 +130,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
     if (campaignId.includes("resume")) {
       return {
         sourceLabel: "Home",
-        laneValue: "Return pick",
+        laneValue: "Resume now",
         title: `${series?.title || "This title"} is being featured on home for returning readers.`,
         description: "Home is surfacing this series to make it easier to jump back into reading.",
       };
@@ -138,7 +138,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
 
     return {
       sourceLabel: "Home",
-      laneValue: "Featured pick",
+      laneValue: "Featured on home",
       title: `${series?.title || "This title"} is one of the featured picks on home right now.`,
       description: "Home is already giving this series premium placement, so the page should keep that context clear.",
     };
@@ -147,7 +147,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
   if (entryPoint.startsWith("rankings_")) {
       return {
         sourceLabel: "Charts",
-        laneValue: "Chart pick",
+        laneValue: "Trending on charts",
         title: `${series?.title || "This title"} is trending on the charts right now.`,
         description: "Chart traffic works best when readers still understand why this title is hot right now.",
       };
@@ -156,7 +156,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
   if (entryPoint.startsWith("creator_")) {
     return {
       sourceLabel: "Creator page",
-      laneValue: "More from this creator",
+      laneValue: "From this creator",
       title: `${series?.title || "This title"} was opened from the creator page during a broader browse session.`,
       description: "Readers coming from a creator page are usually comparing more than one title at once.",
     };
@@ -165,7 +165,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
   if (entryPoint.startsWith("library_")) {
     return {
       sourceLabel: "Library",
-      laneValue: "Resume pick",
+      laneValue: "Saved in library",
       title: `${series?.title || "This title"} is ready for a quick return from your library.`,
       description: "Library visits already show strong intent, so the goal here is to keep the return smooth.",
     };
@@ -174,7 +174,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
   if (entryPoint.startsWith("adult_")) {
     return {
       sourceLabel: "18+ section",
-      laneValue: "18+ pick",
+      laneValue: "18+ browse",
       title: `${series?.title || "This title"} was opened from the 18+ section.`,
       description: "After clearing access rules, readers should still get a clear reason to keep browsing.",
     };
@@ -182,7 +182,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
 
   return {
     sourceLabel: "Discovery",
-    laneValue: "Featured pick",
+    laneValue: "Featured",
     title: `${series?.title || "This title"} arrived through a live discovery surface.`,
     description: "This click came from a featured surface, not a random direct visit.",
   };

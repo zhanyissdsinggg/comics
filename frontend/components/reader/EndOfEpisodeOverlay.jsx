@@ -142,10 +142,10 @@ export default function EndOfEpisodeOverlay({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
-                      Picked from
+                      Opened from
                     </p>
                     <p className="mt-2 text-sm font-semibold text-white">
-                      From {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
+                      {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-neutral-400">{discoveryContext.returnHint}</p>
                   </div>
