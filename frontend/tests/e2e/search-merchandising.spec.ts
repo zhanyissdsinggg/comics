@@ -1,0 +1,179 @@
+import { expect, test, type Route } from "@playwright/test";
+import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
+
+const SEARCH_UI_TIMEOUT_MS = 15000;
+const SEARCH_SERIES_BODY = {
+  series: [
+    {
+      id: "series-default-hot",
+      title: "Atlas Prime",
+      author: "Northline Studio",
+      type: "comic",
+      status: "Completed",
+      adult: false,
+      description: "The default chart monster that would win without homepage overrides.",
+      coverUrl: "https://placehold.co/600x800/png",
+      bannerUrl: "https://placehold.co/1600x900/png",
+      badge: "HOT",
+      badges: ["HOT"],
+      genres: ["Action", "Sci-Fi"],
+      episodeCount: 64,
+      latestEpisodeId: "episode-64",
+      freeEpisodeCount: 6,
+      hasFreeEpisodes: true,
+      rating: 4.9,
+      ratingCount: 5000,
+      followers: 22000,
+      views: 81000,
+      isPublished: true,
+      updatedAt: "2026-03-15T08:00:00.000Z",
+    },
+    {
+      id: "series-slot-free",
+      title: "Soft Launch Kiss",
+      author: "Blue Meadow",
+      type: "comic",
+      status: "Ongoing",
+      adult: false,
+      description: "Manual free-start pick for first-time readers.",
+      coverUrl: "https://placehold.co/600x800/png",
+      badge: "",
+      badges: [],
+      genres: ["Romance", "Comedy"],
+      episodeCount: 12,
+      latestEpisodeId: "episode-12",
+      freeEpisodeCount: 3,
+      hasFreeEpisodes: true,
+      rating: 4.0,
+      ratingCount: 160,
+      followers: 1900,
+      views: 6100,
+      isPublished: true,
+      updatedAt: "2026-03-13T08:00:00.000Z",
+    },
+    {
+      id: "series-slot-binge",
+      title: "Last Ember Files",
+      author: "Nocturne Works",
+      type: "comic",
+      status: "Completed",
+      adult: false,
+      description: "Manual binge-ready pick that should replace the default chart leader.",
+      coverUrl: "https://placehold.co/600x800/png",
+      badge: "",
+      badges: [],
+      genres: ["Thriller", "Mystery"],
+      episodeCount: 30,
+      latestEpisodeId: "episode-30",
+      freeEpisodeCount: 0,
+      hasFreeEpisodes: false,
+      rating: 4.0,
+      ratingCount: 140,
+      followers: 1600,
+      views: 5400,
+      isPublished: true,
+      updatedAt: "2026-03-12T08:00:00.000Z",
+    },
+    {
+      id: "series-slot-breakout",
+      title: "Rocket Choir",
+      author: "Signal House",
+      type: "comic",
+      status: "Ongoing",
+      adult: false,
+      description: "Manual breakout pick tied to live search momentum.",
+      coverUrl: "https://placehold.co/600x800/png",
+      badge: "NEW",
+      badges: ["NEW"],
+      genres: ["Fantasy", "Action"],
+      episodeCount: 9,
+      latestEpisodeId: "episode-9",
+      freeEpisodeCount: 0,
+      hasFreeEpisodes: false,
+      rating: 4.1,
+      ratingCount: 120,
+      followers: 1500,
+      views: 5000,
+      isPublished: true,
+      updatedAt: "2026-03-11T08:00:00.000Z",
+    },
+  ],
+} as const;
+
+async function fulfillJson(route: Route, body: unknown): Promise<void> {
+  await route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify(body),
+  });
+}
+
+test.describe("Search merchandising sync", () => {
+  test("search should honor admin-managed homepage slots when results miss", async ({ page }) => {
+    await page.route("**/api/health", async (route) => {
+      await fulfillJson(route, { ok: true });
+    });
+    await page.route("**/api/branding**", async (route) => {
+      await fulfillJson(route, { branding: {} });
+    });
+    await page.route("**/api/series**", async (route) => {
+      await fulfillJson(route, SEARCH_SERIES_BODY);
+    });
+    await page.route("**/api/search?**", async (route) => {
+      await fulfillJson(route, { results: [], total: 0 });
+    });
+    await page.route("**/api/search/suggest**", async (route) => {
+      await fulfillJson(route, { suggestions: [] });
+    });
+    await page.route("**/api/search/hot**", async (route) => {
+      await fulfillJson(route, {
+        keywords: [{ keyword: "rocket choir", count: 920, growthLabel: "Trending now" }],
+      });
+    });
+    await page.route("**/api/recommendations/homepage**", async (route) => {
+      await fulfillJson(route, {
+        slots: [
+          {
+            id: "slot-home-free-start",
+            slot: "home-free-start",
+            seriesIds: ["series-slot-free"],
+          },
+          {
+            id: "slot-home-binge-ready",
+            slot: "home-binge-ready",
+            seriesIds: ["series-slot-binge"],
+          },
+          {
+            id: "slot-home-breakout",
+            slot: "home-breakout",
+            seriesIds: ["series-slot-breakout"],
+          },
+        ],
+      });
+    });
+
+    const runtimeIssues = collectRuntimeIssues(page);
+    const response = await page.goto("/search?q=void", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "The catalog did not return a clean hit." })).toBeVisible({
+      timeout: SEARCH_UI_TIMEOUT_MS,
+    });
+
+    await expect(page.getByText("Rocket Choir is the strongest storefront rescue for this search right now.")).toBeVisible({
+      timeout: SEARCH_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("button", { name: /Open Rocket Choir/i }).first()).toBeVisible({
+      timeout: SEARCH_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("button", { name: /Open Last Ember Files/i }).first()).toBeVisible({
+      timeout: SEARCH_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("button", { name: /Open Soft Launch Kiss/i }).first()).toBeVisible({
+      timeout: SEARCH_UI_TIMEOUT_MS,
+    });
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/search?q=void", runtimeIssues);
+  });
+});

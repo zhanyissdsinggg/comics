@@ -15,6 +15,7 @@ import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useProgressStore } from "../../store/useProgressStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import { getHomeEditorialSnapshot } from "../../lib/homeMerchandising";
 import { recommendRails } from "../../lib/reco/recommender";
 import { trackEvent } from "../../lib/trackEvent";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
@@ -162,6 +163,8 @@ export default function SearchPage() {
   const { isSignedIn } = useAuthStore();
   const [catalog, setCatalog] = useState([]);
   const [catalogResponse, setCatalogResponse] = useState(null);
+  const [homepageSlots, setHomepageSlots] = useState([]);
+  const [homepageSlotsResponse, setHomepageSlotsResponse] = useState(null);
   const recoImpressionRef = useRef(new Set());
   const resultsRequestRef = useRef(0);
   const surfaceRequestRef = useRef(0);
@@ -169,6 +172,7 @@ export default function SearchPage() {
   const suggestRequestRef = useRef(0);
   const resultsStale = useStaleNotice(resultsResponse);
   const catalogStale = useStaleNotice(catalogResponse);
+  const homepageSlotsStale = useStaleNotice(homepageSlotsResponse);
   const { shouldRetry } = useRetryPolicy();
 
   const query = searchParams.get("q") || searchParams.get("query") || "";
@@ -386,9 +390,33 @@ export default function SearchPage() {
       return false;
     };
 
-    apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }).then((response) => {
-      if (!applyCatalog(response)) {
-        if (!response.ok && (response.status === 0 || response.status >= 500)) {
+    const applyHomepageSlots = (response) => {
+      if (!isCurrentRequest()) {
+        return false;
+      }
+
+      setHomepageSlotsResponse(response);
+      if (response.ok) {
+        setHomepageSlots(response.data?.slots || []);
+        return true;
+      }
+
+      if (response.error === "ADULT_GATED") {
+        forceDisableAdultMode();
+        setHomepageSlots([]);
+        return false;
+      }
+
+      setHomepageSlots([]);
+      return false;
+    };
+
+    parallelRequests2(
+      () => apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }),
+      () => apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, { cacheMs: 60000 }),
+    ).then(([catalogResponse, homepageSlotsResponse]) => {
+      if (!applyCatalog(catalogResponse)) {
+        if (!catalogResponse.ok && (catalogResponse.status === 0 || catalogResponse.status >= 500)) {
           if (shouldRetry(`search_catalog_${adultFlag}`)) {
             retryTimer = setTimeout(() => {
               apiGet(`/api/series?adult=${adultFlag}`, { bust: true }).then((retryResponse) => {
@@ -397,16 +425,26 @@ export default function SearchPage() {
             }, 600);
           }
         }
-        return;
       }
 
-      if (response.stale) {
+      if (catalogResponse.ok && catalogResponse.stale) {
         apiGet(`/api/series?adult=${adultFlag}`, {
           cacheMs: 30000,
           bust: true,
           dedupeMs: 0,
         }).then((freshResponse) => {
           applyCatalog(freshResponse);
+        });
+      }
+
+      applyHomepageSlots(homepageSlotsResponse);
+      if (homepageSlotsResponse.ok && homepageSlotsResponse.stale) {
+        apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, {
+          cacheMs: 60000,
+          bust: true,
+          dedupeMs: 0,
+        }).then((freshResponse) => {
+          applyHomepageSlots(freshResponse);
         });
       }
     });
@@ -470,6 +508,13 @@ export default function SearchPage() {
     () => recommendRails(catalog, behavior, progressMap, { isAdultMode }),
     [catalog, behavior, progressMap, isAdultMode],
   );
+  const editorialSnapshot = useMemo(
+    () => getHomeEditorialSnapshot(catalog, { homepageSlots }),
+    [catalog, homepageSlots],
+  );
+  const freeStartPick = editorialSnapshot.freeStartPick;
+  const completedPick = editorialSnapshot.completedPick;
+  const breakoutPick = editorialSnapshot.breakoutPick;
 
   const recoRails = useMemo(() => {
     const list = [];
@@ -614,61 +659,102 @@ export default function SearchPage() {
     const leadHotValue = leadHotKeyword?.value || leadHotLabel;
     const backupLabel = backupKeyword?.label || "Fantasy";
     const backupValue = backupKeyword?.value || backupLabel;
+    const freeStartCount = Number(freeStartPick?.freeEpisodeCount || 0);
 
     return [
-      {
-        id: "free-unlock",
-        eyebrow: "Free start",
-        title: "Open the chart built for readers who want forward motion before they spend.",
-        description:
-          "Free-unlock momentum is one of the easiest ways to keep a cold session moving without dropping out of the storefront.",
-        ctaLabel: "Open free unlock chart",
-        onClick: () => router.push("/rankings?type=ttf&window=all"),
-        accentClass:
-          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
-      },
-      {
-        id: "completed-binge",
-        eyebrow: "Binge path",
-        title: "Jump straight into completed series that can hold a full-session read.",
-        description:
-          "Finished runs convert well when the reader wants commitment, closure, and zero waiting between chapters.",
-        ctaLabel: "Browse completed",
-        onClick: () =>
-          updateParams(
-            {
-              q: "",
-              type: "",
-              genre: "",
-              status: "Completed",
-              sort: "popular",
-            },
-            { resetPage: true },
-          ),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-      {
-        id: "breakout-watch",
-        eyebrow: "Breakout watch",
-        title: `Use "${leadHotLabel}" as the quickest path into today's live discovery energy.`,
-        description:
-          "When search intent is soft, a trending term gives the reader a stronger first click than a blank grid ever will.",
-        ctaLabel: `Search ${leadHotLabel}`,
-        onClick: () =>
-          updateParams(
-            {
-              q: leadHotValue,
-              type: "",
-              genre: "",
-              status: "",
-              sort: "popular",
-            },
-            { resetPage: true },
-          ),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
+      freeStartPick
+        ? {
+            id: "free-unlock-slot",
+            eyebrow: "Free start",
+            title: `Open ${freeStartPick.title} before the session hits payment friction.`,
+            description:
+              freeStartCount > 0
+                ? `${freeStartPick.title} already has ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}, which makes it a cleaner first click than a generic chart.`
+                : `${freeStartPick.title} is the sample-friendly title the storefront is already using to pull cold readers forward.`,
+            ctaLabel: `Open ${freeStartPick.title}`,
+            onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_PATH_FREE_START", "search_path_free_start"),
+            accentClass:
+              "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+          }
+        : {
+            id: "free-unlock",
+            eyebrow: "Free start",
+            title: "Open the chart built for readers who want forward motion before they spend.",
+            description:
+              "Free-unlock momentum is one of the easiest ways to keep a cold session moving without dropping out of the storefront.",
+            ctaLabel: "Open free unlock chart",
+            onClick: () => router.push("/rankings?type=ttf&window=all"),
+            accentClass:
+              "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+          },
+      completedPick
+        ? {
+            id: "completed-binge-slot",
+            eyebrow: "Binge path",
+            title: `Jump into ${completedPick.title} when the reader wants a full-session payoff.`,
+            description:
+              `${completedPick.title} is already finished, so the next click trades waiting and uncertainty for depth, closure, and stronger session time.`,
+            ctaLabel: `Open ${completedPick.title}`,
+            onClick: () => handleSeriesClick(completedPick.id, "SEARCH_PATH_BINGE", "search_path_binge"),
+            accentClass:
+              "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          }
+        : {
+            id: "completed-binge",
+            eyebrow: "Binge path",
+            title: "Jump straight into completed series that can hold a full-session read.",
+            description:
+              "Finished runs convert well when the reader wants commitment, closure, and zero waiting between chapters.",
+            ctaLabel: "Browse completed",
+            onClick: () =>
+              updateParams(
+                {
+                  q: "",
+                  type: "",
+                  genre: "",
+                  status: "Completed",
+                  sort: "popular",
+                },
+                { resetPage: true },
+              ),
+            accentClass:
+              "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          },
+      breakoutPick
+        ? {
+            id: "breakout-watch-slot",
+            eyebrow: "Breakout watch",
+            title: `${breakoutPick.title} is the breakout the storefront is pushing right now.`,
+            description:
+              leadHotKeyword?.label
+                ? `${breakoutPick.title} gives the search desk a concrete handoff while "${leadHotLabel}" is still pulling live interest.`
+                : `${breakoutPick.title} is the kind of editorial breakout that keeps discovery moving even before the reader knows what to type.`,
+            ctaLabel: `Open ${breakoutPick.title}`,
+            onClick: () => handleSeriesClick(breakoutPick.id, "SEARCH_PATH_BREAKOUT", "search_path_breakout"),
+            accentClass:
+              "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          }
+        : {
+            id: "breakout-watch",
+            eyebrow: "Breakout watch",
+            title: `Use "${leadHotLabel}" as the quickest path into today's live discovery energy.`,
+            description:
+              "When search intent is soft, a trending term gives the reader a stronger first click than a blank grid ever will.",
+            ctaLabel: `Search ${leadHotLabel}`,
+            onClick: () =>
+              updateParams(
+                {
+                  q: leadHotValue,
+                  type: "",
+                  genre: "",
+                  status: "",
+                  sort: "popular",
+                },
+                { resetPage: true },
+              ),
+            accentClass:
+              "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          },
       {
         id: isAdultMode ? "adult-desk" : "broad-browse",
         eyebrow: isAdultMode ? "Protected desk" : "Open browse",
@@ -696,29 +782,57 @@ export default function SearchPage() {
           "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
       },
     ];
-  }, [hotKeywords, isAdultMode, keywords, router, updateParams]);
+  }, [
+    breakoutPick,
+    completedPick,
+    freeStartPick,
+    handleSeriesClick,
+    hotKeywords,
+    isAdultMode,
+    keywords,
+    router,
+    updateParams,
+  ]);
   const browsePathGrid = <StorefrontPathwaysGrid cards={editorialBrowsePaths} />;
-  const leadSearchResult = results[0] || recoRails[0]?.items?.[0] || null;
+  const leadSearchResult = results[0] || breakoutPick || freeStartPick || completedPick || recoRails[0]?.items?.[0] || null;
   const searchEventCards = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
     const leadHotValue = leadHotKeyword?.value || leadHotLabel;
     const sortLabel = SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance";
+    const hasDirectMatch = Boolean(query) && results.length > 0;
+    const hasEditorialLead = Boolean(leadSearchResult) && (!query || results.length === 0);
+    const freeStartCount = Number(freeStartPick?.freeEpisodeCount || 0);
 
     return [
-      query && leadSearchResult
+      leadSearchResult && (hasDirectMatch || hasEditorialLead)
         ? {
-            id: "lead-match",
-            eyebrow: "Live match",
-            title: `${leadSearchResult.title} is the strongest handoff from this search lane.`,
-            description: hasSparseResults
-              ? "The result set is narrow, so the first click should feel confident while the rest of the storefront stays ready as backup."
-              : "Once intent appears, the search desk should move the reader into the right series page without killing context.",
-            signalLabel: "Matches",
-            signalValue: loading ? "--" : total.toLocaleString(),
-            signalHint: `Sorted by ${sortLabel}`,
+            id: hasDirectMatch ? "lead-match" : query ? "lead-editorial-rescue" : "lead-editorial-push",
+            eyebrow: hasDirectMatch ? "Live match" : query ? "Editorial rescue" : "Editorial push",
+            title: hasDirectMatch
+              ? `${leadSearchResult.title} is the strongest handoff from this search lane.`
+              : query
+                ? `${leadSearchResult.title} is the strongest storefront rescue for this search right now.`
+                : `${leadSearchResult.title} is the storefront push worth surfacing before the reader even types.`,
+            description: hasDirectMatch
+              ? hasSparseResults
+                ? "The result set is narrow, so the first click should feel confident while the rest of the storefront stays ready as backup."
+                : "Once intent appears, the search desk should move the reader into the right series page without killing context."
+              : query
+                ? "The current query did not land cleanly, so the search desk should immediately hand off to a title the merchandising desk is already backing."
+                : "When intent is still soft, search should surface the same title the homepage is already pushing instead of making the reader start from a blank grid.",
+            signalLabel: hasDirectMatch ? "Matches" : "Storefront",
+            signalValue: hasDirectMatch ? (loading ? "--" : total.toLocaleString()) : breakoutPick ? "Breakout" : "Featured",
+            signalHint: hasDirectMatch
+              ? `Sorted by ${sortLabel}`
+              : leadHotKeyword?.hint || "Admin-managed homepage slot",
             ctaLabel: `Open ${leadSearchResult.title}`,
-            onClick: () => handleSeriesClick(leadSearchResult.id, "SEARCH_EVENT_HUB", "search_lead_match"),
+            onClick: () =>
+              handleSeriesClick(
+                leadSearchResult.id,
+                "SEARCH_EVENT_HUB",
+                hasDirectMatch ? "search_lead_match" : "search_editorial_rescue",
+              ),
             accentClass:
               "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
           }
@@ -747,51 +861,86 @@ export default function SearchPage() {
             accentClass:
               "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
           },
-      {
-        id: "free-start-desk",
-        eyebrow: "Free start",
-        title: "Keep the session moving before payment friction shows up.",
-        description:
-          "Free-unlock and sample-friendly lanes keep search alive even when the reader has not committed to a title yet.",
-        signalLabel: "Chart",
-        signalValue: "TTF",
-        signalHint: "Timed free unlock momentum",
-        ctaLabel: "Open free unlock chart",
-        onClick: () => router.push("/rankings?type=ttf&window=all"),
-        accentClass:
-          "group border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
-      },
-      {
-        id: isAdultMode ? "protected-desk" : "binge-desk",
-        eyebrow: isAdultMode ? "Protected desk" : "Binge lane",
-        title: isAdultMode
-          ? "The 18+ shelf should feel curated, not hidden behind guesswork."
-          : "Completed runs are the cleanest rescue path when a search lane feels too narrow.",
-        description: isAdultMode
-          ? "If a mature search misses, the reader still needs a premium lane with explicit access rules and clear boundaries."
-          : "Finished series widen discovery fast because they trade uncertainty for payoff, depth, and stronger return intent.",
-        signalLabel: isAdultMode ? "Mode" : "Finished",
-        signalValue: isAdultMode ? "18+" : "Runs",
-        signalHint: isAdultMode ? "Age-gated catalog available" : "Ready for long-session reading",
-        ctaLabel: isAdultMode ? "Open adult hub" : "Browse completed",
-        onClick: () =>
-          isAdultMode
-            ? router.push("/adult")
-            : updateParams(
-                {
-                  q: "",
-                  type: "",
-                  genre: "",
-                  status: "Completed",
-                  sort: "popular",
-                },
-                { resetPage: true },
-              ),
-        accentClass:
-          "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
+      freeStartPick
+        ? {
+            id: "free-start-desk-slot",
+            eyebrow: "Free start",
+            title: `${freeStartPick.title} keeps the session moving before payment friction shows up.`,
+            description:
+              freeStartCount > 0
+                ? `${freeStartPick.title} already gives the reader ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}, so search can offer a concrete low-friction handoff instead of a generic chart.`
+                : `${freeStartPick.title} is the sample-friendly lane the storefront is using to keep cold readers engaged.`,
+            signalLabel: "Free eps",
+            signalValue: freeStartCount > 0 ? String(freeStartCount) : "Live",
+            signalHint: "Ready before checkout",
+            ctaLabel: `Open ${freeStartPick.title}`,
+            onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_EVENT_FREE_START", "search_event_free_start"),
+            accentClass:
+              "group border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+          }
+        : {
+            id: "free-start-desk",
+            eyebrow: "Free start",
+            title: "Keep the session moving before payment friction shows up.",
+            description:
+              "Free-unlock and sample-friendly lanes keep search alive even when the reader has not committed to a title yet.",
+            signalLabel: "Chart",
+            signalValue: "TTF",
+            signalHint: "Timed free unlock momentum",
+            ctaLabel: "Open free unlock chart",
+            onClick: () => router.push("/rankings?type=ttf&window=all"),
+            accentClass:
+              "group border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+          },
+      completedPick
+        ? {
+            id: "binge-desk-slot",
+            eyebrow: "Binge lane",
+            title: `${completedPick.title} is the cleanest long-session backup when search gets too narrow.`,
+            description:
+              `${completedPick.title} is already complete, which makes it a stronger rescue path than asking the reader to widen filters and start over.`,
+            signalLabel: "Status",
+            signalValue: "Completed",
+            signalHint: completedPick?.episodeCount ? `${completedPick.episodeCount} episodes ready` : "Ready for a full-session read",
+            ctaLabel: `Open ${completedPick.title}`,
+            onClick: () => handleSeriesClick(completedPick.id, "SEARCH_EVENT_BINGE", "search_event_binge"),
+            accentClass:
+              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          }
+        : {
+            id: isAdultMode ? "protected-desk" : "binge-desk",
+            eyebrow: isAdultMode ? "Protected desk" : "Binge lane",
+            title: isAdultMode
+              ? "The 18+ shelf should feel curated, not hidden behind guesswork."
+              : "Completed runs are the cleanest rescue path when a search lane feels too narrow.",
+            description: isAdultMode
+              ? "If a mature search misses, the reader still needs a premium lane with explicit access rules and clear boundaries."
+              : "Finished series widen discovery fast because they trade uncertainty for payoff, depth, and stronger return intent.",
+            signalLabel: isAdultMode ? "Mode" : "Finished",
+            signalValue: isAdultMode ? "18+" : "Runs",
+            signalHint: isAdultMode ? "Age-gated catalog available" : "Ready for long-session reading",
+            ctaLabel: isAdultMode ? "Open adult hub" : "Browse completed",
+            onClick: () =>
+              isAdultMode
+                ? router.push("/adult")
+                : updateParams(
+                    {
+                      q: "",
+                      type: "",
+                      genre: "",
+                      status: "Completed",
+                      sort: "popular",
+                    },
+                    { resetPage: true },
+                  ),
+            accentClass:
+              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          },
     ];
   }, [
+    breakoutPick,
+    completedPick,
+    freeStartPick,
     handleSeriesClick,
     hasSparseResults,
     hotKeywords,
@@ -801,6 +950,7 @@ export default function SearchPage() {
     leadSearchResult,
     loading,
     query,
+    results.length,
     router,
     sort,
     total,
@@ -841,7 +991,7 @@ export default function SearchPage() {
           />
         ) : null}
 
-        {resultsStale || catalogStale ? (
+        {resultsStale || catalogStale || homepageSlotsStale ? (
           <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
             Showing cached data. Reconnect to refresh live search surfaces.
           </div>
@@ -1129,38 +1279,68 @@ export default function SearchPage() {
                   Clear filters
                 </button>
               ) : null}
-              <button
-                type="button"
-                onClick={() =>
-                  updateParams(
-                    {
-                      q: "",
-                      type: "",
-                      genre: "",
-                      status: "Completed",
-                      sort: "popular",
-                    },
-                    { resetPage: true },
-                  )
-                }
-                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
-              >
-                Browse completed
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
-              >
-                This week&apos;s chart
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/rankings?type=ttf&window=all")}
-                className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
-              >
-                Free unlock picks
-              </button>
+              {breakoutPick ? (
+                <button
+                  type="button"
+                  onClick={() => handleSeriesClick(breakoutPick.id, "SEARCH_ZERO_RESULTS", "search_zero_breakout")}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  Open {breakoutPick.title}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => router.push("/rankings?type=popular&window=week")}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  This week&apos;s chart
+                </button>
+              )}
+              {completedPick ? (
+                <button
+                  type="button"
+                  onClick={() => handleSeriesClick(completedPick.id, "SEARCH_ZERO_RESULTS", "search_zero_completed")}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  Open {completedPick.title}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateParams(
+                      {
+                        q: "",
+                        type: "",
+                        genre: "",
+                        status: "Completed",
+                        sort: "popular",
+                      },
+                      { resetPage: true },
+                    )
+                  }
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  Browse completed
+                </button>
+              )}
+              {freeStartPick ? (
+                <button
+                  type="button"
+                  onClick={() => handleSeriesClick(freeStartPick.id, "SEARCH_ZERO_RESULTS", "search_zero_free_start")}
+                  className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                >
+                  Open {freeStartPick.title}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => router.push("/rankings?type=ttf&window=all")}
+                  className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                >
+                  Free unlock picks
+                </button>
+              )}
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
               {hotKeywords.slice(0, 6).map((item) => (
@@ -1234,31 +1414,60 @@ export default function SearchPage() {
                       Widen filters
                     </button>
                   ) : null}
-                  <button
-                    type="button"
-                    onClick={() => router.push("/rankings?type=popular&window=week")}
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
-                  >
-                    Compare with the chart
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateParams(
-                        {
-                          q: "",
-                          type: "",
-                          genre: "",
-                          status: "Completed",
-                          sort: "popular",
-                        },
-                        { resetPage: true },
-                      )
-                    }
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
-                  >
-                    Check completed picks
-                  </button>
+                  {breakoutPick ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSeriesClick(breakoutPick.id, "SEARCH_SPARSE_RESULTS", "search_sparse_breakout")}
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                    >
+                      Open {breakoutPick.title}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => router.push("/rankings?type=popular&window=week")}
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                    >
+                      Compare with the chart
+                    </button>
+                  )}
+                  {completedPick ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSeriesClick(completedPick.id, "SEARCH_SPARSE_RESULTS", "search_sparse_completed")}
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                    >
+                      Open {completedPick.title}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateParams(
+                          {
+                            q: "",
+                            type: "",
+                            genre: "",
+                            status: "Completed",
+                            sort: "popular",
+                          },
+                          { resetPage: true },
+                        )
+                      }
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                    >
+                      Check completed picks
+                    </button>
+                  )}
+                  {freeStartPick ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSeriesClick(freeStartPick.id, "SEARCH_SPARSE_RESULTS", "search_sparse_free_start")}
+                      className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                    >
+                      Open {freeStartPick.title}
+                    </button>
+                  ) : null}
                 </div>
               </SurfacePanel>
             ) : null}
