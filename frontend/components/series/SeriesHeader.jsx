@@ -1,11 +1,10 @@
 ﻿"use client";
 
 import { useRouter } from "next/navigation";
-import { BookOpen, Heart, Star } from "lucide-react";
+import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
-import { getReadingCadenceLabel, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 
 function capitalize(value) {
   if (!value) {
@@ -76,23 +75,17 @@ export default function SeriesHeader({
   const followers = Number(series.followers || 0);
   const ratingCount = Number(series.ratingCount || 0);
   const readerPulseItems = [
-    {
-      id: "rating",
-      label: `${ratingValue} rating`,
-      hint: ratingCount > 0 ? `${formatCompactCount(ratingCount)} ratings` : "Be the first to rate it",
-    },
-    {
-      id: "library",
-      label: followers > 0 ? `${formatCompactCount(followers)} saved` : isFollowing ? "Saved now" : "Add to library",
-      hint: followers > 0 ? "Readers already keeping up with this series" : "Save it for a faster return later",
-    },
-    {
-      id: "episodes",
-      label: episodeCount > 0 ? `${episodeCount} episodes` : "New series",
-      hint: hasFreeEpisodes
-        ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"} available`
-        : "Unlock more as you read",
-    },
+    `${ratingValue} rating${ratingCount > 0 ? ` (${formatCompactCount(ratingCount)})` : ""}`,
+    followers > 0
+      ? `${formatCompactCount(followers)} saved`
+      : isFollowing
+        ? "Saved in your library"
+        : "Add to library",
+    hasFreeEpisodes
+      ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"}`
+      : episodeCount > 0
+        ? `${episodeCount} episodes`
+        : "New series",
   ];
   const primaryActionClassName = [
     "inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition-colors",
@@ -100,62 +93,6 @@ export default function SeriesHeader({
       ? "border-emerald-300/60 bg-emerald-400/18 text-emerald-50 shadow-[0_0_0_1px_rgba(110,231,183,0.28),0_22px_60px_rgba(16,185,129,0.22)] motion-safe:animate-pulse"
       : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100 hover:border-emerald-300/50 hover:bg-emerald-400/18",
   ].join(" ");
-  const journeyCards = [
-    {
-      label: "Start here",
-      value: onContinue ? "Resume now" : hasFreeEpisodes ? STOREFRONT_TERMS.freeStart : "Episode 1",
-      hint: onContinue
-        ? lastEpisodeLabel
-          ? `Jump back into Episode ${lastEpisodeLabel} without hunting through the list.`
-          : "Jump back into the latest unlocked chapter without hunting through the list."
-        : hasFreeEpisodes
-          ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"} let you try the series before you spend.`
-          : "Start at Episode 1 and unlock more as you go.",
-    },
-    {
-      label: "Release schedule",
-      value: getReadingCadenceLabel(series.status),
-      hint:
-        String(series.status || "").toLowerCase() === "completed"
-          ? "Finished runs are ideal for long sessions because there is no release gap."
-          : "Ongoing series work best if you like coming back for fresh chapters.",
-    },
-    {
-      label: "Save status",
-      value: isFollowing ? "Saved" : "Not saved",
-      hint: isFollowing
-        ? "This series is already in your library for a quick return."
-        : "Save it to your library so it is easy to find later.",
-    },
-  ];
-  const metadataCards = [
-    {
-      label: "Reader rating",
-      value: ratingValue,
-      hint: series.ratingCount ? `${series.ratingCount} reader ratings` : "Be the first reader to rate it",
-    },
-    {
-      label: "Episodes live",
-      value: episodeCount ? String(episodeCount) : "--",
-      hint: hasFreeEpisodes
-        ? `${series.freeEpisodeCount || 0} free episode${series.freeEpisodeCount === 1 ? "" : "s"} available`
-        : "Unlock chapters as you read",
-    },
-    {
-      label: "Release status",
-      value: capitalize(series.status || "updating"),
-      hint: series.type ? formatSeriesKind(series.type) : "Series availability and release pace",
-    },
-    {
-      label: "Created by",
-      value: series.author || "Studio",
-      hint: creatorHref
-        ? "View the creator page and browse related series."
-        : previewHint || "Open any episode to start reading",
-      onClick: creatorHref ? () => router.push(creatorHref) : null,
-    },
-  ];
-
   return (
     <header className="py-4 sm:py-6">
       <SurfacePanel className="relative overflow-hidden p-0">
@@ -222,53 +159,39 @@ export default function SeriesHeader({
               {series.description || "A polished reading experience with fast chapter access, clear unlock options, and progress that stays in sync."}
             </p>
 
-            <div className="mt-5 flex flex-wrap gap-2.5">
+            <div className="mt-5 flex flex-wrap gap-2">
               {readerPulseItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2"
+                <span
+                  key={item}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-neutral-200"
                 >
-                  <p className="text-sm font-semibold text-white">{item.label}</p>
-                  <p className="mt-0.5 text-[11px] text-neutral-400">{item.hint}</p>
-                </div>
+                  {item}
+                </span>
               ))}
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {metadataCards.map((card) =>
-                card.onClick ? (
-                  <button
-                    key={card.label}
-                    type="button"
-                    onClick={card.onClick}
-                    className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-left backdrop-blur-lg transition hover:border-emerald-300/30 hover:bg-white/[0.06]"
-                  >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-                      {card.label}
-                    </p>
-                    <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                      {card.value}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">
-                      More by this creator
-                    </p>
-                  </button>
-                ) : (
-                  <div
-                    key={card.label}
-                    className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 backdrop-blur-lg"
-                  >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-                      {card.label}
-                    </p>
-                    <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                      {card.value}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
-                  </div>
-                ),
+            <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-neutral-400">
+              <span>{episodeCount ? `${episodeCount} episodes` : "New series"}</span>
+              <span className="text-neutral-600">|</span>
+              <span>{capitalize(series.status || "updating")}</span>
+              <span className="text-neutral-600">|</span>
+              {creatorHref ? (
+                <button
+                  type="button"
+                  onClick={() => router.push(creatorHref)}
+                  className="font-semibold text-emerald-200 transition hover:text-emerald-100"
+                >
+                  {series.author || "Studio"}
+                </button>
+              ) : (
+                <span>{series.author || "Studio"}</span>
               )}
+              {lastEpisodeLabel ? (
+                <>
+                  <span className="text-neutral-600">|</span>
+                  <span>Last read: Episode {lastEpisodeLabel}</span>
+                </>
+              ) : null}
             </div>
 
             {badges.length > 0 || genres.length > 0 ? (
@@ -292,33 +215,9 @@ export default function SeriesHeader({
               </div>
             ) : null}
 
-            {previewHint || lastEpisodeLabel ? (
-              <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-neutral-300">
-                <div className="flex items-center gap-2 text-amber-200">
-                  <Star size={16} className="fill-current" />
-                  <span className="font-semibold">Ready when you are</span>
-                </div>
-                {lastEpisodeLabel ? <span>Last read: Episode {lastEpisodeLabel}.</span> : null}
-                {previewHint ? <span>{previewHint}.</span> : null}
-              </div>
+            {previewHint ? (
+              <p className="mt-4 text-sm text-neutral-400">{previewHint}</p>
             ) : null}
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              {journeyCards.map((card) => (
-                <div
-                  key={card.label}
-                  className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4"
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-                    {card.label}
-                  </p>
-                  <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                    {card.value}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
-                </div>
-              ))}
-            </div>
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               {onFollowToggle ? (

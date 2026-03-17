@@ -9,7 +9,6 @@ import Skeleton from "../common/Skeleton";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
-import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
 import { apiGet } from "../../lib/apiClient";
@@ -458,106 +457,6 @@ export default function LibraryPage() {
     ],
     [continueRailItems.length, historyRail.length, isAdultMode, isSignedIn, visibleLibraryItems.length],
   );
-  const resumeSpotlight = continueRailItems[0] || historyRail[0] || null;
-  const completedShelfCount = visibleLibraryItems.filter((item) => {
-    const status = String(seriesById.get(item.seriesId)?.status || "");
-    return status.toLowerCase() === "completed";
-  }).length;
-  const returnConsoleCards = [
-    {
-      id: "resume-thread",
-      eyebrow: "Resume",
-      title: resumeSpotlight ? resumeSpotlight.title : "Nothing in progress yet",
-      description: resumeSpotlight
-        ? `${resumeSpotlight.subtitle}. Jump back into the latest unlocked chapter with one tap.`
-        : "Start a series and your quickest way back will appear here automatically.",
-      ctaLabel: resumeSpotlight ? "Resume now" : "Open weekly chart",
-      onClick: () => {
-        if (resumeSpotlight?.seriesId && resumeSpotlight?.episodeId) {
-          router.push(
-            buildLibraryReadHref(
-              resumeSpotlight.seriesId,
-              resumeSpotlight.episodeId,
-              "LIBRARY_RESUME_SPOTLIGHT",
-              "resume_spotlight",
-            ),
-          );
-          return;
-        }
-        if (resumeSpotlight?.seriesId) {
-          router.push(
-            buildLibrarySeriesHref(
-              resumeSpotlight.seriesId,
-              "LIBRARY_RESUME_SPOTLIGHT",
-              "resume_spotlight",
-            ),
-          );
-          return;
-        }
-        router.push("/rankings?type=popular&window=week");
-      },
-      accentClass:
-        "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
-    },
-    {
-      id: "unfinished-stack",
-      eyebrow: "In progress",
-      title: `${continueRailItems.length} series in progress`,
-      description:
-        continueRailItems.length > 0
-          ? "These series already have a saved reading spot, so you can jump right back into the story."
-          : "As soon as you stop mid-series, your unfinished reads will start showing up here.",
-      ctaLabel: continueRailItems.length > 0 ? "Continue reading" : "Search all series",
-      onClick: () => {
-        const firstContinue = continueRailItems[0];
-        if (firstContinue?.seriesId && firstContinue?.episodeId) {
-          router.push(
-            buildLibraryReadHref(
-              firstContinue.seriesId,
-              firstContinue.episodeId,
-              "LIBRARY_CONTINUE_STACK",
-              "continue_stack",
-            ),
-          );
-          return;
-        }
-        router.push("/search");
-      },
-      accentClass:
-        "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-    },
-    {
-      id: "binge-ready",
-      eyebrow: "Completed",
-      title: `${completedShelfCount} completed series`,
-      description:
-        completedShelfCount > 0
-          ? "Finished runs are perfect when you want to keep reading without waiting for the next update."
-          : "Completed series will show up here once you save a few binge-ready reads.",
-      ctaLabel: "Browse completed",
-      onClick: () => router.push("/search?status=Completed&sort=popular"),
-      accentClass:
-        "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-    },
-    {
-      id: "shelf-sync",
-      eyebrow: "Sync",
-      title: isSignedIn ? "Saved to this account" : "Local to this device",
-      description: isSignedIn
-        ? "Saved series, rewards, missions, and reading history stay tied to this account."
-        : "Sign in so your saved series, rewards, and reading progress travel across devices.",
-      ctaLabel: isSignedIn ? (showCollectionManager ? "Collections open" : "Manage collections") : "Sign in",
-      onClick: () => {
-        if (!isSignedIn) {
-          openAuthPrompt();
-          return;
-        }
-        setShowCollectionManager(true);
-      },
-      accentClass:
-        "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -605,113 +504,45 @@ export default function LibraryPage() {
           </div>
         ) : (
           <>
-            <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-              <div className="grid gap-6">
-                {isSignedIn ? (
-                  <>
-                    <CheckInPanel
-                      rewards={rewards}
-                      onCheckIn={handleCheckIn}
-                      onMakeUp={handleMakeUp}
-                      working={checkinWorking}
-                    />
-                    <MissionsPanel
-                      missions={missions}
-                      onClaim={handleClaim}
-                      workingId={workingId}
-                    />
-                  </>
-                ) : (
-                  <SurfacePanel className="space-y-4">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                        Account sync
-                      </p>
-                      <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                        Turn this into a real cross-device library.
-                      </h2>
-                      <p className="mt-3 text-sm leading-7 text-neutral-400">
-                        Sign in to unlock daily rewards, mission payouts, and reading progress that survives device changes.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={openAuthPrompt}
-                      className="inline-flex rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
-                    >
-                      Sign in
-                    </button>
-                  </SurfacePanel>
-                )}
+            {isSignedIn ? (
+              <div className="grid gap-6 xl:grid-cols-2">
+                <CheckInPanel
+                  rewards={rewards}
+                  onCheckIn={handleCheckIn}
+                  onMakeUp={handleMakeUp}
+                  working={checkinWorking}
+                />
+                <MissionsPanel
+                  missions={missions}
+                  onClaim={handleClaim}
+                  workingId={workingId}
+                />
               </div>
-
-              <SurfacePanel className="space-y-4">
+            ) : (
+              <SurfacePanel className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                    Reading mode
+                    Account sync
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    Keep this shelf matched to the catalog you're browsing.
+                    Sign in to keep this library across devices.
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-neutral-400">
-                    Your library follows the current catalog mode, so what appears here always matches what you can browse right now.
-                  </p>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                  <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
-                      Catalog
-                    </p>
-                    <p className="mt-3 font-display text-2xl font-semibold text-white">
-                      {isAdultMode ? "18+ enabled" : "Standard mode"}
-                    </p>
-                    <p className="mt-2 text-sm text-neutral-400">
-                      Only titles allowed in the current mode appear below.
-                    </p>
-                  </div>
-                  <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-400">
-                      Sync status
-                    </p>
-                    <p className="mt-3 font-display text-2xl font-semibold text-white">
-                      {isSignedIn ? "Connected" : "Local only"}
-                    </p>
-                    <p className="mt-2 text-sm text-neutral-400">
-                      {isSignedIn
-                        ? "Progress, rewards, and mission activity are tied to your account."
-                        : "Progress is available locally, but rewards and deeper sync need sign-in."}
-                    </p>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={openAuthPrompt}
+                  className="inline-flex rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                >
+                  Sign in
+                </button>
               </SurfacePanel>
-            </div>
+            )}
 
             {showCollectionManager ? (
               <SurfacePanel>
                 <CollectionManager onClose={() => setShowCollectionManager(false)} />
               </SurfacePanel>
             ) : null}
-
-            <SurfacePanel className="space-y-5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                    Pick up where you left off
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    Your next read should be obvious.
-                  </h2>
-                  <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                    A good library should show what to resume, what to binge, and what still needs account sync.
-                  </p>
-                </div>
-                <p className="text-sm text-neutral-500">
-                  {hasLibrarySignals ? "Ready to resume" : "Start saving series"}
-                </p>
-              </div>
-
-              <StorefrontPathwaysGrid cards={returnConsoleCards} />
-            </SurfacePanel>
 
             {!hasLibrarySignals ? (
               <SurfacePanel className="space-y-4">

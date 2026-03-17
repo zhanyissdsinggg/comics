@@ -8,9 +8,6 @@ import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
 import SiteHeader from "../layout/SiteHeader";
 import Skeleton from "../common/Skeleton";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
-import SeriesTrustPanel from "./SeriesTrustPanel";
-import SeriesArrivalPanel from "./SeriesArrivalPanel";
-import StorefrontCampaignPanel from "../common/StorefrontCampaignPanel";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
@@ -67,11 +64,9 @@ const AdultAgeModal = dynamic(() => import("./AdultAgeModal"), {
 const CommentsSection = dynamic(() => import("./CommentsSection"), {
   ssr: false,
 });
-const SeriesFitPanel = dynamic(() => import("./SeriesFitPanel"));
 const SimilarSeriesSection = dynamic(() => import("./SimilarSeriesSection"), {
   ssr: false,
 });
-const SeriesFAQPanel = dynamic(() => import("./SeriesFAQPanel"));
 const EpisodeList = dynamic(() => import("./EpisodeList"), {
   loading: () => <EpisodeListSkeleton />,
 });
@@ -127,7 +122,6 @@ export default function SeriesPage({ seriesId }) {
   const [showSecondarySections, setShowSecondarySections] = useState(false);
   const [authError, setAuthError] = useState("");
   const [commerceNotice, setCommerceNotice] = useState(null);
-  const [activeAttribution, setActiveAttribution] = useState(null);
   const gateReportedRef = useRef(false);
   const requestRef = useRef(0);
   const secondarySectionsRef = useRef(null);
@@ -299,7 +293,6 @@ export default function SeriesPage({ seriesId }) {
 
   useEffect(() => {
     if (!routeAttribution) {
-      setActiveAttribution(null);
       return;
     }
 
@@ -307,7 +300,6 @@ export default function SeriesPage({ seriesId }) {
       loadPersistedPaymentAttribution(),
       routeAttribution,
     );
-    setActiveAttribution(attribution);
     if (attribution) {
       persistPaymentAttribution(attribution);
     }
@@ -506,12 +498,6 @@ export default function SeriesPage({ seriesId }) {
   const handleStart = firstEpisodeId
     ? () => handleRead(seriesId, firstEpisodeId)
     : null;
-  const continueHref = lastReadEpisodeId
-    ? `/read/${seriesId}/${lastReadEpisodeId}`
-    : "";
-  const startHref = firstEpisodeId
-    ? `/read/${seriesId}/${firstEpisodeId}`
-    : "";
   const creatorHref = useMemo(() => {
     const targetPath = buildCreatorHref(series?.author || "Studio");
     return buildPathWithAttribution(targetPath, {
@@ -672,37 +658,6 @@ export default function SeriesPage({ seriesId }) {
           creatorHref={creatorHref}
         />
 
-        <SeriesArrivalPanel
-          series={series}
-          attribution={activeAttribution}
-          creatorHref={creatorHref}
-        />
-
-        <SeriesTrustPanel
-          series={series}
-          episodes={episodes}
-          isFollowing={isFollowing}
-          onFollowToggle={handleFollowToggle}
-          sharePath={`/series/${seriesId}`}
-          creatorHref={creatorHref}
-        />
-
-        <div className="mt-8">
-          <SeriesFitPanel
-            series={series}
-            episodes={episodes}
-            creatorHref={creatorHref}
-            continueHref={continueHref}
-            startHref={startHref}
-          />
-        </div>
-
-        <StorefrontCampaignPanel
-          series={series}
-          sourcePath={`/series/${seriesId}`}
-          returnTo={`/series/${seriesId}`}
-        />
-
         <EpisodeList
           series={series}
           episodes={episodes}
@@ -714,14 +669,6 @@ export default function SeriesPage({ seriesId }) {
           onClaim={handleClaim}
           onSubscribe={handleSubscribe}
         />
-
-        <div className="mt-8">
-          <SeriesFAQPanel
-            series={series}
-            episodes={episodes}
-            creatorHref={creatorHref}
-          />
-        </div>
 
         <div ref={secondarySectionsRef} className="mt-8 h-px w-full" />
         {showSecondarySections ? (

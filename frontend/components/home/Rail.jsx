@@ -34,7 +34,6 @@ export default function Rail({
   tone,
   railName,
   onItemClick,
-  reason,
   href = "",
   ctaLabel = "See All",
   showCreatorShelfLinks = false,
@@ -71,11 +70,10 @@ export default function Rail({
                 </Badge>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-white md:text-[1.95rem]">
                   {title}
                 </h2>
-                {reason ? <p className="max-w-3xl text-sm leading-6 text-neutral-400">{reason}</p> : null}
               </div>
             </div>
 

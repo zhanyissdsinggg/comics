@@ -1,10 +1,8 @@
-﻿"use client";
+"use client";
 
 import useCountdown from "../../hooks/useCountdown";
-import { useSimilarRecommendations } from "../../hooks/useAIRecommendations";
 import { OFFERS } from "../../lib/offers/catalog";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
-import StorefrontContinuationStrip from "../common/StorefrontContinuationStrip";
 import ShareButton from "../common/ShareButton";
 
 function formatPointsLabel(value) {
@@ -16,6 +14,53 @@ function formatPackLabel(value) {
   return `${count || 1} more episode${count === 1 ? "" : "s"}`;
 }
 
+function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
+  if (!discoveryContext) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
+            Opened from
+          </p>
+          <p className="mt-2 text-sm font-semibold text-white">
+            {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-neutral-400">
+            {discoveryContext.returnHint}
+          </p>
+        </div>
+        {onReturnToSource ? (
+          <button
+            type="button"
+            onClick={onReturnToSource}
+            className="rounded-full border border-neutral-700 px-3 py-1.5 text-xs font-semibold text-neutral-100"
+          >
+            {discoveryContext.returnLabel}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function MetaPill({ children, accent = false }) {
+  return (
+    <span
+      className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+        accent
+          ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+          : "border-white/10 bg-white/[0.04] text-neutral-200"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
 export default function EndOfEpisodeOverlay({
   open,
   nextEpisode,
@@ -25,7 +70,6 @@ export default function EndOfEpisodeOverlay({
   packPricing,
   walletBalance = 0,
   isSubscriber = false,
-  upcomingEpisodes = [],
   onNext,
   onUnlock,
   onSubscribe,
@@ -36,10 +80,6 @@ export default function EndOfEpisodeOverlay({
   onOpenStore,
   onViewSeries,
   onOpenSupport,
-  seriesId,
-  series,
-  sourcePath = "/",
-  returnTo = sourcePath,
   discoveryContext = null,
   seriesTitle,
   episodeTitle,
@@ -47,19 +87,17 @@ export default function EndOfEpisodeOverlay({
   highlightPrimaryAction = false,
   onReturnToSource,
 }) {
-  const readyAtMs = nextEpisode?.ttfReadyAt
-    ? Date.parse(nextEpisode.ttfReadyAt)
-    : null;
+  const readyAtMs = nextEpisode?.ttfReadyAt ? Date.parse(nextEpisode.ttfReadyAt) : null;
   const { isReady, formatted } = useCountdown(readyAtMs);
 
   if (!open || !nextEpisode) {
     return null;
   }
+
   const showTtf = Boolean(nextEpisode.ttfEligible);
   const recommendedId = decision?.recommendedUnlockOfferId || "unlock_single";
   const recommendedOffer = OFFERS[recommendedId];
   const showSubscribe = decision?.showSubscribeUpsell;
-  const anchorVariant = decision?.priceAnchoringVariant || "A";
   const countdownVariant = decision?.countdownVariant || "A";
   const packHintVariant = decision?.packHintVariant || "A";
   const packOfferId =
@@ -79,9 +117,7 @@ export default function EndOfEpisodeOverlay({
   const secondaryLabel = showPackPrimary
     ? `Single episode (${formatPointsLabel(singlePrice)})`
     : `${formatPackLabel(packOffer?.episodes || 3)} (${formatPointsLabel(packPrice)})`;
-  const packSavingsText = packOffer?.savingsPct
-    ? `Save ${packOffer.savingsPct}%`
-    : "";
+  const packSavingsText = packOffer?.savingsPct ? `Save ${packOffer.savingsPct}%` : "";
   const pricingNote = pricing?.appliedDailyFree
     ? "Daily free unlock available"
     : pricing?.appliedCoupon?.label ||
@@ -92,8 +128,6 @@ export default function EndOfEpisodeOverlay({
   const subscriptionNote =
     "Membership adds daily free unlocks, shorter wait timers, and better bundle value.";
   const upsellBadge = showSubscribe ? "Recommended" : "";
-  const queuePreview = Array.isArray(upcomingEpisodes) ? upcomingEpisodes.slice(0, 3) : [];
-  const { data: similarSeries } = useSimilarRecommendations(seriesId, 4);
   const nextEpisodeStatusLabel = nextUnlocked
     ? "Ready to read now"
     : showTtf && isReady
@@ -103,6 +137,7 @@ export default function EndOfEpisodeOverlay({
         : singlePrice === 0
           ? "Free"
           : formatPointsLabel(singlePrice);
+
   const handlePrimary = () => {
     const primaryId = showPackPrimary ? packOfferId : "unlock_single";
     onOfferClick?.(primaryId);
@@ -113,73 +148,58 @@ export default function EndOfEpisodeOverlay({
     onUnlock();
   };
 
+  const handleSecondary = () => {
+    const offerId = showPackPrimary ? "unlock_single" : packOfferId;
+    onOfferClick?.(offerId);
+    if (showPackPrimary) {
+      onUnlock();
+      return;
+    }
+    onPackOffer?.(packOffer);
+  };
+
   return (
     <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4">
       <div className="w-full max-w-2xl rounded-3xl border border-neutral-800 bg-neutral-900/95 p-5 shadow-xl">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm text-neutral-400">{STOREFRONT_TERMS.readingDesk}</p>
-            <p className="text-lg font-semibold">{nextEpisode.title}</p>
+            <p className="text-lg font-semibold text-white">{nextEpisode.title}</p>
             {seriesTitle ? (
               <p className="mt-1 text-xs text-neutral-500">{seriesTitle}</p>
             ) : null}
           </div>
-          <div className="flex items-center gap-2">
-            {/* 老王注释：分享按钮 */}
-            <ShareButton
-              url={typeof window !== "undefined" ? window.location.href : ""}
-              title={`${seriesTitle || "Series"} - ${episodeTitle || "Episode"}`}
-              description={`I just finished reading this episode! Check it out.`}
-              className=""
-            />
-          </div>
+          <ShareButton
+            url={typeof window !== "undefined" ? window.location.href : ""}
+            title={`${seriesTitle || "Series"} - ${episodeTitle || "Episode"}`}
+            description="I just finished reading this episode! Check it out."
+            className=""
+          />
         </div>
 
-        {nextUnlocked ? (
-          <div className="mt-4 space-y-4">
-            {discoveryContext ? (
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
-                      Opened from
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-white">
-                      {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-neutral-400">{discoveryContext.returnHint}</p>
-                  </div>
-                  {onReturnToSource ? (
-                    <button
-                      type="button"
-                      onClick={onReturnToSource}
-                      className="rounded-full border border-neutral-700 px-3 py-1.5 text-xs font-semibold text-neutral-100"
-                    >
-                      {discoveryContext.returnLabel}
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-            ) : null}
+        <div className="mt-4 space-y-4">
+          <DiscoveryContextCard
+            discoveryContext={discoveryContext}
+            onReturnToSource={onReturnToSource}
+          />
 
-            <div className="grid gap-3 sm:grid-cols-[1.12fr_0.88fr]">
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
-                  Next up
-                </p>
-                <h3 className="mt-2 text-xl font-semibold text-white">{nextEpisode.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-neutral-300">
-                  The next chapter is already open, so the cleanest next step is to keep reading while the story is still fresh.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-                    {nextEpisodeStatusLabel}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-neutral-200">
-                    {isSubscriber ? "Member perks active" : "Points ready when needed"}
-                  </span>
+          {nextUnlocked ? (
+            <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
+                    Next up
+                  </p>
+                  <h3 className="mt-2 text-xl font-semibold text-white">{nextEpisode.title}</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <MetaPill accent>{nextEpisodeStatusLabel}</MetaPill>
+                    <MetaPill>
+                      {isSubscriber ? "Member perks active" : "Keep reading"}
+                    </MetaPill>
+                  </div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2">
+
+                <div className="flex flex-wrap gap-2">
                   <button
                     ref={primaryActionRef}
                     type="button"
@@ -203,292 +223,136 @@ export default function EndOfEpisodeOverlay({
                   ) : null}
                 </div>
               </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div className="max-w-xl">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
+                    Next unlock
+                  </p>
+                  <h3 className="mt-2 text-xl font-semibold text-white">{nextEpisode.title}</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <MetaPill accent>{nextEpisodeStatusLabel}</MetaPill>
+                    <MetaPill>{formatPointsLabel(walletBalance)}</MetaPill>
+                    <MetaPill>{isSubscriber ? "Member mode" : "Points mode"}</MetaPill>
+                    {pricingNote ? <MetaPill>{pricingNote}</MetaPill> : null}
+                  </div>
 
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                  After this
-                </p>
-                <div className="mt-3 space-y-2">
-                  {queuePreview.length > 0 ? (
-                    queuePreview.map((episode, index) => (
-                      <div
-                        key={episode.id || `${episode.title}-${index}`}
-                        className="flex items-center justify-between gap-3 rounded-2xl border border-neutral-800 bg-black/20 px-3 py-3 text-sm"
+                  {showTtf ? (
+                    isReady ? (
+                      <button
+                        type="button"
+                        onClick={onClaim}
+                        className="mt-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
                       >
-                        <div>
-                          <p className="font-medium text-white">{episode.title}</p>
-                          <p className="mt-1 text-xs text-neutral-500">
-                            {episode.unlocked
-                              ? "Already unlocked"
-                              : episode.ttfEligible
-                                ? "Timed free unlock supported"
-                                : "Premium chapter"}
-                          </p>
-                        </div>
-                        <span className="text-xs font-semibold text-neutral-300">
-                          {episode.unlocked ? "Ready" : episode.pricePts ? `${episode.pricePts} pts` : "Locked"}
-                        </span>
+                        Unlock free
+                      </button>
+                    ) : (
+                      <div
+                        className={`mt-4 ${
+                          countdownVariant === "B"
+                            ? "flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-black/20 px-4 py-3 text-xs text-neutral-200"
+                            : "flex flex-wrap items-center gap-3 rounded-full border border-neutral-800 px-4 py-2 text-xs text-neutral-300"
+                        }`}
+                      >
+                        <span>Free unlock in {formatted || "--:--:--"}</span>
+                        <button
+                          type="button"
+                          onClick={() => onNotify?.()}
+                          className="rounded-full border border-neutral-700 px-3 py-1 text-[10px] font-semibold text-neutral-100"
+                        >
+                          Remind me
+                        </button>
                       </div>
-                    ))
+                    )
+                  ) : null}
+                </div>
+
+                <div className="w-full max-w-sm space-y-2">
+                  <button
+                    ref={primaryActionRef}
+                    type="button"
+                    onClick={handlePrimary}
+                    className={`w-full rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                      highlightPrimaryAction
+                        ? "border-emerald-300/60 bg-emerald-400/14 text-emerald-50 shadow-[0_0_0_1px_rgba(110,231,183,0.26),0_20px_50px_rgba(16,185,129,0.2)] motion-safe:animate-pulse"
+                        : "border-white bg-white text-neutral-900 hover:bg-neutral-200"
+                    }`}
+                  >
+                    {primaryLabel}
+                  </button>
+
+                  {showPackPrimary && packSavingsText ? (
+                    <p className="text-xs text-emerald-300">{packSavingsText}</p>
+                  ) : null}
+
+                  {showSubscribe ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onOfferClick?.("subscribe_basic");
+                          onSubscribe();
+                        }}
+                        className="w-full rounded-full border border-neutral-700 px-4 py-2 text-sm font-semibold text-neutral-100"
+                      >
+                        {STOREFRONT_TERMS.compareMembership}
+                        {upsellBadge ? (
+                          <span className="ml-2 text-[10px] text-emerald-300">{upsellBadge}</span>
+                        ) : null}
+                      </button>
+                      <p className="text-xs text-neutral-400">{subscriptionNote}</p>
+                    </>
                   ) : (
-                    <p className="text-sm leading-6 text-neutral-400">
-                      The series page has the full episode list if you want to plan the rest of the run.
-                    </p>
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleSecondary}
+                        className="w-full rounded-full border border-neutral-700 px-4 py-2 text-sm font-semibold text-neutral-100"
+                      >
+                        {secondaryLabel}
+                      </button>
+                      {packNote ? (
+                        <p className="text-xs text-neutral-400">{packNote}</p>
+                      ) : null}
+                    </>
                   )}
                 </div>
               </div>
             </div>
+          )}
 
-            <StorefrontContinuationStrip
-              series={series}
-              similarItems={similarSeries}
-              sourcePath={sourcePath}
-              returnTo={returnTo}
-              entryPoint="READER_CONTINUE"
-              includeValueCard={false}
-              compact
-            />
-          </div>
-        ) : (
-          <div className="mt-4 space-y-4">
-            {discoveryContext ? (
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
-                      Opened from
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-white">
-                      {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-neutral-400">{discoveryContext.returnHint}</p>
-                  </div>
-                  {onReturnToSource ? (
-                    <button
-                      type="button"
-                      onClick={onReturnToSource}
-                      className="rounded-full border border-neutral-700 px-3 py-1.5 text-xs font-semibold text-neutral-100"
-                    >
-                      {discoveryContext.returnLabel}
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-            ) : null}
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                  Wallet
-                </p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  {Number(walletBalance || 0)} points
-                </p>
-                <p className="mt-1 text-xs text-neutral-500">Available before the next unlock.</p>
-              </div>
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                  Next unlock
-                </p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  {singlePrice === 0 ? "Free" : formatPointsLabel(singlePrice)}
-                </p>
-                <p className="mt-1 text-xs text-neutral-500">
-                  {pricingNote || "Unlock this chapter and keep the story moving."}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                  Reading mode
-                </p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  {isSubscriber ? "Member" : "Standard"}
-                </p>
-                <p className="mt-1 text-xs text-neutral-500">
-                  {isSubscriber ? "Discounts and daily perks stay active." : "Points and packs stay available."}
-                </p>
-              </div>
-            </div>
-
-            {queuePreview.length > 0 ? (
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-white">Keep the binge going</p>
-                    <p className="mt-1 text-xs text-neutral-500">
-                      The next few chapters should feel visible before you commit.
-                    </p>
-                  </div>
-                  {onViewSeries ? (
-                    <button
-                      type="button"
-                      onClick={onViewSeries}
-                      className="rounded-full border border-neutral-700 px-3 py-1 text-[11px] font-semibold text-neutral-200"
-                    >
-                      View series
-                    </button>
-                  ) : null}
-                </div>
-                <div className="mt-4 space-y-2">
-                  {queuePreview.map((episode, index) => (
-                    <div
-                      key={episode.id || `${episode.title}-${index}`}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-neutral-800 bg-black/20 px-3 py-3 text-sm"
-                    >
-                      <div>
-                        <p className="font-medium text-white">{episode.title}</p>
-                        <p className="mt-1 text-xs text-neutral-500">
-                          {episode.unlocked
-                            ? "Already unlocked"
-                            : episode.ttfEligible
-                              ? "Timed free unlock supported"
-                              : "Premium chapter"}
-                        </p>
-                      </div>
-                      <span className="text-xs font-semibold text-neutral-300">
-                        {episode.unlocked ? "Ready" : episode.pricePts ? `${episode.pricePts} pts` : "Locked"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            <StorefrontContinuationStrip
-              series={series}
-              similarItems={similarSeries}
-              sourcePath={sourcePath}
-              returnTo={returnTo}
-              entryPoint="READER_CONTINUE"
-              includeValueCard={false}
-              compact
-            />
-
-            <div className="grid gap-3 md:grid-cols-2">
-            <button
-              ref={primaryActionRef}
-              type="button"
-              onClick={handlePrimary}
-              className={`rounded-full border px-4 py-2 text-sm transition ${
-                highlightPrimaryAction
-                  ? "border-emerald-300/60 bg-emerald-400/14 text-emerald-50 shadow-[0_0_0_1px_rgba(110,231,183,0.26),0_20px_50px_rgba(16,185,129,0.2)] motion-safe:animate-pulse"
-                  : "border-neutral-700"
-              }`}
-            >
-              {primaryLabel}
-              {showPackPrimary && packSavingsText ? (
-                <span className="ml-2 text-xs text-emerald-300">{packSavingsText}</span>
-              ) : null}
-            </button>
-            {pricingNote ? (
-              <div className="flex items-center text-xs text-neutral-400">
-                {pricingNote}
-              </div>
-            ) : null}
-            {showSubscribe ? (
-              <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onOfferClick?.("subscribe_basic");
-                    onSubscribe();
-                  }}
-                  className="rounded-full border border-neutral-700 px-4 py-2 text-sm"
-                >
-                  {STOREFRONT_TERMS.compareMembership}
-                  {upsellBadge ? (
-                    <span className="ml-2 text-[10px] text-emerald-300">{upsellBadge}</span>
-                  ) : null}
-                </button>
-                <p className="text-xs text-neutral-400">{subscriptionNote}</p>
-              </div>
-            ) : (
+          <div className="flex flex-wrap gap-2">
+            {!nextUnlocked && onViewSeries ? (
               <button
                 type="button"
-                onClick={() => {
-                  const offerId = showPackPrimary ? "unlock_single" : packOfferId;
-                  onOfferClick?.(offerId);
-                  if (showPackPrimary) {
-                    onUnlock();
-                    return;
-                  }
-                  onPackOffer?.(packOffer);
-                }}
-                className="rounded-full border border-neutral-700 px-4 py-2 text-sm"
+                onClick={onViewSeries}
+                className="rounded-full border border-neutral-700 px-4 py-2 text-xs font-semibold text-neutral-200"
               >
-                {secondaryLabel}
+                View series
               </button>
-            )}
-            {packNote && !showPackPrimary ? (
-              <div className="flex items-center text-xs text-neutral-400">
-                {packNote}
-              </div>
             ) : null}
-            {anchorVariant !== "A" && packOffer ? (
-              <div className="rounded-2xl border border-neutral-800 px-4 py-2 text-xs text-neutral-300">
-                <span>Single episode {formatPointsLabel(singlePrice)}</span>
-                <span className="mx-2 text-neutral-600">--</span>
-                <span>
-                  {formatPackLabel(packOffer.episodes)} {formatPointsLabel(packPrice)}
-                </span>
-              </div>
+            {onOpenStore ? (
+              <button
+                type="button"
+                onClick={onOpenStore}
+                className="rounded-full border border-neutral-700 px-4 py-2 text-xs font-semibold text-neutral-200"
+              >
+                {STOREFRONT_TERMS.viewPointPacks}
+              </button>
             ) : null}
-            {showTtf ? (
-              isReady ? (
-                <button
-                  type="button"
-                  onClick={onClaim}
-                  className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
-                >
-                  Unlock free
-                </button>
-              ) : (
-                <div
-                  className={
-                    countdownVariant === "B"
-                      ? "flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-xs text-neutral-200"
-                      : "flex items-center justify-between rounded-full border border-neutral-800 px-4 py-2 text-xs text-neutral-300"
-                  }
-                >
-                  <span>Free unlock in {formatted || "--:--:--"}</span>
-                  <button
-                    type="button"
-                    onClick={() => onNotify?.()}
-                    className={
-                      countdownVariant === "B"
-                        ? "self-start rounded-full border border-neutral-700 px-3 py-1 text-[10px]"
-                        : "rounded-full border border-neutral-700 px-3 py-1 text-[10px]"
-                    }
-                  >
-                    Remind me
-                  </button>
-                </div>
-              )
+            {onOpenSupport ? (
+              <button
+                type="button"
+                onClick={onOpenSupport}
+                className="rounded-full border border-neutral-800 px-4 py-2 text-xs font-semibold text-neutral-400"
+              >
+                Billing help
+              </button>
             ) : null}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {onOpenStore ? (
-                <button
-                  type="button"
-                  onClick={onOpenStore}
-                  className="rounded-full border border-neutral-700 px-4 py-2 text-xs font-semibold text-neutral-200"
-                >
-                  {STOREFRONT_TERMS.viewPointPacks}
-                </button>
-              ) : null}
-              {onOpenSupport ? (
-                <button
-                  type="button"
-                  onClick={onOpenSupport}
-                  className="rounded-full border border-neutral-800 px-4 py-2 text-xs font-semibold text-neutral-400"
-                >
-                  Billing help
-                </button>
-              ) : null}
-            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -91,48 +91,42 @@ export default function EpisodeList({
     const timer = setInterval(() => setNowMs(Date.now()), 1000);
     return () => clearInterval(timer);
   }, [needsCountdown]);
-  const summaryCards = [
-    {
-      label: "Ready now",
-      value: unlockedEpisodeIds.length.toLocaleString(),
-      hint: lockedCount > 0 ? `${lockedCount.toLocaleString()} chapter${lockedCount === 1 ? "" : "s"} still locked` : "Everything in this series is ready to read",
-    },
-    {
-      label: "Free options",
-      value: freeUnlockCount.toLocaleString(),
-      hint: freePreviewCount > 0
-        ? `${freePreviewCount.toLocaleString()} episode${freePreviewCount === 1 ? "" : "s"} offer preview pages`
-        : "Free unlock timers and previews reduce first-session friction",
-    },
-    {
-      label: "Wallet",
-      value: walletTotal.toLocaleString(),
-      hint: walletTotal > 0 ? "Points available right now" : "Top up when the next chapter needs points",
-    },
-    {
-      label: "Unlock mode",
-      value: isSubscriber ? "Member" : "Points",
-      hint: isSubscriber
-        ? "Membership perks and daily free unlocks are active"
-        : "Use points or compare membership before the paywall hits",
-    },
+  const summaryItems = [
+    `${unlockedEpisodeIds.length.toLocaleString()} ready`,
+    lockedCount > 0
+      ? `${lockedCount.toLocaleString()} locked`
+      : "All unlocked",
+    freeUnlockCount > 0
+      ? `${freeUnlockCount.toLocaleString()} free unlocks`
+      : freePreviewCount > 0
+        ? `${freePreviewCount.toLocaleString()} previews`
+        : "Premium chapters",
+    walletTotal > 0 ? `${walletTotal.toLocaleString()} points` : "0 points",
+    isSubscriber ? "Member mode" : "Points mode",
   ];
 
   return (
     <section className="mt-6 rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:mt-8 sm:p-6" data-wallet-total={walletTotal}>
-      <div className="mb-6 grid gap-5 xl:grid-cols-[0.92fr_1.08fr]">
-        <div className="rounded-[24px] border border-white/10 bg-black/20 px-5 py-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-            {STOREFRONT_TERMS.readingDesk}
-          </p>
-          <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-            See what is free, unlocked, and worth opening next.
-          </h2>
-          <p className="mt-3 text-sm leading-7 text-neutral-400">
-            Strong series pages make the next chapter feel obvious. You should be able to tell what is already open,
-            what can be tried for free, and when points or membership make more sense.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mb-5 border-b border-white/10 pb-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-white">Episodes</h2>
+              <span className="text-sm text-neutral-500">{episodes.length}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {summaryItems.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-neutral-300"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
             {seriesProgress?.lastEpisodeId ? (
               <button
                 type="button"
@@ -181,31 +175,7 @@ export default function EpisodeList({
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          {summaryCards.map((card) => (
-            <div
-              key={card.label}
-              className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4"
-            >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-                {card.label}
-              </p>
-              <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-white">
-                {card.value}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Toolbar */}
-      <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-bold text-white">Episodes</h2>
-          <span className="text-sm text-neutral-500">{episodes.length}</span>
-        </div>
-        <div className="flex items-center gap-3 text-sm">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
           <select
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
@@ -224,6 +194,9 @@ export default function EpisodeList({
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
           </select>
+          <span className="text-xs text-neutral-500">
+            {sortedEpisodes.length} visible
+          </span>
         </div>
       </div>
       {sortedEpisodes.length === 0 ? (
