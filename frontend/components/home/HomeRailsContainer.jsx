@@ -146,6 +146,7 @@ export default function HomeRailsContainer({ activeGenre = "all", onResetGenre =
           key={rail.id}
           eyebrow={rail.eyebrow}
           title={rail.title}
+          railName={rail.id}
           items={rail.items}
           reason={rail.reason}
           href={rail.href}

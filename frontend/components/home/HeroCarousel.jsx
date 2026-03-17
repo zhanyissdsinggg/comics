@@ -68,7 +68,7 @@ export default function HeroCarousel({ items }) {
           [
             active?.hasFreeEpisodes
               ? `${STOREFRONT_TERMS.freeStart}${
-                  active?.freeEpisodeCount ? ` · ${active.freeEpisodeCount} free episodes` : ""
+                  active?.freeEpisodeCount ? ` / ${active.freeEpisodeCount} free episodes` : ""
                 }`
               : "Premium unlock",
             active?.status ? getReadingCadenceLabel(active.status) : "Staff pick",
@@ -232,7 +232,7 @@ export default function HeroCarousel({ items }) {
             <div className="mt-4 flex flex-wrap gap-3 text-sm text-neutral-200/85">
               {active?.author ? <span>By {active.author}</span> : null}
               {Array.isArray(active?.genres) && active.genres.length > 0 ? (
-                <span>{active.genres.slice(0, 3).join(" · ")}</span>
+                <span>{active.genres.slice(0, 3).join(" / ")}</span>
               ) : null}
             </div>
 

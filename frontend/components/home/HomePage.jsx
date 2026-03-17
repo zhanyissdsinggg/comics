@@ -7,7 +7,19 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, BookOpen, Compass, Gift, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  Clock3,
+  Compass,
+  Flame,
+  Gift,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Star,
+} from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
@@ -43,7 +55,6 @@ const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
 });
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
 const StorefrontContinuationStrip = dynamic(() => import("../common/StorefrontContinuationStrip"));
-const StorefrontPathwaysGrid = dynamic(() => import("../common/StorefrontPathwaysGrid"));
 
 const GENRE_CHIPS = [
   { id: "all", label: "All" },
@@ -64,6 +75,8 @@ const INNER_CARD_CLASS =
   "rounded-[26px] border border-white/10 bg-white/[0.03] shadow-[0_18px_60px_rgba(0,0,0,0.18)]";
 const SECTION_EYEBROW_CLASS =
   "text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85";
+const SIGNAL_TILE_CLASS =
+  "group relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,18,26,0.95),rgba(7,10,16,0.98))] text-left shadow-[0_22px_80px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-1 hover:border-white/18 hover:shadow-[0_26px_90px_rgba(0,0,0,0.28)]";
 
 function toTimestamp(value) {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -143,32 +156,144 @@ function StatTile({ stat, accent = false, compact = false }) {
   );
 }
 
-function EditorialPickCard({ card }) {
+function SignalTile({ tile }) {
+  const Icon = tile.icon;
+
   return (
-    <Card className={cn(INNER_CARD_CLASS, "h-full py-0 transition-transform duration-300 hover:-translate-y-1 hover:border-white/20")}>
-      <CardContent className="flex h-full flex-col p-6">
-        <Badge
-          variant="outline"
-          className="w-fit rounded-full border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-200"
+    <button type="button" onClick={tile.onClick} className={SIGNAL_TILE_CLASS}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.1),transparent_34%),linear-gradient(180deg,transparent,rgba(255,255,255,0.02))]" />
+      <div className="relative flex h-full flex-col gap-4 p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-white">
+            <Icon className="size-5" />
+          </div>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
+            Jump in
+          </span>
+        </div>
+
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200/85">
+            {tile.eyebrow}
+          </p>
+          <p className="mt-3 text-3xl font-semibold tracking-tight text-white">{tile.value}</p>
+          <h3 className="mt-3 text-base font-semibold text-white">{tile.title}</h3>
+          <p className="mt-2 text-sm leading-6 text-neutral-400">{tile.description}</p>
+        </div>
+
+        <div className="mt-auto flex items-center gap-2 text-sm font-semibold text-white">
+          {tile.cta}
+          <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function SpotlightFeatureCard({ card, featured = false }) {
+  return (
+    <button
+      type="button"
+      onClick={card.onClick}
+      className={cn(
+        "group relative overflow-hidden rounded-[30px] border text-left shadow-[0_22px_80px_rgba(0,0,0,0.22)] transition-all duration-300 hover:-translate-y-1",
+        featured
+          ? "min-h-[420px] border-white/12 bg-neutral-950 hover:border-white/22"
+          : "min-h-[200px] border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.95),rgba(8,10,16,0.98))] hover:border-white/18",
+      )}
+    >
+      {card.coverUrl ? (
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-[1.03]"
+          style={{
+            backgroundImage: `linear-gradient(180deg,rgba(5,8,13,0.06),rgba(5,8,13,0.84)), url(${card.coverUrl})`,
+          }}
+        />
+      ) : null}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.14),transparent_30%),linear-gradient(180deg,rgba(6,10,16,0.08),rgba(6,10,16,0.86))]" />
+
+      <div className="relative flex h-full flex-col justify-end p-5 sm:p-6">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <Badge
+            variant="outline"
+            className="rounded-full border-white/12 bg-black/25 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white"
+          >
+            {card.eyebrow}
+          </Badge>
+          {card.meta ? (
+            <Badge
+              variant="outline"
+              className="rounded-full border-white/10 bg-white/[0.05] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-neutral-200"
+            >
+              {card.meta}
+            </Badge>
+          ) : null}
+        </div>
+
+        <h3
+          className={cn(
+            "max-w-2xl font-display font-semibold tracking-tight text-white",
+            featured ? "text-3xl leading-tight sm:text-4xl" : "text-2xl",
+          )}
         >
-          {card.eyebrow}
-        </Badge>
-        <h3 className="mt-4 font-display text-2xl font-semibold tracking-tight text-white">
           {card.title}
         </h3>
-        <p className="mt-3 text-sm leading-7 text-neutral-300">{card.description}</p>
-        <p className="mt-4 text-xs uppercase tracking-[0.2em] text-neutral-500">{card.meta}</p>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={card.onClick}
-          className="mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold text-white hover:bg-transparent hover:text-emerald-200"
-        >
+        <p className={cn("mt-3 max-w-2xl text-neutral-200", featured ? "text-sm leading-7 sm:text-base" : "text-sm leading-6")}>
+          {card.description}
+        </p>
+
+        <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-white">
           {card.cta}
-          <ArrowUpRight className="size-4" />
-        </Button>
-      </CardContent>
-    </Card>
+          <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function WeeklyRankItem({ item, index, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex w-full items-center gap-3 rounded-[24px] border border-white/8 bg-black/20 p-3 text-left transition-all duration-300 hover:border-white/18 hover:bg-white/[0.04]"
+    >
+      <div className="flex w-11 shrink-0 flex-col items-center justify-center rounded-[18px] border border-white/10 bg-white/[0.04] py-2">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-500">No.</span>
+        <span className="mt-1 text-lg font-semibold text-white">{String(index + 1).padStart(2, "0")}</span>
+      </div>
+
+      <div
+        className="h-20 w-14 shrink-0 rounded-[16px] border border-white/10 bg-neutral-900 bg-cover bg-center"
+        style={
+          item.coverUrl
+            ? {
+                backgroundImage: `linear-gradient(180deg,rgba(9,12,18,0.02),rgba(9,12,18,0.2)), url(${item.coverUrl})`,
+              }
+            : undefined
+        }
+      />
+
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          {item.badge ? (
+            <Badge
+              variant="outline"
+              className="rounded-full border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-neutral-200"
+            >
+              {item.badge}
+            </Badge>
+          ) : null}
+          <span className="text-[10px] uppercase tracking-[0.2em] text-emerald-200/80">
+            {item.statusLabel}
+          </span>
+        </div>
+        <h3 className="mt-2 truncate text-base font-semibold text-white">{item.title}</h3>
+        <p className="mt-1 truncate text-sm text-neutral-400">{item.meta}</p>
+      </div>
+
+      <ArrowRight className="size-4 shrink-0 text-neutral-500 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white" />
+    </button>
   );
 }
 
@@ -389,67 +514,23 @@ function HomeContent() {
     );
   };
 
+  const handleLeaderboardOpen = (seriesId) => {
+    const targetPath = `/series/${seriesId}`;
+    router.push(
+      buildPathWithAttribution(targetPath, {
+        entryPoint: "HOME_LEADERBOARD",
+        campaignId: "homepage_leaderboard",
+        sourcePath: "/",
+        sourceSeriesId: seriesId,
+        returnTo: targetPath,
+      }),
+    );
+  };
+
   const editorialStats = useMemo(
     () => getHomeEditorialStats(seriesList, { loading }),
     [loading, seriesList],
   );
-
-  const editorialCards = useMemo(() => {
-    if (!Array.isArray(seriesList) || seriesList.length === 0) {
-      return [];
-    }
-    const { completedPick, freeStartPick, breakoutPick, adultCount } = editorialSnapshot;
-
-    return [
-      completedPick
-        ? {
-            id: "completed-pick",
-            eyebrow: "Weekend binge",
-            title: completedPick.title,
-            description: "Completed series that are easy to binge in one sitting.",
-            meta: `${completedPick.status || "Completed"} · ${Number(completedPick.rating || 0).toFixed(1)} rating`,
-            cta: "Open binge pick",
-            onClick: () => router.push(`/series/${completedPick.id}`),
-          }
-        : null,
-      freeStartPick
-        ? {
-            id: "free-start-pick",
-            eyebrow: "Free-to-start",
-            title: freeStartPick.title,
-            description: "A cleaner first click for new readers who want to sample before spending.",
-            meta: `${freeStartPick.freeEpisodeCount || 0} free episodes available`,
-            cta: "Start free preview",
-            onClick: () => router.push(`/series/${freeStartPick.id}`),
-          }
-        : null,
-      breakoutPick
-        ? {
-            id: "breakout-pick",
-            eyebrow: "Breakout launch",
-            title: breakoutPick.title,
-            description: "Recent heat from the catalog that deserves front-page attention.",
-            meta: breakoutPick.genres?.slice(0, 2).join(" · ") || "Fresh release",
-            cta: "Open breakout title",
-            onClick: () => router.push(`/series/${breakoutPick.id}`),
-          }
-        : null,
-      {
-        id: "adult-hub",
-        eyebrow: "18+ section",
-        title:
-          adultCount > 0
-            ? `${adultCount} mature titles in the 18+ section`
-            : "18+ titles are available behind the age gate",
-        description:
-          "Browse mature titles in a separate section with clear access rules and less friction once access is confirmed.",
-        meta: "Sign-in and age confirmation required",
-        cta: "Open 18+ page",
-        onClick: () => router.push("/adult"),
-      },
-    ].filter(Boolean);
-  }, [editorialSnapshot, router, seriesList]);
-
   const discoverySignals = useMemo(() => {
     const keywordItems = Array.isArray(hotKeywords) ? hotKeywords.filter(Boolean).slice(0, 8) : [];
 
@@ -503,7 +584,6 @@ function HomeContent() {
         signalHint: "Finished runs ready for full-session reading",
         ctaLabel: "Browse completed",
         onClick: () => router.push("/search?status=Completed&sort=popular"),
-        accentClass: "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
       },
       {
         id: "free-start-desk",
@@ -535,8 +615,6 @@ function HomeContent() {
             }),
           );
         },
-        accentClass:
-          "border-emerald-400/25 bg-emerald-400/[0.08] hover:border-emerald-300/45 hover:bg-emerald-400/[0.12]",
       },
       {
         id: "breakout-radar",
@@ -552,31 +630,158 @@ function HomeContent() {
         signalHint: leadSignal?.hint || "Trending searches right now",
         ctaLabel: "Open weekly chart",
         onClick: () => router.push("/rankings?type=popular&window=week"),
-        accentClass:
-          "border-sky-400/20 bg-sky-400/[0.07] hover:border-sky-300/35 hover:bg-sky-400/[0.11]",
       },
     ];
   }, [discoverySignals, editorialSnapshot, router, seriesList]);
 
   const priorityStats = useMemo(() => editorialStats.slice(0, 3), [editorialStats]);
-
-  const quickStartCards = useMemo(
-    () =>
-      homeEventCards.map((card) => ({
-        id: card.id,
-        eyebrow: card.eyebrow,
-        title: card.title,
-        description: card.description,
-        cta: card.ctaLabel,
-        onClick: card.onClick,
-        accentClass: card.accentClass,
-      })),
-    [homeEventCards],
-  );
-
-  const lowerShelfCards = useMemo(() => editorialCards.slice(0, 3), [editorialCards]);
-
   const quickSearchSignals = useMemo(() => discoverySignals.slice(0, 6), [discoverySignals]);
+
+  const spotlightCards = useMemo(() => {
+    const orderedCards = ["free-start-desk", "breakout-radar", "weekend-desk"]
+      .map((cardId) => homeEventCards.find((card) => card.id === cardId))
+      .filter(Boolean);
+
+    return orderedCards.map((card) => {
+      if (card.id === "free-start-desk") {
+        return {
+          ...card,
+          coverUrl:
+            editorialSnapshot.freeStartPick?.coverUrl ||
+            editorialSnapshot.breakoutPick?.coverUrl ||
+            null,
+          meta: editorialSnapshot.freeStartPick?.freeEpisodeCount
+            ? `${editorialSnapshot.freeStartPick.freeEpisodeCount} free episodes`
+            : "Fastest first click",
+          cta: card.ctaLabel,
+        };
+      }
+
+      if (card.id === "breakout-radar") {
+        return {
+          ...card,
+          coverUrl: editorialSnapshot.breakoutPick?.coverUrl || null,
+          meta: quickSearchSignals[0]?.label || "Trending this week",
+          cta: card.ctaLabel,
+        };
+      }
+
+      return {
+        ...card,
+        coverUrl: editorialSnapshot.completedPick?.coverUrl || null,
+        meta:
+          editorialSnapshot.completedPick?.status ||
+          `${editorialSnapshot.completedSeriesCount.toLocaleString()} completed runs`,
+        cta: card.ctaLabel,
+      };
+    });
+  }, [editorialSnapshot, homeEventCards, quickSearchSignals]);
+
+  const leadSpotlightCard = spotlightCards[0] || null;
+  const supportSpotlightCards = useMemo(() => spotlightCards.slice(1, 3), [spotlightCards]);
+
+  const leaderboardItems = useMemo(() => {
+    const seen = new Set();
+    const featuredPool = [
+      editorialSnapshot.breakoutPick,
+      editorialSnapshot.freeStartPick,
+      editorialSnapshot.completedPick,
+      ...editorialSnapshot.safeCatalog,
+    ].filter(Boolean);
+
+    return featuredPool
+      .filter((series) => {
+        const seriesId = String(series?.id || "").trim();
+        if (!seriesId || seen.has(seriesId)) {
+          return false;
+        }
+        seen.add(seriesId);
+        return true;
+      })
+      .map((series) => {
+        const badgeTokens = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
+          .filter(Boolean)
+          .map((badge) => String(badge).trim().toUpperCase());
+        const hasFreeEpisodes = Boolean(series?.hasFreeEpisodes || Number(series?.freeEpisodeCount) > 0);
+        const isCompleted = String(series?.status || "").toLowerCase() === "completed";
+
+        return {
+          id: series.id,
+          title: series.title,
+          coverUrl: series.coverUrl,
+          badge: badgeTokens[0] || null,
+          statusLabel: hasFreeEpisodes
+            ? `${Number(series?.freeEpisodeCount || 0)} free eps`
+            : isCompleted
+              ? "Completed"
+              : "Weekly return",
+          meta:
+            Array.isArray(series?.genres) && series.genres.length > 0
+              ? series.genres.slice(0, 2).join(" / ")
+              : "Official release",
+          score:
+            getSeriesScore(series) +
+            getReaderProof(series) / 90 +
+            (hasFreeEpisodes ? 90 : 0) +
+            (isCompleted ? 70 : 0) +
+            (badgeTokens.includes("HOT") ? 140 : 0) +
+            (badgeTokens.includes("NEW") ? 90 : 0),
+        };
+      })
+      .sort((left, right) => right.score - left.score)
+      .slice(0, 5);
+  }, [editorialSnapshot]);
+
+  const signalTiles = useMemo(
+    () => [
+      {
+        id: "tile-free",
+        icon: Gift,
+        eyebrow: STOREFRONT_TERMS.freeStart,
+        value: editorialSnapshot.freeStartSeriesCount.toLocaleString(),
+        title: "Start with free episodes",
+        description: "The best comic storefronts always make the first sample obvious.",
+        cta: "Browse free starts",
+        onClick: () => router.push("/rankings?type=ttf&window=all"),
+      },
+      {
+        id: "tile-trending",
+        icon: Flame,
+        eyebrow: "Trending now",
+        value: quickSearchSignals[0]?.label || "HOT",
+        title: "See what is climbing this week",
+        description:
+          quickSearchSignals[0]?.hint || "Weekly heat should feel one tap away from the homepage.",
+        cta: "Open weekly chart",
+        onClick: () => router.push("/rankings?type=popular&window=week"),
+      },
+      {
+        id: "tile-completed",
+        icon: Clock3,
+        eyebrow: "Binge-ready",
+        value: editorialSnapshot.completedSeriesCount.toLocaleString(),
+        title: "Finished runs for longer sessions",
+        description: "Completed stories are still one of the easiest conversion paths for new readers.",
+        cta: "Browse completed",
+        onClick: () => router.push("/search?status=Completed&sort=popular"),
+      },
+      {
+        id: "tile-library",
+        icon: isSignedIn ? ShieldCheck : Search,
+        eyebrow: isSignedIn ? "Reader library" : "Reader perks",
+        value: isSignedIn
+          ? followedSeriesIds.length.toLocaleString()
+          : priorityStats[0]?.value || editorialSnapshot.seriesCount.toLocaleString(),
+        title: isSignedIn ? "Pick up your saved titles fast" : "Sign in, save progress, return faster",
+        description: isSignedIn
+          ? "Followed titles, progress sync, and quick returns should never be buried."
+          : "Accounts make rewards, synced progress, and library recovery much easier.",
+        cta: isSignedIn ? "Open library" : "Sign in free",
+        onClick: isSignedIn ? () => router.push("/library") : () => setShowLoginPrompt(true),
+      },
+    ],
+    [editorialSnapshot, followedSeriesIds.length, isSignedIn, priorityStats, quickSearchSignals, router],
+  );
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -675,12 +880,12 @@ function HomeContent() {
                         <p className="mt-3 text-sm leading-7 text-neutral-300">
                           {formatEpisodeLabel(resumeSpotlight?.episodeId)}
                           {resumeSpotlight?.progressPercent > 0
-                            ? ` · ${formatPercent(resumeSpotlight.progressPercent)} complete`
-                            : " · Ready to reopen"}
+                            ? ` / ${formatPercent(resumeSpotlight.progressPercent)} complete`
+                            : " / Ready to reopen"}
                         </p>
                         <p className="mt-3 text-sm leading-7 text-neutral-400">
                           {Array.isArray(resumeSeries.genres) && resumeSeries.genres.length > 0
-                            ? resumeSeries.genres.slice(0, 3).join(" · ")
+                            ? resumeSeries.genres.slice(0, 3).join(" / ")
                             : "Premium series ready to resume"}
                         </p>
 
@@ -730,15 +935,22 @@ function HomeContent() {
           </section>
         ) : null}
 
-        <section className="mb-10 grid gap-4 xl:grid-cols-[0.8fr_1.2fr] xl:items-start">
+        <section className="mb-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {signalTiles.map((tile) => (
+            <SignalTile key={tile.id} tile={tile} />
+          ))}
+        </section>
+
+        <section className="mb-12 grid gap-4 xl:grid-cols-[1.08fr_0.92fr] xl:items-start">
           <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
-            <CardContent className="p-5 sm:p-6">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_28%),radial-gradient(circle_at_75%_0%,rgba(244,114,182,0.1),transparent_24%)]" />
+            <CardContent className="relative p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge
                   variant="outline"
                   className="rounded-full border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white"
                 >
-                  Quick start
+                  Spotlight
                 </Badge>
                 <Badge
                   variant="outline"
@@ -748,12 +960,13 @@ function HomeContent() {
                 </Badge>
               </div>
 
-              <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[0.96] tracking-tight text-white sm:text-5xl">
-                Pick one strong next click instead of sorting through everything.
+              <h1 className="mt-4 max-w-4xl font-display text-4xl font-semibold leading-[0.94] tracking-tight text-white sm:text-5xl">
+                Official drops, fast starts, and chart leaders should all feel one tap away.
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
-                Free starts, breakout launches, and finished binge picks do most of the work. Use
-                genre shortcuts only if you already know your mood.
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-200 sm:text-base">
+                The strongest comics platforms do not read like landing pages. They feel like a
+                living storefront: clear entry points, visible heat, and shelves that keep pulling
+                you forward.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2.5">
@@ -768,109 +981,141 @@ function HomeContent() {
                 ))}
               </div>
 
-              <Separator className="my-6 bg-white/10" />
-
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-white">Genre shortcuts</p>
-                  <p className="mt-1 text-sm text-neutral-400">
-                    Narrow the rails only when you already know what you want.
-                  </p>
-                </div>
-                <Badge
-                  variant="outline"
-                  className="rounded-full border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-300"
-                >
-                  {GENRE_CHIPS.find((chip) => chip.id === activeGenre)?.label || "All"} active
-                </Badge>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {GENRE_CHIPS.map((chip) => {
-                  const isActive = activeGenre === chip.id;
-
-                  return (
-                    <Button
-                      key={chip.id}
-                      type="button"
-                      variant={isActive ? "default" : "outline"}
-                      onClick={() => setActiveGenre(chip.id)}
-                      className={cn(
-                        "h-10 rounded-full px-4 text-sm font-semibold",
-                        isActive
-                          ? "bg-white text-neutral-950 hover:bg-neutral-200"
-                          : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
-                      )}
-                    >
-                      {chip.label}
-                    </Button>
-                  );
-                })}
-              </div>
-
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 {priorityStats.map((stat, index) => (
                   <StatTile key={stat.label} stat={stat} compact accent={index === 0} />
                 ))}
               </div>
+
+              <div className="mt-6 grid gap-4 lg:grid-cols-[1.04fr_0.96fr]">
+                {leadSpotlightCard ? (
+                  <SpotlightFeatureCard card={leadSpotlightCard} featured />
+                ) : (
+                  <Card className={cn(INNER_CARD_CLASS, "min-h-[420px] py-0")}>
+                    <CardContent className="flex h-full flex-col justify-end p-6">
+                      <SectionEyebrow>{STOREFRONT_TERMS.startHere}</SectionEyebrow>
+                      <h3 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
+                        Fresh picks are loading.
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-neutral-300">
+                        Once the catalog responds, this area becomes the strongest editorial entry
+                        point on the page.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <div className="grid gap-4">
+                  {supportSpotlightCards.map((card) => (
+                    <SpotlightFeatureCard key={card.id} card={card} />
+                  ))}
+
+                  <Card className={cn(INNER_CARD_CLASS, "py-0")}>
+                    <CardContent className="p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-white">Genre shortcuts</p>
+                          <p className="mt-1 text-sm text-neutral-400">
+                            Filter the shelves below without flattening the homepage into a bland
+                            search screen.
+                          </p>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="rounded-full border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-300"
+                        >
+                          {GENRE_CHIPS.find((chip) => chip.id === activeGenre)?.label || "All"} active
+                        </Badge>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {GENRE_CHIPS.map((chip) => {
+                          const isActive = activeGenre === chip.id;
+
+                          return (
+                            <Button
+                              key={chip.id}
+                              type="button"
+                              variant={isActive ? "default" : "outline"}
+                              onClick={() => setActiveGenre(chip.id)}
+                              className={cn(
+                                "h-10 rounded-full px-4 text-sm font-semibold",
+                                isActive
+                                  ? "bg-white text-neutral-950 hover:bg-neutral-200"
+                                  : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
+                              )}
+                            >
+                              {chip.label}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
-                <SectionEyebrow>{STOREFRONT_TERMS.startHere}</SectionEyebrow>
-                <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
-                  Open one of these before you overthink it.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  The best homepage is the one that gets you into a series fast, not the one that
-                  explains every merchandising lane.
-                </p>
+          <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.16),transparent_28%),radial-gradient(circle_at_0%_80%,rgba(250,204,21,0.1),transparent_28%)]" />
+            <CardContent className="relative p-5 sm:p-6">
+              <SectionEyebrow>This week</SectionEyebrow>
+              <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-2xl">
+                  <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-[2.15rem]">
+                    Chart leaders and live search heat.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-neutral-300">
+                    This is the part most top comics sites get right: readers can see what is hot
+                    before they decide where to commit their time.
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push("/rankings?type=popular&window=week")}
+                  className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  <Star className="size-4" />
+                  Open full chart
+                </Button>
               </div>
 
-              <Button
-                type="button"
-                size="lg"
-                variant="outline"
-                onClick={() => router.push("/search")}
-                className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
-              >
-                <Compass className="size-4" />
-                Browse all series
-              </Button>
-            </div>
+              <div className="mt-6 space-y-3">
+                {leaderboardItems.map((item, index) => (
+                  <WeeklyRankItem
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    onClick={() => handleLeaderboardOpen(item.id)}
+                  />
+                ))}
+              </div>
 
-            <StorefrontPathwaysGrid
-              cards={quickStartCards}
-              columnsClassName="md:grid-cols-3"
-            />
-          </div>
-        </section>
+              <Separator className="my-6 bg-white/10" />
 
-        {loading ? (
-          <div className="space-y-10">
-            <SkeletonRail />
-            <SkeletonRail />
-            <SkeletonRail />
-          </div>
-        ) : (
-          <HomeRailsContainer activeGenre={activeGenre} onResetGenre={() => setActiveGenre("all")} />
-        )}
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-white">Live search signals</p>
+                  <p className="mt-1 text-sm text-neutral-400">
+                    Trending terms help readers pivot fast without landing on an empty search page.
+                  </p>
+                </div>
 
-        <section className="mt-10 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-          <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
-            <CardContent className="p-5 sm:p-6">
-              <SectionEyebrow>Still browsing?</SectionEyebrow>
-              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
-                Use live search signals instead of guessing.
-              </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-300">
-                If none of the rails feel right, trending terms are the fastest way to pivot
-                without starting from a blank search page.
-              </p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => router.push("/search")}
+                  className="h-10 justify-start gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.06]"
+                >
+                  <Search className="size-4" />
+                  Explore search
+                </Button>
+              </div>
 
-              <div className="mt-6 flex flex-wrap gap-2.5">
+              <div className="mt-4 flex flex-wrap gap-2.5">
                 {quickSearchSignals.length > 0 ? (
                   quickSearchSignals.map((keyword) => (
                     <Button
@@ -896,13 +1141,41 @@ function HomeContent() {
               </div>
             </CardContent>
           </Card>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {lowerShelfCards.map((card) => (
-              <EditorialPickCard key={card.id} card={card} />
-            ))}
-          </div>
         </section>
+
+        <section className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <SectionEyebrow>{siteConfig.siteName} shelves</SectionEyebrow>
+            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-[2.2rem]">
+              Browse the homepage like a real comics storefront.
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-neutral-300">
+              Scrollable shelves, creator links, and genre-aware lanes are what make leading
+              platforms feel alive instead of static.
+            </p>
+          </div>
+
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            onClick={() => router.push("/search")}
+            className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
+          >
+            <Compass className="size-4" />
+            Browse all series
+          </Button>
+        </section>
+
+        {loading ? (
+          <div className="space-y-10">
+            <SkeletonRail />
+            <SkeletonRail />
+            <SkeletonRail />
+          </div>
+        ) : (
+          <HomeRailsContainer activeGenre={activeGenre} onResetGenre={() => setActiveGenre("all")} />
+        )}
       </main>
 
       <LoginPrompt

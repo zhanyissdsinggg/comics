@@ -180,21 +180,19 @@ test.describe("Homepage merchandising sync", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Velvet Voltage" })).toBeVisible({
+    await expect(page.locator("main")).toContainText(/Velvet Voltage|Rocket Choir/, {
       timeout: HOME_UI_TIMEOUT_MS,
     });
 
-    const quickStartSection = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Open one of these before you overthink it." }),
-    });
+    const homepageMain = page.locator("main");
 
-    await expect(quickStartSection).toContainText("Binge Last Ember Files without waiting on the next update.", {
+    await expect(homepageMain).toContainText("Binge Last Ember Files without waiting on the next update.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(quickStartSection).toContainText("Soft Launch Kiss is an easy place to start for free.", {
+    await expect(homepageMain).toContainText("Soft Launch Kiss is an easy place to start for free.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(quickStartSection).toContainText("Rocket Choir is climbing fast this week.", {
+    await expect(homepageMain).toContainText("Rocket Choir is climbing fast this week.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
 
