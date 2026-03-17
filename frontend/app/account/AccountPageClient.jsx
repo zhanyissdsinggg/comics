@@ -7,7 +7,6 @@ import ReadingStats from "../../components/account/ReadingStats";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import CommerceSuccessBanner from "../../components/common/CommerceSuccessBanner";
-import StorefrontPathwaysGrid from "../../components/common/StorefrontPathwaysGrid";
 import { LANGUAGE_OPTIONS, REGION_KEYS, getRegionConfig } from "../../lib/region/config";
 import { setCookie } from "../../lib/cookies";
 import { applyPreferencesToStorage } from "../../lib/preferencesClient";
@@ -298,67 +297,6 @@ export default function AccountPage() {
     "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
   const checkboxClass =
     "h-4 w-4 rounded border-neutral-700 bg-neutral-950 text-emerald-400 focus:ring-emerald-400/30";
-  const accountActionCards = useMemo(
-    () => [
-      {
-        id: "account-membership",
-        eyebrow: "Membership",
-        title: subscription?.active
-          ? `${subscription.planId || plan} is active on this account.`
-          : "Membership is still the cleanest upgrade path for regular readers.",
-        description: subscription?.active
-          ? "Plan controls, renewal timing, and account billing should stay visible from the same account surface."
-          : "Account pages should make plan comparison and billing control feel easy instead of buried.",
-        ctaLabel: "Manage membership",
-        onClick: () =>
-          router.push(
-            buildPathWithAttribution("/subscribe", {
-              entryPoint: "ACCOUNT_SUBSCRIPTION",
-              sourcePath: "/account",
-              returnTo: "/account",
-            }),
-          ),
-        accentClass:
-          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
-      },
-      {
-        id: "account-orders",
-        eyebrow: "Receipts",
-        title: hydrated && isSignedIn
-          ? `${orders.length} receipt${orders.length === 1 ? "" : "s"} loaded for this account.`
-          : "Order history should stay one tap away from billing changes.",
-        description:
-          "Receipts, refunds, and billing follow-up should not live in separate dead-end screens once someone reaches the account center.",
-        ctaLabel: "Open orders",
-        onClick: () => router.push("/orders"),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-      {
-        id: "account-alerts",
-        eyebrow: "Alerts",
-        title: "Notifications and reading nudges belong next to settings.",
-        description:
-          "A premium account page should connect episode alerts, promo messages, and reading reminders back to the same preferences system.",
-        ctaLabel: "Open notifications",
-        onClick: () => router.push("/notifications"),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-      {
-        id: "account-support",
-        eyebrow: "Support",
-        title: "Account problems should have a fast human fallback.",
-        description:
-          "Verification issues, billing edge cases, or sign-in recovery should all route cleanly into support from here.",
-        ctaLabel: "Contact support",
-        onClick: () => router.push("/support"),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-    ],
-    [hydrated, isSignedIn, orders.length, plan, router, subscription?.active, subscription?.planId],
-  );
   return (
     <main className="min-h-screen bg-transparent text-neutral-100">
       <SiteHeader />
@@ -411,27 +349,6 @@ export default function AccountPage() {
         ) : null}
 
         {hydrated && isSignedIn ? <ReadingStats /> : null}
-
-        <SurfacePanel className="space-y-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Account command deck
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Keep billing, recovery, and reading controls connected.
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                A polished account center does not make people hunt through isolated settings. It keeps the next useful
-                action clear whether the user wants receipts, alerts, plan changes, or support.
-              </p>
-            </div>
-            <p className="text-sm text-neutral-500">
-              {hydrated && isSignedIn ? "Signed-in account center" : "Guest account preferences"}
-            </p>
-          </div>
-          <StorefrontPathwaysGrid cards={accountActionCards} />
-        </SurfacePanel>
 
         <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import EditorialHero from "../../components/common/EditorialHero";
 import StorefrontEventHub from "../../components/common/StorefrontEventHub";
-import StorefrontPathwaysGrid from "../../components/common/StorefrontPathwaysGrid";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import NotificationList from "../../components/notifications/NotificationList";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
@@ -242,84 +241,6 @@ export default function NotificationsPage() {
       },
     ];
   }, [handleNavigate, notifications, router]);
-  const notificationCommandCards = useMemo(() => {
-    const unreadCount = notifications.filter((item) => !item.read).length;
-    const unreadEpisode = notifications.find(
-      (item) => !item.read && (item.type === "NEW_EPISODE" || item.type === "TTF_READY"),
-    );
-    const unreadOffer = notifications.find(
-      (item) => !item.read && (item.type === "PROMO" || item.type === "SUB_VOUCHER"),
-    );
-
-    return [
-      {
-        id: "notif-return",
-        eyebrow: unreadEpisode ? "Read next" : "Library path",
-        title: unreadEpisode
-          ? `${unreadEpisode.title} is the clearest reading return right now.`
-          : "When the inbox is light, your library should be the next obvious place to go.",
-        description: unreadEpisode
-          ? "Inbox design works best when one unread episode or free-unlock notice can pull the reader straight back into the story."
-          : "Notification pages should still support reading continuity, even when there is no urgent alert at the top.",
-        ctaLabel: unreadEpisode ? unreadEpisode.ctaLabel || "Open episode" : "Open library",
-        onClick: () => (unreadEpisode ? handleNavigate(unreadEpisode) : router.push("/library")),
-        accentClass:
-          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
-      },
-      {
-        id: "notif-offer",
-        eyebrow: unreadOffer ? "Offer ready" : "Offer backup",
-        title: unreadOffer
-          ? `${unreadOffer.title} is the cleanest offer to open next.`
-          : "If no unread offer stands out, point packs and plans should still stay close.",
-        description: unreadOffer
-          ? "Promotions only feel useful when they land readers on the right commerce page without extra hunting."
-          : "A polished inbox keeps commerce routes visible without turning the whole page into random system mail.",
-        ctaLabel: unreadOffer ? unreadOffer.ctaLabel || "Open offer" : "Open store",
-        onClick: () =>
-          unreadOffer
-            ? handleNavigate(unreadOffer)
-            : router.push(
-                buildPathWithAttribution(
-                  "/store",
-                  {
-                    entryPoint: "NOTIFICATION_COMMAND_DECK",
-                    sourcePath: "/notifications",
-                    returnTo: "/notifications",
-                  },
-                  { focus: "auto" },
-                ),
-              ),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-      {
-        id: "notif-volume",
-        eyebrow: "Unread flow",
-        title: unreadCount > 0 ? `${unreadCount} unread message${unreadCount === 1 ? "" : "s"} are still waiting.` : "Inbox cleared? Keep browsing from charts.",
-        description:
-          unreadCount > 0
-            ? "Unread state should feel actionable, not like passive clutter stacked on top of reading."
-            : "Once the inbox is handled, the ranking page is the best backup route for discovery.",
-        ctaLabel: unreadCount > 0 ? "Review inbox" : "Open charts",
-        onClick: () => (unreadCount > 0 ? window.scrollTo({ top: 0, behavior: "smooth" }) : router.push("/rankings?type=popular&window=week")),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-      {
-        id: "notif-settings",
-        eyebrow: "Preferences",
-        title: "Alerts should always connect back to account settings.",
-        description:
-          "Readers should be able to adjust alert behavior, reading nudges, and promo preferences from the same system instead of hunting through the app.",
-        ctaLabel: "Open account settings",
-        onClick: () => router.push("/account"),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-    ];
-  }, [handleNavigate, notifications, router]);
-
   return (
     <main className="min-h-screen bg-transparent text-neutral-100">
       <SiteHeader />
@@ -349,29 +270,6 @@ export default function NotificationsPage() {
             </>
           }
         />
-
-        {!loading && !error ? (
-          <SurfacePanel className="space-y-5">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Inbox command deck
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Turn notifications into the next useful action.
-                </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                  A strong comic inbox does not just stack alerts. It guides readers back into chapters, offers,
-                  discovery, and settings with clear next moves.
-                </p>
-              </div>
-              <p className="text-sm text-neutral-500">
-                {notifications.length} loaded notification{notifications.length === 1 ? "" : "s"}
-              </p>
-            </div>
-            <StorefrontPathwaysGrid cards={notificationCommandCards} />
-          </SurfacePanel>
-        ) : null}
 
         {!loading && !error ? (
           <StorefrontEventHub

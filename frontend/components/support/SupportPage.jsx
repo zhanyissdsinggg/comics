@@ -7,7 +7,6 @@ import InfoPageNav from "../layout/InfoPageNav";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
-import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { apiPost } from "../../lib/apiClient";
 import {
   consumeCommerceSuccessForPath,
@@ -207,61 +206,6 @@ export default function SupportPage() {
     "mt-2 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-neutral-100 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20";
   const secondaryButtonClass =
     "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10";
-  const supportActionCards = useMemo(
-    () => [
-      {
-        id: "support-billing",
-        eyebrow: "Receipt first",
-        title: "Billing questions should start from orders, not a blank message box.",
-        description:
-          "Order history gives support the fastest path to payment status, refund context, and receipt lookup before a ticket even starts.",
-        ctaLabel: "Open orders",
-        onClick: () => router.push("/orders"),
-        accentClass:
-          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
-      },
-      {
-        id: "support-channel",
-        eyebrow: hydrated && isSignedIn ? "In-app path" : "Email handoff",
-        title: hydrated && isSignedIn
-          ? "Signed-in users should be able to send support without leaving the site."
-          : "Guests still need a clean email-ready handoff.",
-        description: hydrated && isSignedIn
-          ? "A strong support page keeps subject, order context, and reply channel together in one in-app flow."
-          : "If someone is not signed in, the page should still turn the ticket into a usable email draft instead of a dead end.",
-        ctaLabel: hydrated && isSignedIn ? "Focus ticket form" : "Open email app",
-        onClick: () =>
-          hydrated && isSignedIn
-            ? document.getElementById("support-subject")?.scrollIntoView({ behavior: "smooth", block: "center" })
-            : openGuestMailApp(),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-      {
-        id: "support-faq",
-        eyebrow: "Self-serve help",
-        title: "FAQ should absorb the easy questions before support gets involved.",
-        description:
-          "Payment basics, account setup, and reading guidance should be easy to resolve through help content when no human follow-up is needed.",
-        ctaLabel: "Open FAQ",
-        onClick: () => router.push("/faq"),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-      {
-        id: "support-direct",
-        eyebrow: "Direct contact",
-        title: `${siteConfig.supportEmail} stays visible as the fallback path.`,
-        description:
-          "When a ticket needs screenshots, logs, or browser details, direct contact information should still be easy to find.",
-        ctaLabel: "Copy email details",
-        onClick: () => copyGuestDraft(),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-    ],
-    [hydrated, isSignedIn, router],
-  );
 
   return (
     <div className="min-h-screen bg-transparent text-neutral-100">
@@ -282,27 +226,6 @@ export default function SupportPage() {
             onDismiss={() => setCommerceNotice(null)}
           />
         ) : null}
-
-        <SurfacePanel className="space-y-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Support command deck
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Help people choose the fastest support route first.
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                A polished support page should sort billing, self-serve help, in-app tickets, and direct contact into
-                clear next steps before the user writes a long message.
-              </p>
-            </div>
-            <p className="text-sm text-neutral-500">
-              {hydrated && isSignedIn ? "Signed-in ticket flow available" : "Guest email handoff available"}
-            </p>
-          </div>
-          <StorefrontPathwaysGrid cards={supportActionCards} />
-        </SurfacePanel>
 
         <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <SurfacePanel className="space-y-5">

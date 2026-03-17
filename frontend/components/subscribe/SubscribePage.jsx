@@ -6,7 +6,6 @@ import { Check, Zap, Gift, Star, Sparkles } from "lucide-react";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
-import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
 import { getPlanCatalog, setPlanCatalog } from "../../lib/subscriptions";
 import { apiGet } from "../../lib/apiClient";
@@ -227,66 +226,6 @@ export default function SubscribePage() {
     ],
     [subscriptionPreviewOnly],
   );
-  const membershipActionCards = useMemo(() => {
-    const bestPlan = bestPlanId ? planCatalog?.[bestPlanId] : null;
-    const bestPlanLabel = bestPlan?.title || bestPlanId || "VIP";
-
-    return [
-      {
-        id: "membership-best-plan",
-        eyebrow: "Best plan",
-        title: `${bestPlanLabel} is the strongest value anchor on this page.`,
-        description:
-          "Membership pages work best when they spotlight the best fit first instead of making every tier feel equally vague.",
-        ctaLabel: "Jump to plans",
-        onClick: () =>
-          document.getElementById("membership-plans")?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          }),
-        accentClass:
-          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
-      },
-      {
-        id: "membership-vs-wallet",
-        eyebrow: "Compare spend",
-        title: "Point packs should stay close when readers are unsure about recurring spend.",
-        description:
-          "A premium subscription page lets readers compare one-time point packs against recurring value without losing context.",
-        ctaLabel: STOREFRONT_TERMS.viewPointPacks,
-        onClick: () => router.push("/store"),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-      {
-        id: "membership-account",
-        eyebrow: "Account loop",
-        title: isActive
-          ? "Active members still need a clear route back to account controls."
-          : "Membership should stay tied to account and order visibility.",
-        description:
-          "Plan changes, renewals, and future billing decisions should all feel connected to the account center instead of split across unrelated pages.",
-        ctaLabel: "Open account",
-        onClick: () => router.push("/account"),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-      {
-        id: "membership-support",
-        eyebrow: subscriptionPreviewOnly ? "Preview mode" : "Billing follow-up",
-        title: subscriptionPreviewOnly
-          ? "Preview-only membership still needs a clear fallback path."
-          : "Receipts and support should stay one step away from subscription decisions.",
-        description: subscriptionPreviewOnly
-          ? "If activation is disabled for now, the page should make comparison and human follow-up obvious."
-          : "A top-tier subscription flow keeps Orders and Support close for receipt follow-up and edge-case billing issues.",
-        ctaLabel: subscriptionPreviewOnly ? "Contact support" : "View orders",
-        onClick: () => router.push(subscriptionPreviewOnly ? "/support" : "/orders"),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
-    ];
-  }, [bestPlanId, isActive, planCatalog, router, subscriptionPreviewOnly]);
 
   return (
     <div className="min-h-screen bg-transparent text-neutral-100">
@@ -325,27 +264,6 @@ export default function SubscribePage() {
             </>
           }
         />
-
-        <SurfacePanel className="space-y-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Membership command deck
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Make the plan decision easier before readers compare every perk.
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                Strong membership pages highlight the value anchor, keep point-pack comparison nearby, and connect plan
-                changes back to account, receipts, and support.
-              </p>
-            </div>
-            <p className="text-sm text-neutral-500">
-              {subscriptionPreviewOnly ? "Preview-only activation state" : `${SUBSCRIPTION_OFFERS.length} plan tiers live`}
-            </p>
-          </div>
-          <StorefrontPathwaysGrid cards={membershipActionCards} />
-        </SurfacePanel>
 
         <SurfacePanel id="membership-plans" className="space-y-6">
           {feedback ? (
