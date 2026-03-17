@@ -2,6 +2,7 @@
  * Portrait card: calmer storefront card shared by home, search, and creator pages.
  */
 import { memo } from "react";
+import { ArrowRight } from "lucide-react";
 import Cover from "../common/Cover";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -87,9 +88,7 @@ function PortraitCard({ item, tone, onClick }) {
 
           <div className="flex items-center justify-between pt-1">
             <span className="text-[11px] uppercase tracking-[0.18em] text-neutral-500">Read now</span>
-            <span className="text-sm font-semibold text-white transition-transform duration-300 group-hover:translate-x-1">
-              →
-            </span>
+            <ArrowRight className="size-4 text-white transition-transform duration-300 group-hover:translate-x-1" />
           </div>
         </div>
       </div>

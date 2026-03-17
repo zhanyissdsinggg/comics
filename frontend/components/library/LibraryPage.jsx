@@ -9,6 +9,7 @@ import Skeleton from "../common/Skeleton";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
+import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
 import { apiGet } from "../../lib/apiClient";
@@ -709,28 +710,7 @@ export default function LibraryPage() {
                 </p>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {returnConsoleCards.map((card) => (
-                  <button
-                    key={card.id}
-                    type="button"
-                    onClick={card.onClick}
-                    className={`rounded-[24px] border p-5 text-left transition hover:-translate-y-1 ${card.accentClass}`}
-                  >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-current opacity-75">
-                      {card.eyebrow}
-                    </p>
-                    <h3 className="mt-4 font-display text-xl font-semibold leading-tight text-white">
-                      {card.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-7 text-neutral-300">{card.description}</p>
-                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-current">
-                      {card.ctaLabel}
-                      <span aria-hidden="true">&gt;</span>
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <StorefrontPathwaysGrid cards={returnConsoleCards} />
             </SurfacePanel>
 
             {!hasLibrarySignals ? (

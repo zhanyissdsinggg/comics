@@ -7,6 +7,7 @@ import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import StorefrontEventHub from "../common/StorefrontEventHub";
+import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import CreatorShelfLinks from "../common/CreatorShelfLinks";
 import Cover from "../common/Cover";
 import Pill from "../common/Pill";
@@ -280,6 +281,83 @@ export default function RankingsPage() {
     selectedWindow,
     tab,
   ]);
+  const chartPlaybookCards = useMemo(() => {
+    const secondEntry = supportEntries[0] || null;
+    const thirdEntry = supportEntries[1] || null;
+
+    return [
+      {
+        id: "playbook-lead",
+        eyebrow: "Start here",
+        title: leadEntry
+          ? `${leadEntry.title} owns the current ${activeTab.label.toLowerCase()} board.`
+          : `Use the ${activeTab.label.toLowerCase()} board as your first click.`,
+        description: leadEntry
+          ? "The top slot should always feel like a confident reading recommendation, not just a stat on a leaderboard."
+          : "The lead chart slot should surface the clearest first read in this category.",
+        ctaLabel: leadEntry ? `Open ${leadEntry.title}` : "See chart leader",
+        onClick: () =>
+          leadEntry
+            ? handleSeriesClick(leadEntry.id, "RANKINGS_PLAYBOOK", `playbook_${tab}_${selectedWindow}`)
+            : router.push(`/rankings?type=${tab}&window=${selectedWindow}`),
+        accentClass:
+          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+      },
+      {
+        id: "playbook-compare",
+        eyebrow: "Compare next",
+        title: "Use search to widen the chart without losing the signal.",
+        description:
+          "Top ranking pages work best when they hand readers into related discovery, not when the chart becomes a dead-end list.",
+        ctaLabel: chartGuide.searchLabel,
+        onClick: () => router.push(chartGuide.searchHref),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "playbook-support",
+        eyebrow: "Also rising",
+        title: secondEntry
+          ? `${secondEntry.title} and ${thirdEntry?.title || "other board picks"} are worth the second look.`
+          : "The support slots should feel hand-picked, not filler.",
+        description: secondEntry
+          ? "The strongest ranking pages make the top three feel like distinct choices instead of one winner and two leftovers."
+          : "Once the lead title is clear, the next slots should broaden taste, mood, or format.",
+        ctaLabel: secondEntry ? `Open ${secondEntry.title}` : "Review top three",
+        onClick: () =>
+          secondEntry
+            ? handleSeriesClick(secondEntry.id, "RANKINGS_PLAYBOOK", `playbook_support_${tab}_${selectedWindow}`)
+            : router.push(`/rankings?type=${tab}&window=${selectedWindow}`),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "playbook-window",
+        eyebrow: "Time lens",
+        title: `${activeWindow.label} is active, but the board should stay easy to pivot.`,
+        description:
+          "Readers should be able to bounce between weekly heat, monthly stability, and all-time proof without losing context.",
+        ctaLabel: selectedWindow === "all" ? "Switch to weekly" : "Switch to all time",
+        onClick: () =>
+          router.replace(
+            `/rankings?type=${tab}&window=${selectedWindow === "all" ? "week" : "all"}`,
+          ),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+    ];
+  }, [
+    activeTab.label,
+    activeWindow.label,
+    chartGuide.searchHref,
+    chartGuide.searchLabel,
+    handleSeriesClick,
+    leadEntry,
+    router,
+    selectedWindow,
+    supportEntries,
+    tab,
+  ]);
 
   return (
     <main className="min-h-screen bg-transparent text-neutral-100">
@@ -319,6 +397,27 @@ export default function RankingsPage() {
             onDismiss={() => setCommerceNotice(null)}
           />
         ) : null}
+
+        <SurfacePanel className="space-y-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                Chart playbook
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                Turn ranking data into an actual reading decision.
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
+                Great chart pages do more than sort titles. They explain what to open first, what to compare next, and
+                how to keep browsing when the top slot is not your taste.
+              </p>
+            </div>
+            <p className="text-sm text-neutral-500">
+              {activeTab.label} chart | {activeWindow.label}
+            </p>
+          </div>
+          <StorefrontPathwaysGrid cards={chartPlaybookCards} />
+        </SurfacePanel>
 
         <SurfacePanel className="space-y-5">
           <div className="flex flex-wrap items-end justify-between gap-4">

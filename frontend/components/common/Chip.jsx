@@ -1,21 +1,48 @@
-/**
- * 老王注释：Chip标签组件 - 添加悬停动画和品牌色
- */
-export default function Chip({ children, className = "", onClick }) {
+import { cn } from "@/lib/utils";
+
+export default function Chip({
+  children,
+  label,
+  className = "",
+  onClick,
+  active = false,
+}) {
   const isClickable = typeof onClick === "function";
+  const content = children ?? label;
+
+  if (!content) {
+    return null;
+  }
+
+  if (!isClickable) {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold tracking-[0.16em] uppercase",
+          active
+            ? "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"
+            : "border-white/10 bg-white/[0.04] text-neutral-300",
+          className,
+        )}
+      >
+        {content}
+      </span>
+    );
+  }
 
   return (
-    <span
+    <button
+      type="button"
       onClick={onClick}
-      role={isClickable ? "button" : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      className={`inline-block rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs text-neutral-300 transition-all duration-300 ${
-        isClickable
-          ? "cursor-pointer hover:scale-105 hover:border-brand-primary/50 hover:bg-neutral-800 hover:text-brand-primary hover:shadow-glow-sm active:scale-95"
-          : ""
-      } ${className}`.trim()}
+      className={cn(
+        "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-all duration-200",
+        active
+          ? "border-emerald-400/30 bg-emerald-400/12 text-emerald-100 shadow-[0_18px_40px_rgba(16,185,129,0.12)]"
+          : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
+        className,
+      )}
     >
-      {children}
-    </span>
+      {content}
+    </button>
   );
 }

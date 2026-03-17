@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   BarChart3,
   Bell,
@@ -150,6 +151,18 @@ export default function AdminShell({ title, subtitle, children, actions }) {
   const [expandedMenus, setExpandedMenus] = useState(new Set(["/admin/series"]));
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  const activeGroupLabel = useMemo(() => {
+    const group = NAV_GROUPS.find((item) =>
+      item.items.some((navItem) =>
+        navItem.exact
+          ? pathname === navItem.href
+          : navItem.match?.some((prefix) => pathname.startsWith(prefix)),
+      ),
+    );
+
+    return group?.label || "总览";
+  }, [pathname]);
+
   const toggleMenu = (href) => {
     setExpandedMenus((current) => {
       const next = new Set(current);
@@ -175,6 +188,10 @@ export default function AdminShell({ title, subtitle, children, actions }) {
   }, []);
 
   useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname, searchParams]);
+
+  useEffect(() => {
     const handleKeyDown = (event) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -187,150 +204,202 @@ export default function AdminShell({ title, subtitle, children, actions }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.1),transparent_18%),radial-gradient(circle_at_85%_0%,rgba(56,189,248,0.08),transparent_22%),linear-gradient(180deg,#070b12_0%,#090d15_100%)] text-neutral-100">
       <div className="flex min-h-screen">
         <aside
-          className={`fixed inset-y-0 left-0 z-50 border-r border-ios-gray-800 bg-neutral-900/90 shadow-ios-lg backdrop-blur-2xl transition-all duration-300 lg:relative ${
-            isCollapsed ? "w-20" : "w-72"
-          } ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-white/10 bg-[linear-gradient(180deg,rgba(10,14,20,0.98),rgba(7,10,15,0.98))] shadow-[0_28px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl transition-all duration-300 lg:relative",
+            isCollapsed ? "w-24" : "w-80",
+            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          )}
         >
-          <div className="flex items-center justify-between gap-3 border-b border-ios-gray-800 px-5 py-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-4xl bg-gradient-to-br from-ios-green to-emerald-600 shadow-ios shadow-ios-glow transition-transform duration-300 hover:scale-110 active:scale-95">
-                <span className="text-xl font-bold text-white">MN</span>
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_24%),radial-gradient(circle_at_86%_0%,rgba(16,185,129,0.12),transparent_22%)]" />
+          <div className="relative flex h-full flex-col">
+            <div className="border-b border-white/10 px-4 py-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[20px] border border-emerald-400/20 bg-emerald-400/10 text-lg font-bold text-white shadow-[0_18px_45px_rgba(16,185,129,0.18)]">
+                    MN
+                  </div>
+                  {!isCollapsed ? (
+                    <div>
+                      <h1 className="text-base font-semibold text-white">后台总控台</h1>
+                      <p className="mt-1 text-xs text-neutral-500">中文运营工作台</p>
+                    </div>
+                  ) : null}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsCollapsed((current) => !current)}
+                  className="hidden h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-neutral-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white lg:flex"
+                  aria-label={isCollapsed ? "展开侧栏" : "收起侧栏"}
+                >
+                  {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                </button>
               </div>
+
               {!isCollapsed ? (
-                <div className="animate-fade-in">
-                  <h1 className="text-base font-bold text-ios-green">后台控制台</h1>
-                  <p className="text-[10px] text-ios-gray-500">运营工作台</p>
+                <div className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-200/80">
+                    当前分区
+                  </p>
+                  <p className="mt-3 text-lg font-semibold text-white">{activeGroupLabel}</p>
+                  <p className="mt-2 text-sm leading-6 text-neutral-400">
+                    侧栏、搜索与页面主内容已经统一成同一套运营界面语言。
+                  </p>
                 </div>
               ) : null}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsCollapsed((current) => !current)}
-              className="hidden h-9 w-9 items-center justify-center rounded-3xl bg-ios-green/10 text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-110 hover:shadow-ios-sm active:scale-95 lg:flex"
-              aria-label={isCollapsed ? "展开侧栏" : "收起侧栏"}
-            >
-              {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-            </button>
-          </div>
-
-          <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4 scrollbar-thin scrollbar-thumb-ios-gray-700 scrollbar-track-transparent">
-            {NAV_GROUPS.map((group) => (
-              <div key={group.label} className="animate-fade-in">
+            <div className="px-4 py-4">
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(true)}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-3 text-left text-sm text-neutral-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
+                  isCollapsed ? "justify-center px-0" : "",
+                )}
+              >
+                <Search size={18} className="shrink-0 text-emerald-200" />
                 {!isCollapsed ? (
-                  <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-ios-green/60">
-                    {group.label}
-                  </div>
+                  <>
+                    <span className="flex-1">全局搜索</span>
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                      Ctrl+K
+                    </span>
+                  </>
                 ) : null}
-                <div className="space-y-1">
-                  {group.items.map((item) => {
-                    const isActive = item.exact
-                      ? pathname === item.href
-                      : item.match?.some((prefix) => pathname.startsWith(prefix));
-                    const Icon = item.icon;
-                    const hasChildren = Array.isArray(item.children) && item.children.length > 0;
-                    const isExpanded = expandedMenus.has(item.href);
-
-                    return (
-                      <div key={item.label}>
-                        {hasChildren ? (
-                          <button
-                            type="button"
-                            onClick={() => toggleMenu(item.href)}
-                            className={`group flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
-                              isActive
-                                ? "bg-ios-green/20 text-ios-green shadow-ios-sm"
-                                : "text-ios-gray-400 hover:bg-ios-green/10 hover:text-ios-green hover:scale-[1.02] active:scale-95"
-                            }`}
-                            title={isCollapsed ? item.label : undefined}
-                          >
-                            <Icon
-                              size={20}
-                              className={`flex-shrink-0 transition-transform duration-300 ${
-                                isActive ? "scale-110" : "group-hover:scale-110 group-hover:rotate-12"
-                              }`}
-                            />
-                            {!isCollapsed ? <span className="flex-1 truncate text-left">{item.label}</span> : null}
-                            {!isCollapsed ? (
-                              <ChevronDown
-                                size={16}
-                                className={`flex-shrink-0 transition-transform duration-300 ${
-                                  isExpanded ? "rotate-180" : ""
-                                }`}
-                              />
-                            ) : null}
-                          </button>
-                        ) : (
-                          <Link
-                            href={item.href}
-                            className={`group flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
-                              isActive
-                                ? "bg-ios-green/20 text-ios-green shadow-ios-sm"
-                                : "text-ios-gray-400 hover:bg-ios-green/10 hover:text-ios-green hover:scale-[1.02] active:scale-95"
-                            }`}
-                            title={isCollapsed ? item.label : undefined}
-                          >
-                            <Icon
-                              size={20}
-                              className={`flex-shrink-0 transition-transform duration-300 ${
-                                isActive ? "scale-110" : "group-hover:scale-110 group-hover:rotate-12"
-                              }`}
-                            />
-                            {!isCollapsed ? <span className="truncate">{item.label}</span> : null}
-                            {isActive && !isCollapsed ? (
-                              <div className="ml-auto h-2 w-2 rounded-full bg-ios-green animate-pulse shadow-ios-glow" />
-                            ) : null}
-                          </Link>
-                        )}
-
-                        {hasChildren && isExpanded && !isCollapsed ? (
-                          <div className="mt-1 ml-6 space-y-1 border-l-2 border-ios-green/20 pl-3 animate-slide-in-right">
-                            {item.children.map((child) => {
-                              const childIsActive = isChildLinkActive(pathname, searchParams, child.href);
-
-                              return (
-                                <Link
-                                  key={child.label}
-                                  href={child.href}
-                                  className={`group flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-medium transition-all duration-300 ${
-                                    childIsActive
-                                      ? "bg-ios-green/20 text-ios-green"
-                                      : "text-ios-gray-400 hover:bg-ios-green/10 hover:text-ios-green hover:scale-[1.02] active:scale-95"
-                                  }`}
-                                >
-                                  <span className="truncate">{child.label}</span>
-                                  {childIsActive ? (
-                                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-ios-green animate-pulse" />
-                                  ) : null}
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </nav>
-
-          {!isCollapsed ? (
-            <div className="border-t border-ios-gray-800 p-4 animate-fade-in">
-              <div className="flex items-center gap-3 rounded-4xl bg-ios-green/10 px-4 py-3 shadow-ios-sm transition-all duration-300 hover:bg-ios-green/15 hover:scale-[1.02] active:scale-95">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-ios-green to-emerald-600 text-sm font-bold text-white shadow-ios">
-                  A
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-neutral-200">管理员</p>
-                  <p className="truncate text-[10px] text-ios-gray-500">安全会话</p>
-                </div>
-              </div>
+              </button>
             </div>
-          ) : null}
+
+            <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6">
+              {NAV_GROUPS.map((group) => (
+                <div key={group.label}>
+                  {!isCollapsed ? (
+                    <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
+                      {group.label}
+                    </div>
+                  ) : null}
+
+                  <div className="space-y-1">
+                    {group.items.map((item) => {
+                      const isActive = item.exact
+                        ? pathname === item.href
+                        : item.match?.some((prefix) => pathname.startsWith(prefix));
+                      const Icon = item.icon;
+                      const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+                      const isExpanded = expandedMenus.has(item.href);
+
+                      return (
+                        <div key={item.label}>
+                          {hasChildren ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleMenu(item.href)}
+                              className={cn(
+                                "group flex w-full items-center gap-3 rounded-[22px] border px-4 py-3 text-sm font-medium transition-all duration-200",
+                                isActive
+                                  ? "border-white/10 bg-white/[0.08] text-white shadow-[0_18px_45px_rgba(0,0,0,0.18)]"
+                                  : "border-transparent text-neutral-400 hover:border-white/10 hover:bg-white/[0.05] hover:text-white",
+                              )}
+                              title={isCollapsed ? item.label : undefined}
+                            >
+                              <Icon
+                                size={18}
+                                className={cn(
+                                  "shrink-0 transition-transform duration-200",
+                                  isActive ? "text-emerald-200" : "text-neutral-500 group-hover:text-white",
+                                )}
+                              />
+                              {!isCollapsed ? <span className="flex-1 truncate text-left">{item.label}</span> : null}
+                              {!isCollapsed ? (
+                                <ChevronDown
+                                  size={16}
+                                  className={cn(
+                                    "shrink-0 text-neutral-500 transition-transform duration-200",
+                                    isExpanded ? "rotate-180" : "",
+                                  )}
+                                />
+                              ) : null}
+                            </button>
+                          ) : (
+                            <Link
+                              href={item.href}
+                              className={cn(
+                                "group flex items-center gap-3 rounded-[22px] border px-4 py-3 text-sm font-medium transition-all duration-200",
+                                isActive
+                                  ? "border-white/10 bg-white/[0.08] text-white shadow-[0_18px_45px_rgba(0,0,0,0.18)]"
+                                  : "border-transparent text-neutral-400 hover:border-white/10 hover:bg-white/[0.05] hover:text-white",
+                              )}
+                              title={isCollapsed ? item.label : undefined}
+                            >
+                              <Icon
+                                size={18}
+                                className={cn(
+                                  "shrink-0 transition-transform duration-200",
+                                  isActive ? "text-emerald-200" : "text-neutral-500 group-hover:text-white",
+                                )}
+                              />
+                              {!isCollapsed ? <span className="truncate">{item.label}</span> : null}
+                              {isActive && !isCollapsed ? (
+                                <span className="ml-auto h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(110,231,183,0.6)]" />
+                              ) : null}
+                            </Link>
+                          )}
+
+                          {hasChildren && isExpanded && !isCollapsed ? (
+                            <div className="mt-1 ml-6 space-y-1 border-l border-white/10 pl-3">
+                              {item.children.map((child) => {
+                                const childIsActive = isChildLinkActive(pathname, searchParams, child.href);
+
+                                return (
+                                  <Link
+                                    key={child.label}
+                                    href={child.href}
+                                    className={cn(
+                                      "group flex items-center gap-2 rounded-[18px] px-3 py-2 text-xs font-medium transition-all duration-200",
+                                      childIsActive
+                                        ? "bg-emerald-400/10 text-emerald-100"
+                                        : "text-neutral-500 hover:bg-white/[0.05] hover:text-white",
+                                    )}
+                                  >
+                                    <span className="truncate">{child.label}</span>
+                                    {childIsActive ? (
+                                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                                    ) : null}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </nav>
+
+            {!isCollapsed ? (
+              <div className="border-t border-white/10 p-4">
+                <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-400/20 bg-emerald-400/10 text-sm font-semibold text-white">
+                      A
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-white">管理员</p>
+                      <p className="truncate text-xs text-neutral-500">安全会话正常</p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-neutral-400">
+                    后台保持中文，方便你直接运营、排查和调整前台内容。
+                  </p>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </aside>
 
         {isMobileMenuOpen ? (
@@ -341,21 +410,27 @@ export default function AdminShell({ title, subtitle, children, actions }) {
         ) : null}
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-ios-gray-800 bg-neutral-900/80 shadow-ios backdrop-blur-2xl">
-            <div className="flex items-center justify-between gap-4 px-6 py-4">
-              <div className="flex items-center gap-4">
+          <header className="sticky top-0 z-30 border-b border-white/10 bg-neutral-950/70 backdrop-blur-2xl">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent)]" />
+            <div className="relative flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+              <div className="flex items-start gap-4">
                 <button
                   type="button"
                   onClick={() => setIsMobileMenuOpen((current) => !current)}
-                  className="flex h-11 w-11 items-center justify-center rounded-3xl bg-ios-green/10 text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-110 hover:shadow-ios-sm active:scale-95 lg:hidden"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08] lg:hidden"
                   aria-label="打开导航"
                 >
-                  <ChevronRight size={22} />
+                  <ChevronRight size={20} />
                 </button>
-                <div className="animate-fade-in">
-                  <p className="text-xs font-medium text-ios-green/60">{breadcrumb}</p>
-                  <h1 className="text-2xl font-bold text-neutral-100">{title}</h1>
-                  {subtitle ? <p className="mt-0.5 text-xs text-ios-gray-500">{subtitle}</p> : null}
+
+                <div>
+                  <div className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
+                    {breadcrumb}
+                  </div>
+                  <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">{title}</h1>
+                  {subtitle ? (
+                    <p className="mt-1 text-sm leading-6 text-neutral-400">{subtitle}</p>
+                  ) : null}
                 </div>
               </div>
 
@@ -363,21 +438,21 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(true)}
-                  className="hidden items-center gap-2 rounded-4xl border border-ios-green/20 bg-ios-green/5 px-5 py-2.5 text-xs text-ios-green transition-all duration-300 hover:border-ios-green/30 hover:bg-ios-green/10 hover:scale-105 hover:shadow-ios-sm active:scale-95 md:flex"
+                  className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08] md:flex"
                 >
-                  <Search size={16} />
+                  <Search size={16} className="text-emerald-200" />
                   <span>搜索</span>
-                  <kbd className="rounded-2xl border border-ios-green/20 bg-ios-green/10 px-2 py-1 text-[10px] font-medium shadow-ios-sm">
+                  <kbd className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-neutral-500">
                     Ctrl+K
                   </kbd>
                 </button>
-                {actions ? <div className="flex items-center gap-2 animate-fade-in">{actions}</div> : null}
+                {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
               </div>
             </div>
           </header>
 
-          <main className="flex-1 bg-neutral-950 p-6">
-            <div className="mx-auto max-w-7xl">{children}</div>
+          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-[1440px]">{children}</div>
           </main>
         </div>
       </div>

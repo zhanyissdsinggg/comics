@@ -6,6 +6,7 @@ import SiteHeader from "../../components/layout/SiteHeader";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import CommerceSuccessBanner from "../../components/common/CommerceSuccessBanner";
+import StorefrontPathwaysGrid from "../../components/common/StorefrontPathwaysGrid";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
 import { formatUSCurrency } from "../../lib/localization";
@@ -400,28 +401,13 @@ export default function OrdersPageClient() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {postPurchaseCards.map((card) => (
-                      <button
-                        key={card.id}
-                        type="button"
-                        onClick={card.onClick}
-                        className={`rounded-[24px] border p-5 text-left transition hover:-translate-y-1 ${card.accentClass}`}
-                      >
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-current opacity-75">
-                          {card.eyebrow}
-                        </p>
-                        <h3 className="mt-4 font-display text-xl font-semibold leading-tight text-white">
-                          {card.title}
-                        </h3>
-                        <p className="mt-3 text-sm leading-7 text-neutral-300">{card.description}</p>
-                        <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-current">
-                          {card.cta}
-                          <span aria-hidden="true">&gt;</span>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                  <StorefrontPathwaysGrid
+                    cards={postPurchaseCards.map((card) => ({
+                      ...card,
+                      ctaLabel: card.cta,
+                    }))}
+                    columnsClassName="md:grid-cols-2"
+                  />
                 </div>
               </SurfacePanel>
             ) : null}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { apiGet } from "../../lib/apiClient";
 import {
   ArrowDown,
@@ -74,13 +75,13 @@ const RANGE_OPTIONS = [
 ];
 
 const QUICK_ACTIONS = [
-  { href: "/admin/series", label: "新增作品", icon: BookOpen, color: "text-ios-blue" },
-  { href: "/admin/storefront", label: "前台体检", icon: Eye, color: "text-ios-cyan" },
-  { href: "/admin/merchandising", label: "首页编排", icon: TrendingUp, color: "text-ios-orange" },
-  { href: "/admin/creators", label: "创作者管理", icon: Award, color: "text-ios-orange" },
-  { href: "/admin/promotions", label: "创建活动", icon: Megaphone, color: "text-ios-orange" },
-  { href: "/admin/users", label: "管理用户", icon: Users, color: "text-ios-purple" },
-  { href: "/admin/orders", label: "查看订单", icon: Receipt, color: "text-ios-green" },
+  { href: "/admin/series", label: "新增作品", icon: BookOpen },
+  { href: "/admin/storefront", label: "前台体检", icon: Eye },
+  { href: "/admin/merchandising", label: "首页编排", icon: TrendingUp },
+  { href: "/admin/creators", label: "创作者管理", icon: Award },
+  { href: "/admin/promotions", label: "创建活动", icon: Megaphone },
+  { href: "/admin/users", label: "管理用户", icon: Users },
+  { href: "/admin/orders", label: "查看订单", icon: Receipt },
 ];
 
 const safeArray = (value, fallback) => (Array.isArray(value) ? value : fallback);
@@ -167,51 +168,81 @@ function normalize(payload) {
   };
 }
 
-function StatCard({ icon: Icon, label, metric, color }) {
+function StatCard({ icon: Icon, label, metric, format = (value) => number.format(value), accentClass }) {
   const isUp = metric.trend !== "down";
   const Trend = isUp ? ArrowUp : ArrowDown;
 
   return (
-    <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios">
-      <div className="mb-4 flex items-center justify-between">
-        <div className={`flex h-14 w-14 items-center justify-center rounded-4xl bg-gradient-to-br ${color} shadow-ios`}>
-          <Icon size={24} className="text-white" />
+    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent to-transparent",
+          accentClass,
+        )}
+      />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_24%,transparent_76%,rgba(255,255,255,0.03))]" />
+      <div className="relative">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.06] text-white">
+            <Icon size={22} />
+          </div>
+          <div
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
+              isUp
+                ? "border border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
+                : "border border-rose-400/20 bg-rose-400/10 text-rose-100",
+            )}
+          >
+            <Trend size={14} />
+            <span>{Math.abs(metric.change)}%</span>
+          </div>
         </div>
-        <div className={`flex items-center gap-1 text-sm font-bold ${isUp ? "text-ios-green" : "text-ios-red"}`}>
-          <Trend size={16} />
-          <span>{Math.abs(metric.change)}%</span>
-        </div>
+
+        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
+          {label}
+        </p>
+        <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-white">
+          {format(metric.total)}
+        </p>
       </div>
-      <p className="text-sm text-ios-gray-500">{label}</p>
-      <p className="mt-1 text-3xl font-bold text-white">{number.format(metric.total)}</p>
     </div>
   );
 }
 
-function Panel({ title, children, action }) {
+function Panel({ title, description, children, action }) {
   return (
-    <section className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 backdrop-blur-2xl shadow-ios">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h3 className="text-lg font-bold text-white">{title}</h3>
-        {action}
+    <section className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.92),rgba(8,11,16,0.98))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:p-6">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_24%,transparent_76%,rgba(255,255,255,0.03))]" />
+      <div className="relative">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="font-display text-2xl font-semibold tracking-tight text-white">{title}</h3>
+            {description ? (
+              <p className="mt-2 text-sm leading-6 text-neutral-400">{description}</p>
+            ) : null}
+          </div>
+          {action}
+        </div>
+
+        <div className="mt-5 space-y-3">{children}</div>
       </div>
-      <div className="space-y-3">{children}</div>
     </section>
   );
 }
 
 function ListRow({ eyebrow, title, meta }) {
   return (
-    <div className="rounded-4xl bg-neutral-950/40 p-4">
+    <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
       <div className="flex items-center gap-2">
         {eyebrow ? (
-          <span className="rounded-full bg-ios-green/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-ios-green">
+          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
             {eyebrow}
           </span>
         ) : null}
         <p className="text-sm font-semibold text-white">{title}</p>
       </div>
-      <p className="mt-1 text-xs text-ios-gray-400">{meta}</p>
+      <p className="mt-2 text-xs text-neutral-400">{meta}</p>
     </div>
   );
 }
@@ -326,103 +357,137 @@ export default function AdminDashboardNew() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-5xl border border-ios-gray-800 bg-gradient-to-br from-ios-green/10 to-emerald-600/5 p-6 backdrop-blur-2xl shadow-ios">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="flex items-center gap-2 text-2xl font-bold text-white">
-              <TrendingUp size={24} className="text-ios-green" />
-              运营总览
-            </h2>
-            <p className="mt-2 text-sm text-ios-gray-400">
-              在一个面板里查看内容产出、收入表现和用户增长趋势。
-            </p>
+      <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,28,26,0.94),rgba(8,11,16,0.98))] p-5 shadow-[0_26px_90px_rgba(0,0,0,0.24)] sm:p-6">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.2),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(56,189,248,0.14),transparent_22%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_24%,transparent_76%,rgba(255,255,255,0.03))]" />
+        <div className="relative">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-100">
+                <TrendingUp size={14} />
+                运营总览
+              </div>
+              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-[2.35rem]">
+                用一套真正可运营的后台视图看全站数据。
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-neutral-300 sm:text-base">
+                这里把内容产出、收入趋势、用户行为和最近动态都压进一个清晰的工作台里，方便你起床之后直接判断今天先动哪一块。
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={refresh}
+                disabled={refreshing}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
+                <span>{refreshing ? "刷新中..." : "刷新数据"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={exportCsv}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                <Download size={16} />
+                <span>导出报表</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={refresh}
-              disabled={refreshing}
-              className="flex items-center gap-2 rounded-4xl border border-ios-green/20 bg-ios-green/5 px-4 py-2.5 text-xs font-bold text-ios-green transition hover:bg-ios-green/10 disabled:opacity-50"
-            >
-              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-              <span>{refreshing ? "刷新中..." : "刷新"}</span>
-            </button>
-            <button
-              type="button"
-              onClick={exportCsv}
-              className="flex items-center gap-2 rounded-4xl border border-ios-blue/20 bg-ios-blue/5 px-4 py-2.5 text-xs font-bold text-ios-blue transition hover:bg-ios-blue/10"
-            >
-              <Download size={14} />
-              <span>导出</span>
-            </button>
+          <div className="mt-6 flex flex-wrap gap-2">
             {RANGE_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => setRange(option.value)}
-                className={`rounded-4xl px-4 py-2 text-sm font-bold transition ${
+                className={cn(
+                  "rounded-full px-4 py-2 text-sm font-semibold transition",
                   range === option.value
-                    ? "bg-ios-green text-white shadow-ios"
-                    : "bg-neutral-800/50 text-ios-gray-300 hover:bg-neutral-800 hover:text-ios-green"
-                }`}
+                    ? "bg-white text-neutral-950 shadow-[0_18px_40px_rgba(255,255,255,0.18)]"
+                    : "border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
+                )}
               >
                 {option.label}
               </button>
             ))}
           </div>
-        </div>
 
-        {range === "custom" ? (
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 text-sm text-ios-gray-400">
-              开始
-              <input
-                type="date"
-                value={from}
-                onChange={(event) => setFrom(event.target.value)}
-                className="rounded-3xl border border-ios-green/20 bg-neutral-800/50 px-4 py-2 text-sm text-white"
-              />
-            </label>
-            <label className="flex items-center gap-2 text-sm text-ios-gray-400">
-              结束
-              <input
-                type="date"
-                value={to}
-                onChange={(event) => setTo(event.target.value)}
-                className="rounded-3xl border border-ios-green/20 bg-neutral-800/50 px-4 py-2 text-sm text-white"
-              />
-            </label>
-          </div>
-        ) : null}
+          {range === "custom" ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <label className="text-sm text-neutral-400">
+                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                  开始日期
+                </span>
+                <input
+                  type="date"
+                  value={from}
+                  onChange={(event) => setFrom(event.target.value)}
+                  className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40"
+                />
+              </label>
+              <label className="text-sm text-neutral-400">
+                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                  结束日期
+                </span>
+                <input
+                  type="date"
+                  value={to}
+                  onChange={(event) => setTo(event.target.value)}
+                  className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40"
+                />
+              </label>
+            </div>
+          ) : null}
+        </div>
       </section>
 
       {loading ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((item) => (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 9 }).map((_, index) => (
             <div
-              key={item}
-              className="h-36 animate-pulse rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6"
+              key={index}
+              className="h-40 animate-pulse rounded-[28px] border border-white/10 bg-white/[0.04]"
             />
           ))}
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <StatCard icon={Users} label="总用户数" metric={data.stats.users} color="from-purple-500 to-purple-600" />
-            <StatCard icon={BookOpen} label="作品数" metric={data.stats.series} color="from-blue-500 to-blue-600" />
-            <StatCard icon={Receipt} label="订单数" metric={data.stats.orders} color="from-orange-500 to-orange-600" />
-            <StatCard icon={DollarSign} label="收入" metric={data.stats.revenue} color="from-emerald-500 to-emerald-600" />
-            <StatCard icon={Eye} label="浏览量" metric={data.stats.views} color="from-cyan-500 to-cyan-600" />
-            <StatCard icon={MessageSquare} label="评论数" metric={data.stats.comments} color="from-pink-500 to-pink-600" />
-            <StatCard icon={BookOpen} label="漫画作品" metric={data.stats.seriesByType.comic} color="from-blue-500 to-blue-600" />
-            <StatCard icon={Award} label="小说作品" metric={data.stats.seriesByType.novel} color="from-purple-500 to-purple-600" />
-            <StatCard icon={Layers} label="章节数" metric={data.stats.episodes} color="from-emerald-500 to-emerald-600" />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <StatCard icon={Users} label="总用户数" metric={data.stats.users} accentClass="via-cyan-300/55" />
+            <StatCard icon={BookOpen} label="作品数" metric={data.stats.series} accentClass="via-blue-300/55" />
+            <StatCard icon={Receipt} label="订单数" metric={data.stats.orders} accentClass="via-amber-300/55" />
+            <StatCard
+              icon={DollarSign}
+              label="收入"
+              metric={data.stats.revenue}
+              format={(value) => money.format(value)}
+              accentClass="via-emerald-300/55"
+            />
+            <StatCard icon={Eye} label="浏览量" metric={data.stats.views} accentClass="via-sky-300/55" />
+            <StatCard
+              icon={MessageSquare}
+              label="评论数"
+              metric={data.stats.comments}
+              accentClass="via-rose-300/55"
+            />
+            <StatCard
+              icon={BookOpen}
+              label="漫画作品"
+              metric={data.stats.seriesByType.comic}
+              accentClass="via-indigo-300/55"
+            />
+            <StatCard
+              icon={Award}
+              label="小说作品"
+              metric={data.stats.seriesByType.novel}
+              accentClass="via-fuchsia-300/55"
+            />
+            <StatCard icon={Layers} label="章节数" metric={data.stats.episodes} accentClass="via-teal-300/55" />
           </div>
 
-          <div>
-            <h3 className="mb-4 text-lg font-bold text-white">快捷操作</h3>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <Panel title="快捷操作" description="常用入口做成一排，避免每天在后台里来回翻找。">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-7">
               {QUICK_ACTIONS.map((item) => {
                 const Icon = item.icon;
 
@@ -430,18 +495,23 @@ export default function AdminDashboardNew() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="rounded-5xl border border-ios-gray-800 bg-neutral-900/50 p-6 text-center text-white transition hover:border-ios-green/30 hover:bg-neutral-900"
+                    className="group rounded-[24px] border border-white/10 bg-black/20 px-4 py-5 text-center transition hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06]"
                   >
-                    <Icon className={`mx-auto mb-3 ${item.color}`} />
-                    {item.label}
+                    <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/[0.05] text-white">
+                      <Icon size={18} />
+                    </div>
+                    <p className="mt-4 text-sm font-semibold text-white">{item.label}</p>
                   </Link>
                 );
               })}
             </div>
-          </div>
+          </Panel>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Panel title="浏览量最高作品">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <Panel
+              title="浏览量最高作品"
+              description="看当前被打开最多的作品，方便你判断前台热度和曝光位是否合理。"
+            >
               {data.top.byViews.map((series, index) => (
                 <ListRow
                   key={series.id || index}
@@ -451,7 +521,11 @@ export default function AdminDashboardNew() {
                 />
               ))}
             </Panel>
-            <Panel title="收入最高作品">
+
+            <Panel
+              title="收入最高作品"
+              description="高收入作品会直接影响首页编排、活动资源位和充值节奏。"
+            >
               {data.top.byRevenue.map((series, index) => (
                 <ListRow
                   key={series.id || index}
@@ -463,8 +537,11 @@ export default function AdminDashboardNew() {
             </Panel>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Panel title="最近更新">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <Panel
+              title="最近更新"
+              description="最近上线和更新的内容应该跟前台的发现路径保持一致。"
+            >
               {data.updates.map((series, index) => (
                 <ListRow
                   key={series.id || index}
@@ -474,11 +551,16 @@ export default function AdminDashboardNew() {
                 />
               ))}
             </Panel>
+
             <Panel
               title="最近活动"
+              description="运营动作、用户购买和评论变化都应该在这里快速扫到。"
               action={
-                <Link href="/admin/tracking" className="text-sm font-medium text-ios-green hover:text-emerald-300">
-                  查看追踪 &gt;
+                <Link
+                  href="/admin/tracking"
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  查看追踪
                 </Link>
               }
             >

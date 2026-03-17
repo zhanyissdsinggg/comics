@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
+import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import PackageCard from "./PackageCard";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useCouponStore } from "../../store/useCouponStore";
@@ -379,6 +380,107 @@ export default function StorePage() {
     ],
     [bonusPts, coupons.length, isNewPayer, isSignedIn, isSubscriber, paidPts, promotions.length, regionConfig.label],
   );
+  const storeDecisionCards = useMemo(() => {
+    const featuredPack =
+      packageDecisionSummary?.highestBonus || packageDecisionSummary?.largest || packageDecisionSummary?.cheapest;
+    const featuredPackLabel = featuredPack?.name || "Starter pack";
+    const featuredPackHint =
+      featuredPack?.bonusPct !== undefined
+        ? `${featuredPack.bonusPct}% extra value`
+        : featuredPack?.totalPts
+          ? `${formatUSNumber(featuredPack.totalPts)} total pts`
+          : featuredPack?.priceLabel || "Live pricing";
+
+    return [
+      {
+        id: "featured-pack",
+        eyebrow: "Featured pack",
+        title: `${featuredPackLabel} is the clearest pack to compare first.`,
+        description: `A strong wallet page should help readers spot the best starting pack instead of dumping every price at once. ${featuredPackHint}.`,
+        ctaLabel: "Jump to point packs",
+        onClick: () =>
+          document.getElementById("point-packs")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          }),
+        accentClass:
+          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+      },
+      {
+        id: "coupon-flow",
+        eyebrow: isSignedIn ? "Codes and perks" : "Account first",
+        title: isSignedIn
+          ? coupons.length > 0
+            ? `${coupons.length} saved coupon${coupons.length === 1 ? "" : "s"} are ready to use.`
+            : "Keep promo codes and wallet claims close to checkout."
+          : "Sign in before points, coupons, and receipts start to matter.",
+        description: isSignedIn
+          ? "Wallet codes, promo claims, and bonus paths should sit near pricing instead of hiding in a separate account area."
+          : "Point balances only feel trustworthy when they stay tied to a real account with receipts and support history.",
+        ctaLabel: isSignedIn ? "Go to codes" : "Sign in",
+        onClick: isSignedIn
+          ? () =>
+              document.getElementById("wallet-codes")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              })
+          : openAuthPrompt,
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "membership-compare",
+        eyebrow: "Value check",
+        title: subscriptionStats
+          ? `Membership can save up to ${subscriptionStats.maxDiscount}% on unlocks.`
+          : "Compare membership before you buy points repeatedly.",
+        description:
+          "Readers who spend often should be able to compare recurring value against one-off packs without leaving the wallet flow.",
+        ctaLabel: STOREFRONT_TERMS.compareMembership,
+        onClick: () =>
+          router.push(
+            buildPathWithAttribution("/subscribe", {
+              promotionId: promotionId || undefined,
+              campaignId: campaignId || undefined,
+              entryPoint: "STORE_UPSELL",
+              sourcePath,
+              sourceSeriesId: sourceSeriesId || undefined,
+              sourceEpisodeId: sourceEpisodeId || undefined,
+              returnTo,
+            }),
+          ),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "support-path",
+        eyebrow: purchasePreviewOnly ? "Preview mode" : "After purchase",
+        title: purchasePreviewOnly
+          ? "Checkout is still preview-only, so support should stay visible."
+          : "Receipts, refunds, and wallet help should always stay close.",
+        description: purchasePreviewOnly
+          ? "If billing is not fully live yet, the next-best action is clear support and comparison guidance."
+          : "A premium storefront makes post-purchase help obvious instead of burying it after checkout.",
+        ctaLabel: purchasePreviewOnly ? "Contact support" : returnLabel,
+        onClick: () => (purchasePreviewOnly ? router.push("/support") : router.push(returnTo)),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+    ];
+  }, [
+    campaignId,
+    coupons.length,
+    packageDecisionSummary,
+    promotionId,
+    purchasePreviewOnly,
+    returnLabel,
+    returnTo,
+    router,
+    sourceEpisodeId,
+    sourcePath,
+    sourceSeriesId,
+    subscriptionStats,
+  ]);
 
   const secondaryButtonClass =
     "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10";
@@ -473,6 +575,27 @@ export default function StorePage() {
           <PromoBanner offer={OFFERS.first_purchase_bonus} />
         ) : null}
 
+        <SurfacePanel className="space-y-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                Wallet command deck
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                Make the next money decision feel obvious.
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
+                Strong storefront wallets explain value fast, keep trust visible, and shorten the path from pricing to
+                the right purchase.
+              </p>
+            </div>
+            <p className="text-sm text-neutral-500">
+              {purchasePreviewOnly ? "Preview-only billing state" : `${orderedPackages.length} live pack options`}
+            </p>
+          </div>
+          <StorefrontPathwaysGrid cards={storeDecisionCards} />
+        </SurfacePanel>
+
         <div className="grid gap-6 xl:grid-cols-[0.84fr_1.16fr]">
           <div className="space-y-6">
             {!isSignedIn ? (
@@ -541,7 +664,7 @@ export default function StorePage() {
               </SurfacePanel>
             ) : null}
 
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel id="wallet-codes" className="space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
@@ -581,7 +704,7 @@ export default function StorePage() {
             </SurfacePanel>
           </div>
 
-          <SurfacePanel className="space-y-5">
+          <SurfacePanel id="point-packs" className="space-y-5">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">

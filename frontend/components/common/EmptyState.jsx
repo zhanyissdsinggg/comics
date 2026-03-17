@@ -2,22 +2,17 @@
 
 import { memo } from "react";
 import {
+  AlertCircle,
+  ArrowRight,
+  Bell,
+  BookOpen,
+  FileText,
+  Heart,
   Inbox,
   Search,
-  BookOpen,
-  Heart,
   ShoppingCart,
-  Bell,
-  FileText,
-  AlertCircle
 } from "lucide-react";
-
-/**
- * 老王注释：空状态组件 - iOS风格
- * 功能：友好的空数据提示，支持多种场景
- * 遵循KISS原则：简洁的空状态展示
- * 遵循DRY原则：可复用的Empty组件
- */
+import { cn } from "@/lib/utils";
 
 const iconMap = {
   inbox: Inbox,
@@ -27,16 +22,17 @@ const iconMap = {
   cart: ShoppingCart,
   bell: Bell,
   file: FileText,
-  alert: AlertCircle
+  alert: AlertCircle,
 };
 
 export const EmptyState = memo(function EmptyState({
   icon = "inbox",
-  title = "No data",
+  title = "Nothing is here yet",
   description,
   action,
   actionText,
-  className = ""
+  eyebrow = "Next step",
+  className = "",
 }) {
   const Icon = iconMap[icon] || Inbox;
   const resolvedAction =
@@ -48,39 +44,55 @@ export const EmptyState = memo(function EmptyState({
             label: action.label || actionText,
           }
         : null;
+  const accentClass =
+    icon === "alert"
+      ? "border-red-400/20 bg-red-500/[0.08] text-red-200"
+      : "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-100";
 
   return (
-    <div className={`flex flex-col items-center justify-center py-12 px-4 ${className}`}>
-      {/* 老王注释：图标 */}
-      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 text-neutral-500">
-        <Icon size={40} strokeWidth={1.5} />
-      </div>
-
-      {/* 老王注释：标题 */}
-      <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
-
-      {/* 老王注释：描述 */}
-      {description && (
-        <p className="mb-6 max-w-sm text-center text-sm text-neutral-400">
-          {description}
-        </p>
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-[28px] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-12 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
+        className,
       )}
-
-      {/* 老王注释：操作按钮 */}
-      {resolvedAction?.onClick && resolvedAction?.label && (
-        <button
-          type="button"
-          onClick={resolvedAction.onClick}
-          className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-emerald-600 active:scale-95"
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(16,185,129,0.12),transparent_24%)]" />
+      <div className="relative mx-auto flex max-w-xl flex-col items-center">
+        <div
+          className={cn(
+            "mb-5 flex h-20 w-20 items-center justify-center rounded-[24px] border shadow-[0_18px_50px_rgba(0,0,0,0.16)]",
+            accentClass,
+          )}
         >
-          {resolvedAction.label}
-        </button>
-      )}
+          <Icon size={36} strokeWidth={1.6} />
+        </div>
+
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
+          {eyebrow}
+        </p>
+
+        <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+          {title}
+        </h3>
+
+        {description ? (
+          <p className="mt-3 max-w-md text-sm leading-7 text-neutral-400">{description}</p>
+        ) : null}
+
+        {resolvedAction?.onClick && resolvedAction?.label ? (
+          <button
+            type="button"
+            onClick={resolvedAction.onClick}
+            className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-5 py-3 text-sm font-semibold text-emerald-100 transition-all duration-200 hover:border-emerald-300/50 hover:bg-emerald-400/16"
+          >
+            <span>{resolvedAction.label}</span>
+            <ArrowRight size={16} />
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 });
-
-// 预设的空状态组件
 
 export const EmptyLibrary = memo(function EmptyLibrary({ onBrowse }) {
   return (
@@ -90,6 +102,7 @@ export const EmptyLibrary = memo(function EmptyLibrary({ onBrowse }) {
       description="Start adding series to your library to keep track of your reading progress."
       action={onBrowse}
       actionText="Browse Series"
+      eyebrow="Library"
     />
   );
 });
@@ -99,7 +112,12 @@ export const EmptySearch = memo(function EmptySearch({ query }) {
     <EmptyState
       icon="search"
       title="No results found"
-      description={query ? `We couldn't find anything matching "${query}". Try different keywords.` : "Try searching for something else."}
+      description={
+        query
+          ? `We couldn't find anything matching "${query}". Try different keywords.`
+          : "Try searching for something else."
+      }
+      eyebrow="Search"
     />
   );
 });
@@ -112,6 +130,7 @@ export const EmptyFavorites = memo(function EmptyFavorites({ onBrowse }) {
       description="Mark series as favorites to easily find them later."
       action={onBrowse}
       actionText="Discover Series"
+      eyebrow="Favorites"
     />
   );
 });
@@ -124,6 +143,7 @@ export const EmptyOrders = memo(function EmptyOrders({ onShop }) {
       description="You haven't made any purchases yet. Start shopping to unlock episodes!"
       action={onShop}
       actionText="Browse Store"
+      eyebrow="Orders"
     />
   );
 });
@@ -134,6 +154,7 @@ export const EmptyNotifications = memo(function EmptyNotifications() {
       icon="bell"
       title="No notifications"
       description="You're all caught up! We'll notify you when there's something new."
+      eyebrow="Notifications"
     />
   );
 });
@@ -146,6 +167,7 @@ export const EmptyHistory = memo(function EmptyHistory({ onBrowse }) {
       description="Start reading to build your history and pick up where you left off."
       action={onBrowse}
       actionText="Start Reading"
+      eyebrow="History"
     />
   );
 });
@@ -158,6 +180,7 @@ export const ErrorState = memo(function ErrorState({ onRetry }) {
       description="We couldn't load this content. Please try again."
       action={onRetry}
       actionText="Retry"
+      eyebrow="Error"
     />
   );
 });
