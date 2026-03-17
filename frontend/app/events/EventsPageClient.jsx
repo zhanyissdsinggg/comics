@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
+import StorefrontPathwaysGrid from "../../components/common/StorefrontPathwaysGrid";
 import SiteHeader from "../../components/layout/SiteHeader";
 import { clearEventBuffer, getEventBuffer, subscribeEvents } from "../../lib/eventBus";
 import { apiDelete, apiGet, getApiBaseUrl } from "../../lib/apiClient";
@@ -325,11 +326,81 @@ export default function EventsPage() {
     );
     setStatusMessage("Exported the current event view.");
   };
+  const eventConsoleCards = useMemo(
+    () => [
+      {
+        id: "console-source",
+        eyebrow: source === "server" ? "Server mode" : "Local mode",
+        title:
+          source === "server"
+            ? "You are inspecting the signed-in backend event log."
+            : "You are watching the in-memory frontend event buffer.",
+        description:
+          source === "server"
+            ? "Server mode is best for account-scoped history, pagination, and backend export."
+            : "Local mode is best for fast frontend debugging and quick client-side filtering.",
+        ctaLabel: source === "server" ? "Switch to local" : "Switch to server",
+        onClick: () => handleSourceChange(source === "server" ? "local" : "server"),
+        accentClass:
+          source === "server"
+            ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15"
+            : "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "console-errors",
+        eyebrow: "Error lens",
+        title:
+          totalVisibleErrors > 0
+            ? `${totalVisibleErrors} visible error event${totalVisibleErrors === 1 ? "" : "s"} deserve a closer look.`
+            : "No obvious error events are visible in the current view.",
+        description:
+          source === "server"
+            ? "Server logs help validate whether production-like failures are isolated or recurring across the account log."
+            : "Local mode should make it easy to isolate failures without drowning in non-critical client events.",
+        ctaLabel: source === "server" ? "Refresh server log" : "Show only errors",
+        onClick: () => {
+          if (source === "server") {
+            handleServerRefresh();
+            return;
+          }
+          setOnlyErrors(true);
+        },
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "console-export",
+        eyebrow: "Export",
+        title: list.length > 0 ? "Export the current slice before you lose the trail." : "Exports matter most when a useful slice is on screen.",
+        description:
+          "A good event console should make it easy to hand off the exact current view for debugging, triage, or regression review.",
+        ctaLabel: "Export current view",
+        onClick: handleCurrentViewExport,
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "console-account",
+        eyebrow: serverUnavailable ? "Account access" : "Next route",
+        title: serverUnavailable
+          ? "Sign in first if you want the backend event history."
+          : "Keep the event console tied to the rest of the account system.",
+        description: serverUnavailable
+          ? "Server-side logs should stay scoped to a real signed-in account instead of failing in the background."
+          : "Observability pages are strongest when they stay close to account state, support, and commerce follow-up.",
+        ctaLabel: serverUnavailable ? "Open account" : "Open support",
+        onClick: () => (serverUnavailable ? window.location.assign("/account") : window.location.assign("/support")),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+    ],
+    [handleCurrentViewExport, list.length, serverUnavailable, source, totalVisibleErrors],
+  );
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100">
+    <main className="min-h-screen bg-transparent text-neutral-100">
       <SiteHeader />
-      <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 pb-14 sm:py-10">
+      <div className="mx-auto max-w-[1280px] space-y-8 px-4 py-8 pb-14 sm:px-6 sm:py-10 lg:px-8">
         <EditorialHero
           eyebrow="Observability"
           title="Inspect local event flow and the signed-in server log without mixing their behavior."
@@ -364,6 +435,27 @@ export default function EventsPage() {
             },
           ]}
         />
+
+        <SurfacePanel className="space-y-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                Console command deck
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                Keep debugging actions obvious before the raw log.
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
+                A premium observability surface is not just a giant table. It should tell you which source you are
+                reading, what to export, and how to isolate failures quickly.
+              </p>
+            </div>
+            <p className="text-sm text-neutral-500">
+              {source === "server" ? "Signed-in server log mode" : "Frontend buffer mode"}
+            </p>
+          </div>
+          <StorefrontPathwaysGrid cards={eventConsoleCards} />
+        </SurfacePanel>
 
         <section className="grid gap-4 lg:grid-cols-[1.06fr_0.94fr]">
           <SurfacePanel className="space-y-5">

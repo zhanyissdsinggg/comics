@@ -9,6 +9,7 @@ import SurfacePanel from "../common/SurfacePanel";
 import EmptyState from "../common/EmptyState";
 import SkeletonCard from "../common/SkeletonCard";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
+import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { apiGet } from "../../lib/apiClient";
 import { buildCreatorDirectory, getCreatorDirectoryStats } from "../../lib/creatorDirectory";
 import {
@@ -211,6 +212,62 @@ export default function CreatorsHubPage() {
   }, [activeGenre, creators, query]);
   const spotlightCreators = useMemo(() => filteredCreators.slice(0, 3), [filteredCreators]);
   const stats = useMemo(() => getCreatorDirectoryStats(creators), [creators]);
+  const creatorPlaybookCards = useMemo(() => {
+    const leadCreator = spotlightCreators[0] || filteredCreators[0] || null;
+    const leadGenre = genreOptions[0] || "Romance";
+
+    return [
+      {
+        id: "creator-lead",
+        eyebrow: "Start here",
+        title: leadCreator
+          ? `${leadCreator.name} is the clearest creator page to open first.`
+          : "The directory should surface one creator page worth opening first.",
+        description: leadCreator
+          ? "Creator discovery works best when one strong page anchors the directory instead of forcing readers to guess from a giant grid."
+          : "A top creator directory should always feel guided, even before someone types a name.",
+        ctaLabel: leadCreator ? `Open ${leadCreator.name}` : "Browse creators",
+        onClick: () => (leadCreator ? openCreator(leadCreator, "CREATORS_HUB_PLAYBOOK") : router.push("/creators")),
+        accentClass:
+          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+      },
+      {
+        id: "creator-genre",
+        eyebrow: activeGenre === "All" ? "Genre lens" : "Active filter",
+        title: activeGenre === "All" ? `Use "${leadGenre}" as a faster creator filter.` : `"${activeGenre}" is already shaping this directory.`,
+        description:
+          activeGenre === "All"
+            ? "Genre chips should help readers narrow creator identity without losing the broader directory."
+            : "Filtered creator browsing should stay reversible and obvious, not feel like a trapped sub-page.",
+        ctaLabel: activeGenre === "All" ? `Filter ${leadGenre}` : "Clear filter",
+        onClick: () => setActiveGenre(activeGenre === "All" ? leadGenre : "All"),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "creator-chart-link",
+        eyebrow: "Chart crossover",
+        title: "Hit series should lead readers back into the creators behind them.",
+        description:
+          "Top comic platforms connect the weekly chart, series detail, and creator directory so discovery does not stop at one title.",
+        ctaLabel: "Open weekly chart",
+        onClick: () => router.push("/rankings?type=popular&window=week"),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+      {
+        id: "creator-search-link",
+        eyebrow: "Catalog link",
+        title: "Creator discovery should stay tied to full-title search.",
+        description:
+          "Readers often switch between remembering an artist, a studio, a genre, and a single hit title. The directory should support that handoff cleanly.",
+        ctaLabel: "Search all series",
+        onClick: () => router.push("/search"),
+        accentClass:
+          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+      },
+    ];
+  }, [activeGenre, filteredCreators, genreOptions, router, spotlightCreators]);
 
   const heroStats = useMemo(
     () => [
@@ -358,6 +415,27 @@ export default function CreatorsHubPage() {
             </>
           }
         />
+
+        <SurfacePanel className="space-y-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                Creator playbook
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                Turn the directory into a guided discovery surface.
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
+                The best creator hubs do not just list names. They help readers start with a strong page, pivot by
+                genre, and move smoothly between charts, search, and creator identity.
+              </p>
+            </div>
+            <p className="text-sm text-neutral-400">
+              {filteredCreators.length.toLocaleString()} creator{filteredCreators.length === 1 ? "" : "s"} in view
+            </p>
+          </div>
+          <StorefrontPathwaysGrid cards={creatorPlaybookCards} />
+        </SurfacePanel>
 
         <SurfacePanel className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
