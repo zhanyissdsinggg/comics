@@ -81,32 +81,6 @@ export default function SupportPage() {
   );
   const canPrepareGuestEmail = Boolean(trimmedSubject && trimmedMessage);
 
-  const supportStats = useMemo(
-    () => [
-      {
-        label: "Channel",
-        value: hydrated && isSignedIn ? "In-app ticket" : "Email reply",
-        hint: hydrated && isSignedIn ? "Signed-in readers can send tickets without leaving the site." : "If you're browsing without signing in, we prepare an email-ready handoff.",
-      },
-      {
-        label: "Reply SLA",
-        value: "1-2 days",
-        hint: "Current support expectation for standard issues.",
-      },
-      {
-        label: "Contact",
-        value: siteConfig.supportEmail,
-        hint: "Direct email inbox for support escalation.",
-      },
-      {
-        label: "Order Ref",
-        value: orderId.trim() ? "Attached" : "Optional",
-        hint: "Adding a receipt reference speeds up billing triage.",
-      },
-    ],
-    [hydrated, isSignedIn, orderId],
-  );
-
   const openGuestMailApp = () => {
     if (!canPrepareGuestEmail) {
       setFeedback({ type: "error", text: "Please fill in both subject and message." });
@@ -147,8 +121,6 @@ export default function SupportPage() {
   };
 
   const handleSubmit = async () => {
-    const trimmedOrderId = orderId.trim();
-
     if (!trimmedSubject || !trimmedMessage) {
       setFeedback({ type: "error", text: "Please fill in both subject and message." });
       return;
@@ -215,9 +187,8 @@ export default function SupportPage() {
         <EditorialHero
           eyebrow="Support"
           title="Support"
-          description="Get help with billing, account, or reading issues."
-          secondary="Send a support request here, or use email if you are browsing as a guest. Add a reply address, include an order ID when it helps, and keep everything in one clear message."
-          stats={supportStats}
+          description="Get help with billing, account access, or reading issues."
+          secondary="Send one clear message here. Signed-in readers can submit a ticket in app. Guests can prepare an email draft without losing the details."
         />
 
         {commerceNotice ? (
@@ -227,15 +198,18 @@ export default function SupportPage() {
           />
         ) : null}
 
-        <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel className="space-y-5">
             <div className="space-y-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Ticket form
+                Support form
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
                 Tell us what happened
               </h2>
+              <p className="text-sm leading-6 text-neutral-400">
+                Keep it simple: what went wrong, what you expected, and anything you already tried.
+              </p>
             </div>
 
             <div className="space-y-3">
@@ -359,24 +333,34 @@ export default function SupportPage() {
             </div>
           </SurfacePanel>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             <SurfacePanel className="space-y-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                What to expect
-              </p>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  Before you send
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                  Help us resolve it faster.
+                </h2>
+              </div>
               <ul className="space-y-3 text-sm leading-6 text-neutral-300">
                 <li>We usually reply within 1-2 business days.</li>
                 <li>Add an order ID for payment issues so the receipt can be traced faster.</li>
-                <li>Signed-in users can submit tickets directly without leaving the site.</li>
+                <li>Include screenshots, browser or device details, and the page URL when the issue is visual.</li>
               </ul>
             </SurfacePanel>
 
             <SurfacePanel className="space-y-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Billing help
-              </p>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  Need order help first?
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                  Check receipts before opening a thread.
+                </h2>
+              </div>
               <p className="text-sm leading-6 text-neutral-300">
-                Start from Orders when you need a receipt, payment status, or refund reference. Then use Support if the issue still needs a person to review it.
+                Start from Orders when you need a receipt, payment status, or refund reference. If the problem still needs a person to review it, come back here with the order ID attached.
               </p>
               <div className="flex flex-wrap gap-3">
                 <button
@@ -394,16 +378,7 @@ export default function SupportPage() {
                   FAQ
                 </button>
               </div>
-            </SurfacePanel>
-
-            <SurfacePanel className="space-y-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Direct contact
-              </p>
-              <p className="text-sm text-neutral-300">Email: {siteConfig.supportEmail}</p>
-              <p className="text-sm leading-6 text-neutral-400">
-                Include screenshots, browser or device details, and the page URL when the issue is visual.
-              </p>
+              <p className="text-sm text-neutral-400">Direct email: {siteConfig.supportEmail}</p>
             </SurfacePanel>
           </div>
         </div>

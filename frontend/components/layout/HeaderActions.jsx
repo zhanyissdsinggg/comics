@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Coins, Sparkles, User } from "lucide-react";
+import { Bell, Coins, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "../common/ThemeToggle";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
@@ -39,21 +39,24 @@ export default function HeaderActions({
   const { paidPts, bonusPts } = useWalletStore();
   const { unreadCount } = useNotificationsStore();
   const walletTotal = paidPts + bonusPts;
+  const showWallet = hydrated && isSignedIn;
 
   return (
     <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        onClick={onWalletClick}
-        className="hidden h-10 rounded-full border-emerald-400/25 bg-[linear-gradient(180deg,rgba(16,185,129,0.14),rgba(16,185,129,0.08))] px-4 text-emerald-200 hover:border-emerald-300/40 hover:bg-emerald-400/[0.12] sm:inline-flex"
-        aria-label="Points store"
-      >
-        <Coins className="size-4" />
-        <span className="text-[10px] uppercase tracking-[0.18em] text-emerald-100/80">Pts</span>
-        <span className="text-xs font-semibold tabular-nums">{walletTotal.toLocaleString()}</span>
-      </Button>
+      {showWallet ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={onWalletClick}
+          className="hidden h-10 rounded-full border-white/10 bg-white/[0.04] px-4 text-neutral-100 hover:border-white/20 hover:bg-white/[0.08] lg:inline-flex"
+          aria-label="Wallet"
+        >
+          <Coins className="size-4" />
+          <span className="text-sm font-semibold">Wallet</span>
+          <span className="text-xs tabular-nums text-neutral-400">{walletTotal.toLocaleString()}</span>
+        </Button>
+      ) : null}
 
       <Button
         type="button"
@@ -79,7 +82,7 @@ export default function HeaderActions({
         variant="outline"
         onClick={onAdultToggleClick}
         className={cn(
-          "h-10 rounded-full px-3 text-xs font-semibold sm:px-4",
+          "h-10 rounded-full px-3 text-xs font-semibold sm:px-3.5",
           isAdultMode
             ? "border-red-400/30 bg-red-500/[0.12] text-red-200 hover:border-red-300/45 hover:bg-red-500/[0.18]"
             : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-white",
@@ -99,23 +102,35 @@ export default function HeaderActions({
         >
           {legalAge}+
         </span>
-        <span className="hidden sm:inline">{isAdultMode ? "Mature on" : "Mature"}</span>
+        <span className="hidden md:inline">{isAdultMode ? "18+ on" : "18+"}</span>
       </Button>
 
       {!hydrated ? (
         <AuthSkeleton />
       ) : isSignedIn ? (
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          onClick={() => router.push("/account")}
-          className="h-10 w-10 rounded-full border-emerald-400/25 bg-emerald-400/[0.08] text-emerald-200 hover:border-emerald-300/40 hover:bg-emerald-400/[0.12]"
-          aria-label="Profile"
-          title="Open account"
-        >
-          <User className="size-4" />
-        </Button>
+        <>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => router.push("/account")}
+            className="hidden h-10 rounded-full border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08] sm:inline-flex"
+          >
+            <User className="size-4" />
+            Account
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={() => router.push("/account")}
+            className="h-10 w-10 rounded-full border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08] sm:hidden"
+            aria-label="Profile"
+            title="Open account"
+          >
+            <User className="size-4" />
+          </Button>
+        </>
       ) : (
         <>
           <Button
@@ -125,8 +140,7 @@ export default function HeaderActions({
             onClick={onLoginClick}
             className="hidden h-10 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 hover:bg-neutral-200 sm:inline-flex"
           >
-            <Sparkles className="size-4" />
-            Sign in free
+            Sign in
           </Button>
           <Button
             type="button"

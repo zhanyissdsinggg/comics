@@ -30,8 +30,6 @@ const footerSections = [
   },
 ];
 
-const footerHighlights = ["Fast pages", "Clean browse", "Creator discovery", "Age-gated catalog"];
-
 const socialLinks = [
   { label: "GitHub", href: siteConfig.githubUrl },
   { label: "Twitter", href: siteConfig.twitterUrl },
@@ -41,87 +39,41 @@ export default function SiteFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="mt-16 border-t border-white/10 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.08),transparent_26%),linear-gradient(180deg,rgba(8,10,16,0.98),rgba(4,5,8,1))]">
-      <div className="mx-auto max-w-[1280px] px-4 pb-10 pt-12 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.03] shadow-[0_30px_120px_rgba(0,0,0,0.26)] backdrop-blur-xl">
-          <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),transparent_28%),radial-gradient(circle_at_80%_20%,rgba(34,211,238,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] px-6 py-8 sm:px-8 lg:px-10">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/80">
-                  Keep browsing
-                </p>
-                <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                  {siteConfig.tagline}
-                </h2>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-300">
-                  Discover fresh launches, open free episodes first, and move through the chart like
-                  a real premium comics storefront.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/rankings?type=popular&window=week"
-                  className="inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition-colors hover:bg-neutral-200"
+    <footer className="mt-16 border-t border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))]">
+      <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+          <div className="max-w-xl space-y-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/75">
+              Read better
+            </p>
+            <div>
+              <Link href="/" className="font-display text-3xl font-semibold tracking-tight text-white">
+                {siteConfig.siteName}
+              </Link>
+              <p className="mt-3 text-sm leading-7 text-neutral-300">{siteConfig.aboutSummary}</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={`mailto:${siteConfig.supportEmail}`}
+                className="inline-flex items-center rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                {siteConfig.supportEmail}
+              </a>
+              {socialLinks.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-full border border-white/10 bg-black/10 px-4 py-2 text-sm font-semibold text-neutral-300 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
                 >
-                  Open weekly chart
-                </Link>
-                <Link
-                  href="/rankings?type=ttf&window=all"
-                  className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white transition-colors hover:border-white/20 hover:bg-white/[0.08]"
-                >
-                  Start with free episodes
-                </Link>
-              </div>
+                  {item.label}
+                </a>
+              ))}
             </div>
           </div>
 
-          <div className="grid gap-10 px-6 py-8 sm:px-8 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-10 lg:py-10">
-            <div className="space-y-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/80">
-                Built for uninterrupted reading
-              </p>
-              <div>
-                <h3 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                  {siteConfig.siteName}
-                </h3>
-                <p className="mt-4 max-w-md text-sm leading-7 text-neutral-300">
-                  {siteConfig.aboutSummary}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {footerHighlights.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-neutral-200"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <a
-                  href={`mailto:${siteConfig.supportEmail}`}
-                  className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15 hover:text-white"
-                >
-                  {siteConfig.supportEmail}
-                </a>
-                {socialLinks.map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-300 transition-colors hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-                  >
-                    {item.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-
+          <div className="grid gap-8 sm:grid-cols-3">
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-4">
                 <h4 className="text-[11px] font-semibold uppercase tracking-[0.32em] text-neutral-400">
@@ -132,7 +84,7 @@ export default function SiteFooter() {
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-sm text-neutral-300 transition-colors hover:text-emerald-300"
+                        className="text-sm text-neutral-300 transition-colors hover:text-white"
                       >
                         {link.label}
                       </Link>
@@ -142,17 +94,15 @@ export default function SiteFooter() {
               </div>
             ))}
           </div>
+        </div>
 
-          <div className="border-t border-white/10 px-6 py-5 sm:px-8 lg:px-10">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <p className="text-sm text-neutral-500">
-                © {currentYear} {siteConfig.companyName}. All rights reserved.
-              </p>
-              <div className="flex flex-col gap-1 text-sm text-neutral-500 sm:flex-row sm:items-center sm:gap-4">
-                <span>{siteConfig.supportEmail}</span>
-                {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
-              </div>
-            </div>
+        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-sm text-neutral-500 lg:flex-row lg:items-center lg:justify-between">
+          <p>
+            © {currentYear} {siteConfig.companyName}. All rights reserved.
+          </p>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+            <span>{siteConfig.supportEmail}</span>
+            {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
           </div>
         </div>
       </div>

@@ -12,27 +12,10 @@ export const metadata = createPageMetadata({
   path: "/about",
 });
 
-const PLATFORM_PILLARS = [
-  {
-    title: "Reader-first product decisions",
-    description:
-      "Discovery, checkout, and reading flows are shaped to reduce friction instead of chasing vanity features.",
-  },
-  {
-    title: "Operationally practical systems",
-    description:
-      "Admin controls, analytics, and support tooling stay clear enough to run without drowning the team in busywork.",
-  },
-  {
-    title: "Trust through clarity",
-    description:
-      "Support channels, legal pages, and platform status stay visible so users can verify how the product behaves.",
-  },
-];
-
 const CONTACT_LINKS = [
   { label: "Support", href: `mailto:${siteConfig.supportEmail}`, external: true },
-  { label: "Privacy", href: `mailto:${siteConfig.privacyEmail}`, external: true },
+  { label: "FAQ", href: "/faq", external: false },
+  { label: "Privacy Policy", href: "/privacy-policy", external: false },
   { label: "Terms", href: "/terms-of-service", external: false },
 ];
 
@@ -48,7 +31,7 @@ export default function AboutPage() {
             eyebrow="About"
             title={siteConfig.companyName}
             description={siteConfig.aboutSummary}
-            secondary="We focus on fast page loads, dependable reading progress, and a buying flow that stays straightforward."
+            secondary="We keep browsing, buying, and reading as clear as possible so readers can get to the story faster."
             actions={
               <>
                 <Link
@@ -65,53 +48,27 @@ export default function AboutPage() {
                 </Link>
               </>
             }
-            stats={[
-              {
-                label: "Focus",
-                value: "Reader first",
-                hint: "Interfaces are shaped around discovery, purchase clarity, and uninterrupted reading.",
-              },
-              {
-                label: "Ops model",
-                value: "Lean systems",
-                hint: "The platform is designed to stay maintainable instead of hiding simple work behind noise.",
-              },
-              {
-                label: "Trust",
-                value: "Visible",
-                hint: "Support, policy, and billing touchpoints stay obvious so users know where to go next.",
-              },
-              {
-                label: "Contact",
-                value: siteConfig.supportEmail,
-                hint: "Direct access to the support inbox remains available across the product.",
-              },
-            ]}
           />
 
           <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
             <SurfacePanel className="space-y-5">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  What we optimize for
+                  What this site is
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  A reading product should feel fast, legible, and predictable.
+                  A digital reading platform for comics and novels.
                 </h2>
               </div>
               <div className="space-y-4 text-sm leading-7 text-neutral-300">
                 <p>
-                  {siteConfig.companyName} exists to make digital reading easier to browse, easier to buy, and easier to
-                  return to across both comics and novels.
+                  {siteConfig.companyName} is built for readers who want to discover a title, open an episode, and keep reading without wrestling the interface.
                 </p>
                 <p>
-                  That means less interface clutter, fewer confusing dead ends, and clearer support paths when billing,
-                  account, or catalog issues happen.
+                  That means less interface clutter, clearer purchase paths, and support pages that help when billing, account, or catalog issues happen.
                 </p>
                 <p>
-                  We also treat the operational side of the product as part of the user experience. Clean back-office
-                  tools, consistent metadata, and visible legal information all contribute to a platform that feels more
-                  trustworthy.
+                  It also means visible policies, a direct support inbox, and predictable reading behavior across desktop and mobile.
                 </p>
               </div>
             </SurfacePanel>
@@ -119,10 +76,10 @@ export default function AboutPage() {
             <SurfacePanel className="space-y-5">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Contact snapshot
+                  Contact and policies
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  Reach the team through the channel that matches the issue.
+                  Real company details should be easy to find.
                 </h2>
               </div>
               <div className="space-y-3 text-sm text-neutral-300">
@@ -162,17 +119,30 @@ export default function AboutPage() {
             </SurfacePanel>
           </section>
 
-          <section className="grid gap-4 md:grid-cols-3">
-            {PLATFORM_PILLARS.map((pillar) => (
-              <SurfacePanel key={pillar.title} className="h-full">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">Principle</p>
-                <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                  {pillar.title}
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-neutral-300">{pillar.description}</p>
-              </SurfacePanel>
-            ))}
-          </section>
+          <SurfacePanel className="space-y-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+              Need help now?
+            </p>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <p className="max-w-3xl text-sm leading-7 text-neutral-300">
+                For billing questions, reading bugs, or account problems, Support is the fastest path. For common questions, the FAQ and policy pages usually answer them immediately.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/support"
+                  className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                >
+                  Open Support
+                </Link>
+                <Link
+                  href="/privacy-policy"
+                  className="rounded-full border border-white/12 px-5 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:text-white"
+                >
+                  Privacy Policy
+                </Link>
+              </div>
+            </div>
+          </SurfacePanel>
         </div>
       </main>
     </div>

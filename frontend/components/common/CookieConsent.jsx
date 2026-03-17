@@ -13,25 +13,24 @@ export default function CookieConsent() {
   const pathname = usePathname();
   const [showBanner, setShowBanner] = useState(false);
   const isAdminRoute = pathname?.startsWith("/admin");
+  const isReaderRoute = pathname?.startsWith("/read");
 
   useEffect(() => {
-    if (isAdminRoute) {
+    if (isAdminRoute || isReaderRoute) {
       setShowBanner(false);
       return;
     }
 
     const consent = localStorage.getItem("cookie_consent");
     if (!consent) {
-
       const timer = setTimeout(() => {
         setShowBanner(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [isAdminRoute]);
+  }, [isAdminRoute, isReaderRoute]);
 
   const handleAccept = () => {
-
     localStorage.setItem("cookie_consent", "accepted");
     setShowBanner(false);
   };
@@ -41,60 +40,56 @@ export default function CookieConsent() {
     setShowBanner(false);
   };
 
-  if (isAdminRoute || !showBanner) return null;
+  if (isAdminRoute || isReaderRoute || !showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6">
-      <div className="mx-auto max-w-6xl">
-        <div className="relative rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 shadow-2xl p-6 md:p-8">
+    <div className="fixed inset-x-4 bottom-24 z-50 md:inset-x-auto md:bottom-4 md:right-4">
+      <div className="mx-auto max-w-xl">
+        <div className="relative rounded-[24px] border border-white/10 bg-neutral-950/94 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
           <button
             onClick={handleDecline}
-            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-800 transition-colors"
+            className="absolute right-3 top-3 rounded-full p-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
             aria-label="Close"
           >
-            <X size={20} className="text-gray-400" />
+            <X size={16} />
           </button>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="flex-shrink-0">
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                <Cookie size={32} className="text-amber-400" />
+          <div className="flex items-start gap-4 pr-8">
+            <div className="mt-0.5 flex-shrink-0">
+              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3">
+                <Cookie size={22} className="text-amber-300" />
               </div>
             </div>
-            <div className="flex-1 space-y-2">
-              <h3 className="text-lg font-semibold text-white">
-                We use cookies
-              </h3>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                We use cookies and similar technologies to enhance your browsing experience,
-                personalize content and ads, provide social media features, and analyze our traffic.
-                By clicking &quot;Accept All&quot;, you consent to our use of cookies.{" "}
+            <div className="min-w-0 flex-1 space-y-2">
+              <h3 className="text-base font-semibold text-white">We use cookies</h3>
+              <p className="text-sm leading-6 text-neutral-300">
+                We use cookies to keep sign-in, reading progress, and site analytics working smoothly.{" "}
                 <Link
                   href="/privacy-policy"
-                  className="text-blue-400 hover:text-blue-300 underline"
+                  className="font-semibold text-emerald-300 underline-offset-4 transition hover:text-emerald-200 hover:underline"
                 >
                   Learn more
                 </Link>
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <button
-                onClick={handleDecline}
-                className="px-6 py-2.5 rounded-lg border border-gray-600 bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white transition-all duration-200 text-sm font-medium whitespace-nowrap"
-              >
-                Decline
-              </button>
-              <button
-                onClick={handleAccept}
-                className="px-6 py-2.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 text-sm font-medium whitespace-nowrap shadow-lg shadow-emerald-500/20"
-              >
-                Accept All
-              </button>
-            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              onClick={handleDecline}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+            >
+              Not now
+            </button>
+            <button
+              onClick={handleAccept}
+              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+            >
+              Accept
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
