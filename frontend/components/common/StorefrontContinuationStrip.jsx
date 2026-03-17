@@ -25,10 +25,10 @@ function getSimilarDescription(series) {
   const ratingLabel = Number.isFinite(rating) ? `${rating.toFixed(1)} rating` : "Fresh pick";
   const genreLabel =
     Array.isArray(series?.genres) && series.genres.length > 0
-      ? series.genres.slice(0, 2).join(" · ")
+      ? series.genres.slice(0, 2).join(" / ")
       : "Editorially adjacent";
 
-  return `${genreLabel} · ${ratingLabel}`;
+  return `${genreLabel} / ${ratingLabel}`;
 }
 
 export default function StorefrontContinuationStrip({
@@ -146,14 +146,11 @@ export default function StorefrontContinuationStrip({
             >
               {card.title}
             </h3>
-            <p
-              className={cn(
-                "mt-3 text-neutral-200/90",
-                compact ? "text-xs leading-6" : "text-sm leading-7",
-              )}
-            >
-              {card.description}
-            </p>
+            {!compact ? (
+              <p className="mt-3 text-sm leading-6 text-neutral-200/90">
+                {card.description}
+              </p>
+            ) : null}
             {card.meta ? (
               <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-neutral-500">
                 {card.meta}
@@ -163,7 +160,10 @@ export default function StorefrontContinuationStrip({
               type="button"
               variant="ghost"
               onClick={card.onClick}
-              className="mt-4 h-9 justify-start gap-2 px-0 text-sm font-semibold text-white hover:bg-transparent hover:text-emerald-200"
+              className={cn(
+                "justify-start gap-2 px-0 text-sm font-semibold text-white hover:bg-transparent hover:text-emerald-200",
+                compact ? "mt-3 h-8" : "mt-4 h-9",
+              )}
             >
               {card.cta}
               <ArrowUpRight className="size-4" />

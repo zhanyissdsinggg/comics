@@ -24,14 +24,14 @@ export default function FilterBar({
   const [showAllGenres, setShowAllGenres] = useState(false);
 
   const sortOptions = [
-    { id: "popular", label: "Popular", icon: "Hot", hint: "Reader heat, saves, and momentum" },
-    { id: "latest", label: "Latest", icon: "New", hint: "Freshly updated titles first" },
+    { id: "popular", label: "Popular", icon: "Hot" },
+    { id: "latest", label: "Latest", icon: "New" },
   ];
 
   const statusOptions = [
-    { id: "all", label: "All", hint: "Every release state" },
-    { id: "ongoing", label: "Ongoing", hint: "Keep up with active releases" },
-    { id: "completed", label: "Completed", hint: "Binge-ready full runs" },
+    { id: "all", label: "All" },
+    { id: "ongoing", label: "Ongoing" },
+    { id: "completed", label: "Completed" },
   ];
 
   const displayedGenres = showAllGenres ? genres : genres.slice(0, 8);
@@ -64,20 +64,16 @@ export default function FilterBar({
     "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-300">
             <SlidersHorizontal size={14} className="text-emerald-200" />
             Browsing controls
           </div>
-          <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+          <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">
             {loading ? "Refreshing the catalog..." : `${totalCount.toLocaleString()} titles ready to browse.`}
           </h3>
-          <p className="mt-2 max-w-2xl text-sm leading-7 text-neutral-400">
-            Start with reader heat or recent updates, then narrow by release status and genre
-            without flattening the page into a plain database.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -109,7 +105,7 @@ export default function FilterBar({
         </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[0.92fr_0.92fr_1.16fr]">
+      <div className="grid gap-3 xl:grid-cols-[0.92fr_0.92fr_1.16fr]">
         <div className={filterSectionClass}>
           <div className="flex items-center gap-2">
             <ArrowDownUp size={16} className="text-emerald-200" />
@@ -117,9 +113,6 @@ export default function FilterBar({
               Sort order
             </p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-neutral-400">
-            Choose whether this shelf should feel hot right now or newly refreshed.
-          </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {sortOptions.map((option) => (
               <div key={option.id}>
@@ -129,9 +122,7 @@ export default function FilterBar({
                   onClick={() => handleSortChange(option.id)}
                   className={cn("tracking-[0.16em]", sortBy === option.id ? "text-white" : "")}
                 />
-                <p className="mt-2 text-xs text-neutral-500">
-                  {option.icon} | {option.hint}
-                </p>
+                <p className="mt-1 text-[11px] text-neutral-500">{option.icon}</p>
               </div>
             ))}
           </div>
@@ -144,9 +135,6 @@ export default function FilterBar({
               Release state
             </p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-neutral-400">
-            Separate ongoing week-to-week reads from full series you can binge in one run.
-          </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {statusOptions.map((option) => (
               <div key={option.id}>
@@ -155,7 +143,6 @@ export default function FilterBar({
                   active={status === option.id}
                   onClick={() => handleStatusChange(option.id)}
                 />
-                <p className="mt-2 text-xs text-neutral-500">{option.hint}</p>
               </div>
             ))}
           </div>
@@ -167,10 +154,6 @@ export default function FilterBar({
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
                   Genres
-                </p>
-                <p className="mt-3 text-sm leading-6 text-neutral-400">
-                  Use a genre lens when you already know the mood you want, then fall back to the
-                  full catalog fast.
                 </p>
               </div>
               {genres.length > 8 ? (

@@ -17,11 +17,10 @@ function EventCard({ event, priority = "secondary" }) {
     <Card
       className={cn(
         "h-full rounded-[28px] border py-0 shadow-none transition-transform duration-300 hover:-translate-y-1",
-        priority === "lead" ? "min-h-[280px]" : "",
         event.accentClass || "border-white/10 bg-white/[0.03]",
       )}
     >
-      <CardContent className="flex h-full flex-col p-6">
+      <CardContent className="flex h-full flex-col p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-3xl">
             <Badge
@@ -34,33 +33,27 @@ function EventCard({ event, priority = "secondary" }) {
               className={cn(
                 "mt-4 font-display font-semibold tracking-tight text-white",
                 priority === "lead"
-                  ? "text-3xl leading-tight sm:text-[2.2rem]"
-                  : "text-2xl leading-tight",
+                  ? "text-2xl leading-tight sm:text-[2rem]"
+                  : "text-xl leading-tight",
               )}
             >
               {event.title}
             </CardTitle>
-            <CardDescription
-              className={cn(
-                "mt-4 text-neutral-200/90",
-                priority === "lead" ? "max-w-3xl text-sm leading-7" : "text-sm leading-6",
-              )}
-            >
-              {event.description}
-            </CardDescription>
+            {priority === "lead" ? (
+              <CardDescription className="mt-3 max-w-3xl text-sm leading-6 text-neutral-200/90">
+                {event.description}
+              </CardDescription>
+            ) : null}
           </div>
 
           {event.signalValue ? (
-            <div className="min-w-[144px] rounded-[22px] border border-white/10 bg-black/25 px-4 py-3 text-left">
+            <div className="min-w-[120px] rounded-[18px] border border-white/10 bg-black/25 px-3 py-2.5 text-left">
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
                 {event.signalLabel || "Signal"}
               </p>
-              <p className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+              <p className="mt-1.5 font-display text-xl font-semibold tracking-tight text-white">
                 {event.signalValue}
               </p>
-              {event.signalHint ? (
-                <p className="mt-2 text-xs leading-5 text-neutral-400">{event.signalHint}</p>
-              ) : null}
             </div>
           ) : null}
         </div>
@@ -101,14 +94,14 @@ export default function StorefrontEventHub({
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
               {eyebrow}
             </p>
-            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
+            <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
               {title}
             </h2>
-            <p className="mt-3 text-sm leading-7 text-neutral-300">{description}</p>
+            <p className="mt-2 text-sm leading-6 text-neutral-300">{description}</p>
           </div>
         </CardHeader>
 
-        <CardContent className="relative p-5 pt-6 sm:p-6 sm:pt-6">
+        <CardContent className="relative p-5 pt-5 sm:p-6 sm:pt-5">
           <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
             <EventCard event={leadEvent} priority="lead" />
             {secondaryEvents.length > 0 ? (
