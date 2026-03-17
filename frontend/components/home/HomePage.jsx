@@ -1,5 +1,5 @@
 /**
- * Home page shell: hero, discovery desk, return lane, and recommendation rails.
+ * Home page shell: hero, quick-start, return lane, and recommendation rails.
  */
 
 "use client";
@@ -35,18 +35,14 @@ import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
   ssr: false,
 });
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
 const StorefrontContinuationStrip = dynamic(() => import("../common/StorefrontContinuationStrip"));
-const StorefrontEventHub = dynamic(() => import("../common/StorefrontEventHub"));
 const StorefrontPathwaysGrid = dynamic(() => import("../common/StorefrontPathwaysGrid"));
 
 const GENRE_CHIPS = [
@@ -203,7 +199,7 @@ function HomeContent() {
   const { items: historyItems, loadHistory } = useHistoryStore();
   const { bySeriesId: progressMap, loadProgress } = useProgressStore();
   const { isSignedIn } = useAuthStore();
-  const { loading, seriesList, hotKeywords, homepageSlots, hotWindow, setHotWindow } = useHomeData();
+  const { loading, seriesList, hotKeywords, homepageSlots } = useHomeData();
 
   const [activeGenre, setActiveGenre] = useState("all");
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
@@ -562,61 +558,25 @@ function HomeContent() {
     ];
   }, [discoverySignals, editorialSnapshot, router, seriesList]);
 
-  const onboardingCards = useMemo(() => {
-    const freeStartCard = editorialCards.find((card) => card.id === "free-start-pick");
-    const breakoutCard = editorialCards.find((card) => card.id === "breakout-pick");
-    const completedCard = editorialCards.find((card) => card.id === "completed-pick");
+  const priorityStats = useMemo(() => editorialStats.slice(0, 3), [editorialStats]);
 
-    return [
-      {
-        id: "start-free",
-        eyebrow: "New reader path",
-        title: freeStartCard ? `Start with ${freeStartCard.title}` : "Start with a free preview",
-        description: freeStartCard
-          ? "Free episodes give new readers a clean first click before they have to think about points or plans."
-          : "Free-to-start titles let first-time visitors sample the product before spending.",
-        cta: freeStartCard ? "Open free preview" : "Browse free-start titles",
-        onClick: freeStartCard?.onClick || (() => router.push("/search?sort=popular")),
-        accentClass:
-          "border-emerald-400/25 bg-emerald-400/[0.08] hover:border-emerald-300/45 hover:bg-emerald-400/[0.12]",
-      },
-      {
-        id: "keep-progress",
-        eyebrow: isSignedIn ? "Return path" : "Account perks",
-        title: isSignedIn ? "Jump back in without searching" : "Save progress, rewards, and your library",
-        description: isSignedIn
-          ? "Returning readers should be able to reach unfinished chapters, rewards, and their saved library in one tap."
-          : "Signing in should clearly pay off: synced progress, daily rewards, and faster return visits.",
-        cta: isSignedIn ? "Open library" : "Sign in free",
-        onClick: isSignedIn ? () => router.push("/library") : () => setShowLoginPrompt(true),
-        accentClass: "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
-      },
-      {
-        id: "momentum",
-        eyebrow: "Trending now",
-        title: breakoutCard ? `See why ${breakoutCard.title} is trending` : "See what's trending this week",
-        description: breakoutCard
-          ? "A fast-rising title is often the easiest way to turn casual browsing into a confident first read."
-          : "Charts are the fastest way to show readers what everyone is opening right now.",
-        cta: "Open weekly chart",
-        onClick: () => router.push("/rankings?type=popular&window=week"),
-        accentClass:
-          "border-sky-400/20 bg-sky-400/[0.07] hover:border-sky-300/35 hover:bg-sky-400/[0.11]",
-      },
-      {
-        id: "value-path",
-        eyebrow: "Plans & points",
-        title: completedCard
-          ? `Compare plans before you unlock more of ${completedCard.title}`
-          : "Compare plans before you unlock more",
-        description:
-          "Show points, free unlock value, and membership savings before the paywall becomes a surprise.",
-        cta: STOREFRONT_TERMS.compareMembership,
-        onClick: () => router.push("/subscribe"),
-        accentClass: "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
-      },
-    ];
-  }, [editorialCards, isSignedIn, router]);
+  const quickStartCards = useMemo(
+    () =>
+      homeEventCards.map((card) => ({
+        id: card.id,
+        eyebrow: card.eyebrow,
+        title: card.title,
+        description: card.description,
+        cta: card.ctaLabel,
+        onClick: card.onClick,
+        accentClass: card.accentClass,
+      })),
+    [homeEventCards],
+  );
+
+  const lowerShelfCards = useMemo(() => editorialCards.slice(0, 3), [editorialCards]);
+
+  const quickSearchSignals = useMemo(() => discoverySignals.slice(0, 6), [discoverySignals]);
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -770,7 +730,7 @@ function HomeContent() {
           </section>
         ) : null}
 
-        <section className="mb-10 grid gap-4 xl:grid-cols-[1.02fr_0.98fr]">
+        <section className="mb-10 grid gap-4 xl:grid-cols-[0.8fr_1.2fr] xl:items-start">
           <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
             <CardContent className="p-5 sm:p-6">
               <div className="flex flex-wrap items-center gap-2">
@@ -778,7 +738,7 @@ function HomeContent() {
                   variant="outline"
                   className="rounded-full border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white"
                 >
-                  Featured this week
+                  Quick start
                 </Badge>
                 <Badge
                   variant="outline"
@@ -789,43 +749,14 @@ function HomeContent() {
               </div>
 
               <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[0.96] tracking-tight text-white sm:text-5xl">
-                A cleaner storefront for official comics, novels, and premium drops.
+                Pick one strong next click instead of sorting through everything.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
-                Start free, catch breakout launches, and pick up unfinished chapters without
-                digging through clutter.
-              </p>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-400">
-                The homepage now behaves more like a modern American content platform: clearer
-                hierarchy, stronger merchandising, and fewer decorative layers fighting for
-                attention.
+                Free starts, breakout launches, and finished binge picks do most of the work. Use
+                genre shortcuts only if you already know your mood.
               </p>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  size="lg"
-                  onClick={() => router.push("/search")}
-                  className="h-11 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 hover:bg-neutral-200"
-                >
-                  <Compass className="size-4" />
-                  Browse all series
-                </Button>
-                <Button
-                  type="button"
-                  size="lg"
-                  variant="outline"
-                  onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
-                >
-                  See what's trending
-                  <ArrowUpRight className="size-4" />
-                </Button>
-              </div>
-
-              <Separator className="my-6 bg-white/10" />
-
-              <div className="flex flex-wrap gap-2.5">
+              <div className="mt-6 flex flex-wrap gap-2.5">
                 {HOME_PILLARS.map((item) => (
                   <Badge
                     key={item}
@@ -836,37 +767,14 @@ function HomeContent() {
                   </Badge>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
-            <CardContent className="p-5 sm:p-6">
-              <SectionEyebrow>Discovery desk</SectionEyebrow>
-              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
-                Browse like a storefront, not a spreadsheet.
-              </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-300">
-                Use live genre shortcuts to focus the recommendation rails below while the desk
-                stats keep the catalog readable at a glance.
-              </p>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {editorialStats.map((stat, index) => (
-                  <StatTile
-                    key={stat.label}
-                    stat={stat}
-                    accent={index === 0}
-                  />
-                ))}
-              </div>
 
               <Separator className="my-6 bg-white/10" />
 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-white">Catalog filters</p>
+                  <p className="text-sm font-semibold text-white">Genre shortcuts</p>
                   <p className="mt-1 text-sm text-neutral-400">
-                    Pick a mood and the rails below will narrow in real time.
+                    Narrow the rails only when you already know what you want.
                   </p>
                 </div>
                 <Badge
@@ -899,60 +807,72 @@ function HomeContent() {
                   );
                 })}
               </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {priorityStats.map((stat, index) => (
+                  <StatTile key={stat.label} stat={stat} compact accent={index === 0} />
+                ))}
+              </div>
             </CardContent>
           </Card>
+
+          <div className="space-y-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <SectionEyebrow>{STOREFRONT_TERMS.startHere}</SectionEyebrow>
+                <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
+                  Open one of these before you overthink it.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  The best homepage is the one that gets you into a series fast, not the one that
+                  explains every merchandising lane.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                onClick={() => router.push("/search")}
+                className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
+              >
+                <Compass className="size-4" />
+                Browse all series
+              </Button>
+            </div>
+
+            <StorefrontPathwaysGrid
+              cards={quickStartCards}
+              columnsClassName="md:grid-cols-3"
+            />
+          </div>
         </section>
 
-        <StorefrontEventHub
-          eyebrow="Happening now"
-          title="Start with what's hot right now."
-          description="Fresh updates, free starts, and breakout hits make the first click easier when you do not know where to begin."
-          events={homeEventCards}
-          className="mb-10"
-        />
+        {loading ? (
+          <div className="space-y-10">
+            <SkeletonRail />
+            <SkeletonRail />
+            <SkeletonRail />
+          </div>
+        ) : (
+          <HomeRailsContainer activeGenre={activeGenre} onResetGenre={() => setActiveGenre("all")} />
+        )}
 
-        <section className="mb-10 grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
+        <section className="mt-10 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
           <Card className={cn(SECTION_CARD_CLASS, "py-0")}>
             <CardContent className="p-5 sm:p-6">
-              <Tabs value={hotWindow} onValueChange={setHotWindow} className="w-full">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="max-w-2xl">
-                    <SectionEyebrow>Trending searches</SectionEyebrow>
-                    <CardTitle className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
-                      See what readers are searching right now.
-                    </CardTitle>
-                    <CardDescription className="mt-3 text-sm leading-7 text-neutral-300">
-                      Search momentum is one of the fastest ways to turn casual browsing into a
-                      stronger first read.
-                    </CardDescription>
-                  </div>
-
-                  <TabsList
-                    variant="line"
-                    className="h-auto rounded-full border border-white/10 bg-white/[0.04] p-1"
-                  >
-                    <TabsTrigger
-                      value="day"
-                      className="h-8 flex-none rounded-full px-3 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-300 after:hidden data-[active]:bg-white data-[active]:text-neutral-950"
-                    >
-                      Today
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="week"
-                      className="h-8 flex-none rounded-full px-3 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-300 after:hidden data-[active]:bg-white data-[active]:text-neutral-950"
-                    >
-                      This week
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-
-                <TabsContent value="day" className="hidden" />
-                <TabsContent value="week" className="hidden" />
-              </Tabs>
+              <SectionEyebrow>Still browsing?</SectionEyebrow>
+              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
+                Use live search signals instead of guessing.
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-300">
+                If none of the rails feel right, trending terms are the fastest way to pivot
+                without starting from a blank search page.
+              </p>
 
               <div className="mt-6 flex flex-wrap gap-2.5">
-                {discoverySignals.length > 0 ? (
-                  discoverySignals.map((keyword) => (
+                {quickSearchSignals.length > 0 ? (
+                  quickSearchSignals.map((keyword) => (
                     <Button
                       key={keyword.id}
                       type="button"
@@ -977,50 +897,12 @@ function HomeContent() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {editorialCards.map((card) => (
+          <div className="grid gap-4 md:grid-cols-3">
+            {lowerShelfCards.map((card) => (
               <EditorialPickCard key={card.id} card={card} />
             ))}
           </div>
         </section>
-
-        <Card className={cn(SECTION_CARD_CLASS, "mb-10 py-0")}>
-          <CardContent className="p-5 sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
-                <SectionEyebrow>{STOREFRONT_TERMS.startHere}</SectionEyebrow>
-                <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white">
-                  Give every reader an easy next step.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  Whether someone is brand new or halfway through a binge, the next click should
-                  feel obvious and worth taking.
-                </p>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push("/search")}
-                className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
-              >
-                Browse full catalog
-              </Button>
-            </div>
-
-            <StorefrontPathwaysGrid cards={onboardingCards} className="mt-6" />
-          </CardContent>
-        </Card>
-
-        {loading ? (
-          <div className="space-y-10">
-            <SkeletonRail />
-            <SkeletonRail />
-            <SkeletonRail />
-          </div>
-        ) : (
-          <HomeRailsContainer activeGenre={activeGenre} onResetGenre={() => setActiveGenre("all")} />
-        )}
       </main>
 
       <LoginPrompt

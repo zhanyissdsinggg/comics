@@ -184,17 +184,17 @@ test.describe("Homepage merchandising sync", () => {
       timeout: HOME_UI_TIMEOUT_MS,
     });
 
-    const eventHub = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Start with what's hot right now." }),
+    const quickStartSection = page.locator("section").filter({
+      has: page.getByRole("heading", { name: "Open one of these before you overthink it." }),
     });
 
-    await expect(eventHub).toContainText("Binge Last Ember Files without waiting on the next update.", {
+    await expect(quickStartSection).toContainText("Binge Last Ember Files without waiting on the next update.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(eventHub).toContainText("Soft Launch Kiss is an easy place to start for free.", {
+    await expect(quickStartSection).toContainText("Soft Launch Kiss is an easy place to start for free.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(eventHub).toContainText("Rocket Choir is climbing fast this week.", {
+    await expect(quickStartSection).toContainText("Rocket Choir is climbing fast this week.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
 

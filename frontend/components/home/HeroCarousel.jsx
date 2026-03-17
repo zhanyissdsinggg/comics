@@ -61,15 +61,28 @@ export default function HeroCarousel({ items }) {
   const coverUrl = normalizePlaceholdImageUrl(active?.coverUrl);
   const gradient = TONE_GRADIENTS[active?.coverTone] || TONE_GRADIENTS.default;
   const campaign = getStorefrontCampaign(active);
-  const heroSignals = [
-    active?.hasFreeEpisodes
-      ? `${STOREFRONT_TERMS.freeStart}${
-          active?.freeEpisodeCount ? ` · ${active.freeEpisodeCount} free episodes` : ""
-        }`
-      : "Premium unlock",
-    active?.status ? getReadingCadenceLabel(active.status) : "Staff pick",
-    campaign?.eyebrow || "Featured now",
-  ].filter(Boolean);
+  const heroSignals = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          [
+            active?.hasFreeEpisodes
+              ? `${STOREFRONT_TERMS.freeStart}${
+                  active?.freeEpisodeCount ? ` · ${active.freeEpisodeCount} free episodes` : ""
+                }`
+              : "Premium unlock",
+            active?.status ? getReadingCadenceLabel(active.status) : "Staff pick",
+            campaign?.eyebrow || "Featured now",
+          ].filter(Boolean),
+        ),
+      ),
+    [
+      active?.freeEpisodeCount,
+      active?.hasFreeEpisodes,
+      active?.status,
+      campaign?.eyebrow,
+    ],
+  );
 
   const handlePrev = useCallback(() => {
     setIndex((prev) => (prev - 1 + safeItems.length) % safeItems.length);
