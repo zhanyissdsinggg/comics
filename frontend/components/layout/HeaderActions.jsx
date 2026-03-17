@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Coins, User } from "lucide-react";
+import { Bell, Coins, Sparkles, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "../common/ThemeToggle";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
@@ -47,10 +47,11 @@ export default function HeaderActions({
         size="sm"
         variant="outline"
         onClick={onWalletClick}
-        className="hidden h-10 rounded-full border-emerald-400/25 bg-emerald-400/[0.08] px-4 text-emerald-200 hover:border-emerald-300/40 hover:bg-emerald-400/[0.12] sm:inline-flex"
+        className="hidden h-10 rounded-full border-emerald-400/25 bg-[linear-gradient(180deg,rgba(16,185,129,0.14),rgba(16,185,129,0.08))] px-4 text-emerald-200 hover:border-emerald-300/40 hover:bg-emerald-400/[0.12] sm:inline-flex"
         aria-label="Points store"
       >
         <Coins className="size-4" />
+        <span className="text-[10px] uppercase tracking-[0.18em] text-emerald-100/80">Pts</span>
         <span className="text-xs font-semibold tabular-nums">{walletTotal.toLocaleString()}</span>
       </Button>
 
@@ -120,11 +121,12 @@ export default function HeaderActions({
           <Button
             type="button"
             size="sm"
-            variant="outline"
+            variant="default"
             onClick={onLoginClick}
-            className="hidden h-10 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-neutral-100 hover:border-white/20 hover:bg-white/[0.08] sm:inline-flex"
+            className="hidden h-10 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 hover:bg-neutral-200 sm:inline-flex"
           >
-            Sign in
+            <Sparkles className="size-4" />
+            Sign in free
           </Button>
           <Button
             type="button"

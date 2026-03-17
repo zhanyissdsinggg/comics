@@ -44,6 +44,38 @@ export default function SiteFooter() {
     <footer className="mt-16 border-t border-white/10 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.08),transparent_26%),linear-gradient(180deg,rgba(8,10,16,0.98),rgba(4,5,8,1))]">
       <div className="mx-auto max-w-[1280px] px-4 pb-10 pt-12 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.03] shadow-[0_30px_120px_rgba(0,0,0,0.26)] backdrop-blur-xl">
+          <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),transparent_28%),radial-gradient(circle_at_80%_20%,rgba(34,211,238,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] px-6 py-8 sm:px-8 lg:px-10">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/80">
+                  Keep browsing
+                </p>
+                <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                  {siteConfig.tagline}
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-300">
+                  Discover fresh launches, open free episodes first, and move through the chart like
+                  a real premium comics storefront.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/rankings?type=popular&window=week"
+                  className="inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition-colors hover:bg-neutral-200"
+                >
+                  Open weekly chart
+                </Link>
+                <Link
+                  href="/rankings?type=ttf&window=all"
+                  className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                >
+                  Start with free episodes
+                </Link>
+              </div>
+            </div>
+          </div>
+
           <div className="grid gap-10 px-6 py-8 sm:px-8 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-10 lg:py-10">
             <div className="space-y-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/80">
