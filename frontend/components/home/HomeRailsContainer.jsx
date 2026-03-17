@@ -12,6 +12,7 @@ import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 import { useHomeRecommendations } from "./HomeRecommendations";
 import { useHomeData } from "./HomeDataProvider";
+import { useAuthStore } from "../../store/useAuthStore";
 
 function getSeriesId(item) {
   if (item?.seriesId) {
@@ -25,6 +26,7 @@ export default function HomeRailsContainer({ activeGenre = "all", onResetGenre =
   const router = useRouter();
   const { activeRails } = useHomeRecommendations();
   const { seriesList } = useHomeData();
+  const { isSignedIn } = useAuthStore();
   const recoImpressionRef = useRef(new Set());
 
   const seriesGenresMap = useMemo(() => {
@@ -64,8 +66,33 @@ export default function HomeRailsContainer({ activeGenre = "all", onResetGenre =
       .filter((rail) => rail.items.length > 0);
   }, [activeGenre, activeRails, seriesGenresMap]);
 
+  const visibleRails = useMemo(() => {
+    const preferredOrder = isSignedIn
+      ? [
+          "following",
+          "continue",
+          "trending",
+          "completed",
+          "ttf",
+          "because-you-read",
+          "recommended",
+          "new",
+          "history",
+          "adult",
+          "starter",
+          "ai-recommended",
+        ]
+      : ["trending", "ttf", "completed", "new", "starter", "adult"];
+
+    const railMap = new Map(filteredRails.map((rail) => [rail.id, rail]));
+    const orderedRails = preferredOrder.map((id) => railMap.get(id)).filter(Boolean);
+    const extraRails = filteredRails.filter((rail) => !preferredOrder.includes(rail.id));
+
+    return [...orderedRails, ...extraRails].slice(0, 3);
+  }, [filteredRails, isSignedIn]);
+
   useEffect(() => {
-    filteredRails.forEach((rail) => {
+    visibleRails.forEach((rail) => {
       rail.items.forEach((item) => {
         const seriesId = getSeriesId(item);
         const key = `${rail.id}:${item.id}`;
@@ -78,7 +105,7 @@ export default function HomeRailsContainer({ activeGenre = "all", onResetGenre =
         trackEvent("reco_impression", { railName: rail.title, seriesId });
       });
     });
-  }, [filteredRails]);
+  }, [visibleRails]);
 
   const handleItemClick = useCallback(
     (rail, item) => {
@@ -111,7 +138,7 @@ export default function HomeRailsContainer({ activeGenre = "all", onResetGenre =
     [router],
   );
 
-  if (filteredRails.length === 0) {
+  if (visibleRails.length === 0) {
     return (
       <EmptyState
         icon={activeGenre === "all" ? "inbox" : "search"}
@@ -141,20 +168,15 @@ export default function HomeRailsContainer({ activeGenre = "all", onResetGenre =
 
   return (
     <div className="space-y-10">
-      {filteredRails.map((rail) => (
+      {visibleRails.map((rail) => (
         <Rail
           key={rail.id}
-          eyebrow={rail.eyebrow}
           title={rail.title}
           railName={rail.id}
           items={rail.items}
           reason={rail.reason}
           href={rail.href}
           ctaLabel={rail.ctaLabel}
-          showCreatorShelfLinks
-          creatorEntryPoint="HOME_CREATOR_CHIP"
-          creatorCampaignId={`${rail.id}_creator`}
-          creatorSourcePath="/"
           onItemClick={(item) => handleItemClick(rail, item)}
         />
       ))}

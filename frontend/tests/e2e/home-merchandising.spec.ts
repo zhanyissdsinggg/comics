@@ -186,13 +186,28 @@ test.describe("Homepage merchandising sync", () => {
 
     const homepageMain = page.locator("main");
 
-    await expect(homepageMain).toContainText("Binge Last Ember Files without waiting on the next update.", {
+    await expect(homepageMain).toContainText("Find a comic worth getting obsessed with.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Soft Launch Kiss is an easy place to start for free.", {
+    await expect(homepageMain).toContainText("Start with Velvet Voltage, sample free chapters, or jump straight into a finished binge.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Rocket Choir is climbing fast this week.", {
+    await expect(homepageMain).toContainText("Trending Now", {
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(homepageMain).toContainText("Start Free", {
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(homepageMain).toContainText("Completed Series", {
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(homepageMain).toContainText("Soft Launch Kiss", {
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(homepageMain).toContainText("Last Ember Files", {
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(homepageMain).toContainText("Rocket Choir", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
 
