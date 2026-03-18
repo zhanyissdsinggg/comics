@@ -21,6 +21,7 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
+import { buildSupportPath } from "../../lib/supportRouting";
 
 const REGION_KEY = "mn_region";
 const LANG_KEY = "mn_lang";
@@ -449,6 +450,30 @@ export default function AccountPage({ initialSignedIn = false }) {
 
         <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+              <div className="space-y-2">
+                <p className={sectionEyebrowClass}>Sync rules</p>
+                <h2 className={sectionTitleClass}>What stays on this device, and what follows your account.</h2>
+                <p className={mutedCopyClass}>
+                  The page should make this obvious instead of leaving you to guess.
+                </p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
+                  <p className="text-sm font-semibold text-slate-950">Saved here right away</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Region, language, 18+ history visibility, display name, and alert choices apply to this browser as soon as you save.
+                  </p>
+                </div>
+                <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
+                  <p className="text-sm font-semibold text-slate-950">Also saved to your account after sign-in</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Once you are signed in, we also save these preferences to your account, along with purchases, library, progress, and recovery details.
+                  </p>
+                </div>
+              </div>
+            </SurfacePanel>
+
             <SurfacePanel className="space-y-5" appearance="light" accent="blue">
               <div className="space-y-2">
                 <p className={sectionEyebrowClass}>Account basics</p>
@@ -542,7 +567,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push("/support")}
+                  onClick={() => router.push(buildSupportPath({ topic: "account", context: "Account help from account page" }))}
                   className={secondaryButtonClass}
                 >
                   Get help
@@ -555,7 +580,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 <p className={sectionEyebrowClass}>Reading setup</p>
                 <h2 className={sectionTitleClass}>Region, language, and 18+ history</h2>
                 <p className={mutedCopyClass}>
-                  Keep these defaults consistent so mature-content access and language feel predictable across devices.
+                  Keep these defaults consistent so mature-content access and language feel predictable. They save to this browser immediately and sync to your account after sign-in.
                 </p>
               </div>
 
@@ -617,7 +642,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 <p className={sectionEyebrowClass}>Notifications</p>
                 <h2 className={sectionTitleClass}>Only keep the alerts that matter</h2>
                 <p className={mutedCopyClass}>
-                  New chapters, free unlocks, and promos should help you come back, not fill space.
+                  New chapters, free unlocks, and promos should help you come back, not fill space. These choices save here first and sync to your account when available.
                 </p>
               </div>
 
@@ -846,7 +871,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => router.push("/support")}
+                      onClick={() => router.push(buildSupportPath({ topic: "billing", context: "Billing help from account purchases panel" }))}
                       className={secondaryButtonClass}
                     >
                       Billing help
@@ -886,7 +911,9 @@ export default function AccountPage({ initialSignedIn = false }) {
               <div>
                 <p className={sectionEyebrowClass}>Save changes</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Save these choices to this device and, when signed in, to your account.
+                  {viewerSignedIn
+                    ? "Save these choices to this device now and to your signed-in account."
+                    : "Save these choices to this device now. Sign in later if you want them tied to your account too."}
                 </p>
               </div>
               <button
@@ -894,7 +921,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 onClick={handleSave}
                 className={primaryButtonClass}
               >
-                Save changes
+                {viewerSignedIn ? "Save to account" : "Save to this device"}
               </button>
             </SurfacePanel>
           </div>

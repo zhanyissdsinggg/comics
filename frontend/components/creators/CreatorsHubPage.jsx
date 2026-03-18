@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,18 +18,6 @@ import {
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
-
-function toNumber(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function formatCompactCount(value) {
-  return new Intl.NumberFormat("en-US", {
-    notation: value >= 1000 ? "compact" : "standard",
-    maximumFractionDigits: value >= 1000 ? 1 : 0,
-  }).format(Math.max(0, toNumber(value)));
-}
 
 function formatDateLabel(value) {
   if (!value) {
@@ -66,6 +54,30 @@ function buildGenreOptions(creators) {
     .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
     .map(([genre]) => genre)
     .slice(0, 8);
+}
+
+function formatCreditTypeLabel(creditType) {
+  return creditType === "studio" ? "Studio" : "Creator";
+}
+
+function summarizeLeadCopy(text, fallback) {
+  const source = String(text || "").replace(/\s+/g, " ").trim();
+  if (!source) {
+    return fallback;
+  }
+
+  if (source.length <= 120) {
+    return source;
+  }
+
+  return `${source.slice(0, 117).trimEnd()}...`;
+}
+
+function getCreatorTopTitles(creator, limit = 3) {
+  return (Array.isArray(creator?.series) ? creator.series : [])
+    .map((item) => String(item?.title || "").trim())
+    .filter(Boolean)
+    .slice(0, limit);
 }
 
 function CreatorDirectorySkeleton() {
@@ -122,6 +134,7 @@ export default function CreatorsHubPage({
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
+  const [creditFilter, setCreditFilter] = useState("all");
   const [commerceNotice, setCommerceNotice] = useState(null);
   const requestRef = useRef(0);
 
@@ -193,11 +206,14 @@ export default function CreatorsHubPage({
     const normalizedQuery = String(query || "").trim().toLowerCase();
 
     return creators.filter((creator) => {
+      const matchesCredit =
+        creditFilter === "all" ||
+        (creditFilter === "studio" ? creator?.creditType === "studio" : creator?.creditType !== "studio");
       const matchesGenre =
         activeGenre === "All" ||
         (Array.isArray(creator?.topGenres) ? creator.topGenres : []).includes(activeGenre);
 
-      if (!matchesGenre) {
+      if (!matchesCredit || !matchesGenre) {
         return false;
       }
 
@@ -216,8 +232,16 @@ export default function CreatorsHubPage({
 
       return haystack.includes(normalizedQuery);
     });
-  }, [activeGenre, creators, query]);
+  }, [activeGenre, creators, creditFilter, query]);
   const spotlightCreators = useMemo(() => filteredCreators.slice(0, 3), [filteredCreators]);
+  const featuredStudios = useMemo(
+    () => creators.filter((creator) => creator?.creditType === "studio").slice(0, 3),
+    [creators],
+  );
+  const featuredVoices = useMemo(
+    () => creators.filter((creator) => creator?.creditType !== "studio" && creator?.titleCount > 1).slice(0, 3),
+    [creators],
+  );
   const stats = useMemo(() => getCreatorDirectoryStats(creators), [creators]);
   const creatorFallbackCards = useMemo(
     () => [
@@ -257,22 +281,22 @@ export default function CreatorsHubPage({
         hint: "Writers, artists, and studios with a visible page right now.",
       },
       {
+        label: "Studios",
+        value: stats.studios.toLocaleString(),
+        hint: "Multi-title teams and studio credits with a visible page.",
+      },
+      {
         label: "Series",
         value: stats.titles.toLocaleString(),
         hint: "Titles already tied back to a creator page.",
       },
       {
-        label: "Readers",
-        value: formatCompactCount(stats.readerProof),
-        hint: "Visible audience activity across those creator shelves.",
-      },
-      {
-        label: "Catalog",
-        value: isAdultMode ? "18+" : "Standard",
-        hint: isAdultMode ? "18+ titles can appear here." : "18+ titles stay hidden here.",
+        label: "Free starts",
+        value: stats.freeStarts.toLocaleString(),
+        hint: "Creator-linked titles that still give readers a low-risk first click.",
       },
     ],
-    [isAdultMode, stats.creators, stats.readerProof, stats.titles],
+    [stats.creators, stats.freeStarts, stats.studios, stats.titles],
   );
 
   const primaryButtonClass =
@@ -349,7 +373,7 @@ export default function CreatorsHubPage({
             eyebrow="Creators"
             title="Find the creators worth following."
             description="Move from one favorite title to the writer, artist, or studio behind it, then keep browsing from the same creative voice."
-            secondary="When creator pages are still filling in, search by creator, studio, or genre and use Top Series as the cleaner first stop."
+            secondary="Creator pages are still expanding. Until every credit is public, search by creator, studio, or genre and use Top Series as the cleaner fallback."
             stats={heroStats}
             actions={
               <>
@@ -472,7 +496,7 @@ export default function CreatorsHubPage({
           eyebrow="Creators"
           title="Find the creators worth following."
           description="Jump from one favorite series to the writer, artist, or studio behind it, then keep reading from the same voice."
-          secondary="Search by name or genre, open a creator page, and let the catalog feel smaller in the right way."
+          secondary="Creator pages are live in beta. Use them when credits are visible, then fall back to Search or Top Series when a shelf is still filling in."
           stats={heroStats}
           actions={
             <>
@@ -501,6 +525,101 @@ export default function CreatorsHubPage({
           />
         ) : null}
 
+        <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
+          <SurfacePanel appearance="light" accent="blue" className="space-y-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Creator pages beta
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                Not every title exposes clean credits yet.
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                When a creator or studio page exists, it is the fastest way to branch into related work. When the credit is still missing, Search and Top Series should keep you moving instead of dead-ending.
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {[
+                "Use creator pages when you want the clearest follow-up after one strong title.",
+                "Use Search if you already know the creator name, studio, genre, or lead series.",
+                "Use Top Series when a creator shelf is still thin and you want the safer first click.",
+                "Use Comics or Novels when you want the wider catalog before narrowing to one voice.",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </SurfacePanel>
+
+          <SurfacePanel appearance="light" accent="blue" className="space-y-4">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Featured shelves
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  Open a strong creator shelf first.
+                </h2>
+              </div>
+              <p className="text-xs text-slate-500">
+                {featuredStudios.length > 0 ? `${featuredStudios.length} studios surfaced` : "More studios appear as credits get cleaner"}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {(featuredStudios.length > 0 ? featuredStudios : featuredVoices).map((creator) => (
+                <button
+                  key={`featured-${creator.slug}`}
+                  type="button"
+                  onClick={() => openCreator(creator, "CREATORS_HUB_FEATURED")}
+                  className="w-full rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-white"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                        {formatCreditTypeLabel(creator.creditType)}
+                      </p>
+                      <h3 className="mt-2 text-lg font-semibold text-slate-950">{creator.name}</h3>
+                    </div>
+                    <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
+                      {creator.titleCount} titles
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    {summarizeLeadCopy(
+                      creator.leadSummary,
+                      creator.spotlightSeries?.title
+                        ? `Start with ${creator.spotlightSeries.title}, then fan out through the rest of this shelf.`
+                        : "Open the creator page to see every visible title in one place.",
+                    )}
+                  </p>
+                  {getCreatorTopTitles(creator, 2).length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {getCreatorTopTitles(creator, 2).map((title) => (
+                        <span
+                          key={`${creator.slug}-featured-title-${title}`}
+                          className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
+                        >
+                          {title}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
+                    {creator.freeStartCount > 0 ? <span>{creator.freeStartCount} start free</span> : null}
+                    <span>{creator.ongoingCount} active</span>
+                    <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </SurfacePanel>
+        </section>
+
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -513,14 +632,15 @@ export default function CreatorsHubPage({
               </div>
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm text-slate-500">
-                {filteredCreators.length.toLocaleString()} creator{filteredCreators.length === 1 ? "" : "s"} shown
+                {filteredCreators.length.toLocaleString()} creator page{filteredCreators.length === 1 ? "" : "s"} shown
               </p>
-              {query || activeGenre !== "All" ? (
+              {query || activeGenre !== "All" || creditFilter !== "all" ? (
                 <button
                   type="button"
                   onClick={() => {
                     setQuery("");
                     setActiveGenre("All");
+                    setCreditFilter("all");
                   }}
                   className={secondaryButtonClass}
                 >
@@ -537,6 +657,23 @@ export default function CreatorsHubPage({
               placeholder="Search creators or studios"
               className="rounded-[20px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.18)] focus:ring-4 focus:ring-[rgba(47,107,255,0.08)]"
             />
+
+            <div className="flex flex-wrap gap-2.5">
+              {[
+                { id: "all", label: "All credits" },
+                { id: "creator", label: "Creators" },
+                { id: "studio", label: "Studios" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setCreditFilter(item.id)}
+                  className={filterButtonClass(creditFilter === item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
 
             <div className="flex flex-wrap gap-2.5">
               {["All", ...genreOptions].map((genre) => (
@@ -572,6 +709,7 @@ export default function CreatorsHubPage({
             <div className="grid gap-4 xl:grid-cols-3">
               {spotlightCreators.map((creator) => {
                 const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres : [];
+                const creatorTopTitles = getCreatorTopTitles(creator, 3);
 
                 return (
                   <button
@@ -589,7 +727,7 @@ export default function CreatorsHubPage({
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                            Creator spotlight
+                            {formatCreditTypeLabel(creator.creditType)} spotlight
                           </p>
                           <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                             {creator.name}
@@ -601,9 +739,12 @@ export default function CreatorsHubPage({
                       </div>
 
                       <p className="text-sm leading-6 text-slate-600">
-                        {creator.spotlightSeries?.title
-                          ? `Start with ${creator.spotlightSeries.title}, then keep moving through the rest of this shelf.`
-                          : "Open this page to see every visible series from this creator or studio in one place."}
+                        {summarizeLeadCopy(
+                          creator.leadSummary,
+                          creator.spotlightSeries?.title
+                            ? `Start with ${creator.spotlightSeries.title}, then keep moving through the rest of this shelf.`
+                            : "Open this page to see every visible series from this creator or studio in one place.",
+                        )}
                       </p>
 
                       {creatorGenres.length > 0 ? (
@@ -619,8 +760,22 @@ export default function CreatorsHubPage({
                         </div>
                       ) : null}
 
+                      {creatorTopTitles.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {creatorTopTitles.map((title) => (
+                            <span
+                              key={`${creator.slug}-spotlight-title-${title}`}
+                              className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs text-slate-600"
+                            >
+                              {title}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+
                       <div className="flex flex-wrap gap-3 text-xs text-slate-500">
-                        <span>{formatCompactCount(creator.readerProof)} readers</span>
+                        {creator.freeStartCount > 0 ? <span>{creator.freeStartCount} start free</span> : null}
+                        <span>{creator.ongoingCount} active</span>
                         <span>{creator.completedCount} completed</span>
                         <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
                       </div>
@@ -645,6 +800,7 @@ export default function CreatorsHubPage({
                 onClick: () => {
                   setQuery("");
                   setActiveGenre("All");
+                  setCreditFilter("all");
                 },
               }}
             />
@@ -661,13 +817,17 @@ export default function CreatorsHubPage({
                 </h2>
               </div>
               <p className="text-sm text-slate-500">
-                {activeGenre === "All" ? "All genres" : activeGenre}
+                {[
+                  creditFilter === "studio" ? "Studios only" : creditFilter === "creator" ? "Creators only" : "All credits",
+                  activeGenre === "All" ? "All genres" : activeGenre,
+                ].join(" | ")}
               </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filteredCreators.map((creator) => {
                 const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres : [];
+                const creatorTopTitles = getCreatorTopTitles(creator, 3);
 
                 return (
                   <button
@@ -683,10 +843,10 @@ export default function CreatorsHubPage({
                         className="h-44 rounded-[20px]"
                       />
                       <div className="min-w-0">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                              Creator
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                              {formatCreditTypeLabel(creator.creditType)}
                             </p>
                             <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
                               {creator.name}
@@ -698,9 +858,12 @@ export default function CreatorsHubPage({
                         </div>
 
                         <p className="mt-3 text-sm leading-6 text-slate-600">
-                          {creator.spotlightSeries?.title
-                            ? `Best entry: ${creator.spotlightSeries.title}.`
-                            : "Open the page to see every visible series from this creator or studio."}
+                          {summarizeLeadCopy(
+                            creator.leadSummary,
+                            creator.spotlightSeries?.title
+                              ? `Best entry: ${creator.spotlightSeries.title}.`
+                              : "Open the page to see every visible series from this creator or studio.",
+                          )}
                         </p>
 
                         {creatorGenres.length > 0 ? (
@@ -716,8 +879,22 @@ export default function CreatorsHubPage({
                           </div>
                         ) : null}
 
+                        {creatorTopTitles.length > 0 ? (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {creatorTopTitles.map((title) => (
+                              <span
+                                key={`${creator.slug}-grid-title-${title}`}
+                                className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-xs text-slate-600"
+                              >
+                                {title}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+
                         <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
-                          <span>{formatCompactCount(creator.readerProof)} readers</span>
+                          {creator.freeStartCount > 0 ? <span>{creator.freeStartCount} start free</span> : null}
+                          <span>{creator.ongoingCount} active</span>
                           <span>{creator.completedCount} completed</span>
                           <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
                         </div>

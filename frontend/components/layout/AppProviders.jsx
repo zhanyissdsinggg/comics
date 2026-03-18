@@ -35,6 +35,27 @@ const PerfMonitorBadge = dynamic(() => import("../common/PerfMonitorBadge"), {
 });
 const SiteFooter = dynamic(() => import("./SiteFooter"));
 
+const FULL_FOOTER_PATHS = [
+  "/",
+  "/comics",
+  "/novels",
+  "/creators",
+  "/rankings",
+  "/search",
+];
+
+function matchesPath(pathname, prefix) {
+  if (!pathname || !prefix) {
+    return false;
+  }
+
+  if (prefix === "/") {
+    return pathname === "/";
+  }
+
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
 function BrandingHeadSync() {
   const { branding } = useBrandingStore();
 
@@ -72,7 +93,9 @@ export default function AppProviders({ children }) {
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
   const shouldShowFooter = !isAdminRoute && !isReaderRoute;
+  const useFullFooter = FULL_FOOTER_PATHS.some((prefix) => matchesPath(pathname, prefix));
   const footerTone = shouldShowFooter ? "light" : "default";
+  const footerVariant = useFullFooter ? "full" : "compact";
 
   return (
     <ErrorBoundary
@@ -102,7 +125,7 @@ export default function AppProviders({ children }) {
                             <BehaviorProvider>
                               <HistoryProvider>
                                 {children}
-                                {shouldShowFooter ? <SiteFooter tone={footerTone} /> : null}
+                                {shouldShowFooter ? <SiteFooter tone={footerTone} variant={footerVariant} /> : null}
                                 <PWAInstallPrompt />
                               </HistoryProvider>
                             </BehaviorProvider>

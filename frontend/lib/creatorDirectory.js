@@ -5,6 +5,8 @@ import {
   slugifyCreatorName,
 } from "./creators";
 
+const STUDIO_TOKENS = ["studio", "team", "works", "lab", "collective", "house", "project"];
+
 function toNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -36,13 +38,25 @@ function normalizeIsoDate(value) {
   return new Date(parsed).toISOString();
 }
 
+function getCreatorCreditType(name) {
+  const normalized = normalizeCreatorName(name).toLowerCase();
+  if (!normalized) {
+    return "creator";
+  }
+
+  return STUDIO_TOKENS.some((token) => normalized.includes(token)) ? "studio" : "creator";
+}
+
 function buildCreatorBucket(name, slug) {
   return {
     slug,
     name: getCreatorDisplayName(name),
     path: buildCreatorPathFromSlug(slug),
+    creditType: getCreatorCreditType(name),
     titleCount: 0,
     completedCount: 0,
+    ongoingCount: 0,
+    freeStartCount: 0,
     readerProof: 0,
     latestUpdatedAt: null,
     topGenres: [],
@@ -85,6 +99,12 @@ export function buildCreatorDirectory(seriesList) {
 
     if (String(series?.status || "").toLowerCase() === "completed") {
       current.completedCount += 1;
+    } else {
+      current.ongoingCount += 1;
+    }
+
+    if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
+      current.freeStartCount += 1;
     }
 
     const updatedAt = normalizeIsoDate(series?.updatedAt);
@@ -120,6 +140,11 @@ export function buildCreatorDirectory(seriesList) {
         topGenres,
         spotlightSeries: sortedSeries[0] || null,
         series: sortedSeries,
+        leadSummary:
+          sortedSeries[0]?.description ||
+          `Start with ${sortedSeries[0]?.title || "the lead title"}${
+            topGenres[0] ? ` if you want a strong ${topGenres[0].toLowerCase()} entry.` : "."
+          }`,
       };
     })
     .sort((left, right) => {
@@ -146,20 +171,28 @@ export function getCreatorDirectoryStats(creators) {
     (summary, creator) => {
       summary.titles += Number(creator?.titleCount || 0);
       summary.completedTitles += Number(creator?.completedCount || 0);
+      summary.freeStarts += Number(creator?.freeStartCount || 0);
       summary.readerProof += Number(creator?.readerProof || 0);
+      if (creator?.creditType === "studio") {
+        summary.studios += 1;
+      }
       return summary;
     },
     {
       titles: 0,
       completedTitles: 0,
+      freeStarts: 0,
       readerProof: 0,
+      studios: 0,
     },
   );
 
   return {
     creators: safeCreators.length,
+    studios: totals.studios,
     titles: totals.titles,
     completedTitles: totals.completedTitles,
+    freeStarts: totals.freeStarts,
     readerProof: totals.readerProof,
   };
 }

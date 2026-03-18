@@ -180,6 +180,19 @@ function getSeriesSubtitle(series) {
   return series?.author || "Updated series";
 }
 
+function summarizeDescription(text, fallback) {
+  const source = String(text || "").replace(/\s+/g, " ").trim();
+  if (!source) {
+    return fallback;
+  }
+
+  if (source.length <= 138) {
+    return source;
+  }
+
+  return `${source.slice(0, 135).trimEnd()}...`;
+}
+
 function mapSeriesCardItem(series) {
   return {
     id: series.id,
@@ -470,6 +483,93 @@ export default function SeriesPage({
       completed,
     };
   }, [series, type]);
+  const lowInventoryMode = !loading && series.length > 0 && (type === "novel" || series.length <= 8);
+  const curatedShelfCards = useMemo(() => {
+    if (!lowInventoryMode) {
+      return [];
+    }
+
+    const seen = new Set();
+    const cards = [];
+    const byPopular = [...series].sort((left, right) => getPopularityScore(right) - getPopularityScore(left));
+    const byLatest = [...series].sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt));
+
+    const pushCard = (seriesItem, config) => {
+      if (!seriesItem?.id || seen.has(seriesItem.id)) {
+        return;
+      }
+      seen.add(seriesItem.id);
+      cards.push({
+        ...config,
+        series: seriesItem,
+      });
+    };
+
+    const companionPick =
+      byPopular.find(
+        (item) =>
+          item?.id !== entrySpotlight.primary?.id &&
+          item?.id !== entrySpotlight.completed?.id &&
+          item?.id !== entrySpotlight.freeStart?.id,
+      ) || null;
+
+    pushCard(entrySpotlight.primary, {
+      eyebrow: type === "novel" ? "Best first read" : "Safest first click",
+      title:
+        type === "novel"
+          ? "Start with the novel carrying the strongest signal."
+          : "Start with the title most likely to land fast.",
+      ctaLabel: "Open this title",
+      fallbackDescription:
+        type === "novel"
+          ? "If you only open one title from this shelf first, make it the one already pulling the best signal."
+          : "When the shelf is compact, lead with the title already doing the clearest job of pulling readers in.",
+    });
+
+    pushCard(
+      type === "novel" ? entrySpotlight.secondary || byLatest[0] : companionPick || entrySpotlight.secondary,
+      {
+        eyebrow: type === "novel" ? "Next up" : "If you want a second option",
+        title:
+          type === "novel"
+            ? "Keep one contrast pick nearby."
+            : "Compare one neighboring title before you commit.",
+        ctaLabel: "Compare this title",
+        fallbackDescription:
+          type === "novel"
+            ? "A smaller novel shelf reads better when you have one backup pick with a different rhythm or status."
+            : "A second strong option keeps the catalog from feeling thinner than it really is.",
+      },
+    );
+
+    pushCard(entrySpotlight.completed || entrySpotlight.freeStart || byLatest[0], {
+      eyebrow:
+        entrySpotlight.completed || normalizeStatus(entrySpotlight.completed?.status) === "completed"
+          ? "Finished pick"
+          : entrySpotlight.freeStart
+            ? "Start free"
+            : "Fresh update",
+      title:
+        entrySpotlight.completed
+          ? "Keep a payoff-ready option close."
+          : entrySpotlight.freeStart
+            ? "Keep one low-risk entry point in view."
+            : "Keep a current title nearby.",
+      ctaLabel: "Open this title",
+      fallbackDescription:
+        entrySpotlight.completed
+          ? "Completed runs work well when you want the cleaner commitment from a small shelf."
+          : entrySpotlight.freeStart
+            ? "Free starts make the first click easier when you are still deciding if the shelf is for you."
+            : "A fresh update keeps the shelf from feeling static.",
+    });
+
+    return cards.slice(0, 3);
+  }, [entrySpotlight.completed, entrySpotlight.freeStart, entrySpotlight.primary, entrySpotlight.secondary, lowInventoryMode, series, type]);
+  const catalogGridClassName =
+    filteredAndSortedSeries.length <= 8
+      ? "grid grid-cols-2 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      : "grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5";
   const genreQuickPicks = useMemo(() => {
     const genreCounts = new Map();
 
@@ -798,6 +898,70 @@ export default function SeriesPage({
           </section>
         ) : null}
 
+        {curatedShelfCards.length > 0 ? (
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Curated starts
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  {type === "novel"
+                    ? "This novel shelf is small enough to curate."
+                    : "A compact shelf should still feel deliberate."}
+                </h2>
+              </div>
+              <p className="text-sm text-slate-500">
+                {type === "novel"
+                  ? "Use these three picks to get into the catalog without making the page feel thin."
+                  : "A tighter catalog still needs a few distinct ways in."}
+              </p>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+              {curatedShelfCards.map((card) => {
+                const item = card.series;
+                return (
+                  <button
+                    key={`curated-${card.eyebrow}-${item.id}`}
+                    type="button"
+                    onClick={() => handleSeriesClick(item.id)}
+                    className="group rounded-[28px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                  >
+                    <Cover
+                      tone={item.coverTone}
+                      coverUrl={item.coverUrl}
+                      className="h-56 rounded-[22px]"
+                    />
+                    <div className="mt-4 space-y-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                          {card.eyebrow}
+                        </p>
+                        <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">{item.title}</h3>
+                      </div>
+                      <p className="text-sm leading-6 text-slate-600">
+                        {summarizeDescription(item.description, card.fallbackDescription)}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                          {getSeriesSubtitle(item)}
+                        </span>
+                        {getSeriesBadge(item) ? (
+                          <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
+                            {getSeriesBadge(item)}
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="text-xs font-semibold text-slate-950">{card.ctaLabel}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </SurfacePanel>
+        ) : null}
+
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -881,7 +1045,7 @@ export default function SeriesPage({
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className={catalogGridClassName}>
               {filteredAndSortedSeries.map((item) => (
                 <PortraitCard
                   key={item.id}

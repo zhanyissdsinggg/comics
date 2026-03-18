@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
-import InfoPageNav from "../layout/InfoPageNav";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
@@ -15,6 +14,7 @@ import {
 import { focusInteractiveTarget } from "../../lib/focusTarget";
 import { useAuthStore } from "../../store/useAuthStore";
 import { siteConfig } from "../../lib/siteConfig";
+import { getSupportTopicPreset, SUPPORT_TOPICS } from "../../lib/supportRouting";
 
 function buildSupportBody(message, replyEmail, orderId) {
   const notes = [];
@@ -34,34 +34,6 @@ function buildSupportDraft(subject, body, supportEmail) {
   return `To: ${supportEmail}\nSubject: ${subject}\n\n${body}`;
 }
 
-const SUPPORT_TOPIC_PRESETS = [
-  { id: "billing", label: "Billing issue", subject: "Billing issue" },
-  { id: "refund", label: "Refund request", subject: "Refund request" },
-  { id: "account", label: "Sign-in help", subject: "Sign-in help" },
-  { id: "reader", label: "Reader issue", subject: "Reader issue" },
-  { id: "adult", label: "Age-check help", subject: "Mature content access" },
-  { id: "content", label: "Content report", subject: "Content report" },
-];
-
-const SUPPORT_CATEGORIES = [
-  {
-    title: "Billing & refunds",
-    description: "Wrong charge, duplicate payment, missing points, refund eligibility, or receipt questions.",
-  },
-  {
-    title: "Account & sign-in",
-    description: "Email verification, password reset, social sign-in, or account access problems.",
-  },
-  {
-    title: "Reader & content",
-    description: "Broken reader pages, missing chapters, cover issues, translation problems, or title reports.",
-  },
-  {
-    title: "Mature content",
-    description: "18+ access, age check, hidden titles, region settings, or Hide 18+ history questions.",
-  },
-];
-
 export default function SupportPage() {
   const router = useRouter();
   const { hydrated, isSignedIn, user } = useAuthStore();
@@ -69,10 +41,55 @@ export default function SupportPage() {
   const [subject, setSubject] = useState("");
   const [orderId, setOrderId] = useState("");
   const [message, setMessage] = useState("");
+  const [activeTopic, setActiveTopic] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", text: "" });
   const [commerceNotice, setCommerceNotice] = useState(null);
   const orderIdInputRef = useRef(null);
+  const quickIssueCards = [
+    {
+      id: "wrong-charge",
+      label: "Wrong charge",
+      topic: "billing",
+      subject: "Wrong charge",
+      context: "A charge amount, renewal, or duplicate payment looks wrong.",
+    },
+    {
+      id: "missing-points",
+      label: "Missing points",
+      topic: "billing",
+      subject: "Missing points",
+      context: "A paid pack or renewal finished but the points balance did not update.",
+    },
+    {
+      id: "missing-receipt",
+      label: "Missing receipt",
+      topic: "billing",
+      subject: "Missing receipt",
+      context: "A purchase went through but the receipt or order confirmation is missing.",
+    },
+    {
+      id: "sign-in-trouble",
+      label: "Sign-in trouble",
+      topic: "account",
+      subject: "Sign-in help",
+      context: "Sign-in, reset, or account access is failing.",
+    },
+    {
+      id: "broken-chapter",
+      label: "Broken chapter",
+      topic: "reader",
+      subject: "Reader issue",
+      context: "A chapter or episode is broken, missing, or not loading.",
+    },
+    {
+      id: "age-check",
+      label: "Age-check issue",
+      topic: "adult",
+      subject: "Mature content access",
+      context: "Age check or mature visibility settings are blocking access unexpectedly.",
+    },
+  ];
 
   useEffect(() => {
     if (hydrated && isSignedIn) {
@@ -80,17 +97,62 @@ export default function SupportPage() {
     }
   }, [hydrated, isSignedIn, user?.email]);
 
+  const applyTopicPreset = (preset, { preserveMessage = false } = {}) => {
+    if (!preset) {
+      return;
+    }
+
+    setActiveTopic(preset.id);
+    setSubject(preset.subject || "");
+    if (!preserveMessage) {
+      setMessage((current) => current || preset.draft || "");
+    }
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
-    const seededOrderId = new URLSearchParams(window.location.search).get("orderId")?.trim();
-    if (!seededOrderId) {
-      return;
+    const params = new URLSearchParams(window.location.search);
+    const seededOrderId = params.get("orderId")?.trim();
+    const seededTopic = params.get("topic")?.trim();
+    const seededSubject = params.get("subject")?.trim();
+    const seededMessage = params.get("message")?.trim();
+    const seededContext = params.get("context")?.trim();
+    const preset = getSupportTopicPreset(seededTopic);
+
+    if (seededOrderId) {
+      setOrderId((current) => current || seededOrderId);
     }
 
-    setOrderId((current) => current || seededOrderId);
+    if (preset) {
+      applyTopicPreset(preset, { preserveMessage: true });
+    }
+
+    if (seededSubject) {
+      setSubject((current) => current || seededSubject);
+    }
+
+    if (seededContext || seededMessage) {
+      setMessage((current) => {
+        if (current) {
+          return current;
+        }
+
+        const segments = [];
+        if (preset?.draft) {
+          segments.push(preset.draft);
+        }
+        if (seededContext) {
+          segments.push(`Context: ${seededContext}`);
+        }
+        if (seededMessage) {
+          segments.push(seededMessage);
+        }
+        return segments.filter(Boolean).join("\n\n");
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -189,11 +251,12 @@ export default function SupportPage() {
       if (response.ok) {
         setFeedback({
           type: "success",
-          text: "Message sent. We usually reply within 1 to 2 business days.",
+          text: `Message sent. We usually reply within 1 to 2 business days at ${user?.email || trimmedEmail}.`,
         });
         setSubject("");
         setOrderId("");
         setMessage("");
+        setActiveTopic("");
         setEmail(user?.email || trimmedEmail);
         return;
       }
@@ -219,7 +282,6 @@ export default function SupportPage() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
       <SiteHeader variant="light" />
       <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <InfoPageNav current="support" appearance="light" />
         <EditorialHero
           eyebrow="Support"
           title="Billing, account, and reader help."
@@ -235,19 +297,55 @@ export default function SupportPage() {
           />
         ) : null}
 
-        <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
-          {SUPPORT_CATEGORIES.map((item) => (
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {SUPPORT_TOPICS.map((item) => (
             <SurfacePanel key={item.title} appearance="light" accent="blue">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Category
-              </p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Category</p>
               <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {item.title}
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+              <button
+                type="button"
+                onClick={() => applyTopicPreset(item)}
+                className="mt-4 rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                Use this topic
+              </button>
             </SurfacePanel>
           ))}
         </section>
+
+        <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Fast issue shortcuts
+            </p>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              Start with the exact problem if you already know it.
+            </h2>
+            <p className="text-sm leading-6 text-slate-600">
+              These shortcuts prefill the topic and subject so billing, account, and reader issues do not start from a blank form.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {quickIssueCards.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  const preset = getSupportTopicPreset(item.topic);
+                  applyTopicPreset(preset, { preserveMessage: true });
+                  setSubject(item.subject);
+                  setMessage((current) => current || `Context: ${item.context}`);
+                }}
+                className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </SurfacePanel>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
@@ -261,6 +359,9 @@ export default function SupportPage() {
               <p className="text-sm leading-6 text-slate-600">
                 A short note works best. Tell us what broke, what you expected, and where it happened.
               </p>
+              <p className="text-xs text-slate-500">
+                If this came from Purchases, Store, Membership, or a broken chapter, keep the order ID, page URL, or episode number in the note.
+              </p>
             </div>
 
             <div className="space-y-3">
@@ -268,12 +369,16 @@ export default function SupportPage() {
                 Common topics
               </p>
               <div className="flex flex-wrap gap-2">
-                {SUPPORT_TOPIC_PRESETS.map((preset) => (
+                {SUPPORT_TOPICS.map((preset) => (
                   <button
                     key={preset.id}
                     type="button"
-                    onClick={() => setSubject(preset.subject)}
-                    className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                    onClick={() => applyTopicPreset(preset)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      activeTopic === preset.id
+                        ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
+                        : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
+                    }`}
                   >
                     {preset.label}
                   </button>

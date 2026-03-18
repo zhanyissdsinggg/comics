@@ -1,6 +1,5 @@
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
-import InfoPageNav from "../../components/layout/InfoPageNav";
 import SiteHeader from "../../components/layout/SiteHeader";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
@@ -128,8 +127,6 @@ export default function PrivacyPolicyPage() {
       <SiteHeader variant="light" />
       <main className="relative px-4 py-8 pb-14 sm:py-10">
         <div className="mx-auto max-w-6xl space-y-8">
-          <InfoPageNav current="privacy" appearance="light" />
-
           <EditorialHero
             appearance="light"
             accent="blue"

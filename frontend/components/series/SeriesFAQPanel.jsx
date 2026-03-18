@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import SurfacePanel from "../common/SurfacePanel";
 import { getSeriesFaqItems } from "../../lib/storefrontFaq";
+import { buildSupportPath } from "../../lib/supportRouting";
 
 export default function SeriesFAQPanel({ series, episodes = [], creatorHref = "" }) {
   const router = useRouter();
@@ -75,7 +76,14 @@ export default function SeriesFAQPanel({ series, episodes = [], creatorHref = ""
         </button>
         <button
           type="button"
-          onClick={() => router.push("/support")}
+          onClick={() =>
+            router.push(
+              buildSupportPath({
+                topic: "reader",
+                context: `Series question before starting ${series?.title || "this title"}`,
+              }),
+            )
+          }
           className={secondaryButtonClass}
         >
           Get help

@@ -41,11 +41,29 @@ function formatCompactCount(value) {
   }).format(count);
 }
 
+function formatUpdateLabel(value) {
+  if (!value) {
+    return "Update timing unavailable";
+  }
+
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) {
+    return "Update timing unavailable";
+  }
+
+  return `Updated ${new Date(timestamp).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })}`;
+}
+
 export default function SeriesHeader({
   series,
   previewHint,
   progress,
   episodeCount = 0,
+  latestEpisode = null,
   onContinue,
   onStart,
   onFollowToggle,
@@ -54,6 +72,8 @@ export default function SeriesHeader({
   mobilePrimaryActionRef,
   highlightPrimaryAction = false,
   creatorHref = "",
+  onOpenStore,
+  onOpenMembership,
 }) {
   const router = useRouter();
   const genres = series.genres || [];
@@ -75,6 +95,7 @@ export default function SeriesHeader({
   const secondaryActionLabel = secondaryAction ? "Start at Episode 1" : "";
   const followers = Number(series.followers || 0);
   const ratingCount = Number(series.ratingCount || 0);
+  const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.id || latestEpisode?.number || "");
   const readerPulseItems = [
     ratingCount > 0 ? `${ratingValue} stars` : ratingValue === "New" ? "New release" : `${ratingValue} stars`,
     followers > 0
@@ -96,6 +117,31 @@ export default function SeriesHeader({
       ? "border-[rgba(47,107,255,0.3)] bg-[rgba(47,107,255,0.08)] text-slate-950 shadow-[0_0_0_1px_rgba(47,107,255,0.12),0_22px_60px_rgba(47,107,255,0.14)]"
       : "border-black/8 bg-slate-950 text-white hover:bg-slate-800",
   ].join(" ");
+  const quickFacts = [
+    {
+      label: "Latest update",
+      value: latestEpisodeNumber ? `Episode ${latestEpisodeNumber}` : isCompleted ? "Completed run" : "Series page",
+      hint: latestEpisode?.title
+        ? `${latestEpisode.title} • ${formatUpdateLabel(latestEpisode?.publishedAt || series.updatedAt)}`
+        : formatUpdateLabel(series.updatedAt),
+    },
+    {
+      label: "Start here",
+      value: onContinue ? "Continue where you stopped" : hasFreeEpisodes ? "Use the free start" : "Unlock as you go",
+      hint: hasFreeEpisodes
+        ? `${series.freeEpisodeCount || 0} free to test before points.`
+        : isCompleted
+          ? "A finished run if you want payoff without waiting."
+          : "Open the first episode, then use points or membership when needed.",
+    },
+    {
+      label: creatorHref ? "Creator shelf" : "Creator credit",
+      value: series.author || "Studio",
+      hint: creatorHref
+        ? "Open the creator page to compare related titles from the same voice."
+        : "Creator or studio credit attached to this series.",
+    },
+  ];
   return (
     <header className="py-4 sm:py-6">
       <SurfacePanel className="relative overflow-hidden p-0" appearance="light" accent="blue">
@@ -197,6 +243,21 @@ export default function SeriesHeader({
               ) : null}
             </div>
 
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              {quickFacts.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-slate-950">{item.value}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.hint}</p>
+                </div>
+              ))}
+            </div>
+
             {badges.length > 0 || genres.length > 0 ? (
               <div className="mt-5 flex flex-wrap gap-2">
                 {badges.map((badge) => (
@@ -244,6 +305,24 @@ export default function SeriesHeader({
                 description={series.description || ""}
                 className="rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
               />
+              {onOpenStore ? (
+                <button
+                  type="button"
+                  onClick={onOpenStore}
+                  className="rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                >
+                  Point packs
+                </button>
+              ) : null}
+              {onOpenMembership ? (
+                <button
+                  type="button"
+                  onClick={onOpenMembership}
+                  className="rounded-full border border-black/8 bg-[#f8f9fc] px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                >
+                  Membership
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

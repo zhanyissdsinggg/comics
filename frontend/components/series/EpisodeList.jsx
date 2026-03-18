@@ -104,6 +104,39 @@ export default function EpisodeList({
     walletTotal > 0 ? `${walletTotal.toLocaleString()} points` : "0 points",
     isSubscriber ? "Member access" : "Points access",
   ];
+  const episodePrice = Number(series?.pricing?.episodePrice || 0);
+  const accessGuides = [
+    {
+      label: "Start path",
+      title:
+        series?.hasFreeEpisodes || Number(series?.freeEpisodeCount || 0) > 0
+          ? "Use the free start first."
+          : "Start with the opening chapter.",
+      description:
+        Number(series?.freeEpisodeCount || 0) > 0
+          ? `${Number(series.freeEpisodeCount).toLocaleString()} chapter${Number(series.freeEpisodeCount) === 1 ? "" : "s"} are free before points kick in.`
+          : freeUnlockCount > 0
+            ? `${freeUnlockCount.toLocaleString()} chapter${freeUnlockCount === 1 ? "" : "s"} can unlock on a timer.`
+            : freePreviewCount > 0
+              ? `${freePreviewCount.toLocaleString()} chapter${freePreviewCount === 1 ? "" : "s"} include preview pages before you unlock.`
+              : "This title moves into paid unlocks quickly, so keep points or membership in view.",
+    },
+    {
+      label: "Unlock path",
+      title: episodePrice > 0 ? `${episodePrice.toLocaleString()} points per locked chapter.` : "Locked chapters use points.",
+      description:
+        lockedCount > 0
+          ? `${lockedCount.toLocaleString()} chapter${lockedCount === 1 ? "" : "s"} are currently locked on this list.`
+          : "Everything visible here is already ready to open.",
+    },
+    {
+      label: "Read often?",
+      title: isSubscriber ? "Membership is already active." : "Membership may fit heavy reading better.",
+      description: isSubscriber
+        ? "Your member access is already on, so compare the list against the perks you are using."
+        : "If you keep topping up for multiple series, compare membership before your next pack purchase.",
+    },
+  ];
 
   return (
     <section className="mt-6 rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:mt-8 sm:p-6" data-wallet-total={walletTotal}>
@@ -173,6 +206,19 @@ export default function EpisodeList({
               {STOREFRONT_TERMS.compareMembership}
             </button>
           </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {accessGuides.map((item) => (
+            <div
+              key={item.label}
+              className="rounded-[22px] border border-black/6 bg-white/88 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">{item.label}</p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">{item.title}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+            </div>
+          ))}
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">

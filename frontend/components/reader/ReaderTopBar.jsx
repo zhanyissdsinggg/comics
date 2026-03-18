@@ -22,6 +22,8 @@ export default function ReaderTopBar({
   layoutMode,
   disableLayoutToggle,
   progress,
+  hasPrev = true,
+  hasNext = true,
 }) {
   const shareUrl =
     typeof window !== "undefined" && seriesId && episodeId
@@ -126,20 +128,28 @@ export default function ReaderTopBar({
           <button
             type="button"
             onClick={onPrev}
-            className="shrink-0 rounded-full border border-neutral-800 px-2 py-1 text-xs text-neutral-200 md:px-3"
+            disabled={!hasPrev}
+            className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
+              hasPrev
+                ? "border-neutral-800 text-neutral-200"
+                : "border-neutral-900 text-neutral-600"
+            }`}
           >
             Previous
           </button>
           <button
             type="button"
             onClick={onNext}
+            disabled={!hasNext}
             className={`shrink-0 rounded-full px-3 py-1 text-xs ${
-              nextLocked
+              !hasNext
+                ? "border border-neutral-900 text-neutral-600"
+                : nextLocked
                 ? "border border-red-700 text-red-300"
                 : "border border-neutral-800 text-neutral-200"
             }`}
           >
-            Next
+            {!hasNext ? "End" : nextLocked ? "Next locked" : "Next"}
           </button>
         </div>
       </div>

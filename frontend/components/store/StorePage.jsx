@@ -28,6 +28,7 @@ import { persistCommerceSuccess } from "../../lib/commerceSuccess";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { siteConfig } from "../../lib/siteConfig";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
+import { buildSupportPath } from "../../lib/supportRouting";
 
 const PromoBanner = dynamic(() => import("./PromoBanner"));
 
@@ -496,18 +497,45 @@ export default function StorePage({
           <SurfacePanel tone="warning" appearance="light" accent="amber">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-amber-700">Checkout coming soon</p>
+                <p className="text-sm font-semibold text-amber-700">Preview mode</p>
                 <p className="text-sm text-amber-700/80">
-                  You can look through the packs now. Buying opens here once checkout is ready.
+                  You can compare every pack right now. Checkout is still paused, so use this page to understand the model and line up your next move.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => router.push("/support")}
-                className={secondaryButtonClass}
-              >
-                Contact support
-              </button>
+              <div className="flex flex-wrap gap-2">
+                {!isSignedIn ? (
+                  <button
+                    type="button"
+                    onClick={openAuthPrompt}
+                    className={secondaryButtonClass}
+                  >
+                    Sign in ahead of launch
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => router.push("/rankings?type=ttf&window=all")}
+                  className={secondaryButtonClass}
+                >
+                  Browse free starts
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/subscribe")}
+                  className={secondaryButtonClass}
+                >
+                  Compare membership
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(buildSupportPath({ topic: "billing", context: "Point-pack checkout preview" }))
+                  }
+                  className={secondaryButtonClass}
+                >
+                  Contact support
+                </button>
+              </div>
             </div>
           </SurfacePanel>
         ) : null}
@@ -535,7 +563,9 @@ export default function StorePage({
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/support")}
+                onClick={() =>
+                  router.push(buildSupportPath({ topic: "billing", context: "Point-pack billing question" }))
+                }
                 className={secondaryButtonClass}
               >
                 Billing help
@@ -616,6 +646,22 @@ export default function StorePage({
                 >
                   Sign in
                 </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/rankings?type=ttf&window=all")}
+                    className={secondaryButtonClass}
+                  >
+                    Browse free starts
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/subscribe")}
+                    className={secondaryButtonClass}
+                  >
+                    Compare membership
+                  </button>
+                </div>
               </SurfacePanel>
             ) : null}
 
@@ -758,7 +804,7 @@ export default function StorePage({
                     disabled={!purchaseActionsEnabled}
                     ctaLabel={
                       !purchaseActionsEnabled
-                        ? "Coming soon"
+                        ? "Preview only"
                         : isSignedIn
                           ? "Get this pack"
                           : "Sign in to get it"
@@ -778,7 +824,9 @@ export default function StorePage({
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/support")}
+                onClick={() =>
+                  router.push(buildSupportPath({ topic: "billing", context: "Point-pack purchase history help" }))
+                }
                 className={secondaryButtonClass}
               >
                 Get billing help
@@ -917,7 +965,9 @@ export default function StorePage({
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push("/support")}
+                  onClick={() =>
+                    router.push(buildSupportPath({ topic: "billing", context: "Store billing support" }))
+                  }
                   className={secondaryButtonClass}
                 >
                   {STOREFRONT_TERMS.billingSupport}
@@ -972,7 +1022,9 @@ export default function StorePage({
             </button>
             <button
               type="button"
-              onClick={() => router.push("/support")}
+              onClick={() =>
+                router.push(buildSupportPath({ topic: "billing", context: "Store billing accountability" }))
+              }
               className={secondaryButtonClass}
             >
               Billing help

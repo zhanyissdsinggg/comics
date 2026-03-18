@@ -22,6 +22,16 @@ import { persistCommerceSuccess } from "../../lib/commerceSuccess";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { siteConfig } from "../../lib/siteConfig";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
+import { buildSupportPath } from "../../lib/supportRouting";
+import { useAuthStore } from "../../store/useAuthStore";
+
+function openAuthPrompt() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(new CustomEvent("auth:open"));
+}
 
 const PLAN_FIT_GUIDE = {
   basic: {
@@ -45,6 +55,7 @@ export default function SubscribePage({
 }) {
   const router = useRouter();
   const { subscription, subscribe, cancelSubscription } = useWalletStore();
+  const { isSignedIn } = useAuthStore();
   const [workingId, setWorkingId] = useState("");
   const [feedback, setFeedback] = useState("");
   const [planCatalog, setPlanCatalogState] = useState(initialPlanCatalog || getPlanCatalog());
@@ -108,6 +119,12 @@ export default function SubscribePage({
   const subscriptionPreviewOnly = billingAvailability?.subscriptionActionsEnabled === false;
 
   const handleSubscribe = async (planId) => {
+    if (!isSignedIn) {
+      setFeedback("Sign in first so membership, receipts, and renewal history stay on one account.");
+      openAuthPrompt();
+      return;
+    }
+
     if (!subscriptionActionsEnabled) {
       setFeedback("You can compare every plan right now. Starting membership opens once checkout is live.");
       return;
@@ -148,7 +165,7 @@ export default function SubscribePage({
 
   const handleCancel = async () => {
     if (!subscriptionActionsEnabled) {
-      router.push("/support");
+      router.push(buildSupportPath({ topic: "billing", context: "Membership cancellation help" }));
       return;
     }
 
@@ -258,10 +275,16 @@ export default function SubscribePage({
             <>
               <button
                 type="button"
-                onClick={() => router.push(returnTo)}
+                onClick={() => {
+                  if (!isSignedIn && !isActive) {
+                    openAuthPrompt();
+                    return;
+                  }
+                  router.push(returnTo);
+                }}
                 className={primaryButtonClass}
               >
-                Back
+                {!isSignedIn && !isActive ? "Sign in to start" : "Back"}
               </button>
               <button
                 type="button"
@@ -297,7 +320,9 @@ export default function SubscribePage({
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/support")}
+                onClick={() =>
+                  router.push(buildSupportPath({ topic: "billing", context: "Membership billing question" }))
+                }
                 className={secondaryButtonClass}
               >
                 Billing help
@@ -337,6 +362,36 @@ export default function SubscribePage({
           </div>
         </SurfacePanel>
 
+        {!isSignedIn ? (
+          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="max-w-3xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Sign in first
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Membership belongs to your account, not just this browser.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Sign in before you start a plan so renewals, receipts, cancellation, and support all stay attached to one account.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button type="button" onClick={openAuthPrompt} className={primaryButtonClass}>
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/rankings?type=ttf&window=all")}
+                  className={secondaryButtonClass}
+                >
+                  Browse free starts
+                </button>
+              </div>
+            </div>
+          </SurfacePanel>
+        ) : null}
+
         <SurfacePanel id="membership-plans" className="space-y-6" appearance="light" accent="blue">
           {feedback ? (
             <div className="rounded-[24px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -345,7 +400,31 @@ export default function SubscribePage({
           ) : null}
           {subscriptionPreviewOnly ? (
             <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-              Starting membership is not live yet. You can still compare every tier here.
+              Starting membership is not live yet. Use this page to compare tiers, then browse free starts or point packs while checkout is still paused.
+            </div>
+          ) : null}
+
+          {subscriptionPreviewOnly ? (
+            <div className="flex flex-wrap gap-3">
+              {!isSignedIn ? (
+                <button type="button" onClick={openAuthPrompt} className={secondaryButtonClass}>
+                  Sign in ahead of launch
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => router.push("/rankings?type=ttf&window=all")}
+                className={secondaryButtonClass}
+              >
+                Browse free starts
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/store")}
+                className={secondaryButtonClass}
+              >
+                Compare point packs
+              </button>
             </div>
           ) : null}
 
@@ -487,13 +566,15 @@ export default function SubscribePage({
                       disabled={workingId === key || isCurrent || !subscriptionActionsEnabled}
                       className={primaryButtonClass}
                     >
-                      {isCurrent
-                        ? "Current plan"
-                        : !subscriptionActionsEnabled
-                          ? "Coming soon"
-                          : workingId === key
-                            ? "Processing..."
-                            : "Pick this plan"}
+                    {isCurrent
+                      ? "Current plan"
+                      : !subscriptionActionsEnabled
+                        ? "Coming soon"
+                        : !isSignedIn
+                          ? "Sign in to start"
+                        : workingId === key
+                          ? "Processing..."
+                          : "Pick this plan"}
                     </button>
                     <p className="text-xs leading-5 text-slate-500">
                       Recurring monthly billing while active, with receipts in Purchases and billing help in Support.
@@ -608,7 +689,9 @@ export default function SubscribePage({
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/support")}
+                onClick={() =>
+                  router.push(buildSupportPath({ topic: "billing", context: "Membership support help" }))
+                }
                 className={secondaryButtonClass}
               >
                 Contact support
@@ -734,7 +817,9 @@ export default function SubscribePage({
             </button>
             <button
               type="button"
-              onClick={() => router.push("/support")}
+              onClick={() =>
+                router.push(buildSupportPath({ topic: "billing", context: "Membership accountability contact" }))
+              }
               className={secondaryButtonClass}
             >
               Billing help

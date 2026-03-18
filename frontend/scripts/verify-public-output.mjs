@@ -62,6 +62,18 @@ const ROUTES = [
     expectedH1: "Your account, purchases, and reading setup.",
     expectedNeedles: ["Sign in to keep purchases, library, and mature-content settings on one account.", "Browse series", "Store"],
   },
+  {
+    route: "/series/demo-series",
+    expectedTitle: "Series",
+    expectedH1: "We're pulling the full series page now.",
+    expectedNeedles: ["Loading title", "Browse Top Series", "See point packs"],
+  },
+  {
+    route: "/read/demo-series/demo-episode",
+    expectedTitle: "Gush | Read comics and novels",
+    expectedH1: "Getting the reader ready.",
+    expectedNeedles: ["Opening chapter", "Back to series", "Need help instead?"],
+  },
 ];
 
 function getFreePort() {

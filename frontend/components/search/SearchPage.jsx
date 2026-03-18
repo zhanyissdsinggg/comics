@@ -8,7 +8,10 @@ import Cover from "../common/Cover";
 import Pill from "../common/Pill";
 import { SkeletonCard } from "../common/Skeleton";
 import EditorialHero from "../common/EditorialHero";
+import SearchBar from "../common/SearchBar";
 import SurfacePanel from "../common/SurfacePanel";
+import SiteHeader from "../layout/SiteHeader";
+import SearchCreatorMatchesPanel from "./SearchCreatorMatchesPanel";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { parallelRequests2 } from "../../lib/parallelRequests";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -31,14 +34,7 @@ import {
   subscribeSearchHistory,
 } from "../../lib/searchHistory";
 
-const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
-  ssr: false,
-});
-
 const SearchHistoryPanel = dynamic(() => import("./SearchHistoryPanel"));
-const SearchBar = dynamic(() => import("../common/SearchBar"), {
-  ssr: false,
-});
 const AdvancedFilterPanel = dynamic(() => import("./AdvancedFilterPanel"), {
   ssr: false,
 });
@@ -47,9 +43,6 @@ const CreatorShelfLinks = dynamic(() => import("../common/CreatorShelfLinks"));
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
 const StorefrontEventHub = dynamic(() => import("../common/StorefrontEventHub"));
 const StorefrontPathwaysGrid = dynamic(() => import("../common/StorefrontPathwaysGrid"));
-const SearchCreatorMatchesPanel = dynamic(() => import("./SearchCreatorMatchesPanel"), {
-  ssr: false,
-});
 
 const STATUS_OPTIONS = ["Ongoing", "Completed"];
 const TYPE_OPTIONS = [
@@ -154,6 +147,46 @@ function formatSearchSeriesMeta(series) {
   ]
     .filter(Boolean)
     .join(" / ");
+}
+
+function summarizeSearchDescription(series) {
+  const description = String(series?.description || "").replace(/\s+/g, " ").trim();
+  if (description) {
+    return description.length > 132 ? `${description.slice(0, 129).trimEnd()}...` : description;
+  }
+
+  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
+    const freeCount = Number(series?.freeEpisodeCount || 0);
+    return `${freeCount} free chapter${freeCount === 1 ? "" : "s"} before points kick in.`;
+  }
+
+  if (String(series?.status || "").toLowerCase() === "completed") {
+    return "Completed series ready for a full-session read.";
+  }
+
+  return "Open the title page to see chapters, free starts, and unlock options.";
+}
+
+function getSearchSignals(series) {
+  const signals = [];
+
+  if (series?.author) {
+    signals.push(`By ${series.author}`);
+  }
+
+  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
+    signals.push("Starts free");
+  }
+
+  if (String(series?.status || "").toLowerCase() === "completed") {
+    signals.push("Completed");
+  }
+
+  if (series?.adult) {
+    signals.push("18+");
+  }
+
+  return signals.slice(0, 4);
 }
 
 export default function SearchPage() {
@@ -1599,8 +1632,19 @@ export default function SearchPage() {
                     <p className="text-sm text-slate-500">
                       {formatSearchSeriesMeta(series)}
                     </p>
+                    <p className="text-sm leading-6 text-slate-600">
+                      {summarizeSearchDescription(series)}
+                    </p>
                     <div className="flex flex-wrap gap-2 text-xs text-slate-600">
-                      {(series.genres || []).slice(0, 3).map((item) => (
+                      {getSearchSignals(series).map((item) => (
+                        <span
+                          key={`${series.id}-signal-${item}`}
+                          className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-2.5 py-1"
+                        >
+                          {highlight(item, query)}
+                        </span>
+                      ))}
+                      {(series.genres || []).slice(0, 2).map((item) => (
                         <span
                           key={item}
                           className="rounded-full border border-black/8 bg-white/84 px-2.5 py-1"
@@ -1609,6 +1653,7 @@ export default function SearchPage() {
                         </span>
                       ))}
                     </div>
+                    <p className="text-xs font-semibold text-slate-950">Open title details</p>
                   </div>
                 </button>
               ))}

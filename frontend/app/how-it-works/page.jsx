@@ -2,7 +2,6 @@ import Link from "next/link";
 import EditorialHero from "../../components/common/EditorialHero";
 import StructuredDataScript from "../../components/common/StructuredDataScript";
 import SurfacePanel from "../../components/common/SurfacePanel";
-import InfoPageNav from "../../components/layout/InfoPageNav";
 import SiteHeader from "../../components/layout/SiteHeader";
 import { createPageMetadata } from "../../lib/seo";
 import {
@@ -94,8 +93,6 @@ export default function HowItWorksPage() {
       <SiteHeader variant="light" />
       <main className="relative px-4 py-8 pb-14 sm:py-10">
         <div className="mx-auto max-w-6xl space-y-8">
-          <InfoPageNav current="how-it-works" appearance="light" />
-
           <EditorialHero
             appearance="light"
             accent="blue"

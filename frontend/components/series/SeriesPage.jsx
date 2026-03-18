@@ -499,6 +499,30 @@ export default function SeriesPage({ seriesId }) {
   const handleStart = firstEpisodeId
     ? () => handleRead(seriesId, firstEpisodeId)
     : null;
+  const handleOpenStore = useCallback(() => {
+    router.push(
+      buildPathWithAttribution(
+        "/store",
+        {
+          entryPoint: "SERIES_HEADER_STORE",
+          sourcePath: `/series/${seriesId}`,
+          sourceSeriesId: seriesId,
+          returnTo: `/series/${seriesId}`,
+        },
+        { focus: "auto" },
+      ),
+    );
+  }, [router, seriesId]);
+  const handleOpenMembership = useCallback(() => {
+    router.push(
+      buildPathWithAttribution("/subscribe", {
+        entryPoint: "SERIES_HEADER_MEMBERSHIP",
+        sourcePath: `/series/${seriesId}`,
+        sourceSeriesId: seriesId,
+        returnTo: `/series/${seriesId}`,
+      }),
+    );
+  }, [router, seriesId]);
   const creatorHref = useMemo(() => {
     const targetPath = buildCreatorHref(series?.author || "Studio");
     return buildPathWithAttribution(targetPath, {
@@ -509,6 +533,13 @@ export default function SeriesPage({ seriesId }) {
       returnTo: `/series/${seriesId}`,
     });
   }, [series?.author, seriesId]);
+  const latestEpisode = useMemo(() => {
+    if (!Array.isArray(episodes) || episodes.length === 0) {
+      return null;
+    }
+
+    return [...episodes].sort((left, right) => Number(right?.number || 0) - Number(left?.number || 0))[0] || null;
+  }, [episodes]);
 
   const isFollowing = followedSeriesIds.includes(seriesId);
 
@@ -545,6 +576,34 @@ export default function SeriesPage({ seriesId }) {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
         <SiteHeader variant="light" />
         <div className="relative mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+          <div className="mb-6 rounded-[28px] border border-black/6 bg-white/90 p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Loading title
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+              We're pulling the full series page now.
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-[15px]">
+              Cover art, free-start info, episode access, and creator credits all land here. If this title takes too
+              long, you can jump back to Top Series or check point packs first.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => router.push("/rankings?type=popular&window=week")}
+                className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Browse Top Series
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/store")}
+                className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                See point packs
+              </button>
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
             <Skeleton className="h-80 w-full sm:w-56 md:w-64 flex-shrink-0 rounded-lg" />
             <div className="flex-1 space-y-3">
@@ -577,8 +636,11 @@ export default function SeriesPage({ seriesId }) {
         <SiteHeader variant="light" />
         <div className="relative mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
           <div className="rounded-[28px] border border-red-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.98))] p-6 text-center shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
-            <p className="mb-2 text-sm font-semibold text-red-600">Failed to Load</p>
-            <p className="mb-4 text-xs text-red-500">Unable to load series info. Please check your connection or try again later.</p>
+            <p className="mb-2 text-sm font-semibold text-red-600">Series details could not load</p>
+            <p className="mb-4 text-xs text-red-500">
+              We could not pull the cover, episode list, or access details for this title. Retry first, or head back
+              to Top Series while this page catches up.
+            </p>
             <div className="flex gap-2 justify-center">
               <button
                 type="button"
@@ -589,10 +651,17 @@ export default function SeriesPage({ seriesId }) {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/rankings?type=popular&window=week")}
                 className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
-                Back to home
+                Browse Top Series
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/store")}
+                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                See point packs
               </button>
             </div>
           </div>
@@ -653,6 +722,7 @@ export default function SeriesPage({ seriesId }) {
           previewHint={previewHint}
           progress={progress}
           episodeCount={episodes.length}
+          latestEpisode={latestEpisode}
           onContinue={handleContinue}
           onStart={handleStart}
           onFollowToggle={handleFollowToggle}
@@ -661,6 +731,8 @@ export default function SeriesPage({ seriesId }) {
           mobilePrimaryActionRef={mobilePrimaryActionRef}
           highlightPrimaryAction={Boolean(commerceNotice)}
           creatorHref={creatorHref}
+          onOpenStore={handleOpenStore}
+          onOpenMembership={handleOpenMembership}
         />
 
         <SeriesArrivalPanel

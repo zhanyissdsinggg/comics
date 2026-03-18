@@ -17,6 +17,7 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { getCommerceJourneyGuide, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+import { buildSupportPath } from "../../lib/supportRouting";
 
 function formatOrderAmount(amount, currency) {
   const numericAmount = Number(amount || 0);
@@ -57,13 +58,12 @@ function isRecentOrder(value, maxAgeDays = 5) {
   return Date.now() - timestamp <= maxAgeDays * 24 * 60 * 60 * 1000;
 }
 
-function buildSupportHref(orderId) {
-  if (!orderId) {
-    return "/support";
-  }
-
-  const params = new URLSearchParams({ orderId });
-  return `/support?${params.toString()}`;
+function buildSupportHref(orderId, topic = "billing") {
+  return buildSupportPath({
+    topic,
+    orderId,
+    context: orderId ? `Purchase issue for ${orderId}` : "Purchase or billing question",
+  });
 }
 
 export default function OrdersPageClient({ initialSignedIn = false }) {
@@ -527,7 +527,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/support")}
+                onClick={() => router.push(buildSupportHref("", "billing"))}
                 className={secondaryButtonClass}
               >
                 Support
@@ -580,7 +580,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/support")}
+                onClick={() => router.push(buildSupportHref("", "billing"))}
                 className={secondaryButtonClass}
               >
                 Billing help
