@@ -8,32 +8,33 @@ export default function ModalBase({ open, title, children, onClose }) {
   }
 
   return (
-    // 老王注释：背景遮罩 - 半透明黑色 + 模糊效果 + 淡入动画
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4 animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,42,0.28)] px-4 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
-      {/* 老王注释：模态框主体 - 玻璃态 + 品牌色边框 + 发光阴影 + 滑入动画 */}
       <div
-        className="w-full max-w-lg rounded-3xl border border-brand-primary/30 bg-neutral-900/95 backdrop-blur-xl p-6 shadow-glow-lg animate-slide-up"
-        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_28px_80px_rgba(15,23,42,0.18)] backdrop-blur-xl animate-slide-up"
+        onClick={(event) => event.stopPropagation()}
       >
-        {/* 老王注释：标题栏 - 品牌色渐变文字 + 优雅关闭按钮 */}
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold bg-brand-gradient bg-clip-text text-transparent">
-            {title}
-          </h3>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Account access
+            </p>
+            <h3 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+              {title}
+            </h3>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="group rounded-full p-2 text-neutral-400 transition-all duration-300 hover:bg-neutral-800 hover:text-brand-primary hover:scale-110 active:scale-95"
+            className="group rounded-full border border-black/8 p-2 text-slate-500 transition-all duration-300 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 hover:scale-110 active:scale-95"
             aria-label="Close modal"
           >
             <X size={20} className="transition-transform duration-300 group-hover:rotate-90" />
           </button>
         </div>
-        {/* 老王注释：内容区域 */}
-        <div className="space-y-4 text-sm text-neutral-300">{children}</div>
+        <div className="space-y-4 text-sm text-slate-600">{children}</div>
       </div>
     </div>
   );

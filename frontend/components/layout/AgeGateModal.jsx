@@ -11,13 +11,13 @@ export default function AgeGateModal({ open, onClose, onConfirm, ageRuleKey, leg
 
   return (
     <ModalBase open={open} title={AGE_GATE_TITLE} onClose={onClose}>
-      <div className="space-y-3 text-sm text-neutral-300">
+      <div className="space-y-3 text-sm text-slate-600">
         <p>You must be at least {currentAge} years old to access mature content.</p>
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
+        <div className="rounded-2xl border border-black/8 bg-white/84 px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Region rule
           </p>
-          <p className="mt-2 text-sm text-white">
+          <p className="mt-2 text-sm font-semibold text-slate-950">
             {regionLabel} ({currentAge}+)
           </p>
         </div>
@@ -26,14 +26,14 @@ export default function AgeGateModal({ open, onClose, onConfirm, ageRuleKey, leg
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full border border-neutral-700 px-4 py-2 text-sm"
+          className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
         >
           Cancel
         </button>
         <button
           type="button"
           onClick={onConfirm}
-          className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
+          className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
           I confirm
         </button>

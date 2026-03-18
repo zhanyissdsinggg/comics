@@ -35,18 +35,18 @@ function getStatusAnswer(seriesTitle, statusLabel) {
 
 function getFreeAccessAnswer(seriesTitle, freeEpisodeCount, maxPreviewPages) {
   if (freeEpisodeCount > 0 && maxPreviewPages > 0) {
-    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} and preview access up to ${maxPreviewPages} pages on eligible chapters, so new readers can sample before committing points.`;
+    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} and previews up to ${maxPreviewPages} pages on eligible chapters, so new readers can get a real feel for it before spending.`;
   }
 
   if (freeEpisodeCount > 0) {
-    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"}, which makes it easier to test the hook before unlocking premium chapters.`;
+    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"}, which makes it easy to test the hook before you spend anything.`;
   }
 
   if (maxPreviewPages > 0) {
-    return `${seriesTitle} currently exposes preview access up to ${maxPreviewPages} pages on eligible chapters, so readers can inspect pacing and art before they spend.`;
+    return `${seriesTitle} currently offers previews up to ${maxPreviewPages} pages on eligible chapters, so readers can get a feel for the pacing and art first.`;
   }
 
-  return `${seriesTitle} does not currently offer a clear free start, but you can still review the episode list, pricing, and membership options before checkout.`;
+  return `${seriesTitle} does not currently offer a free start, but you can still check the episode list, pricing, and membership options before you buy.`;
 }
 
 export function getSiteFaqItems() {
@@ -55,30 +55,30 @@ export function getSiteFaqItems() {
       id: "unlock-episodes",
       question: "How do I unlock episodes?",
       answer:
-        "Use points to unlock an episode, or wait for a free unlock if the series offers one. Membership benefits may also reduce the cost on selected titles.",
+        "Use points to unlock an episode. Some series also offer free unlocks, and membership may lower the price on selected titles.",
     },
     {
       id: "cancel-membership",
-      question: "How do I cancel my subscription?",
+      question: "How do I cancel my membership?",
       answer:
-        "Open Account, review your subscription section, and cancel there. You can re-subscribe later without losing access to the rest of your account.",
+        "Open Account, find your membership, and cancel it there. You can come back later without losing the rest of your account.",
     },
     {
       id: "view-orders",
-      question: "Where can I see my orders?",
+      question: "Where do I see what I bought?",
       answer:
-        "Visit Orders to review recent purchases, payment status, and refund eligibility from one place.",
+        "Open Purchases to see recent packs, memberships, and any order ID you might need.",
     },
     {
       id: "adult-access",
-      question: "Why can't I see adult series?",
+      question: "Why is 18+ locked for me?",
       answer:
-        "Turn on mature content and complete the age gate flow for your current region. The catalog updates as soon as access is confirmed.",
+        "Turn on mature content and complete the age check for your current region. The catalog updates once access is confirmed.",
     },
     {
       id: "contact-support",
-      question: "How do I contact support?",
-      answer: `Use the support form or email ${siteConfig.supportEmail} when billing, account, or reading issues need human follow-up.`,
+      question: "How do I reach a real person?",
+      answer: `Use the contact page or email ${siteConfig.supportEmail} if a charge, sign-in problem, or reading bug needs a person.`,
     },
   ];
 }
@@ -126,7 +126,7 @@ export function getSeriesFaqItems({ series, episodes }) {
     {
       id: "series-support",
       question: `Where do I go if I hit a billing or access issue with ${seriesTitle}?`,
-      answer: `Open Orders to review receipts and payment state first, then use Support or email ${siteConfig.supportEmail} if the issue needs human review.`,
+      answer: `Check Purchases first for the order details, then use Contact or email ${siteConfig.supportEmail} if you still need help.`,
     },
   ];
 }

@@ -50,7 +50,7 @@ function highlight(text, query) {
   return (
     <>
       {before}
-      <mark className="rounded bg-amber-400/30 px-1 text-amber-200">{match}</mark>
+      <mark className="rounded bg-amber-200 px-1 text-slate-950">{match}</mark>
       {after}
     </>
   );
@@ -222,34 +222,34 @@ export default function SearchCreatorMatchesPanel({
   const leadCreatorMatch = matchedCreators[0] || null;
   const creatorPanelTitle =
     resultsLength === 0
-      ? "This search looks closer to a creator than a title."
+      ? "This looks more like a creator search."
       : resultsLength > 0 && resultsLength < 4
-        ? "A creator page can widen a short result list."
-        : "Open the creator behind this search before picking just one title.";
+        ? "Open the creator page before the list runs dry."
+        : "The creator behind this search should be visible early.";
   const creatorPanelHint =
     resultsLength === 0
-      ? "When a title search misses, a creator page is often the quickest way to find related works, genres, and lead series."
+      ? "If the exact title misses, the creator page is usually the quickest way back into the right shelf."
       : resultsLength > 0 && resultsLength < 4
-        ? "If only a few results match, the creator page gives you a wider set of strong options without restarting the search."
-        : "If you are searching by author or studio, the creator page should be visible before the grid becomes your only option.";
+        ? "A creator page gives you more room to branch out without restarting the search."
+        : "If you are really looking for a writer or studio, this should feel like the smarter first click.";
 
   return (
-    <SurfacePanel className="space-y-6">
+    <SurfacePanel className="space-y-6" appearance="light" accent="blue">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
             Creator matches
           </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
             {creatorPanelTitle}
           </h2>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">{creatorPanelHint}</p>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">{creatorPanelHint}</p>
         </div>
         {leadCreatorMatch ? (
           <button
             type="button"
             onClick={() => handleCreatorClick(leadCreatorMatch)}
-            className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+            className="rounded-full border border-black/8 bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
           >
             View {leadCreatorMatch.name}
           </button>
@@ -260,7 +260,7 @@ export default function SearchCreatorMatchesPanel({
         {matchedCreators.map((creator) => (
           <article
             key={creator.slug}
-            className="rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.18)]"
+            className="rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
           >
             <Cover
               tone={creator.spotlightSeries?.coverTone}
@@ -270,51 +270,56 @@ export default function SearchCreatorMatchesPanel({
             <div className="mt-4 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                     {creator.matchLabel}
                   </p>
-                  <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                  <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                     {highlight(creator.name, query)}
                   </h3>
                 </div>
-                <Pill>
+                <Pill appearance="light">
                   {creator.titleCount} title{creator.titleCount === 1 ? "" : "s"}
                 </Pill>
               </div>
 
-              <p className="text-sm leading-6 text-neutral-400">{creator.matchDescription}</p>
-
               {creator.spotlightSeries?.title ? (
-                <p className="text-sm leading-6 text-neutral-300">
-                  Lead title:{" "}
-                  <span className="font-medium text-white">
+                <p className="text-sm leading-6 text-slate-600">
+                  Start with{" "}
+                  <span className="font-medium text-slate-950">
                     {highlight(creator.spotlightSeries.title, query)}
                   </span>
+                  , then move through the rest of this shelf.
                 </p>
-              ) : null}
+              ) : (
+                <p className="text-sm leading-6 text-slate-600">
+                  Open the creator page to see the strongest related titles in one place.
+                </p>
+              )}
 
               <div className="flex flex-wrap gap-2">
-                {(creator.matchedGenres.length > 0 ? creator.matchedGenres : creator.topGenres).map((genre) => (
-                  <span
-                    key={`${creator.slug}-${genre}`}
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-neutral-300"
-                  >
-                    {highlight(genre, query)}
-                  </span>
-                ))}
+                {(creator.matchedGenres.length > 0 ? creator.matchedGenres : creator.topGenres)
+                  .slice(0, 3)
+                  .map((genre) => (
+                    <span
+                      key={`${creator.slug}-${genre}`}
+                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-xs text-slate-500"
+                    >
+                      {highlight(genre, query)}
+                    </span>
+                  ))}
               </div>
 
-              <div className="flex flex-wrap gap-3 text-xs text-neutral-400">
-                <span>{formatCompactCount(creator.readerProof)} reader signals</span>
-                <span>{creator.completedCount} completed</span>
-                {creator.relatedTitleCount > 0 ? <span>{creator.relatedTitleCount} related title matches</span> : null}
+              <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+                <span>{formatCompactCount(creator.readerProof)} readers</span>
+                {creator.relatedTitleCount > 0 ? <span>{creator.relatedTitleCount} title matches</span> : null}
+                {creator.completedCount > 0 ? <span>{creator.completedCount} completed</span> : null}
               </div>
 
               <div className="flex flex-wrap gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => handleCreatorClick(creator)}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  className="rounded-full border border-black/8 bg-white/84 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
                 >
                   View creator page
                 </button>
@@ -322,7 +327,7 @@ export default function SearchCreatorMatchesPanel({
                   <button
                     type="button"
                     onClick={() => handleSeriesClick(creator.spotlightSeries.id)}
-                    className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                    className="rounded-full border border-black/8 bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
                   >
                     Read lead title
                   </button>

@@ -2,8 +2,8 @@ import OrdersPageClient from "./OrdersPageClient";
 import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
-  title: "Orders & Receipts",
-  description: "Review purchases, receipts, reconciliations, and refund activity.",
+  title: "Purchases",
+  description: "See your recent point packs, memberships, and saved purchase history.",
   path: "/orders",
 });
 

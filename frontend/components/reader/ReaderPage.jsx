@@ -1079,8 +1079,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const handleShortfall = (response, targetEpisodeId) => {
     setModalState({
       type: "SHORTFALL",
-      title: "Not enough points",
-      description: "Add points or use member perks to keep reading.",
+      title: "Need more points",
+      description: "Add points or check membership to keep reading.",
       shortfallPts: response.shortfallPts || 0,
       targetEpisodeId,
       offerId: offerDecision?.recommendedTopupOffer?.id,
@@ -1094,7 +1094,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setModalState({
         type: "SUCCESS",
         title: "Episode unlocked",
-        description: "This episode is now in your library.",
+        description: "You're all set. Start reading.",
       });
       return;
     }
@@ -1103,7 +1103,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setModalState({
         type: "ERROR",
         title: "Sign in required",
-        description: "Sign in to unlock this episode and keep your progress synced.",
+        description: "Sign in to unlock this episode and keep your place.",
       });
       return;
     }
@@ -1139,7 +1139,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setModalState({
         type: "ERROR",
         title: "Sign in required",
-        description: "Sign in to unlock this episode and keep your progress synced.",
+        description: "Sign in to unlock this episode and keep your place.",
       });
       return;
     }
@@ -1175,14 +1175,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setModalState({
         type: "ERROR",
         title: "Sign in required",
-        description: "Sign in to claim this free unlock and keep your progress synced.",
+        description: "Sign in to claim this free read and keep your place.",
       });
       return;
     }
     setModalState({
       type: "ERROR",
-      title: "Free unlock unavailable",
-      description: response.error || "The free unlock timer is not ready yet.",
+      title: "Free read unavailable",
+      description: response.error || "That free read is not ready yet.",
     });
   };
 
@@ -1428,101 +1428,105 @@ export default function ReaderPage({ seriesId, episodeId }) {
       </div>
 
       {showPaywall ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-md rounded-3xl border border-neutral-800 bg-neutral-900/95 p-6 text-center">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[rgba(15,23,42,0.36)] px-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-[32px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 text-center shadow-[0_28px_80px_rgba(15,23,42,0.18)]">
             {commerceNotice ? (
-              <div className="mb-4 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-4 text-left">
+              <div className="mb-4 rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4 text-left">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300/85">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#2f6bff)]">
                       {commerceNotice.eyebrow}
                     </p>
-                    <p className="mt-2 text-base font-semibold text-white">{commerceNotice.title}</p>
-                    <p className="mt-2 text-xs leading-6 text-neutral-300">{commerceNotice.description}</p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">{commerceNotice.title}</p>
+                    <p className="mt-2 text-xs leading-6 text-slate-600">{commerceNotice.description}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setCommerceNotice(null)}
-                    className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-semibold text-neutral-200"
+                    className="rounded-full border border-black/8 bg-white px-3 py-1 text-[10px] font-semibold text-slate-600"
                   >
                     Dismiss
                   </button>
                 </div>
               </div>
             ) : null}
-            <h2 className="text-xl font-semibold">Unlock this episode</h2>
-            <p className="mt-2 text-sm text-neutral-400">
-              Continue reading with a one-tap unlock, points pack, or member perk.
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">Keep reading</h2>
+            <p className="mt-2 text-sm leading-7 text-slate-600">
+              {previewCount || previewParagraphs
+                ? "You're at the end of the free preview. Unlock this episode to keep going."
+                : "Unlock this episode to keep going."}
             </p>
             {previewCount ? (
-              <p className="mt-2 text-xs text-neutral-500">
-                Free preview reached: {previewCount} pages.
+              <p className="mt-2 text-xs text-slate-500">
+                Preview ended after {previewCount} page{previewCount === 1 ? "" : "s"}.
               </p>
             ) : previewParagraphs ? (
-              <p className="mt-2 text-xs text-neutral-500">
-                Free preview reached: {previewParagraphs} sections.
+              <p className="mt-2 text-xs text-slate-500">
+                Preview ended after {previewParagraphs} section{previewParagraphs === 1 ? "" : "s"}.
               </p>
             ) : null}
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-left">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                  Wallet
+              <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Your balance
                 </p>
-                <p className="mt-2 text-lg font-semibold text-white">{walletBalance} points</p>
-                <p className="mt-1 text-xs text-neutral-500">Current balance across this account.</p>
+                <p className="mt-2 text-lg font-semibold text-slate-950">{walletBalance} points</p>
+                <p className="mt-1 text-xs text-slate-500">Points ready on this account.</p>
               </div>
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-left">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                  Unlock price
+              <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  This episode
                 </p>
-                <p className="mt-2 text-lg font-semibold text-white">
+                <p className="mt-2 text-lg font-semibold text-slate-950">
                   {currentPricing.finalPrice === 0 ? "Free" : `${currentPricing.finalPrice} points`}
                 </p>
-                <p className="mt-1 text-xs text-neutral-500">
+                <p className="mt-1 text-xs text-slate-500">
                   {currentPricing.appliedDailyFree
-                    ? "Daily free unlock is ready."
+                    ? "Free now."
                     : currentPricing.discountPct
-                      ? `Subscriber ${currentPricing.discountPct}% off is active.`
-                      : "Standard wallet pricing."}
+                      ? `Member ${currentPricing.discountPct}% off is active.`
+                      : "Unlock with points."}
                 </p>
               </div>
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-left">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                  Reading mode
+              <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Your access
                 </p>
-                <p className="mt-2 text-lg font-semibold text-white">{isSubscriber ? "Member" : "Standard"}</p>
-                <p className="mt-1 text-xs text-neutral-500">
-                  {isSubscriber ? "Discounts and daily perks are available." : "Points and packs are available."}
+                <p className="mt-2 text-lg font-semibold text-slate-950">{isSubscriber ? "Member" : "Points"}</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {isSubscriber
+                    ? "Members get free reads and lower prices."
+                    : "Use points now or pick a pack."}
                 </p>
               </div>
             </div>
             {currentPricing.appliedDailyFree ? (
-              <p className="mt-3 text-xs text-emerald-300">Daily free unlock available</p>
+              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">Free now</p>
             ) : currentPricing.discountPct ? (
-              <p className="mt-3 text-xs text-emerald-300">
-                Subscriber {currentPricing.discountPct}% off
+              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                Member {currentPricing.discountPct}% off
               </p>
             ) : null}
             {upcomingEpisodes.length > 0 ? (
-              <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-4 text-left">
-                <p className="text-sm font-semibold text-neutral-100">What opens up next</p>
+              <div className="mt-4 rounded-[24px] border border-black/8 bg-white/84 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                <p className="text-sm font-semibold text-slate-950">Up next</p>
                 <div className="mt-3 space-y-2">
                   {upcomingEpisodes.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-neutral-800 bg-black/20 px-3 py-3 text-sm"
+                      className="flex items-center justify-between gap-3 rounded-[20px] border border-black/8 bg-[#f8f9fc] px-3 py-3 text-sm"
                     >
                       <div>
-                        <p className="font-medium text-white">{item.title}</p>
-                        <p className="mt-1 text-xs text-neutral-500">
+                        <p className="font-medium text-slate-950">{item.title}</p>
+                        <p className="mt-1 text-xs text-slate-500">
                           {item.unlocked
                             ? "Already unlocked"
                             : item.ttfEligible
-                              ? "Timed free unlock supported"
-                              : "Premium chapter"}
+                              ? "Free later"
+                              : "Locked chapter"}
                         </p>
                       </div>
-                      <span className="text-xs font-semibold text-neutral-300">
+                      <span className="text-xs font-semibold text-slate-600">
                         {item.unlocked ? "Ready" : item.pricePts ? `${item.pricePts} pts` : "Locked"}
                       </span>
                     </div>
@@ -1536,22 +1540,21 @@ export default function ReaderPage({ seriesId, episodeId }) {
               onClick={handleUnlockCurrent}
               className={`mt-6 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold text-neutral-900 transition-all active:scale-95 ${
                 commerceNotice
-                  ? "bg-emerald-200 shadow-[0_0_0_1px_rgba(110,231,183,0.35),0_24px_60px_rgba(16,185,129,0.24)] motion-safe:animate-pulse hover:bg-emerald-100 active:bg-emerald-200"
-                  : "bg-white hover:bg-emerald-50 active:bg-emerald-100"
+                  ? "bg-[rgba(47,107,255,0.12)] text-slate-950 shadow-[0_0_0_1px_rgba(47,107,255,0.18),0_24px_60px_rgba(47,107,255,0.18)] motion-safe:animate-pulse hover:bg-[rgba(47,107,255,0.16)] active:bg-[rgba(47,107,255,0.12)]"
+                  : "bg-slate-950 text-white hover:bg-slate-800 active:bg-slate-900"
               }`}
               style={{ willChange: "transform" }}
             >
               {currentPricing.finalPrice === 0
-                ? "Unlock free"
-                : `Unlock (${currentPricing.finalPrice} points)`}
+                ? "Continue free"
+                : `Unlock for ${currentPricing.finalPrice} points`}
             </button>
-            <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-950/40 px-4 py-3 text-left text-[11px] text-neutral-300">
-              <div className="font-semibold text-neutral-100">Why unlock?</div>
-              <div className="mt-2 space-y-1 text-neutral-400">
-                <div>- Unlocking keeps this episode in your library.</div>
-                <div>- Episode packs lower your cost per chapter.</div>
-                <div>- Membership adds daily free unlocks and shorter wait timers.</div>
-                <div>- Orders and Support stay available if billing follow-up is needed.</div>
+            <div className="mt-4 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-left text-[11px] text-slate-600">
+              <div className="font-semibold text-slate-950">Worth knowing</div>
+              <div className="mt-2 space-y-1">
+                <div>- Unlocked episodes stay in your library.</div>
+                <div>- Packs usually cost less per chapter.</div>
+                <div>- Membership adds free reads and lower prices.</div>
               </div>
             </div>
             <button
@@ -1565,8 +1568,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   )
                 );
               }}
-              className="mt-3 w-full rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-100"
-            >
+               className="mt-3 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+             >
               {STOREFRONT_TERMS.compareMembership}
             </button>
             <button
@@ -1581,17 +1584,17 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   )
                 );
               }}
-              className="mt-2 w-full rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300"
-            >
+               className="mt-2 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+             >
               {STOREFRONT_TERMS.viewPointPacks}
             </button>
             <button
               type="button"
               onClick={() => router.push(buildSeriesHref())}
-              className="mt-2 w-full rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-300"
-            >
-              Back to series details
-            </button>
+               className="mt-2 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+             >
+               Back to series
+             </button>
           </div>
         </div>
       ) : null}
@@ -1717,7 +1720,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   },
                   {
                     label: "Membership",
-                    value: isSubscriber ? "Already active" : "Daily free + lower unlock cost",
+                    value: isSubscriber ? "Already active" : "Free unlocks + lower prices",
                   },
                 ]
               : []
@@ -1726,14 +1729,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
           tips={
             modalState?.type === "SHORTFALL"
               ? [
-                  "Unlocking keeps this episode in your library.",
-                  "Episode packs lower your cost per chapter.",
-                  "Membership adds daily free unlocks and shorter wait timers.",
-                  "Member perks can reduce unlock costs on supported titles.",
+                  "Unlocked episodes stay in your library.",
+                  "Packs usually cost less per chapter.",
+                  "Membership adds more free reads and shorter waits.",
+                  "Member pricing can lower unlock costs on eligible titles.",
                 ]
               : []
           }
-          tipsTitle="What changes after each choice"
+          tipsTitle="What each option gets you"
           actions={
             modalState?.type === "SHORTFALL"
               ? [
@@ -1777,8 +1780,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   },
                   {
                     label: offerDecision?.recommendedTopupOffer?.name
-                      ? `Top up ${offerDecision.recommendedTopupOffer.name}`
-                      : "Top up recommended pack",
+                      ? `Get ${offerDecision.recommendedTopupOffer.name}`
+                      : "Get recommended pack",
                     onClick: async () => {
                       const packageId =
                         offerDecision?.recommendedTopupOffer?.id?.replace(
@@ -1813,7 +1816,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                         setModalState({
                           type: "SUCCESS",
                           title: "Episode unlocked",
-                          description: "This episode is now in your library.",
+                          description: "You're all set. Start reading.",
                         });
                         return;
                       }
@@ -1825,8 +1828,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       });
                       setModalState({
                         type: "ERROR",
-                        title: "Couldn't top up",
-                        description: "We couldn't complete the top-up and unlock flow.",
+                        title: "Couldn't add points",
+                        description: "We couldn't finish that purchase just now.",
                       });
                     },
                     variant: "primary",

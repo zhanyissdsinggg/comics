@@ -12,8 +12,8 @@ test.describe("Header search", () => {
     const searchInput = page.getByPlaceholder("Search titles, genres, or creators");
     await searchInput.focus();
 
-    await expect(page.getByText("Quick paths")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Popular this week/i })).toBeVisible();
+    await expect(page.getByText(/^Start with$/)).toBeVisible();
+    await expect(page.getByRole("button", { name: /Trending/i })).toBeVisible();
 
     await page.evaluate(() => {
       document.dispatchEvent(
@@ -26,6 +26,6 @@ test.describe("Header search", () => {
       );
     });
 
-    await expect(page.getByText("Quick paths")).toHaveCount(0);
+    await expect(page.getByText(/^Start with$/)).toHaveCount(0);
   });
 });

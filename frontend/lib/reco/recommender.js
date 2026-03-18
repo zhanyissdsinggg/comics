@@ -50,7 +50,7 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
         return null;
       }
       const lastEpisodeId = progress?.lastEpisodeId || "";
-      return mapSeriesCard(series, `Continue ${lastEpisodeId}`, "Continue", {
+      return mapSeriesCard(series, lastEpisodeId ? `Episode ${lastEpisodeId}` : "Continue reading", "Continue", {
         progressPercent: progress?.percent || 0,
         resumeEpisodeId: lastEpisodeId || null,
       });
@@ -69,29 +69,29 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
         }))
         .sort((a, b) => b.score - a.score)
         .slice(0, 10)
-        .map(({ item }) => mapSeriesCard(item, item.genres?.[0], "For you"))
+        .map(({ item }) => mapSeriesCard(item, item.genres?.[0] || "Similar vibe", "For you"))
     : [];
 
   const trendingRail = [...safeCatalog]
     .sort((a, b) => (b.rating || 0) - (a.rating || 0))
     .slice(0, 10)
-    .map((series) => mapSeriesCard(series, "Trending"));
+    .map((series) => mapSeriesCard(series, "Readers are opening this"));
 
   const newRail = [...safeCatalog]
     .sort((a, b) => parseLatestNumber(b.latest) - parseLatestNumber(a.latest))
     .slice(0, 10)
-    .map((series) => mapSeriesCard(series, "New"));
+    .map((series) => mapSeriesCard(series, "Just landed"));
 
   const completedRail = safeCatalog
     .filter((series) => series.status === "Completed")
-    .map((series) => mapSeriesCard(series, "Completed"));
+    .map((series) => mapSeriesCard(series, "Finished run"));
 
   const ttfRail = safeCatalog
     .filter((series) => series.ttf?.enabled)
-    .map((series) => mapSeriesCard(series, "TTF", "TTF"));
+    .map((series) => mapSeriesCard(series, "Free start", "FREE"));
 
   const adultRail = isAdultMode
-    ? safeCatalog.map((series) => mapSeriesCard(series, "Adult", "18+"))
+    ? safeCatalog.map((series) => mapSeriesCard(series, "18+ read", "18+"))
     : [];
 
   return {

@@ -214,31 +214,37 @@ export default function SeriesPage({ type = "comic" }) {
     ],
     [activeFilterCount, filteredAndSortedSeries.length, isAdultMode, loading, series.length, type],
   );
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
 
   return (
-    <main className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
+    <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
 
-      <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow={type === "comic" ? "Comics" : "Novels"}
           title={`Browse ${config.title.toLowerCase()} in one place.`}
           description={config.description}
           secondary={config.secondary}
           stats={heroStats}
+          appearance="light"
           actions={
             <>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className={primaryButtonClass}
               >
                 Search all series
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/rankings")}
-                className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                className={secondaryButtonClass}
               >
                 See charts
               </button>
@@ -246,17 +252,17 @@ export default function SeriesPage({ type = "comic" }) {
           }
         />
 
-        <SurfacePanel className="space-y-5">
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Filters
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 Narrow the list without losing the storefront feel.
               </h2>
             </div>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-slate-500">
               {loading
                 ? "Loading titles..."
                 : `${filteredAndSortedSeries.length} title${filteredAndSortedSeries.length === 1 ? "" : "s"} visible`}
@@ -274,21 +280,23 @@ export default function SeriesPage({ type = "comic" }) {
             totalCount={filteredAndSortedSeries.length}
             loading={loading}
             onReset={handleResetFilters}
+            appearance="light"
           />
         </SurfacePanel>
 
         {loading ? (
           <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 15 }).map((_, index) => (
-              <SkeletonCard key={index} />
+              <SkeletonCard key={index} appearance="light" />
             ))}
           </div>
         ) : filteredAndSortedSeries.length === 0 ? (
-          <SurfacePanel>
+          <SurfacePanel appearance="light" accent="blue">
             <EmptyState
               icon={config.emptyIcon}
               title={config.emptyTitle}
               description={config.emptyDescription}
+              appearance="light"
               action={{
                 label: "Reset filters",
                 onClick: handleResetFilters,
@@ -299,14 +307,14 @@ export default function SeriesPage({ type = "comic" }) {
           <div className="space-y-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Full catalog grid
                 </p>
-                <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-white">
+                <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {filteredAndSortedSeries.length.toLocaleString()} titles in view.
                 </h2>
               </div>
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-slate-500">
                 Sorted by {sortBy === "latest" ? "Latest" : "Popular"}
               </p>
             </div>
@@ -317,6 +325,7 @@ export default function SeriesPage({ type = "comic" }) {
                   key={item.id}
                   item={item}
                   tone={item.coverTone}
+                  appearance="light"
                   onClick={() => handleSeriesClick(item.id)}
                 />
               ))}

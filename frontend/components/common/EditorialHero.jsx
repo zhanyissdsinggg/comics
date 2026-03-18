@@ -11,36 +11,69 @@ export default function EditorialHero({
   actions = null,
   stats = [],
   className = "",
+  appearance = "default",
+  accent = "blue",
 }) {
   const hasStats = Array.isArray(stats) && stats.length > 0;
+  const isLight = appearance === "light";
 
   return (
     <SurfacePanel
       className={cn("relative overflow-hidden p-0", className)}
       tone="highlight"
-      accent="cyan"
+      accent={accent}
+      appearance={appearance}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.22),transparent_34%),radial-gradient(circle_at_84%_14%,rgba(34,211,238,0.16),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_38%,rgba(255,255,255,0.02))]" />
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0",
+          isLight
+            ? "bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.12),transparent_30%),radial-gradient(circle_at_84%_14%,rgba(255,255,255,0.76),transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.42),transparent_40%,rgba(255,255,255,0.14))]"
+            : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.22),transparent_34%),radial-gradient(circle_at_84%_14%,rgba(34,211,238,0.16),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_38%,rgba(255,255,255,0.02))]",
+        )}
+      />
       <div className="relative grid gap-5 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-center">
         <div className="max-w-3xl">
           {eyebrow ? (
-            <div className="inline-flex items-center rounded-full border border-white/12 bg-black/20 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-200">
+            <div
+              className={cn(
+                "inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.3em]",
+                isLight
+                  ? "border border-black/6 bg-white/80 text-slate-500"
+                  : "border border-white/12 bg-black/20 text-emerald-200",
+              )}
+            >
               {eyebrow}
             </div>
           ) : null}
 
-          <h1 className="mt-4 max-w-4xl font-display text-3xl font-semibold leading-[0.96] tracking-tight text-white sm:text-4xl xl:text-[3.1rem]">
+          <h1
+            className={cn(
+              "mt-4 max-w-4xl font-display text-3xl font-semibold leading-[0.96] tracking-tight sm:text-4xl xl:text-[3.1rem]",
+              isLight ? "text-slate-950" : "text-white",
+            )}
+          >
             {title}
           </h1>
 
           {description ? (
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-200 sm:text-base">
+            <p
+              className={cn(
+                "mt-3 max-w-2xl text-sm leading-6 sm:text-base",
+                isLight ? "text-slate-600" : "text-neutral-200",
+              )}
+            >
               {description}
             </p>
           ) : null}
 
           {secondary ? (
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-400">
+            <p
+              className={cn(
+                "mt-3 max-w-2xl text-sm leading-6",
+                isLight ? "text-slate-500" : "text-neutral-400",
+              )}
+            >
               {secondary}
             </p>
           ) : null}
@@ -60,15 +93,29 @@ export default function EditorialHero({
                 title={stat.hint || ""}
                 className={cn(
                   "rounded-[20px] border px-4 py-3 shadow-[0_18px_60px_rgba(0,0,0,0.18)] backdrop-blur-lg",
-                  index === 0
-                    ? "border-emerald-400/20 bg-emerald-400/[0.08]"
-                    : "border-white/10 bg-black/20",
+                  isLight
+                    ? index === 0
+                      ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.08)] shadow-[0_14px_30px_rgba(15,23,42,0.05)]"
+                      : "border-black/6 bg-white/80 shadow-[0_14px_30px_rgba(15,23,42,0.05)]"
+                    : index === 0
+                      ? "border-emerald-400/20 bg-emerald-400/[0.08]"
+                      : "border-white/10 bg-black/20",
                 )}
               >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+                <p
+                  className={cn(
+                    "text-[11px] font-semibold uppercase tracking-[0.28em]",
+                    isLight ? "text-slate-500" : "text-neutral-400",
+                  )}
+                >
                   {stat.label}
                 </p>
-                <p className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-[1.9rem]">
+                <p
+                  className={cn(
+                    "mt-2 font-display text-2xl font-semibold tracking-tight sm:text-[1.9rem]",
+                    isLight ? "text-slate-950" : "text-white",
+                  )}
+                >
                   {stat.value}
                 </p>
               </div>

@@ -22,7 +22,11 @@ function getSeriesId(item) {
   return typeof item?.id === "string" ? item.id.split("-")[0] : "";
 }
 
-export default function HomeRailsContainer({ activeGenre = "all", onResetGenre = null }) {
+export default function HomeRailsContainer({
+  activeGenre = "all",
+  onResetGenre = null,
+  appearance = "default",
+}) {
   const router = useRouter();
   const { activeRails } = useHomeRecommendations();
   const { seriesList } = useHomeData();
@@ -88,7 +92,7 @@ export default function HomeRailsContainer({ activeGenre = "all", onResetGenre =
     const orderedRails = preferredOrder.map((id) => railMap.get(id)).filter(Boolean);
     const extraRails = filteredRails.filter((rail) => !preferredOrder.includes(rail.id));
 
-    return [...orderedRails, ...extraRails].slice(0, 3);
+    return [...orderedRails, ...extraRails].slice(0, 2);
   }, [filteredRails, isSignedIn]);
 
   useEffect(() => {
@@ -141,6 +145,7 @@ export default function HomeRailsContainer({ activeGenre = "all", onResetGenre =
   if (visibleRails.length === 0) {
     return (
       <EmptyState
+        appearance={appearance === "light" ? "light" : "default"}
         icon={activeGenre === "all" ? "inbox" : "search"}
         title={activeGenre === "all" ? "No content available" : `No ${activeGenre} series found`}
         description={
@@ -167,16 +172,18 @@ export default function HomeRailsContainer({ activeGenre = "all", onResetGenre =
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {visibleRails.map((rail) => (
         <Rail
           key={rail.id}
+          eyebrow={rail.eyebrow}
           title={rail.title}
           railName={rail.id}
           items={rail.items}
           reason={rail.reason}
           href={rail.href}
           ctaLabel={rail.ctaLabel}
+          appearance={appearance}
           onItemClick={(item) => handleItemClick(rail, item)}
         />
       ))}

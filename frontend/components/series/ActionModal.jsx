@@ -1,5 +1,13 @@
 "use client";
 
+function getActionClass(variant) {
+  if (variant === "secondary") {
+    return "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]";
+  }
+
+  return "border-transparent bg-slate-950 text-white hover:bg-slate-800";
+}
+
 export default function ActionModal({
   open,
   type,
@@ -10,9 +18,9 @@ export default function ActionModal({
   offerBadge,
   offerSavingsText,
   compareItems,
-  compareTitle = "Compare options",
+  compareTitle = "Your options",
   tips,
-  tipsTitle = "Why this helps",
+  tipsTitle = "Worth knowing",
   actions,
   onClose,
 }) {
@@ -25,70 +33,109 @@ export default function ActionModal({
       ? actions
       : [
           {
-            label: "Got it",
+            label: "Close",
             onClick: onClose,
             variant: "primary",
           },
         ];
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal-card" role="dialog" aria-modal="true">
-        <h3>{title}</h3>
-        <p>{description}</p>
+    <div
+      className="fixed inset-0 z-[120] flex items-end justify-center bg-[rgba(15,23,42,0.28)] p-4 backdrop-blur-sm sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="w-full max-w-[34rem] rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_28px_80px_rgba(15,23,42,0.18)]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              {type === "SHORTFALL"
+                ? "Keep reading"
+                : type === "SUCCESS"
+                  ? "Ready"
+                  : "Quick note"}
+            </p>
+            <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              {title}
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+          >
+            Close
+          </button>
+        </div>
+
+        <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
+
         {type === "SHORTFALL" ? (
-          <p>You need {shortfallPts} more points.</p>
+          <div className="mt-4 rounded-[22px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-3 text-sm text-slate-700">
+            Need <span className="font-semibold text-slate-950">{shortfallPts}</span> more points to unlock this episode.
+          </div>
         ) : null}
+
         {offer ? (
-          <div className="mt-3 rounded-xl border border-neutral-800 bg-neutral-900/60 p-3 text-xs text-neutral-300">
+          <div className="mt-4 rounded-[24px] border border-black/6 bg-white/84 p-4 text-sm text-slate-600 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
             <div className="flex items-center justify-between gap-2">
-              <span>{offer.title || offer.name}</span>
+              <span className="font-semibold text-slate-950">{offer.title || offer.name}</span>
               {offerBadge ? (
-                <span className="rounded-full border border-neutral-700 px-2 py-0.5 text-[10px]">
+                <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                   {offerBadge}
                 </span>
               ) : null}
             </div>
             {offer.pricePts ? (
-              <p className="mt-2 text-[11px] text-neutral-400">
-                Price: {offer.pricePts} points
-              </p>
+              <p className="mt-2 text-xs text-slate-500">{offer.pricePts} points</p>
             ) : null}
             {offerSavingsText ? (
-              <p className="mt-2 text-[10px] text-emerald-300">{offerSavingsText}</p>
+              <p className="mt-2 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                {offerSavingsText}
+              </p>
             ) : null}
           </div>
         ) : null}
+
         {Array.isArray(compareItems) && compareItems.length > 0 ? (
-          <div className="mt-3 rounded-xl border border-neutral-800 bg-neutral-900/40 p-3 text-[11px] text-neutral-300">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+          <div className="mt-4 rounded-[24px] border border-black/6 bg-white/84 p-4 text-sm text-slate-600 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               {compareTitle}
             </p>
             {compareItems.map((item) => (
-              <div key={item.label} className="flex items-center justify-between">
+              <div key={item.label} className="flex items-center justify-between gap-3 py-1">
                 <span>{item.label}</span>
-                <span className="text-neutral-400">{item.value}</span>
+                <span className="text-right text-slate-500">{item.value}</span>
               </div>
             ))}
           </div>
         ) : null}
+
         {Array.isArray(tips) && tips.length > 0 ? (
-          <div className="mt-3 space-y-1 text-[11px] text-neutral-400">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
+          <div className="mt-4 rounded-[24px] border border-black/6 bg-[#f8f9fc] px-4 py-4 text-sm text-slate-600">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               {tipsTitle}
             </p>
             {tips.map((tip) => (
-              <div key={tip}>- {tip}</div>
+              <div key={tip} className="flex gap-2">
+                <span className="text-[var(--gush-accent,#2f6bff)]">-</span>
+                <span>{tip}</span>
+              </div>
             ))}
           </div>
         ) : null}
-        <div className="modal-actions">
+
+        <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           {resolvedActions.map((action) => (
             <button
               key={action.label}
               type="button"
               onClick={action.onClick}
-              data-variant={action.variant}
+              className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition ${getActionClass(action.variant)}`}
             >
               {action.label}
             </button>

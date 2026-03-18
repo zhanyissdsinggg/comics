@@ -10,6 +10,7 @@ import CommerceSuccessBanner from "../../components/common/CommerceSuccessBanner
 import { LANGUAGE_OPTIONS, REGION_KEYS, getRegionConfig } from "../../lib/region/config";
 import { setCookie } from "../../lib/cookies";
 import { applyPreferencesToStorage } from "../../lib/preferencesClient";
+import { formatUSCurrency } from "../../lib/localization";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { apiGet, apiPost } from "../../lib/apiClient";
@@ -34,6 +35,32 @@ function readStorage(key, fallback) {
     return fallback;
   }
   return window.localStorage.getItem(key) || fallback;
+}
+
+function formatOrderAmount(amount, currency) {
+  const numericAmount = Number(amount || 0);
+  const normalizedCurrency = String(currency || "USD").toUpperCase();
+  if (normalizedCurrency === "USD") {
+    return formatUSCurrency(numericAmount);
+  }
+  return `${normalizedCurrency} ${numericAmount.toFixed(2)}`;
+}
+
+function formatOrderDate(value) {
+  if (!value) {
+    return "Date unavailable";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Date unavailable";
+  }
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export default function AccountPage() {
@@ -178,7 +205,7 @@ export default function AccountPage() {
       window.dispatchEvent(
         new CustomEvent("mn-region-change", {
           detail: { region: nextRegion },
-        })
+        }),
       );
     }
     setCookie(REGION_KEY, nextRegion);
@@ -207,13 +234,13 @@ export default function AccountPage() {
       apiPost("/api/preferences", { preferences: payload }).then((response) => {
         if (response.ok) {
           applyPreferencesToStorage(payload);
-          setMessage("Preferences saved.");
+          setMessage("Changes saved.");
         } else {
           setMessage(response.error || "Save failed.");
         }
       });
     } else {
-      setMessage("Preferences saved.");
+      setMessage("Saved to this device.");
     }
   };
 
@@ -227,9 +254,9 @@ export default function AccountPage() {
 
     const response = await apiPost("/api/auth/request-reset", { email });
     if (response.ok) {
-      setSecurityStatus("Password reset email sent.");
+      setSecurityStatus("Reset email sent.");
     } else {
-      setSecurityStatus(response.error || "Failed to send password reset email.");
+      setSecurityStatus(response.error || "Couldn't send the reset email.");
     }
   };
 
@@ -244,36 +271,36 @@ export default function AccountPage() {
   const accountHeroStats = useMemo(
     () => [
       {
-        label: "Account status",
-        value: !hydrated ? "Checking..." : isSignedIn ? "Active" : "Guest mode",
+        label: "Status",
+        value: !hydrated ? "Checking..." : isSignedIn ? "Signed in" : "Guest",
         hint: !hydrated
           ? "Session status is still loading."
           : isSignedIn
             ? user?.emailVerified
-              ? "Signed in and ready for billing changes."
-              : "Verification is still pending."
-            : "Sign in to sync history, billing, and alerts.",
+              ? "Ready to sync reading, purchases, and alerts."
+              : "Confirm your email to keep recovery simple."
+            : "Sign in to sync your shelf, purchases, and alerts.",
       },
       {
         label: "Membership",
         value: subscription?.active ? "Member" : "Free",
         hint: subscription?.renewAt
           ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
-          : "Upgrade to unlock membership perks.",
+          : "Upgrade any time for extra perks.",
       },
       {
         label: "Region",
         value: regionConfig.label,
-        hint: `${language.toUpperCase()} reading experience | ${regionConfig.legalAge}+ age gate`,
+        hint: `${language.toUpperCase()} | ${regionConfig.legalAge}+ age check`,
       },
       {
-        label: "Receipts",
+        label: "Purchases",
         value: hydrated && isSignedIn ? orders.length.toLocaleString() : "0",
         hint: ordersLoading
-          ? "Loading recent receipts."
+          ? "Loading recent purchases."
           : isSignedIn
-            ? "Review recent payments and refunds here."
-            : "Sign in to access purchase history.",
+            ? "Latest packs and memberships at a glance."
+            : "Sign in to see your purchases.",
       },
     ],
     [
@@ -290,22 +317,33 @@ export default function AccountPage() {
     ],
   );
 
-  const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500";
+  const sectionEyebrowClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
+  const sectionTitleClass = "font-display text-2xl font-semibold tracking-tight text-slate-950";
+  const mutedCopyClass = "text-sm leading-6 text-slate-600";
+  const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const fieldClass =
-    "mt-2 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-neutral-100 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20";
+    "mt-2 w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.35)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
   const secondaryButtonClass =
-    "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
   const checkboxClass =
-    "h-4 w-4 rounded border-neutral-700 bg-neutral-950 text-emerald-400 focus:ring-emerald-400/30";
+    "h-4 w-4 rounded border-black/12 bg-white text-[var(--gush-accent,#2f6bff)] focus:ring-[rgba(47,107,255,0.22)]";
+  const checkboxCardClass =
+    "flex items-center gap-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-700";
+
   return (
-    <main className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
-      <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Account"
-          title="Keep billing, sign-in, and reading settings in one place."
-          description="Update your display name, review receipts, and control the settings that shape reading and billing."
-          secondary="The goal here is simple: fewer dead ends, faster account fixes, and one clear home for plan changes."
+          appearance="light"
+          accent="blue"
+          eyebrow="Reader account"
+          title="Your account, without the clutter."
+          description="Keep your name, purchases, membership, and reading setup together."
+          secondary="Use this page for the few account things that matter, then get back to reading."
           stats={accountHeroStats}
           actions={
             <>
@@ -317,19 +355,19 @@ export default function AccountPage() {
                       entryPoint: "ACCOUNT_SUBSCRIPTION",
                       sourcePath: "/account",
                       returnTo: "/account",
-                    })
+                    }),
                   )
                 }
-                className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className={primaryButtonClass}
               >
-                Manage membership
+                See membership
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/orders")}
                 className={secondaryButtonClass}
               >
-                Order history
+                View purchases
               </button>
             </>
           }
@@ -343,8 +381,12 @@ export default function AccountPage() {
         ) : null}
 
         {message ? (
-          <SurfacePanel className="border border-white/10 bg-emerald-500/10">
-            <p className="text-sm text-neutral-100">{message}</p>
+          <SurfacePanel
+            appearance="light"
+            accent="blue"
+            className="border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)]"
+          >
+            <p className="text-sm text-slate-700">{message}</p>
           </SurfacePanel>
         ) : null}
 
@@ -352,16 +394,12 @@ export default function AccountPage() {
 
         <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
-            <SurfacePanel className="space-y-5">
+            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Profile
-                </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Profile, verification, and help
-                </h2>
-                <p className="text-sm leading-6 text-neutral-400">
-                  Keep your display name, verification status, and support shortcuts easy to reach.
+                <p className={sectionEyebrowClass}>Account basics</p>
+                <h2 className={sectionTitleClass}>Name, email, and quick help</h2>
+                <p className={mutedCopyClass}>
+                  Keep the basics easy to scan when you need them.
                 </p>
               </div>
 
@@ -377,7 +415,7 @@ export default function AccountPage() {
                 </div>
                 <div>
                   <label className={fieldLabelClass}>Account</label>
-                  <div className={`${fieldClass} text-neutral-300`}>
+                  <div className={`${fieldClass} text-slate-600`}>
                     {!hydrated
                       ? "Checking session..."
                       : isSignedIn
@@ -388,11 +426,11 @@ export default function AccountPage() {
               </div>
 
               {hydrated && isSignedIn ? (
-                <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-xs text-neutral-300">
+                <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-4 text-sm text-slate-700">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      Verification status:{" "}
-                      <span className="text-white">
+                      Email status:{" "}
+                      <span className="font-semibold text-slate-950">
                         {user?.emailVerified ? "Verified" : "Not verified"}
                       </span>
                     </div>
@@ -408,15 +446,15 @@ export default function AccountPage() {
                             } else {
                               setVerifyStatus(response.error || "Request failed.");
                             }
-                          }
+                          },
                         );
                       }}
                       className={secondaryButtonClass}
                     >
-                      Send verification email
+                      Send another email
                     </button>
                   </div>
-                  {verifyStatus ? <div className="mt-2 text-[11px]">{verifyStatus}</div> : null}
+                  {verifyStatus ? <div className="mt-2 text-xs text-slate-600">{verifyStatus}</div> : null}
                 </div>
               ) : null}
 
@@ -426,42 +464,38 @@ export default function AccountPage() {
                   onClick={() => router.push("/orders")}
                   className={secondaryButtonClass}
                 >
-                  Order history
+                  View purchases
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/notifications")}
                   className={secondaryButtonClass}
                 >
-                  Notification center
+                  Notifications
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/faq")}
                   className={secondaryButtonClass}
                 >
-                  Help center
+                  FAQ
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/support")}
                   className={secondaryButtonClass}
                 >
-                  Contact Support
+                  Get help
                 </button>
               </div>
             </SurfacePanel>
 
-            <SurfacePanel className="space-y-5">
+            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Preferences
-                </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Reading preferences
-                </h2>
-                <p className="text-sm leading-6 text-neutral-400">
-                  Keep region, language, and mature-history controls together so the reading experience stays predictable.
+                <p className={sectionEyebrowClass}>Reading setup</p>
+                <h2 className={sectionTitleClass}>Region, language, and 18+ history</h2>
+                <p className={mutedCopyClass}>
+                  Keep these reading defaults consistent across devices.
                 </p>
               </div>
 
@@ -479,7 +513,7 @@ export default function AccountPage() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-2 text-xs text-neutral-500">Legal age: {regionConfig.legalAge}+</p>
+                  <p className="mt-2 text-xs text-slate-500">Legal age: {regionConfig.legalAge}+</p>
                 </div>
 
                 <div>
@@ -498,37 +532,36 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              <label className="flex items-center gap-3 rounded-[24px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-neutral-200">
+              <label className={checkboxCardClass}>
                 <input
                   type="checkbox"
                   checked={hideAdultHistory}
                   onChange={(event) => setHideAdultHistory(event.target.checked)}
                   className={checkboxClass}
                 />
-                Hide adult history
+                Hide 18+ history
               </label>
             </SurfacePanel>
 
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Alerts
+                <p className={sectionEyebrowClass}>Notifications</p>
+                <h2 className={sectionTitleClass}>Only keep the alerts that matter</h2>
+                <p className={mutedCopyClass}>
+                  New chapters, free unlocks, and promos should help you come back, not fill space.
                 </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Alerts and reminders
-                </h2>
               </div>
 
-              <label className="flex items-center gap-3 rounded-[24px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-neutral-200">
+              <label className={checkboxCardClass}>
                 <input
                   type="checkbox"
                   checked={notifyNew}
                   onChange={(event) => setNotifyNew(event.target.checked)}
                   className={checkboxClass}
                 />
-                New episode alerts
+                New chapter alerts
               </label>
-              <label className="flex items-center gap-3 rounded-[24px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-neutral-200">
+              <label className={checkboxCardClass}>
                 <input
                   type="checkbox"
                   checked={notifyTtf}
@@ -537,35 +570,31 @@ export default function AccountPage() {
                 />
                 Free unlock reminders
               </label>
-              <label className="flex items-center gap-3 rounded-[24px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-neutral-200">
+              <label className={checkboxCardClass}>
                 <input
                   type="checkbox"
                   checked={notifyPromo}
                   onChange={(event) => setNotifyPromo(event.target.checked)}
                   className={checkboxClass}
                 />
-                Promotions and offers
+                Offers and promos
               </label>
             </SurfacePanel>
           </div>
 
           <div className="space-y-6">
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Billing
-                </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Membership and billing
-                </h2>
+                <p className={sectionEyebrowClass}>Membership</p>
+                <h2 className={sectionTitleClass}>Plan and renewal</h2>
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-neutral-400">
+              <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-600">
                 <div>
-                  <div className={fieldLabelClass}>Plan</div>
-                  <div className="mt-1 text-sm text-neutral-200">{subscriptionLabel}</div>
+                  <div className={fieldLabelClass}>Current plan</div>
+                  <div className="mt-1 text-sm font-semibold text-slate-950">{subscriptionLabel}</div>
                   {subscription?.renewAt ? (
-                    <div className="mt-1 text-xs text-neutral-500">
-                      Renews at {new Date(subscription.renewAt).toLocaleDateString()}
+                    <div className="mt-1 text-xs text-slate-500">
+                      Renews on {new Date(subscription.renewAt).toLocaleDateString()}
                     </div>
                   ) : null}
                 </div>
@@ -578,12 +607,12 @@ export default function AccountPage() {
                           entryPoint: "ACCOUNT_SUBSCRIPTION",
                           sourcePath: "/account",
                           returnTo: "/account",
-                        })
+                        }),
                       )
                     }
                     className={secondaryButtonClass}
                   >
-                    Manage
+                    See plans
                   </button>
                   <button
                     type="button"
@@ -592,44 +621,40 @@ export default function AccountPage() {
                       setWorking("cancel");
                       const response = await cancelSubscription();
                       if (response.ok) {
-                        setMessage("Subscription canceled.");
+                        setMessage("Membership ended.");
                       } else {
-                        setMessage(response.error || "Cancel failed.");
+                        setMessage(response.error || "Couldn't end the membership.");
                       }
                       setWorking("");
                     }}
                     className={secondaryButtonClass}
                   >
-                    Cancel
+                    End membership
                   </button>
                 </div>
               </div>
             </SurfacePanel>
 
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Security
-                </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Sign-in methods and recovery
-                </h2>
-                <p className="text-sm leading-6 text-neutral-400">
-                  Audit which sign-in methods are connected and trigger password recovery without hunting through separate dialogs.
+                <p className={sectionEyebrowClass}>Sign-in</p>
+                <h2 className={sectionTitleClass}>How you sign in</h2>
+                <p className={mutedCopyClass}>
+                  See which sign-in methods are connected and send a reset email without extra digging.
                 </p>
               </div>
 
               {hydrated && isSignedIn ? (
-                <div className="space-y-3 rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-xs text-neutral-300">
+                <div className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm text-slate-700">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span>Password login</span>
-                    <span className={providers.password ? "text-emerald-400" : "text-amber-300"}>
-                      {providers.password ? "Enabled" : "Not set"}
+                    <span>Email/password</span>
+                    <span className={providers.password ? "text-[var(--gush-accent,#2f6bff)]" : "text-amber-600"}>
+                      {providers.password ? "Ready" : "Not set"}
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span>Google login</span>
-                    <span className={providers.google ? "text-emerald-400" : "text-neutral-400"}>
+                    <span>Google</span>
+                    <span className={providers.google ? "text-[var(--gush-accent,#2f6bff)]" : "text-slate-500"}>
                       {providersLoading ? "Loading..." : providers.google ? "Connected" : "Not connected"}
                     </span>
                   </div>
@@ -647,7 +672,7 @@ export default function AccountPage() {
                         setProviderBusy(true);
                         const response = await apiPost("/api/auth/google/unlink");
                         if (response.ok) {
-                          setProviderStatus("Google account disconnected.");
+                          setProviderStatus("Google sign-in removed.");
                           await loadAuthProviders();
                         } else {
                           setProviderStatus(response.message || response.error || "Failed to disconnect Google.");
@@ -665,7 +690,7 @@ export default function AccountPage() {
                         action="link"
                         requestPayload={{ mode: "link" }}
                         onSuccess={async () => {
-                          setProviderStatus("Google account connected.");
+                          setProviderStatus("Google sign-in connected.");
                           await loadAuthProviders();
                         }}
                         onError={(nextMessage) => {
@@ -679,7 +704,7 @@ export default function AccountPage() {
               ) : null}
 
               {hydrated && isSignedIn && !googleAuthEnabled ? (
-                <div className="text-xs text-neutral-500">Google login is not configured.</div>
+                <div className="text-xs text-slate-500">Google login is not configured.</div>
               ) : null}
 
               <button
@@ -688,31 +713,30 @@ export default function AccountPage() {
                 onClick={handleRequestPasswordReset}
                 className={secondaryButtonClass}
               >
-                Request password reset
+                Send password reset email
               </button>
-              {securityStatus ? <div className="text-xs text-neutral-300">{securityStatus}</div> : null}
-              {providerStatus ? <div className="text-xs text-neutral-300">{providerStatus}</div> : null}
+              {securityStatus ? <div className="text-xs text-slate-600">{securityStatus}</div> : null}
+              {providerStatus ? <div className="text-xs text-slate-600">{providerStatus}</div> : null}
             </SurfacePanel>
 
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Orders
+                <p className={sectionEyebrowClass}>Purchases</p>
+                <h2 className={sectionTitleClass}>Recent purchases</h2>
+                <p className={mutedCopyClass}>
+                  A quick look at your latest packs and memberships.
                 </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Recent receipts
-                </h2>
               </div>
               {!hydrated || ordersLoading ? (
-                <div className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-sm text-neutral-400">
-                  Pulling your recent receipts.
+                <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">
+                  Loading recent purchases.
                 </div>
               ) : !isSignedIn ? (
-                <div className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-sm text-neutral-300">
-                  Sign in to review receipts, refunds, and your recent purchases.
+                <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-600">
+                  Sign in to see purchases, refunds, and order IDs.
                 </div>
               ) : orders.length === 0 ? (
-                <div className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-sm text-neutral-400">
+                <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">
                   No purchases yet. Top-ups and membership charges will appear here.
                 </div>
               ) : (
@@ -720,36 +744,43 @@ export default function AccountPage() {
                   {orders.slice(0, 5).map((order) => (
                     <div
                       key={order.orderId}
-                      className="rounded-[24px] border border-white/10 bg-black/10 p-4"
+                      className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-white">{order.packageId}</p>
-                        <p className="text-xs text-neutral-400">{order.status}</p>
+                        <p className="text-sm font-semibold text-slate-950">{order.packageId}</p>
+                        <p className="text-xs text-slate-500">{order.status}</p>
                       </div>
-                      <div className="mt-2 text-xs text-neutral-400">
-                        {order.amount} {order.currency} / {order.orderId}
+                      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+                        <span>{formatOrderAmount(order.amount, order.currency)}</span>
+                        <span>{formatOrderDate(order.createdAt)}</span>
+                        <span>{order.orderId}</span>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
+              <button
+                type="button"
+                onClick={() => router.push("/orders")}
+                className={secondaryButtonClass}
+              >
+                View all purchases
+              </button>
             </SurfacePanel>
 
-            <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" appearance="light" accent="blue">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Settings sync
-                </p>
-                <p className="mt-2 text-sm leading-6 text-neutral-400">
-                  Save the current preferences to this device and, when signed in, to your account profile.
+                <p className={sectionEyebrowClass}>Save changes</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Save these choices to this device and, when signed in, to your account.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleSave}
-                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className={primaryButtonClass}
               >
-                Save account settings
+                Save changes
               </button>
             </SurfacePanel>
           </div>
@@ -758,5 +789,3 @@ export default function AccountPage() {
     </main>
   );
 }
-
-

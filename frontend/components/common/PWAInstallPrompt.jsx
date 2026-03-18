@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { Download, Smartphone, X } from "lucide-react";
 
 const PWAInstallPrompt = React.memo(() => {
   const pathname = usePathname();
@@ -16,29 +17,34 @@ const PWAInstallPrompt = React.memo(() => {
       setShowPrompt(false);
       return;
     }
+
     if (
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true
     ) {
       setIsInstalled(true);
+      setShowPrompt(false);
       return;
     }
 
+    const dismissed = localStorage.getItem("mn_pwa_prompt_dismissed") === "true";
     const isIOSDevice =
       /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
     setIsIOS(isIOSDevice);
+
+    if (isIOSDevice && !dismissed) {
+      setShowPrompt(true);
+    }
 
     const handleBeforeInstallPrompt = (event) => {
       event.preventDefault();
       setDeferredPrompt(event);
 
-      const dismissed = localStorage.getItem("mn_pwa_prompt_dismissed");
       if (!dismissed) {
         setShowPrompt(true);
       }
     };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     const handleAppInstalled = () => {
       setIsInstalled(true);
@@ -46,13 +52,11 @@ const PWAInstallPrompt = React.memo(() => {
       setDeferredPrompt(null);
     };
 
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      );
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, [isAdminRoute]);
@@ -78,70 +82,59 @@ const PWAInstallPrompt = React.memo(() => {
     return null;
   }
 
-  if (isIOS) {
-    return (
-      <div className="fixed bottom-0 left-0 right-0 z-50 mb-0 border-t border-neutral-800 bg-neutral-900 p-3 shadow-2xl md:mb-0 md:p-4">
-        <div className="mx-auto flex max-w-4xl items-start gap-3 md:gap-4">
-          <div className="flex-shrink-0 text-xl md:text-2xl" aria-hidden="true">
-            APP
-          </div>
-          <div className="flex-1">
-            <h3 className="mb-1 text-sm font-semibold text-white md:text-base">
-              Install Gush App
-            </h3>
-            <p className="mb-2 text-xs text-neutral-400 md:text-sm">
-              Install on iPhone: tap <span className="font-semibold">Share</span>{" "}
-              then choose <span className="font-semibold">Add to Home Screen</span>.
-            </p>
-          </div>
-          <button
-            onClick={handleDismiss}
-            className="min-h-[44px] min-w-[44px] flex-shrink-0 rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white active:bg-neutral-700"
-            aria-label="Close"
-          >
-            x
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 mb-0 border-t border-neutral-800 bg-neutral-900 p-3 shadow-2xl md:mb-0 md:p-4">
-      <div className="mx-auto flex max-w-4xl items-start gap-3 md:gap-4">
-        <div className="flex-shrink-0 text-xl md:text-2xl" aria-hidden="true">
-          APP
-        </div>
-        <div className="flex-1">
-          <h3 className="mb-1 text-sm font-semibold text-white md:text-base">
-            Install Gush App
-          </h3>
-          <p className="mb-2 text-xs text-neutral-400 md:mb-3 md:text-sm">
-            Install our app for a better experience. Access your content offline,
-            get faster loading, and enjoy a native app feel.
-          </p>
-          <div className="flex flex-wrap gap-2">
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 px-4">
+      <div className="pointer-events-auto mx-auto max-w-4xl rounded-[28px] border border-black/8 bg-[rgba(255,255,255,0.94)] shadow-[0_22px_48px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+        <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.76),transparent_24%)]" />
+        <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[16px] bg-[rgba(47,107,255,0.1)] text-[var(--gush-accent,#2f6bff)]">
+              {isIOS ? <Smartphone size={20} /> : <Download size={20} />}
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-950 sm:text-base">
+                Install Gush
+              </h3>
+              {isIOS ? (
+                <p className="mt-1 text-xs leading-6 text-slate-600 sm:text-sm">
+                  On iPhone, tap <span className="font-semibold text-slate-900">Share</span> and then{" "}
+                  <span className="font-semibold text-slate-900">Add to Home Screen</span>.
+                </p>
+              ) : (
+                <p className="mt-1 text-xs leading-6 text-slate-600 sm:text-sm">
+                  Add Gush to your home screen for faster launches, cleaner reading, and a more app-like feel.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {!isIOS ? (
+              <button
+                type="button"
+                onClick={handleInstall}
+                className="min-h-[44px] rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Install app
+              </button>
+            ) : null}
             <button
-              onClick={handleInstall}
-              className="min-h-[44px] rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-600 active:bg-emerald-700"
+              type="button"
+              onClick={handleDismiss}
+              className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
             >
-              Install App
+              Not now
             </button>
             <button
+              type="button"
               onClick={handleDismiss}
-              className="min-h-[44px] rounded-lg border border-neutral-800 bg-neutral-900/50 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-800 active:bg-neutral-700"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-black/8 bg-white/80 text-slate-500 transition hover:bg-white hover:text-slate-900"
+              aria-label="Close"
             >
-              Not Now
+              <X size={16} />
             </button>
           </div>
         </div>
-        <button
-          onClick={handleDismiss}
-          className="min-h-[44px] min-w-[44px] flex-shrink-0 rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white active:bg-neutral-700"
-          aria-label="Close"
-        >
-          x
-        </button>
       </div>
     </div>
   );

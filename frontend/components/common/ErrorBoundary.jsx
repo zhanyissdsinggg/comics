@@ -67,13 +67,14 @@ class ErrorBoundary extends Component {
       }
 
       return (
-        <div className="flex min-h-screen items-center justify-center bg-neutral-950 p-4">
+        <div className="relative flex min-h-screen items-center justify-center bg-[#f4f6fb] p-4">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
           <div className="w-full max-w-md">
-            <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-6">
+            <div className="relative rounded-[28px] border border-red-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.98))] p-6 shadow-[0_22px_54px_rgba(15,23,42,0.08)]">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0">
                   <svg
-                    className="h-6 w-6 text-red-400"
+                    className="h-6 w-6 text-red-500"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -87,20 +88,20 @@ class ErrorBoundary extends Component {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-red-200">
+                  <h3 className="text-lg font-semibold text-slate-950">
                     {this.props.title || "Something went wrong"}
                   </h3>
-                  <p className="mt-2 text-sm text-red-300">
+                  <p className="mt-2 text-sm text-slate-600">
                     {this.props.message ||
                       "An unexpected error occurred. Please try again."}
                   </p>
 
                   {process.env.NODE_ENV === "development" && this.state.error ? (
                     <details className="mt-4">
-                      <summary className="cursor-pointer text-xs text-red-400 hover:text-red-300">
+                      <summary className="cursor-pointer text-xs text-red-500 hover:text-red-600">
                         Error details (dev only)
                       </summary>
-                      <pre className="mt-2 overflow-auto rounded bg-neutral-900 p-2 text-[10px] text-red-300">
+                      <pre className="mt-2 overflow-auto rounded-2xl bg-white p-3 text-[10px] text-slate-600">
                         {this.state.error.toString()}
                         {"\n\n"}
                         {this.state.errorInfo?.componentStack}
@@ -111,13 +112,13 @@ class ErrorBoundary extends Component {
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={this.handleReset}
-                      className="rounded-full bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600"
+                      className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                     >
                       Try again
                     </button>
                     <button
                       onClick={() => window.location.reload()}
-                      className="rounded-full border border-red-500 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-500/20"
+                      className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                     >
                       Reload page
                     </button>

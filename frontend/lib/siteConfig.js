@@ -21,13 +21,13 @@ export const siteConfig = {
   siteUrl: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
   defaultDescription:
     clean(process.env.NEXT_PUBLIC_SITE_DESCRIPTION) ||
-    "Discover thousands of comics and novels. Read your favorite series online with fast pages, clean layouts, and daily updates.",
+    "Read comics and novels with clean pages, strong stories, and new chapters worth coming back for.",
   tagline:
     clean(process.env.NEXT_PUBLIC_SITE_TAGLINE) ||
-    "Comics, novels, and premium reading experiences without the clutter.",
+    "Stories worth getting into.",
   aboutSummary:
     clean(process.env.NEXT_PUBLIC_ABOUT_SUMMARY) ||
-    "Gush is a digital reading platform focused on fast discovery, polished reading flows, and dependable access across comics and novels.",
+    "Gush is built for readers who want good stories, clean pages, and a better way to discover comics and novels.",
   supportEmail: clean(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) || "support@gushcomics.com",
   privacyEmail:
     clean(process.env.NEXT_PUBLIC_PRIVACY_EMAIL) ||

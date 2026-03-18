@@ -92,20 +92,20 @@ function getStarterLane(series, leadGenre) {
 
   if (freeEpisodeCount > 0) {
     return {
-      label: "Low-friction start",
+      label: "Easy first try",
       body: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} make this easy to sample before you commit.`,
     };
   }
 
   if (status === "completed") {
     return {
-      label: "Binge-first pick",
+      label: "Built for a binge",
       body: "A completed run is best if you want the full story without waiting for another update.",
     };
   }
 
   return {
-    label: "Return habit pick",
+    label: "Good to come back to",
     body: leadGenre
       ? `This title works well for readers who like coming back for more ${leadGenre.toLowerCase()} over time.`
       : "This title works well for readers who like coming back over time instead of finishing everything in one sitting.",
@@ -120,6 +120,10 @@ export default function SeriesFitPanel({
   startHref = "",
 }) {
   const router = useRouter();
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
 
   const fitModel = useMemo(() => {
     const leadGenre = Array.isArray(series?.genres) && series.genres.length > 0 ? series.genres[0] : "";
@@ -181,25 +185,25 @@ export default function SeriesFitPanel({
   ];
 
   return (
-    <SurfacePanel className="space-y-5">
+    <SurfacePanel className="space-y-5" appearance="light" accent="blue">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-            Reader fit
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+            Before you start
           </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            See if this series fits your mood.
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+            Is this your kind of read?
           </h2>
-          <p className="mt-3 text-sm leading-7 text-neutral-300">
-            Good series pages help you understand the vibe, commitment, and easiest way to start before you unlock more.
+          <p className="mt-3 text-sm leading-7 text-slate-600">
+            The best title pages make it easy to feel the vibe, the commitment, and the easiest way in.
           </p>
         </div>
-        <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-left">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+        <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-4 text-left">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Best way in
           </p>
-          <p className="mt-3 text-sm leading-6 text-neutral-300">
-            <span className="font-semibold text-white">{fitModel.starterLane.label}.</span> {fitModel.starterLane.body}
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            <span className="font-semibold text-slate-950">{fitModel.starterLane.label}.</span> {fitModel.starterLane.body}
           </p>
         </div>
       </div>
@@ -208,35 +212,35 @@ export default function SeriesFitPanel({
         {fitCards.map((card) => (
           <div
             key={card.label}
-            className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4"
+            className="rounded-[22px] border border-black/8 bg-[#f8f9fc] px-4 py-4"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               {card.label}
             </p>
-            <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+            <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
               {card.value}
             </p>
-            <p className="mt-2 text-sm leading-6 text-neutral-400">{card.body}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{card.body}</p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Best reading mood
+        <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Best if you want
           </p>
-          <p className="mt-3 text-sm leading-7 text-neutral-300">
+          <p className="mt-3 text-sm leading-7 text-slate-600">
             {series?.title || "This title"} works best when the reader wants{" "}
             {fitModel.status === "completed" ? "continuity and payoff in a longer session" : "a title worth saving and revisiting over time"}
             {fitModel.leadGenre ? `, especially if ${fitModel.leadGenre.toLowerCase()} is already part of the browsing intent` : ""}.
           </p>
         </div>
-        <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Similar vibe
+        <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            What to compare next
           </p>
-          <p className="mt-3 text-sm leading-7 text-neutral-300">
+          <p className="mt-3 text-sm leading-7 text-slate-600">
             {fitModel.secondaryGenre
               ? `If you like ${fitModel.leadGenre}, ${fitModel.secondaryGenre} is the easiest adjacent genre to compare next.`
               : "If you want more to compare, open the genre page or the creator page before committing."}
@@ -245,18 +249,18 @@ export default function SeriesFitPanel({
       </div>
 
       {fitModel.primaryAction ? (
-        <div className="rounded-[24px] border border-emerald-300/20 bg-emerald-300/10 px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
+        <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Recommended next step
           </p>
           <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <p className="max-w-3xl text-sm leading-7 text-emerald-50/90">
+            <p className="max-w-3xl text-sm leading-7 text-slate-700">
               {fitModel.primaryAction.hint}
             </p>
             <button
               type="button"
               onClick={() => router.push(fitModel.primaryAction.href)}
-              className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+              className={primaryButtonClass}
             >
               {fitModel.primaryAction.label}
             </button>
@@ -268,19 +272,19 @@ export default function SeriesFitPanel({
         <button
           type="button"
           onClick={() => router.push(fitModel.genrePath)}
-          className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
+          className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
             fitModel.primaryAction
-              ? "border border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]"
-              : "bg-white text-neutral-950 hover:bg-neutral-200"
+              ? secondaryButtonClass
+              : primaryButtonClass
           }`}
         >
-          {fitModel.leadGenre ? `Browse ${fitModel.leadGenre}` : "Browse similar titles"}
+          {fitModel.leadGenre ? `More ${fitModel.leadGenre}` : "More like this"}
         </button>
         {creatorHref ? (
           <button
             type="button"
             onClick={() => router.push(creatorHref)}
-            className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+            className={secondaryButtonClass}
           >
             More by this creator
           </button>
@@ -288,9 +292,9 @@ export default function SeriesFitPanel({
         <button
           type="button"
           onClick={() => router.push("/rankings?type=popular&window=week")}
-          className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+          className={secondaryButtonClass}
         >
-          Compare with weekly chart
+          See what's hot
         </button>
       </div>
     </SurfacePanel>

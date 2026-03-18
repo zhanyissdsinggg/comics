@@ -11,7 +11,7 @@ import { getSiteFaqItems } from "../../lib/storefrontFaq";
 
 export const metadata = createPageMetadata({
   title: "Help & FAQ",
-  description: "Common questions about purchases, subscriptions, adult content, and account support.",
+  description: "Fast answers about charges, account access, memberships, and 18+ settings.",
   path: "/faq",
 });
 
@@ -22,22 +22,22 @@ const FAQ = getSiteFaqItems().map((item) => ({
 
 const QUICK_LINKS = [
   {
-    title: "Support form",
-    description: "Send billing, account, or reading issues without hunting for the right channel.",
+    title: "Get help",
+    description: "Message us about a charge, a broken page, or an access problem.",
     href: "/support",
-    label: "Open support",
+    label: "Contact us",
   },
   {
-    title: "Orders",
-    description: "Review receipts, payment status, and refund status in the same view.",
+    title: "Purchases",
+    description: "Check what you bought and grab an order ID if you need one.",
     href: "/orders",
-    label: "View orders",
+    label: "View purchases",
   },
   {
-    title: "Account center",
-    description: "Manage subscriptions, history, preferences, and notification settings.",
+    title: "Account",
+    description: "Manage membership, history, and reading settings.",
     href: "/account",
-    label: "Go to account",
+    label: "Open account",
   },
 ];
 
@@ -50,37 +50,40 @@ export default function FAQPage() {
     buildFaqStructuredData({
       path: "/faq",
       name: `Help & FAQ | ${siteConfig.siteName}`,
-      description: "Common questions about purchases, subscriptions, adult content, and account support.",
+      description: "Fast answers about charges, account access, memberships, and 18+ settings.",
       items: FAQ,
     }),
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
       <StructuredDataScript id="faq-jsonld" data={structuredData} />
-      <SiteHeader />
-      <main className="px-4 py-8 pb-14 sm:py-10">
+      <SiteHeader variant="light" />
+      <main className="relative px-4 py-8 pb-14 sm:py-10">
         <div className="mx-auto max-w-6xl space-y-8">
-          <InfoPageNav current="faq" />
+          <InfoPageNav current="faq" appearance="light" />
 
           <EditorialHero
-            eyebrow="Help & FAQ"
-            title="Short answers for the issues users hit most often."
-            description="This page covers the repeat questions around unlocking, subscriptions, order history, and adult catalog access so users can recover quickly without opening a ticket first."
-            secondary="When the answer here is not enough, the support form and email path remain one click away."
+            appearance="light"
+            accent="blue"
+            eyebrow="Help"
+            title="Answers that get you back to reading."
+            description="Start here for charges, unlocks, account access, memberships, and 18+ settings."
+            secondary="If the FAQ does not solve it, you can contact us in one step."
             actions={
               <>
                 <Link
                   href="/support"
-                  className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
-                  Contact support
+                  Get help
                 </Link>
                 <a
                   href={`mailto:${siteConfig.supportEmail}`}
-                  className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-emerald-300 hover:text-emerald-200"
+                  className="rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                 >
-                  Email support
+                  Email us
                 </a>
               </>
             }
@@ -88,47 +91,44 @@ export default function FAQPage() {
               {
                 label: "Answers",
                 value: String(FAQ.length),
-                hint: "Focused on the support topics users reach for most often.",
+                hint: "Short answers to the issues readers hit most.",
               },
               {
-                label: "Support",
-                value: "Email or form",
-                hint: "Escalation stays available if the self-serve answer does not solve it.",
+                label: "Contact",
+                value: "Email + form",
+                hint: "If the FAQ is not enough, a person is one click away.",
               },
               {
-                label: "Billing",
-                value: "Order ledger",
-                hint: "Receipts and refund state now live in a dedicated orders view.",
+                label: "Purchases",
+                value: "Orders page",
+                hint: "Check purchases and order IDs there.",
               },
               {
-                label: "Adult access",
-                value: "Mature gate",
-                hint: "Catalog visibility depends on the age gate and your current region settings.",
+                label: "18+ access",
+                value: "Age + region",
+                hint: "Availability depends on your age check and region settings.",
               },
             ]}
           />
 
           <section className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Frequently asked questions
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Common questions
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  Quick fixes before you open a ticket.
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Start here before you message us.
                 </h2>
               </div>
               <div className="space-y-3">
-                {FAQ.map((item, index) => (
+                {FAQ.map((item) => (
                   <div
                     key={item.q}
-                    className="rounded-[24px] border border-white/8 bg-black/20 px-5 py-4 backdrop-blur-sm"
+                    className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                   >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
-                      Question {index + 1}
-                    </p>
-                    <h3 className="mt-2 text-base font-semibold text-white">{item.q}</h3>
-                    <p className="mt-3 text-sm leading-7 text-neutral-300">{item.a}</p>
+                    <h3 className="text-base font-semibold text-slate-950">{item.q}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">{item.a}</p>
                   </div>
                 ))}
               </div>
@@ -136,15 +136,15 @@ export default function FAQPage() {
 
             <div className="grid gap-4">
               {QUICK_LINKS.map((item) => (
-                <SurfacePanel key={item.title} className="h-full">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">Shortcut</p>
-                  <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+                <SurfacePanel key={item.title} className="h-full" appearance="light" accent="blue">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Shortcut</p>
+                  <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
                     {item.title}
                   </h2>
-                  <p className="mt-4 text-sm leading-7 text-neutral-300">{item.description}</p>
+                  <p className="mt-4 text-sm leading-7 text-slate-600">{item.description}</p>
                   <Link
                     href={item.href}
-                    className="mt-6 inline-flex rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-emerald-300 hover:text-emerald-200"
+                    className="mt-6 inline-flex rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                   >
                     {item.label}
                   </Link>

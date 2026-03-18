@@ -294,7 +294,7 @@ export default function CommentsSection({
       {
         label: "Library saves",
         value: formatCount(followers),
-        hint: Number(followers || 0) > 0 ? "Readers who already saved this title." : "First saves are still up for grabs.",
+        hint: Number(followers || 0) > 0 ? "Readers already keeping up with this title." : "Be the first to save it.",
       },
     ],
     [comments.length, followers, replyCount, topLikeCount],
@@ -317,15 +317,21 @@ export default function CommentsSection({
     },
     [isSignedIn],
   );
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
+  const inputClass =
+    "flex-1 rounded-full border border-black/8 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
 
   return (
-    <section data-comments-section className="mt-8 rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-6 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+    <section data-comments-section className="mt-8 rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold">Ratings & Comments</h3>
-          <p className="text-xs text-neutral-400">
+          <h3 className="text-lg font-semibold text-slate-950">Ratings & Comments</h3>
+          <p className="text-xs text-slate-500">
             {displayRating
-              ? `${displayRating} / 5 — ${ratingCount} rating${ratingCount === 1 ? "" : "s"}`
+              ? `${displayRating} / 5 - ${ratingCount} rating${ratingCount === 1 ? "" : "s"}`
               : "No ratings yet — be the first!"}
           </p>
         </div>
@@ -337,11 +343,11 @@ export default function CommentsSection({
               onClick={() => handleRating(value)}
               disabled={ratingPending}
               className={`text-lg ${
-                value <= (userRating || rating) ? "text-yellow-400" : "text-neutral-600"
+                value <= (userRating || rating) ? "text-amber-500" : "text-slate-300"
               }`}
               aria-label={`Rate ${value} star`}
             >
-              *
+              ★
             </button>
           ))}
         </div>
@@ -351,29 +357,29 @@ export default function CommentsSection({
         {commentStats.map((item) => (
           <div
             key={item.label}
-            className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4"
+            className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               {item.label}
             </p>
-            <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+            <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
               {item.value}
             </p>
-            <p className="mt-2 text-sm leading-6 text-neutral-400">{item.hint}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">{item.hint}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-5 rounded-[24px] border border-white/10 bg-black/20 p-4">
+      <div className="mt-5 rounded-[24px] border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
               Community moves
             </p>
-            <h4 className="mt-2 text-lg font-semibold text-white">
+            <h4 className="mt-2 text-lg font-semibold text-slate-950">
               Give readers a reason to react, save, and share before they leave the page.
             </h4>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-400">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
               Strong series pages turn comments into a return reason instead of hiding discussion under a plain text box.
             </p>
           </div>
@@ -384,24 +390,24 @@ export default function CommentsSection({
                 onClick={onFollowToggle}
                 className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                   isFollowing
-                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15"
-                    : "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]"
+                    ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-950 hover:border-[rgba(47,107,255,0.22)] hover:bg-[rgba(47,107,255,0.09)]"
+                    : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
                 }`}
               >
-                {isFollowing ? "Saved to library" : "Save to library"}
+                {isFollowing ? "Saved" : "Save"}
               </button>
             ) : null}
             <button
               type="button"
               onClick={() => focusComposer()}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+              className={secondaryButtonClass}
             >
               Write a comment
             </button>
             <button
               type="button"
               onClick={() => router.push(isFollowing ? "/notifications" : "/library")}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+              className={secondaryButtonClass}
             >
               {isFollowing ? "Open notifications" : "Open library"}
             </button>
@@ -409,19 +415,21 @@ export default function CommentsSection({
               url={shareUrl}
               title={seriesTitle || "Check out this series"}
               description={`Join the discussion around ${seriesTitle || "this series"}.`}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+              className={secondaryButtonClass}
             />
           </div>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-400">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setSortKey("latest")}
-            className={`rounded-full border px-3 py-1 ${
-              sortKey === "latest" ? "border-neutral-600 text-neutral-200" : "border-white/10"
+            className={`rounded-full border px-3 py-1 transition ${
+              sortKey === "latest"
+                ? "border-black/10 bg-slate-950 text-white"
+                : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc]"
             }`}
           >
             Latest
@@ -429,8 +437,10 @@ export default function CommentsSection({
           <button
             type="button"
             onClick={() => setSortKey("top")}
-            className={`rounded-full border px-3 py-1 ${
-              sortKey === "top" ? "border-neutral-600 text-neutral-200" : "border-white/10"
+            className={`rounded-full border px-3 py-1 transition ${
+              sortKey === "top"
+                ? "border-black/10 bg-slate-950 text-white"
+                : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc]"
             }`}
           >
             Top
@@ -440,7 +450,7 @@ export default function CommentsSection({
           <button
             type="button"
             onClick={() => setActiveModal(true)}
-            className="rounded-full border border-neutral-700 px-3 py-1 text-xs text-neutral-200"
+            className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs text-slate-600 transition hover:border-black/12 hover:bg-[#f8f9fc]"
           >
             Sign in to comment
           </button>
@@ -448,19 +458,19 @@ export default function CommentsSection({
       </div>
 
       <div className="mt-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
           Conversation starters
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {promptSuggestions.map((prompt) => (
             <button
-              key={prompt.id}
-              type="button"
-              onClick={() => focusComposer(prompt.text)}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08]"
-            >
-              {prompt.label}
-            </button>
+            key={prompt.id}
+            type="button"
+            onClick={() => focusComposer(prompt.text)}
+            className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+          >
+            {prompt.label}
+          </button>
           ))}
         </div>
       </div>
@@ -471,13 +481,13 @@ export default function CommentsSection({
           value={input}
           onChange={(event) => setInput(event.target.value)}
           placeholder={`Write a comment about ${seriesTitle || "this series"}...`}
-          className="flex-1 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm"
+          className={inputClass}
         />
         <button
           type="button"
           onClick={handleSubmit}
           disabled={working}
-          className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900"
+          className={primaryButtonClass}
         >
           Post
         </button>
@@ -485,28 +495,28 @@ export default function CommentsSection({
 
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-black/50 p-4 text-sm text-neutral-500">
+          <div className="rounded-2xl border border-black/6 bg-white/84 p-4 text-sm text-slate-500">
             Be the first to comment. Strong series pages feel more alive once readers leave a reaction, recommendation, or latest-episode take.
           </div>
         ) : (
           sortedComments.map((comment) => (
             <div
               key={comment.id}
-              className="rounded-2xl border border-white/10 bg-black/60 p-4"
+              className="rounded-2xl border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
             >
-              <div className="flex items-center justify-between text-xs text-neutral-500">
+              <div className="flex items-center justify-between text-xs text-slate-500">
                 <span>{getCommentAuthor(comment)}</span>
                 <span>{formatDate(comment.createdAt)}</span>
               </div>
-              <p className="mt-2 text-sm text-neutral-200">{comment.text}</p>
-              <div className="mt-3 flex items-center gap-2 text-xs text-neutral-400">
+              <p className="mt-2 text-sm text-slate-700">{comment.text}</p>
+              <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
                 <button
                   type="button"
                   onClick={() => handleLike(comment.id)}
-                  className={`rounded-full border px-3 py-1 ${
+                  className={`rounded-full border px-3 py-1 transition ${
                     getCommentLikedByUser(comment)
-                      ? "border-yellow-500 text-yellow-300"
-                      : "border-white/10"
+                      ? "border-amber-200 bg-amber-50 text-amber-700"
+                      : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc]"
                   }`}
                 >
                   Like {getCommentLikeCount(comment)}
@@ -516,20 +526,20 @@ export default function CommentsSection({
                   onClick={() =>
                     setReplyOpenId((prev) => (prev === comment.id ? "" : comment.id))
                   }
-                  className="rounded-full border border-white/10 px-3 py-1"
+                  className="rounded-full border border-black/8 bg-white px-3 py-1 text-slate-600 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                 >
                   Reply {Array.isArray(comment.replies) ? comment.replies.length : 0}
                 </button>
               </div>
               {Array.isArray(comment.replies) && comment.replies.length > 0 ? (
-                <div className="mt-3 space-y-2 border-l border-white/10 pl-4 text-xs text-neutral-300">
+                <div className="mt-3 space-y-2 border-l border-black/6 pl-4 text-xs text-slate-600">
                   {comment.replies.map((reply) => (
                     <div key={reply.id}>
-                      <div className="flex items-center justify-between text-[10px] text-neutral-500">
+                      <div className="flex items-center justify-between text-[10px] text-slate-400">
                         <span>{getCommentAuthor(reply)}</span>
                         <span>{formatDate(reply.createdAt)}</span>
                       </div>
-                      <p className="mt-1 text-xs text-neutral-200">{reply.text}</p>
+                      <p className="mt-1 text-xs text-slate-700">{reply.text}</p>
                     </div>
                   ))}
                 </div>
@@ -545,12 +555,12 @@ export default function CommentsSection({
                       }))
                     }
                     placeholder="Write a reply..."
-                    className="flex-1 rounded-full border border-white/10 bg-black/20 px-3 py-2 text-xs"
+                    className="flex-1 rounded-full border border-black/8 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]"
                   />
                   <button
                     type="button"
                     onClick={() => handleReply(comment.id)}
-                    className="rounded-full bg-white px-3 py-2 text-xs font-semibold text-neutral-900"
+                    className="rounded-full bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
                   >
                     Reply
                   </button>

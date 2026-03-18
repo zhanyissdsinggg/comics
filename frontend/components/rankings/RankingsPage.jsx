@@ -23,26 +23,26 @@ const TABS = [
   {
     id: "popular",
     label: "Popular",
-    title: "See what readers are opening most right now.",
-    description: "The biggest hits across the active catalog, all in one chart.",
+    title: "See what readers are opening right now.",
+    description: "The safest first click when you want something already pulling people in.",
   },
   {
     id: "new",
     label: "New",
-    title: "Catch fresh releases before they blow up.",
-    description: "New and recently updated series worth trying early.",
+    title: "Catch fresh releases before they go obvious.",
+    description: "New launches and early risers that still feel a little ahead of the crowd.",
   },
   {
     id: "completed",
     label: "Completed",
     title: "Find finished stories you can binge now.",
-    description: "Completed charts surface series you can read straight through.",
+    description: "Finished runs you can start tonight and keep reading straight through.",
   },
   {
     id: "ttf",
     label: "Free Episodes",
     title: "Start with series that let you read before you pay.",
-    description: "A cleaner way to find titles with a strong free starting point.",
+    description: "The easiest way to find titles that give you a real first sample.",
   },
 ];
 
@@ -54,32 +54,32 @@ const WINDOWS = [
 
 const CHART_GUIDES = {
   popular: {
-    audience: "Best if you want a proven hit first.",
-    signal: "These are the series readers are opening most right now.",
-    nextMove: "Start with the top title, then branch into search if you want something in the same lane.",
+    audience: "Best when you just want the safest first click.",
+    signal: "These are the titles readers are opening most right now.",
+    nextMove: "Start with the top book, then branch into something nearby if the vibe feels right.",
     searchHref: "/search?sort=popular",
-    searchLabel: "Search popular series",
+    searchLabel: "Open popular search",
   },
   new: {
-    audience: "Best if you want fresh launches and rising titles.",
-    signal: "Use this chart to catch new series before they feel obvious.",
-    nextMove: "Open the strongest launch, then compare it against the newest catalog results.",
+    audience: "Best when you want something early, not something overexposed.",
+    signal: "Use this chart to catch rising books before they feel obvious.",
+    nextMove: "Open the strongest launch, then see what else is still new.",
     searchHref: "/search?sort=latest",
-    searchLabel: "Browse latest releases",
+    searchLabel: "See latest releases",
   },
   completed: {
-    audience: "Best if you want a full binge with no waiting.",
+    audience: "Best when you want payoff without waiting on updates.",
     signal: "Completed charts go straight to finished stories you can read straight through.",
-    nextMove: "Start with the top completed title, then compare genre and length in search.",
+    nextMove: "Start with the top finished title, then compare length and genre if you want another one.",
     searchHref: "/search?status=Completed&sort=popular",
-    searchLabel: "Browse completed series",
+    searchLabel: "See finished series",
   },
   ttf: {
-    audience: "Best if you want to sample a title before paying.",
-    signal: "This chart highlights the strongest free-start options in the catalog.",
-    nextMove: "Use the chart to start free, then compare points or membership only when you want more.",
+    audience: "Best when you want to try the hook before you spend.",
+    signal: "This chart highlights the titles with the strongest free start right now.",
+    nextMove: "Start free here, then decide later if the story is worth more of your time.",
     searchHref: "/search?sort=popular",
-    searchLabel: "Browse free-start picks",
+    searchLabel: "See more free starts",
   },
 };
 
@@ -150,12 +150,18 @@ export default function RankingsPage() {
     [
       "rounded-full border px-4 py-2 text-xs font-semibold transition",
       isActive
-        ? "border-white/20 bg-white text-neutral-950"
-        : "border-white/10 bg-black/10 text-neutral-300 hover:border-white/20 hover:bg-white/10",
+        ? "border-black/10 bg-slate-950 text-white"
+        : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950",
     ].join(" ");
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
 
   const spotlightEntries = list.slice(0, 8);
   const leadEntry = spotlightEntries[0] || null;
+  const supportingEntries = list.slice(1, 3);
+  const boardEntries = list.slice(3, 12);
   const leadCampaign = useMemo(() => getStorefrontCampaign(leadEntry), [leadEntry]);
 
   const openLeadValuePath = useCallback(() => {
@@ -180,31 +186,33 @@ export default function RankingsPage() {
   }, [leadCampaign, leadEntry, rankingsPath, router]);
 
   return (
-    <main className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
-      <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+    <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Charts"
           title={activeTab.title}
           description={activeTab.description}
-          secondary={`Browse the ${activeWindow.label.toLowerCase()} board, then switch windows without losing your place.`}
+          secondary={`${activeWindow.label} view. Move between windows and keep the same reading mood.`}
+          appearance="light"
           actions={
             <>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className={primaryButtonClass}
               >
-                Search all series
+                Search titles
               </button>
               <button
                 type="button"
                 onClick={() =>
                   router.push(tab === "completed" ? "/search?status=Completed&sort=popular" : "/search?sort=popular")
                 }
-                className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
-                {tab === "completed" ? "Browse completed" : "Browse catalog"}
+                {tab === "completed" ? "See finished reads" : "Open search"}
               </button>
             </>
           }
@@ -217,20 +225,20 @@ export default function RankingsPage() {
           />
         ) : null}
 
-        <SurfacePanel className="space-y-5">
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Chart controls
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Pick the board
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                Choose a chart and time range.
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Choose a chart and time window.
               </h2>
             </div>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-slate-500">
               {loading
                 ? "Loading titles..."
-                : `${list.length} titles / ${isAdultMode ? "18+ catalog enabled" : "Standard catalog enabled"}`}
+                : `${list.length} titles / ${isAdultMode ? "18+ on" : "standard view"}`}
             </p>
           </div>
 
@@ -262,20 +270,20 @@ export default function RankingsPage() {
         </SurfacePanel>
 
         {loading ? (
-          <SurfacePanel>
-            <p className="text-sm text-neutral-400">Loading rankings...</p>
+          <SurfacePanel appearance="light" accent="blue">
+            <p className="text-sm text-slate-500">Loading rankings...</p>
           </SurfacePanel>
         ) : list.length === 0 ? (
-          <SurfacePanel className="space-y-4">
+          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Empty board
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 No ranked titles are available for this chart window.
               </h2>
-              <p className="mt-3 text-sm leading-7 text-neutral-400">
-                Try another time range or go back to search to keep browsing.
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                Try another time window or head back to search.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -283,7 +291,7 @@ export default function RankingsPage() {
                 <button
                   type="button"
                   onClick={() => router.replace(`/rankings?type=${tab}&window=all`)}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   Show all time
                 </button>
@@ -291,132 +299,171 @@ export default function RankingsPage() {
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                className={primaryButtonClass}
               >
-                Search catalog
+                Search titles
               </button>
             </div>
           </SurfacePanel>
         ) : (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_360px]">
-            <SurfacePanel className="space-y-5">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                    Leaderboard
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    {activeTab.label} chart / {activeWindow.label}
-                  </h2>
-                </div>
-                <p className="text-xs text-neutral-500">{list.length} entries loaded</p>
-              </div>
-
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.32fr)_360px]">
+            <div className="space-y-6">
               {leadEntry ? (
                 <button
                   type="button"
                   onClick={() => handleSeriesClick(leadEntry.id, "RANKINGS_LEAD")}
-                  className="w-full rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 text-left transition hover:border-white/20 hover:bg-white/[0.06]"
+                  className="w-full rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-5 text-left shadow-[0_22px_52px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-black/10"
                 >
-                  <div className="grid gap-5 md:grid-cols-[140px_minmax(0,1fr)]">
-                    <Cover tone={leadEntry.coverTone} coverUrl={leadEntry.coverUrl} className="h-52 rounded-[22px] md:h-full" />
+                  <div className="grid gap-5 lg:grid-cols-[200px_minmax(0,1fr)]">
+                    <Cover tone={leadEntry.coverTone} coverUrl={leadEntry.coverUrl} className="h-64 rounded-[24px] lg:h-full" />
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                            Rank #1 now
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                            Rank #1
                           </p>
-                          <h3 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white">
+                          <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                             {leadEntry.title}
-                          </h3>
+                          </h2>
                         </div>
-                        {leadEntry.badge ? <Pill>{leadEntry.badge}</Pill> : null}
+                        {leadEntry.badge ? <Pill appearance="light">{leadEntry.badge}</Pill> : null}
                       </div>
-                      <p className="mt-4 text-sm text-neutral-300">{formatSeriesMeta(leadEntry)}</p>
-                      <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                        {chartGuide.signal}
-                      </p>
+
+                      <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
+                      <p className="mt-3 text-sm text-slate-500">{formatSeriesMeta(leadEntry)}</p>
+
+                      {Array.isArray(leadEntry.genres) && leadEntry.genres.length > 0 ? (
+                        <div className="mt-5 flex flex-wrap gap-2">
+                          {leadEntry.genres.slice(0, 3).map((genre) => (
+                            <span
+                              key={genre}
+                              className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600"
+                            >
+                              {genre}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+
                       <div className="mt-5 flex flex-wrap gap-2">
-                        {Array.isArray(leadEntry.genres) && leadEntry.genres.length > 0
-                          ? leadEntry.genres.slice(0, 3).map((genre) => (
-                              <span
-                                key={genre}
-                                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-neutral-300"
-                              >
-                                {genre}
-                              </span>
-                            ))
-                          : null}
+                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1.5 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                          {activeWindow.label}
+                        </span>
+                        <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs font-semibold text-slate-500">
+                          {activeTab.label}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </button>
               ) : null}
 
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {list.map((series, index) => (
-                  <button
-                    key={series.id}
-                    type="button"
-                    onClick={() => handleSeriesClick(series.id)}
-                    className="rounded-[24px] border border-white/10 bg-black/10 p-4 text-left transition hover:border-white/20 hover:bg-white/[0.06]"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
-                          Rank
-                        </p>
-                        <p className="mt-2 font-display text-3xl font-semibold tracking-tight text-white">
-                          #{index + 1}
-                        </p>
+              {supportingEntries.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {supportingEntries.map((series, index) => (
+                    <button
+                      key={series.id}
+                      type="button"
+                      onClick={() => handleSeriesClick(series.id, "RANKINGS_SUPPORTING")}
+                      className="rounded-[26px] border border-black/6 bg-white/88 p-4 text-left shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-black/10"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                            Rank #{index + 2}
+                          </p>
+                          <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                            {series.title}
+                          </h3>
+                        </div>
+                        {series.badge ? <Pill appearance="light">{series.badge}</Pill> : null}
                       </div>
-                      {series.badge ? <Pill>{series.badge}</Pill> : null}
+                      <Cover tone={series.coverTone} coverUrl={series.coverUrl} className="mt-4 h-48 rounded-[20px]" />
+                      <p className="mt-4 text-sm text-slate-500">{formatSeriesMeta(series)}</p>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              {boardEntries.length > 0 ? (
+                <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+                  <div className="flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                        Keep going
+                      </p>
+                      <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                        Continue down the chart.
+                      </h2>
                     </div>
-                    <Cover tone={series.coverTone} coverUrl={series.coverUrl} className="mt-4 h-44" />
-                    <div className="mt-4 space-y-2">
-                      <p className="text-base font-semibold text-white">{series.title}</p>
-                      <p className="text-xs text-neutral-400">{formatSeriesMeta(series)}</p>
-                      {Array.isArray(series.genres) && series.genres.length > 0 ? (
-                        <p className="text-xs text-neutral-500">{series.genres.slice(0, 3).join(" / ")}</p>
-                      ) : null}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </SurfacePanel>
+                    <p className="text-xs text-slate-500">
+                      {list.length} ranked title{list.length === 1 ? "" : "s"} in this view
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {boardEntries.map((series, index) => (
+                      <button
+                        key={series.id}
+                        type="button"
+                        onClick={() => handleSeriesClick(series.id, "RANKINGS_BOARD_LIST")}
+                        className="flex w-full items-center gap-4 rounded-[24px] border border-black/6 bg-white/86 p-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-black/10"
+                      >
+                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-[18px] border border-black/8 bg-[#f8f9fc]">
+                          <span className="font-display text-xl font-semibold tracking-tight text-slate-950">
+                            #{index + 4}
+                          </span>
+                        </div>
+                        <Cover tone={series.coverTone} coverUrl={series.coverUrl} className="h-20 w-16 flex-shrink-0 rounded-[16px]" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-base font-semibold text-slate-950">{series.title}</p>
+                          <p className="mt-1 text-xs text-slate-500">{formatSeriesMeta(series)}</p>
+                          {Array.isArray(series.genres) && series.genres.length > 0 ? (
+                            <p className="mt-1 truncate text-xs text-slate-400">{series.genres.slice(0, 2).join(" / ")}</p>
+                          ) : null}
+                        </div>
+                        <span className="hidden rounded-full border border-black/8 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-500 sm:inline-flex">
+                          Open
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </SurfacePanel>
+              ) : null}
+            </div>
 
             <div className="space-y-4">
               {leadEntry ? (
-                <SurfacePanel className="space-y-4" tone="muted">
+                <SurfacePanel className="space-y-4" tone="muted" appearance="light" accent="blue">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                         Start here
                       </p>
-                      <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                        Read the board winner first.
+                      <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                        Read the chart leader first.
                       </h2>
                     </div>
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-300">
+                    <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       {activeWindow.label}
                     </span>
                   </div>
 
-                  <p className="text-sm leading-7 text-neutral-300">{chartGuide.nextMove}</p>
-                  <p className="text-sm leading-6 text-neutral-400">{chartGuide.audience}</p>
+                  <p className="text-sm leading-7 text-slate-600">{chartGuide.nextMove}</p>
+                  <p className="text-sm leading-6 text-slate-500">{chartGuide.audience}</p>
 
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => handleSeriesClick(leadEntry.id, "RANKINGS_START_HERE")}
-                      className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                      className={primaryButtonClass}
                     >
                       Read #1
                     </button>
                     <button
                       type="button"
                       onClick={() => router.push(chartGuide.searchHref)}
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+                      className={secondaryButtonClass}
                     >
                       {chartGuide.searchLabel}
                     </button>
@@ -426,34 +473,34 @@ export default function RankingsPage() {
                         onClick={() => {
                           router.push(`/search?q=${encodeURIComponent(leadEntry.genres[0])}&sort=popular`);
                         }}
-                        className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                        className={secondaryButtonClass}
                       >
-                        Find similar
+                        Browse {leadEntry.genres[0]}
                       </button>
                     ) : null}
                   </div>
 
                   {leadCampaign ? (
-                    <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                    <div className="rounded-[24px] border border-black/6 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                         {leadCampaign.eyebrow || "Keep going"}
                       </p>
-                      <p className="mt-3 text-sm font-semibold text-white">{leadCampaign.title}</p>
-                      <p className="mt-2 text-sm leading-6 text-neutral-400">
+                      <p className="mt-3 text-sm font-semibold text-slate-950">{leadCampaign.title}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
                         {leadCampaign.nextMove || chartGuide.nextMove}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button
                           type="button"
                           onClick={() => router.push(leadCampaign.discoveryHref)}
-                          className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+                          className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                         >
                           {leadCampaign.discoveryCta}
                         </button>
                         <button
                           type="button"
                           onClick={openLeadValuePath}
-                          className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold text-emerald-200 transition hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                          className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]"
                         >
                           {leadCampaign.valueCta}
                         </button>
@@ -463,17 +510,33 @@ export default function RankingsPage() {
                 </SurfacePanel>
               ) : null}
 
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    What this board is good at
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Read the chart like an editor&apos;s shelf.
+                  </h2>
+                </div>
+                <p className="text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
+                <p className="text-sm leading-6 text-slate-500">
+                  Move from the lead pick to the next two, then keep going if the mood still feels right.
+                </p>
+              </SurfacePanel>
+
               <CreatorShelfLinks
                 items={spotlightEntries}
                 entryPoint="RANKINGS_CREATOR_CHIP"
                 campaignId={`${tab}_${selectedWindow}_spotlight_creator`}
                 sourcePath={rankingsPath}
                 label="Chart creators"
-                title="Follow the people behind the chart"
-                description="If you like the top titles here, the creators behind them are a good next click."
+                title="Try the creators behind these picks"
+                description="If one of these titles lands, the same creator pages are the next smart click."
                 maxCreators={6}
                 compact
-                className="shadow-[0_26px_90px_rgba(0,0,0,0.24)]"
+                appearance="light"
+                className="shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
               />
             </div>
           </div>

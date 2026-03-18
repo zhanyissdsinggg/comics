@@ -57,6 +57,15 @@ function isRecentOrder(value, maxAgeDays = 5) {
   return Date.now() - timestamp <= maxAgeDays * 24 * 60 * 60 * 1000;
 }
 
+function buildSupportHref(orderId) {
+  if (!orderId) {
+    return "/support";
+  }
+
+  const params = new URLSearchParams({ orderId });
+  return `/support?${params.toString()}`;
+}
+
 export default function OrdersPageClient() {
   const router = useRouter();
   const { hydrated, isSignedIn } = useAuthStore();
@@ -136,22 +145,22 @@ export default function OrdersPageClient() {
         id: "resume",
         eyebrow: latestOrderGuide.eyebrow,
         title: hasRecentPaidOrder
-          ? "Use your latest purchase while it is still fresh."
-          : "Jump back into reading from your latest order.",
+          ? "Go use your latest purchase."
+          : "Jump back into reading.",
         description: latestPaidOrder
           ? latestOrderGuide.description
-          : "Your latest order should help you get back to reading, not just sit in your history.",
+          : "Your latest purchase should point you back to a series, not just sit in a list.",
         cta: latestOrderGuide.nextCta,
         onClick: () => router.push(latestOrderGuide.nextHref),
         accentClass:
-          "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
       },
       {
         id: "membership",
         eyebrow: "Plans",
-        title: "Compare plans before you buy more points.",
+        title: "Read often? Compare membership.",
         description:
-          "If you read often, compare membership against one-off spending before your next purchase.",
+          "If you keep buying packs, membership may be the better fit before your next purchase.",
         cta: STOREFRONT_TERMS.compareMembership,
         onClick: () =>
           router.push(
@@ -162,14 +171,14 @@ export default function OrdersPageClient() {
             }),
           ),
         accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
       {
         id: "store",
         eyebrow: "Point packs",
-        title: "Need more points? Start here.",
+        title: "Need a quick top-up?",
         description:
-          "Keep point packs close to your receipts so it is easy to top up when you are ready.",
+          "Grab another pack when you are ready to unlock more chapters.",
         cta: STOREFRONT_TERMS.viewPointPacks,
         onClick: () =>
           router.push(
@@ -184,20 +193,20 @@ export default function OrdersPageClient() {
             ),
           ),
         accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
       {
         id: "support",
         eyebrow: "Help",
         title: latestPaidOrder
-          ? `Need help with ${latestPaidOrder.orderId}?`
-          : "Need help with an order?",
+          ? `Something off with ${latestPaidOrder.orderId}?`
+          : "Need help with a purchase?",
         description:
-          "Contact support with the order ID so billing questions start with the right receipt.",
-        cta: STOREFRONT_TERMS.billingSupport,
-        onClick: () => router.push("/support"),
+          "Send us a message and include the order ID so we can find it faster.",
+        cta: "Get help",
+        onClick: () => router.push(buildSupportHref(latestPaidOrder?.orderId)),
         accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
     ],
     [hasRecentPaidOrder, latestOrderGuide, latestPaidOrder, router],
@@ -223,52 +232,57 @@ export default function OrdersPageClient() {
       {
         label: "Orders",
         value: loading ? "..." : orders.length.toLocaleString(),
-        hint: isSignedIn ? "Purchase history loaded from your account." : "Sign in to load receipts and refunds.",
+        hint: isSignedIn ? "Saved to your account." : "Sign in to see your saved purchases.",
       },
       {
         label: "Paid",
         value: loading ? "..." : paidCount.toLocaleString(),
-        hint: "Orders still eligible for refund review.",
+        hint: "Completed purchases in your history.",
       },
       {
         label: "Refunds",
         value: loading ? "..." : refundedCount.toLocaleString(),
-        hint: "Orders already moved into a refund state.",
+        hint: "Orders already moving through a refund.",
       },
       {
         label: "Spent",
         value: totalSpentLabel,
         hint:
           currencies.length > 1
-            ? "Multiple currencies appear in your loaded receipts."
-            : "Visible order total across the receipts on this page.",
+            ? "Loaded in more than one currency."
+            : "Visible total for the purchases on this page.",
       },
     ];
   }, [isSignedIn, loading, orders]);
 
   const secondaryButtonClass =
-    "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
-    <div className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
-      <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Orders"
+          appearance="light"
+          accent="blue"
+          eyebrow="Purchases"
           title={
             latestPaidOrder
-              ? "See receipts, refund status, and what to do next."
-              : "View receipts, payment status, and refund requests in one place."
+              ? "See what you bought and jump back into reading."
+              : "Your purchases, all in one place."
           }
           description={
             latestPaidOrder
-              ? "Check your latest purchase, compare plans, and get billing help without leaving the order page."
-              : "Scan recent purchases quickly, refresh payment status, and review refunds without jumping through settings."
+              ? "Your latest purchase is here, along with quick ways to keep reading or get help."
+              : "Point packs and memberships show up here so you can check them without digging through settings."
           }
           secondary={
             latestPaidOrder
-              ? `Latest paid receipt: ${latestPaidOrder.orderId} | ${formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)}`
-              : "Order status refreshes are available here whenever you want to check for updates."
+              ? `Latest order: ${latestPaidOrder.orderId} | ${formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)}`
+              : "New purchases usually appear here shortly after checkout."
           }
           stats={orderStats}
           actions={
@@ -288,7 +302,7 @@ export default function OrdersPageClient() {
                   });
                   if (response.ok) {
                     setOrders(response.data?.orders || []);
-                    setFeedback({ type: "success", text: "Order status updated." });
+                    setFeedback({ type: "success", text: "Purchase list updated." });
                   } else {
                     setFeedback({
                       type: "error",
@@ -297,10 +311,10 @@ export default function OrdersPageClient() {
                   }
                   setWorkingId("");
                 }}
-                className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
+                className={primaryButtonClass}
                 disabled={!hydrated || !isSignedIn || workingId === "refresh"}
               >
-                {workingId === "refresh" ? "Refreshing..." : "Refresh status"}
+                {workingId === "refresh" ? "Refreshing..." : "Refresh purchases"}
               </button>
               <button
                 type="button"
@@ -322,31 +336,33 @@ export default function OrdersPageClient() {
 
         {feedback.text ? (
           <SurfacePanel
+            appearance="light"
+            accent={feedback.type === "error" ? "rose" : "blue"}
             className={
               feedback.type === "error"
-                ? "border border-red-500/40 bg-red-500/10 text-red-100"
-                : "border border-white/10 bg-emerald-500/10"
+                ? "border border-red-200 bg-red-50 text-red-600"
+                : "border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-700"
             }
           >
-            <p className="text-sm text-neutral-100">{feedback.text}</p>
+            <p className={`text-sm ${feedback.type === "error" ? "text-red-600" : "text-slate-700"}`}>{feedback.text}</p>
           </SurfacePanel>
         ) : null}
 
         {isSignedIn && refundPreviewOnly ? (
-          <SurfacePanel className="border border-amber-500/30 bg-amber-500/10 text-amber-50">
+          <SurfacePanel className="border border-amber-200 bg-amber-50 text-amber-700" appearance="light" tone="warning" accent="amber">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <p className="text-sm font-semibold">Self-serve refunds are temporarily unavailable</p>
-                <p className="text-sm text-amber-100/85">
-                  Receipts are still visible here, but refund requests stay locked until secure billing is fully enabled.
+                <p className="text-sm font-semibold">Need help with a charge?</p>
+                <p className="text-sm text-amber-700/85">
+                  You can still see every purchase here. If something looks off, send us a message and include the order ID.
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => router.push("/support")}
+                onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
                 className={secondaryButtonClass}
               >
-                Contact support
+                Get help
               </button>
             </div>
           </SurfacePanel>
@@ -355,46 +371,46 @@ export default function OrdersPageClient() {
         {hydrated && isSignedIn ? (
           <>
             {latestPaidOrder ? (
-              <SurfacePanel className="space-y-5">
+              <SurfacePanel className="space-y-5" appearance="light" accent="blue">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                      What to do next
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Up next
                     </p>
-                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                       Use your latest purchase right away.
                     </h2>
-                    <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                      After checkout, readers should be able to jump back into reading, compare plans, or get help
-                      without digging through settings.
+                    <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
+                      The next move should be obvious: jump back into reading, compare plans, or get help without
+                      digging through settings.
                     </p>
                   </div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
                     {latestOrderGuide.eyebrow}
                   </p>
                 </div>
 
                 <div className="grid gap-6 xl:grid-cols-[0.86fr_1.14fr]">
-                  <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-5">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                      Latest paid receipt
+                  <div className="rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Latest purchase
                     </p>
-                    <h3 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white">
+                    <h3 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
                       {latestOrderGuide.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-7 text-neutral-300">{latestOrderGuide.description}</p>
-                    <div className="mt-5 flex flex-wrap gap-2 text-[11px] text-neutral-300">
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
+                    <p className="mt-3 text-sm leading-7 text-slate-600">{latestOrderGuide.description}</p>
+                    <div className="mt-5 flex flex-wrap gap-2 text-[11px] text-slate-600">
+                      <span className="rounded-full border border-black/8 bg-white px-3 py-1">
                         {latestPaidOrder.packageId}
                       </span>
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
+                      <span className="rounded-full border border-black/8 bg-white px-3 py-1">
                         {formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)}
                       </span>
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
+                      <span className="rounded-full border border-black/8 bg-white px-3 py-1">
                         Paid {formatOrderDate(latestPaidOrder.createdAt)}
                       </span>
                       {hasRecentPaidOrder ? (
-                        <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-emerald-200">
+                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-white px-3 py-1 text-[var(--gush-accent,#2f6bff)]">
                           Recent purchase
                         </span>
                       ) : null}
@@ -407,48 +423,48 @@ export default function OrdersPageClient() {
                       ctaLabel: card.cta,
                     }))}
                     columnsClassName="md:grid-cols-2"
+                    appearance="light"
                   />
                 </div>
               </SurfacePanel>
             ) : null}
 
           <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Refunds
                 </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Know what can be refunded.
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Not every purchase can be refunded.
                 </h2>
               </div>
-              <ul className="space-y-3 text-sm leading-6 text-neutral-300">
-                <li>Only paid orders can be reviewed for refunds.</li>
-                <li>Self-serve refunds depend on billing availability and whether the purchased points have already been used.</li>
-                <li>If self-serve refunds are unavailable, support is the next step.</li>
+              <ul className="space-y-3 text-sm leading-6 text-slate-600">
+                <li>Only completed purchases can be reviewed.</li>
+                <li>If points from the purchase were already used, it may no longer qualify.</li>
+                <li>If you do not see a refund button, send us a message with the order ID.</li>
               </ul>
             </SurfacePanel>
 
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Need help?
                 </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Keep the order ID with your message.
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Keep the order ID handy.
                 </h2>
               </div>
-              <p className="text-sm leading-6 text-neutral-300">
-                Refresh this page after checkout, then include the order ID when you contact support so the team can
-                start from the right receipt.
+              <p className="text-sm leading-6 text-slate-600">
+                If a charge looks wrong, send us a message and include the order ID so we can start in the right place.
               </p>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={() => router.push("/support")}
-                  className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
+                  className={primaryButtonClass}
                 >
-                  Contact support
+                  Get help
                 </button>
                 <button
                   type="button"
@@ -464,41 +480,41 @@ export default function OrdersPageClient() {
         ) : null}
 
         {!hydrated || loading ? (
-          <SurfacePanel>
-            <p className="text-sm text-neutral-400">Pulling your receipts...</p>
+          <SurfacePanel appearance="light" accent="blue">
+            <p className="text-sm text-slate-500">Loading your purchases...</p>
           </SurfacePanel>
         ) : !isSignedIn ? (
-          <SurfacePanel className="space-y-4">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-              Sign in to view your orders
+          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              Sign in to view your purchases
             </h2>
-            <p className="text-sm leading-6 text-neutral-300">
-              Receipts and refund actions are tied to your account, so you will need to sign in first.
+            <p className="text-sm leading-6 text-slate-600">
+              Purchases live on your account, so you will need to sign in first.
             </p>
             <button
               type="button"
               onClick={() => router.push("/signin?returnTo=/orders")}
-              className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+              className={primaryButtonClass}
             >
               Sign in
             </button>
           </SurfacePanel>
         ) : orders.length === 0 ? (
-          <SurfacePanel>
-            <p className="text-sm text-neutral-400">No purchases yet. When you buy points or membership, the receipts will appear here.</p>
+          <SurfacePanel appearance="light" accent="blue">
+            <p className="text-sm text-slate-500">No purchases yet. Point packs and memberships will show up here after you buy them.</p>
           </SurfacePanel>
         ) : (
-          <SurfacePanel className="space-y-5">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Order history
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Purchase history
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  Order timeline
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Recent purchases
                 </h2>
               </div>
-              <p className="text-xs text-neutral-500">{orders.length} entries loaded</p>
+              <p className="text-xs text-slate-500">{orders.length} purchases loaded</p>
             </div>
 
             <div className="space-y-3">
@@ -508,40 +524,34 @@ export default function OrdersPageClient() {
                 return (
                   <div
                     key={order.orderId}
-                    className="rounded-[24px] border border-white/10 bg-black/10 p-4"
+                    className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-semibold text-white">{order.packageId}</p>
-                        <p className="mt-2 text-xs text-neutral-400">
-                          {formatOrderAmount(order.amount, order.currency)} - {order.orderId}
+                        <p className="text-sm font-semibold text-slate-950">{order.packageId}</p>
+                        <p className="mt-2 text-xs text-slate-500">
+                          {formatOrderAmount(order.amount, order.currency)} | {order.orderId}
                         </p>
                       </div>
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-neutral-300">
+                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600">
                         {order.status}
                       </span>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-neutral-400">
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
+                    <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
+                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
                         {orderGuide.eyebrow}
                       </span>
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
+                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
                         Placed {formatOrderDate(order.createdAt)}
                       </span>
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
-                        Receipt synced to account
-                      </span>
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
-                        Use {order.orderId} for support follow-up
-                      </span>
                     </div>
-                    <p className="mt-3 text-sm leading-6 text-neutral-300">{orderGuide.description}</p>
-                    <p className="mt-3 text-sm leading-6 text-neutral-400">
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{orderGuide.description}</p>
+                    <p className="mt-3 text-sm leading-6 text-slate-500">
                       {order.status === "PAID"
                         ? refundActionsEnabled
-                          ? "You can request a refund here while secure billing is active. Approval still depends on the order status and whether the purchased points have been used."
-                          : "This receipt is still valid, but refund requests currently go through support until secure billing actions are enabled."
-                        : "Any status changes stay attached to this receipt so you can track the order over time."}
+                          ? "Keep reading now, or request a refund if this purchase still qualifies."
+                          : "Need help with this order? Send us a message and include the order ID."
+                        : "Any updates to this purchase will appear here."}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {order.status === "PAID" && refundActionsEnabled ? (
@@ -562,19 +572,19 @@ export default function OrdersPageClient() {
                                   item.orderId === order.orderId ? response.data?.order : item,
                                 ),
                               );
-                              setFeedback({ type: "success", text: "Refund requested." });
+                              setFeedback({ type: "success", text: "Refund request sent." });
                             } else {
                               setFeedback({
                                 type: "error",
-                                text: getFriendlyMessage(response.error, response.message || "Refund failed."),
+                                text: getFriendlyMessage(response.error, response.message || "Refund request failed."),
                               });
                             }
                             setWorkingId("");
                           }}
                           className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                             workingId === order.orderId
-                              ? "cursor-not-allowed bg-neutral-700 text-neutral-300"
-                              : "bg-white text-neutral-950 hover:bg-neutral-200"
+                              ? "cursor-not-allowed bg-slate-300 text-slate-500"
+                              : "bg-slate-950 text-white hover:bg-slate-800"
                           }`}
                           disabled={workingId === order.orderId}
                         >
@@ -583,16 +593,16 @@ export default function OrdersPageClient() {
                       ) : order.status === "PAID" ? (
                         <button
                           type="button"
-                          onClick={() => router.push("/support")}
-                          className="rounded-full border border-white/10 bg-black/10 px-3 py-1.5 text-xs font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/10"
+                          onClick={() => router.push(buildSupportHref(order.orderId))}
+                          className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                         >
-                          {STOREFRONT_TERMS.billingSupport}
+                          Get help
                         </button>
                       ) : null}
                       <button
                         type="button"
                         onClick={() => router.push(orderGuide.nextHref)}
-                        className="rounded-full border border-white/10 bg-black/10 px-3 py-1.5 text-xs font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/10"
+                        className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                       >
                         {orderGuide.nextCta}
                       </button>

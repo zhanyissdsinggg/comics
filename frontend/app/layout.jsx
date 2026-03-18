@@ -1,31 +1,15 @@
 import dynamic from "next/dynamic";
 import Script from "next/script";
-import { Fraunces, Geist, Manrope } from "next/font/google";
 import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import { defaultSocialImage } from "../lib/seo";
 import { siteConfig } from "../lib/siteConfig";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const CookieConsent = dynamic(() => import("../components/common/CookieConsent"));
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-const defaultTitle = `${siteConfig.siteName} - Read Comics and Novels Online`;
-
-const bodyFont = Manrope({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const displayFont = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
+const defaultTitle = `${siteConfig.siteName} | Read comics and novels`;
 
 export const metadata = {
   title: {
@@ -86,12 +70,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn(bodyFont.variable, displayFont.variable, "font-sans", geist.variable)}
-    >
-      <body className="min-h-screen bg-neutral-950 font-sans text-neutral-100 antialiased">
+    <html lang="en" suppressHydrationWarning className="font-sans">
+      <body className="min-h-screen font-sans antialiased">
         {GOOGLE_CLIENT_ID ? (
           <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
         ) : null}

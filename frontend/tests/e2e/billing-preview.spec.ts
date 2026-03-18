@@ -55,7 +55,7 @@ test.describe("Billing preview states", () => {
     await expect(page.getByText("Checkout coming soon", { exact: true }).first()).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Checkout coming soon" }).first()).toBeDisabled({
+    await expect(page.getByRole("button", { name: "Coming soon" }).first()).toBeDisabled({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
 
@@ -70,10 +70,10 @@ test.describe("Billing preview states", () => {
     const response = await page.goto("/subscribe", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Membership checkout is currently preview-only.")).toBeVisible({
+    await expect(page.getByText("Starting membership is not live yet. You can still compare every tier here.")).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Checkout coming soon" }).first()).toBeDisabled({
+    await expect(page.getByRole("button", { name: "Coming soon" }).first()).toBeDisabled({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
 

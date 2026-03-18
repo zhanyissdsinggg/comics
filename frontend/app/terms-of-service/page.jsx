@@ -8,7 +8,7 @@ import { siteConfig } from "../../lib/siteConfig";
 
 export const metadata = createPageMetadata({
   title: "Terms of Service",
-  description: `Read the terms that govern access to ${siteConfig.siteName} and the services we provide.`,
+  description: `Read the rules for using ${siteConfig.siteName}, buying content, and keeping your account in good standing.`,
   path: "/terms-of-service",
 });
 
@@ -16,62 +16,62 @@ const effectiveDate = "March 9, 2026";
 
 const TERMS_SECTIONS = [
   {
-    title: "1. Eligibility and accounts",
+    title: "Accounts",
     paragraphs: [
-      "You must provide accurate account information and keep your login credentials secure.",
-      "If you use the platform on behalf of an organization, you confirm that you are authorized to bind that organization.",
+      "Keep your account information accurate and your login credentials secure.",
+      `If you use ${siteConfig.siteName} on behalf of a company or organization, you confirm that you can bind that entity to these Terms.`,
     ],
   },
   {
-    title: "2. Acceptable use",
+    title: "What you cannot do",
     bullets: [
-      "Do not misuse the service, interfere with other users, or attempt to bypass technical restrictions.",
+      `Do not misuse ${siteConfig.siteName}, interfere with other readers, or try to bypass technical limits.`,
       "Do not scrape, reverse engineer, resell, or automate access in ways we have not explicitly approved.",
       "Do not upload unlawful, infringing, fraudulent, or abusive material.",
     ],
   },
   {
-    title: "3. Digital content and purchases",
+    title: "Purchases and digital access",
     paragraphs: [
-      "Purchases, subscriptions, credits, and promotional benefits are licensed for personal use inside the service unless a separate written agreement says otherwise.",
-      "Prices, catalog availability, and promotional rules may change at any time, but those changes will not retroactively remove content you have already lawfully unlocked unless required for legal or operational reasons.",
+      `When you buy packs, memberships, credits, or promo benefits, you are getting personal access inside ${siteConfig.siteName} unless a separate written agreement says otherwise.`,
+      "Prices, catalog availability, and promo rules can change, but we will not retroactively remove content you already unlocked lawfully unless we have to for legal or operational reasons.",
     ],
   },
   {
-    title: "4. Intellectual property",
+    title: "Ownership and rights",
     paragraphs: [
-      `The platform, site design, trademarks, software, and all associated content are owned by ${siteConfig.companyName} or its licensors.`,
-      "These Terms do not transfer ownership to you. You may not reproduce or distribute content outside the service except where the law clearly allows it.",
+      `The site, design, trademarks, software, and all associated content are owned by ${siteConfig.companyName} or its licensors.`,
+      "These Terms do not transfer ownership to you. You may not reproduce or distribute content outside the site except where the law clearly allows it.",
     ],
   },
   {
-    title: "5. Availability and changes",
+    title: "Availability and changes",
     paragraphs: [
-      "We work to keep the service available and accurate, but we do not promise uninterrupted access.",
-      "We may update features, pricing, catalogs, security controls, or supported regions when necessary to maintain the product or comply with law.",
+      `We work to keep ${siteConfig.siteName} available and accurate, but we cannot promise the site will always be uninterrupted.`,
+      "We may change features, pricing, catalog availability, security settings, or supported regions when needed to maintain the product or comply with law.",
     ],
   },
   {
-    title: "6. Suspension and termination",
+    title: "Suspension or termination",
     paragraphs: [
-      "We may suspend or terminate access if you violate these Terms, create risk for the platform, or use the service in a way that harms other users, rights holders, or our operations.",
+      "We may suspend or terminate access if you break these Terms, create risk for the site, or use it in a way that harms other readers, rights holders, or operations.",
     ],
   },
   {
-    title: "7. Warranty disclaimer",
+    title: "Warranty disclaimer",
     paragraphs: [
-      'The service is provided on an "as is" and "as available" basis to the maximum extent permitted by law.',
-      "We do not make guarantees that the service will always be uninterrupted, error-free, or suitable for every purpose.",
+      'The site is provided on an "as is" and "as available" basis to the maximum extent permitted by law.',
+      `We do not guarantee that ${siteConfig.siteName} will always be uninterrupted, error-free, or suitable for every purpose.`,
     ],
   },
   {
-    title: "8. Limitation of liability",
+    title: "Limits on liability",
     paragraphs: [
-      `To the maximum extent permitted by law, ${siteConfig.companyName} will not be liable for indirect, incidental, consequential, special, exemplary, or punitive damages arising from your use of the service.`,
+      `To the maximum extent permitted by law, ${siteConfig.companyName} will not be liable for indirect, incidental, consequential, special, exemplary, or punitive damages arising from your use of the site.`,
     ],
   },
   {
-    title: "9. Governing law",
+    title: "Governing law",
     paragraphs: [
       `These Terms are governed by the laws that apply to the place where ${siteConfig.companyName} operates, without regard to conflict-of-law principles.`,
       "Disputes will be resolved in the courts or forums with competent jurisdiction over that place, unless mandatory law requires a different venue.",
@@ -81,15 +81,14 @@ const TERMS_SECTIONS = [
 
 function LegalSection({ title, paragraphs = [], bullets = [], className = "", children = null }) {
   return (
-    <SurfacePanel className={className}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">Terms section</p>
-      <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">{title}</h2>
-      <div className="mt-4 space-y-4 text-sm leading-7 text-neutral-300">
+    <SurfacePanel className={className} appearance="light" accent="blue">
+      <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">{title}</h2>
+      <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
         {paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
         {bullets.length > 0 ? (
-          <ul className="list-disc space-y-2 pl-5 text-neutral-300 marker:text-emerald-300/80">
+          <ul className="list-disc space-y-2 pl-5 text-slate-600 marker:text-[var(--gush-accent,#2f6bff)]">
             {bullets.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -103,19 +102,19 @@ function LegalSection({ title, paragraphs = [], bullets = [], className = "", ch
 
 function ContactCard() {
   return (
-    <div className="rounded-[24px] border border-white/8 bg-black/20 px-5 py-4 backdrop-blur-sm">
-      <p className="text-sm text-neutral-300">
-        <span className="font-semibold text-white">Email:</span>{" "}
+    <div className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+      <p className="text-sm text-slate-600">
+        <span className="font-semibold text-slate-950">Email:</span>{" "}
         <a
           href={`mailto:${siteConfig.legalEmail}`}
-          className="text-emerald-200 transition hover:text-emerald-100"
+          className="text-[var(--gush-accent,#2f6bff)] transition hover:text-[rgba(47,107,255,0.8)]"
         >
           {siteConfig.legalEmail}
         </a>
       </p>
       {siteConfig.companyAddress ? (
-        <p className="mt-3 text-sm text-neutral-300">
-          <span className="font-semibold text-white">Address:</span> {siteConfig.companyAddress}
+        <p className="mt-3 text-sm text-slate-600">
+          <span className="font-semibold text-slate-950">Address:</span> {siteConfig.companyAddress}
         </p>
       ) : null}
     </div>
@@ -124,46 +123,48 @@ function ContactCard() {
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      <SiteHeader />
-      <main className="px-4 py-8 pb-14 sm:py-10">
+    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <main className="relative px-4 py-8 pb-14 sm:py-10">
         <div className="mx-auto max-w-6xl space-y-8">
-          <InfoPageNav current="terms" />
+          <InfoPageNav current="terms" appearance="light" />
 
           <EditorialHero
-            eyebrow="Legal"
-            title="Terms of Service"
+            appearance="light"
+            accent="blue"
+            eyebrow="Terms"
+            title="Terms, in plain English."
             description={
               <>
-                These Terms govern your use of {siteConfig.siteName}. By accessing or using the site, you agree to follow
-                these Terms, our{" "}
-                <Link href="/privacy-policy" className="text-emerald-200 transition hover:text-emerald-100">
+                These terms cover using {siteConfig.siteName}, buying content, and keeping your account in good standing. By using the site, you agree to these Terms and our{" "}
+                <Link href="/privacy-policy" className="text-[var(--gush-accent,#2f6bff)] transition hover:text-[rgba(47,107,255,0.8)]">
                   Privacy Policy
                 </Link>
-                , and any service-specific rules shown inside the product.
+                .
               </>
             }
-            secondary="The agreement below is arranged into clear sections so users can scan account rules, purchase language, liability, and legal contact details without reading a dense block of prose."
+            secondary="We broke the legal stuff into short sections so it is readable."
             stats={[
               {
                 label: "Effective",
                 value: effectiveDate,
-                hint: "This date marks the active version of the Terms now shown on the site.",
+                hint: "This is the current version of the Terms.",
               },
               {
-                label: "Coverage",
-                value: "Accounts + purchases",
-                hint: "These Terms apply to browsing, accounts, payments, subscriptions, and platform use.",
+                label: "Covers",
+                value: "Browsing + purchases",
+                hint: "Applies to browsing, accounts, memberships, payments, and use of the site.",
               },
               {
-                label: "Content",
-                value: "Licensed use",
-                hint: "Purchases unlock personal access inside the service rather than ownership transfer.",
+                label: "Purchases",
+                value: "Personal access",
+                hint: `What you buy unlocks personal access on ${siteConfig.siteName}. It does not transfer ownership.`,
               },
               {
                 label: "Contact",
                 value: siteConfig.legalEmail,
-                hint: "Formal notices and legal questions should route to this address.",
+                hint: "Formal notices and legal questions should go to this address.",
               },
             ]}
           />
@@ -174,10 +175,10 @@ export default function TermsOfServicePage() {
             ))}
 
             <LegalSection
-              title="10. Contact"
+              title="Legal contact"
               className="xl:col-span-2"
               paragraphs={[
-                "If you have legal questions or need to send a formal notice, use the contact details below.",
+                "If you have a legal question or need to send formal notice, use the contact details below.",
               ]}
             >
               <ContactCard />

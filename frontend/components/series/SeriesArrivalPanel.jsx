@@ -20,56 +20,56 @@ export default function SeriesArrivalPanel({
   }
 
   return (
-    <SurfacePanel className={`mt-8 space-y-5 ${className}`.trim()}>
+    <SurfacePanel className={`mt-8 space-y-5 ${className}`.trim()} appearance="light" accent="blue">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-            Why you're seeing this
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+            A better next click
           </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
             {context.title}
           </h2>
-          <p className="mt-3 text-sm leading-7 text-neutral-300">{context.description}</p>
+          <p className="mt-3 text-sm leading-7 text-slate-600">{context.description}</p>
         </div>
-        <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-left">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Back where you came from
+        <div className="rounded-[24px] border border-black/6 bg-white/84 px-4 py-4 text-left">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            If you want to go back
           </p>
-          <p className="mt-3 text-sm leading-6 text-neutral-300">{context.returnHint}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{context.returnHint}</p>
         </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+        <div className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Source
           </p>
-          <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+          <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
             {context.sourceLabel}
           </p>
-          <p className="mt-2 text-sm leading-6 text-neutral-400">
-            Where this visit started before you landed on the series page.
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Where this visit started before you landed here.
           </p>
         </div>
-        <div className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Landing reason
+        <div className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Why it stood out
           </p>
-          <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+          <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
             {context.laneValue}
           </p>
-          <p className="mt-2 text-sm leading-6 text-neutral-400">
-            Why this title stood out enough to earn the next click.
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            The signal that made this title worth the next click.
           </p>
         </div>
-        <div className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Best next step
+        <div className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Best next move
           </p>
-          <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+          <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
             {context.returnTitle}
           </p>
-          <p className="mt-2 text-sm leading-6 text-neutral-400">{context.returnHint}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-500">{context.returnHint}</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export default function SeriesArrivalPanel({
             });
             router.push(context.sourcePath);
           }}
-          className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+          className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
           {context.returnLabel}
         </button>
@@ -100,7 +100,7 @@ export default function SeriesArrivalPanel({
               });
               router.push(creatorHref);
             }}
-            className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+            className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
           >
             More by this creator
           </button>
@@ -108,7 +108,7 @@ export default function SeriesArrivalPanel({
         <button
           type="button"
           onClick={() => router.push("/rankings?type=popular&window=week")}
-          className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+          className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
         >
           See weekly chart
         </button>

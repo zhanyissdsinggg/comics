@@ -31,7 +31,7 @@ import {
 
 function PanelLoadingSkeleton({ rows = 3 }) {
   return (
-    <SurfacePanel className="space-y-3">
+    <SurfacePanel className="space-y-3" appearance="light" accent="blue">
       {Array.from({ length: rows }).map((_, index) => (
         <Skeleton key={`panel-loading-${rows}-${index}`} className="h-12 w-full rounded-2xl" />
       ))}
@@ -409,7 +409,7 @@ export default function LibraryPage() {
         seriesId: series.id,
         title: series.title,
         eyebrow: sourceLabel || "",
-        subtitle: series.genres?.slice(0, 2).join(" | ") || series.badge || series.status,
+        subtitle: sourceLabel || series.genres?.slice(0, 2).join(" | ") || series.badge || series.status,
         coverTone: series.coverTone,
         coverUrl: series.coverUrl,
         badge: series.badge,
@@ -457,29 +457,64 @@ export default function LibraryPage() {
     ],
     [continueRailItems.length, historyRail.length, isAdultMode, isSignedIn, visibleLibraryItems.length],
   );
+  const resumeSpotlight = continueRailItems[0] || historyRail[0] || null;
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
 
   return (
-    <div className="min-h-screen bg-transparent">
-      <SiteHeader />
-      <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Library"
-          title="Everything you've saved, followed, or started."
-          description="Resume chapters, scan recent visits, and keep your saved series from feeling scattered."
+          title="Your next read should be obvious."
+          description="Resume the last chapter fast, keep saved series in view, and stop hunting through your own shelf."
           secondary={
             isSignedIn
-              ? "Rewards, missions, and reading history stay tied to the current account, so getting back into a story takes less hunting."
-              : "Sign in to unlock check-in rewards, mission payouts, and a library that follows you across sessions."
+              ? "Reading history, saved titles, and rewards stay tied to this account so getting back into a story feels immediate."
+              : "Sign in to keep your shelf, reading history, and rewards in one place."
           }
           stats={libraryStats}
+          appearance="light"
           actions={
-            <button
-              type="button"
-              onClick={() => setShowCollectionManager((value) => !value)}
-              className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-semibold text-neutral-100 transition-colors hover:border-emerald-400/30 hover:bg-emerald-400/10"
-            >
-              {showCollectionManager ? "Close collections" : "Manage collections"}
-            </button>
+            <>
+              {resumeSpotlight?.seriesId && resumeSpotlight?.episodeId ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      buildLibraryReadHref(
+                        resumeSpotlight.seriesId,
+                        resumeSpotlight.episodeId,
+                        "LIBRARY_RESUME_SPOTLIGHT",
+                        "resume_spotlight",
+                      ),
+                    )
+                  }
+                  className={primaryButtonClass}
+                >
+                  Resume now
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => router.push("/search")}
+                  className={primaryButtonClass}
+                >
+                  Find something to start
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowCollectionManager((value) => !value)}
+                className={secondaryButtonClass}
+              >
+                {showCollectionManager ? "Close collections" : "Manage collections"}
+              </button>
+            </>
           }
         />
 
@@ -491,8 +526,8 @@ export default function LibraryPage() {
         ) : null}
 
         {showLibraryStale ? (
-          <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-            Showing cached data. Reconnect to refresh your latest shelves.
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+            Showing saved data while we reconnect.
           </div>
         ) : null}
 
@@ -519,19 +554,22 @@ export default function LibraryPage() {
                 />
               </div>
             ) : (
-              <SurfacePanel className="flex flex-wrap items-center justify-between gap-4">
+              <SurfacePanel className="flex flex-wrap items-center justify-between gap-4" appearance="light" accent="blue">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                     Account sync
                   </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    Sign in to keep this library across devices.
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Take this library with you.
                   </h2>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    Sign in once and keep your shelf, reading history, and rewards synced.
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={openAuthPrompt}
-                  className="inline-flex rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                  className={primaryButtonClass}
                 >
                   Sign in
                 </button>
@@ -539,37 +577,36 @@ export default function LibraryPage() {
             )}
 
             {showCollectionManager ? (
-              <SurfacePanel>
+              <SurfacePanel appearance="light" accent="blue">
                 <CollectionManager onClose={() => setShowCollectionManager(false)} />
               </SurfacePanel>
             ) : null}
 
             {!hasLibrarySignals ? (
-              <SurfacePanel className="space-y-4">
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                     Get started
                   </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                     Start a series or save a favorite.
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-neutral-400">
-                    Read a chapter, follow a series, or open this week's chart so your library has something to bring
-                    you back to.
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    Read a chapter, follow a title, or open this week's chart so your library has something worth returning to.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => router.push("/search")}
-                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                    className={primaryButtonClass}
                   >
                     Search all series
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/rankings?type=popular&window=week")}
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                    className={secondaryButtonClass}
                   >
                     See weekly chart
                   </button>
@@ -577,7 +614,7 @@ export default function LibraryPage() {
                     <button
                       type="button"
                       onClick={openAuthPrompt}
-                      className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                      className={secondaryButtonClass}
                     >
                       Sign in for sync
                     </button>
@@ -588,115 +625,111 @@ export default function LibraryPage() {
 
             <div className="grid gap-6">
               {continueRailItems.length > 0 ? (
-                <SurfacePanel>
-                  <Rail
-                    title="Continue Reading"
-                    items={continueRailItems}
-                    reason="Jump back into unlocked chapters before the reading thread goes cold."
-                    ctaLabel="Resume reading"
-                    href="/library"
-                    onItemClick={(item) => {
-                      if (item.seriesId && item.episodeId) {
-                        router.push(
-                          buildLibraryReadHref(
-                            item.seriesId,
-                            item.episodeId,
-                            "LIBRARY_CONTINUE_RAIL",
-                            "continue_rail",
-                          ),
-                        );
-                        return;
-                      }
-                      if (item.seriesId) {
-                        router.push(
-                          buildLibrarySeriesHref(
-                            item.seriesId,
-                            "LIBRARY_CONTINUE_RAIL",
-                            "continue_rail",
-                          ),
-                        );
-                      }
-                    }}
-                  />
-                </SurfacePanel>
+                <Rail
+                  title="Continue Reading"
+                  items={continueRailItems}
+                  reason="Pick up where you left off before the thread goes cold."
+                  ctaLabel="Resume reading"
+                  href="/library"
+                  appearance="light"
+                  onItemClick={(item) => {
+                    if (item.seriesId && item.episodeId) {
+                      router.push(
+                        buildLibraryReadHref(
+                          item.seriesId,
+                          item.episodeId,
+                          "LIBRARY_CONTINUE_RAIL",
+                          "continue_rail",
+                        ),
+                      );
+                      return;
+                    }
+                    if (item.seriesId) {
+                      router.push(
+                        buildLibrarySeriesHref(
+                          item.seriesId,
+                          "LIBRARY_CONTINUE_RAIL",
+                          "continue_rail",
+                        ),
+                      );
+                    }
+                  }}
+                />
               ) : null}
 
               {historyRail.length > 0 ? (
-                <SurfacePanel>
-                  <Rail
-                    title="Reading History"
-                    items={historyRail}
-                    reason="Recent sessions stay one tap away when you want to retrace a title."
-                    ctaLabel="Review History"
-                    href="/library"
-                    onItemClick={(item) => {
-                      if (item.seriesId && item.episodeId) {
-                        router.push(
-                          buildLibraryReadHref(
-                            item.seriesId,
-                            item.episodeId,
-                            "LIBRARY_HISTORY_RAIL",
-                            "history_rail",
-                          ),
-                        );
-                        return;
-                      }
-                      if (item.seriesId) {
-                        router.push(
-                          buildLibrarySeriesHref(
-                            item.seriesId,
-                            "LIBRARY_HISTORY_RAIL",
-                            "history_rail",
-                          ),
-                        );
-                      }
-                    }}
-                  />
-                </SurfacePanel>
+                <Rail
+                  title="Reading History"
+                  items={historyRail}
+                  reason="Recent sessions stay close when you want to retrace a title."
+                  ctaLabel="Review History"
+                  href="/library"
+                  appearance="light"
+                  onItemClick={(item) => {
+                    if (item.seriesId && item.episodeId) {
+                      router.push(
+                        buildLibraryReadHref(
+                          item.seriesId,
+                          item.episodeId,
+                          "LIBRARY_HISTORY_RAIL",
+                          "history_rail",
+                        ),
+                      );
+                      return;
+                    }
+                    if (item.seriesId) {
+                      router.push(
+                        buildLibrarySeriesHref(
+                          item.seriesId,
+                          "LIBRARY_HISTORY_RAIL",
+                          "history_rail",
+                        ),
+                      );
+                    }
+                  }}
+                />
               ) : null}
 
               {visibleLibraryItems.length > 0 ? (
-                <SurfacePanel>
-                  <Rail
-                    title="Your Library"
-                    items={visibleLibraryItems}
-                    reason="Followed and bookmarked titles gathered into your current catalog view."
-                    ctaLabel="Manage Shelf"
-                    href="/library"
-                    onItemClick={(item) => {
-                      if (item.seriesId) {
-                        router.push(
-                          buildLibrarySeriesHref(
-                            item.seriesId,
-                            "LIBRARY_SHELF_RAIL",
-                            "library_shelf",
-                          ),
-                        );
-                      }
-                    }}
-                  />
-                </SurfacePanel>
+                <Rail
+                  title="Your Library"
+                  items={visibleLibraryItems}
+                  reason="Saved and followed titles gathered into your current catalog view."
+                  ctaLabel="Manage Shelf"
+                  href="/library"
+                  appearance="light"
+                  onItemClick={(item) => {
+                    if (item.seriesId) {
+                      router.push(
+                        buildLibrarySeriesHref(
+                          item.seriesId,
+                          "LIBRARY_SHELF_RAIL",
+                          "library_shelf",
+                        ),
+                      );
+                    }
+                  }}
+                />
               ) : null}
 
               {recommendedItems.length > 0 ? (
-                <SurfacePanel>
-                  <Rail
-                    title="Recommended for You"
-                    items={recommendedItems}
-                    reason={recommendedRailReason}
-                    ctaLabel="View Chart"
-                    href="/rankings?type=popular&window=week"
-                    onItemClick={(item) =>
-                      router.push(
-                        buildLibrarySeriesHref(
-                          item.id,
-                          item.entryPoint || "LIBRARY_RECOMMENDED_RAIL",
-                          item.campaignId || "recommended_rail",
-                        ),
-                      )
-                    }
-                  />
-                </SurfacePanel>
+                <Rail
+                  title="Recommended for You"
+                  items={recommendedItems}
+                  reason={recommendedRailReason}
+                  ctaLabel="View Chart"
+                  href="/rankings?type=popular&window=week"
+                  appearance="light"
+                  onItemClick={(item) =>
+                    router.push(
+                      buildLibrarySeriesHref(
+                        item.id,
+                        item.entryPoint || "LIBRARY_RECOMMENDED_RAIL",
+                        item.campaignId || "recommended_rail",
+                      ),
+                    )
+                  }
+                />
               ) : null}
 
             </div>

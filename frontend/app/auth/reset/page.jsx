@@ -12,14 +12,14 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   }
 
   const toneMap = {
-    neutral: "border-white/10 bg-white/[0.04] text-neutral-300",
-    success: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
-    error: "border-red-500/30 bg-red-500/10 text-red-200",
+    neutral: "border-black/8 bg-[#f8f9fc] text-slate-600",
+    success: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    error: "border-red-200 bg-red-50 text-red-600",
   };
 
   return (
     <div className={`rounded-2xl border px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}>
-      {title ? <p className="text-sm font-semibold text-white">{title}</p> : null}
+      {title ? <p className="text-sm font-semibold text-slate-950">{title}</p> : null}
       {message ? <p className="mt-1 text-sm leading-6">{message}</p> : null}
     </div>
   );
@@ -40,6 +40,12 @@ function ResetPageContent() {
   }, [searchParams]);
 
   const hasToken = Boolean(token);
+  const inputClassName =
+    "w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.18)] focus:ring-4 focus:ring-[rgba(47,107,255,0.08)]";
+  const primaryButtonClass =
+    "w-full rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
+  const secondaryButtonClass =
+    "w-full rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-60";
 
   const handleSendResetLink = async () => {
     const normalizedEmail = String(email || "").trim();
@@ -121,35 +127,35 @@ function ResetPageContent() {
 
   return (
     <EmailLinkActionShell
-      eyebrow="Account recovery"
-      title="Reset your password without the awkward extra steps."
-      description="A top-tier reader site should let people recover access quickly, clearly, and without exposing raw tokens or confusing utility copy."
-      asideTitle="What happens next"
+      eyebrow="Account access"
+      title="Reset your password"
+      description="Get back into your account in a minute."
+      asideTitle="What to do"
       asideBody={
         hasToken
-          ? "We detected a reset link from your email. Set a new password here, then we will send you back to sign in."
-          : "Enter your account email and we will send a fresh reset link. For security, the message looks the same whether the address exists or not."
+          ? "Your reset link is already here. Choose a new password and we'll send you back to sign in."
+          : "Enter your account email and we'll send a fresh reset link. For security, the message looks the same whether the address exists or not."
       }
     >
       <div className="space-y-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-200/80">
+        <div className="relative">
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">
             Password reset
           </p>
-          <h2 className="mt-3 text-2xl font-semibold text-white">
-            {hasToken ? "Set a new password" : "Need a fresh reset email?"}
+          <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+            {hasToken ? "Choose a new password" : "Need another reset email?"}
           </h2>
-          <p className="mt-3 text-sm leading-6 text-neutral-400">
+          <p className="mt-3 text-sm leading-6 text-slate-600">
             {hasToken
-              ? "Your reset link is already loaded from the email you opened. Enter the new password you want to use."
-              : "If the previous link expired or opened on another device, send yourself a new one here."}
+              ? "The reset link is already loaded from the email you opened."
+              : "If the old link expired or opened on another device, send a new one here."}
           </p>
         </div>
 
         {hasToken ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-neutral-300">
-              Reset link detected from your email. No manual token entry needed.
+            <div className="rounded-2xl border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-3 text-sm text-slate-700">
+              Reset link loaded from your email. No code field required.
             </div>
             <input
               type="password"
@@ -157,15 +163,15 @@ function ResetPageContent() {
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Choose a new password"
               autoComplete="new-password"
-              className="w-full rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400/50"
+              className={inputClassName}
             />
             <button
               type="button"
               disabled={submitting}
               onClick={handleResetPassword}
-              className="w-full rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className={primaryButtonClass}
             >
-              {submitting ? "Saving your new password..." : "Save new password"}
+              {submitting ? "Saving..." : "Save new password"}
             </button>
             <button
               type="button"
@@ -175,9 +181,9 @@ function ResetPageContent() {
                 setPassword("");
                 setStatus(null);
               }}
-              className="w-full rounded-full border border-white/12 px-5 py-3 text-sm font-semibold text-neutral-200 transition hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-60"
+              className={secondaryButtonClass}
             >
-              Use a fresh reset email instead
+              Send me a new reset email
             </button>
           </div>
         ) : (
@@ -188,29 +194,29 @@ function ResetPageContent() {
               onChange={(event) => setEmail(event.target.value)}
               placeholder="name@example.com"
               autoComplete="email"
-              className="w-full rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400/50"
+              className={inputClassName}
             />
             <button
               type="button"
               disabled={submitting}
               onClick={handleSendResetLink}
-              className="w-full rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className={primaryButtonClass}
             >
-              {submitting ? "Sending reset email..." : "Email me a reset link"}
+              {submitting ? "Sending..." : "Email me a reset link"}
             </button>
           </div>
         )}
 
         <StatusNotice tone={status?.tone} title={status?.title} message={status?.message} />
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-6 text-neutral-400">
+        <div className="rounded-2xl border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600">
           Signed in already? Head back to{" "}
-          <Link href="/account" className="font-semibold text-white hover:text-emerald-200">
+          <Link href="/account" className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#2f6bff)]">
             your account
           </Link>
-          . Need help with a stuck email? Reach our{" "}
-          <Link href="/support" className="font-semibold text-white hover:text-emerald-200">
-            support team
+          . Need help with a missing email? Contact{" "}
+          <Link href="/support" className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#2f6bff)]">
+            us
           </Link>
           .
         </div>
@@ -221,7 +227,7 @@ function ResetPageContent() {
 
 export default function ResetPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#050816]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#f4f6fb]" />}>
       <ResetPageContent />
     </Suspense>
   );

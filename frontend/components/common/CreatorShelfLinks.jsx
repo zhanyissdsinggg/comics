@@ -70,17 +70,23 @@ export default function CreatorShelfLinks({
   maxCreators = 6,
   compact = false,
   className = "",
+  appearance = "default",
 }) {
   const router = useRouter();
   const creators = useMemo(() => collectCreators(items, maxCreators), [items, maxCreators]);
+  const isLight = appearance === "light";
 
   if (creators.length === 0) {
     return null;
   }
 
   const baseClassName = compact
-    ? "rounded-[24px] border border-white/10 bg-white/[0.025] px-3 py-3"
-    : "rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 sm:px-5";
+    ? isLight
+      ? "rounded-[24px] border border-black/6 bg-white/76 px-3 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.05)]"
+      : "rounded-[24px] border border-white/10 bg-white/[0.025] px-3 py-3"
+    : isLight
+      ? "rounded-[24px] border border-black/6 bg-white/80 px-4 py-4 shadow-[0_14px_32px_rgba(15,23,42,0.05)] sm:px-5"
+      : "rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 sm:px-5";
 
   const handleClick = (creator) => {
     const targetPath = buildCreatorHref(creator.name);
@@ -108,13 +114,13 @@ export default function CreatorShelfLinks({
     <div className={`${baseClassName} ${className}`.trim()}>
       <div className={compact ? "flex flex-col gap-3" : "space-y-3"}>
         <div className={compact ? "flex flex-wrap items-center gap-2" : "space-y-2"}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+          <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-emerald-300/80"}`}>
             {label}
           </p>
           {title ? (
-            <h3 className="font-display text-lg font-semibold tracking-tight text-white sm:text-xl">{title}</h3>
+            <h3 className={`font-display text-lg font-semibold tracking-tight sm:text-xl ${isLight ? "text-slate-950" : "text-white"}`}>{title}</h3>
           ) : null}
-          {description ? <p className="max-w-3xl text-sm leading-6 text-neutral-400">{description}</p> : null}
+          {description ? <p className={`max-w-3xl text-sm leading-6 ${isLight ? "text-slate-500" : "text-neutral-400"}`}>{description}</p> : null}
         </div>
 
         <div className="flex flex-wrap gap-2.5">
@@ -123,16 +129,20 @@ export default function CreatorShelfLinks({
               key={creator.slug}
               type="button"
               onClick={() => handleClick(creator)}
-              className="group rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-left transition hover:border-white/20 hover:bg-white/[0.08]"
+              className={`group rounded-full px-3.5 py-2 text-left transition ${
+                isLight
+                  ? "border border-black/8 bg-[#f8f9fc] hover:border-black/12 hover:bg-white"
+                  : "border border-white/10 bg-white/[0.05] hover:border-white/20 hover:bg-white/[0.08]"
+              }`}
             >
               <span className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-white">{creator.name}</span>
-                <span className="text-[11px] uppercase tracking-[0.18em] text-neutral-500 transition group-hover:text-neutral-400">
+                <span className={`text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}>{creator.name}</span>
+                <span className={`text-[11px] uppercase tracking-[0.18em] transition ${isLight ? "text-slate-400 group-hover:text-slate-500" : "text-neutral-500 group-hover:text-neutral-400"}`}>
                   {creator.titles} title{creator.titles === 1 ? "" : "s"}
                 </span>
                 <span
                   aria-hidden="true"
-                  className="text-sm text-neutral-500 transition group-hover:translate-x-0.5 group-hover:text-neutral-300"
+                  className={`text-sm transition group-hover:translate-x-0.5 ${isLight ? "text-slate-400 group-hover:text-slate-700" : "text-neutral-500 group-hover:text-neutral-300"}`}
                 >
                   &gt;
                 </span>

@@ -251,29 +251,36 @@ export default function AdultHubPage() {
   );
 
   return (
-    <main className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
+    <main className="min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="After hours"
-          title="Browse the 18+ catalog in one place."
-          description="This section is reserved for mature readers and should feel easy to browse once access is confirmed."
-          secondary="Unlock access, compare real titles, and jump straight into completed reads or free unlocks."
+          eyebrow="18+ catalog"
+          title="The protected 18+ catalog, without the awkwardness."
+          description="Private by default. Turn on 18+ browsing only when you want it, then move through mature titles with the same clean discovery flow as the main catalog."
+          secondary={
+            isAdultMode
+              ? "Access is on. Start with the most-read titles, finished series, or the best free-unlock picks."
+              : "Nothing 18+ appears until you sign in and confirm access."
+          }
           stats={adultStats}
+          appearance="light"
+          accent="blue"
           actions={
             isAdultMode ? (
               <>
                 <button
                   type="button"
                   onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  className="rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800"
                 >
                   See 18+ chart
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                  className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                 >
                   See free unlocks
                 </button>
@@ -282,7 +289,7 @@ export default function AdultHubPage() {
               <button
                 type="button"
                 onClick={handleGate}
-                className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className="rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800"
               >
                 Unlock 18+ access
               </button>
@@ -291,7 +298,7 @@ export default function AdultHubPage() {
         />
 
         {showStale ? (
-          <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
             Showing cached 18+ catalog data. Reconnect to refresh the latest titles.
           </div>
         ) : null}
@@ -308,7 +315,7 @@ export default function AdultHubPage() {
             <Skeleton className="h-56 w-full rounded-[28px]" />
           </div>
         ) : seriesList.length === 0 ? (
-          <SurfacePanel>
+          <SurfacePanel appearance="light" accent="blue">
             <EmptyState
               icon="search"
               title="No adult titles are currently available"
@@ -317,42 +324,46 @@ export default function AdultHubPage() {
                 label: "See charts",
                 onClick: () => router.push("/rankings?type=popular&window=week"),
               }}
+              appearance="light"
             />
           </SurfacePanel>
         ) : (
           <div className="space-y-6">
-            <SurfacePanel>
+            <SurfacePanel appearance="light" accent="blue">
               <Rail
                 title="18+ Spotlight"
                 items={spotlightItems}
                 reason="Popular 18+ titles worth opening first."
                 href="/rankings?type=popular&window=week"
                 ctaLabel="See chart"
+                appearance="light"
                 onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
               />
             </SurfacePanel>
 
             {completedItems.length > 0 ? (
-              <SurfacePanel>
+              <SurfacePanel appearance="light" accent="blue">
                 <Rail
                   title="Completed 18+ Series"
                   items={completedItems}
                   reason="Finished 18+ series for readers who want a full binge."
                   href="/rankings?type=completed&window=all"
                   ctaLabel="Browse completed"
+                  appearance="light"
                   onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
                 />
               </SurfacePanel>
             ) : null}
 
             {freeUnlockItems.length > 0 ? (
-              <SurfacePanel>
+              <SurfacePanel appearance="light" accent="blue">
                 <Rail
                   title="Free Unlock 18+ Picks"
                   items={freeUnlockItems}
                   reason="18+ titles with free unlock value before you spend points."
                   href="/rankings?type=ttf&window=all"
                   ctaLabel="See free unlocks"
+                  appearance="light"
                   onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
                 />
               </SurfacePanel>

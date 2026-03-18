@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, Zap, Gift, Star, Sparkles } from "lucide-react";
+import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
@@ -24,15 +24,15 @@ import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 const PLAN_FIT_GUIDE = {
   basic: {
     title: "Light readers",
-    description: "For readers who unlock a few premium episodes each week and want a small discount without replacing point packs.",
+    description: "Good for readers who unlock a few chapters each week and want a lighter monthly spend.",
   },
   pro: {
     title: "Weekly regulars",
-    description: "For readers who follow multiple series and want discounts plus a stronger daily free-read routine.",
+    description: "Best for readers following multiple series who want stronger savings and more free reads.",
   },
   vip: {
     title: "Daily binge readers",
-    description: "For readers treating the site like a primary entertainment subscription and expecting the richest perk stack.",
+    description: "Built for readers who use Gush constantly and want the fullest set of monthly benefits.",
   },
 };
 
@@ -45,7 +45,6 @@ export default function SubscribePage() {
   const [planCatalog, setPlanCatalogState] = useState(getPlanCatalog());
   const [billingAvailability, setBillingAvailability] = useState(null);
   const isActive = Boolean(subscription?.active);
-  const baseUnlockPrice = 5;
   const returnTo = searchParams.get("returnTo") || "/account";
 
   const routeAttribution = useMemo(
@@ -104,9 +103,7 @@ export default function SubscribePage() {
 
   const handleSubscribe = async (planId) => {
     if (!subscriptionActionsEnabled) {
-      setFeedback(
-        "Membership checkout is currently preview-only. You can still compare plans below.",
-      );
+      setFeedback("You can compare every plan right now. Starting membership opens once checkout is live.");
       return;
     }
 
@@ -139,7 +136,7 @@ export default function SubscribePage() {
     }
 
     setFeedback(
-      getFriendlyMessage(response.error, response.message || "Subscription could not be updated right now."),
+      getFriendlyMessage(response.error, response.message || "We couldn't update membership right now."),
     );
   };
 
@@ -155,7 +152,7 @@ export default function SubscribePage() {
     setWorkingId("");
     if (!response.ok) {
       setFeedback(
-        getFriendlyMessage(response.error, response.message || "Subscription could not be updated right now."),
+        getFriendlyMessage(response.error, response.message || "We couldn't update membership right now."),
       );
     }
   };
@@ -176,83 +173,89 @@ export default function SubscribePage() {
     return [
       {
         label: "Status",
-        value: isActive ? "Active" : "Available",
+        value: isActive ? "Active" : "Ready",
         hint: isActive
-          ? `${subscription?.planId || "Membership"} is currently attached to this wallet.`
-          : "Choose a tier to unlock discounts and daily free reads.",
+          ? `${subscription?.planId || "Membership"} is active on this account.`
+          : "Pick a tier when you want lower prices, free reads, and monthly points.",
       },
       {
-        label: "Discount",
+        label: "Best savings",
         value: `${maxDiscount}%`,
-        hint: "Top unlock discount across the current catalog.",
+        hint: "Highest unlock discount in the current lineup.",
       },
       {
-        label: "Daily Free",
+        label: "Free reads",
         value: maxDailyFree.toLocaleString(),
-        hint: "Highest free-episode allowance available today.",
+        hint: "Most free reads a plan gives you in one day.",
       },
       {
-        label: "Bonus Pts",
+        label: "Monthly points",
         value: maxVoucher.toLocaleString(),
         hint: subscription?.renewAt
           ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
-          : "Monthly voucher points on qualifying plans.",
+          : "Extra monthly points on eligible plans.",
       },
     ];
   }, [isActive, planCatalog, subscription?.planId, subscription?.renewAt]);
 
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
-    "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
+
   const billingGuardrails = useMemo(
     () => [
       {
-        title: "Monthly billing stays obvious",
-        body: "Tier pricing and perk math stay visible on the comparison page so users are not guessing what activates after checkout.",
+        title: "Pricing should be obvious",
+        body: "You should know the price and what changes before you start a plan.",
       },
       {
-        title: "Receipts belong in Orders",
-        body: "Membership follow-up should always have a receipt trail, so billing changes stay anchored to the same order history surface.",
+        title: "Receipts stay easy to find",
+        body: "Orders is where renewals and charges should stay visible.",
       },
       {
-        title: subscriptionPreviewOnly ? "Activation is preview-only" : "Plan changes stay intentional",
+        title: subscriptionPreviewOnly ? "Membership starts later" : "Changing plans stays simple",
         body: subscriptionPreviewOnly
-          ? "Users can compare tiers now, then return to activate once secure billing is available."
-          : "Users can start or cancel from the same account system without hunting for hidden billing controls.",
+          ? "You can compare every tier now and come back when checkout is open."
+          : "Starting or canceling a plan should never feel hidden.",
       },
       {
-        title: "Support is the fallback path",
-        body: "Renewal questions, edge-case refunds, or mismatched plan states should route cleanly into Support with the account context attached.",
+        title: "Help is still close",
+        body: "If billing gets weird, support should still be one click away.",
       },
     ],
     [subscriptionPreviewOnly],
   );
 
   return (
-    <div className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
-      <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
+          appearance="light"
+          accent="blue"
           eyebrow="Membership"
-          title="Pick the plan that fits how you read."
+          title="Pick the plan that fits your reading rhythm."
           description={
             subscriptionPreviewOnly
-              ? "Compare every tier, discount, and monthly bonus now, then come back to activate when secure billing is ready."
-              : "Compare every tier, perk, and monthly bonus in one place, then start the plan that matches your reading pace."
+              ? "Look through every tier now. Starting membership opens here once checkout is ready."
+              : "Choose the tier that feels right for how often you read, not just for the lowest price."
           }
           secondary={
             subscriptionPreviewOnly
-              ? "Plan comparison stays live, but activation is still disabled for now."
-              : "Each tier keeps the same value from comparison through activation."
+              ? "Plans are live to compare. Starting is still paused for now."
+              : "Everything important should be clear before you start."
           }
           stats={subscriptionHeroStats}
           actions={
             <>
               <button
                 type="button"
-                onClick={() => router.push("/account")}
-                className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                onClick={() => router.push(returnTo)}
+                className={primaryButtonClass}
               >
-                Account
+                Back
               </button>
               <button
                 type="button"
@@ -265,28 +268,29 @@ export default function SubscribePage() {
           }
         />
 
-        <SurfacePanel id="membership-plans" className="space-y-6">
+        <SurfacePanel id="membership-plans" className="space-y-6" appearance="light" accent="blue">
           {feedback ? (
-            <div className="rounded-[24px] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            <div className="rounded-[24px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {feedback}
             </div>
           ) : null}
           {subscriptionPreviewOnly ? (
-            <div className="rounded-[24px] border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-50">
-              Membership checkout is currently preview-only.
+            <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+              Starting membership is not live yet. You can still compare every tier here.
             </div>
           ) : null}
+
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Plans
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                Three tiers for different reading habits
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Three tiers. Three reading habits.
               </h2>
             </div>
-            <p className="text-xs text-neutral-500">
-              {isActive ? `Current plan: ${subscription?.planId}` : `${SUBSCRIPTION_OFFERS.length} tiers available`}
+            <p className="text-xs text-slate-500">
+              {isActive ? `Current: ${subscription?.planId}` : `${SUBSCRIPTION_OFFERS.length} tiers available`}
             </p>
           </div>
 
@@ -304,103 +308,106 @@ export default function SubscribePage() {
               return (
                 <div
                   key={plan.id}
-                  className={`relative rounded-[28px] border p-5 shadow-[0_18px_60px_rgba(0,0,0,0.18)] backdrop-blur-xl transition ${
+                  className={`relative rounded-[30px] border p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 ${
                     isBest
-                      ? "border-emerald-500/35 bg-[linear-gradient(160deg,rgba(16,185,129,0.16),rgba(10,10,10,0.92))]"
-                      : "border-white/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]"
-                  } ${isCurrent ? "ring-2 ring-emerald-400/50" : ""}`}
+                      ? "border-[rgba(47,107,255,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))]"
+                      : "border-black/6 bg-white"
+                  } ${isCurrent ? "ring-2 ring-[rgba(47,107,255,0.22)]" : ""}`}
                 >
                   {isBest ? (
-                    <div className="absolute -top-3 left-5 rounded-full bg-emerald-400 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-neutral-950">
+                    <div className="absolute -top-3 left-5 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-white">
                       Best value
                     </div>
                   ) : null}
+
                   <div className="space-y-5 pt-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-3">
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-                            isBest ? "bg-emerald-400 text-neutral-950" : "bg-black/30 text-neutral-200"
+                            isBest
+                              ? "bg-[rgba(47,107,255,0.1)] text-[var(--gush-accent,#2f6bff)]"
+                              : "bg-[#f8f9fc] text-slate-600"
                           }`}
                         >
                           {getPlanIcon(plan.id)}
                         </div>
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                             {plan.tag}
                           </p>
-                          <h3 className="mt-2 font-display text-3xl font-semibold tracking-tight text-white">
+                          <h3 className="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-950">
                             {plan.title}
                           </h3>
-                          <p className="mt-3 max-w-xs text-sm leading-6 text-neutral-400">
-                            {PLAN_FIT_GUIDE[key]?.description || "Membership perks tuned for recurring readers."}
+                          <p className="mt-3 max-w-xs text-sm leading-6 text-slate-600">
+                            {PLAN_FIT_GUIDE[key]?.description || "Built for readers who come back often."}
                           </p>
                         </div>
                       </div>
                       {isCurrent ? (
-                        <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-300">
+                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
                           Active
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="space-y-2 border-t border-white/10 pt-5">
+                    <div className="space-y-2 border-t border-black/6 pt-5">
                       <div className="flex items-end gap-2">
-                        <span className="font-display text-4xl font-semibold tracking-tight text-white">
+                        <span className="font-display text-4xl font-semibold tracking-tight text-slate-950">
                           {priceLabel}
                         </span>
-                        <span className="pb-1 text-sm text-neutral-400">/month</span>
+                        <span className="pb-1 text-sm text-slate-500">/month</span>
                       </div>
                       {perks?.discountPct ? (
-                        <div className="inline-flex items-center gap-2 rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
                           <Zap className="h-3.5 w-3.5" />
-                          Save {perks.discountPct}% on unlocks
+                          Save {perks.discountPct}% on locked chapters
                         </div>
                       ) : null}
                     </div>
 
-                    <div className="space-y-3 border-t border-white/10 pt-5 text-sm text-neutral-300">
-                      <div className="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
+                    <div className="space-y-3 border-t border-black/6 pt-5 text-sm text-slate-600">
+                      <div className="rounded-2xl border border-black/8 bg-[#f8f9fc] px-4 py-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                           Best for
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-neutral-200">
+                        <p className="mt-2 text-sm leading-6 text-slate-700">
                           {PLAN_FIT_GUIDE[key]?.title || "Recurring readers"}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400/15">
-                          <Check className="h-3 w-3 text-emerald-300" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(47,107,255,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent,#2f6bff)]" />
                         </div>
                         <span>
-                          <span className="font-semibold text-white">{perks?.dailyFreeUnlocks ?? "-"}</span> daily free episodes
+                          <span className="font-semibold text-slate-950">{perks?.dailyFreeUnlocks ?? "-"}</span> free reads a day
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400/15">
-                          <Check className="h-3 w-3 text-emerald-300" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(47,107,255,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent,#2f6bff)]" />
                         </div>
                         <span>
-                          <span className="font-semibold text-white">
+                          <span className="font-semibold text-slate-950">
                             {perks?.ttfMultiplier ? `${Math.round(perks.ttfMultiplier * 100)}%` : "-"}
                           </span>{" "}
-                          of the normal free-unlock wait
+                          of the normal wait
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400/15">
-                          <Check className="h-3 w-3 text-emerald-300" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(47,107,255,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent,#2f6bff)]" />
                         </div>
                         <span>
-                          <span className="font-semibold text-white">{perks?.voucherPts ?? "-"}</span> monthly bonus points
+                          <span className="font-semibold text-slate-950">{perks?.voucherPts ?? "-"}</span> monthly points
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400/15">
-                          <Check className="h-3 w-3 text-emerald-300" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(47,107,255,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent,#2f6bff)]" />
                         </div>
                         <span>
-                          Save roughly {perks?.discountPct ? Math.round((perks.discountPct / 100) * baseUnlockPrice * 10) : 0} pts per 10 unlocks
+                          Better value if you unlock often
                         </span>
                       </div>
                     </div>
@@ -409,22 +416,18 @@ export default function SubscribePage() {
                       type="button"
                       onClick={() => handleSubscribe(key)}
                       disabled={workingId === key || isCurrent || !subscriptionActionsEnabled}
-                      className={`w-full rounded-full px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                        isBest
-                          ? "bg-emerald-400 text-neutral-950 hover:bg-emerald-300"
-                          : "bg-white text-neutral-950 hover:bg-neutral-200"
-                      }`}
+                      className={primaryButtonClass}
                     >
                       {isCurrent
                         ? "Current plan"
                         : !subscriptionActionsEnabled
-                          ? "Checkout coming soon"
+                          ? "Coming soon"
                           : workingId === key
                             ? "Processing..."
-                            : "Choose plan"}
+                            : "Pick this plan"}
                     </button>
-                    <p className="text-xs leading-5 text-neutral-500">
-                      Monthly plan management stays tied to Account, with receipt follow-up available from Orders and Support.
+                    <p className="text-xs leading-5 text-slate-500">
+                      Charges stay on your account, with receipts in Orders and help in Support.
                     </p>
                   </div>
                 </div>
@@ -433,68 +436,68 @@ export default function SubscribePage() {
           </div>
         </SurfacePanel>
 
-        <SurfacePanel className="hidden sm:block">
-          <h3 className="font-display text-2xl font-semibold tracking-tight text-white">Compare Plans</h3>
+        <SurfacePanel className="hidden sm:block" appearance="light" accent="blue">
+          <h3 className="font-display text-2xl font-semibold tracking-tight text-slate-950">See the difference</h3>
           <div className="mt-6 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-neutral-400">
+                <tr className="border-b border-black/8 text-left text-slate-500">
                   <th className="pb-4 font-semibold">Feature</th>
                   {SUBSCRIPTION_OFFERS.map((plan) => (
-                    <th key={plan.id} className="pb-4 text-center font-semibold text-white">
+                    <th key={plan.id} className="pb-4 text-center font-semibold text-slate-950">
                       {plan.title}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
+              <tbody className="divide-y divide-black/8">
                 <tr>
-                  <td className="py-4 text-neutral-300">Daily Free Episodes</td>
+                  <td className="py-4 text-slate-600">Free Reads / Day</td>
                   {SUBSCRIPTION_OFFERS.map((plan) => {
                     const key = plan.id.replace("subscribe_", "");
                     const perks = planCatalog[key];
                     return (
-                      <td key={plan.id} className="py-4 text-center font-semibold text-white">
+                      <td key={plan.id} className="py-4 text-center font-semibold text-slate-950">
                         {perks?.dailyFreeUnlocks ?? "-"}
                       </td>
                     );
                   })}
                 </tr>
                 <tr>
-                  <td className="py-4 text-neutral-300">Free Unlock Wait</td>
+                  <td className="py-4 text-slate-600">Wait Time</td>
                   {SUBSCRIPTION_OFFERS.map((plan) => {
                     const key = plan.id.replace("subscribe_", "");
                     const perks = planCatalog[key];
                     return (
-                      <td key={plan.id} className="py-4 text-center font-semibold text-white">
+                      <td key={plan.id} className="py-4 text-center font-semibold text-slate-950">
                         {perks?.ttfMultiplier ? `${Math.round(perks.ttfMultiplier * 100)}%` : "-"}
                       </td>
                     );
                   })}
                 </tr>
                 <tr>
-                  <td className="py-4 text-neutral-300">Monthly Bonus Points</td>
+                  <td className="py-4 text-slate-600">Monthly Points</td>
                   {SUBSCRIPTION_OFFERS.map((plan) => {
                     const key = plan.id.replace("subscribe_", "");
                     const perks = planCatalog[key];
                     return (
-                      <td key={plan.id} className="py-4 text-center font-semibold text-white">
+                      <td key={plan.id} className="py-4 text-center font-semibold text-slate-950">
                         {perks?.voucherPts ?? "-"}
                       </td>
                     );
                   })}
                 </tr>
                 <tr>
-                  <td className="py-4 text-neutral-300">Unlock Discount</td>
+                  <td className="py-4 text-slate-600">Unlock Savings</td>
                   {SUBSCRIPTION_OFFERS.map((plan) => {
                     const key = plan.id.replace("subscribe_", "");
                     const perks = planCatalog[key];
                     return (
                       <td key={plan.id} className="py-4 text-center">
                         {perks?.discountPct ? (
-                          <span className="font-semibold text-emerald-300">{perks.discountPct}%</span>
+                          <span className="font-semibold text-[var(--gush-accent,#2f6bff)]">{perks.discountPct}%</span>
                         ) : (
-                          <span className="text-neutral-500">-</span>
+                          <span className="text-slate-400">-</span>
                         )}
                       </td>
                     );
@@ -506,23 +509,23 @@ export default function SubscribePage() {
         </SurfacePanel>
 
         <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-          <SurfacePanel className="space-y-5">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Billing safeguards
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Before you start
               </p>
-              <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
-                Membership should feel clear before and after activation.
+              <h3 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Membership should feel easy to understand.
               </h3>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {billingGuardrails.map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-[24px] border border-white/10 bg-black/10 p-4"
+                  className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4"
                 >
-                  <p className="text-sm font-semibold text-white">{item.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-neutral-400">{item.body}</p>
+                  <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -530,7 +533,7 @@ export default function SubscribePage() {
               <button
                 type="button"
                 onClick={() => router.push("/orders")}
-                className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className={primaryButtonClass}
               >
                 View orders
               </button>
@@ -544,13 +547,13 @@ export default function SubscribePage() {
             </div>
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Tier fit guide
               </p>
-              <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
-                Match the plan to the reader instead of just the price.
+              <h3 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Choose by habit, not just price.
               </h3>
             </div>
             <div className="space-y-3">
@@ -562,26 +565,26 @@ export default function SubscribePage() {
                 return (
                   <div
                     key={plan.id}
-                    className="rounded-[24px] border border-white/10 bg-black/10 p-4"
+                    className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-white">{plan.title}</p>
-                        <p className="mt-2 text-sm leading-6 text-neutral-400">{guide?.description}</p>
+                        <p className="text-sm font-semibold text-slate-950">{plan.title}</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">{guide?.description}</p>
                       </div>
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-neutral-300">
+                      <span className="rounded-full border border-black/8 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600">
                         {perks?.discountPct ?? 0}% off
                       </span>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-neutral-400">
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
-                        {perks?.dailyFreeUnlocks ?? "-"} daily free
+                    <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-600">
+                      <span className="rounded-full border border-black/8 bg-white px-3 py-1">
+                        {perks?.dailyFreeUnlocks ?? "-"} free reads
                       </span>
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
-                        {perks?.voucherPts ?? "-"} monthly bonus pts
+                      <span className="rounded-full border border-black/8 bg-white px-3 py-1">
+                        {perks?.voucherPts ?? "-"} monthly points
                       </span>
-                      <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
-                        {perks?.ttfMultiplier ? `${Math.round(perks.ttfMultiplier * 100)}% wait` : "Standard wait"}
+                      <span className="rounded-full border border-black/8 bg-white px-3 py-1">
+                        {perks?.ttfMultiplier ? `${Math.round(perks.ttfMultiplier * 100)}% wait` : "Normal wait"}
                       </span>
                     </div>
                   </div>
@@ -592,22 +595,22 @@ export default function SubscribePage() {
         </div>
 
         {isActive ? (
-          <SurfacePanel className="border border-emerald-400/25 bg-emerald-500/10">
+          <SurfacePanel className="border-[rgba(47,107,255,0.16)]" appearance="light" accent="blue">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Active subscription
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Active membership
                 </p>
-                <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {subscription?.planId}
                 </h3>
-                <p className="mt-2 text-sm text-neutral-300">
+                <p className="mt-2 text-sm text-slate-600">
                   {subscription?.renewAt
                     ? `Renews on ${new Date(subscription.renewAt).toLocaleDateString()}`
                     : "Renewal date is not available yet."}
                 </p>
-                <p className="mt-2 text-sm text-neutral-400">
-                  Orders keeps receipt history, while Support handles billing edge cases that need a person to step in.
+                <p className="mt-2 text-sm text-slate-500">
+                  Orders keeps your receipts, and Support is there if billing needs someone to step in.
                 </p>
               </div>
               <button
@@ -617,10 +620,10 @@ export default function SubscribePage() {
                 className={secondaryButtonClass}
               >
                 {!subscriptionActionsEnabled
-                  ? "Open support"
+                  ? "Need help?"
                   : workingId === "cancel"
                     ? "Canceling..."
-                    : "Cancel membership"}
+                    : "Cancel plan"}
               </button>
             </div>
           </SurfacePanel>

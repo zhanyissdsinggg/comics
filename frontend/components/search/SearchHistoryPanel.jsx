@@ -117,11 +117,11 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
       {history.length > 0 ? (
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-neutral-300 md:text-base">Recent Searches</h3>
+            <h3 className="text-sm font-medium text-slate-700 md:text-base">Recent</h3>
             <button
               type="button"
               onClick={clearHistory}
-              className="min-h-[44px] rounded-lg px-3 py-2 text-xs text-neutral-500 hover:text-neutral-300 active:bg-neutral-900 md:text-sm"
+              className="min-h-[44px] rounded-lg px-3 py-2 text-xs text-slate-400 hover:text-slate-700 active:bg-slate-100 md:text-sm"
             >
               Clear All
             </button>
@@ -130,10 +130,10 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
             {history.map((keyword, index) => (
               <div
                 key={`${keyword}-${index}`}
-                className="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/50 px-3 py-3 hover:border-neutral-700 md:py-2"
+                className="flex items-center gap-2 rounded-[20px] border border-black/6 bg-white/80 px-3 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.05)] hover:border-black/10 md:py-2"
               >
                 <svg
-                  className="h-4 w-4 flex-shrink-0 text-neutral-500 md:h-5 md:w-5"
+                  className="h-4 w-4 flex-shrink-0 text-slate-400 md:h-5 md:w-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -148,14 +148,14 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
                 <button
                   type="button"
                   onClick={() => handleSearch(keyword)}
-                  className="flex-1 text-left text-sm text-neutral-300 hover:text-white active:text-emerald-400 md:text-base"
+                  className="flex-1 text-left text-sm text-slate-700 hover:text-slate-950 active:text-[var(--gush-accent,#2f6bff)] md:text-base"
                 >
                   {keyword}
                 </button>
                 <button
                   type="button"
                   onClick={() => removeFromHistory(keyword)}
-                  className="flex min-h-[44px] min-w-[44px] flex-shrink-0 items-center justify-center text-neutral-500 hover:text-neutral-300 active:text-red-400"
+                  className="flex min-h-[44px] min-w-[44px] flex-shrink-0 items-center justify-center text-slate-400 hover:text-slate-700 active:text-red-500"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -174,41 +174,41 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
 
       {normalizedHotKeywords.length > 0 ? (
         <div>
-          <h3 className="mb-3 text-sm font-medium text-neutral-300 md:text-base">Trending Right Now</h3>
+          <h3 className="mb-3 text-sm font-medium text-slate-700 md:text-base">Trending searches</h3>
           <div className="space-y-2">
             {normalizedHotKeywords.slice(0, 8).map((keyword, index) => (
               <button
                 key={keyword.id}
                 type="button"
                 onClick={() => handleSearch(keyword.value)}
-                className="flex min-h-[44px] w-full items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900/50 px-3 py-3 text-left hover:border-neutral-700 active:border-emerald-500 active:bg-emerald-500/10 md:py-2"
+                className="flex min-h-[44px] w-full items-center gap-3 rounded-[20px] border border-black/6 bg-white/80 px-3 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.05)] hover:border-black/10 active:border-[var(--gush-accent,#2f6bff)] active:bg-[rgba(47,107,255,0.06)] md:py-2"
               >
                 <span
                   className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-xs font-bold md:h-5 md:w-5 md:text-[10px] ${
                     index < 3
-                      ? "bg-emerald-500 text-white"
-                      : "bg-neutral-800 text-neutral-400"
+                      ? "bg-[var(--gush-accent,#2f6bff)] text-white"
+                      : "bg-slate-100 text-slate-500"
                   }`}
                 >
                   {index + 1}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm text-neutral-300 md:text-base">
+                  <span className="block truncate text-sm text-slate-700 md:text-base">
                     {keyword.label}
                   </span>
                   {keyword.hint ? (
-                    <span className="mt-0.5 block truncate text-xs text-neutral-500">
+                    <span className="mt-0.5 block truncate text-xs text-slate-500">
                       {keyword.hint}
                     </span>
                   ) : null}
                 </span>
                 {keyword.badge ? (
-                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-300">
+                  <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                     {keyword.badge}
                   </span>
                 ) : null}
                 <svg
-                  className="h-4 w-4 flex-shrink-0 text-neutral-500 md:h-5 md:w-5"
+                  className="h-4 w-4 flex-shrink-0 text-slate-400 md:h-5 md:w-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -227,14 +227,14 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
       ) : null}
 
       <div>
-        <h3 className="mb-3 text-sm font-medium text-neutral-300 md:text-base">Try a Lane</h3>
+        <h3 className="mb-3 text-sm font-medium text-slate-700 md:text-base">Browse fast</h3>
         <div className="flex flex-wrap gap-2">
           {quickSearches.map((suggestion) => (
             <button
               key={suggestion.id}
               type="button"
               onClick={() => handleSearch(suggestion.value)}
-              className="min-h-[44px] rounded-full border border-neutral-800 bg-neutral-900/50 px-4 py-2 text-xs text-neutral-400 hover:border-emerald-500 hover:text-emerald-400 active:bg-emerald-500/10 md:text-sm"
+              className="min-h-[44px] rounded-full border border-black/8 bg-white/84 px-4 py-2 text-xs text-slate-500 shadow-[0_8px_22px_rgba(15,23,42,0.04)] hover:border-[var(--gush-accent,#2f6bff)] hover:text-[var(--gush-accent,#2f6bff)] active:bg-[rgba(47,107,255,0.06)] md:text-sm"
             >
               {suggestion.label}
             </button>

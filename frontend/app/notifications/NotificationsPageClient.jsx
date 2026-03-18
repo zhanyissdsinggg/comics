@@ -14,7 +14,7 @@ import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 
 export default function NotificationsPage() {
   const router = useRouter();
-  const { notifications, loadNotifications, markRead } = useNotificationsStore();
+  const { notifications, unreadCount, loadNotifications, markRead } = useNotificationsStore();
   const { isAdultMode } = useAdultGateStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,6 +34,20 @@ export default function NotificationsPage() {
   const handleMarkRead = async (notificationId) => {
     setWorkingId(notificationId);
     const response = await markRead([notificationId]);
+    if (!response.ok) {
+      setError("MARK_ERROR");
+    }
+    setWorkingId(null);
+  };
+
+  const handleMarkAllRead = async () => {
+    const unreadIds = notifications.filter((item) => !item.read).map((item) => item.id);
+    if (unreadIds.length === 0) {
+      return;
+    }
+
+    setWorkingId("__all__");
+    const response = await markRead(unreadIds);
     if (!response.ok) {
       setError("MARK_ERROR");
     }
@@ -129,33 +143,32 @@ export default function NotificationsPage() {
 
   const notificationStats = useMemo(() => {
     const total = notifications.length;
-    const unread = notifications.filter((item) => !item.read).length;
     const promo = notifications.filter((item) => item.type === "PROMO" || item.type === "SUB_VOUCHER").length;
     const episodes = notifications.filter((item) => item.type === "NEW_EPISODE" || item.type === "TTF_READY").length;
 
     return [
       {
         label: "Unread",
-        value: loading ? "..." : unread.toLocaleString(),
-        hint: "Unread messages waiting in the current inbox.",
+        value: loading ? "..." : unreadCount.toLocaleString(),
+        hint: "Messages still waiting for you.",
       },
       {
-        label: "Total",
-        value: loading ? "..." : total.toLocaleString(),
-        hint: "All loaded notifications in this session.",
+        label: "Episodes",
+        value: loading ? "..." : episodes.toLocaleString(),
+        hint: "Chapter and free unlock updates.",
       },
       {
         label: "Offers",
         value: loading ? "..." : promo.toLocaleString(),
-        hint: "Promotion and subscription voucher messages.",
+        hint: "Promos and member offers in this inbox.",
       },
       {
-        label: "Episode",
-        value: loading ? "..." : episodes.toLocaleString(),
-        hint: isAdultMode ? "18+ catalog filtering is active." : "Standard catalog filtering is active.",
+        label: "Total",
+        value: loading ? "..." : total.toLocaleString(),
+        hint: isAdultMode ? "18+ filtering is on." : "Standard catalog is showing.",
       },
     ];
-  }, [isAdultMode, loading, notifications]);
+  }, [isAdultMode, loading, notifications, unreadCount]);
 
   const notificationEventCards = useMemo(() => {
     const unreadEpisode = notifications.find(
@@ -179,41 +192,41 @@ export default function NotificationsPage() {
             eyebrow: "Read next",
             title: `${unreadEpisode.title} is ready when you want to jump back in.`,
             description:
-              "A strong inbox should make the clearest reading return obvious instead of hiding it in a long list.",
+              "The best inbox makes the next chapter obvious instead of burying it in a stack of messages.",
             signalLabel: "Unread",
             signalValue: unreadCount.toLocaleString(),
-            signalHint: "Messages still waiting in this inbox",
+            signalHint: "Messages still waiting",
             ctaLabel: unreadEpisode.ctaLabel || "Open episode",
             onClick: () => handleNavigate(unreadEpisode),
             accentClass:
-              "group border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+              "group border-emerald-100 bg-emerald-50/80 text-slate-900 hover:border-emerald-200 hover:bg-emerald-50",
           }
         : {
             id: "library-return",
             eyebrow: "Back to reading",
-            title: "No urgent episode alert right now? Go back to your library.",
+            title: "Nothing urgent? Go back to your library.",
             description:
-              "When the inbox is quiet, the easiest next step is your saved and unfinished series.",
+              "When the inbox is quiet, your saved and unfinished titles should be the next obvious stop.",
             signalLabel: "Episode alerts",
             signalValue: episodeCount.toLocaleString(),
-            signalHint: "Loaded episode-related messages",
+            signalHint: "Episode updates loaded",
             ctaLabel: "Open library",
             onClick: () => router.push("/library"),
             accentClass:
-              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+              "group border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
           },
       {
         id: "offer-return",
         eyebrow: "Offers",
         title: unreadOffer
           ? `${unreadOffer.title} is the easiest offer to open next.`
-          : "If promotions are all that's left, keep plans and point packs easy to reach.",
+          : "If offers are all that's left, keep the next top-up easy to reach.",
         description: unreadOffer
-          ? "Offer messages only help when they send readers to the right plan or point pack without extra hunting."
-          : "An offer-heavy inbox still needs one clear next step so it does not feel like random system mail.",
+          ? "Offers only work when they send readers to the right plan or point pack without extra hunting."
+          : "Even an offer-heavy inbox needs one clear next step so it does not feel like random mail.",
         signalLabel: "Offers",
         signalValue: offerCount.toLocaleString(),
-        signalHint: "Promo and voucher messages loaded",
+        signalHint: "Offer messages loaded",
         ctaLabel: unreadOffer?.ctaLabel || "See point packs",
         onClick: () => {
           if (unreadOffer) {
@@ -223,49 +236,60 @@ export default function NotificationsPage() {
           router.push(buildPathWithAttribution("/store", { entryPoint: "NOTIFICATION_EVENT_HUB", sourcePath: "/notifications", returnTo: "/notifications" }, { focus: "auto" }));
         },
         accentClass:
-          "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          "group border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
       {
         id: "chart-backup",
         eyebrow: "Keep browsing",
         title: "If the inbox is light, go straight to the charts.",
         description:
-          "Notifications should help readers return, but the charts should always be one tap away when the inbox is quiet.",
+          "Notifications should help readers return, but charts should always be close when the inbox is quiet.",
         signalLabel: "Discovery",
         signalValue: "Charts",
-        signalHint: "Weekly and free unlock charts stay live",
+        signalHint: "Weekly charts stay live",
         ctaLabel: "See charts",
         onClick: () => router.push("/rankings?type=popular&window=week"),
         accentClass:
-          "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+          "group border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
     ];
   }, [handleNavigate, notifications, router]);
   return (
-    <main className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
-      <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Inbox"
-          title="Keep episode updates, promos, and vouchers in one place."
-          description="Open a title, jump to an offer, or mark messages read without losing your place."
-          secondary="Your inbox should help you get back to reading fast, not feel like a pile of system mail."
+          appearance="light"
+          accent="blue"
+          eyebrow="Notifications"
+          title="Only the updates that matter."
+          description="New chapters, offers, and unlocks without the clutter."
+          secondary="Use this page to jump back into a title fast, then clear what you don't need."
           stats={notificationStats}
           actions={
             <>
               <button
                 type="button"
                 onClick={() => router.push("/library")}
-                className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className="rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800"
               >
                 Library
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/rankings")}
-                className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
                 Charts
+              </button>
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                disabled={loading || unreadCount === 0 || workingId === "__all__"}
+                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {workingId === "__all__" ? "Saving..." : "Mark all read"}
               </button>
             </>
           }
@@ -274,38 +298,40 @@ export default function NotificationsPage() {
         {!loading && !error ? (
           <StorefrontEventHub
             eyebrow="From your inbox"
-            title="Notifications should help you jump back in."
-            description="A good comic inbox does more than list messages. It should point to the clearest reading return, the best offer, and one easy backup path."
+            title="The fastest way back in."
+            description="Use the inbox to jump to the next chapter, catch an offer, or move on to something better."
             events={notificationEventCards}
+            appearance="light"
           />
         ) : null}
 
         {loading ? (
-          <SurfacePanel>
-            <p className="text-sm text-neutral-400">Checking your inbox...</p>
+          <SurfacePanel appearance="light" accent="blue">
+            <p className="text-sm text-slate-500">Loading notifications...</p>
           </SurfacePanel>
         ) : error ? (
-          <SurfacePanel className="border border-red-500/40 bg-red-500/10 text-red-100">
-            <p className="text-sm">Failed to load notifications.</p>
+          <SurfacePanel className="border border-red-200 bg-red-50 text-red-600" appearance="light" tone="danger" accent="rose">
+            <p className="text-sm">Couldn't load notifications.</p>
           </SurfacePanel>
         ) : (
-          <SurfacePanel className="space-y-5">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Feed
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Latest activity
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  All notifications
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Your notifications
                 </h2>
               </div>
-              <p className="text-xs text-neutral-500">{notifications.length} items loaded</p>
+              <p className="text-xs text-slate-500">{notifications.length} messages loaded</p>
             </div>
             <NotificationList
               notifications={notifications}
               onMarkRead={handleMarkRead}
               onNavigate={handleNavigate}
               workingId={workingId}
+              appearance="light"
             />
           </SurfacePanel>
         )}

@@ -72,6 +72,7 @@ export default function AppProviders({ children }) {
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
   const shouldShowFooter = !isAdminRoute && !isReaderRoute;
+  const footerTone = shouldShowFooter ? "light" : "default";
 
   return (
     <ErrorBoundary
@@ -101,7 +102,7 @@ export default function AppProviders({ children }) {
                             <BehaviorProvider>
                               <HistoryProvider>
                                 {children}
-                                {shouldShowFooter ? <SiteFooter /> : null}
+                                {shouldShowFooter ? <SiteFooter tone={footerTone} /> : null}
                                 <PWAInstallPrompt />
                               </HistoryProvider>
                             </BehaviorProvider>

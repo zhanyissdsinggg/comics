@@ -36,6 +36,9 @@ const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
 });
 
 const SearchHistoryPanel = dynamic(() => import("./SearchHistoryPanel"));
+const SearchBar = dynamic(() => import("../common/SearchBar"), {
+  ssr: false,
+});
 const AdvancedFilterPanel = dynamic(() => import("./AdvancedFilterPanel"), {
   ssr: false,
 });
@@ -83,7 +86,7 @@ function highlight(text, query) {
   return (
     <>
       {before}
-      <mark className="rounded bg-amber-400/30 px-1 text-amber-200">{match}</mark>
+      <mark className="rounded bg-amber-200 px-1 text-slate-950">{match}</mark>
       {after}
     </>
   );
@@ -140,6 +143,17 @@ function normalizeKeywordList(items) {
   }
 
   return items.map((item, index) => normalizeKeywordItem(item, index)).filter(Boolean);
+}
+
+function formatSearchSeriesMeta(series) {
+  const rating = Number(series?.rating);
+  return [
+    series?.type || "Series",
+    series?.status || "Ongoing",
+    Number.isFinite(rating) ? `Rating ${rating.toFixed(1)}` : null,
+  ]
+    .filter(Boolean)
+    .join(" / ");
 }
 
 export default function SearchPage() {
@@ -605,60 +619,67 @@ export default function SearchPage() {
     .length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasSparseResults = Boolean(query) && !loading && results.length > 0 && results.length < 4;
-  const heroTitle = query ? `Results for "${query}"` : "Find your next read.";
+  const showResultSections = Boolean(query);
+  const discoveryKeywords = useMemo(
+    () => [...hotKeywords, ...keywords].filter(Boolean).slice(0, 8),
+    [hotKeywords, keywords],
+  );
+  const heroTitle = query ? `"${query}"` : "Search without guessing.";
   const heroDescription = query
-    ? "Narrow the results by type, status, genre, and ranking without losing your place."
-    : "Start with trending searches, recent history, and quick filters to get to the right series faster.";
+    ? "Best matches first. Refine only if the list feels off."
+    : "Find a title, a genre, or a creator, then get into something worth opening.";
   const heroSecondary = query
     ? loading
-      ? "Refreshing results..."
-      : `${total.toLocaleString()} result${total === 1 ? "" : "s"} for this search.`
-    : "Use the header search or start with the shortcuts below.";
+      ? "Refreshing matches..."
+      : `${total.toLocaleString()} match${total === 1 ? "" : "es"} right now.`
+    : "Use the search box, trending terms, or a fast lane below. The page should help before the filter sheet ever does.";
   const heroStats = useMemo(
     () => [
       {
-        label: query ? "Matches" : "Catalog",
-        value: loading ? "--" : total.toLocaleString(),
-        hint: query ? "Results in the current query set" : "Searchable titles right now",
+        label: query ? "Matches" : "Trending now",
+        value: query
+          ? loading
+            ? "--"
+            : total.toLocaleString()
+          : (hotKeywords[0]?.label || keywords[0]?.label || "Live"),
+        hint: query ? "Visible results for this search" : "A quick way into the catalog",
       },
       {
         label: "Filters",
-        value: String(activeFilterCount),
-        hint: activeFilterCount > 0 ? "Type, status, genre, and sort are active" : "Browsing the full catalog",
+        value: activeFilterCount > 0 ? String(activeFilterCount) : "Open",
+        hint: activeFilterCount > 0 ? "This search is narrowed down" : "No filters are holding the list back",
       },
       {
         label: "Mode",
         value: isAdultMode ? "18+" : "Standard",
-        hint: isAdultMode ? "Age-gated catalog visible" : "Main catalog",
-      },
-      {
-        label: "History",
-        value: history.length ? history.length.toLocaleString() : (hotKeywords.length || keywords.length).toLocaleString(),
-        hint: history.length ? "Recent searches remembered locally" : "Trending entry points ready",
+        hint: isAdultMode ? "18+ titles visible" : "Main catalog",
       },
     ],
-    [activeFilterCount, history.length, hotKeywords.length, isAdultMode, keywords.length, loading, query, total],
+    [activeFilterCount, hotKeywords, isAdultMode, keywords, loading, query, total],
   );
-  const shouldShowReco = recoRails.length > 0 && (!query || results.length === 0 || hasSparseResults);
-  const shouldShowSearchTools =
-    suggestions.length > 0 || (!query && (history.length > 0 || keywords.length > 0 || hotKeywords.length > 0));
   const recoPanelTitle = !query
-    ? "Good picks should stay visible even before you search."
+    ? "If you are still deciding, start here."
     : results.length === 0
-      ? "No exact match yet. Try a better next click."
-      : "Only a few matches? Here are some better options.";
+      ? "No exact match yet. Try one of these instead."
+      : "Only a few matches? Widen the net.";
   const recoPanelHint = !query
-    ? "Start with trending titles, free previews, and completed reads."
+    ? "A reading site should still feel useful before the search box does all the work."
     : results.length === 0
       ? "These picks keep you moving when a search comes up empty."
       : "A short result list is a good time to branch into something similar.";
+  const lightCardAccentClass = "border-black/6 bg-white/84 hover:border-black/10 hover:bg-white";
+  const lightFeatureAccentClass =
+    "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
+  const accentButtonClass =
+    "rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-3 py-2 text-sm font-semibold text-slate-950 transition-colors hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]";
+  const filterSelectClass =
+    "rounded-full border border-black/8 bg-white/88 px-4 py-2 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#2f6bff)]";
   const editorialBrowsePaths = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
-    const backupKeyword = hotKeywords[1] || keywords[1] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
     const leadHotValue = leadHotKeyword?.value || leadHotLabel;
-    const backupLabel = backupKeyword?.label || "Fantasy";
-    const backupValue = backupKeyword?.value || backupLabel;
     const freeStartCount = Number(freeStartPick?.freeEpisodeCount || 0);
 
     return [
@@ -673,8 +694,7 @@ export default function SearchPage() {
                 : `${freeStartPick.title} is an easy sample pick if you want something simple to try first.`,
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_PATH_FREE_START", "search_path_free_start"),
-            accentClass:
-              "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+            accentClass: lightFeatureAccentClass,
           }
         : {
             id: "free-unlock",
@@ -684,8 +704,7 @@ export default function SearchPage() {
               "Free unlocks are one of the easiest ways to test a series before spending.",
             ctaLabel: "Open free unlock chart",
             onClick: () => router.push("/rankings?type=ttf&window=all"),
-            accentClass:
-              "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+            accentClass: lightFeatureAccentClass,
           },
       completedPick
         ? {
@@ -696,8 +715,7 @@ export default function SearchPage() {
               `${completedPick.title} is complete, so you can read straight through without waiting for updates.`,
             ctaLabel: `Open ${completedPick.title}`,
             onClick: () => handleSeriesClick(completedPick.id, "SEARCH_PATH_BINGE", "search_path_binge"),
-            accentClass:
-              "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+            accentClass: lightCardAccentClass,
           }
         : {
             id: "completed-binge",
@@ -717,8 +735,7 @@ export default function SearchPage() {
                 },
                 { resetPage: true },
               ),
-            accentClass:
-              "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+            accentClass: lightCardAccentClass,
           },
       breakoutPick
         ? {
@@ -731,8 +748,7 @@ export default function SearchPage() {
                 : `${breakoutPick.title} is a fast-rising pick if you want something readers are finding right now.`,
             ctaLabel: `Open ${breakoutPick.title}`,
             onClick: () => handleSeriesClick(breakoutPick.id, "SEARCH_PATH_BREAKOUT", "search_path_breakout"),
-            accentClass:
-              "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+            accentClass: lightCardAccentClass,
           }
         : {
             id: "breakout-watch",
@@ -752,35 +768,19 @@ export default function SearchPage() {
                 },
                 { resetPage: true },
               ),
-            accentClass:
-              "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+            accentClass: lightCardAccentClass,
           },
-      {
-        id: isAdultMode ? "adult-desk" : "broad-browse",
-        eyebrow: isAdultMode ? "18+ page" : "Open browse",
-        title: isAdultMode
-          ? "Go straight to the 18+ section."
-          : `If "${backupLabel}" feels like a better fit, start there instead.`,
-        description: isAdultMode
-          ? "Use the dedicated 18+ page, then come back to search once you know what you want."
-          : "Broad browse still helps when you want to compare genre, mood, and popularity before choosing a series.",
-        ctaLabel: isAdultMode ? "Open 18+ page" : `Search ${backupLabel}`,
-        onClick: () =>
-          isAdultMode
-            ? router.push("/adult")
-            : updateParams(
-                {
-                  q: backupValue,
-                  type: "",
-                  genre: "",
-                  status: "",
-                  sort: "relevance",
-                },
-                { resetPage: true },
-              ),
-        accentClass:
-          "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
-      },
+      isAdultMode
+        ? {
+            id: "adult-desk",
+            eyebrow: "18+ page",
+            title: "Go straight to the 18+ section.",
+            description: "Use the dedicated 18+ page when you already know you want mature reads.",
+            ctaLabel: "Open 18+ page",
+            onClick: () => router.push("/adult"),
+            accentClass: lightCardAccentClass,
+          }
+        : null,
     ];
   }, [
     breakoutPick,
@@ -790,11 +790,26 @@ export default function SearchPage() {
     hotKeywords,
     isAdultMode,
     keywords,
+    lightCardAccentClass,
+    lightFeatureAccentClass,
     router,
     updateParams,
   ]);
-  const browsePathGrid = <StorefrontPathwaysGrid cards={editorialBrowsePaths} />;
+  const browsePathGrid = (
+    <StorefrontPathwaysGrid
+      cards={editorialBrowsePaths.filter(Boolean)}
+      columnsClassName="md:grid-cols-2 xl:grid-cols-3"
+      appearance="light"
+    />
+  );
   const leadSearchResult = results[0] || breakoutPick || freeStartPick || completedPick || recoRails[0]?.items?.[0] || null;
+  const visibleRecoRails = recoRails.slice(0, 2).map((rail) => ({
+    ...rail,
+    items: Array.isArray(rail.items) ? rail.items.slice(0, 4) : [],
+  }));
+  const shouldShowReco =
+    Boolean(query) && visibleRecoRails.length > 0 && (results.length === 0 || hasSparseResults);
+  const shouldShowEventHub = !query || results.length === 0 || hasSparseResults;
   const searchEventCards = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -833,8 +848,7 @@ export default function SearchPage() {
                 "SEARCH_EVENT_HUB",
                 hasDirectMatch ? "search_lead_match" : "search_editorial_rescue",
               ),
-            accentClass:
-              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+            accentClass: lightCardAccentClass,
           }
         : {
             id: "lead-trend",
@@ -858,8 +872,7 @@ export default function SearchPage() {
                 },
                 { resetPage: true },
               ),
-            accentClass:
-              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+            accentClass: lightCardAccentClass,
           },
       freeStartPick
         ? {
@@ -875,8 +888,7 @@ export default function SearchPage() {
             signalHint: "Ready before checkout",
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_EVENT_FREE_START", "search_event_free_start"),
-            accentClass:
-              "group border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+            accentClass: lightFeatureAccentClass,
           }
         : {
             id: "free-start-desk",
@@ -889,8 +901,7 @@ export default function SearchPage() {
             signalHint: "Timed free unlocks available now",
             ctaLabel: "Open free unlock chart",
             onClick: () => router.push("/rankings?type=ttf&window=all"),
-            accentClass:
-              "group border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:border-emerald-300/50 hover:bg-emerald-400/15",
+            accentClass: lightFeatureAccentClass,
           },
       completedPick
         ? {
@@ -904,8 +915,7 @@ export default function SearchPage() {
             signalHint: completedPick?.episodeCount ? `${completedPick.episodeCount} episodes ready` : "Ready for a full-session read",
             ctaLabel: `Open ${completedPick.title}`,
             onClick: () => handleSeriesClick(completedPick.id, "SEARCH_EVENT_BINGE", "search_event_binge"),
-            accentClass:
-              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+            accentClass: lightCardAccentClass,
           }
         : {
             id: isAdultMode ? "protected-desk" : "binge-desk",
@@ -931,10 +941,9 @@ export default function SearchPage() {
                       status: "Completed",
                       sort: "popular",
                     },
-                    { resetPage: true },
-                  ),
-            accentClass:
-              "group border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]",
+                      { resetPage: true },
+                    ),
+            accentClass: lightCardAccentClass,
           },
     ];
   }, [
@@ -949,6 +958,8 @@ export default function SearchPage() {
     keywords,
     leadSearchResult,
     loading,
+    lightCardAccentClass,
+    lightFeatureAccentClass,
     query,
     results.length,
     router,
@@ -957,8 +968,9 @@ export default function SearchPage() {
     updateParams,
   ]);
   return (
-    <main className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
+    <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Search"
@@ -966,20 +978,36 @@ export default function SearchPage() {
           description={heroDescription}
           secondary={heroSecondary}
           stats={heroStats}
+          appearance="light"
           actions={
-            <button
-              type="button"
-              onClick={() => setShowAdvancedFilters(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-semibold text-neutral-100 transition-colors hover:border-emerald-400/30 hover:bg-emerald-400/10"
-            >
-              <SlidersHorizontal size={16} />
-              <span>Advanced Filters</span>
-              {activeFilterCount > 0 ? (
-                <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-neutral-950">
-                  {activeFilterCount}
-                </span>
-              ) : null}
-            </button>
+            query ? (
+              <button
+                type="button"
+                onClick={() =>
+                  updateParams(
+                    {
+                      q: "",
+                      type: "",
+                      status: "",
+                      genre: "",
+                      sort: "relevance",
+                    },
+                    { resetPage: true },
+                  )
+                }
+                className={secondaryButtonClass}
+              >
+                Clear search
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => router.push("/rankings?type=popular&window=week")}
+                className={secondaryButtonClass}
+              >
+                Weekly chart
+              </button>
+            )
           }
         />
 
@@ -991,64 +1019,168 @@ export default function SearchPage() {
         ) : null}
 
         {resultsStale || catalogStale || homepageSlotsStale ? (
-          <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
             Showing cached data. Reconnect to refresh the latest search results.
           </div>
         ) : null}
 
-        {shouldShowSearchTools ? (
-          <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-            {suggestions.length > 0 ? (
-              <SurfacePanel className="space-y-4">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                    Smart suggestions
-                  </p>
-                  <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                    Tighten the query before you dive deeper.
-                  </h2>
-                </div>
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                {query ? "Refine this search" : "Search the catalog"}
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                {query ? "Tighten the search before you scroll forever." : "Title, genre, or creator. Keep it simple."}
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAdvancedFilters(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                <SlidersHorizontal size={16} />
+                <span>Filters</span>
+                {activeFilterCount > 0 ? (
+                  <span className="rounded-full bg-slate-950 px-2 py-0.5 text-[11px] font-bold text-white">
+                    {activeFilterCount}
+                  </span>
+                ) : null}
+              </button>
+              {query ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateParams(
+                      {
+                        q: "",
+                        type: "",
+                        status: "",
+                        genre: "",
+                        sort: "relevance",
+                      },
+                      { resetPage: true },
+                    )
+                  }
+                  className={secondaryButtonClass}
+                >
+                  Clear search
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => router.push("/rankings?type=popular&window=week")}
+                  className={secondaryButtonClass}
+                >
+                  Weekly chart
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_0.85fr]">
+            <div className="space-y-3">
+              <SearchBar
+                variant="light"
+                placeholder="Search titles, genres, or creators"
+                showShortcut={false}
+              />
+              {suggestions.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {suggestions.map((item) => (
+                  {suggestions.slice(0, 6).map((item) => (
                     <button
                       key={item}
                       type="button"
                       onClick={() => updateParam("q", item)}
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-neutral-200 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                      className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
                     >
                       {item}
                     </button>
                   ))}
                 </div>
-              </SurfacePanel>
-            ) : null}
+              ) : null}
+            </div>
 
-            {!query && (keywords.length > 0 || hotKeywords.length > 0) ? (
-              <div className={suggestions.length > 0 ? "" : "xl:col-span-2"}>
-                <SearchHistoryPanel
-                  onSearch={(keyword) => updateParam("q", keyword)}
-                  hotKeywords={hotKeywords}
-                  quickKeywords={keywords}
-                />
+            <div className="rounded-[24px] border border-black/6 bg-white/82 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                {query ? "Fast pivots" : "Start with"}
+              </p>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {query
+                  ? "If this search feels too narrow, jump sideways instead of retyping from scratch."
+                  : "These are the fastest ways into the catalog when you do not know the exact title yet."}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {discoveryKeywords.slice(0, 6).map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() =>
+                      updateParams(
+                        {
+                          q: item.value,
+                          type: "",
+                          status: "",
+                          genre: "",
+                          sort: "popular",
+                        },
+                        { resetPage: true },
+                      )
+                    }
+                    className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                {!query ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/search?status=Completed&sort=popular")}
+                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                    >
+                      Finished series
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/rankings?type=ttf&window=all")}
+                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                    >
+                      Start free
+                    </button>
+                  </>
+                ) : null}
               </div>
-            ) : null}
+            </div>
           </div>
-        ) : null}
 
-        <StorefrontEventHub
-          eyebrow={query ? "Search picks" : "Start here"}
-          title={
-            query
-              ? "Keep going after the first result."
-              : "Start with a better first click."
-          }
-          description={
-            query
-              ? "A good search page does more than count results. It helps you open something worth reading next."
-              : "If you have not typed anything yet, start with trending picks, free previews, and popular completed series."
-          }
-          events={searchEventCards}
-        />
+          {!query && history.length > 0 ? (
+            <SearchHistoryPanel
+              onSearch={(keyword) => updateParam("q", keyword)}
+              hotKeywords={hotKeywords}
+              quickKeywords={keywords}
+            />
+          ) : null}
+        </SurfacePanel>
+
+        {shouldShowEventHub ? (
+          <StorefrontEventHub
+            eyebrow={query ? "Search picks" : "Start here"}
+            title={
+              query
+                ? "Open the strongest match first."
+                : "Start with something readers already want."
+            }
+            description={
+              query
+                ? "If the list feels thin, these picks keep you moving without sending you into dead ends."
+                : "Hot picks, free starts, and finished reads are the fastest way into the site."
+            }
+            events={searchEventCards}
+            appearance="light"
+          />
+        ) : null}
 
         <SearchCreatorMatchesPanel
           catalog={catalog}
@@ -1058,43 +1190,17 @@ export default function SearchPage() {
           searchPath={searchPath}
         />
 
-        {!query ? (
-          <SurfacePanel className="space-y-5">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                  Browse paths
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Start with a genre, a trend, or a free preview.
-                </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">
-                  These shortcuts help when you want something good to read but do not have the exact title yet.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
-              >
-                See weekly chart
-              </button>
-            </div>
-            {browsePathGrid}
-          </SurfacePanel>
-        ) : null}
-
         {shouldShowReco ? (
-          <SurfacePanel className="space-y-8">
+          <SurfacePanel className="space-y-8" appearance="light" accent="blue">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   More to try
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   {recoPanelTitle}
                 </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-400">{recoPanelHint}</p>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">{recoPanelHint}</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -1102,8 +1208,8 @@ export default function SearchPage() {
                   onClick={() => setHotWindow("day")}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     hotWindow === "day"
-                      ? "border-white bg-white text-neutral-950"
-                      : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:text-white"
+                      ? "border-black/10 bg-slate-950 text-white"
+                      : "border-black/8 bg-white text-slate-500 hover:border-black/12 hover:text-slate-900"
                   }`}
                 >
                   Today
@@ -1113,8 +1219,8 @@ export default function SearchPage() {
                   onClick={() => setHotWindow("week")}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     hotWindow === "week"
-                      ? "border-white bg-white text-neutral-950"
-                      : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:text-white"
+                      ? "border-black/10 bg-slate-950 text-white"
+                      : "border-black/8 bg-white text-slate-500 hover:border-black/12 hover:text-slate-900"
                   }`}
                 >
                   This Week
@@ -1123,12 +1229,12 @@ export default function SearchPage() {
             </div>
 
             <div className="space-y-8">
-              {recoRails.map((rail) => (
+              {visibleRecoRails.map((rail) => (
                 <section key={rail.id} className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Recommended row</p>
-                      <h3 className="mt-1 text-lg font-semibold text-white">{rail.title}</h3>
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">More to try</p>
+                      <h3 className="mt-1 text-lg font-semibold text-slate-950">{rail.title}</h3>
                     </div>
                   </div>
                   <CreatorShelfLinks
@@ -1138,12 +1244,14 @@ export default function SearchPage() {
                     sourcePath={searchPath}
                     label="Creators in this row"
                     compact
+                    appearance="light"
                   />
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {rail.items.map((item) => (
                       <PortraitCard
                         key={item.id}
                         item={item}
+                        appearance="light"
                         onClick={() => {
                           trackEvent("reco_click", { railName: rail.title, seriesId: item.id });
                           handleSeriesClick(item.id, "SEARCH_RECO", rail.id);
@@ -1157,17 +1265,19 @@ export default function SearchPage() {
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel className="space-y-4">
+        {showResultSections ? (
+          <>
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                Live filters
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Narrow it down
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Refine this search.
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                Trim the list.
               </h2>
             </div>
-            <p className="text-sm text-neutral-400">
+            <p className="text-sm text-slate-500">
               {loading ? "Refreshing titles..." : `Page ${page} of ${totalPages}`}
             </p>
           </div>
@@ -1176,7 +1286,7 @@ export default function SearchPage() {
             <select
               value={type}
               onChange={(event) => updateParam("type", event.target.value)}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-emerald-400/40"
+              className={filterSelectClass}
             >
               <option value="">All types</option>
               {TYPE_OPTIONS.map((option) => (
@@ -1188,7 +1298,7 @@ export default function SearchPage() {
             <select
               value={status}
               onChange={(event) => updateParam("status", event.target.value)}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-emerald-400/40"
+              className={filterSelectClass}
             >
               <option value="">All status</option>
               {STATUS_OPTIONS.map((option) => (
@@ -1201,12 +1311,12 @@ export default function SearchPage() {
               value={genre}
               onChange={(event) => updateParam("genre", event.target.value)}
               placeholder="Genres"
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-neutral-100 outline-none transition-colors placeholder:text-neutral-500 focus:border-emerald-400/40"
+              className={`${filterSelectClass} placeholder:text-slate-400`}
             />
             <select
               value={sort}
               onChange={(event) => updateParam("sort", event.target.value)}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-neutral-100 outline-none transition-colors focus:border-emerald-400/40"
+              className={filterSelectClass}
             >
               {SORT_OPTIONS.map((option) => (
                 <option key={option.id} value={option.id}>
@@ -1215,46 +1325,46 @@ export default function SearchPage() {
               ))}
             </select>
           </div>
-        </SurfacePanel>
+            </SurfacePanel>
 
-        {loading ? (
+            {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <SkeletonCard key={index} />
             ))}
           </div>
-        ) : error ? (
-          <SurfacePanel className="border-red-500/40 bg-red-500/10 text-red-100">
+            ) : error ? (
+          <SurfacePanel className="text-red-700" appearance="light" tone="danger" accent="rose">
             <p className="text-lg font-semibold">{error}</p>
-            <p className="mt-2 text-sm text-red-200/80">Please check your connection and try again.</p>
+            <p className="mt-2 text-sm text-red-600/80">Please check your connection and try again.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="rounded-full border border-red-400/60 bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 transition-colors hover:bg-red-500/30"
+                className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
               >
                 Retry
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/")}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                className={secondaryButtonClass}
               >
                 Back to home
               </button>
             </div>
           </SurfacePanel>
-        ) : results.length === 0 ? (
-          <SurfacePanel className="space-y-4">
+            ) : results.length === 0 ? (
+          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 No direct matches
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 No exact matches for this search.
               </h2>
-              <p className="mt-3 text-sm leading-7 text-neutral-400">
-                Try a broader keyword, clear the current filters, or jump into one of the picks below.
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                Try a broader keyword, clear the filters, or jump into one of these better options.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
@@ -1272,7 +1382,7 @@ export default function SearchPage() {
                       { resetPage: true },
                     )
                   }
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   Clear filters
                 </button>
@@ -1281,7 +1391,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => handleSeriesClick(breakoutPick.id, "SEARCH_ZERO_RESULTS", "search_zero_breakout")}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   Open {breakoutPick.title}
                 </button>
@@ -1289,7 +1399,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   This week&apos;s chart
                 </button>
@@ -1298,7 +1408,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => handleSeriesClick(completedPick.id, "SEARCH_ZERO_RESULTS", "search_zero_completed")}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   Open {completedPick.title}
                 </button>
@@ -1317,7 +1427,7 @@ export default function SearchPage() {
                       { resetPage: true },
                     )
                   }
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   Browse completed
                 </button>
@@ -1326,7 +1436,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => handleSeriesClick(freeStartPick.id, "SEARCH_ZERO_RESULTS", "search_zero_free_start")}
-                  className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                  className={accentButtonClass}
                 >
                   Open {freeStartPick.title}
                 </button>
@@ -1334,19 +1444,19 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                  className={accentButtonClass}
                 >
                   Free unlock picks
                 </button>
               )}
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
-              {hotKeywords.slice(0, 6).map((item) => (
+              {hotKeywords.slice(0, 4).map((item) => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => updateParam("q", item.value)}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-neutral-200 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   {item.label}
                 </button>
@@ -1354,41 +1464,41 @@ export default function SearchPage() {
               <button
                 type="button"
                 onClick={() => router.push("/")}
-                className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                className={accentButtonClass}
               >
                 Browse popular
               </button>
             </div>
             <div className="pt-2">{browsePathGrid}</div>
           </SurfacePanel>
-        ) : (
+            ) : (
           <div className="space-y-5">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
-                  Live result grid
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Results
                 </p>
-                <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-white">
+                <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {total.toLocaleString()} titles found.
                 </h2>
               </div>
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-slate-500">
                 Sorted by {SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance"}
               </p>
             </div>
 
             {hasSparseResults ? (
-              <SurfacePanel className="space-y-3 border-white/10 bg-white/[0.025]">
+              <SurfacePanel className="space-y-3" appearance="light" accent="blue">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-                      Discovery backup
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Wider picks
                     </p>
-                    <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-white">
-                      Only a few results? Try a wider pick.
+                    <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-slate-950">
+                      Only a few results? Open something nearby.
                     </h3>
                   </div>
-                  <p className="text-sm text-neutral-400">
+                  <p className="text-sm text-slate-500">
                     Keep this search if you want, or branch into something with a similar vibe.
                   </p>
                 </div>
@@ -1407,7 +1517,7 @@ export default function SearchPage() {
                           { resetPage: true },
                         )
                       }
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                      className={secondaryButtonClass}
                     >
                       Widen filters
                     </button>
@@ -1416,7 +1526,7 @@ export default function SearchPage() {
                     <button
                       type="button"
                       onClick={() => handleSeriesClick(breakoutPick.id, "SEARCH_SPARSE_RESULTS", "search_sparse_breakout")}
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                      className={secondaryButtonClass}
                     >
                       Open {breakoutPick.title}
                     </button>
@@ -1424,7 +1534,7 @@ export default function SearchPage() {
                     <button
                       type="button"
                       onClick={() => router.push("/rankings?type=popular&window=week")}
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                      className={secondaryButtonClass}
                     >
                       Compare with the chart
                     </button>
@@ -1433,7 +1543,7 @@ export default function SearchPage() {
                     <button
                       type="button"
                       onClick={() => handleSeriesClick(completedPick.id, "SEARCH_SPARSE_RESULTS", "search_sparse_completed")}
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                      className={secondaryButtonClass}
                     >
                       Open {completedPick.title}
                     </button>
@@ -1452,7 +1562,7 @@ export default function SearchPage() {
                           { resetPage: true },
                         )
                       }
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-neutral-100 transition-colors hover:border-white/20 hover:bg-white/[0.08]"
+                      className={secondaryButtonClass}
                     >
                       Check completed picks
                     </button>
@@ -1461,7 +1571,7 @@ export default function SearchPage() {
                     <button
                       type="button"
                       onClick={() => handleSeriesClick(freeStartPick.id, "SEARCH_SPARSE_RESULTS", "search_sparse_free_start")}
-                      className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm font-semibold text-emerald-200 transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/15"
+                      className={accentButtonClass}
                     >
                       Open {freeStartPick.title}
                     </button>
@@ -1476,24 +1586,24 @@ export default function SearchPage() {
                   key={series.id}
                   type="button"
                   onClick={() => handleSeriesClick(series.id)}
-                  className="group rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-4 text-left shadow-[0_20px_80px_rgba(0,0,0,0.16)] transition-transform duration-300 hover:-translate-y-1 hover:border-white/20"
+                  className="group rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
                 >
                   <Cover tone={series.coverTone} coverUrl={series.coverUrl} className="h-44 rounded-[20px]" />
                   <div className="mt-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-display text-lg font-semibold tracking-tight text-white">
+                      <h3 className="font-display text-lg font-semibold tracking-tight text-slate-950">
                         {highlight(series.title, query)}
                       </h3>
-                      {series.badge ? <Pill>{series.badge}</Pill> : null}
+                      {series.badge ? <Pill appearance="light">{series.badge}</Pill> : null}
                     </div>
-                    <p className="text-sm text-neutral-400">
-                      {series.type} | {series.status} | {series.rating}
+                    <p className="text-sm text-slate-500">
+                      {formatSearchSeriesMeta(series)}
                     </p>
-                    <div className="flex flex-wrap gap-2 text-xs text-neutral-300">
+                    <div className="flex flex-wrap gap-2 text-xs text-slate-600">
                       {(series.genres || []).slice(0, 3).map((item) => (
                         <span
                           key={item}
-                          className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1"
+                          className="rounded-full border border-black/8 bg-white/84 px-2.5 py-1"
                         >
                           {highlight(item, query)}
                         </span>
@@ -1505,7 +1615,7 @@ export default function SearchPage() {
             </div>
 
             {total > PAGE_SIZE ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-neutral-400">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-black/6 bg-white/84 px-4 py-3 text-sm text-slate-500">
                 <span>
                   Page {page} of {totalPages}
                 </span>
@@ -1515,7 +1625,7 @@ export default function SearchPage() {
                     onClick={() => updateParam("page", String(page - 1))}
                     disabled={page <= 1}
                     aria-label="Previous page"
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-neutral-200 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Previous
                   </button>
@@ -1524,7 +1634,7 @@ export default function SearchPage() {
                     onClick={() => updateParam("page", String(page + 1))}
                     disabled={page >= totalPages}
                     aria-label="Next page"
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-neutral-200 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Next page
                   </button>
@@ -1532,7 +1642,9 @@ export default function SearchPage() {
               </div>
             ) : null}
           </div>
-        )}
+            )}
+          </>
+        ) : null}
       </div>
 
       <AdvancedFilterPanel

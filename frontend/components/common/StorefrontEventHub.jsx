@@ -12,12 +12,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-function EventCard({ event, priority = "secondary" }) {
+function EventCard({ event, priority = "secondary", appearance = "default" }) {
+  const isLight = appearance === "light";
+
   return (
     <Card
       className={cn(
-        "h-full rounded-[28px] border py-0 shadow-none transition-transform duration-300 hover:-translate-y-1",
-        event.accentClass || "border-white/10 bg-white/[0.03]",
+        "h-full rounded-[28px] border py-0 shadow-none transition-transform duration-300 hover:-translate-y-0.5",
+        event.accentClass ||
+          (isLight
+            ? "border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,249,252,0.98))] hover:border-black/10 hover:bg-white"
+            : "border-white/10 bg-white/[0.03]"),
       )}
     >
       <CardContent className="flex h-full flex-col p-5">
@@ -25,13 +30,17 @@ function EventCard({ event, priority = "secondary" }) {
           <div className="max-w-3xl">
             <Badge
               variant="outline"
-              className="rounded-full border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current"
+              className={cn(
+                "rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current",
+                isLight ? "border-black/8 bg-white/82" : "border-white/10 bg-black/20",
+              )}
             >
               {event.eyebrow}
             </Badge>
             <CardTitle
               className={cn(
-                "mt-4 font-display font-semibold tracking-tight text-white",
+                "mt-4 font-display font-semibold tracking-tight",
+                isLight ? "text-slate-950" : "text-white",
                 priority === "lead"
                   ? "text-2xl leading-tight sm:text-[2rem]"
                   : "text-xl leading-tight",
@@ -40,18 +49,18 @@ function EventCard({ event, priority = "secondary" }) {
               {event.title}
             </CardTitle>
             {priority === "lead" ? (
-              <CardDescription className="mt-3 max-w-3xl text-sm leading-6 text-neutral-200/90">
+              <CardDescription className={cn("mt-3 max-w-3xl text-sm leading-6", isLight ? "text-slate-600" : "text-neutral-200/90")}>
                 {event.description}
               </CardDescription>
             ) : null}
           </div>
 
           {event.signalValue ? (
-            <div className="min-w-[120px] rounded-[18px] border border-white/10 bg-black/25 px-3 py-2.5 text-left">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+            <div className={cn("min-w-[120px] rounded-[18px] border px-3 py-2.5 text-left", isLight ? "border-black/8 bg-white/80" : "border-white/10 bg-black/25")}>
+              <p className={cn("text-[10px] font-semibold uppercase tracking-[0.22em]", isLight ? "text-slate-500" : "text-neutral-400")}>
                 {event.signalLabel || "Signal"}
               </p>
-              <p className="mt-1.5 font-display text-xl font-semibold tracking-tight text-white">
+              <p className={cn("mt-1.5 font-display text-xl font-semibold tracking-tight", isLight ? "text-slate-950" : "text-white")}>
                 {event.signalValue}
               </p>
             </div>
@@ -62,7 +71,10 @@ function EventCard({ event, priority = "secondary" }) {
           type="button"
           variant="ghost"
           onClick={event.onClick}
-          className="mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold text-white hover:bg-transparent hover:text-emerald-200"
+          className={cn(
+            "mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold hover:bg-transparent",
+            isLight ? "text-slate-900 hover:text-[var(--gush-accent,#2f6bff)]" : "text-white hover:text-emerald-200",
+          )}
         >
           {event.ctaLabel}
           <ArrowUpRight className="size-4" />
@@ -78,32 +90,48 @@ export default function StorefrontEventHub({
   description,
   events = [],
   className = "",
+  appearance = "default",
 }) {
   if (!Array.isArray(events) || events.length === 0) {
     return null;
   }
 
   const [leadEvent, ...secondaryEvents] = events;
+  const isLight = appearance === "light";
 
   return (
     <section className={className}>
-      <Card className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(10,14,22,0.98))] py-0 shadow-[0_26px_90px_rgba(0,0,0,0.28)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(56,189,248,0.12),transparent_22%)]" />
+      <Card
+        className={cn(
+          "relative overflow-hidden rounded-[32px] py-0",
+          isLight
+            ? "border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] shadow-[0_22px_52px_rgba(15,23,42,0.06)]"
+            : "border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(10,14,22,0.98))] shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
+        )}
+      >
+        <div
+          className={cn(
+            "absolute inset-0",
+            isLight
+              ? "bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_30%),radial-gradient(circle_at_88%_18%,rgba(255,255,255,0.66),transparent_22%)]"
+              : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(56,189,248,0.12),transparent_22%)]",
+          )}
+        />
         <CardHeader className="relative p-5 pb-0 sm:p-6 sm:pb-0">
           <div className="max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+            <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-emerald-300/85"}`}>
               {eyebrow}
             </p>
-            <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+            <h2 className={`mt-3 font-display text-2xl font-semibold tracking-tight sm:text-3xl ${isLight ? "text-slate-950" : "text-white"}`}>
               {title}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-neutral-300">{description}</p>
+            <p className={`mt-2 text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-300"}`}>{description}</p>
           </div>
         </CardHeader>
 
         <CardContent className="relative p-5 pt-5 sm:p-6 sm:pt-5">
           <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
-            <EventCard event={leadEvent} priority="lead" />
+            <EventCard event={leadEvent} priority="lead" appearance={appearance} />
             {secondaryEvents.length > 0 ? (
               <div
                 className={cn(
@@ -112,7 +140,7 @@ export default function StorefrontEventHub({
                 )}
               >
                 {secondaryEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
+                  <EventCard key={event.id} event={event} appearance={appearance} />
                 ))}
               </div>
             ) : null}

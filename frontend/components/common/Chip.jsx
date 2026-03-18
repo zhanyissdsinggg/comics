@@ -6,9 +6,11 @@ export default function Chip({
   className = "",
   onClick,
   active = false,
+  appearance = "default",
 }) {
   const isClickable = typeof onClick === "function";
   const content = children ?? label;
+  const isLight = appearance === "light";
 
   if (!content) {
     return null;
@@ -20,8 +22,12 @@ export default function Chip({
         className={cn(
           "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold tracking-[0.16em] uppercase",
           active
-            ? "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"
-            : "border-white/10 bg-white/[0.04] text-neutral-300",
+            ? isLight
+              ? "border-[rgba(47,107,255,0.18)] bg-[rgba(47,107,255,0.08)] text-slate-950"
+              : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"
+            : isLight
+              ? "border-black/8 bg-white text-slate-600"
+              : "border-white/10 bg-white/[0.04] text-neutral-300",
           className,
         )}
       >
@@ -37,8 +43,12 @@ export default function Chip({
       className={cn(
         "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-all duration-200",
         active
-          ? "border-emerald-400/30 bg-emerald-400/12 text-emerald-100 shadow-[0_18px_40px_rgba(16,185,129,0.12)]"
-          : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
+          ? isLight
+            ? "border-[rgba(47,107,255,0.18)] bg-[rgba(47,107,255,0.08)] text-slate-950 shadow-[0_12px_26px_rgba(47,107,255,0.08)]"
+            : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100 shadow-[0_18px_40px_rgba(16,185,129,0.12)]"
+          : isLight
+            ? "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
+            : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
         className,
       )}
     >

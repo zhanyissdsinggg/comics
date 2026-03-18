@@ -97,28 +97,28 @@ export default function EpisodeList({
       ? `${lockedCount.toLocaleString()} locked`
       : "All unlocked",
     freeUnlockCount > 0
-      ? `${freeUnlockCount.toLocaleString()} free unlocks`
+      ? `${freeUnlockCount.toLocaleString()} free reads`
       : freePreviewCount > 0
         ? `${freePreviewCount.toLocaleString()} previews`
-        : "Premium chapters",
+        : "Locked chapters",
     walletTotal > 0 ? `${walletTotal.toLocaleString()} points` : "0 points",
-    isSubscriber ? "Member mode" : "Points mode",
+    isSubscriber ? "Member access" : "Points access",
   ];
 
   return (
-    <section className="mt-6 rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:mt-8 sm:p-6" data-wallet-total={walletTotal}>
-      <div className="mb-5 border-b border-white/10 pb-5">
+    <section className="mt-6 rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:mt-8 sm:p-6" data-wallet-total={walletTotal}>
+      <div className="mb-5 border-b border-black/6 pb-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">Episodes</h2>
-              <span className="text-sm text-neutral-500">{episodes.length}</span>
+              <h2 className="text-lg font-bold text-slate-950">Episodes</h2>
+              <span className="text-sm text-slate-500">{episodes.length}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {summaryItems.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-neutral-300"
+                  className="rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs text-slate-600"
                 >
                   {item}
                 </span>
@@ -131,7 +131,7 @@ export default function EpisodeList({
               <button
                 type="button"
                 onClick={() => onRead(series?.id, seriesProgress.lastEpisodeId)}
-                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 Continue reading
               </button>
@@ -152,7 +152,7 @@ export default function EpisodeList({
                   )
                 )
               }
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+              className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
             >
               {STOREFRONT_TERMS.viewPointPacks}
             </button>
@@ -168,7 +168,7 @@ export default function EpisodeList({
                   })
                 )
               }
-              className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:border-emerald-300/50 hover:bg-emerald-400/15"
+              className="rounded-full border border-black/8 bg-[#f8f9fc] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white"
             >
               {STOREFRONT_TERMS.compareMembership}
             </button>
@@ -179,30 +179,30 @@ export default function EpisodeList({
           <select
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
-            className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-neutral-200 outline-none transition-colors focus:border-emerald-400/40"
+            className="rounded-full border border-black/8 bg-white/88 px-3 py-2 text-xs text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#2f6bff)]"
           >
             <option value="all">All</option>
             <option value="locked">Locked</option>
             <option value="unlocked">Unlocked</option>
-            <option value="ttf">Free unlocks</option>
+            <option value="ttf">Free reads</option>
           </select>
           <select
             value={sortOrder}
             onChange={(event) => setSortOrder(event.target.value)}
-            className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-neutral-200 outline-none transition-colors focus:border-emerald-400/40"
+            className="rounded-full border border-black/8 bg-white/88 px-3 py-2 text-xs text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#2f6bff)]"
           >
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
           </select>
-          <span className="text-xs text-neutral-500">
+          <span className="text-xs text-slate-500">
             {sortedEpisodes.length} visible
           </span>
         </div>
       </div>
       {sortedEpisodes.length === 0 ? (
-        <div className="rounded-[24px] border border-white/10 bg-black/20 p-6 text-sm text-neutral-300">
-          <p className="text-base font-semibold text-white">No episodes found</p>
-          <p className="mt-2 text-sm text-neutral-500">
+        <div className="rounded-[24px] border border-black/6 bg-white/84 p-6 text-sm text-slate-600">
+          <p className="text-base font-semibold text-slate-950">No episodes found</p>
+          <p className="mt-2 text-sm text-slate-500">
             {filter === "all"
               ? "Episodes will appear here once available."
               : "Try a different filter to see more episodes."}

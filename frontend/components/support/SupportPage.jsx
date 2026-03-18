@@ -35,11 +35,11 @@ function buildSupportDraft(subject, body, supportEmail) {
 }
 
 const SUPPORT_TOPIC_PRESETS = [
-  { id: "billing", label: "Billing issue", subject: "Billing issue" },
-  { id: "refund", label: "Refund follow-up", subject: "Refund follow-up" },
-  { id: "account", label: "Account access", subject: "Account access" },
+  { id: "billing", label: "Charge issue", subject: "Charge issue" },
+  { id: "refund", label: "Refund question", subject: "Refund question" },
+  { id: "account", label: "Sign-in help", subject: "Sign-in help" },
   { id: "reader", label: "Reader bug", subject: "Reader bug" },
-  { id: "content", label: "Content report", subject: "Content report" },
+  { id: "content", label: "Title report", subject: "Title report" },
 ];
 
 export default function SupportPage() {
@@ -59,6 +59,19 @@ export default function SupportPage() {
       setEmail(user?.email || "");
     }
   }, [hydrated, isSignedIn, user?.email]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const seededOrderId = new URLSearchParams(window.location.search).get("orderId")?.trim();
+    if (!seededOrderId) {
+      return;
+    }
+
+    setOrderId((current) => current || seededOrderId);
+  }, []);
 
   useEffect(() => {
     setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/support")));
@@ -83,7 +96,7 @@ export default function SupportPage() {
 
   const openGuestMailApp = () => {
     if (!canPrepareGuestEmail) {
-      setFeedback({ type: "error", text: "Please fill in both subject and message." });
+      setFeedback({ type: "error", text: "Please add both a subject and a message." });
       return;
     }
 
@@ -96,7 +109,7 @@ export default function SupportPage() {
   const copyGuestDraft = async () => {
     const draft = buildSupportDraft(trimmedSubject, supportBody, siteConfig.supportEmail);
     if (!canPrepareGuestEmail) {
-      setFeedback({ type: "error", text: "Please fill in both subject and message." });
+      setFeedback({ type: "error", text: "Please add both a subject and a message." });
       return false;
     }
 
@@ -105,7 +118,7 @@ export default function SupportPage() {
         await navigator.clipboard.writeText(draft);
         setFeedback({
           type: "success",
-          text: `Support details copied. Paste them into an email to ${siteConfig.supportEmail}, or use the Open email app button.`,
+          text: `Draft copied. Paste it into an email to ${siteConfig.supportEmail}, or use Open mail app.`,
         });
         return true;
       }
@@ -115,27 +128,27 @@ export default function SupportPage() {
 
     setFeedback({
       type: "success",
-      text: `Your message is ready. Send it to ${siteConfig.supportEmail}, or use the Open email app button if your device supports it.`,
+      text: `Your message is ready. Send it to ${siteConfig.supportEmail}, or use Open mail app if your device supports it.`,
     });
     return true;
   };
 
   const handleSubmit = async () => {
     if (!trimmedSubject || !trimmedMessage) {
-      setFeedback({ type: "error", text: "Please fill in both subject and message." });
+      setFeedback({ type: "error", text: "Please add both a subject and a message." });
       return;
     }
 
     if (!hydrated && !trimmedEmail) {
       setFeedback({
         type: "error",
-        text: "Add a reply email so support can reach you if you are browsing as a guest.",
+        text: "Add a reply email so we know where to answer.",
       });
       return;
     }
 
     if (!isSignedIn && !trimmedEmail) {
-      setFeedback({ type: "error", text: "Please add a reply email so support can reach you." });
+      setFeedback({ type: "error", text: "Please add a reply email so we know where to answer." });
       return;
     }
 
@@ -156,7 +169,7 @@ export default function SupportPage() {
       if (response.ok) {
         setFeedback({
           type: "success",
-          text: "Ticket submitted successfully. We usually reply within 1-2 business days.",
+          text: "Message sent. We usually reply within 1 to 2 business days.",
         });
         setSubject("");
         setOrderId("");
@@ -165,30 +178,34 @@ export default function SupportPage() {
         return;
       }
 
-      setFeedback({ type: "error", text: response.error || "Submit failed." });
+      setFeedback({ type: "error", text: response.error || "Could not send your message." });
     } catch {
-      setFeedback({ type: "error", text: "Submit failed. Please try again." });
+      setFeedback({ type: "error", text: "Could not send your message. Please try again." });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500";
+  const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const fieldClass =
-    "mt-2 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-neutral-100 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20";
+    "mt-2 w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
   const secondaryButtonClass =
-    "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10";
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
-    <div className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
-      <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <InfoPageNav current="support" />
+    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+        <InfoPageNav current="support" appearance="light" />
         <EditorialHero
-          eyebrow="Support"
-          title="Support"
-          description="Get help with billing, account access, or reading issues."
-          secondary="Send one clear message here. Signed-in readers can submit a ticket in app. Guests can prepare an email draft without losing the details."
+          eyebrow="Help"
+          title="Need help?"
+          description="Tell us what went wrong and how we can reach you."
+          secondary="Signed-in readers can send a message here. If you are browsing as a guest, we will build the email for you."
+          appearance="light"
         />
 
         {commerceNotice ? (
@@ -199,22 +216,22 @@ export default function SupportPage() {
         ) : null}
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel className="space-y-5">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Support form
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Send a message
               </p>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                Tell us what happened
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                What happened?
               </h2>
-              <p className="text-sm leading-6 text-neutral-400">
-                Keep it simple: what went wrong, what you expected, and anything you already tried.
+              <p className="text-sm leading-6 text-slate-600">
+                A short note works best. Tell us what broke, what you expected, and where it happened.
               </p>
             </div>
 
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
-                Quick topics
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Quick picks
               </p>
               <div className="flex flex-wrap gap-2">
                 {SUPPORT_TOPIC_PRESETS.map((preset) => (
@@ -222,7 +239,7 @@ export default function SupportPage() {
                     key={preset.id}
                     type="button"
                     onClick={() => setSubject(preset.subject)}
-                    className="rounded-full border border-white/10 bg-black/10 px-3 py-1.5 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                    className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                   >
                     {preset.label}
                   </button>
@@ -235,8 +252,8 @@ export default function SupportPage() {
                 className={[
                   "rounded-[24px] border px-4 py-3 text-sm",
                   feedback.type === "success"
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-                    : "border-red-500/30 bg-red-500/10 text-red-200",
+                    ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-700"
+                    : "border-red-200 bg-red-50 text-red-600",
                 ].join(" ")}
               >
                 {feedback.text}
@@ -254,10 +271,10 @@ export default function SupportPage() {
                   placeholder="name@example.com"
                   className={fieldClass}
                 />
-                <p className="mt-2 text-xs text-neutral-500">
+                <p className="mt-2 text-xs text-slate-500">
                   {hydrated && isSignedIn
-                    ? "We prefill your account email, but you can change the best reply address."
-                    : "If you are browsing without signing in, add the inbox you want us to reply to."}
+                    ? "We filled in your account email, but you can change it if another inbox is better."
+                    : "If you are not signed in, add the inbox you want us to reply to."}
                 </p>
               </div>
               <div>
@@ -281,7 +298,7 @@ export default function SupportPage() {
                 type="text"
                 value={subject}
                 onChange={(event) => setSubject(event.target.value)}
-                placeholder="Billing issue / Account / Content"
+                placeholder="Charge issue / Sign-in help / Reader bug"
                 className={fieldClass}
               />
             </div>
@@ -293,7 +310,7 @@ export default function SupportPage() {
                 rows={7}
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
-                placeholder="Describe the issue, what you expected to happen, and any steps you already tried."
+                placeholder="Tell us what happened, what you expected, and any steps you already tried."
                 className={fieldClass}
               />
             </div>
@@ -303,9 +320,9 @@ export default function SupportPage() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
+                className={primaryButtonClass}
               >
-                {submitting ? "Submitting..." : hydrated && isSignedIn ? "Send ticket" : "Copy email details"}
+                {submitting ? "Sending..." : hydrated && isSignedIn ? "Send message" : "Copy draft"}
               </button>
               {!isSignedIn ? (
                 <button
@@ -314,7 +331,7 @@ export default function SupportPage() {
                   disabled={!canPrepareGuestEmail}
                   className={secondaryButtonClass}
                 >
-                  Open email app
+                  Open mail app
                 </button>
               ) : null}
               {hydrated && !isSignedIn ? (
@@ -327,48 +344,48 @@ export default function SupportPage() {
                   }}
                   className={secondaryButtonClass}
                 >
-                  Sign in to send in app
+                  Sign in to send here
                 </button>
               ) : null}
             </div>
           </SurfacePanel>
 
           <div className="space-y-4">
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Before you send
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  Help us resolve it faster.
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  A few details help a lot.
                 </h2>
               </div>
-              <ul className="space-y-3 text-sm leading-6 text-neutral-300">
-                <li>We usually reply within 1-2 business days.</li>
-                <li>Add an order ID for payment issues so the receipt can be traced faster.</li>
-                <li>Include screenshots, browser or device details, and the page URL when the issue is visual.</li>
+              <ul className="space-y-3 text-sm leading-6 text-slate-600">
+                <li>We usually reply within 1 to 2 business days.</li>
+                <li>Add the order ID if this is about a charge.</li>
+                <li>Include screenshots, the page URL, and your device if something looks broken.</li>
               </ul>
             </SurfacePanel>
 
-            <SurfacePanel className="space-y-4">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Need order help first?
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Need purchase details?
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  Check receipts before opening a thread.
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Check your purchases first.
                 </h2>
               </div>
-              <p className="text-sm leading-6 text-neutral-300">
-                Start from Orders when you need a receipt, payment status, or refund reference. If the problem still needs a person to review it, come back here with the order ID attached.
+              <p className="text-sm leading-6 text-slate-600">
+                Use Orders to grab the order ID or confirm what you bought before you message us.
               </p>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => router.push("/orders")}
-                  className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  className={primaryButtonClass}
                 >
-                  View orders
+                  View purchases
                 </button>
                 <button
                   type="button"
@@ -378,7 +395,7 @@ export default function SupportPage() {
                   FAQ
                 </button>
               </div>
-              <p className="text-sm text-neutral-400">Direct email: {siteConfig.supportEmail}</p>
+              <p className="text-sm text-slate-500">Email us directly: {siteConfig.supportEmail}</p>
             </SurfacePanel>
           </div>
         </div>

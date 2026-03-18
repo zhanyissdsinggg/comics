@@ -37,13 +37,13 @@ const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), { ssr: false })
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
 const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
   ssr: false,
-  loading: () => <div className="sticky top-0 z-40 h-[72px] border-b border-white/5 bg-neutral-950/90" />,
+  loading: () => <div className="sticky top-0 z-40 h-[72px] border-b border-black/6 bg-[rgba(246,247,251,0.82)] backdrop-blur-xl" />,
 });
 const HomeRailsContainer = dynamic(() => import("./HomeRailsContainer"), {
   loading: () => (
     <div className="space-y-10">
-      <div className="h-72 rounded-[28px] bg-neutral-900/60" />
-      <div className="h-72 rounded-[28px] bg-neutral-900/60" />
+      <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
+      <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
     </div>
   ),
 });
@@ -114,9 +114,9 @@ function SpotlightItem({ item, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-center gap-3 rounded-[24px] border border-white/10 bg-black/20 p-3 text-left transition hover:border-white/20 hover:bg-white/[0.05]"
+      className="group flex w-full items-center gap-3 rounded-[22px] border border-black/6 bg-white/72 p-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:border-black/10 hover:bg-white"
     >
-      <div className="h-16 w-11 shrink-0 overflow-hidden rounded-[14px] border border-white/10 bg-neutral-900">
+      <div className="h-16 w-11 shrink-0 overflow-hidden rounded-[14px] border border-black/6 bg-slate-200">
         <Cover
           tone={item.coverTone}
           coverUrl={item.coverUrl}
@@ -124,29 +124,22 @@ function SpotlightItem({ item, onClick }) {
         />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-white">{item.title}</p>
-        <p className="mt-1 truncate text-xs text-neutral-400">{item.meta}</p>
+        <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
+        <p className="mt-1 truncate text-xs text-slate-500">{item.meta}</p>
       </div>
-      <ArrowRight className="size-4 shrink-0 text-neutral-500 transition group-hover:translate-x-1 group-hover:text-white" />
+      <ArrowRight className="size-4 shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-900" />
     </button>
   );
 }
 
 function HomeEntryCard({ card, onOpenSeries, onOpenCollection }) {
-  const Icon = card.icon;
-
   return (
-    <Card className="overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(10,14,22,0.98))] py-0 shadow-[0_26px_90px_rgba(0,0,0,0.28)]">
+    <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,249,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <CardContent className="p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="max-w-[18rem]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">{card.eyebrow}</p>
-            <h2 className="mt-3 font-display text-[1.7rem] font-semibold tracking-tight text-white">{card.title}</h2>
-            <p className="mt-2 text-sm leading-7 text-neutral-300">{card.description}</p>
-          </div>
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-[18px] border border-white/10 bg-white/[0.05] text-white">
-            <Icon className="size-5" />
-          </div>
+        <div className="max-w-[20rem]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{card.eyebrow}</p>
+          <h2 className="mt-3 font-display text-[1.75rem] font-semibold tracking-tight text-slate-950">{card.title}</h2>
+          <p className="mt-2 text-sm leading-7 text-slate-600">{card.description}</p>
         </div>
 
         <div className="mt-6 space-y-3">
@@ -163,7 +156,7 @@ function HomeEntryCard({ card, onOpenSeries, onOpenCollection }) {
           type="button"
           variant="outline"
           onClick={() => onOpenCollection(card.href)}
-          className="mt-5 h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
+          className="mt-5 h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
         >
           {card.ctaLabel}
           <ArrowRight className="size-4" />
@@ -253,6 +246,24 @@ function HomeContent() {
     signals.push(getReadingState(featuredSeries));
     return signals;
   }, [featuredSeries]);
+  const heroSupportingItems = useMemo(
+    () =>
+      heroItems
+        .slice(1, 2)
+        .map((item) => seriesById.get(item.seriesId))
+        .filter(Boolean)
+        .map((series) => ({
+          id: series.id,
+          title: series.title,
+          meta:
+            Array.isArray(series.genres) && series.genres.length > 0
+              ? series.genres.slice(0, 2).join(" / ")
+              : getReadingState(series),
+          coverUrl: series.coverUrl,
+          coverTone: series.coverTone,
+        })),
+    [heroItems, seriesById],
+  );
 
   const progressEntries = useMemo(
     () =>
@@ -346,7 +357,7 @@ function HomeContent() {
   }, [editorialSnapshot]);
 
   const homeEntryCards = useMemo(() => {
-    const trendingItems = leaderboardItems.slice(0, 3).map((item) => ({
+    const trendingItems = leaderboardItems.slice(0, 2).map((item) => ({
       id: item.id,
       title: item.title,
       meta: item.statusLabel,
@@ -366,7 +377,7 @@ function HomeContent() {
           return getSeriesScore(right) - getSeriesScore(left);
         }),
     ])
-      .slice(0, 3)
+      .slice(0, 2)
       .map((series) => ({
         id: series.id,
         title: series.title,
@@ -381,7 +392,7 @@ function HomeContent() {
         .filter((series) => String(series?.status || "").toLowerCase() === "completed")
         .sort((left, right) => getSeriesScore(right) - getSeriesScore(left)),
     ])
-      .slice(0, 3)
+      .slice(0, 2)
       .map((series) => ({
         id: series.id,
         title: series.title,
@@ -394,9 +405,9 @@ function HomeContent() {
       {
         id: "trending",
         eyebrow: "Right now",
-        title: "Trending Now",
-        description: "The fastest way to land on something readers are already opening.",
-        ctaLabel: "Open the chart",
+        title: "Trending",
+        description: "Start with what already has real reader momentum.",
+        ctaLabel: "See all",
         href: "/rankings?type=popular&window=week",
         icon: Flame,
         entryPoint: "HOME_TRENDING_CARD",
@@ -406,8 +417,8 @@ function HomeContent() {
         id: "start-free",
         eyebrow: "Easy entry",
         title: "Start Free",
-        description: "Try the hook first, then decide what deserves your time.",
-        ctaLabel: "Browse free chapters",
+        description: "Try the first few chapters before you commit.",
+        ctaLabel: "See free chapters",
         href: "/rankings?type=ttf&window=all",
         icon: BookOpenText,
         entryPoint: "HOME_FREE_CARD",
@@ -416,15 +427,17 @@ function HomeContent() {
       {
         id: "completed",
         eyebrow: "No waiting",
-        title: "Completed Series",
-        description: "Finished runs for readers who would rather binge than babysit updates.",
-        ctaLabel: "See finished runs",
+        title: "Finished Series",
+        description: "For readers who would rather binge than wait.",
+        ctaLabel: "See finished series",
         href: "/search?status=Completed&sort=popular",
         icon: CheckCircle2,
         entryPoint: "HOME_COMPLETED_CARD",
         items: completedItems,
       },
-    ].filter((card) => card.items.length > 0);
+    ]
+      .filter((card) => card.items.length > 0)
+      .slice(0, 2);
   }, [editorialSnapshot, leaderboardItems]);
 
   const openHomeSeries = (seriesId, entryPoint, campaignId) => {
@@ -464,37 +477,37 @@ function HomeContent() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent">
-      <SiteHeader />
-      <main className="mx-auto max-w-[1320px] px-4 pb-24 sm:px-6 sm:pb-10 lg:px-8">
+    <div className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[38rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.14),transparent_24%),radial-gradient(circle_at_78%_10%,rgba(255,255,255,0.72),transparent_22%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="home" />
+      <main className="relative mx-auto max-w-[1320px] px-4 pb-24 sm:px-6 sm:pb-12 lg:px-8">
         <section className="py-4 md:py-6">
           {loading ? (
-            <div className="aspect-[21/10] w-full animate-pulse rounded-[36px] bg-neutral-800 sm:aspect-[21/9] md:aspect-[21/8]" />
+            <div className="aspect-[21/10] w-full animate-pulse rounded-[40px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)] sm:aspect-[21/9] md:aspect-[21/8]" />
           ) : featuredSeries ? (
-            <Card className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,24,0.92),rgba(8,11,18,0.98))] py-0 shadow-[0_30px_110px_rgba(0,0,0,0.36)]">
+            <Card className="relative overflow-hidden rounded-[40px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] py-0 shadow-[0_24px_56px_rgba(15,23,42,0.08)]">
               {featuredBannerUrl ? (
                 <div
-                  className="absolute inset-0 bg-cover bg-center opacity-30"
+                  className="absolute inset-0 bg-cover bg-center opacity-[0.08]"
                   style={{ backgroundImage: `url(${featuredBannerUrl})` }}
                 />
               ) : null}
-              <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(8,11,18,0.94)_18%,rgba(8,11,18,0.74)_56%,rgba(8,11,18,0.94)_100%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.14),transparent_28%),radial-gradient(circle_at_78%_18%,rgba(255,255,255,0.08),transparent_24%)]" />
-              <CardContent className="relative grid gap-8 p-5 sm:p-7 xl:grid-cols-[1.15fr_0.85fr] xl:items-end xl:p-8">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(247,249,252,0.96))]" />
+              <CardContent className="relative grid gap-8 p-5 sm:p-7 xl:grid-cols-[1.04fr_0.96fr] xl:items-start xl:p-8">
                 <div className="max-w-3xl">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">Today&apos;s spotlight</p>
-                  <h1 className="mt-4 max-w-3xl font-display text-[2.4rem] font-semibold tracking-tight text-white sm:text-[3rem] xl:text-[3.55rem]">
-                    Find a comic worth getting obsessed with.
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Featured this week</p>
+                  <h1 className="mt-4 max-w-3xl font-display text-[2.45rem] font-semibold tracking-tight text-slate-950 sm:text-[3.1rem] xl:text-[3.8rem]">
+                    Read something worth staying up for.
                   </h1>
-                  <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
-                    Start with <span className="font-semibold text-white">{featuredSeries.title}</span>, sample free chapters, or jump straight into a finished binge.
+                  <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">
+                    Start with <span className="font-semibold text-slate-950">{featuredSeries.title}</span>, try a few free chapters, or jump straight into a finished series.
                   </p>
 
-                  <div className="mt-5 flex flex-wrap gap-2">
+                  <div className="mt-5 flex flex-wrap gap-2.5">
                     {featuredSignals.map((signal) => (
                       <span
                         key={signal}
-                        className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-neutral-100"
+                        className="rounded-full border border-black/6 bg-white/72 px-3 py-1.5 text-xs font-medium text-slate-700"
                       >
                         {signal}
                       </span>
@@ -506,77 +519,89 @@ function HomeContent() {
                       type="button"
                       size="lg"
                       onClick={() => openHomeSeries(featuredSeries.id, "HOME_HERO", "home_hero_primary")}
-                      className="h-11 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 hover:bg-neutral-200"
+                      className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
                     >
-                      Start Reading
+                      Start reading
                     </Button>
                     <Button
                       type="button"
                       size="lg"
                       variant="outline"
                       onClick={() => router.push("/rankings?type=ttf&window=all")}
-                      className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
+                      className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
                     >
-                      Browse Free Chapters
+                      See free chapters
                     </Button>
                   </div>
 
-                  <div className="mt-8 rounded-[28px] border border-white/10 bg-black/20 p-4 sm:p-5">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="mt-8 rounded-[30px] border border-black/6 bg-white/72 p-5 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">Featured series</p>
-                        <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-[2rem]">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Today&apos;s pick</p>
+                        <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
                           {featuredSeries.title}
                         </h2>
                         {featuredSeries.author ? (
-                          <p className="mt-1 text-sm text-neutral-400">by {featuredSeries.author}</p>
+                          <p className="mt-1 text-sm text-slate-500">by {featuredSeries.author}</p>
                         ) : null}
                       </div>
                       {Number(featuredSeries.ratingCount || 0) > 0 ? (
-                        <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-neutral-200">
+                        <span className="rounded-full border border-black/6 bg-[#f8f9fc] px-3 py-1.5 text-xs font-medium text-slate-700">
                           {formatCompactNumber(featuredSeries.ratingCount)} ratings
                         </span>
                       ) : null}
                     </div>
                     {featuredSeries.description ? (
-                      <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-300">{featuredSeries.description}</p>
+                      <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{featuredSeries.description}</p>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-[220px_1fr] xl:grid-cols-[248px_1fr]">
-                  <div className="overflow-hidden rounded-[28px] border border-white/10 bg-neutral-900 shadow-[0_20px_70px_rgba(0,0,0,0.3)]">
+                <div className="grid gap-4 sm:grid-cols-[228px_1fr] xl:grid-cols-[264px_1fr]">
+                  <div className="overflow-hidden rounded-[30px] border border-black/6 bg-slate-200 shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
                     <Cover tone={featuredSeries.coverTone} coverUrl={featuredSeries.coverUrl} className="aspect-[3/4] w-full" />
                   </div>
-                  <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">Why start here</p>
-                    <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">{featuredSeries.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  <div className="space-y-4">
+                    <div className="rounded-[30px] border border-black/6 bg-white/76 p-5 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Why this one</p>
+                    <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">{featuredSeries.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">
                       {String(featuredSeries.status || "").toLowerCase() === "completed"
                         ? "A finished run is the easiest way to trust the site with your time."
                         : Number(featuredSeries.freeEpisodeCount || 0) > 0
-                          ? `${Number(featuredSeries.freeEpisodeCount || 0)} free chapter${Number(featuredSeries.freeEpisodeCount || 0) === 1 ? "" : "s"} make this an easy first click.`
-                          : "Strong reader momentum and a clean entry point make this a safer first read than a random catalog card."}
+                          ? `${Number(featuredSeries.freeEpisodeCount || 0)} free chapter${Number(featuredSeries.freeEpisodeCount || 0) === 1 ? "" : "s"} make it easy to know fast if it is for you.`
+                          : "A strong hook and clear reader momentum make this a better first click than a random catalog pick."}
                     </p>
 
                     <div className="mt-6 space-y-3">
                       {formatRating(featuredSeries.rating) ? (
-                        <div className="rounded-[20px] border border-white/10 bg-black/20 p-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">Reader signal</p>
-                          <p className="mt-1 text-sm text-white">
+                        <div className="rounded-[20px] border border-black/6 bg-[#f8f9fc] p-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Reader signal</p>
+                          <p className="mt-1 text-sm text-slate-900">
                             {formatRating(featuredSeries.rating)} stars from {formatCompactNumber(featuredSeries.ratingCount)} readers
                           </p>
                         </div>
                       ) : null}
-                      <div className="rounded-[20px] border border-white/10 bg-black/20 p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">Reading pace</p>
-                        <p className="mt-1 text-sm text-white">{getReadingState(featuredSeries)}</p>
-                      </div>
-                      <div className="rounded-[20px] border border-white/10 bg-black/20 p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">What to do next</p>
-                        <p className="mt-1 text-sm text-white">Hit the featured title first, then use the three lanes below to keep browsing fast.</p>
+                      <div className="rounded-[20px] border border-black/6 bg-[#f8f9fc] p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Reading pace</p>
+                        <p className="mt-1 text-sm text-slate-900">{getReadingState(featuredSeries)}</p>
                       </div>
                     </div>
+                  </div>
+                    {heroSupportingItems.length > 0 ? (
+                      <div className="rounded-[30px] border border-black/6 bg-white/76 p-5 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">One more pick</p>
+                        <div className="mt-4 space-y-3">
+                          {heroSupportingItems.map((item) => (
+                            <SpotlightItem
+                              key={item.id}
+                              item={item}
+                              onClick={() => openHomeSeries(item.id, "HOME_HERO_SECONDARY", `home_hero_secondary_${item.id}`)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </CardContent>
@@ -592,40 +617,40 @@ function HomeContent() {
 
         {isSignedIn && resumeSeries ? (
           <section className="mb-10">
-            <Card className="overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(10,14,22,0.98))] py-0 shadow-[0_26px_90px_rgba(0,0,0,0.28)]">
+            <Card className="overflow-hidden rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
               <CardContent className="grid gap-5 p-5 sm:p-6 xl:grid-cols-[1.02fr_0.98fr] xl:items-center">
                 <div className="max-w-3xl">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">Continue reading</p>
-                  <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">Jump back into {resumeSeries.title}.</h2>
-                  <p className="mt-4 max-w-2xl text-sm leading-7 text-neutral-200 sm:text-base">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Continue reading</p>
+                  <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Pick up where you left off.</h2>
+                  <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                     {resumeSpotlight?.progressPercent > 0 ? `${formatEpisodeLabel(resumeSpotlight.episodeId)} is ${formatPercent(resumeSpotlight.progressPercent)} complete.` : `${formatEpisodeLabel(resumeSpotlight?.episodeId)} is still the fastest way back into the story.`}
                   </p>
                   <div className="mt-5 flex flex-wrap gap-2">
                     {[["Continue", continueItems.length], ["History", recentHistoryItems.length], ["Following", followedSeriesIds.length]].map(([label, value], index) => (
-                      <span key={String(label)} className={`rounded-full border px-3 py-1.5 text-sm ${index === 0 ? "border-emerald-400/30 bg-emerald-400/[0.08] text-emerald-100" : "border-white/10 bg-white/[0.04] text-neutral-200"}`}>
-                        <span className="font-semibold text-white">{Number(value).toLocaleString()}</span>
-                        <span className="ml-2 text-neutral-400">{label}</span>
+                      <span key={String(label)} className={`rounded-full border px-3 py-1.5 text-sm ${index === 0 ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-800" : "border-black/6 bg-white/72 text-slate-700"}`}>
+                        <span className="font-semibold text-slate-950">{Number(value).toLocaleString()}</span>
+                        <span className="ml-2 text-slate-500">{label}</span>
                       </span>
                     ))}
                   </div>
                   <div className="mt-6 flex flex-wrap gap-3">
-                    <Button type="button" size="lg" onClick={goResume} className="h-11 rounded-full bg-white px-5 text-sm font-semibold text-neutral-950 hover:bg-neutral-200">Continue {formatEpisodeLabel(resumeSpotlight?.episodeId)}</Button>
-                    <Button type="button" size="lg" variant="outline" onClick={() => router.push(`/series/${resumeSeries.id}`)} className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]">Open series page</Button>
-                    <Button type="button" size="lg" variant="outline" onClick={() => router.push("/library")} className="h-11 rounded-full border-white/10 bg-black/20 px-5 text-sm font-semibold text-neutral-200 hover:border-white/20 hover:bg-white/[0.06]">Open library</Button>
+                    <Button type="button" size="lg" onClick={goResume} className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800">Continue reading</Button>
+                    <Button type="button" size="lg" variant="outline" onClick={() => router.push(`/series/${resumeSeries.id}`)} className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]">Open series</Button>
+                    <Button type="button" size="lg" variant="outline" onClick={() => router.push("/library")} className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]">Library</Button>
                   </div>
                 </div>
-                <div className="rounded-[28px] border border-white/10 bg-black/20 p-4 sm:p-5">
+                <div className="rounded-[28px] border border-black/6 bg-white/72 p-4 sm:p-5">
                   <div className="grid gap-4 sm:grid-cols-[148px_1fr]">
-                    <div className="aspect-[3/4] rounded-[24px] border border-white/10 bg-neutral-900 bg-cover bg-center shadow-[0_20px_50px_rgba(0,0,0,0.22)]" style={resumeSeries.coverUrl ? { backgroundImage: `linear-gradient(180deg,rgba(12,18,24,0.04),rgba(12,18,24,0.24)), url(${resumeSeries.coverUrl})` } : undefined} />
+                    <div className="aspect-[3/4] rounded-[24px] border border-black/6 bg-neutral-900 bg-cover bg-center shadow-[0_16px_32px_rgba(15,23,42,0.08)]" style={resumeSeries.coverUrl ? { backgroundImage: `linear-gradient(180deg,rgba(12,18,24,0.04),rgba(12,18,24,0.24)), url(${resumeSeries.coverUrl})` } : undefined} />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">Up next</p>
-                      <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">{resumeSeries.title}</h3>
-                      <p className="mt-3 text-sm text-neutral-300">{formatEpisodeLabel(resumeSpotlight?.episodeId)}{resumeSpotlight?.progressPercent > 0 ? ` / ${formatPercent(resumeSpotlight.progressPercent)} complete` : " / Ready to reopen"}</p>
-                      {Array.isArray(resumeSeries.genres) && resumeSeries.genres.length > 0 ? <p className="mt-2 text-sm text-neutral-400">{resumeSeries.genres.slice(0, 3).join(" / ")}</p> : null}
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Up next</p>
+                      <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">{resumeSeries.title}</h3>
+                      <p className="mt-3 text-sm text-slate-600">{formatEpisodeLabel(resumeSpotlight?.episodeId)}{resumeSpotlight?.progressPercent > 0 ? ` / ${formatPercent(resumeSpotlight.progressPercent)} complete` : " / Ready to reopen"}</p>
+                      {Array.isArray(resumeSeries.genres) && resumeSeries.genres.length > 0 ? <p className="mt-2 text-sm text-slate-500">{resumeSeries.genres.slice(0, 3).join(" / ")}</p> : null}
                       <div className="mt-4 flex flex-wrap gap-2">
-                        {resumeSeries.badge ? <Badge variant="outline" className="rounded-full border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white">{resumeSeries.badge}</Badge> : null}
-                        {followedSeriesIds.includes(resumeSeries.id) ? <Badge variant="outline" className="rounded-full border-emerald-400/20 bg-emerald-400/[0.1] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-emerald-200">Following</Badge> : null}
-                        {resumeSeries.status ? <Badge variant="outline" className="rounded-full border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-neutral-300">{resumeSeries.status}</Badge> : null}
+                        {resumeSeries.badge ? <Badge variant="outline" className="rounded-full border-black/8 bg-white px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-700">{resumeSeries.badge}</Badge> : null}
+                        {followedSeriesIds.includes(resumeSeries.id) ? <Badge variant="outline" className="rounded-full border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-800">Following</Badge> : null}
+                        {resumeSeries.status ? <Badge variant="outline" className="rounded-full border-black/8 bg-[#f8f9fc] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-500">{resumeSeries.status}</Badge> : null}
                       </div>
                     </div>
                   </div>
@@ -636,7 +661,7 @@ function HomeContent() {
         ) : null}
 
         {homeEntryCards.length > 0 ? (
-          <section className="mb-12 grid gap-4 lg:grid-cols-3">
+          <section className="mb-12 grid gap-4 lg:grid-cols-2">
             {homeEntryCards.map((card) => (
               <HomeEntryCard
                 key={card.id}
@@ -650,16 +675,16 @@ function HomeContent() {
 
         <section className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">Keep browsing</p>
-            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-[2.2rem]">More good reads, less homepage clutter.</h2>
-            <p className="mt-3 text-sm leading-7 text-neutral-300">Below the spotlight, the shelves stay focused on a few strong lanes instead of explaining the platform to you.</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Keep browsing</p>
+            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">A few more picks. Nothing extra.</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">The shelves below stay short on purpose, so browsing still feels calm.</p>
           </div>
           <Button
             type="button"
             size="lg"
             variant="outline"
             onClick={() => router.push("/search")}
-            className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white hover:border-white/20 hover:bg-white/[0.08]"
+            className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
           >
             <Compass className="size-4" />
             Browse all series
@@ -668,11 +693,11 @@ function HomeContent() {
 
         {loading ? (
           <div className="space-y-10">
-            <div className="h-72 rounded-[28px] bg-neutral-900/60" />
-            <div className="h-72 rounded-[28px] bg-neutral-900/60" />
+            <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
+            <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
           </div>
         ) : (
-          <HomeRailsContainer />
+          <HomeRailsContainer appearance="light" />
         )}
 
         <LoginPrompt

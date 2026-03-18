@@ -7,7 +7,7 @@ import { siteConfig } from "../../lib/siteConfig";
 
 export const metadata = createPageMetadata({
   title: "Privacy Policy",
-  description: `Learn how ${siteConfig.siteName} collects, uses, and protects personal information.`,
+  description: `See what data ${siteConfig.siteName} collects, why it is needed, and how to contact us about it.`,
   path: "/privacy-policy",
 });
 
@@ -15,58 +15,58 @@ const effectiveDate = "March 9, 2026";
 
 const PRIVACY_SECTIONS = [
   {
-    title: "1. Information we collect",
+    title: "What we collect",
     bullets: [
-      "Account details such as email address, login identifiers, and profile preferences.",
-      "Transactional data related to purchases, subscriptions, refunds, and promotional redemptions.",
-      "Usage data such as pages visited, reading progress, device type, and basic diagnostic information.",
-      "Messages you send to support, feedback forms, or other direct communications with us.",
+      "Account details like email address, sign-in identifiers, and profile preferences.",
+      "Purchase data tied to memberships, point packs, refunds, and promo redemptions.",
+      "Reading and device data such as pages visited, reading progress, device type, and basic diagnostics.",
+      "Messages you send us through support, feedback forms, or direct email.",
     ],
   },
   {
-    title: "2. How we use information",
+    title: "How we use it",
     bullets: [
-      "Operate the service, authenticate users, and process payments.",
-      "Improve stability, fix bugs, monitor abuse, and maintain security.",
-      "Personalize recommendations, reading features, and product messaging.",
+      "Run the site, sign readers in, and process payments.",
+      "Fix bugs, prevent abuse, and keep the product secure.",
+      "Personalize recommendations, reading tools, and product messages.",
       "Meet legal obligations, enforce our Terms, and respond to valid requests from authorities.",
     ],
   },
   {
-    title: "3. Legal bases and sharing",
+    title: "Why we process and share it",
     paragraphs: [
-      "We process information when it is necessary to perform our contract with you, comply with law, protect the service, or pursue legitimate business interests such as fraud prevention and service improvement.",
-      "We may share data with infrastructure providers, payment processors, analytics vendors, customer support tools, or rights holders when needed to operate the platform.",
+      `We process information when we need it to run ${siteConfig.siteName}, honor purchases, comply with law, protect the site, or improve the product.`,
+      "We may share data with hosting providers, payment processors, analytics vendors, support tools, or rights holders when that is required to run the site.",
     ],
   },
   {
-    title: "4. Retention and security",
+    title: "How long we keep it",
     paragraphs: [
-      "We retain data only as long as it is needed for the purposes described here, including compliance, accounting, dispute resolution, and service integrity.",
-      "We use administrative, technical, and organizational safeguards designed to protect personal information, but no system is perfectly secure.",
+      "We keep data only as long as we need it for the reasons in this policy, including compliance, accounting, disputes, and site integrity.",
+      "We use administrative, technical, and organizational safeguards, but no internet system is perfectly secure.",
     ],
   },
   {
-    title: "5. International transfers",
+    title: "International transfers",
     paragraphs: [
-      "Your information may be processed in countries other than where you live. When that happens, we use reasonable safeguards appropriate for the type of data involved and the legal requirements that apply.",
+      "Your information may be processed outside the country where you live. When that happens, we use reasonable safeguards based on the type of data involved and the laws that apply.",
     ],
   },
   {
-    title: "6. Your rights",
+    title: "Your privacy choices",
     paragraphs: [
       "Depending on where you live, you may have the right to access, correct, delete, restrict, object to, or port certain personal information. You may also have the right to withdraw consent where processing depends on consent.",
       `To make a privacy request, contact us at ${siteConfig.privacyEmail}. We may need to verify your identity before completing the request.`,
     ],
   },
   {
-    title: "7. Children",
+    title: "Children",
     paragraphs: [
-      "The service is not directed to children under the age required by applicable law in their jurisdiction. If you believe a child provided personal information without proper consent, contact us so we can review it.",
+      "The site is not directed to children under the age required by applicable law in their jurisdiction. If you believe a child provided personal information without proper consent, contact us so we can review it.",
     ],
   },
   {
-    title: "8. Policy updates",
+    title: "Policy updates",
     paragraphs: [
       "We may update this policy when our practices, product features, or legal obligations change. When we make material updates, we will post the new version on this page and update the effective date above.",
     ],
@@ -81,15 +81,14 @@ function LegalSection({
   children = null,
 }) {
   return (
-    <SurfacePanel className={className}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">Policy section</p>
-      <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">{title}</h2>
-      <div className="mt-4 space-y-4 text-sm leading-7 text-neutral-300">
+    <SurfacePanel className={className} appearance="light" accent="blue">
+      <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">{title}</h2>
+      <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
         {paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
         {bullets.length > 0 ? (
-          <ul className="list-disc space-y-2 pl-5 text-neutral-300 marker:text-emerald-300/80">
+          <ul className="list-disc space-y-2 pl-5 text-slate-600 marker:text-[var(--gush-accent,#2f6bff)]">
             {bullets.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -103,19 +102,19 @@ function LegalSection({
 
 function ContactCard() {
   return (
-    <div className="rounded-[24px] border border-white/8 bg-black/20 px-5 py-4 backdrop-blur-sm">
-      <p className="text-sm text-neutral-300">
-        <span className="font-semibold text-white">Email:</span>{" "}
+    <div className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+      <p className="text-sm text-slate-600">
+        <span className="font-semibold text-slate-950">Email:</span>{" "}
         <a
           href={`mailto:${siteConfig.privacyEmail}`}
-          className="text-emerald-200 transition hover:text-emerald-100"
+          className="text-[var(--gush-accent,#2f6bff)] transition hover:text-[rgba(47,107,255,0.8)]"
         >
           {siteConfig.privacyEmail}
         </a>
       </p>
       {siteConfig.companyAddress ? (
-        <p className="mt-3 text-sm text-neutral-300">
-          <span className="font-semibold text-white">Address:</span> {siteConfig.companyAddress}
+        <p className="mt-3 text-sm text-slate-600">
+          <span className="font-semibold text-slate-950">Address:</span> {siteConfig.companyAddress}
         </p>
       ) : null}
     </div>
@@ -124,37 +123,40 @@ function ContactCard() {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      <SiteHeader />
-      <main className="px-4 py-8 pb-14 sm:py-10">
+    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <main className="relative px-4 py-8 pb-14 sm:py-10">
         <div className="mx-auto max-w-6xl space-y-8">
-          <InfoPageNav current="privacy" />
+          <InfoPageNav current="privacy" appearance="light" />
 
           <EditorialHero
-            eyebrow="Legal"
-            title="Privacy Policy"
-            description={`This policy explains what data ${siteConfig.companyName} collects, why we collect it, how we protect it, and what choices you have.`}
-            secondary="The summary below is organized for scan speed so users can find collection, usage, rights, and contact details without wading through a wall of text."
+            appearance="light"
+            accent="blue"
+            eyebrow="Privacy"
+            title="Privacy, in plain English."
+            description={`Here is what data ${siteConfig.companyName} collects, why we need it, and what choices you have.`}
+            secondary="We organized this page to be scanned quickly, not buried in legal fog."
             stats={[
               {
                 label: "Effective",
                 value: effectiveDate,
-                hint: "The current policy version is identified by this effective date.",
+                hint: "This is the current version of the policy.",
               },
               {
-                label: "Coverage",
-                value: "Account + billing",
-                hint: "The policy covers account, transaction, usage, and support interaction data.",
+                label: "Covers",
+                value: "Account + reading",
+                hint: "Includes purchases, usage, and support messages.",
               },
               {
-                label: "Rights",
+                label: "Your options",
                 value: "Access / delete",
-                hint: "Available rights depend on the laws that apply where the user lives.",
+                hint: "Available rights depend on the laws that apply where you live.",
               },
               {
                 label: "Contact",
                 value: siteConfig.privacyEmail,
-                hint: "Privacy questions and formal data requests should be sent here.",
+                hint: "Privacy questions and data requests should go here.",
               },
             ]}
           />
@@ -165,10 +167,10 @@ export default function PrivacyPolicyPage() {
             ))}
 
             <LegalSection
-              title="9. Contact"
+              title="Questions or requests"
               className="xl:col-span-2"
               paragraphs={[
-                "If you have privacy questions or need to submit a data rights request, use the contact details below.",
+                "If you have a privacy question or want to make a data request, use the contact details below.",
               ]}
             >
               <ContactCard />

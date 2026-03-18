@@ -186,19 +186,16 @@ test.describe("Homepage merchandising sync", () => {
 
     const homepageMain = page.locator("main");
 
-    await expect(homepageMain).toContainText("Find a comic worth getting obsessed with.", {
+    await expect(homepageMain).toContainText("Read something worth staying up for.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Start with Velvet Voltage, sample free chapters, or jump straight into a finished binge.", {
+    await expect(homepageMain).toContainText("Start with Velvet Voltage, try a few free chapters, or jump straight into a finished series.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Trending Now", {
+    await expect(homepageMain).toContainText("Trending", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(homepageMain).toContainText("Start Free", {
-      timeout: HOME_UI_TIMEOUT_MS,
-    });
-    await expect(homepageMain).toContainText("Completed Series", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(homepageMain).toContainText("Soft Launch Kiss", {

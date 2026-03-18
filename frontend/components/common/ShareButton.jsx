@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useMemo, useState } from "react";
+import { X } from "lucide-react";
 
 const ShareButton = React.memo(function ShareButton({ url, title, description, className = "" }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -109,22 +110,27 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,42,0.28)] p-4 backdrop-blur-sm"
           onClick={handleClose}
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
+            className="w-full max-w-md rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_28px_80px_rgba(15,23,42,0.18)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Share</h3>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  Share
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-slate-950">Send this title</h3>
+              </div>
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
+                className="rounded-full border border-black/8 p-2 text-slate-500 transition-colors hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
                 aria-label="Close"
               >
-                X
+                <X size={16} />
               </button>
             </div>
 
@@ -142,22 +148,22 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
               ))}
             </div>
 
-            <div className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-4">
-              <p className="mb-2 text-xs font-medium text-neutral-400">Or copy link</p>
+            <div className="rounded-[22px] border border-black/6 bg-white/84 p-4">
+              <p className="mb-2 text-xs font-medium text-slate-500">Or copy link</p>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={url}
                   readOnly
-                  className="flex-1 rounded-lg border border-neutral-800 bg-neutral-800/50 px-3 py-2 text-sm text-neutral-300 focus:border-emerald-500 focus:outline-none"
+                  className="flex-1 rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--gush-accent,#2f6bff)]"
                 />
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
                     copied
-                      ? "bg-emerald-500 text-white"
-                      : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                      ? "bg-[var(--gush-accent,#2f6bff)] text-white"
+                      : "bg-slate-950 text-white hover:bg-slate-800"
                   }`}
                 >
                   {copied ? "Copied" : "Copy"}

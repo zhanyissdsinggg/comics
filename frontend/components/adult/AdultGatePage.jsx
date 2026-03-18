@@ -85,25 +85,59 @@ export default function AdultGatePage() {
   }, [reason, returnTo]);
 
   return (
-    <div className="min-h-screen bg-neutral-950">
-      <SiteHeader />
-      <main className="mx-auto flex min-h-[70vh] max-w-6xl items-center justify-center px-4">
-        <div className="w-full max-w-md rounded-3xl border border-neutral-900 bg-neutral-900/60 p-6 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">
-            Adult Gate
+    <div className="min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <main className="relative mx-auto flex min-h-[70vh] max-w-6xl items-center justify-center px-4 py-10">
+        <div className="w-full max-w-2xl rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.08)] sm:p-7">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+            18+ access
           </p>
-          <h1 className="mt-3 text-2xl font-semibold">{titleMap[reason]}</h1>
-          <p className="mt-2 text-sm text-neutral-400">{descriptionMap[reason]}</p>
-          <button
-            type="button"
-            onClick={handleOpen}
-            className="mt-6 w-full rounded-full bg-white px-5 py-2 text-sm font-semibold text-neutral-900"
-          >
-            {ADULT_GATE_ACTION_LABELS[reason] || "Continue"}
-          </button>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
+              Private by default
+            </span>
+            <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
+              One quick check
+            </span>
+            <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
+              Easy to turn off
+            </span>
+          </div>
+          <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950">
+            {titleMap[reason]}
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{descriptionMap[reason]}</p>
+
+          <div className="mt-5 rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4 text-left">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              What happens next
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              Sign in if needed, confirm your age once, then return to the page you came from.
+            </p>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleOpen}
+              className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              {ADULT_GATE_ACTION_LABELS[reason] || "Continue"}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            >
+              Back to all titles
+            </button>
+          </div>
+
           {isSignedIn && reason === "NEED_LOGIN" ? (
-            <p className="mt-4 text-xs text-neutral-500">
-              You are already signed in.
+            <p className="mt-4 text-xs text-slate-500">
+              You're already signed in on this device. Continue to finish the 18+ check.
             </p>
           ) : null}
         </div>

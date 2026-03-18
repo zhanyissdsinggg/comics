@@ -40,9 +40,11 @@ export default function StorefrontContinuationStrip({
   includeValueCard = true,
   className = "",
   compact = false,
+  appearance = "default",
 }) {
   const router = useRouter();
   const campaign = useMemo(() => getStorefrontCampaign(series), [series]);
+  const isLight = appearance === "light";
   const leadSimilar = useMemo(
     () => similarItems.find((item) => item?.id && item.id !== series?.id) || null,
     [similarItems, series?.id],
@@ -61,7 +63,9 @@ export default function StorefrontContinuationStrip({
         description: campaign.nextMove,
         cta: campaign.discoveryCta,
         onClick: () => router.push(campaign.discoveryHref),
-        accentClass: "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
+        accentClass: isLight
+          ? "border-black/6 bg-white/84 hover:border-black/10 hover:bg-white"
+          : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
       },
     ];
 
@@ -75,7 +79,9 @@ export default function StorefrontContinuationStrip({
         cta: "Open similar pick",
         onClick: () => router.push(`/series/${leadSimilar.id}`),
         meta: getSimilarDescription(leadSimilar),
-        accentClass: "border-white/10 bg-black/20 hover:border-white/20 hover:bg-white/[0.05]",
+        accentClass: isLight
+          ? "border-black/6 bg-[#f8f9fc] hover:border-black/10 hover:bg-white"
+          : "border-white/10 bg-black/20 hover:border-white/20 hover:bg-white/[0.05]",
       });
     }
 
@@ -103,12 +109,14 @@ export default function StorefrontContinuationStrip({
           router.push(buildPathWithAttribution("/subscribe", attribution));
         },
         accentClass:
-          "border-emerald-400/25 bg-emerald-400/[0.08] hover:border-emerald-300/45 hover:bg-emerald-400/[0.12]",
+          isLight
+            ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]"
+            : "border-emerald-400/25 bg-emerald-400/[0.08] hover:border-emerald-300/45 hover:bg-emerald-400/[0.12]",
       });
     }
 
     return nextCards;
-  }, [campaign, entryPoint, includeValueCard, leadSimilar, returnTo, router, series?.id, sourcePath]);
+  }, [campaign, entryPoint, includeValueCard, isLight, leadSimilar, returnTo, router, series?.id, sourcePath]);
 
   if (cards.length === 0) {
     return null;
@@ -134,25 +142,29 @@ export default function StorefrontContinuationStrip({
           <CardContent className={cn(compact ? "p-4" : "p-5")}>
             <Badge
               variant="outline"
-              className="w-fit rounded-full border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current"
+              className={cn(
+                "w-fit rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current",
+                isLight ? "border-black/8 bg-white/82" : "border-white/10 bg-black/20",
+              )}
             >
               {card.eyebrow}
             </Badge>
             <h3
               className={cn(
-                "mt-4 font-semibold leading-tight text-white",
+                "mt-4 font-semibold leading-tight",
+                isLight ? "text-slate-950" : "text-white",
                 compact ? "text-base" : "text-lg",
               )}
             >
               {card.title}
             </h3>
             {!compact ? (
-              <p className="mt-3 text-sm leading-6 text-neutral-200/90">
+              <p className={cn("mt-3 text-sm leading-6", isLight ? "text-slate-600" : "text-neutral-200/90")}>
                 {card.description}
               </p>
             ) : null}
             {card.meta ? (
-              <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-neutral-500">
+              <p className={cn("mt-3 text-[11px] uppercase tracking-[0.18em]", isLight ? "text-slate-500" : "text-neutral-500")}>
                 {card.meta}
               </p>
             ) : null}
@@ -161,7 +173,8 @@ export default function StorefrontContinuationStrip({
               variant="ghost"
               onClick={card.onClick}
               className={cn(
-                "justify-start gap-2 px-0 text-sm font-semibold text-white hover:bg-transparent hover:text-emerald-200",
+                "justify-start gap-2 px-0 text-sm font-semibold hover:bg-transparent",
+                isLight ? "text-slate-900 hover:text-[var(--gush-accent,#2f6bff)]" : "text-white hover:text-emerald-200",
                 compact ? "mt-3 h-8" : "mt-4 h-9",
               )}
             >

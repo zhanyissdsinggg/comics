@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SeriesHeader from "./SeriesHeader";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
+import SeriesArrivalPanel from "./SeriesArrivalPanel";
 import SiteHeader from "../layout/SiteHeader";
 import Skeleton from "../common/Skeleton";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
@@ -35,8 +36,8 @@ import { buildCreatorHref, slugifyCreatorName } from "../../lib/creators";
 
 function EpisodeListSkeleton() {
   return (
-    <section className="mt-6 rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-5 shadow-[0_24px_100px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:mt-8 sm:p-6">
-      <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
+    <section className="mt-6 rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:mt-8 sm:p-6">
+      <div className="mb-4 flex items-center justify-between border-b border-black/6 pb-4">
         <div className="flex items-center gap-2">
           <Skeleton className="h-6 w-28 rounded-full" />
           <Skeleton className="h-4 w-10 rounded-full" />
@@ -540,9 +541,10 @@ export default function SeriesPage({ seriesId }) {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-neutral-950">
-        <SiteHeader />
-        <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+      <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+        <SiteHeader variant="light" />
+        <div className="relative mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
             <Skeleton className="h-80 w-full sm:w-56 md:w-64 flex-shrink-0 rounded-lg" />
             <div className="flex-1 space-y-3">
@@ -570,24 +572,25 @@ export default function SeriesPage({ seriesId }) {
 
   if (error && error !== "ADULT_GATED") {
     return (
-      <main className="min-h-screen bg-neutral-950">
-        <SiteHeader />
-        <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
-          <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-6 text-center">
-            <p className="text-sm text-red-200 font-semibold mb-2">Failed to Load</p>
-            <p className="text-xs text-red-300 mb-4">Unable to load series info. Please check your connection or try again later.</p>
+      <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+        <SiteHeader variant="light" />
+        <div className="relative mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+          <div className="rounded-[28px] border border-red-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.98))] p-6 text-center shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+            <p className="mb-2 text-sm font-semibold text-red-600">Failed to Load</p>
+            <p className="mb-4 text-xs text-red-500">Unable to load series info. Please check your connection or try again later.</p>
             <div className="flex gap-2 justify-center">
               <button
                 type="button"
                 onClick={() => fetchSeries({ bust: true })}
-                className="rounded-lg border border-red-400 bg-red-500/20 px-4 py-2 text-xs text-red-200 hover:bg-red-500/30"
+                className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100"
               >
                 Retry
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/")}
-                className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
+                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
                 Back to home
               </button>
@@ -600,8 +603,9 @@ export default function SeriesPage({ seriesId }) {
 
   if ((series?.adult || error === "ADULT_GATED") && gateStatus !== "OK") {
     return (
-      <main className="min-h-screen bg-neutral-950">
-        <SiteHeader />
+      <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+        <SiteHeader variant="light" />
 
         <AdultGateBlockingPanel status={gateStatus} onOpenModal={openGateModal} />
         {activeModal === "login" ? (
@@ -629,10 +633,11 @@ export default function SeriesPage({ seriesId }) {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950">
-      <SiteHeader />
+    <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
 
-      <div className="mx-auto max-w-[1280px] px-4 pb-24 sm:px-6 sm:pb-8 lg:px-8">
+      <div className="relative mx-auto max-w-[1280px] px-4 pb-24 sm:px-6 sm:pb-8 lg:px-8">
         {commerceNotice ? (
           <div className="pt-6">
             <CommerceSuccessBanner
@@ -658,6 +663,12 @@ export default function SeriesPage({ seriesId }) {
           creatorHref={creatorHref}
         />
 
+        <SeriesArrivalPanel
+          series={series}
+          attribution={routeAttribution}
+          creatorHref={creatorHref}
+        />
+
         <EpisodeList
           series={series}
           episodes={episodes}
@@ -674,7 +685,7 @@ export default function SeriesPage({ seriesId }) {
         {showSecondarySections ? (
           <>
             <SimilarSeriesSection seriesId={seriesId} series={series} />
-            <div className="mt-8 border-t border-neutral-800 pt-6" />
+            <div className="mt-8 border-t border-black/6 pt-6" />
             <CommentsSection
               seriesId={seriesId}
               rating={series.rating}

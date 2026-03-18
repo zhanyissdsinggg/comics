@@ -70,39 +70,40 @@ function buildGenreOptions(creators) {
 
 function CreatorDirectorySkeleton() {
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100">
-      <SiteHeader />
-      <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <SurfacePanel className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+        <SurfacePanel appearance="light" accent="blue" className="space-y-6">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-center">
             <div className="space-y-3">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
-              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-white/10" />
-              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/10" />
+              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
+              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-slate-200" />
+              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-200" />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={`creators-hero-skeleton-${index}`}
-                  className="h-28 animate-pulse rounded-[24px] border border-white/10 bg-black/20"
+                  className="h-28 animate-pulse rounded-[24px] border border-black/6 bg-white/80"
                 />
               ))}
             </div>
           </div>
         </SurfacePanel>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 xl:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={`creators-card-skeleton-${index}`}
-              className="h-[340px] animate-pulse rounded-[28px] border border-white/10 bg-black/20"
+              className="h-[360px] animate-pulse rounded-[28px] border border-black/6 bg-white/85 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
             />
           ))}
         </div>
 
         <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, index) => (
-            <SkeletonCard key={`creator-grid-skeleton-${index}`} />
+            <SkeletonCard key={`creator-grid-skeleton-${index}`} appearance="light" />
           ))}
         </div>
       </div>
@@ -217,26 +218,37 @@ export default function CreatorsHubPage() {
       {
         label: "Creators",
         value: stats.creators.toLocaleString(),
-        hint: "Writers, artists, and studio identities visible in the current catalog mode.",
+        hint: "Writers, artists, and studios with a visible page right now.",
       },
       {
-        label: "Titles",
+        label: "Series",
         value: stats.titles.toLocaleString(),
-        hint: "Published titles currently mapped back into creator discovery.",
+        hint: "Titles already tied back to a creator page.",
       },
       {
-        label: "Reader signals",
+        label: "Readers",
         value: formatCompactCount(stats.readerProof),
-        hint: "Combined reader activity across creator pages.",
+        hint: "Visible audience activity across those creator shelves.",
       },
       {
-        label: "Mode",
+        label: "Catalog",
         value: isAdultMode ? "18+" : "Standard",
-        hint: isAdultMode ? "18+ creator pages can appear here." : "18+ creator pages stay hidden.",
+        hint: isAdultMode ? "18+ titles can appear here." : "18+ titles stay hidden here.",
       },
     ],
     [isAdultMode, stats.creators, stats.readerProof, stats.titles],
   );
+
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
+  const filterButtonClass = (isActive) =>
+    `rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors ${
+      isActive
+        ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
+        : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-900"
+    }`;
 
   const openCreator = (creator, entryPoint = "CREATORS_HUB_GRID") => {
     if (!creator?.path) {
@@ -267,16 +279,19 @@ export default function CreatorsHubPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-neutral-950 text-neutral-100">
-        <SiteHeader />
-        <div className="mx-auto max-w-[960px] px-4 py-12 sm:px-6">
-          <SurfacePanel>
+      <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+        <SiteHeader variant="light" />
+        <div className="relative mx-auto max-w-[960px] px-4 py-12 sm:px-6">
+          <SurfacePanel appearance="light" tone="danger" accent="rose">
             <EmptyState
+              appearance="light"
               icon="alert"
-              title="Creator directory unavailable"
-              description="We could not load the creator directory right now. Retry or go back to search."
+              eyebrow="Load issue"
+              title="Creators are unavailable right now."
+              description="The page did not load cleanly. Try again, or jump back into search while this recovers."
               action={{
-                label: "Retry",
+                label: "Try again",
                 onClick: () => window.location.reload(),
               }}
             />
@@ -288,30 +303,33 @@ export default function CreatorsHubPage() {
 
   if (!creators.length) {
     return (
-      <main className="min-h-screen bg-neutral-950 text-neutral-100">
-        <SiteHeader />
-        <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+      <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+        <SiteHeader variant="light" />
+        <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
           <EditorialHero
-            eyebrow="Creator directory"
-            title="No creator pages are visible in this catalog mode yet."
-            description="Once published titles expose stable creator or studio names, they will appear here automatically."
-            secondary="Go back to search, charts, or home so browsing never stalls."
+            appearance="light"
+            accent="blue"
+            eyebrow="Creators"
+            title="No creator pages are showing yet."
+            description="As more titles get clean writer, artist, and studio credits, they will land here automatically."
+            secondary="Until then, head back to search or the weekly chart to keep browsing."
             stats={heroStats}
             actions={
               <>
                 <button
                   type="button"
                   onClick={() => router.push("/search")}
-                  className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  className={primaryButtonClass}
                 >
-                  Open search
+                  Search series
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
-                  See weekly chart
+                  Browse weekly hits
                 </button>
               </>
             }
@@ -322,36 +340,32 @@ export default function CreatorsHubPage() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100">
-      <SiteHeader />
+    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
 
-      <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        {commerceNotice ? (
-          <CommerceSuccessBanner
-            notice={commerceNotice}
-            onDismiss={() => setCommerceNotice(null)}
-          />
-        ) : null}
-
+      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Creator directory"
-          title="Meet the creators behind your next read."
-          description="Jump from a hit series to the writer, artist, or studio behind it, then browse everything else they have published."
-          secondary="Use this directory to compare creators, spot multi-title studios, and find more from the same team."
+          appearance="light"
+          accent="blue"
+          eyebrow="Creators"
+          title="Find the creators worth following."
+          description="Jump from one favorite series to the writer, artist, or studio behind it, then keep reading from the same voice."
+          secondary="Search by name or genre, open a creator page, and let the catalog feel smaller in the right way."
           stats={heroStats}
           actions={
             <>
               <button
                 type="button"
                 onClick={() => router.push("/rankings?type=popular&window=week")}
-                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className={primaryButtonClass}
               >
-                See weekly chart
+                Browse weekly hits
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+                className={secondaryButtonClass}
               >
                 Search all series
               </button>
@@ -359,142 +373,152 @@ export default function CreatorsHubPage() {
           }
         />
 
-        <SurfacePanel className="space-y-5">
+        {commerceNotice ? (
+          <CommerceSuccessBanner
+            notice={commerceNotice}
+            onDismiss={() => setCommerceNotice(null)}
+          />
+        ) : null}
+
+        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Filter the directory
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Find a creator
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  Search by creator, studio, or genre.
+                </h2>
+              </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm text-slate-500">
+                {filteredCreators.length.toLocaleString()} creator{filteredCreators.length === 1 ? "" : "s"} shown
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                Search creators without losing the full directory.
-              </h2>
+              {query || activeGenre !== "All" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    setActiveGenre("All");
+                  }}
+                  className={secondaryButtonClass}
+                >
+                  Clear filters
+                </button>
+              ) : null}
             </div>
-            <p className="text-sm text-neutral-400">
-              {filteredCreators.length.toLocaleString()} creator{filteredCreators.length === 1 ? "" : "s"} visible
-            </p>
           </div>
 
           <div className="flex flex-col gap-4">
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search creators, studios, or leading genres"
-              className="rounded-[20px] border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-neutral-100 outline-none transition-colors placeholder:text-neutral-500 focus:border-emerald-400/40"
+              placeholder="Search creators or studios"
+              className="rounded-[20px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.18)] focus:ring-4 focus:ring-[rgba(47,107,255,0.08)]"
             />
 
             <div className="flex flex-wrap gap-2.5">
-              {["All", ...genreOptions].map((genre) => {
-                const isActive = activeGenre === genre;
-                return (
-                  <button
-                    key={genre}
-                    type="button"
-                    onClick={() => setActiveGenre(genre)}
-                    className={`rounded-full border px-3.5 py-2 text-sm font-semibold transition ${
-                      isActive
-                        ? "border-white bg-white text-neutral-950"
-                        : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-                    }`}
-                  >
-                    {genre}
-                  </button>
-                );
-              })}
+              {["All", ...genreOptions].map((genre) => (
+                <button
+                  key={genre}
+                  type="button"
+                  onClick={() => setActiveGenre(genre)}
+                  className={filterButtonClass(activeGenre === genre)}
+                >
+                  {genre}
+                </button>
+              ))}
             </div>
           </div>
         </SurfacePanel>
 
         {spotlightCreators.length > 0 ? (
-          <SurfacePanel className="space-y-5">
+          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Creator spotlight
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Start here
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Start with the strongest creator pages.
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  A few creator pages worth opening first.
                 </h2>
               </div>
-              <p className="text-sm text-neutral-400">
-                Sorted by title count, reader activity, and recent updates.
+              <p className="text-sm text-slate-500">
+                Picked from the strongest visible creator shelves.
               </p>
             </div>
 
             <div className="grid gap-4 xl:grid-cols-3">
-              {spotlightCreators.map((creator) => (
-                <button
-                  key={creator.slug}
-                  type="button"
-                  onClick={() => openCreator(creator, "CREATORS_HUB_SPOTLIGHT")}
-                  className="rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-4 text-left shadow-[0_24px_80px_rgba(0,0,0,0.18)] transition hover:border-white/20 hover:bg-white/[0.05]"
-                >
-                  <Cover
-                    tone={creator.spotlightSeries?.coverTone}
-                    coverUrl={creator.spotlightSeries?.coverUrl}
-                    className="h-56 rounded-[22px]"
-                  />
-                  <div className="mt-4 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
-                          Creator page
-                        </p>
-                        <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                          {creator.name}
-                        </h3>
-                      </div>
-                      <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-                        {creator.titleCount} title{creator.titleCount === 1 ? "" : "s"}
-                      </span>
-                    </div>
-                    <p className="text-sm leading-6 text-neutral-400">
-                      {creator.spotlightSeries?.title
-                        ? `${creator.spotlightSeries.title} is a good place to start with this creator.`
-                        : "Open this page to compare the strongest published titles from this creator or studio."}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {creator.topGenres.map((genre) => (
-                        <span
-                          key={`${creator.slug}-${genre}`}
-                          className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-neutral-300"
-                        >
-                          {genre}
+              {spotlightCreators.map((creator) => {
+                const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres : [];
+
+                return (
+                  <button
+                    key={creator.slug}
+                    type="button"
+                    onClick={() => openCreator(creator, "CREATORS_HUB_SPOTLIGHT")}
+                    className="group rounded-[30px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                  >
+                    <Cover
+                      tone={creator.spotlightSeries?.coverTone}
+                      coverUrl={creator.spotlightSeries?.coverUrl}
+                      className="h-56 rounded-[22px]"
+                    />
+                    <div className="mt-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                            Creator spotlight
+                          </p>
+                          <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                            {creator.name}
+                          </h3>
+                        </div>
+                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                          {creator.titleCount} title{creator.titleCount === 1 ? "" : "s"}
                         </span>
-                      ))}
+                      </div>
+
+                      <p className="text-sm leading-6 text-slate-600">
+                        {creator.spotlightSeries?.title
+                          ? `Start with ${creator.spotlightSeries.title}, then keep moving through the rest of this shelf.`
+                          : "Open this page to see every visible series from this creator or studio in one place."}
+                      </p>
+
+                      {creatorGenres.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {creatorGenres.map((genre) => (
+                            <span
+                              key={`${creator.slug}-${genre}`}
+                              className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
+                            >
+                              {genre}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+
+                      <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+                        <span>{formatCompactCount(creator.readerProof)} readers</span>
+                        <span>{creator.completedCount} completed</span>
+                        <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
+                      </div>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-[20px] border border-white/10 bg-black/20 px-3 py-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                          Reader signals
-                        </p>
-                        <p className="mt-2 text-lg font-semibold text-white">{formatCompactCount(creator.readerProof)}</p>
-                      </div>
-                      <div className="rounded-[20px] border border-white/10 bg-black/20 px-3 py-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                          Completed
-                        </p>
-                        <p className="mt-2 text-lg font-semibold text-white">{creator.completedCount}</p>
-                      </div>
-                      <div className="rounded-[20px] border border-white/10 bg-black/20 px-3 py-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                          Updated
-                        </p>
-                        <p className="mt-2 text-lg font-semibold text-white">{formatDateLabel(creator.latestUpdatedAt)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </SurfacePanel>
         ) : null}
 
         {filteredCreators.length === 0 ? (
-          <SurfacePanel>
+          <SurfacePanel appearance="light" accent="blue">
             <EmptyState
+              appearance="light"
               icon="search"
-              title="No creators match the current filter"
-              description="Try a broader keyword or clear the active genre chip to reopen the full creator directory."
+              eyebrow="No matches"
+              title="Nothing matches this filter yet."
+              description="Try a broader search or remove the active genre to bring the full creator list back."
               action={{
                 label: "Show all creators",
                 onClick: () => {
@@ -505,76 +529,82 @@ export default function CreatorsHubPage() {
             />
           </SurfacePanel>
         ) : (
-          <SurfacePanel className="space-y-5">
+          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Full directory
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Full list
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Compare creators before you pick the next title.
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  Browse every visible creator page.
                 </h2>
               </div>
-              <p className="text-sm text-neutral-400">
-                Filtered by {activeGenre === "All" ? "all genres" : activeGenre}
+              <p className="text-sm text-slate-500">
+                {activeGenre === "All" ? "All genres" : activeGenre}
               </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {filteredCreators.map((creator) => (
-                <button
-                  key={creator.slug}
-                  type="button"
-                  onClick={() => openCreator(creator)}
-                  className="rounded-[26px] border border-white/10 bg-black/10 p-4 text-left transition hover:border-white/20 hover:bg-white/[0.05]"
-                >
-                  <div className="grid gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
-                    <Cover
-                      tone={creator.spotlightSeries?.coverTone}
-                      coverUrl={creator.spotlightSeries?.coverUrl}
-                      className="h-44 rounded-[20px]"
-                    />
-                    <div className="min-w-0">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                            Creator
-                          </p>
-                          <h3 className="mt-2 text-xl font-semibold tracking-tight text-white">
-                            {creator.name}
-                          </h3>
-                        </div>
-                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-neutral-300">
-                          {creator.titleCount} titles
-                        </span>
-                      </div>
+              {filteredCreators.map((creator) => {
+                const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres : [];
 
-                      <p className="mt-3 text-sm leading-6 text-neutral-400">
-                        {creator.spotlightSeries?.title
-                          ? `${creator.spotlightSeries.title} is the current lead title on this creator page.`
-                          : "Open the page to compare related titles from this creator or studio."}
-                      </p>
-
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {creator.topGenres.map((genre) => (
-                          <span
-                            key={`${creator.slug}-grid-${genre}`}
-                            className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-neutral-300"
-                          >
-                            {genre}
+                return (
+                  <button
+                    key={creator.slug}
+                    type="button"
+                    onClick={() => openCreator(creator)}
+                    className="group rounded-[28px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                  >
+                    <div className="grid gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
+                      <Cover
+                        tone={creator.spotlightSeries?.coverTone}
+                        coverUrl={creator.spotlightSeries?.coverUrl}
+                        className="h-44 rounded-[20px]"
+                      />
+                      <div className="min-w-0">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                              Creator
+                            </p>
+                            <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
+                              {creator.name}
+                            </h3>
+                          </div>
+                          <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-xs text-slate-600">
+                            {creator.titleCount} titles
                           </span>
-                        ))}
-                      </div>
+                        </div>
 
-                      <div className="mt-4 flex flex-wrap gap-3 text-xs text-neutral-400">
-                        <span>{formatCompactCount(creator.readerProof)} reader signals</span>
-                        <span>{creator.completedCount} completed</span>
-                        <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
+                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                          {creator.spotlightSeries?.title
+                            ? `Best entry: ${creator.spotlightSeries.title}.`
+                            : "Open the page to see every visible series from this creator or studio."}
+                        </p>
+
+                        {creatorGenres.length > 0 ? (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {creatorGenres.map((genre) => (
+                              <span
+                                key={`${creator.slug}-grid-${genre}`}
+                                className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-xs text-slate-600"
+                              >
+                                {genre}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+
+                        <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
+                          <span>{formatCompactCount(creator.readerProof)} readers</span>
+                          <span>{creator.completedCount} completed</span>
+                          <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </SurfacePanel>
         )}

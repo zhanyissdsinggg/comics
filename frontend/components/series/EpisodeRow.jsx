@@ -63,6 +63,14 @@ function formatPackLabel(value) {
   return `${count || 1}-episode pack`;
 }
 
+function getSignalClass(tone) {
+  if (tone === "emerald") {
+    return "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] text-[var(--gush-accent,#2f6bff)]";
+  }
+
+  return "border-black/8 bg-[#f8f9fc] text-slate-500";
+}
+
 function EpisodeRow({
   episode,
   seriesId,
@@ -146,7 +154,7 @@ function EpisodeRow({
       pricePts,
       ttfStatus?.eligible,
       bucketMap,
-    ]
+    ],
   );
 
   const recommendedTopup = offerDecision.recommendedTopupOffer;
@@ -164,14 +172,13 @@ function EpisodeRow({
         method: "WALLET",
         applyDailyFree: Boolean(subscriptionUsage?.remaining),
       }),
-    [pricePts, subscription, coupons, subscriptionUsage?.remaining]
+    [pricePts, subscription, coupons, subscriptionUsage?.remaining],
   );
   const effectivePrice = pricing.finalPrice ?? pricePts;
   const discountLabel =
     pricing.appliedCoupon?.label ||
-    (pricing.discountPct ? `Subscriber ${pricing.discountPct}% off` : "");
-  const dailyFreeLabel =
-    !unlocked && subscriptionUsage?.remaining ? "Daily free unlock available" : "";
+    (pricing.discountPct ? `Member ${pricing.discountPct}% off` : "");
+  const dailyFreeLabel = !unlocked && subscriptionUsage?.remaining ? "Free now" : "";
   const episodeDisplayTitle =
     episode?.title && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title)
       ? ["Ep ", episode?.number, " - ", episode.title].join("")
@@ -187,11 +194,11 @@ function EpisodeRow({
         label:
           progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
             ? `${Math.round(progress.percent * 100)}% read`
-            : "Unlocked now",
+            : "Ready now",
         tone: "emerald",
       });
     } else if (ttfStatus?.eligible && isReady) {
-      list.push({ id: "free-ready", label: "Free unlock ready", tone: "emerald" });
+      list.push({ id: "free-ready", label: "Free now", tone: "emerald" });
       list.push({ id: "points", label: "No points needed", tone: "neutral" });
     } else if (ttfStatus?.eligible && !isReady) {
       list.push({
@@ -201,13 +208,13 @@ function EpisodeRow({
       });
       list.push({
         id: "member",
-        label: isSubscriber ? "Member timers active" : "Membership can shorten wait",
+        label: isSubscriber ? "Shorter member wait" : "Members wait less",
         tone: isSubscriber ? "emerald" : "neutral",
       });
     } else {
       list.push({
         id: "price",
-        label: effectivePrice === 0 ? "Free today" : `${effectivePrice} points`,
+        label: effectivePrice === 0 ? "Free now" : `${effectivePrice} points`,
         tone: effectivePrice === 0 ? "emerald" : "neutral",
       });
       if (dailyFreeLabel) {
@@ -221,8 +228,8 @@ function EpisodeRow({
           id: "wallet",
           label:
             walletBalance >= effectivePrice
-              ? `Wallet covers it (${walletBalance} pts)`
-              : `Short ${shortfallValue} points`,
+              ? "You have enough"
+              : `Need ${shortfallValue} more`,
           tone: walletBalance >= effectivePrice ? "emerald" : "neutral",
         });
       }
@@ -263,23 +270,23 @@ function EpisodeRow({
           },
           {
             label: "Membership",
-            value: isSubscriber ? "Already active" : "Daily free + lower unlock cost",
+            value: isSubscriber ? "Already active" : "Free unlocks + lower prices",
           },
         ]
       : [];
   const unlockTips =
     modalState?.type === "SHORTFALL"
       ? [
-          "Unlocking keeps this episode in your library.",
-          "Episode packs lower your cost per chapter.",
-          "Membership adds daily free unlocks and shorter wait timers.",
+          "Unlocked episodes stay in your library.",
+          "Packs usually cost less per chapter.",
+          "Membership adds more free reads and shorter waits.",
         ]
       : [];
   const subscribeUpsellTips =
     modalState?.type === "SHORTFALL"
       ? [
-          "Member perks can reduce unlock costs on supported titles.",
-          "Membership shortens the wait before free unlocks are ready.",
+          "Member pricing can lower unlock costs on eligible titles.",
+          "Membership can speed up free unlock timers.",
         ]
       : [];
 
@@ -306,19 +313,17 @@ function EpisodeRow({
         type="button"
         onClick={() => onRead(seriesId, episode?.id)}
         disabled={isWorking}
-        className="min-h-[44px] rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-600 active:scale-95 active:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-[44px] w-full rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 active:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
         style={{ willChange: "transform" }}
       >
         Read now
       </button>
     );
     if (progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0) {
-      metaNode = (
-        <span>{Math.round(progress.percent * 100)}% read</span>
-      );
+      metaNode = <span>{Math.round(progress.percent * 100)}% read</span>;
     }
   } else if (ttfStatus?.eligible && isReady) {
-    metaNode = <span>Free unlock ready</span>;
+    metaNode = <span>Free now</span>;
     actionNode = (
       <button
         type="button"
@@ -328,17 +333,17 @@ function EpisodeRow({
           let response;
           try {
             response = await onClaim(seriesId, episode?.id);
-          } catch (err) {
+          } catch {
             response = { ok: false, status: 500, error: "CLAIM_FAILED" };
           }
-          if (response.ok) {
-            trackEvent("ttf_claim_success", { seriesId, episodeId: episode?.id });
-            setModalState({
-              type: "SUCCESS",
-              title: "Episode unlocked",
-              description: "This episode is now unlocked and ready to read.",
-            });
-          } else {
+            if (response.ok) {
+              trackEvent("ttf_claim_success", { seriesId, episodeId: episode?.id });
+              setModalState({
+                type: "SUCCESS",
+                title: "Episode unlocked",
+                description: "You're all set. Start reading.",
+              });
+            } else {
             trackEvent("ttf_claim_fail", {
               seriesId,
               episodeId: episode?.id,
@@ -349,43 +354,43 @@ function EpisodeRow({
             if (response.status === 401) {
               openAuthModal();
             }
-            const description =
+            const nextDescription =
               response.status === 409
-                ? "The free unlock timer is not ready yet."
-                : response.error || "The free unlock could not be claimed.";
+                ? "That free read is not ready yet."
+                : response.error || "We couldn't open that free read right now.";
             setModalState({
               type: "ERROR",
-              title: "Free unlock unavailable",
-              description,
+              title: "Free read unavailable",
+              description: nextDescription,
             });
           }
           setIsWorking(false);
         }}
         disabled={isWorking}
-        className="min-h-[44px] rounded-full bg-emerald-500 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-600 active:scale-95 active:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#2f6bff)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#255af0] active:scale-95 active:bg-[#1e4dd4] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
         style={{ willChange: "transform" }}
       >
-        Unlock free
+        Read free
       </button>
     );
   } else if (ttfStatus?.eligible && !isReady) {
-    metaNode = <span>Free unlock in {formatted || "--:--:--"}</span>;
+    metaNode = <span>Free in {formatted || "--:--:--"}</span>;
     actionNode = (
       <button
         type="button"
         onClick={() => onSubscribe(seriesId, episode?.id)}
         disabled={isWorking}
-        className="min-h-[44px] rounded-full border border-neutral-700 bg-neutral-900 px-6 py-2 text-sm font-semibold text-neutral-300 transition-all hover:border-neutral-600 hover:bg-neutral-800 active:scale-95 active:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-[44px] w-full rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-black/12 hover:bg-[#f8f9fc] active:scale-95 active:bg-[#eef2f8] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
         style={{ willChange: "transform" }}
       >
-        See member perks
+        See membership
       </button>
     );
   } else {
     if (pricing.appliedDailyFree) {
-      metaNode = <span>Daily free unlock available</span>;
+      metaNode = <span>Free now</span>;
     } else if (effectivePrice !== pricePts) {
-      metaNode = <span>{discountLabel || "Member discount applied"}</span>;
+      metaNode = <span>{discountLabel || "Member price active"}</span>;
     }
     actionNode = (
       <button
@@ -397,7 +402,7 @@ function EpisodeRow({
           let response;
           try {
             response = await onUnlock(seriesId, episode?.id, idempotencyKey);
-          } catch (err) {
+          } catch {
             response = { ok: false, status: 500, error: "UNLOCK_FAILED" };
           }
           if (response.ok) {
@@ -406,7 +411,7 @@ function EpisodeRow({
             setModalState({
               type: "SUCCESS",
               title: "Episode unlocked",
-              description: "This episode is now in your library.",
+              description: "You're all set. Start reading.",
             });
             setIsWorking(false);
             return;
@@ -425,100 +430,121 @@ function EpisodeRow({
             setModalState({
               type: "ERROR",
               title: "Sign in required",
-              description: "Sign in to unlock this episode and keep your progress synced.",
+              description: "Sign in to unlock this episode and keep your place.",
             });
           } else if (response.status === 402) {
             setModalState({
               type: "SHORTFALL",
-              title: "Not enough points",
-              description: "Add points or use member perks to keep reading.",
+              title: "Need more points",
+              description: "Add points or check membership to keep reading.",
               shortfallPts: response.shortfallPts || 0,
               offerId: recommendedTopup?.id,
             });
           } else {
             setModalState({
               type: "ERROR",
-              title: "Unlock failed",
+              title: "Couldn't unlock",
               description: response.error || "Please try again in a moment.",
             });
           }
           setIsWorking(false);
         }}
         disabled={isWorking}
-        className="min-h-[44px] rounded-full bg-white px-6 py-2 text-sm font-semibold text-neutral-900 transition-all hover:bg-emerald-50 active:scale-95 active:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-[44px] w-full rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 active:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
         style={{ willChange: "transform" }}
       >
-        {effectivePrice === 0 ? "Unlock free" : `Unlock (${effectivePrice} points)`}
+        {effectivePrice === 0 ? "Read free" : `Unlock for ${effectivePrice} points`}
       </button>
     );
   }
 
   return (
-    <li className="series-episode">
-      {/* 老王注释：章节缩略图 - 使用Next.js Image优化加载 */}
-      <div className="episode-thumbnail relative">
-        {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
-          <Image
-            src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
-            alt={`Episode ${episode?.number} thumbnail`}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100px, 120px"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-neutral-600">
-            <span className="text-2xl font-bold">Ep {episode?.number}</span>
-          </div>
-        )}
-      </div>
-      <div className="episode-info">
-        <div className="episode-title">
-          <strong className="hidden">
-            {episode?.title && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title)
-              ? `Ep ${episode?.number} — ${episode.title}`
-              : `Episode ${episode?.number}`}
-          </strong>
-          <strong>{episodeDisplayTitle}</strong>
-          {unlocked ? <Pill>Unlocked</Pill> : null}
-          {ttfStatus?.eligible && isReady ? <Pill>Free to Read</Pill> : null}
-          {progress?.lastEpisodeId === episode?.id ? <Pill>Last read</Pill> : null}
+    <li className="group overflow-hidden rounded-[26px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10">
+      <div className="grid gap-4 sm:grid-cols-[84px_minmax(0,1fr)_auto] sm:items-center">
+        <div className="relative h-28 overflow-hidden rounded-[20px] border border-black/6 bg-[#eef2f8] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[112px]">
+          {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
+            <Image
+              src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
+              alt={`Episode ${episode?.number} thumbnail`}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, 84px"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#eef2f8_0%,#dbe5f4_100%)] text-slate-400">
+              <span className="text-lg font-semibold tracking-tight">Ep {episode?.number}</span>
+            </div>
+          )}
         </div>
-        <div className="episode-subtitle">
-          <span>{formatDate(episode?.releasedAt)}</span>
-          {episode?.previewFreePages ? (
-            <span>Free preview: {episode.previewFreePages} pages</span>
+
+        <div className="min-w-0">
+          <span className="sr-only">
+            {episode?.title && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title)
+              ? `Episode ${episode?.number} - ${episode.title}`
+              : `Episode ${episode?.number}`}
+          </span>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <strong className="text-base font-semibold tracking-tight text-slate-950">
+              {episodeDisplayTitle}
+            </strong>
+            {unlocked ? <Pill appearance="light">Unlocked</Pill> : null}
+            {ttfStatus?.eligible && isReady ? (
+              <Pill appearance="light" tone="accent">
+                Free to read
+              </Pill>
+            ) : null}
+            {progress?.lastEpisodeId === episode?.id ? (
+              <Pill appearance="light" tone="subtle">
+                Last read
+              </Pill>
+            ) : null}
+          </div>
+
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+            <span>{formatDate(episode?.releasedAt)}</span>
+            {episode?.previewFreePages ? (
+              <span>
+                {episode.previewFreePages} preview page
+                {episode.previewFreePages === 1 ? "" : "s"}
+              </span>
+            ) : null}
+          </div>
+
+          {episodeSignals.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {episodeSignals.map((signal) => (
+                <span
+                  key={signal.id}
+                  className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(signal.tone)}`}
+                >
+                  {signal.label}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          {progress?.lastEpisodeId === episode?.id ? (
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/6">
+              <div
+                className="h-full rounded-full bg-[rgba(47,107,255,0.76)]"
+                style={{ width: `${Math.round((progress.percent || 0) * 100)}%` }}
+              />
+            </div>
           ) : null}
         </div>
-        {episodeSignals.length > 0 ? (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {episodeSignals.map((signal) => (
-              <span
-                key={signal.id}
-                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
-                  signal.tone === "emerald"
-                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
-                    : "border-white/10 bg-white/[0.04] text-neutral-300"
-                }`}
-              >
-                {signal.label}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        {progress?.lastEpisodeId === episode?.id ? (
-          <div className="mt-2 h-1 w-full rounded-full bg-neutral-900">
-            <div
-              className="h-full rounded-full bg-emerald-400/70"
-              style={{ width: `${Math.round((progress.percent || 0) * 100)}%` }}
-            />
-          </div>
-        ) : null}
+
+        <div className="flex flex-col gap-2 sm:min-w-[176px] sm:items-end">
+          {metaNode ? (
+            <p className="text-xs font-medium text-slate-500 sm:text-right">{metaNode}</p>
+          ) : (
+            <div className="hidden h-5 sm:block" aria-hidden="true" />
+          )}
+          {actionNode}
+        </div>
       </div>
-      <div className="episode-cta">
-        {metaNode}
-        {actionNode}
-      </div>
+
       <ActionModal
         open={Boolean(modalState)}
         type={modalState?.type}
@@ -531,7 +557,7 @@ function EpisodeRow({
         compareItems={compareItems}
         compareTitle="Single, pack, or membership"
         tips={[...unlockTips, ...subscribeUpsellTips]}
-        tipsTitle="What changes after each choice"
+        tipsTitle="What each option gets you"
         actions={
           modalState?.type === "SHORTFALL"
             ? [
@@ -548,8 +574,8 @@ function EpisodeRow({
                           sourceEpisodeId: episode?.id,
                           returnTo: `/series/${seriesId}`,
                         },
-                        { focus: "auto" }
-                      )
+                        { focus: "auto" },
+                      ),
                     );
                     trackEvent("offer_click", {
                       offerId: "store_entry",
@@ -560,7 +586,7 @@ function EpisodeRow({
                   variant: "secondary",
                 },
                 {
-                    label: STOREFRONT_TERMS.compareMembership,
+                  label: STOREFRONT_TERMS.compareMembership,
                   onClick: () => {
                     trackEvent("click_subscribe_from_shortfall", {
                       seriesId,
@@ -573,7 +599,7 @@ function EpisodeRow({
                         sourceSeriesId: seriesId,
                         sourceEpisodeId: episode?.id,
                         returnTo: `/series/${seriesId}`,
-                      })
+                      }),
                     );
                     setModalState(null);
                   },
@@ -581,12 +607,11 @@ function EpisodeRow({
                 },
                 {
                   label: recommendedTopup?.name
-                    ? `Top up ${recommendedTopup.name}`
-                    : "Top up recommended pack",
+                    ? `Get ${recommendedTopup.name}`
+                    : "Get recommended pack",
                   onClick: async () => {
                     const packageId =
-                      recommendedTopup?.id?.replace("points_pack_", "") ||
-                      "starter";
+                      recommendedTopup?.id?.replace("points_pack_", "") || "starter";
                     trackEvent("offer_click", {
                       offerId: recommendedTopup?.id || "points_pack_starter",
                       entry: "UNLOCK_MODAL",
@@ -606,7 +631,7 @@ function EpisodeRow({
                       try {
                         const retryKey = createIdempotencyKey();
                         retry = await onUnlock(seriesId, episode?.id, retryKey);
-                      } catch (err) {
+                      } catch {
                         retry = { ok: false };
                       }
                       if (retry.ok) {
@@ -628,7 +653,7 @@ function EpisodeRow({
                         setModalState({
                           type: "SUCCESS",
                           title: "Episode unlocked",
-                          description: "This episode is now in your library.",
+                          description: "You're all set. Start reading.",
                         });
                         return;
                       }
@@ -648,8 +673,8 @@ function EpisodeRow({
                     });
                     setModalState({
                       type: "ERROR",
-                      title: "Couldn't top up",
-                      description: "We couldn't complete the top-up and unlock flow.",
+                      title: "Couldn't add points",
+                      description: "We couldn't finish that purchase just now.",
                     });
                   },
                   variant: "primary",

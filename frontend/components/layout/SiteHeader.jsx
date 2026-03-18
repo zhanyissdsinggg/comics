@@ -16,7 +16,7 @@ const HeaderSearch = dynamic(() => import("./HeaderSearch"), {
   ssr: false,
 });
 
-export default function SiteHeader({ onSearch }) {
+export default function SiteHeader({ onSearch, variant = "default" }) {
   const { isAdultMode, legalAge, requestAdultToggle } = useAdultGateStore();
   const { isSignedIn, hydrated } = useAuthStore();
   const [activeModal, setActiveModal] = useState(null);
@@ -24,6 +24,7 @@ export default function SiteHeader({ onSearch }) {
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [HeaderModalsComponent, setHeaderModalsComponent] = useState(null);
+  const isLight = variant === "home" || variant === "light";
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? window.localStorage.getItem("mn_region") : null;
@@ -148,21 +149,37 @@ export default function SiteHeader({ onSearch }) {
       <header
         data-site-header="1"
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
-          scrolled
-            ? "border-white/10 bg-neutral-950/90 shadow-[0_18px_56px_rgba(0,0,0,0.26)] backdrop-blur-2xl"
-            : "border-white/8 bg-neutral-950/76 backdrop-blur-xl"
+          isLight
+            ? scrolled
+              ? "border-black/8 bg-[rgba(246,247,251,0.82)] shadow-[0_16px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl"
+              : "border-transparent bg-[rgba(246,247,251,0.62)] backdrop-blur-xl"
+            : scrolled
+              ? "border-white/10 bg-neutral-950/90 shadow-[0_18px_56px_rgba(0,0,0,0.26)] backdrop-blur-2xl"
+              : "border-white/8 bg-neutral-950/76 backdrop-blur-xl"
         }`}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.06),transparent_32%),radial-gradient(circle_at_85%_0%,rgba(34,211,238,0.04),transparent_24%)] opacity-90" />
+        <div
+          className={`pointer-events-none absolute inset-x-0 top-0 h-px ${
+            isLight
+              ? "bg-gradient-to-r from-transparent via-black/10 to-transparent"
+              : "bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent"
+          }`}
+        />
+        <div
+          className={`pointer-events-none absolute inset-0 ${
+            isLight
+              ? "bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.06),transparent_30%),radial-gradient(circle_at_85%_0%,rgba(255,255,255,0.28),transparent_24%)] opacity-90"
+              : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.06),transparent_32%),radial-gradient(circle_at_85%_0%,rgba(34,211,238,0.04),transparent_24%)] opacity-90"
+          }`}
+        />
         <div className="relative mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
           <div className="flex min-h-[68px] items-center gap-3 py-2.5 sm:gap-4 lg:gap-6">
-            <HeaderLogo />
+            <HeaderLogo variant={variant} />
             <HomeProvider>
-              <HeaderNav />
+              <HeaderNav variant={variant} />
             </HomeProvider>
             <div className="min-w-0 flex-1 md:max-w-sm lg:max-w-md xl:max-w-[30rem]">
-              <HeaderSearch onSearch={onSearch} />
+              <HeaderSearch onSearch={onSearch} variant={variant} />
             </div>
             <HeaderActions
               onWalletClick={handleWalletClick}
@@ -170,12 +187,13 @@ export default function SiteHeader({ onSearch }) {
               onLoginClick={handleLoginClick}
               isAdultMode={isAdultMode}
               legalAge={legalAge}
+              variant={variant}
             />
           </div>
         </div>
       </header>
 
-      <MobileTabNav />
+      <MobileTabNav variant={variant} />
 
       {activeModal && HeaderModalsComponent ? (
         <HeaderModalsComponent

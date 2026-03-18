@@ -14,6 +14,7 @@ export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
+  const isHomeRoute = pathname === "/";
 
   useEffect(() => {
     if (isAdminRoute || isReaderRoute) {
@@ -25,10 +26,10 @@ export default function CookieConsent() {
     if (!consent) {
       const timer = setTimeout(() => {
         setShowBanner(true);
-      }, 1000);
+      }, isHomeRoute ? 4000 : 1200);
       return () => clearTimeout(timer);
     }
-  }, [isAdminRoute, isReaderRoute]);
+  }, [isAdminRoute, isHomeRoute, isReaderRoute]);
 
   const handleAccept = () => {
     localStorage.setItem("cookie_consent", "accepted");
@@ -43,12 +44,12 @@ export default function CookieConsent() {
   if (isAdminRoute || isReaderRoute || !showBanner) return null;
 
   return (
-    <div className="fixed inset-x-4 bottom-24 z-50 md:inset-x-auto md:bottom-4 md:right-4">
-      <div className="mx-auto max-w-xl">
-        <div className="relative rounded-[24px] border border-white/10 bg-neutral-950/94 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
+    <div className="pointer-events-none fixed inset-x-4 bottom-24 z-30 md:inset-x-auto md:bottom-4 md:right-4">
+      <div className="pointer-events-auto mx-auto max-w-xl">
+        <div className="relative rounded-[24px] border border-black/8 bg-[rgba(255,255,255,0.9)] p-5 text-slate-800 shadow-[0_20px_48px_rgba(15,23,42,0.12)] backdrop-blur-2xl">
           <button
             onClick={handleDecline}
-            className="absolute right-3 top-3 rounded-full p-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+            className="absolute right-3 top-3 rounded-full p-2 text-slate-400 transition-colors hover:bg-black/[0.04] hover:text-slate-900"
             aria-label="Close"
           >
             <X size={16} />
@@ -56,17 +57,17 @@ export default function CookieConsent() {
 
           <div className="flex items-start gap-4 pr-8">
             <div className="mt-0.5 flex-shrink-0">
-              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3">
-                <Cookie size={22} className="text-amber-300" />
+              <div className="rounded-2xl border border-[rgba(47,107,255,0.12)] bg-[rgba(47,107,255,0.06)] p-3">
+                <Cookie size={22} className="text-[var(--gush-accent,#2f6bff)]" />
               </div>
             </div>
             <div className="min-w-0 flex-1 space-y-2">
-              <h3 className="text-base font-semibold text-white">We use cookies</h3>
-              <p className="text-sm leading-6 text-neutral-300">
-                We use cookies to keep sign-in, reading progress, and site analytics working smoothly.{" "}
+              <h3 className="text-base font-semibold text-slate-900">Cookies</h3>
+              <p className="text-sm leading-6 text-slate-600">
+                We use cookies to remember sign-in, keep reading progress, and understand what people actually use.{" "}
                 <Link
                   href="/privacy-policy"
-                  className="font-semibold text-emerald-300 underline-offset-4 transition hover:text-emerald-200 hover:underline"
+                  className="font-semibold text-[var(--gush-accent,#2f6bff)] underline-offset-4 transition hover:text-[#2158dd] hover:underline"
                 >
                   Learn more
                 </Link>
@@ -77,13 +78,13 @@ export default function CookieConsent() {
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={handleDecline}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              className="rounded-full border border-black/8 bg-white/72 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white hover:text-slate-900"
             >
               Not now
             </button>
             <button
               onClick={handleAccept}
-              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+              className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
             >
               Accept
             </button>

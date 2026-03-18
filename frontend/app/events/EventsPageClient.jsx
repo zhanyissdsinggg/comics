@@ -175,16 +175,8 @@ export default function EventsPage() {
   }, [events, onlyErrors, query, source, windowMinutes]);
 
   const list = source === "server" ? events : localView;
-
-  const errorSummary = useMemo(
-    () => list.filter(isErrorEvent).slice(0, 5),
-    [list],
-  );
-
-  const totalVisibleErrors = useMemo(
-    () => list.filter(isErrorEvent).length,
-    [list],
-  );
+  const errorSummary = useMemo(() => list.filter(isErrorEvent).slice(0, 5), [list]);
+  const totalVisibleErrors = useMemo(() => list.filter(isErrorEvent).length, [list]);
 
   const windowLabel =
     windowMinutes === 0
@@ -325,15 +317,29 @@ export default function EventsPage() {
     );
     setStatusMessage("Exported the current event view.");
   };
+
+  const fieldLabelClass = "font-semibold uppercase tracking-[0.22em] text-slate-500";
+  const fieldClass =
+    "w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.35)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)] disabled:cursor-not-allowed disabled:opacity-60";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-60";
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
+  const destructiveButtonClass =
+    "rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60";
+
   return (
-    <main className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
-      <div className="mx-auto max-w-[1280px] space-y-8 px-4 py-8 pb-14 sm:px-6 sm:py-10 lg:px-8">
+    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <div className="relative mx-auto max-w-[1280px] space-y-8 px-4 py-8 pb-14 sm:px-6 sm:py-10 lg:px-8">
         <EditorialHero
+          appearance="light"
+          accent="blue"
           eyebrow="Observability"
-          title="Inspect local event flow and the signed-in server log without mixing their behavior."
-          description="The event console now separates local memory from server history, makes destructive actions explicit, and keeps export behavior aligned with what the user actually sees."
-          secondary="Use local mode for quick frontend debugging. Switch to server mode when you need account-scoped history, counts, and export from the backend."
+          title="Inspect local events and the signed-in server log without mixing the two."
+          description="This page keeps the local event buffer separate from account-level server history, so refresh, export, and clear actions stay predictable."
+          secondary="Use local mode for quick frontend checks. Switch to server mode when you need account-scoped history, counts, and export."
           stats={[
             {
               label: "Source",
@@ -352,36 +358,36 @@ export default function EventsPage() {
             {
               label: "Errors",
               value: String(totalVisibleErrors),
-              hint: "Current view entries whose event names read like an error or failure.",
+              hint: "Entries in the current view that look like errors or failures.",
             },
             {
               label: "Scope",
               value: source === "server" ? "Account log" : windowLabel,
               hint: source === "server"
                 ? "Server mode uses exact event-name filtering and page navigation."
-                : "Local mode supports time-window and client-side error filtering.",
+                : "Local mode supports time windows and client-side error filtering.",
             },
           ]}
         />
 
         <section className="grid gap-4 lg:grid-cols-[1.06fr_0.94fr]">
-          <SurfacePanel className="space-y-5">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Controls
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                Switch data source, narrow the view, and run explicit actions.
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Pick a source, narrow the list, and run explicit actions.
               </h2>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="space-y-2 text-xs text-neutral-400">
-                <span className="font-semibold uppercase tracking-[0.22em] text-neutral-500">Source</span>
+              <label className="space-y-2 text-xs text-slate-500">
+                <span className={fieldLabelClass}>Source</span>
                 <select
                   value={source}
                   onChange={(event) => handleSourceChange(event.target.value)}
-                  className="w-full rounded-full border border-neutral-800 bg-neutral-950 px-4 py-2 text-sm text-neutral-100"
+                  className={fieldClass}
                 >
                   <option value="local">Local</option>
                   <option value="server">Server</option>
@@ -389,10 +395,8 @@ export default function EventsPage() {
               </label>
 
               {source === "server" ? (
-                <label className="space-y-2 text-xs text-neutral-400">
-                  <span className="font-semibold uppercase tracking-[0.22em] text-neutral-500">
-                    Server event name
-                  </span>
+                <label className="space-y-2 text-xs text-slate-500">
+                  <span className={fieldLabelClass}>Server event name</span>
                   <input
                     value={eventFilter}
                     onChange={(event) => {
@@ -401,17 +405,17 @@ export default function EventsPage() {
                     }}
                     placeholder="Exact event name"
                     disabled={serverUnavailable}
-                    className="w-full rounded-full border border-neutral-800 bg-neutral-950 px-4 py-2 text-sm text-neutral-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={fieldClass}
                   />
                 </label>
               ) : (
-                <label className="space-y-2 text-xs text-neutral-400">
-                  <span className="font-semibold uppercase tracking-[0.22em] text-neutral-500">Search</span>
+                <label className="space-y-2 text-xs text-slate-500">
+                  <span className={fieldLabelClass}>Search</span>
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Filter local event names"
-                    className="w-full rounded-full border border-neutral-800 bg-neutral-950 px-4 py-2 text-sm text-neutral-100"
+                    className={fieldClass}
                   />
                 </label>
               )}
@@ -419,12 +423,12 @@ export default function EventsPage() {
 
             {source === "local" ? (
               <div className="grid gap-3 sm:grid-cols-[0.72fr_0.28fr]">
-                <label className="space-y-2 text-xs text-neutral-400">
-                  <span className="font-semibold uppercase tracking-[0.22em] text-neutral-500">Time window</span>
+                <label className="space-y-2 text-xs text-slate-500">
+                  <span className={fieldLabelClass}>Time window</span>
                   <select
                     value={String(windowMinutes)}
                     onChange={(event) => setWindowMinutes(Number(event.target.value || 0))}
-                    className="w-full rounded-full border border-neutral-800 bg-neutral-950 px-4 py-2 text-sm text-neutral-100"
+                    className={fieldClass}
                   >
                     <option value="0">All time</option>
                     <option value="5">Last 5m</option>
@@ -433,7 +437,7 @@ export default function EventsPage() {
                   </select>
                 </label>
 
-                <label className="flex items-center gap-3 rounded-[24px] border border-white/8 bg-black/20 px-4 py-3 text-sm text-neutral-200 backdrop-blur-sm">
+                <label className="flex items-center gap-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-700">
                   <input
                     type="checkbox"
                     checked={onlyErrors}
@@ -451,7 +455,7 @@ export default function EventsPage() {
                     type="button"
                     onClick={handleServerRefresh}
                     disabled={loading || serverUnavailable}
-                    className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-emerald-300 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={primaryButtonClass}
                   >
                     {loading ? "Refreshing..." : "Refresh server"}
                   </button>
@@ -459,7 +463,7 @@ export default function EventsPage() {
                     type="button"
                     onClick={handleServerClear}
                     disabled={clearing || serverUnavailable}
-                    className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-red-300 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={destructiveButtonClass}
                   >
                     {clearing ? "Clearing..." : "Clear server"}
                   </button>
@@ -467,7 +471,7 @@ export default function EventsPage() {
                     type="button"
                     onClick={handleServerExport}
                     disabled={exportingServer || serverUnavailable}
-                    className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-emerald-300 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={secondaryButtonClass}
                   >
                     {exportingServer ? "Exporting..." : "Export server"}
                   </button>
@@ -477,14 +481,14 @@ export default function EventsPage() {
                   <button
                     type="button"
                     onClick={handleLocalReload}
-                    className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-emerald-300 hover:text-emerald-200"
+                    className={secondaryButtonClass}
                   >
                     Reload local
                   </button>
                   <button
                     type="button"
                     onClick={handleLocalClear}
-                    className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-red-300 hover:text-red-200"
+                    className={destructiveButtonClass}
                   >
                     Clear local
                   </button>
@@ -495,24 +499,24 @@ export default function EventsPage() {
                 type="button"
                 onClick={handleCurrentViewExport}
                 disabled={list.length === 0}
-                className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-neutral-100 transition hover:border-emerald-300 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-60"
+                className={secondaryButtonClass}
               >
                 Export current view
               </button>
             </div>
 
-            <div className="rounded-[24px] border border-white/8 bg-black/20 px-4 py-4 text-sm text-neutral-300 backdrop-blur-sm">
-              <p className="font-semibold text-white">Status</p>
+            <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm text-slate-700">
+              <p className="font-semibold text-slate-950">Status</p>
               <p className="mt-2">{statusMessage}</p>
               {source === "server" ? (
-                <p className="mt-2 text-xs text-neutral-500">
+                <p className="mt-2 text-xs text-slate-500">
                   {serverUnavailable
                     ? "Sign in first, then switch or refresh to load the server log without triggering failed requests."
                     : "Server mode uses exact event-name filtering on the backend and supports export from the signed-in account log."}
                 </p>
               ) : (
-                <p className="mt-2 text-xs text-neutral-500">
-                  Local mode reflects the in-memory frontend buffer. Reload reads the buffer again; clear wipes it.
+                <p className="mt-2 text-xs text-slate-500">
+                  Local mode reflects the in-memory frontend buffer. Reload reads the buffer again. Clear wipes it.
                 </p>
               )}
             </div>
@@ -520,22 +524,27 @@ export default function EventsPage() {
 
           <div className="grid gap-4">
             {errorMessage ? (
-              <SurfacePanel className="border-red-500/35 bg-[linear-gradient(135deg,rgba(127,29,29,0.45),rgba(255,255,255,0.02))]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-200/85">Error</p>
-                <p className="mt-3 text-sm leading-7 text-red-100">{errorMessage}</p>
+              <SurfacePanel
+                className="border-red-200 bg-[linear-gradient(135deg,rgba(255,241,242,0.98),rgba(255,255,255,0.98))]"
+                appearance="light"
+                tone="danger"
+                accent="rose"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-500">Error</p>
+                <p className="mt-3 text-sm leading-7 text-red-600">{errorMessage}</p>
               </SurfacePanel>
             ) : null}
 
             {errorSummary.length > 0 ? (
-              <SurfacePanel>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-200/85">
+              <SurfacePanel appearance="light" tone="danger" accent="rose">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-500">
                   Recent errors
                 </p>
-                <div className="mt-4 space-y-3 text-sm text-neutral-300">
+                <div className="mt-4 space-y-3 text-sm text-slate-700">
                   {errorSummary.map((item, index) => (
                     <div key={`${item.event}-${item.ts}-${index}`}>
-                      <p className="font-semibold text-white">{item.event}</p>
-                      <p className="text-xs text-red-200/80">{formatUSTime(item.ts)}</p>
+                      <p className="font-semibold text-slate-950">{item.event}</p>
+                      <p className="text-xs text-red-500">{formatUSTime(item.ts)}</p>
                     </div>
                   ))}
                 </div>
@@ -543,15 +552,15 @@ export default function EventsPage() {
             ) : null}
 
             {source === "server" && Object.keys(counts).length > 0 ? (
-              <SurfacePanel>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+              <SurfacePanel appearance="light" accent="blue">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Server event counts
                 </p>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs text-neutral-300">
+                <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-700">
                   {Object.entries(counts).map(([key, value]) => (
                     <span
                       key={key}
-                      className="rounded-full border border-white/12 px-3 py-1"
+                      className="rounded-full border border-black/8 bg-white px-3 py-1"
                     >
                       {key}: {value}
                     </span>
@@ -562,23 +571,23 @@ export default function EventsPage() {
           </div>
         </section>
 
-        <SurfacePanel>
+        <SurfacePanel appearance="light" accent="blue">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Event feed
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {source === "server" ? "Current server page" : "Current local view"}
               </h2>
             </div>
             {source === "server" && serverTotal > PAGE_SIZE && !serverUnavailable ? (
-              <div className="flex items-center gap-2 text-xs text-neutral-400">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
                 <button
                   type="button"
                   onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                   disabled={loading || page <= 1}
-                  className="rounded-full border border-white/12 px-3 py-1 transition hover:border-emerald-300 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full border border-black/8 bg-white px-3 py-1 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Prev
                 </button>
@@ -589,7 +598,7 @@ export default function EventsPage() {
                   type="button"
                   onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                   disabled={loading || page >= totalPages}
-                  className="rounded-full border border-white/12 px-3 py-1 transition hover:border-emerald-300 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full border border-black/8 bg-white px-3 py-1 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Next
                 </button>
@@ -598,11 +607,11 @@ export default function EventsPage() {
           </div>
 
           {loading ? (
-            <div className="mt-6 rounded-[24px] border border-white/8 bg-black/20 px-5 py-8 text-sm text-neutral-300 backdrop-blur-sm">
+            <div className="mt-6 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-5 py-8 text-sm text-slate-600">
               Loading events...
             </div>
           ) : list.length === 0 ? (
-            <div className="mt-6 rounded-[24px] border border-white/8 bg-black/20 px-5 py-8 text-sm text-neutral-300 backdrop-blur-sm">
+            <div className="mt-6 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-5 py-8 text-sm text-slate-600">
               {source === "server"
                 ? serverUnavailable
                   ? "Sign in to view the server event log."
@@ -614,13 +623,13 @@ export default function EventsPage() {
               {list.map((item, index) => (
                 <details
                   key={`${item.event}-${item.ts}-${index}`}
-                  className="rounded-[24px] border border-white/8 bg-black/20 px-5 py-4 text-xs text-neutral-300 backdrop-blur-sm"
+                  className="rounded-[24px] border border-black/8 bg-white px-5 py-4 text-xs text-slate-600 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                 >
                   <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2">
-                    <span className="font-semibold text-neutral-100">{item.event}</span>
-                    <span className="text-neutral-500">{formatUSTime(item.ts)}</span>
+                    <span className="font-semibold text-slate-950">{item.event}</span>
+                    <span className="text-slate-500">{formatUSTime(item.ts)}</span>
                   </summary>
-                  <pre className="mt-3 whitespace-pre-wrap text-[11px] leading-6 text-neutral-400">
+                  <pre className="mt-3 whitespace-pre-wrap text-[11px] leading-6 text-slate-500">
 {JSON.stringify(item.props || {}, null, 2)}
                   </pre>
                 </details>

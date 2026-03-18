@@ -4,7 +4,7 @@ export const STOREFRONT_TERMS = {
   freeStart: "Free to start",
   bingeReady: "Binge-ready",
   returnWeekly: "Return weekly",
-  compareMembership: "Compare plans",
+  compareMembership: "See membership",
   viewPointPacks: "See point packs",
   billingSupport: "Get billing help",
   readerBenefits: "Why join",
@@ -21,7 +21,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: STOREFRONT_TERMS.freeStart,
     title: "Starter pack",
     description:
-      "A smaller pack for trying a few premium episodes without committing to a big top-up.",
+      "A smaller pack for trying a few locked chapters without grabbing a big balance.",
     nextCta: "Browse free-to-start series",
     nextHref: "/search?sort=popular",
   },
@@ -29,7 +29,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: "Flexible pick",
     title: "Flexible pack",
     description:
-      "A balanced option if you follow a few ongoing series and want room for selective unlocks.",
+      "A balanced pick if you follow a few series and unlock here and there.",
     nextCta: "Open library",
     nextHref: "/library",
   },
@@ -37,7 +37,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: STOREFRONT_TERMS.bingeReady,
     title: "Value pack",
     description:
-      "A stronger fit for binge sessions and longer premium runs.",
+      "A stronger fit for binge sessions and longer paid runs.",
     nextCta: "Browse completed",
     nextHref: "/search?status=Completed&sort=popular",
   },
@@ -45,7 +45,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: "Big reader pick",
     title: "Big pack",
     description:
-      "A higher-balance pack for readers moving across multiple series.",
+      "A bigger balance for readers moving across multiple series.",
     nextCta: "See weekly chart",
     nextHref: "/rankings?type=popular&window=week",
   },
@@ -53,7 +53,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: "Best for daily readers",
     title: "Mega pack",
     description:
-      "The biggest pack for readers who unlock often and want fewer repeat top-ups.",
+      "The biggest pack for readers who unlock often and do not want to keep coming back for more points.",
     nextCta: STOREFRONT_TERMS.compareMembership,
     nextHref: "/subscribe",
   },
@@ -61,7 +61,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: "Membership starter",
     title: "Basic membership",
     description:
-      "A lighter recurring plan with smaller discounts and a simple daily-free routine.",
+      "A lighter monthly plan with smaller savings and a simple free-read routine.",
     nextCta: STOREFRONT_TERMS.viewPointPacks,
     nextHref: "/store",
   },
@@ -69,15 +69,15 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: "Membership regular",
     title: "Pro membership",
     description:
-      "A better fit for weekly readers who want stronger discounts and more daily reading support.",
-    nextCta: "Open orders",
-    nextHref: "/orders",
+      "A better fit for weekly readers who want stronger savings and more room to keep going.",
+    nextCta: "Open library",
+    nextHref: "/library",
   },
   vip: {
     eyebrow: "Membership max",
     title: "VIP membership",
     description:
-      "The richest recurring perk stack for daily readers who want the smoothest path through premium chapters.",
+      "The strongest monthly plan for daily readers who want the smoothest path through locked chapters.",
     nextCta: STOREFRONT_TERMS.bingeReady,
     nextHref: "/search?status=Completed&sort=popular",
   },
@@ -85,7 +85,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: "Recent order",
     title: "Recent purchase",
     description:
-      "This purchase is active on your account, so the best next step is to jump back into reading, compare plans, or keep help close by.",
+      "This purchase is already on your account, so the best next move is usually to jump back into reading.",
     nextCta: "Open library",
     nextHref: "/library",
   },

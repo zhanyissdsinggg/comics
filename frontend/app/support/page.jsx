@@ -2,8 +2,8 @@ import SupportPage from "../../components/support/SupportPage";
 import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
-  title: "Support & Contact",
-  description: "Reach support, submit ticket details, and find the fastest way to get a reply.",
+  title: "Help",
+  description: "Send us a message about charges, account access, or reading problems.",
   path: "/support",
 });
 

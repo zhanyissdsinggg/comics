@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useMemo, useState } from "react";
-import { Wallet, Sparkles, Zap, Gift, X } from "lucide-react";
+import { Gift, Sparkles, Wallet, X, Zap } from "lucide-react";
 import { formatUSCurrency, formatUSNumber } from "../../lib/localization";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 
@@ -133,18 +133,18 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     setIsAnimating(false);
     setTimeout(() => {
       onClose?.();
-    }, 300);
+    }, 260);
   };
 
   const handleSelectPackage = (pkg) => {
     handleClose();
     setTimeout(() => {
       onTopUp?.(pkg);
-    }, 300);
+    }, 260);
   };
 
-  const handleContentClick = (e) => {
-    e.stopPropagation();
+  const handleContentClick = (event) => {
+    event.stopPropagation();
   };
 
   if (!isOpen) {
@@ -154,46 +154,53 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
   return (
     <div
       className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
-        isAnimating ? "bg-black/60 backdrop-blur-sm" : "bg-black/0"
+        isAnimating ? "bg-slate-950/42 backdrop-blur-md" : "bg-transparent"
       }`}
       onClick={handleClose}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
       <div
         onClick={handleContentClick}
-        className={`relative w-full border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-xl transition-all duration-300 sm:max-w-lg sm:rounded-3xl ${
+        className={`relative w-full border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] shadow-[0_28px_100px_rgba(15,23,42,0.18)] backdrop-blur-xl transition-all duration-300 sm:max-w-xl sm:rounded-[32px] ${
           isAnimating
             ? "translate-y-0 scale-100 opacity-100"
-            : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-95"
+            : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-[0.98]"
         }`}
         style={{
-          borderTopLeftRadius: "1.5rem",
-          borderTopRightRadius: "1.5rem",
+          borderTopLeftRadius: "1.75rem",
+          borderTopRightRadius: "1.75rem",
         }}
       >
-        <div className="flex justify-center pb-2 pt-3 sm:hidden">
-          <div className="h-1 w-10 rounded-full bg-neutral-700" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.84),transparent_24%)]" />
+
+        <div className="relative flex justify-center pb-2 pt-3 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-slate-300" />
         </div>
 
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-neutral-400 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
+          className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-black/8 bg-white/80 p-2 text-slate-500 transition-all duration-300 hover:bg-white hover:text-slate-900 active:scale-95"
           aria-label="Close top-up dialog"
         >
-          <X size={20} />
+          <X size={18} />
         </button>
 
-        <div className="p-6 sm:p-8">
+        <div className="relative p-6 sm:p-8">
           <div className="mb-6 text-center">
             <div className="mb-4 flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-400">
-                <Wallet size={32} />
+              <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[rgba(47,107,255,0.1)] text-[var(--gush-accent,#2f6bff)]">
+                <Wallet size={30} />
               </div>
             </div>
-            <h2 className="mb-2 text-2xl font-bold text-white">Top up your wallet</h2>
-            <p className="text-sm text-neutral-400">
-              Balance: <span className="font-semibold text-emerald-400">{formatUSNumber(currentPoints)} points</span>
+            <h2 className="mb-2 font-display text-3xl font-semibold tracking-tight text-slate-950">
+              Add points
+            </h2>
+            <p className="text-sm text-slate-500">
+              Current balance:{" "}
+              <span className="font-semibold text-[var(--gush-accent,#2f6bff)]">
+                {formatUSNumber(currentPoints)} points
+              </span>
             </p>
           </div>
 
@@ -202,7 +209,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
               {[0, 1, 2].map((index) => (
                 <div
                   key={index}
-                  className="h-24 animate-pulse rounded-2xl border border-neutral-800 bg-neutral-900/50"
+                  className="h-24 animate-pulse rounded-[24px] border border-black/8 bg-white/80"
                 />
               ))}
             </div>
@@ -214,20 +221,24 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                 const bonusPts = Number(pkg?.bonusPts || 0);
                 const totalPts = paidPts + bonusPts;
                 const isHighlighted = highlightedPackageId === packageId;
+                const packageSummary =
+                  bonusPts > 0
+                    ? `${formatUSNumber(paidPts)} paid points - ${formatUSNumber(totalPts)} total`
+                    : `${formatUSNumber(paidPts)} paid points`;
 
                 return (
                   <button
                     key={packageId}
                     type="button"
                     onClick={() => handleSelectPackage({ ...pkg, id: packageId })}
-                    className={`relative w-full rounded-2xl border p-4 text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
+                    className={`relative w-full rounded-[24px] border p-4 text-left shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)] active:scale-[0.99] ${
                       isHighlighted
-                        ? "border-emerald-500/50 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5"
-                        : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
+                        ? "border-[rgba(47,107,255,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))]"
+                        : "border-black/8 bg-white"
                     }`}
                   >
                     {isHighlighted ? (
-                      <div className="absolute -top-2 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                      <div className="absolute -top-2 right-4 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white shadow-lg">
                         Best value
                       </div>
                     ) : null}
@@ -235,32 +246,34 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-                            isHighlighted ? "bg-emerald-500/20 text-emerald-400" : "bg-neutral-800 text-neutral-400"
+                          className={`flex h-12 w-12 items-center justify-center rounded-[18px] ${
+                            isHighlighted
+                              ? "bg-[rgba(47,107,255,0.1)] text-[var(--gush-accent,#2f6bff)]"
+                              : "bg-[#f8f9fc] text-slate-500"
                           }`}
                         >
-                          <Zap size={24} />
+                          <Zap size={22} />
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg font-bold text-white">{getPackageTitle(pkg)}</span>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-lg font-semibold text-slate-950">
+                              {getPackageTitle(pkg)}
+                            </span>
                             {bonusPts > 0 ? (
-                              <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">
+                              <span className="flex items-center gap-1 rounded-full bg-[rgba(47,107,255,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
                                 <Gift size={12} />
                                 +{formatUSNumber(bonusPts)}
                               </span>
                             ) : null}
                           </div>
-                          <p className="text-xs text-neutral-400">
-                            {formatUSNumber(paidPts)} paid points
-                            {bonusPts > 0 ? ` · ${formatUSNumber(totalPts)} total` : ""}
-                          </p>
+                          <p className="text-xs text-slate-500">{packageSummary}</p>
                         </div>
                       </div>
+
                       <div className="text-right">
-                        <div className="text-xl font-bold text-white">{formatPackagePrice(pkg)}</div>
-                        <div className="text-xs text-neutral-500">
-                          {purchaseActionsEnabled ? "Open in store" : "Review in store"}
+                        <div className="text-xl font-semibold text-slate-950">{formatPackagePrice(pkg)}</div>
+                        <div className="text-xs text-slate-500">
+                          {purchaseActionsEnabled ? "Open in store" : "See in store"}
                         </div>
                       </div>
                     </div>
@@ -269,43 +282,43 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
               })}
             </div>
           ) : (
-            <div className="mb-6 rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4 text-sm text-neutral-300">
-              <p className="font-semibold text-white">Point-pack details are unavailable right now.</p>
-              <p className="mt-2 text-neutral-400">
+            <div className="mb-6 rounded-[24px] border border-black/8 bg-white px-4 py-4 text-sm text-slate-600 shadow-[0_14px_34px_rgba(15,23,42,0.05)]">
+              <p className="font-semibold text-slate-950">Point packs are unavailable right now.</p>
+              <p className="mt-2 text-slate-500">
                 {loadFailed
-                  ? "The latest catalog could not be loaded, but you can still open the points store."
-                  : "Open the points store to review packages and billing details."}
+                  ? "We couldn't load the latest packs, but you can still open the points store."
+                  : "Open the points store to see the full pack list."}
               </p>
               <button
                 type="button"
                 onClick={() => handleSelectPackage({ id: "auto" })}
-                className="mt-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className="mt-4 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 Open points store
               </button>
             </div>
           )}
 
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+          <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] p-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white text-[var(--gush-accent,#2f6bff)]">
                 <Sparkles size={16} />
               </div>
               <div>
-                <p className="mb-1 text-sm font-semibold text-emerald-400">
-                  {purchaseActionsEnabled ? "Store checkout ready" : "Store preview only"}
+                <p className="mb-1 text-sm font-semibold text-slate-950">
+                  {purchaseActionsEnabled ? "Continue in the store" : "See the full store"}
                 </p>
-                <p className="text-xs text-neutral-400">
+                <p className="text-xs leading-6 text-slate-600">
                   {purchaseActionsEnabled
-                    ? "Choose a pack here to open the store with the matching offer already focused."
-                    : "You can review the live pack mix now, and checkout will unlock once secure billing is enabled."}
+                    ? "Pick a pack here and we'll open the same offer in the store."
+                    : "Browse the live pack lineup here. The full purchase step continues in the store."}
                 </p>
               </div>
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs text-neutral-500">
-            Pricing stays synced with the live backend catalog so the offer you open matches the real checkout surface.
+          <p className="mt-4 text-center text-xs text-slate-500">
+            Prices stay in sync with the store, so the pack you pick here is the one you see next.
           </p>
         </div>
       </div>

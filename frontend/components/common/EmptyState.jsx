@@ -33,8 +33,10 @@ export const EmptyState = memo(function EmptyState({
   actionText,
   eyebrow = "Next step",
   className = "",
+  appearance = "default",
 }) {
   const Icon = iconMap[icon] || Inbox;
+  const isLight = appearance === "light";
   const resolvedAction =
     typeof action === "function"
       ? { onClick: action, label: actionText }
@@ -46,17 +48,29 @@ export const EmptyState = memo(function EmptyState({
         : null;
   const accentClass =
     icon === "alert"
-      ? "border-red-400/20 bg-red-500/[0.08] text-red-200"
-      : "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-100";
+      ? isLight
+        ? "border-red-200 bg-red-50 text-red-500"
+        : "border-red-400/20 bg-red-500/[0.08] text-red-200"
+      : isLight
+        ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-[var(--gush-accent,#2f6bff)]"
+        : "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-100";
 
   return (
     <div
       className={cn(
         "relative overflow-hidden rounded-[28px] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-12 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
+        isLight &&
+          "border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] shadow-[0_18px_42px_rgba(15,23,42,0.06)]",
         className,
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(16,185,129,0.12),transparent_24%)]" />
+      <div
+        className={`pointer-events-none absolute inset-0 ${
+          isLight
+            ? "bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.7),transparent_24%)]"
+            : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(16,185,129,0.12),transparent_24%)]"
+        }`}
+      />
       <div className="relative mx-auto flex max-w-xl flex-col items-center">
         <div
           className={cn(
@@ -67,23 +81,29 @@ export const EmptyState = memo(function EmptyState({
           <Icon size={36} strokeWidth={1.6} />
         </div>
 
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
+        <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
           {eyebrow}
         </p>
 
-        <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+        <h3 className={`mt-3 font-display text-2xl font-semibold tracking-tight ${isLight ? "text-slate-950" : "text-white"}`}>
           {title}
         </h3>
 
         {description ? (
-          <p className="mt-3 max-w-md text-sm leading-7 text-neutral-400">{description}</p>
+          <p className={`mt-3 max-w-md text-sm leading-7 ${isLight ? "text-slate-600" : "text-neutral-400"}`}>{description}</p>
         ) : null}
 
         {resolvedAction?.onClick && resolvedAction?.label ? (
           <button
             type="button"
             onClick={resolvedAction.onClick}
-            className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-5 py-3 text-sm font-semibold text-emerald-100 transition-all duration-200 hover:border-emerald-300/50 hover:bg-emerald-400/16"
+            className={`mt-6 inline-flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-all duration-200 ${
+              isLight
+                ? icon === "alert"
+                  ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+                  : "border-black/8 bg-slate-950 text-white hover:bg-slate-800"
+                : "border-emerald-400/30 bg-emerald-400/10 text-emerald-100 hover:border-emerald-300/50 hover:bg-emerald-400/16"
+            }`}
           >
             <span>{resolvedAction.label}</span>
             <ArrowRight size={16} />

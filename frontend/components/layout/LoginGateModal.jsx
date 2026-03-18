@@ -160,7 +160,7 @@ export default function LoginGateModal({
   return (
     <ModalBase open={open} title={title} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <p className="text-neutral-400">{description}</p>
+        <p className="text-slate-500">{description}</p>
         <div className="mt-6 space-y-4">
         <input
           type="email"
@@ -168,7 +168,7 @@ export default function LoginGateModal({
           onChange={(event) => setEmail(event.target.value)}
           placeholder="Email"
           autoComplete="email"
-          className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white placeholder-neutral-500 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
+          className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none"
         />
 
         {step === "otp" ? (
@@ -178,8 +178,8 @@ export default function LoginGateModal({
               onClick={() => setOtpChannel("email")}
               className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                 otpChannel === "email"
-                  ? "bg-brand-gradient text-white shadow-glow-sm"
-                  : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                  ? "bg-slate-950 text-white"
+                  : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
               }`}
             >
               Email OTP
@@ -189,8 +189,8 @@ export default function LoginGateModal({
               onClick={() => setOtpChannel("sms")}
               className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                 otpChannel === "sms"
-                  ? "bg-brand-gradient text-white shadow-glow-sm"
-                  : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                  ? "bg-slate-950 text-white"
+                  : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
               }`}
             >
               SMS OTP
@@ -205,7 +205,7 @@ export default function LoginGateModal({
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Password"
             autoComplete={mode === "register" ? "new-password" : "current-password"}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white placeholder-neutral-500 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
+            className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none"
           />
         ) : (
           <>
@@ -214,7 +214,7 @@ export default function LoginGateModal({
                 <select
                   value={countryCode}
                   onChange={(event) => setCountryCode(event.target.value)}
-                  className="rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-3 text-sm text-neutral-200 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
+                  className="rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-3 text-sm text-slate-700 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none"
                 >
                   {(config?.countryCodes || [
                     { code: "+1", label: "US" },
@@ -236,7 +236,7 @@ export default function LoginGateModal({
                   }}
                   placeholder="Phone number"
                   autoComplete="tel-national"
-                  className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white placeholder-neutral-500 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
+                  className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none"
                 />
               </div>
             ) : null}
@@ -245,17 +245,17 @@ export default function LoginGateModal({
               onChange={(event) => setOtpCode(event.target.value)}
               placeholder="6-digit code"
               autoComplete="one-time-code"
-              className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white placeholder-neutral-500 transition-all duration-300 focus:border-brand-primary/50 focus:bg-neutral-900 focus:shadow-glow-sm focus:outline-none"
+              className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none"
             />
           </>
         )}
 
         {step !== "otp" && googleAuthEnabled ? (
           <div className="space-y-2">
-            <div className="flex items-center gap-3 text-xs text-neutral-500">
-              <div className="h-px flex-1 bg-neutral-800" />
+            <div className="flex items-center gap-3 text-xs text-slate-400">
+              <div className="h-px flex-1 bg-black/8" />
               <span>or continue with</span>
-              <div className="h-px flex-1 bg-neutral-800" />
+              <div className="h-px flex-1 bg-black/8" />
             </div>
             <SocialAuthButton
               provider="google"
@@ -267,24 +267,24 @@ export default function LoginGateModal({
       </div>
 
       {errorMessage ? (
-        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-300">
+        <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
           {errorMessage}
         </p>
       ) : null}
 
       {socialError ? (
-        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-300">
+        <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
           {socialError}
         </p>
       ) : null}
 
       {step === "otp" ? (
-        <div className="mt-3 text-xs text-neutral-400">
+        <div className="mt-3 text-xs text-slate-500">
           {otpStatus}
           <button
             type="button"
             onClick={handleResendOtp}
-            className="ml-2 font-semibold text-brand-primary transition-colors duration-300 hover:text-brand-secondary"
+            className="ml-2 font-semibold text-[var(--gush-accent,#2f6bff)] transition-colors duration-300 hover:text-[#255af0]"
           >
             Resend
           </button>
@@ -298,8 +298,8 @@ export default function LoginGateModal({
             onClick={() => setMode("login")}
             className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
               mode === "login"
-                ? "bg-brand-gradient text-white shadow-glow-sm"
-                : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                ? "bg-slate-950 text-white"
+                : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
             }`}
           >
             Sign in
@@ -309,8 +309,8 @@ export default function LoginGateModal({
             onClick={() => setMode("register")}
             className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
               mode === "register"
-                ? "bg-brand-gradient text-white shadow-glow-sm"
-                : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                ? "bg-slate-950 text-white"
+                : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
             }`}
           >
             Register
@@ -322,19 +322,19 @@ export default function LoginGateModal({
         <button
           type="button"
           onClick={handleReset}
-          className="font-semibold text-neutral-400 transition-colors duration-300 hover:text-brand-primary"
+          className="font-semibold text-slate-500 transition-colors duration-300 hover:text-[var(--gush-accent,#2f6bff)]"
         >
           Forgot password?
         </button>
       </div>
 
       {resetStatus ? (
-        <div className="mt-3 rounded-lg border border-brand-primary/30 bg-brand-primary/10 px-4 py-2 text-xs text-neutral-300">
+        <div className="mt-3 rounded-lg border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-2 text-xs text-slate-600">
           {resetStatus}
         </div>
       ) : null}
 
-      <p className="mt-4 text-[11px] text-neutral-500">
+      <p className="mt-4 text-[11px] text-slate-400">
         If sign in fails due to email not verified, please verify from the email link.
       </p>
 
@@ -342,13 +342,13 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-neutral-700 px-6 py-2.5 text-sm font-semibold text-neutral-300 transition-all duration-300 hover:border-neutral-600 hover:bg-neutral-800 active:scale-95"
+            className="rounded-full border border-black/8 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-300 hover:border-black/12 hover:bg-[#f8f9fc] active:scale-95"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-full bg-brand-gradient px-6 py-2.5 text-sm font-semibold text-white shadow-glow-sm transition-all duration-300 hover:scale-105 hover:shadow-glow-md active:scale-95"
+            className="rounded-full bg-slate-950 px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-slate-800 active:scale-95"
           >
             {mode === "register" ? "Register" : "Sign in"}
           </button>

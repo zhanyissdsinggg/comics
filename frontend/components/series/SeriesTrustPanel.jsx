@@ -64,6 +64,10 @@ export default function SeriesTrustPanel({
   creatorHref = "",
 }) {
   const router = useRouter();
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
 
   const latestEpisode = useMemo(() => getLatestEpisode(episodes), [episodes]);
   const shareUrl = useMemo(() => {
@@ -99,11 +103,11 @@ export default function SeriesTrustPanel({
       onClick: creatorHref ? () => router.push(creatorHref) : null,
     },
     {
-      label: "Reader signals",
+      label: "Reader pull",
       value: followers > 0 ? formatCompactCount(followers) : formatCompactCount(Math.max(views, ratingCount)),
       hint:
         followers > 0
-          ? "Readers who already saved this series."
+          ? "Readers already keeping up with this series."
           : views > 0
             ? "Reader interest already building around this series."
             : ratingCount > 0
@@ -111,7 +115,7 @@ export default function SeriesTrustPanel({
               : "Early readers can shape the first impression.",
     },
     {
-      label: "Release pulse",
+      label: "Latest chapter",
       value: latestEpisode ? formatEpisodeLabel(latestEpisode) : status === "completed" ? "Completed" : "Live",
       hint: latestEpisode
         ? `Most recent visible release. Updated ${formatDateLabel(series?.updatedAt)}.`
@@ -138,24 +142,24 @@ export default function SeriesTrustPanel({
     : "/search?sort=popular";
 
   return (
-    <SurfacePanel className="space-y-5">
+    <SurfacePanel className="space-y-5" appearance="light" accent="blue">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-300/85">
-            What to know
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+            At a glance
           </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Why readers stick with this series.
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+            Why this one feels worth the click.
           </h2>
-          <p className="mt-3 text-sm leading-7 text-neutral-300">
-            Before you unlock more chapters, it helps to know who made the series, how active it is, and how many readers are already following along.
+          <p className="mt-3 text-sm leading-7 text-slate-600">
+            Creator, momentum, and update cadence should all be obvious before someone gives a story their time.
           </p>
         </div>
-        <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 text-left">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+        <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-4 text-left">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Quick take
           </p>
-          <p className="mt-3 text-sm leading-6 text-neutral-300">{trustNarrative}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-700">{trustNarrative}</p>
         </div>
       </div>
 
@@ -166,42 +170,42 @@ export default function SeriesTrustPanel({
               key={card.label}
               type="button"
               onClick={card.onClick}
-              className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4 text-left transition hover:border-emerald-300/30 hover:bg-white/[0.06]"
+              className="rounded-[22px] border border-black/8 bg-[#f8f9fc] px-4 py-4 text-left transition hover:border-black/12 hover:bg-white"
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 {card.label}
               </p>
-              <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+              <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {card.value}
               </p>
-              <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">
+              <p className="mt-2 text-sm leading-6 text-slate-600">{card.hint}</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent,#2f6bff)]">
                 More by this creator
               </p>
             </button>
           ) : (
             <div
               key={card.label}
-              className="rounded-[22px] border border-white/10 bg-black/20 px-4 py-4"
+              className="rounded-[22px] border border-black/8 bg-[#f8f9fc] px-4 py-4"
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 {card.label}
               </p>
-              <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
+              <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {card.value}
               </p>
-              <p className="mt-2 text-sm leading-6 text-neutral-400">{card.hint}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{card.hint}</p>
             </div>
           ),
         )}
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.12fr_0.88fr]">
-        <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Good if you want
+        <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Best if you want
           </p>
-          <p className="mt-3 text-sm leading-7 text-neutral-300">
+          <p className="mt-3 text-sm leading-7 text-slate-600">
             {series?.title || "This title"} is positioned best for readers who want
             {" "}
             {status === "completed" ? "a finished run with immediate payoff" : "a title they can return to regularly"}
@@ -209,11 +213,11 @@ export default function SeriesTrustPanel({
             {secondaryGenre ? ` and ${secondaryGenre}` : ""}.
           </p>
         </div>
-        <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-400">
-            Easy to recommend
+        <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Easy to share
           </p>
-          <p className="mt-3 text-sm leading-7 text-neutral-300">
+          <p className="mt-3 text-sm leading-7 text-slate-600">
             This page is easier to share when it already shows the creator, latest update, reader interest, and a clear way to start reading.
           </p>
         </div>
@@ -223,31 +227,31 @@ export default function SeriesTrustPanel({
         <button
           type="button"
           onClick={() => router.push(genreLaneHref)}
-          className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+          className={primaryButtonClass}
         >
-          {leadGenre ? `Browse ${leadGenre}` : "Browse similar titles"}
+          {leadGenre ? `More ${leadGenre}` : "More like this"}
         </button>
         <button
           type="button"
           onClick={() => router.push("/rankings?type=popular&window=week")}
-          className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+          className={secondaryButtonClass}
         >
-          Open weekly chart
+          This week's chart
         </button>
         {onFollowToggle ? (
           <button
             type="button"
             onClick={isFollowing ? () => router.push("/library") : onFollowToggle}
-            className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+            className={secondaryButtonClass}
           >
-            {isFollowing ? "Open library" : "Save to library"}
+            {isFollowing ? "Open library" : "Save"}
           </button>
         ) : null}
         <ShareButton
           url={shareUrl}
           title={series?.title || "Check out this series"}
           description={series?.description || ""}
-          className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-neutral-100 transition hover:border-white/20 hover:bg-white/[0.08]"
+          className={secondaryButtonClass}
         />
       </div>
     </SurfacePanel>

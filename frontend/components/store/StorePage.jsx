@@ -257,14 +257,14 @@ export default function StorePage() {
 
   const handleBuy = async (packageId) => {
     if (!isSignedIn) {
-      setErrorMessage("Sign in to buy points and keep your balance synced across devices.");
+      setErrorMessage("Sign in to buy points and keep them on your account.");
       openAuthPrompt();
       return;
     }
 
     if (!purchaseActionsEnabled) {
       setErrorMessage(
-        "Checkout is currently preview-only. You can still compare point packs here.",
+        "You can compare packs here right now. Buying will open once checkout is live.",
       );
       return;
     }
@@ -317,7 +317,7 @@ export default function StorePage() {
     }
 
     if (response.status === 401) {
-      setErrorMessage("Sign in to buy points and keep your balance synced across devices.");
+      setErrorMessage("Sign in to buy points and keep them on your account.");
       openAuthPrompt();
       return;
     }
@@ -332,7 +332,7 @@ export default function StorePage() {
     }
 
     if (!isSignedIn) {
-      setCouponMessage("Sign in to redeem codes and keep them synced to your account.");
+      setCouponMessage("Sign in to redeem codes on your account.");
       openAuthPrompt();
       return;
     }
@@ -340,7 +340,7 @@ export default function StorePage() {
     const response = await claimCoupon(code);
     if (response.ok) {
       trackEvent("coupon_claim", { code });
-      setCouponMessage("Coupon applied to your wallet.");
+      setCouponMessage("Code applied.");
       setCouponCode("");
       return;
     }
@@ -358,51 +358,55 @@ export default function StorePage() {
         hint: `Paid ${paidPts.toLocaleString()} - Bonus ${bonusPts.toLocaleString()}`,
       },
       {
-        label: "Mode",
-        value: isSubscriber ? "Subscriber" : "Standard",
+        label: "Reading style",
+        value: isSubscriber ? "Member" : "Points",
         hint: isSubscriber
-          ? "Membership perks are already active on this account."
-          : "Upgrade to cut unlock costs and add daily free reads.",
+          ? "Membership is already active."
+          : "Buy packs when you want flexibility.",
       },
       {
         label: "Coupons",
         value: coupons.length.toLocaleString(),
         hint: isSignedIn
-          ? "Stored on your signed-in account."
+          ? "Saved on your account."
           : "Sign in before redeeming codes.",
       },
       {
-        label: "Promos",
+        label: "Offers",
         value: (promotions.length > 0 ? promotions.length : isNewPayer ? 1 : 0).toLocaleString(),
-        hint: `${regionConfig.label} pricing - tax rules applied at checkout`,
+        hint: `${regionConfig.label} pricing`,
       },
     ],
     [bonusPts, coupons.length, isNewPayer, isSignedIn, isSubscriber, paidPts, promotions.length, regionConfig.label],
   );
 
   const secondaryButtonClass =
-    "rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10";
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
   const fieldClass =
-    "flex-1 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs text-neutral-100 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20";
+    "flex-1 rounded-full border border-black/8 bg-white px-4 py-2 text-xs text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
 
   return (
-    <div className="min-h-screen bg-transparent text-neutral-100">
-      <SiteHeader />
-      <main className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <SiteHeader variant="light" />
+      <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Points store"
-          title="Buy points with clear pricing."
+          eyebrow="Point packs"
+          title="Top up once. Keep reading."
           description={
             purchasePreviewOnly
-              ? "Compare live pack pricing, coupons, and regional tax notes here while checkout stays preview-only."
-              : "See your balance, coupons, promos, and point packs in one place before you buy."
+              ? "Look through the live pack lineup now. Buying opens here once checkout is ready."
+              : "Pick the pack that fits your reading pace and jump back into the story."
           }
           secondary={
             purchasePreviewOnly
-              ? `${regionConfig.label} pricing | checkout preview only`
+              ? `${regionConfig.label} pricing | preview only`
               : `${regionConfig.label} pricing | ${regionConfig.taxHint}`
           }
           stats={storeHeroStats}
+          appearance="light"
           actions={
             <>
               {subscriptionStats ? (
@@ -421,7 +425,7 @@ export default function StorePage() {
                       }),
                     )
                   }
-                  className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  className={primaryButtonClass}
                 >
                   {STOREFRONT_TERMS.compareMembership}
                 </button>
@@ -438,18 +442,18 @@ export default function StorePage() {
         />
 
         {errorMessage ? (
-          <SurfacePanel className="border border-red-500/40 bg-red-500/10 text-red-100">
-            <p className="text-sm">{errorMessage}</p>
+          <SurfacePanel tone="danger" appearance="light" accent="rose">
+            <p className="text-sm text-red-600">{errorMessage}</p>
           </SurfacePanel>
         ) : null}
 
         {purchasePreviewOnly ? (
-          <SurfacePanel className="border border-amber-500/30 bg-amber-500/10 text-amber-50">
+          <SurfacePanel tone="warning" appearance="light" accent="amber">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <p className="text-sm font-semibold">Checkout coming soon</p>
-                <p className="text-sm text-amber-100/85">
-                  Pack pricing is live, but purchases stay disabled until secure billing is fully enabled.
+                <p className="text-sm font-semibold text-amber-700">Checkout coming soon</p>
+                <p className="text-sm text-amber-700/80">
+                  You can look through the packs now. Buying opens here once checkout is ready.
                 </p>
               </div>
               <button
@@ -476,48 +480,48 @@ export default function StorePage() {
         <div className="grid gap-6 xl:grid-cols-[0.84fr_1.16fr]">
           <div className="space-y-6">
             {!isSignedIn ? (
-              <SurfacePanel className="space-y-4">
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                     Sign in
                   </p>
-                  <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                    Sign in to buy points or redeem codes.
+                  <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Sign in before you buy or redeem a code.
                   </h2>
-                  <p className="text-sm leading-6 text-neutral-400">
-                    Purchases, coupons, and balance changes should stay attached to a real account.
+                  <p className="text-sm leading-6 text-slate-600">
+                    Points, codes, and purchase history should stay attached to one account.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={openAuthPrompt}
-                  className="rounded-full bg-white px-5 py-2.5 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  className={primaryButtonClass}
                 >
                   Sign in
                 </button>
               </SurfacePanel>
             ) : null}
 
-            <SurfacePanel className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Taxes and pricing
+            <SurfacePanel className="space-y-3" appearance="light" accent="blue">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Regional pricing
               </p>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                See your region before checkout.
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Know the price before you buy.
               </h2>
-              <p className="text-sm leading-6 text-neutral-400">{regionConfig.taxHint}</p>
+              <p className="text-sm leading-6 text-slate-600">{regionConfig.taxHint}</p>
             </SurfacePanel>
 
             {subscriptionStats ? (
-              <SurfacePanel className="space-y-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                  Also compare membership
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Weekly reader?
                 </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-white">
-                  Want better value for weekly reading?
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Membership fits better if you read all the time.
                 </h2>
-                <p className="text-sm leading-6 text-neutral-400">
-                  Save up to {subscriptionStats.maxDiscount}% on unlocks, get up to {subscriptionStats.maxDailyFree} daily free episodes, and cut free-unlock wait times down to {Math.round(subscriptionStats.bestTtf * 100)}% of the standard timer.
+                <p className="text-sm leading-6 text-slate-600">
+                  Get up to {subscriptionStats.maxDiscount}% off unlocks, up to {subscriptionStats.maxDailyFree} free reads a day, and shorter wait timers.
                 </p>
                 <button
                   type="button"
@@ -541,23 +545,23 @@ export default function StorePage() {
               </SurfacePanel>
             ) : null}
 
-            <SurfacePanel id="wallet-codes" className="space-y-4">
+            <SurfacePanel id="wallet-codes" className="space-y-4" appearance="light" accent="blue">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                     Codes
                   </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                    Redeem a wallet or promo code
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Redeem a code
                   </h2>
                 </div>
-                <span className="text-xs text-neutral-500">{coupons.length} available</span>
+                <span className="text-xs text-slate-500">{coupons.length} available</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 <input
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value)}
-                  placeholder="Enter a wallet or promo code"
+                  placeholder="Enter your code"
                   className={fieldClass}
                 />
                 <button
@@ -568,11 +572,11 @@ export default function StorePage() {
                   {isSignedIn ? "Redeem" : "Sign in to redeem"}
                 </button>
               </div>
-              {couponMessage ? <p className="text-xs text-neutral-400">{couponMessage}</p> : null}
+              {couponMessage ? <p className="text-xs text-slate-500">{couponMessage}</p> : null}
               {coupons.length > 0 ? (
-                <div className="flex flex-wrap gap-2 text-[10px] text-neutral-300">
+                <div className="flex flex-wrap gap-2 text-[10px] text-slate-600">
                   {coupons.map((coupon) => (
-                    <span key={coupon.id} className="rounded-full border border-white/10 bg-black/10 px-3 py-1">
+                    <span key={coupon.id} className="rounded-full border border-black/8 bg-white/84 px-3 py-1">
                       {coupon.label || coupon.code}
                     </span>
                   ))}
@@ -581,17 +585,17 @@ export default function StorePage() {
             </SurfacePanel>
           </div>
 
-          <SurfacePanel id="point-packs" className="space-y-5">
+          <SurfacePanel id="point-packs" className="space-y-5" appearance="light" accent="blue">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Point packs
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                  Choose a pack and keep reading.
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Pick a pack.
                 </h2>
               </div>
-              <p className="text-xs text-neutral-500">{orderedPackages.length} packages available</p>
+              <p className="text-xs text-slate-500">{orderedPackages.length} packs</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {orderedPackages.map((pkg) => (
@@ -603,10 +607,10 @@ export default function StorePage() {
                     disabled={!purchaseActionsEnabled}
                     ctaLabel={
                       !purchaseActionsEnabled
-                        ? "Checkout coming soon"
+                        ? "Coming soon"
                         : isSignedIn
-                          ? "Buy points"
-                          : "Sign in to buy"
+                          ? "Get this pack"
+                          : "Sign in to get it"
                     }
                   />
                 </div>
@@ -615,36 +619,36 @@ export default function StorePage() {
           </SurfacePanel>
         </div>
 
-        <SurfacePanel className="space-y-5">
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/85">
-                Points or membership?
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Pick your rhythm
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
-                Pick the option that fits how you read.
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                One-time packs or a monthly plan.
               </h2>
             </div>
-            <p className="text-xs text-neutral-500">
-              Compare one-time point packs, recurring plans, and support options before checkout starts.
+            <p className="text-xs text-slate-500">
+              Choose points if you dip in and out. Choose membership if you read every week.
             </p>
           </div>
 
           <div className="grid gap-4 xl:grid-cols-3">
-            <div className="rounded-[24px] border border-white/10 bg-black/10 p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+            <div className="rounded-[24px] border border-black/6 bg-white/84 p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Points packs
               </p>
-              <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                Best for one-off unlocks
+              <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Better for casual reading
               </h3>
-              <p className="mt-3 text-sm leading-6 text-neutral-300">
-                Buy points when you want flexibility, promo codes, or no monthly renewal.
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                Buy points when you want to read at your own pace without a monthly charge.
               </p>
-              <div className="mt-4 space-y-2 text-sm text-neutral-400">
+              <div className="mt-4 space-y-2 text-sm text-slate-500">
                 <p>
                   Entry pack:{" "}
-                  <span className="text-white">
+                  <span className="text-slate-950">
                     {packageDecisionSummary?.cheapest?.name || "Starter"}
                     {packageDecisionSummary?.cheapest?.priceLabel
                       ? ` | ${packageDecisionSummary.cheapest.priceLabel}`
@@ -653,7 +657,7 @@ export default function StorePage() {
                 </p>
                 <p>
                   Largest pack:{" "}
-                  <span className="text-white">
+                  <span className="text-slate-950">
                     {packageDecisionSummary?.largest
                       ? `${packageDecisionSummary.largest.name} | ${formatUSNumber(packageDecisionSummary.largest.totalPts)} pts`
                       : "Catalog unavailable"}
@@ -661,7 +665,7 @@ export default function StorePage() {
                 </p>
                 <p>
                   Best bonus:{" "}
-                  <span className="text-white">
+                  <span className="text-slate-950">
                     {packageDecisionSummary?.highestBonus
                       ? `${packageDecisionSummary.highestBonus.name} | ${packageDecisionSummary.highestBonus.bonusPct}% extra`
                       : "Catalog unavailable"}
@@ -670,33 +674,33 @@ export default function StorePage() {
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-white/10 bg-black/10 p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+            <div className="rounded-[24px] border border-black/6 bg-white/84 p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Membership
               </p>
-              <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                Best for regular reading
+              <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Better for regular reading
               </h3>
-              <p className="mt-3 text-sm leading-6 text-neutral-300">
-                Membership works best when you read every week, want discounts on unlocks, and like predictable monthly perks.
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                Membership makes more sense if you read often and want lower unlock prices every week.
               </p>
-              <div className="mt-4 space-y-2 text-sm text-neutral-400">
+              <div className="mt-4 space-y-2 text-sm text-slate-500">
                 <p>
                   Unlock savings:{" "}
-                  <span className="text-white">
-                    Up to {subscriptionStats?.maxDiscount ?? 0}% off premium unlocks
+                  <span className="text-slate-950">
+                    Up to {subscriptionStats?.maxDiscount ?? 0}% off locked chapters
                   </span>
                 </p>
                 <p>
-                  Daily access:{" "}
-                  <span className="text-white">
-                    Up to {subscriptionStats?.maxDailyFree ?? 0} free episodes each day
+                  Free reads:{" "}
+                  <span className="text-slate-950">
+                    Up to {subscriptionStats?.maxDailyFree ?? 0} each day
                   </span>
                 </p>
                 <p>
-                  Wait times:{" "}
-                  <span className="text-white">
-                    As low as {subscriptionStats ? Math.round(subscriptionStats.bestTtf * 100) : 100}% of the standard timer
+                  Wait time:{" "}
+                  <span className="text-slate-950">
+                    As low as {subscriptionStats ? Math.round(subscriptionStats.bestTtf * 100) : 100}% of the normal timer
                   </span>
                 </p>
               </div>
@@ -716,38 +720,37 @@ export default function StorePage() {
                       }),
                     )
                   }
-                  className="mt-5 rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                  className="mt-5 rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                 >
                   {STOREFRONT_TERMS.compareMembership}
                 </button>
               ) : null}
             </div>
 
-            <div className="rounded-[24px] border border-white/10 bg-black/10 p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
-                After purchase
+            <div className="rounded-[24px] border border-black/6 bg-white/84 p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Need receipts or help?
               </p>
-              <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white">
-                Receipts and help stay easy to find
+              <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                The support stuff is easy to find later.
               </h3>
-              <ul className="mt-4 space-y-3 text-sm leading-6 text-neutral-300">
-                <li>Points stay attached to the signed-in account across devices.</li>
-                <li>Region pricing and tax notes stay visible before checkout.</li>
-                <li>Orders keeps your receipts in one place, and support handles billing questions.</li>
-                <li>Refund options depend on billing availability and order status.</li>
+              <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+                <li>Points stay on the signed-in account.</li>
+                <li>Orders keeps your receipts in one place.</li>
+                <li>Support is there if a billing issue needs someone to step in.</li>
               </ul>
               <div className="mt-5 flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => router.push("/orders")}
-                  className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                  className={primaryButtonClass}
                 >
                   View orders
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/support")}
-                  className="rounded-full border border-white/10 bg-black/10 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+                  className={secondaryButtonClass}
                 >
                   {STOREFRONT_TERMS.billingSupport}
                 </button>
