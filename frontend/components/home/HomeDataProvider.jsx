@@ -21,17 +21,21 @@ export function useHomeData() {
   return context;
 }
 
-export function HomeDataProvider({ children }) {
+export function HomeDataProvider({ children, initialData = null }) {
   const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
   const { shouldRetry } = useRetryPolicy();
   const requestRef = useRef(0);
+  const initialSeriesList = Array.isArray(initialData?.seriesList) ? initialData.seriesList : [];
+  const initialHotKeywords = Array.isArray(initialData?.hotKeywords) ? initialData.hotKeywords : [];
+  const initialHomepageSlots = Array.isArray(initialData?.homepageSlots) ? initialData.homepageSlots : [];
+  const hasInitialData = Boolean(initialData?.ready);
 
-  const [seriesList, setSeriesList] = useState([]);
+  const [seriesList, setSeriesList] = useState(initialSeriesList);
   const [seriesResponse, setSeriesResponse] = useState(null);
-  const [hotKeywords, setHotKeywords] = useState([]);
-  const [homepageSlots, setHomepageSlots] = useState([]);
+  const [hotKeywords, setHotKeywords] = useState(initialHotKeywords);
+  const [homepageSlots, setHomepageSlots] = useState(initialHomepageSlots);
   const [hotWindow, setHotWindow] = useState("day");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasInitialData);
 
   const showStale = useStaleNotice(seriesResponse);
 
@@ -39,7 +43,9 @@ export function HomeDataProvider({ children }) {
     const requestId = requestRef.current + 1;
     requestRef.current = requestId;
     const adultFlag = isAdultMode ? "1" : "0";
-    setLoading(true);
+    if (!hasInitialData) {
+      setLoading(true);
+    }
 
     const isCurrentRequest = () => requestRef.current === requestId;
 
@@ -138,7 +144,7 @@ export function HomeDataProvider({ children }) {
           setLoading(false);
         }
       });
-  }, [forceDisableAdultMode, hotWindow, isAdultMode, shouldRetry]);
+  }, [forceDisableAdultMode, hasInitialData, hotWindow, isAdultMode, shouldRetry]);
 
   return (
     <HomeDataContext.Provider

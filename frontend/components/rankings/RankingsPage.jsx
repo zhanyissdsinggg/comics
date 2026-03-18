@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
@@ -18,6 +18,7 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
+import { getSearchParam } from "../../lib/pageSearchParams";
 
 const TABS = [
   {
@@ -133,13 +134,16 @@ function RankingsLoadingState() {
   );
 }
 
-export default function RankingsPage() {
+export default function RankingsPage({
+  initialSearchParams = {},
+  initialRankings = [],
+  hasInitialRankings = false,
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const tab = searchParams.get("type") || "popular";
-  const selectedWindow = searchParams.get("window") || "all";
-  const [list, setList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const tab = getSearchParam(initialSearchParams, "type", "popular");
+  const selectedWindow = getSearchParam(initialSearchParams, "window", "all");
+  const [list, setList] = useState(Array.isArray(initialRankings) ? initialRankings : []);
+  const [loading, setLoading] = useState(!hasInitialRankings);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const { isAdultMode } = useAdultGateStore();
 
@@ -172,7 +176,9 @@ export default function RankingsPage() {
   );
 
   useEffect(() => {
-    setLoading(true);
+    if (!hasInitialRankings) {
+      setLoading(true);
+    }
     const adultFlag = isAdultMode ? "1" : "0";
     apiGet(`/api/rankings?type=${tab}&window=${selectedWindow}&adult=${adultFlag}`).then((response) => {
       if (response.ok) {
@@ -182,7 +188,7 @@ export default function RankingsPage() {
       }
       setLoading(false);
     });
-  }, [isAdultMode, selectedWindow, tab]);
+  }, [hasInitialRankings, isAdultMode, selectedWindow, tab]);
 
   useEffect(() => {
     setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/rankings")));
@@ -314,37 +320,164 @@ export default function RankingsPage() {
         {loading ? (
           <RankingsLoadingState />
         ) : list.length === 0 ? (
-          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Quiet board
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                This Top Series view is quiet right now.
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Try another time window, open Top Series, or head back to search for a broader browse.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {selectedWindow !== "all" ? (
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.32fr)_360px]">
+            <div className="grid gap-4 md:grid-cols-2">
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Rank #1
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Use this slot as your safest first click.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => router.replace(`/rankings?type=${tab}&window=all`)}
+                  onClick={() =>
+                    router.push(tab === "completed" ? "/search?status=Completed&sort=popular" : chartGuide.searchHref)
+                  }
+                  className={primaryButtonClass}
+                >
+                  {chartGuide.searchLabel}
+                </button>
+              </SurfacePanel>
+
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Rank #2
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Compare it against another board mood.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    Switch between Popular, New, Completed, and Free Episodes when this one feels too quiet.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedWindow !== "all" ? (
+                    <button
+                      type="button"
+                      onClick={() => router.replace(`/rankings?type=${tab}&window=all`)}
+                      className={secondaryButtonClass}
+                    >
+                      Show all time
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => router.replace(`/rankings?type=popular&window=week`)}
+                    className={secondaryButtonClass}
+                  >
+                    Open Popular
+                  </button>
+                </div>
+              </SurfacePanel>
+
+              <SurfacePanel className="space-y-4 md:col-span-2" appearance="light" accent="blue">
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Rank #3
+                    </p>
+                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                      Keep the browse moving even without a live board.
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/search")}
+                    className={secondaryButtonClass}
+                  >
+                    Search titles
+                  </button>
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {[
+                    {
+                      title: "Popular",
+                      body: "Best when you just want the safest first click.",
+                      href: "/rankings?type=popular&window=week",
+                    },
+                    {
+                      title: "Completed",
+                      body: "Best when you want a finished story instead of waiting on updates.",
+                      href: "/rankings?type=completed&window=all",
+                    },
+                    {
+                      title: "Free Episodes",
+                      body: "Best when you want to try a hook before you spend points.",
+                      href: "/rankings?type=ttf&window=all",
+                    },
+                  ].map((item) => (
+                    <button
+                      key={item.title}
+                      type="button"
+                      onClick={() => router.push(item.href)}
+                      className="rounded-[22px] border border-black/6 bg-white/86 p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-black/10"
+                    >
+                      <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+                    </button>
+                  ))}
+                </div>
+              </SurfacePanel>
+            </div>
+
+            <div className="space-y-4">
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Top Series creators
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Follow the people behind the books that stick.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    When creator pages are visible, they are the cleanest next step after a strong ranking pick.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/creators")}
+                    className={primaryButtonClass}
+                  >
+                    Browse creators
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/comics")}
+                    className={secondaryButtonClass}
+                  >
+                    Browse comics
+                  </button>
+                </div>
+              </SurfacePanel>
+
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Better fallback
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Use search when this board is empty.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    Search, Top Series, and creator pages work together. If one route is thin, the others should still keep the visit moving.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => router.push("/search")}
                   className={secondaryButtonClass}
                 >
-                  Show all time
+                  Search everything
                 </button>
-              ) : null}
-              <button
-                type="button"
-                onClick={() => router.push("/search")}
-                className={primaryButtonClass}
-              >
-                Search titles
-              </button>
+              </SurfacePanel>
             </div>
-          </SurfacePanel>
+          </div>
         ) : (
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.32fr)_360px]">
             <div className="space-y-6">

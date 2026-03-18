@@ -66,7 +66,7 @@ function buildSupportHref(orderId) {
   return `/support?${params.toString()}`;
 }
 
-export default function OrdersPageClient() {
+export default function OrdersPageClient({ initialSignedIn = false }) {
   const router = useRouter();
   const { hydrated, isSignedIn } = useAuthStore();
   const [orders, setOrders] = useState([]);
@@ -75,6 +75,7 @@ export default function OrdersPageClient() {
   const [feedback, setFeedback] = useState({ type: "", text: "" });
   const [billingAvailability, setBillingAvailability] = useState(null);
   const [commerceNotice, setCommerceNotice] = useState(null);
+  const viewerSignedIn = hydrated ? isSignedIn : initialSignedIn;
 
   useEffect(() => {
     let mounted = true;
@@ -101,7 +102,7 @@ export default function OrdersPageClient() {
       };
     }
 
-    if (!isSignedIn) {
+    if (!viewerSignedIn) {
       setOrders([]);
       setLoading(false);
       return () => {
@@ -122,7 +123,7 @@ export default function OrdersPageClient() {
     return () => {
       mounted = false;
     };
-  }, [hydrated, isSignedIn]);
+  }, [hydrated, viewerSignedIn]);
 
   useEffect(() => {
     setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/orders")));
@@ -222,7 +223,7 @@ export default function OrdersPageClient() {
       ];
     }
 
-    if (!isSignedIn) {
+    if (!viewerSignedIn) {
       return [
         { label: "Orders", value: "Sign in", hint: "Purchases stay on your account, not just this device." },
         { label: "Billing", value: "Clear", hint: "Point packs and membership charges both show up here." },
@@ -248,7 +249,7 @@ export default function OrdersPageClient() {
       {
         label: "Orders",
         value: orders.length.toLocaleString(),
-        hint: isSignedIn ? "Saved to your account." : "Sign in to see your saved purchases.",
+        hint: viewerSignedIn ? "Saved to your account." : "Sign in to see your saved purchases.",
       },
       {
         label: "Paid",
@@ -269,7 +270,7 @@ export default function OrdersPageClient() {
             : "Visible total for the purchases on this page.",
       },
     ];
-  }, [isSignedIn, loading, orders]);
+  }, [viewerSignedIn, loading, orders]);
 
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
@@ -288,21 +289,21 @@ export default function OrdersPageClient() {
           title={
             latestPaidOrder
               ? "See what you bought and jump back into reading."
-              : isSignedIn
+              : viewerSignedIn
                 ? "Your purchases, receipts, and order IDs."
                 : "Purchases live on your account."
           }
           description={
             latestPaidOrder
               ? "Your latest purchase is here, along with quick ways to keep reading or get help."
-              : isSignedIn
+              : viewerSignedIn
                 ? "Point packs and memberships show up here so you can check receipts, charges, and billing details without digging through settings."
                 : "Sign in to see receipts, order IDs, membership charges, and billing help in one place."
           }
           secondary={
             latestPaidOrder
               ? `Latest order: ${latestPaidOrder.orderId} | ${formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)}`
-              : isSignedIn
+              : viewerSignedIn
                 ? "New purchases usually appear here shortly after checkout."
                 : "After checkout, this page is where charges, receipts, and order IDs stay easy to find."
           }
@@ -312,7 +313,7 @@ export default function OrdersPageClient() {
               <button
                 type="button"
                 onClick={async () => {
-                  if (!isSignedIn) {
+                  if (!viewerSignedIn) {
                     router.push("/signin?returnTo=/orders");
                     return;
                   }
@@ -334,16 +335,16 @@ export default function OrdersPageClient() {
                   setWorkingId("");
                 }}
                 className={primaryButtonClass}
-                disabled={!hydrated || !isSignedIn || workingId === "refresh"}
+                disabled={!viewerSignedIn || (!hydrated && initialSignedIn) || workingId === "refresh"}
               >
                 {workingId === "refresh" ? "Refreshing..." : "Refresh purchases"}
               </button>
               <button
                 type="button"
-                onClick={() => router.push(isSignedIn ? "/account" : "/signin?returnTo=/orders")}
+                onClick={() => router.push(viewerSignedIn ? "/account" : "/signin?returnTo=/orders")}
                 className={secondaryButtonClass}
               >
-                {isSignedIn ? "Account" : "Sign in"}
+                {viewerSignedIn ? "Account" : "Sign in"}
               </button>
             </>
           }
@@ -370,7 +371,7 @@ export default function OrdersPageClient() {
           </SurfacePanel>
         ) : null}
 
-        {isSignedIn && refundPreviewOnly ? (
+        {viewerSignedIn && refundPreviewOnly ? (
           <SurfacePanel className="border border-amber-200 bg-amber-50 text-amber-700" appearance="light" tone="warning" accent="amber">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
@@ -390,7 +391,7 @@ export default function OrdersPageClient() {
           </SurfacePanel>
         ) : null}
 
-        {hydrated && isSignedIn ? (
+        {viewerSignedIn && hydrated ? (
           <>
             {latestPaidOrder ? (
               <SurfacePanel className="space-y-5" appearance="light" accent="blue">
@@ -501,28 +502,7 @@ export default function OrdersPageClient() {
           </>
         ) : null}
 
-        {!hydrated || loading ? (
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-            <div className="space-y-2">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
-              <div className="h-9 w-72 animate-pulse rounded-2xl bg-slate-200" aria-hidden="true" />
-              <div className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
-            </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-                  aria-hidden="true"
-                >
-                  <div className="h-4 w-24 animate-pulse rounded-full bg-slate-200" />
-                  <div className="mt-4 h-6 w-40 animate-pulse rounded-2xl bg-slate-200" />
-                  <div className="mt-4 h-3 w-full animate-pulse rounded-full bg-slate-100" />
-                </div>
-              ))}
-            </div>
-          </SurfacePanel>
-        ) : !isSignedIn ? (
+        {!viewerSignedIn ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
               Sign in to view your purchases
@@ -552,6 +532,27 @@ export default function OrdersPageClient() {
               >
                 Support
               </button>
+            </div>
+          </SurfacePanel>
+        ) : !hydrated || loading ? (
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+            <div className="space-y-2">
+              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
+              <div className="h-9 w-72 animate-pulse rounded-2xl bg-slate-200" aria-hidden="true" />
+              <div className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  aria-hidden="true"
+                >
+                  <div className="h-4 w-24 animate-pulse rounded-full bg-slate-200" />
+                  <div className="mt-4 h-6 w-40 animate-pulse rounded-2xl bg-slate-200" />
+                  <div className="mt-4 h-3 w-full animate-pulse rounded-full bg-slate-100" />
+                </div>
+              ))}
             </div>
           </SurfacePanel>
         ) : orders.length === 0 ? (

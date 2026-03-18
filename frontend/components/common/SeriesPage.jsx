@@ -5,7 +5,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import Cover from "../common/Cover";
 import PortraitCard from "../home/PortraitCard";
@@ -16,6 +16,7 @@ import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
+import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 
 const PAGE_CONFIG = {
   comic: {
@@ -52,6 +53,23 @@ const PAGE_CONFIG = {
         href: "/comics?status=completed",
       },
     ],
+    emptyBrowseCards: [
+      {
+        eyebrow: "Start here",
+        title: "Free first chapters",
+        body: "Use free starts when you want to test art, pacing, and translation quality before spending points.",
+        ctaLabel: "Start reading free",
+        href: "/rankings?type=ttf&window=all",
+      },
+      {
+        eyebrow: "Trending now",
+        title: "Popular comics",
+        body: "When the full comic catalog is still settling in, Top Series gives you the safer first click.",
+        ctaLabel: "Browse Top Series",
+        href: "/rankings?type=popular&window=week",
+      },
+    ],
+    fallbackGenres: ["Romance", "Fantasy", "Action", "BL", "Drama", "Thriller"],
   },
   novel: {
     eyebrow: "Novels",
@@ -87,6 +105,23 @@ const PAGE_CONFIG = {
         href: "/novels?status=completed",
       },
     ],
+    emptyBrowseCards: [
+      {
+        eyebrow: "Trending now",
+        title: "Popular novels",
+        body: "If you want the safest first long-form read, start with the novels already pulling readers in.",
+        ctaLabel: "Browse Top Series",
+        href: "/rankings?type=popular&window=week",
+      },
+      {
+        eyebrow: "New updates",
+        title: "Fresh drops",
+        body: "Latest releases keep the novel catalog feeling alive while you wait for deeper shelves to fill in.",
+        ctaLabel: "See latest novels",
+        href: "/novels?sort=latest",
+      },
+    ],
+    fallbackGenres: ["Fantasy", "Romance", "Drama", "Mystery", "BL", "Historical"],
   },
 };
 
@@ -156,22 +191,29 @@ function mapSeriesCardItem(series) {
   };
 }
 
-export default function SeriesPage({ type = "comic" }) {
+export default function SeriesPage({
+  type = "comic",
+  initialSearchParams = {},
+  initialSeries = [],
+  hasInitialSeries = false,
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { isAdultMode } = useAdultGateStore();
-  const [series, setSeries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [series, setSeries] = useState(Array.isArray(initialSeries) ? initialSeries : []);
+  const [loading, setLoading] = useState(!hasInitialSeries);
   const config = PAGE_CONFIG[type] || PAGE_CONFIG.comic;
+  const searchParams = useMemo(() => toURLSearchParams(initialSearchParams), [initialSearchParams]);
 
-  const selectedGenre = searchParams.get("genre") || "all";
-  const sortBy = searchParams.get("sort") || "popular";
-  const status = searchParams.get("status") || "all";
+  const selectedGenre = getSearchParam(initialSearchParams, "genre", "all");
+  const sortBy = getSearchParam(initialSearchParams, "sort", "popular");
+  const status = getSearchParam(initialSearchParams, "status", "all");
 
   useEffect(() => {
     async function loadSeries() {
       try {
-        setLoading(true);
+        if (!hasInitialSeries) {
+          setLoading(true);
+        }
         const response = await apiGet(`/api/series?adult=${isAdultMode ? "1" : "0"}`, {
           cacheMs: 300000,
         });
@@ -189,7 +231,7 @@ export default function SeriesPage({ type = "comic" }) {
     }
 
     loadSeries();
-  }, [isAdultMode, type]);
+  }, [hasInitialSeries, isAdultMode, type]);
 
   const updateParams = useCallback(
     (updates) => {
@@ -345,6 +387,23 @@ export default function SeriesPage({ type = "comic" }) {
       },
     ].filter((shelf) => shelf.items.length > 0);
   }, [config.pathname, config.title, series]);
+  const showFallbackDiscovery = !loading && discoveryShelves.length === 0;
+  const emptyStateCopy = useMemo(() => {
+    if (!loading && series.length === 0) {
+      return {
+        title: type === "comic" ? "Comic shelves are still filling in." : "Novel shelves are still filling in.",
+        description:
+          type === "comic"
+            ? "Browse Top Series, start with free chapters, or search by genre while the live comic catalog catches up."
+            : "Browse Top Series, check the latest novel updates, or search by genre while the live novel catalog catches up.",
+      };
+    }
+
+    return {
+      title: config.emptyTitle,
+      description: `${config.emptyDescription} If you just want a safer first click, jump to Top Series or start with free chapters.`,
+    };
+  }, [config.emptyDescription, config.emptyTitle, loading, series.length, type]);
 
   const handleSeriesClick = useCallback(
     (seriesId) => {
@@ -433,6 +492,16 @@ export default function SeriesPage({ type = "comic" }) {
       .slice(0, 6)
       .map(([genre, count]) => ({ genre, count }));
   }, [series]);
+  const fallbackGenrePicks = useMemo(() => {
+    if (genreQuickPicks.length > 0) {
+      return genreQuickPicks;
+    }
+
+    return (Array.isArray(config.fallbackGenres) ? config.fallbackGenres : []).map((genre) => ({
+      genre,
+      count: null,
+    }));
+  }, [config.fallbackGenres, genreQuickPicks]);
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
@@ -524,6 +593,70 @@ export default function SeriesPage({ type = "comic" }) {
                 </div>
               </SurfacePanel>
             ))}
+          </section>
+        ) : showFallbackDiscovery ? (
+          <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
+            <div className="grid gap-4 md:grid-cols-2">
+              {config.emptyBrowseCards.map((card) => (
+                <SurfacePanel key={card.title} className="space-y-4" appearance="light" accent="blue">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      {card.eyebrow}
+                    </p>
+                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                      {card.title}
+                    </h2>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">{card.body}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => router.push(card.href)}
+                    className={secondaryButtonClass}
+                  >
+                    {card.ctaLabel}
+                  </button>
+                </SurfacePanel>
+              ))}
+            </div>
+
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Quick browse
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Quick genre picks
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Use genre-led search when the live shelves are still thin and you just want a clean way into the catalog.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {fallbackGenrePicks.map((item) => (
+                  <button
+                    key={item.genre}
+                    type="button"
+                    onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=popular`)}
+                    className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
+                  >
+                    {item.genre}
+                    {item.count ? <span className="ml-2 text-xs text-slate-400">{item.count}</span> : null}
+                  </button>
+                ))}
+              </div>
+
+              <div className="rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Better next move
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {type === "comic"
+                    ? "Use free starts first, then compare Top Series and completed comics before you wander into the full grid."
+                    : "Use Top Series first, then compare fresh drops and completed novels before you settle into a longer read."}
+                </p>
+              </div>
+            </SurfacePanel>
           </section>
         ) : null}
 
@@ -707,8 +840,8 @@ export default function SeriesPage({ type = "comic" }) {
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <EmptyState
               icon={config.emptyIcon}
-              title={config.emptyTitle}
-              description={`${config.emptyDescription} If you just want a safer first click, jump to Top Series or start with free chapters.`}
+              title={emptyStateCopy.title}
+              description={emptyStateCopy.description}
               appearance="light"
               action={{
                 label: "Reset filters",

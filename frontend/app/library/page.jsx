@@ -2,6 +2,7 @@ import LibraryPage from "../../components/library/LibraryPage";
 import { BookmarkProvider } from "../../store/useBookmarkStore";
 import { RewardsProvider } from "../../store/useRewardsStore";
 import { createPageMetadata } from "../../lib/seo";
+import { cookies } from "next/headers";
 
 export const metadata = createPageMetadata({
   title: "Library",
@@ -13,11 +14,14 @@ export const metadata = createPageMetadata({
   },
 });
 
-export default function Page() {
+export default async function Page() {
+  const cookieStore = await cookies();
+  const initialSignedIn = cookieStore.get("mn_is_signed_in")?.value === "1";
+
   return (
     <RewardsProvider>
       <BookmarkProvider>
-        <LibraryPage />
+        <LibraryPage initialSignedIn={initialSignedIn} />
       </BookmarkProvider>
     </RewardsProvider>
   );

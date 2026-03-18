@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   BookOpen,
@@ -19,6 +19,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import Cover from "../common/Cover";
+import SiteHeader from "../layout/SiteHeader";
 import PortraitCard from "./PortraitCard";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import { useFollowStore } from "../../store/useFollowStore";
@@ -32,16 +33,13 @@ import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { buildHomeHeroItems, getHomeEditorialSnapshot, getSeriesScore } from "../../lib/homeMerchandising";
 import { siteConfig } from "../../lib/siteConfig";
+import { getSearchParam } from "../../lib/pageSearchParams";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), { ssr: false });
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
-const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
-  ssr: false,
-  loading: () => <div className="sticky top-0 z-40 h-[72px] border-b border-black/6 bg-[rgba(246,247,251,0.82)] backdrop-blur-xl" />,
-});
 const HomeRailsContainer = dynamic(() => import("./HomeRailsContainer"), {
   loading: () => (
     <div className="space-y-10">
@@ -251,6 +249,27 @@ function ResourceLinkCard({ eyebrow, title, description, label, onClick }) {
   );
 }
 
+function FallbackDiscoveryCard({ eyebrow, title, description, label, onClick }) {
+  return (
+    <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+      <CardContent className="p-5 sm:p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{eyebrow}</p>
+        <h2 className="mt-3 font-display text-[1.75rem] font-semibold tracking-tight text-slate-950">{title}</h2>
+        <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClick}
+          className="mt-5 h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+        >
+          {label}
+          <ArrowRight className="size-4" />
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 function TrustContactCard({ eyebrow, title, description, label, href, onClick, external = false }) {
   const className =
     "block rounded-[24px] border border-black/6 bg-[#f8f9fc] p-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/10 hover:bg-white";
@@ -279,9 +298,8 @@ function TrustContactCard({ eyebrow, title, description, label, href, onClick, e
   );
 }
 
-function HomeContent() {
+function HomeContent({ initialSearchParams = {} }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { followedSeriesIds, loadFollowed } = useFollowStore();
   const { items: historyItems, loadHistory } = useHistoryStore();
   const { bySeriesId: progressMap, loadProgress } = useProgressStore();
@@ -300,9 +318,9 @@ function HomeContent() {
   }, [isSignedIn, loadFollowed, loadHistory, loadProgress]);
 
   useEffect(() => {
-    const reason = searchParams.get("reason");
-    const openLogin = searchParams.get("openLogin");
-    const returnTo = searchParams.get("returnTo") || "/";
+    const reason = getSearchParam(initialSearchParams, "reason");
+    const openLogin = getSearchParam(initialSearchParams, "openLogin");
+    const returnTo = getSearchParam(initialSearchParams, "returnTo", "/");
     if (openLogin === "1") {
       window.sessionStorage.setItem("mn_open_login", "1");
       window.sessionStorage.setItem("mn_return_to", returnTo);
@@ -316,7 +334,7 @@ function HomeContent() {
       newUrl.searchParams.delete("openLogin");
       router.replace(newUrl.pathname + newUrl.search, { scroll: false });
     }
-  }, [searchParams, router]);
+  }, [initialSearchParams, router]);
   useEffect(() => {
     trackEvent("view_home", {});
   }, []);
@@ -601,6 +619,72 @@ function HomeContent() {
         })),
     [editorialSnapshot.safeCatalog],
   );
+  const showCatalogFallback = !loading && !featuredSeries;
+  const homepageFallbackCards = useMemo(
+    () => [
+      {
+        id: "trending-now",
+        eyebrow: "Trending now",
+        title: "Start with the books readers usually open first.",
+        description:
+          "Top Series is still the fastest path when you want the safest first click instead of guessing from the full catalog.",
+        label: "Browse top series",
+        href: "/rankings?type=popular&window=week",
+      },
+      {
+        id: "new-updates",
+        eyebrow: "New updates",
+        title: "Check what feels current before you settle in.",
+        description:
+          "If you want the catalog to feel alive, jump to the freshest releases and recently updated stories.",
+        label: "See latest releases",
+        href: "/search?sort=latest",
+      },
+      {
+        id: "start-free",
+        eyebrow: "Start free",
+        title: "Look for free first chapters before spending anything.",
+        description:
+          "Free starts are the cleanest way to test tone, pacing, and translation quality before you unlock more episodes.",
+        label: "Start reading free",
+        href: "/rankings?type=ttf&window=all",
+      },
+    ],
+    [],
+  );
+  const helpResourceCards = useMemo(
+    () => [
+      {
+        eyebrow: "Pricing",
+        title: "Points and packs",
+        description: "See what is free, what uses points, and where purchase history shows up later.",
+        label: "See pricing",
+        href: "/store",
+      },
+      {
+        eyebrow: "FAQ",
+        title: "Quick answers",
+        description: "Get the plain-English version of billing, access, and common reader questions.",
+        label: "Open FAQ",
+        href: "/faq",
+      },
+      {
+        eyebrow: "Support",
+        title: "Billing help",
+        description: "Know where to go if a charge, receipt, or access issue needs a real person.",
+        label: "Contact support",
+        href: "/support",
+      },
+      {
+        eyebrow: "18+",
+        title: "Mature content",
+        description: "Review age checks, region visibility, and history controls before turning it on.",
+        label: "Review settings",
+        href: "/mature-content",
+      },
+    ],
+    [],
+  );
 
   const openHomeSeries = (seriesId, entryPoint, campaignId) => {
     if (!seriesId) {
@@ -802,10 +886,84 @@ function HomeContent() {
                 </div>
               </CardContent>
             </Card>
-          ) : null}
+          ) : (
+            <Card className="relative overflow-hidden rounded-[40px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.98))] py-0 shadow-[0_24px_56px_rgba(15,23,42,0.08)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.74),rgba(247,249,252,0.96))]" />
+              <CardContent className="relative grid gap-8 p-5 sm:p-7 xl:grid-cols-[1.04fr_0.96fr] xl:items-start xl:p-8">
+                <div className="max-w-3xl">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Start here</p>
+                  <h1 className="mt-4 max-w-3xl font-display text-[2.45rem] font-semibold tracking-tight text-slate-950 sm:text-[3.1rem] xl:text-[3.8rem]">
+                    Read comics and novels, start free, and unlock more when you&apos;re ready.
+                  </h1>
+                  <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">
+                    Gush keeps the first visit simple: browse top series, try free chapters when they exist, and understand points or membership before you spend.
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-2.5">
+                    {heroTrustItems.map((signal) => (
+                      <span
+                        key={signal}
+                        className="rounded-full border border-black/6 bg-white/72 px-3 py-1.5 text-xs font-medium text-slate-700"
+                      >
+                        {signal}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <Button
+                      type="button"
+                      size="lg"
+                      onClick={() => router.push("/rankings?type=ttf&window=all")}
+                      className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
+                    >
+                      Start reading free
+                    </Button>
+                    <Button
+                      type="button"
+                      size="lg"
+                      variant="outline"
+                      onClick={() => router.push("/rankings?type=popular&window=week")}
+                      className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                    >
+                      Browse top series
+                    </Button>
+                  </div>
+                </div>
+                <div className="rounded-[30px] border border-black/6 bg-white/76 p-5 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Why start here</p>
+                  <div className="mt-4 space-y-3">
+                    {[
+                      "Top Series trims the catalog down to safer first taps.",
+                      "Free first chapters let you test the hook before paying.",
+                      "Store, support, and mature-content settings stay close instead of buried.",
+                    ].map((item) => (
+                      <div
+                        key={item}
+                        className="rounded-[20px] border border-black/6 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </section>
 
-        {homeEntryCards.length > 0 ? (
+        {showCatalogFallback ? (
+          <section className="mb-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {homepageFallbackCards.map((card) => (
+              <FallbackDiscoveryCard
+                key={card.id}
+                eyebrow={card.eyebrow}
+                title={card.title}
+                description={card.description}
+                label={card.label}
+                onClick={() => router.push(card.href)}
+              />
+            ))}
+          </section>
+        ) : homeEntryCards.length > 0 ? (
           <section className="mb-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {homeEntryCards.map((card) => (
               <HomeEntryCard
@@ -948,36 +1106,107 @@ function HomeContent() {
                 </p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {helpResourceCards.map((item) => (
+                    <ResourceLinkCard
+                      key={item.href}
+                      eyebrow={item.eyebrow}
+                      title={item.title}
+                      description={item.description}
+                      label={item.label}
+                      onClick={() => router.push(item.href)}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <TrustContactCard
+                    eyebrow="Support"
+                    title={siteConfig.supportEmail}
+                    description="Billing, account, and access help with a direct contact path."
+                    label="Email support"
+                    href={`mailto:${siteConfig.supportEmail}`}
+                    external
+                  />
+                  <TrustContactCard
+                    eyebrow="Privacy"
+                    title={siteConfig.privacyEmail}
+                    description="Privacy questions and data requests should not be buried."
+                    label="Email privacy"
+                    href={`mailto:${siteConfig.privacyEmail}`}
+                    external
+                  />
+                  <TrustContactCard
+                    eyebrow="Company"
+                    title={siteConfig.companyName}
+                    description="About, terms, and policy links stay visible when trust matters."
+                    label="About Gush"
+                    onClick={() => router.push("/about")}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        ) : showCatalogFallback ? (
+          <section className="mb-10 grid gap-4 xl:grid-cols-[0.96fr_1.04fr]">
+            <Card className="overflow-hidden rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+              <CardContent className="p-5 sm:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">First visit basics</p>
+                <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+                  Clear next steps beat an empty homepage every time.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Start with Top Series or free chapters, then keep pricing, support, and mature-content controls close when you need them.
+                </p>
+
+                <div className="mt-6 grid gap-3">
                   {[
-                    {
-                      eyebrow: "Pricing",
-                      title: "Points and packs",
-                      description: "See what is free, what uses points, and where purchase history shows up later.",
-                      label: "See pricing",
-                      href: "/store",
-                    },
-                    {
-                      eyebrow: "FAQ",
-                      title: "Quick answers",
-                      description: "Get the plain-English version of billing, access, and common reader questions.",
-                      label: "Open FAQ",
-                      href: "/faq",
-                    },
-                    {
-                      eyebrow: "Support",
-                      title: "Billing help",
-                      description: "Know where to go if a charge, receipt, or access issue needs a real person.",
-                      label: "Contact support",
-                      href: "/support",
-                    },
-                    {
-                      eyebrow: "18+",
-                      title: "Mature content",
-                      description: "Review age checks, region visibility, and history controls before turning it on.",
-                      label: "Review settings",
-                      href: "/mature-content",
-                    },
+                    "Browse Top Series when you want the safest first click.",
+                    "Use free chapters first when you do not want to commit points yet.",
+                    "Check points, membership, and support before you pay for anything.",
                   ].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={() => router.push("/rankings?type=popular&window=week")}
+                    className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
+                  >
+                    Browse top series
+                  </Button>
+                  <Button
+                    type="button"
+                    size="lg"
+                    variant="outline"
+                    onClick={() => router.push("/store")}
+                    className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  >
+                    See pricing
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden rounded-[32px] border border-black/6 bg-white/94 py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+              <CardContent className="p-5 sm:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Keep help close</p>
+                <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+                  Pricing, support, and account rules stay visible.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Even before the full catalog is live, the homepage should still explain how points, billing help, and 18+ controls work.
+                </p>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {helpResourceCards.map((item) => (
                     <ResourceLinkCard
                       key={item.href}
                       eyebrow={item.eyebrow}
@@ -1063,32 +1292,36 @@ function HomeContent() {
           </Card>
         </section>
 
-        <section className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Keep browsing</p>
-            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">Trending, new updates, and easier places to start.</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-600">The shelves below stay short on purpose so discovery still feels calm, not like a dashboard.</p>
-          </div>
-          <Button
-            type="button"
-            size="lg"
-            variant="outline"
-            onClick={() => router.push("/search")}
-            className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
-          >
-            <Compass className="size-4" />
-            Browse all series
-          </Button>
-        </section>
+        {!showCatalogFallback ? (
+          <>
+            <section className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Keep browsing</p>
+                <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">Trending, new updates, and easier places to start.</h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">The shelves below stay short on purpose so discovery still feels calm, not like a dashboard.</p>
+              </div>
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                onClick={() => router.push("/search")}
+                className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                <Compass className="size-4" />
+                Browse all series
+              </Button>
+            </section>
 
-        {loading ? (
-          <div className="space-y-10">
-            <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
-            <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
-          </div>
-        ) : (
-          <HomeRailsContainer appearance="light" />
-        )}
+            {loading ? (
+              <div className="space-y-10">
+                <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
+                <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
+              </div>
+            ) : (
+              <HomeRailsContainer appearance="light" />
+            )}
+          </>
+        ) : null}
 
         <LoginPrompt
           isOpen={showLoginPrompt}
@@ -1110,6 +1343,10 @@ function HomeContent() {
   );
 }
 
-export default function HomePage() {
-  return <HomeDataProvider><HomeContent /></HomeDataProvider>;
+export default function HomePage({ initialSearchParams = {}, initialHomeData = null }) {
+  return (
+    <HomeDataProvider initialData={initialHomeData}>
+      <HomeContent initialSearchParams={initialSearchParams} />
+    </HomeDataProvider>
+  );
 }

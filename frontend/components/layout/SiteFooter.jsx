@@ -7,7 +7,6 @@ const footerSections = [
   {
     title: "Browse",
     links: [
-      { label: "Home", href: "/" },
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
       { label: "Creators", href: "/creators" },
@@ -207,12 +206,7 @@ export default function SiteFooter({ tone = "default" }) {
           <p>
             © {currentYear} {siteConfig.companyName}. All rights reserved.
           </p>
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-            <span>Support: {siteConfig.supportEmail}</span>
-            <span>Privacy: {siteConfig.privacyEmail}</span>
-            <span>Legal: {siteConfig.legalEmail}</span>
-            {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
-          </div>
+          {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
         </div>
       </div>
     </footer>

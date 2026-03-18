@@ -7,6 +7,6 @@
 
 import SeriesPage from "../../components/common/SeriesPage";
 
-export default function NovelsPage() {
-  return <SeriesPage type="novel" />;
+export default function NovelsPage(props) {
+  return <SeriesPage type="novel" {...props} />;
 }

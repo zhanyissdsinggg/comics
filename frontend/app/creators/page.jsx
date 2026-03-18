@@ -21,6 +21,9 @@ export async function generateMetadata() {
 
 export default async function CreatorsPageRoute() {
   const payload = await loadCreatorsDirectorySeoPayload();
+  const initialCatalog = (payload?.creators || []).flatMap((creator) =>
+    Array.isArray(creator?.series) ? creator.series : [],
+  );
   const structuredData = buildCreatorsDirectoryStructuredData({
     creators: payload?.creators || [],
   });
@@ -28,7 +31,10 @@ export default async function CreatorsPageRoute() {
   return (
     <>
       <StructuredDataScript id="creators-directory-jsonld" data={structuredData} />
-      <CreatorsHubPage />
+      <CreatorsHubPage
+        initialCatalog={initialCatalog}
+        hasInitialCatalog={Boolean(payload)}
+      />
     </>
   );
 }

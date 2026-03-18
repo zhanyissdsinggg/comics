@@ -111,11 +111,14 @@ function CreatorDirectorySkeleton() {
   );
 }
 
-export default function CreatorsHubPage() {
+export default function CreatorsHubPage({
+  initialCatalog = [],
+  hasInitialCatalog = false,
+}) {
   const router = useRouter();
   const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
-  const [catalog, setCatalog] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [catalog, setCatalog] = useState(Array.isArray(initialCatalog) ? initialCatalog : []);
+  const [loading, setLoading] = useState(!hasInitialCatalog);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
@@ -130,7 +133,9 @@ export default function CreatorsHubPage() {
     const requestId = requestRef.current + 1;
     requestRef.current = requestId;
     const adultFlag = isAdultMode ? "1" : "0";
-    setLoading(true);
+    if (!hasInitialCatalog) {
+      setLoading(true);
+    }
     setError("");
 
     const isCurrentRequest = () => requestRef.current === requestId;
@@ -145,8 +150,10 @@ export default function CreatorsHubPage() {
           setCatalog([]);
           setError("");
         } else {
-          setCatalog([]);
-          setError(response.error || "Unable to load creators.");
+          if (!hasInitialCatalog) {
+            setCatalog([]);
+            setError(response.error || "Unable to load creators.");
+          }
         }
         return true;
       }
@@ -178,7 +185,7 @@ export default function CreatorsHubPage() {
         });
       }
     });
-  }, [forceDisableAdultMode, isAdultMode]);
+  }, [forceDisableAdultMode, hasInitialCatalog, isAdultMode]);
 
   const creators = useMemo(() => buildCreatorDirectory(catalog), [catalog]);
   const genreOptions = useMemo(() => buildGenreOptions(creators), [creators]);
@@ -212,6 +219,35 @@ export default function CreatorsHubPage() {
   }, [activeGenre, creators, query]);
   const spotlightCreators = useMemo(() => filteredCreators.slice(0, 3), [filteredCreators]);
   const stats = useMemo(() => getCreatorDirectoryStats(creators), [creators]);
+  const creatorFallbackCards = useMemo(
+    () => [
+      {
+        eyebrow: "Find a creator",
+        title: "Search by creator, studio, or genre.",
+        description:
+          "Start from search when you already know a creator name, a studio, or just the lane of story you want.",
+        label: "Search series",
+        href: "/search",
+      },
+      {
+        eyebrow: "Start here",
+        title: "Creator spotlight",
+        description:
+          "Top Series is still the easiest first stop when creator pages are sparse. Open a strong title first, then follow the creator trail as more credits appear.",
+        label: "Browse Top Series",
+        href: "/rankings?type=popular&window=week",
+      },
+      {
+        eyebrow: "Full list",
+        title: "Browse every visible creator page.",
+        description:
+          "This directory fills in automatically as more titles expose clean writer, artist, and studio credits.",
+        label: "Browse comics",
+        href: "/comics",
+      },
+    ],
+    [],
+  );
 
   const heroStats = useMemo(
     () => [
@@ -311,9 +347,9 @@ export default function CreatorsHubPage() {
             appearance="light"
             accent="blue"
             eyebrow="Creators"
-            title="No creator pages are showing yet."
-            description="As more titles get clean writer, artist, and studio credits, they will land here automatically."
-            secondary="Until then, head back to search or open Top Series to keep browsing."
+            title="Find the creators worth following."
+            description="Move from one favorite title to the writer, artist, or studio behind it, then keep browsing from the same creative voice."
+            secondary="When creator pages are still filling in, search by creator, studio, or genre and use Top Series as the cleaner first stop."
             stats={heroStats}
             actions={
               <>
@@ -334,6 +370,91 @@ export default function CreatorsHubPage() {
               </>
             }
           />
+
+          {commerceNotice ? (
+            <CommerceSuccessBanner
+              notice={commerceNotice}
+              onDismiss={() => setCommerceNotice(null)}
+            />
+          ) : null}
+
+          <section className="grid gap-4 xl:grid-cols-[1.06fr_0.94fr]">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
+              {creatorFallbackCards.slice(0, 2).map((card) => (
+                <SurfacePanel key={card.title} appearance="light" accent="blue" className="space-y-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      {card.eyebrow}
+                    </p>
+                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                      {card.title}
+                    </h2>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">{card.description}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => router.push(card.href)}
+                    className={secondaryButtonClass}
+                  >
+                    {card.label}
+                  </button>
+                </SurfacePanel>
+              ))}
+            </div>
+
+            <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Directory view
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  {creatorFallbackCards[2].title}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  {creatorFallbackCards[2].description}
+                </p>
+              </div>
+
+              <div className="grid gap-3">
+                {[
+                  "Search still works better than guessing when you know the creator name already.",
+                  "Top Series is the faster detour when you want a title worth opening before the creator directory fills in.",
+                  "Comics and novels stay the best browse routes until more creator credits are public.",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push(creatorFallbackCards[2].href)}
+                  className={primaryButtonClass}
+                >
+                  {creatorFallbackCards[2].label}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/novels")}
+                  className={secondaryButtonClass}
+                >
+                  Browse novels
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/rankings")}
+                  className={secondaryButtonClass}
+                >
+                  Open Top Series
+                </button>
+              </div>
+            </SurfacePanel>
+          </section>
         </div>
       </main>
     );

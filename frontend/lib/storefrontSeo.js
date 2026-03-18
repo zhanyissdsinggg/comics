@@ -21,6 +21,27 @@ function getSeoApiBaseUrl() {
   );
 }
 
+async function fetchSeoApiJson(path, requestId) {
+  try {
+    const response = await fetch(`${getSeoApiBaseUrl()}${path}`, {
+      next: { revalidate: SEO_REVALIDATE_SECONDS },
+      headers: requestId
+        ? {
+            "x-gush-seo": requestId,
+          }
+        : undefined,
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 function toNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -76,6 +97,67 @@ export const loadSeriesSeoPayload = cache(async (seriesId) => {
   } catch {
     return null;
   }
+});
+
+export const loadSeriesCatalogSeoPayload = cache(async () => {
+  const payload = await fetchSeoApiJson("/api/series?adult=0", "series-catalog");
+  return {
+    series: Array.isArray(payload?.series) ? payload.series : [],
+  };
+});
+
+export const loadHomepageSeoPayload = cache(async () => {
+  const [seriesPayload, hotPayload, recommendationsPayload] = await Promise.all([
+    fetchSeoApiJson("/api/series?adult=0", "home-series"),
+    fetchSeoApiJson("/api/search/hot?adult=0&window=day", "home-hot-keywords"),
+    fetchSeoApiJson("/api/recommendations/homepage?adult=0", "home-recommendations"),
+  ]);
+
+  return {
+    seriesList: Array.isArray(seriesPayload?.series) ? seriesPayload.series : [],
+    hotKeywords: Array.isArray(hotPayload?.keywords) ? hotPayload.keywords : [],
+    homepageSlots: Array.isArray(recommendationsPayload?.slots) ? recommendationsPayload.slots : [],
+    ready: true,
+  };
+});
+
+export const loadRankingsSeoPayload = cache(async (type = "popular", window = "all") => {
+  const payload = await fetchSeoApiJson(
+    `/api/rankings?type=${encodeURIComponent(type)}&window=${encodeURIComponent(window)}&adult=0`,
+    "rankings-page",
+  );
+
+  return {
+    rankings: Array.isArray(payload?.rankings) ? payload.rankings : [],
+  };
+});
+
+export const loadTopupCatalogSeoPayload = cache(async () => {
+  const payload = await fetchSeoApiJson("/api/billing/topups", "store-topups");
+
+  return {
+    packages: Array.isArray(payload?.packages) ? payload.packages : [],
+    billing: payload?.billing || null,
+  };
+});
+
+export const loadSubscriptionPlansSeoPayload = cache(async () => {
+  const payload = await fetchSeoApiJson("/api/billing/plans", "subscription-plans");
+  const plans = Array.isArray(payload?.plans) ? payload.plans : [];
+
+  return {
+    plans,
+    planCatalog: plans.reduce((catalog, plan) => {
+      const planId = String(plan?.id || "").trim();
+      if (!planId) {
+        return catalog;
+      }
+
+      catalog[planId] = plan;
+      return catalog;
+    }, {}),
+    billing: payload?.billing || null,
+  };
 });
 
 export const loadCreatorSeoPayload = cache(async (creatorSlug) => {

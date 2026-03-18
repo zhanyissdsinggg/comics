@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
@@ -27,6 +27,7 @@ import { getPlanCatalog } from "../../lib/subscriptions";
 import { persistCommerceSuccess } from "../../lib/commerceSuccess";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { siteConfig } from "../../lib/siteConfig";
+import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 
 const PromoBanner = dynamic(() => import("./PromoBanner"));
 
@@ -67,9 +68,12 @@ const PACKAGE_FIT_GUIDE = {
   mega: "Heavy unlocking across multiple series.",
 };
 
-export default function StorePage() {
+export default function StorePage({
+  initialSearchParams = {},
+  initialTopupCatalog = [],
+  initialBillingAvailability = null,
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { topup, paidPts, bonusPts, subscription } = useWalletStore();
   const { coupons, loadCoupons, claimCoupon } = useCouponStore();
   const { isSignedIn } = useAuthStore();
@@ -79,15 +83,16 @@ export default function StorePage() {
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
   const [promotions, setPromotions] = useState([]);
-  const [topupCatalog, setTopupCatalog] = useState([]);
-  const [billingAvailability, setBillingAvailability] = useState(null);
+  const [topupCatalog, setTopupCatalog] = useState(Array.isArray(initialTopupCatalog) ? initialTopupCatalog : []);
+  const [billingAvailability, setBillingAvailability] = useState(initialBillingAvailability);
   const [isNewPayer, setIsNewPayer] = useState(true);
+  const routeSearchParams = useMemo(() => toURLSearchParams(initialSearchParams), [initialSearchParams]);
 
-  const returnTo = searchParams.get("returnTo") || "/";
-  const focus = searchParams.get("focus") || "";
+  const returnTo = getSearchParam(initialSearchParams, "returnTo", "/");
+  const focus = getSearchParam(initialSearchParams, "focus");
   const routeAttribution = useMemo(
-    () => readPaymentAttributionFromSearchParams(searchParams),
-    [searchParams],
+    () => readPaymentAttributionFromSearchParams(routeSearchParams),
+    [routeSearchParams],
   );
   const promotionId = routeAttribution?.promotionId || "";
   const campaignId = routeAttribution?.campaignId || "";

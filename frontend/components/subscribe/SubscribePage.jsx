@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
@@ -21,6 +21,7 @@ import { trackEvent } from "../../lib/trackEvent";
 import { persistCommerceSuccess } from "../../lib/commerceSuccess";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { siteConfig } from "../../lib/siteConfig";
+import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 
 const PLAN_FIT_GUIDE = {
   basic: {
@@ -37,20 +38,24 @@ const PLAN_FIT_GUIDE = {
   },
 };
 
-export default function SubscribePage() {
+export default function SubscribePage({
+  initialSearchParams = {},
+  initialPlanCatalog = null,
+  initialBillingAvailability = null,
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { subscription, subscribe, cancelSubscription } = useWalletStore();
   const [workingId, setWorkingId] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [planCatalog, setPlanCatalogState] = useState(getPlanCatalog());
-  const [billingAvailability, setBillingAvailability] = useState(null);
+  const [planCatalog, setPlanCatalogState] = useState(initialPlanCatalog || getPlanCatalog());
+  const [billingAvailability, setBillingAvailability] = useState(initialBillingAvailability);
   const isActive = Boolean(subscription?.active);
-  const returnTo = searchParams.get("returnTo") || "/account";
+  const returnTo = getSearchParam(initialSearchParams, "returnTo", "/account");
+  const routeSearchParams = useMemo(() => toURLSearchParams(initialSearchParams), [initialSearchParams]);
 
   const routeAttribution = useMemo(
-    () => readPaymentAttributionFromSearchParams(searchParams),
-    [searchParams],
+    () => readPaymentAttributionFromSearchParams(routeSearchParams),
+    [routeSearchParams],
   );
   const attribution = useMemo(
     () =>

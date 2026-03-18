@@ -1,6 +1,7 @@
-import StorePageLoader from "./StorePageLoader";
 import { CouponProvider } from "../../store/useCouponStore";
 import { createPageMetadata } from "../../lib/seo";
+import StorePage from "../../components/store/StorePage";
+import { loadTopupCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Store",
@@ -8,10 +9,17 @@ export const metadata = createPageMetadata({
   path: "/store",
 });
 
-export default function Page() {
+export default async function Page({ searchParams }) {
+  const initialSearchParams = (await searchParams) || {};
+  const payload = await loadTopupCatalogSeoPayload();
+
   return (
     <CouponProvider>
-      <StorePageLoader />
+      <StorePage
+        initialSearchParams={initialSearchParams}
+        initialTopupCatalog={payload?.packages || []}
+        initialBillingAvailability={payload?.billing || null}
+      />
     </CouponProvider>
   );
 }

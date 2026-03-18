@@ -63,7 +63,7 @@ function formatOrderDate(value) {
   });
 }
 
-export default function AccountPage() {
+export default function AccountPage({ initialSignedIn = false }) {
   const router = useRouter();
   const { hydrated, isSignedIn, user } = useAuthStore();
   const { plan, subscription, loadWallet, cancelSubscription } = useWalletStore();
@@ -86,6 +86,7 @@ export default function AccountPage() {
   const [providerBusy, setProviderBusy] = useState(false);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const googleAuthEnabled = isGoogleAuthEnabled();
+  const viewerSignedIn = hydrated ? isSignedIn : initialSignedIn;
   const openAuthPrompt = () => {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("auth:open"));
@@ -277,10 +278,12 @@ export default function AccountPage() {
     () => [
       {
         label: "Status",
-        value: !hydrated ? "Reader setup" : isSignedIn ? "Signed in" : "Signed out",
+        value: viewerSignedIn ? "Signed in" : "Signed out",
         hint: !hydrated
-          ? "Library, purchases, and settings connect here."
-          : isSignedIn
+          ? viewerSignedIn
+            ? "Library, purchases, and settings are loading for this account."
+            : "Sign in to keep library, purchases, and settings together."
+          : viewerSignedIn
             ? user?.emailVerified
               ? "Reading, purchases, and alerts can stay synced here."
               : "Verify your email to keep recovery simple."
@@ -288,11 +291,13 @@ export default function AccountPage() {
       },
       {
         label: "Membership",
-        value: !hydrated ? "Available" : subscription?.active ? "Member" : "Free",
+        value: subscription?.active ? "Member" : "Free",
         hint: subscription?.renewAt
           ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
           : !hydrated
-            ? "Membership details live here once the page is ready."
+            ? viewerSignedIn
+              ? "Membership details live here once the page is ready."
+              : "Compare plans after you sign in."
             : "Upgrade any time if you read often.",
       },
       {
@@ -302,17 +307,19 @@ export default function AccountPage() {
       },
       {
         label: "Purchases",
-        value: !hydrated || ordersLoading ? "Recent" : isSignedIn ? orders.length.toLocaleString() : "Sign in",
-        hint: ordersLoading
+        value: !hydrated && viewerSignedIn ? "Recent" : viewerSignedIn ? orders.length.toLocaleString() : "Sign in",
+        hint: !hydrated && viewerSignedIn
           ? "Recent charges and receipts show up below."
-          : isSignedIn
+          : ordersLoading
+          ? "Recent charges and receipts show up below."
+          : viewerSignedIn
             ? "Latest packs and memberships at a glance."
             : "Sign in to see receipts and order IDs.",
       },
     ],
     [
       hydrated,
-      isSignedIn,
+      viewerSignedIn,
       language,
       orders.length,
       ordersLoading,
@@ -357,7 +364,7 @@ export default function AccountPage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (!hydrated || !isSignedIn) {
+                  if (!viewerSignedIn) {
                     openAuthPrompt();
                     return;
                   }
@@ -371,14 +378,14 @@ export default function AccountPage() {
                 }}
                 className={primaryButtonClass}
               >
-                {hydrated && isSignedIn ? "Manage membership" : "Sign in"}
+                {viewerSignedIn ? "Manage membership" : "Sign in"}
               </button>
               <button
                 type="button"
-                onClick={() => router.push(hydrated && isSignedIn ? "/orders" : "/store")}
+                onClick={() => router.push(viewerSignedIn ? "/orders" : "/store")}
                 className={secondaryButtonClass}
               >
-                {hydrated && isSignedIn ? "View purchases" : "See point packs"}
+                {viewerSignedIn ? "View purchases" : "See point packs"}
               </button>
             </>
           }
@@ -391,7 +398,7 @@ export default function AccountPage() {
           />
         ) : null}
 
-        {hydrated && !isSignedIn ? (
+        {!viewerSignedIn ? (
           <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" appearance="light" accent="blue">
             <div>
               <p className={sectionEyebrowClass}>Signed out</p>
@@ -470,7 +477,7 @@ export default function AccountPage() {
                     </div>
                   ) : (
                     <div className={`${fieldClass} text-slate-600`}>
-                      {isSignedIn
+                      {viewerSignedIn
                         ? user?.email || user?.id || "Active account"
                         : "Browsing on this device"}
                     </div>
@@ -796,17 +803,7 @@ export default function AccountPage() {
                   A quick look at your latest packs and memberships.
                 </p>
               </div>
-              {!hydrated || ordersLoading ? (
-                <div className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4" aria-hidden="true">
-                  {Array.from({ length: 2 }).map((_, index) => (
-                    <div key={index} className="rounded-[20px] border border-black/6 bg-white px-4 py-4">
-                      <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
-                      <div className="mt-3 h-3 w-40 animate-pulse rounded-full bg-slate-100" />
-                      <div className="mt-3 h-3 w-full animate-pulse rounded-full bg-slate-100" />
-                    </div>
-                  ))}
-                </div>
-              ) : !isSignedIn ? (
+              {!viewerSignedIn ? (
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-600">
                   <p>Sign in to see receipts, refunds, order IDs, and membership charges on your account.</p>
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -825,6 +822,16 @@ export default function AccountPage() {
                       See point packs
                     </button>
                   </div>
+                </div>
+              ) : !hydrated || ordersLoading ? (
+                <div className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4" aria-hidden="true">
+                  {Array.from({ length: 2 }).map((_, index) => (
+                    <div key={index} className="rounded-[20px] border border-black/6 bg-white px-4 py-4">
+                      <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
+                      <div className="mt-3 h-3 w-40 animate-pulse rounded-full bg-slate-100" />
+                      <div className="mt-3 h-3 w-full animate-pulse rounded-full bg-slate-100" />
+                    </div>
+                  ))}
                 </div>
               ) : orders.length === 0 ? (
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">

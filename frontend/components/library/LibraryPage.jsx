@@ -90,9 +90,9 @@ function toTimestamp(value) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-export default function LibraryPage() {
+export default function LibraryPage({ initialSignedIn = false }) {
   const router = useRouter();
-  const { isSignedIn } = useAuthStore();
+  const { hydrated, isSignedIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
   const { bySeriesId, loadProgress } = useProgressStore();
   const { bookmarksBySeries } = useBookmarkStore();
@@ -117,8 +117,9 @@ export default function LibraryPage() {
   const [homepageSlots, setHomepageSlots] = useState([]);
   const [homepageSlotsResponse, setHomepageSlotsResponse] = useState(null);
   const [showCollectionManager, setShowCollectionManager] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(initialSignedIn);
   const [commerceNotice, setCommerceNotice] = useState(null);
+  const viewerSignedIn = hydrated ? isSignedIn : initialSignedIn;
   const showStale = useStaleNotice(seriesResponse);
   const showHomepageSlotsStale = useStaleNotice(homepageSlotsResponse);
   const { shouldRetry } = useRetryPolicy();
@@ -220,12 +221,12 @@ export default function LibraryPage() {
   useEffect(() => {
     loadProgress();
     loadHistory();
-    if (isSignedIn) {
+    if (viewerSignedIn) {
       loadRewards();
       loadMissions();
       loadFollowed();
     }
-  }, [isSignedIn, loadFollowed, loadMissions, loadRewards, loadProgress, loadHistory]);
+  }, [viewerSignedIn, loadFollowed, loadMissions, loadRewards, loadProgress, loadHistory]);
 
   useEffect(() => {
     const adultFlag = isAdultMode ? "1" : "0";
@@ -452,10 +453,10 @@ export default function LibraryPage() {
       {
         label: "Mode",
         value: isAdultMode ? "18+" : "Standard",
-        hint: isSignedIn ? "Account sync available" : "Sign in to unlock rewards",
+        hint: viewerSignedIn ? "Account sync available" : "Sign in to unlock rewards",
       },
     ],
-    [continueRailItems.length, historyRail.length, isAdultMode, isSignedIn, visibleLibraryItems.length],
+    [continueRailItems.length, historyRail.length, isAdultMode, viewerSignedIn, visibleLibraryItems.length],
   );
   const resumeSpotlight = continueRailItems[0] || historyRail[0] || null;
   const primaryButtonClass =
@@ -473,7 +474,7 @@ export default function LibraryPage() {
           title="Your next read should be obvious."
           description="Resume the last chapter fast, keep saved series in view, and stop hunting through your own shelf."
           secondary={
-            isSignedIn
+            viewerSignedIn
               ? "Reading history, saved titles, and rewards stay tied to this account so getting back into a story feels immediate."
               : "Sign in to keep your shelf, reading history, and rewards in one place."
           }
@@ -510,7 +511,7 @@ export default function LibraryPage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (!isSignedIn) {
+                  if (!viewerSignedIn) {
                     router.push("/rankings?type=popular&window=week");
                     return;
                   }
@@ -518,7 +519,7 @@ export default function LibraryPage() {
                 }}
                 className={secondaryButtonClass}
               >
-                {isSignedIn ? (showCollectionManager ? "Close collections" : "Manage collections") : "Browse Top Series"}
+                {viewerSignedIn ? (showCollectionManager ? "Close collections" : "Manage collections") : "Browse Top Series"}
               </button>
             </>
           }
@@ -545,7 +546,7 @@ export default function LibraryPage() {
           </div>
         ) : (
           <>
-            {isSignedIn ? (
+            {viewerSignedIn ? (
               <div className="grid gap-6 xl:grid-cols-2">
                 <CheckInPanel
                   rewards={rewards}
@@ -632,7 +633,7 @@ export default function LibraryPage() {
                   >
                     Browse Top Series
                   </button>
-                  {!isSignedIn ? (
+                  {!viewerSignedIn ? (
                     <button
                       type="button"
                       onClick={openAuthPrompt}
