@@ -7,6 +7,19 @@ export default function MobileTabNav({ variant = "default" }) {
   const pathname = usePathname();
   const router = useRouter();
   const isLight = variant === "home" || variant === "light";
+  const hideOnInfoPages = [
+    "/about",
+    "/faq",
+    "/support",
+    "/how-it-works",
+    "/mature-content",
+    "/privacy-policy",
+    "/terms-of-service",
+  ].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+
+  if (hideOnInfoPages) {
+    return null;
+  }
 
   const tabs = [
     {

@@ -509,10 +509,16 @@ export default function LibraryPage() {
               )}
               <button
                 type="button"
-                onClick={() => setShowCollectionManager((value) => !value)}
+                onClick={() => {
+                  if (!isSignedIn) {
+                    router.push("/rankings?type=popular&window=week");
+                    return;
+                  }
+                  setShowCollectionManager((value) => !value);
+                }}
                 className={secondaryButtonClass}
               >
-                {showCollectionManager ? "Close collections" : "Manage collections"}
+                {isSignedIn ? (showCollectionManager ? "Close collections" : "Manage collections") : "Browse Top Series"}
               </button>
             </>
           }
@@ -580,6 +586,13 @@ export default function LibraryPage() {
                     className={secondaryButtonClass}
                   >
                     Start free
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/how-it-works")}
+                    className={secondaryButtonClass}
+                  >
+                    How it works
                   </button>
                 </div>
               </SurfacePanel>

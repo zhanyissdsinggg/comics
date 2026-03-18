@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
+import Cover from "../common/Cover";
 import PortraitCard from "../home/PortraitCard";
 import SkeletonCard from "../common/SkeletonCard";
 import FilterBar from "../common/FilterBar";
@@ -360,7 +361,7 @@ export default function SeriesPage({ type = "comic" }) {
     () => [
       {
         label: "Titles",
-        value: loading ? "--" : series.length.toLocaleString(),
+        value: loading ? "Catalog" : series.length.toLocaleString(),
         hint:
           type === "comic"
             ? "Comic series available right now"
@@ -368,7 +369,7 @@ export default function SeriesPage({ type = "comic" }) {
       },
       {
         label: "Visible",
-        value: loading ? "--" : filteredAndSortedSeries.length.toLocaleString(),
+        value: loading ? "Preview" : filteredAndSortedSeries.length.toLocaleString(),
         hint:
           activeFilterCount > 0
             ? "Titles left after the current filters"
@@ -390,6 +391,48 @@ export default function SeriesPage({ type = "comic" }) {
     ],
     [activeFilterCount, filteredAndSortedSeries.length, isAdultMode, loading, series.length, type],
   );
+  const entrySpotlight = useMemo(() => {
+    const byPopular = [...series].sort((left, right) => getPopularityScore(right) - getPopularityScore(left));
+    const byLatest = [...series].sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt));
+    const freeStart = byPopular.find((item) => Number(item?.freeEpisodeCount || 0) > 0 || item?.hasFreeEpisodes) || null;
+    const completed = byPopular.find((item) => normalizeStatus(item?.status) === "completed") || null;
+    const primary =
+      type === "comic"
+        ? freeStart || byPopular[0] || byLatest[0] || completed || null
+        : byPopular[0] || byLatest[0] || completed || freeStart || null;
+
+    return {
+      primary,
+      secondary:
+        type === "comic"
+          ? completed || byLatest[0] || byPopular[1] || null
+          : byLatest[0] || completed || freeStart || byPopular[1] || null,
+      freeStart,
+      completed,
+    };
+  }, [series, type]);
+  const genreQuickPicks = useMemo(() => {
+    const genreCounts = new Map();
+
+    series.forEach((item) => {
+      if (!Array.isArray(item?.genres)) {
+        return;
+      }
+
+      item.genres.forEach((genre) => {
+        const key = String(genre || "").trim();
+        if (!key) {
+          return;
+        }
+        genreCounts.set(key, (genreCounts.get(key) || 0) + 1);
+      });
+    });
+
+    return Array.from(genreCounts.entries())
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .slice(0, 6)
+      .map(([genre, count]) => ({ genre, count }));
+  }, [series]);
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
@@ -422,7 +465,7 @@ export default function SeriesPage({ type = "comic" }) {
                 onClick={() => router.push("/rankings")}
                 className={secondaryButtonClass}
               >
-                Top Series
+                Browse Top Series
               </button>
             </>
           }
@@ -484,28 +527,141 @@ export default function SeriesPage({ type = "comic" }) {
           </section>
         ) : null}
 
-        {!loading && Array.isArray(config.browseGuides) && config.browseGuides.length > 0 ? (
-          <section className="grid gap-4 xl:grid-cols-3">
-            {config.browseGuides.map((item) => (
-              <SurfacePanel key={item.title} className="space-y-4" appearance="light" accent="blue">
+        {!loading && entrySpotlight.primary ? (
+          <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
+            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+              <div className="grid gap-4 sm:grid-cols-[200px_minmax(0,1fr)] sm:items-start">
+                <Cover
+                  tone={entrySpotlight.primary.coverTone}
+                  coverUrl={entrySpotlight.primary.coverUrl}
+                  className="h-72 rounded-[24px]"
+                />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    {type === "comic" ? "Best first click" : "Best place to settle in"}
+                  </p>
+                  <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
+                    {entrySpotlight.primary.title}
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    {type === "comic"
+                      ? "If you want the fastest way into this catalog, start with a book that already has momentum or free entry."
+                      : "If you want a novel worth sinking into, start with the book that already has the strongest signal in this shelf."}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1.5 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                      {getSeriesSubtitle(entrySpotlight.primary)}
+                    </span>
+                    {getSeriesBadge(entrySpotlight.primary) ? (
+                      <span className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
+                        {getSeriesBadge(entrySpotlight.primary)}
+                      </span>
+                    ) : null}
+                    {Array.isArray(entrySpotlight.primary.genres) && entrySpotlight.primary.genres.length > 0 ? (
+                      <span className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
+                        {entrySpotlight.primary.genres.slice(0, 2).join(" / ")}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleSeriesClick(entrySpotlight.primary.id)}
+                      className={primaryButtonClass}
+                    >
+                      Open this title
+                    </button>
+                    {entrySpotlight.freeStart ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSeriesClick(entrySpotlight.freeStart.id)}
+                        className={secondaryButtonClass}
+                      >
+                        Start with free chapters
+                      </button>
+                    ) : null}
+                    {entrySpotlight.completed ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSeriesClick(entrySpotlight.completed.id)}
+                        className={secondaryButtonClass}
+                      >
+                        Try a finished read
+                      </button>
+                    ) : null}
+                  </div>
+                  {entrySpotlight.secondary ? (
+                    <div className="mt-5 rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                        Next good click
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-slate-950">{entrySpotlight.secondary.title}</p>
+                      <p className="mt-1 text-sm text-slate-600">{getSeriesSubtitle(entrySpotlight.secondary)}</p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </SurfacePanel>
+
+            <div className="grid gap-4">
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    {item.eyebrow}
+                    Quick genre picks
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    {item.title}
+                    Jump by genre before opening filters.
                   </h2>
                 </div>
-                <p className="text-sm leading-7 text-slate-600">{item.body}</p>
-                <button
-                  type="button"
-                  onClick={() => router.push(item.href)}
-                  className={secondaryButtonClass}
-                >
-                  {item.ctaLabel}
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  {genreQuickPicks.map((item) => (
+                    <button
+                      key={item.genre}
+                      type="button"
+                      onClick={() => updateParams({ genre: item.genre })}
+                      className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
+                    >
+                      {item.genre}
+                      <span className="ml-2 text-xs text-slate-400">{item.count}</span>
+                    </button>
+                  ))}
+                </div>
               </SurfacePanel>
-            ))}
+
+              {Array.isArray(config.browseGuides) && config.browseGuides.length > 0 ? (
+                <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Best lanes
+                    </p>
+                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                      Pick a lane before the full grid.
+                    </h2>
+                  </div>
+                  <div className="space-y-3">
+                    {config.browseGuides.map((item) => (
+                      <div
+                        key={item.title}
+                        className="rounded-[20px] border border-black/6 bg-white/88 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
+                      >
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                          {item.eyebrow}
+                        </p>
+                        <h3 className="mt-2 text-base font-semibold text-slate-950">{item.title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+                        <button
+                          type="button"
+                          onClick={() => router.push(item.href)}
+                          className={`mt-3 ${secondaryButtonClass}`}
+                        >
+                          {item.ctaLabel}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </SurfacePanel>
+              ) : null}
+            </div>
           </section>
         ) : null}
 
@@ -521,7 +677,7 @@ export default function SeriesPage({ type = "comic" }) {
             </div>
             <p className="text-xs text-slate-500">
               {loading
-                ? "Getting the catalog ready..."
+                ? "The live catalog is settling in."
                 : `${filteredAndSortedSeries.length} title${filteredAndSortedSeries.length === 1 ? "" : "s"} visible`}
             </p>
           </div>

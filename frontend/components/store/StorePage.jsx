@@ -60,6 +60,13 @@ function getReturnLabel(returnTo, sourceEntry) {
   return "Back to browse";
 }
 
+const PACKAGE_FIT_GUIDE = {
+  starter: "Trying the site or unlocking a few chapters.",
+  medium: "Following one or two series each week.",
+  value: "Regular weekly reading with a better bonus.",
+  mega: "Heavy unlocking across multiple series.",
+};
+
 export default function StorePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -268,6 +275,25 @@ export default function StorePage() {
       { cheapest: null, largest: null, highestBonus: null },
     );
   }, [orderedPackages]);
+  const packageComparisonRows = useMemo(
+    () =>
+      orderedPackages.map((pkg) => {
+        const totalPts = Number(pkg.paidPts || 0) + Number(pkg.bonusPts || 0);
+        const bonusPct = pkg.paidPts
+          ? Math.round((Number(pkg.bonusPts || 0) / Number(pkg.paidPts || 1)) * 100)
+          : 0;
+
+        return {
+          id: pkg.id,
+          name: pkg.name,
+          priceLabel: pkg.priceLabel || "Shown at checkout",
+          totalPts,
+          bonusLabel: bonusPct > 0 ? `${bonusPct}% extra` : "No bonus",
+          bestFor: PACKAGE_FIT_GUIDE[pkg.id] || "Flexible one-time reading.",
+        };
+      }),
+    [orderedPackages],
+  );
 
   const handleBuy = async (packageId) => {
     if (!isSignedIn) {
@@ -680,13 +706,43 @@ export default function StorePage() {
                   Point packs
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Choose a point pack.
+                  Choose a point pack, then unlock chapters as you go.
                 </h2>
               </div>
               <p className="text-xs text-slate-500">
                 {orderedPackages.length} pack{orderedPackages.length === 1 ? "" : "s"} with price labels shown up front
               </p>
             </div>
+
+            {packageComparisonRows.length > 0 ? (
+              <div className="overflow-hidden rounded-[26px] border border-black/8 bg-[#f8f9fc]">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-black/8 text-left text-slate-500">
+                        <th className="px-4 py-3 font-semibold">Pack</th>
+                        <th className="px-4 py-3 font-semibold">Price</th>
+                        <th className="px-4 py-3 font-semibold">Total points</th>
+                        <th className="px-4 py-3 font-semibold">Bonus</th>
+                        <th className="px-4 py-3 font-semibold">Best for</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-black/8 bg-white/84">
+                      {packageComparisonRows.map((pkg) => (
+                        <tr key={pkg.id}>
+                          <td className="px-4 py-3 font-semibold text-slate-950">{pkg.name}</td>
+                          <td className="px-4 py-3 text-slate-600">{pkg.priceLabel}</td>
+                          <td className="px-4 py-3 text-slate-600">{formatUSNumber(pkg.totalPts)} pts</td>
+                          <td className="px-4 py-3 text-slate-600">{pkg.bonusLabel}</td>
+                          <td className="px-4 py-3 text-slate-600">{pkg.bestFor}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
+
             <div className="grid gap-4 md:grid-cols-2">
               {orderedPackages.map((pkg) => (
                 <div key={pkg.id} className={busyId === pkg.id ? "opacity-70" : ""}>
@@ -705,6 +761,23 @@ export default function StorePage() {
                   />
                 </div>
               ))}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => router.push("/orders")}
+                className={secondaryButtonClass}
+              >
+                View purchase history
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/support")}
+                className={secondaryButtonClass}
+              >
+                Get billing help
+              </button>
             </div>
           </SurfacePanel>
         </div>

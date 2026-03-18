@@ -47,6 +47,27 @@ const socialLinks = [
   { label: "Twitter", href: siteConfig.twitterUrl },
 ].filter((item) => item.href);
 
+const trustPanels = [
+  {
+    title: "Support",
+    body: "Billing, account, and access help should always be easy to reach.",
+    value: siteConfig.supportEmail,
+    href: `mailto:${siteConfig.supportEmail}`,
+  },
+  {
+    title: "Privacy",
+    body: "Privacy questions and data requests have a direct contact path.",
+    value: siteConfig.privacyEmail,
+    href: `mailto:${siteConfig.privacyEmail}`,
+  },
+  {
+    title: "Company",
+    body: "Policies, company context, and legal contact stay visible instead of buried.",
+    value: siteConfig.companyName,
+    href: "/about",
+  },
+];
+
 export default function SiteFooter({ tone = "default" }) {
   const currentYear = new Date().getFullYear();
   const isHome = tone === "home" || tone === "light";
@@ -147,6 +168,39 @@ export default function SiteFooter({ tone = "default" }) {
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          {trustPanels.map((panel) => {
+            const isExternal = panel.href.startsWith("mailto:");
+            const panelClass = `rounded-[24px] border px-4 py-4 ${
+              isHome
+                ? "border-black/6 bg-white/72 text-slate-900"
+                : "border-white/10 bg-white/[0.04] text-white"
+            }`;
+            const titleClass = isHome ? "text-slate-950" : "text-white";
+            const bodyClass = isHome ? "text-slate-500" : "text-neutral-300";
+            const valueClass = isHome ? "text-slate-700 hover:text-slate-950" : "text-neutral-200 hover:text-white";
+
+            return (
+              <div key={panel.title} className={panelClass}>
+                <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isHome ? "text-slate-400" : "text-neutral-400"}`}>
+                  {panel.title}
+                </p>
+                <p className={`mt-3 text-base font-semibold ${titleClass}`}>{panel.value}</p>
+                <p className={`mt-2 text-sm leading-6 ${bodyClass}`}>{panel.body}</p>
+                {isExternal ? (
+                  <a href={panel.href} className={`mt-4 inline-flex text-sm font-semibold transition-colors ${valueClass}`}>
+                    Contact {panel.title.toLowerCase()}
+                  </a>
+                ) : (
+                  <Link href={panel.href} className={`mt-4 inline-flex text-sm font-semibold transition-colors ${valueClass}`}>
+                    Open {panel.title.toLowerCase()}
+                  </Link>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div className={`mt-10 flex flex-col gap-3 border-t pt-5 text-sm lg:flex-row lg:items-center lg:justify-between ${isHome ? "border-black/6 text-slate-400" : "border-white/10 text-neutral-500"}`}>

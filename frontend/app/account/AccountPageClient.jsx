@@ -86,6 +86,11 @@ export default function AccountPage() {
   const [providerBusy, setProviderBusy] = useState(false);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const googleAuthEnabled = isGoogleAuthEnabled();
+  const openAuthPrompt = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("auth:open"));
+    }
+  };
 
   useEffect(() => {
     const storedRegion = readStorage(REGION_KEY, "global");
@@ -272,9 +277,9 @@ export default function AccountPage() {
     () => [
       {
         label: "Status",
-        value: !hydrated ? "Syncing" : isSignedIn ? "Signed in" : "Guest",
+        value: !hydrated ? "Reader setup" : isSignedIn ? "Signed in" : "Signed out",
         hint: !hydrated
-          ? "Account status is syncing now."
+          ? "Library, purchases, and settings connect here."
           : isSignedIn
             ? user?.emailVerified
               ? "Reading, purchases, and alerts can stay synced here."
@@ -283,11 +288,11 @@ export default function AccountPage() {
       },
       {
         label: "Membership",
-        value: !hydrated ? "Checking" : subscription?.active ? "Member" : "Free",
+        value: !hydrated ? "Available" : subscription?.active ? "Member" : "Free",
         hint: subscription?.renewAt
           ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
           : !hydrated
-            ? "Plan details will appear here."
+            ? "Membership details live here once the page is ready."
             : "Upgrade any time if you read often.",
       },
       {
@@ -297,9 +302,9 @@ export default function AccountPage() {
       },
       {
         label: "Purchases",
-        value: !hydrated || ordersLoading ? "Updating" : isSignedIn ? orders.length.toLocaleString() : "Sign in",
+        value: !hydrated || ordersLoading ? "Recent" : isSignedIn ? orders.length.toLocaleString() : "Sign in",
         hint: ordersLoading
-          ? "Purchase history is syncing now."
+          ? "Recent charges and receipts show up below."
           : isSignedIn
             ? "Latest packs and memberships at a glance."
             : "Sign in to see receipts and order IDs.",
@@ -353,9 +358,7 @@ export default function AccountPage() {
                 type="button"
                 onClick={() => {
                   if (!hydrated || !isSignedIn) {
-                    if (typeof window !== "undefined") {
-                      window.dispatchEvent(new CustomEvent("auth:open"));
-                    }
+                    openAuthPrompt();
                     return;
                   }
                   router.push(
@@ -372,10 +375,10 @@ export default function AccountPage() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push(hydrated && isSignedIn ? "/orders" : "/how-it-works")}
+                onClick={() => router.push(hydrated && isSignedIn ? "/orders" : "/store")}
                 className={secondaryButtonClass}
               >
-                {hydrated && isSignedIn ? "View purchases" : "How it works"}
+                {hydrated && isSignedIn ? "View purchases" : "See point packs"}
               </button>
             </>
           }
@@ -402,11 +405,7 @@ export default function AccountPage() {
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    window.dispatchEvent(new CustomEvent("auth:open"));
-                  }
-                }}
+                onClick={openAuthPrompt}
                 className={primaryButtonClass}
               >
                 Sign in
@@ -717,9 +716,16 @@ export default function AccountPage() {
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span>Google</span>
-                    <span className={providers.google ? "text-[var(--gush-accent,#2f6bff)]" : "text-slate-500"}>
-                      {providersLoading ? "Checking" : providers.google ? "Connected" : "Not connected"}
-                    </span>
+                    {providersLoading ? (
+                      <span
+                        aria-hidden="true"
+                        className="inline-flex h-2 w-16 animate-pulse rounded-full bg-slate-200"
+                      />
+                    ) : (
+                      <span className={providers.google ? "text-[var(--gush-accent,#2f6bff)]" : "text-slate-500"}>
+                        {providers.google ? "Connected" : "Not connected"}
+                      </span>
+                    )}
                   </div>
                 </div>
               ) : null}
@@ -802,11 +808,43 @@ export default function AccountPage() {
                 </div>
               ) : !isSignedIn ? (
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-600">
-                  Sign in to see receipts, refunds, order IDs, and membership charges on your account.
+                  <p>Sign in to see receipts, refunds, order IDs, and membership charges on your account.</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={openAuthPrompt}
+                      className={secondaryButtonClass}
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/store")}
+                      className={secondaryButtonClass}
+                    >
+                      See point packs
+                    </button>
+                  </div>
                 </div>
               ) : orders.length === 0 ? (
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">
-                  No purchases yet. Point packs and membership charges will appear here after checkout, along with the order ID you may need later.
+                  <p>No purchases yet. Point packs and membership charges will appear here after checkout, along with the order ID you may need later.</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/store")}
+                      className={secondaryButtonClass}
+                    >
+                      See point packs
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/support")}
+                      className={secondaryButtonClass}
+                    >
+                      Billing help
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">

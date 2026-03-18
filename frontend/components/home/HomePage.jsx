@@ -31,6 +31,7 @@ import { consumeCommerceSuccessForPath, getCommerceSuccessPresentation } from ".
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { buildHomeHeroItems, getHomeEditorialSnapshot, getSeriesScore } from "../../lib/homeMerchandising";
+import { siteConfig } from "../../lib/siteConfig";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -98,6 +99,17 @@ function formatUpdatedLabel(value) {
     return "Updated recently";
   }
   return `Updated ${compactDateFormatter.format(new Date(timestamp))}`;
+}
+
+function clampText(value, limit = 180) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return "";
+  }
+  if (text.length <= limit) {
+    return text;
+  }
+  return `${text.slice(0, limit).trimEnd()}...`;
 }
 
 function getDiscoveryBadge(series) {
@@ -204,14 +216,14 @@ function HomeEntryCard({ card, onOpenSeries, onOpenCollection }) {
 function ValueCard({ icon: Icon, eyebrow, title, description }) {
   return (
     <Card className="overflow-hidden rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] py-0 shadow-[0_16px_34px_rgba(15,23,42,0.05)]">
-      <CardContent className="flex h-full gap-4 p-5">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]">
+      <CardContent className="flex h-full gap-3 p-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]">
           <Icon className="size-5" />
         </div>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{eyebrow}</p>
-          <h2 className="mt-2 text-base font-semibold text-slate-950">{title}</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+          <h2 className="mt-1.5 text-[15px] font-semibold text-slate-950">{title}</h2>
+          <p className="mt-1.5 text-sm leading-5 text-slate-600">{description}</p>
         </div>
       </CardContent>
     </Card>
@@ -236,6 +248,34 @@ function ResourceLinkCard({ eyebrow, title, description, label, onClick }) {
         </Button>
       </CardContent>
     </Card>
+  );
+}
+
+function TrustContactCard({ eyebrow, title, description, label, href, onClick, external = false }) {
+  const className =
+    "block rounded-[24px] border border-black/6 bg-[#f8f9fc] p-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/10 hover:bg-white";
+
+  const content = (
+    <>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">{eyebrow}</p>
+      <h3 className="mt-2 text-base font-semibold text-slate-950">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+      <span className="mt-3 inline-flex text-sm font-semibold text-slate-700">{label}</span>
+    </>
+  );
+
+  if (external) {
+    return (
+      <a href={href} className={className}>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
   );
 }
 
@@ -692,7 +732,9 @@ function HomeContent() {
                       ) : null}
                     </div>
                     {featuredSeries.description ? (
-                      <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{featuredSeries.description}</p>
+                      <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                        {clampText(featuredSeries.description)}
+                      </p>
                     ) : null}
                     {featuredSignals.length > 0 ? (
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -715,31 +757,33 @@ function HomeContent() {
                   </div>
                   <div className="space-y-4">
                     <div className="rounded-[30px] border border-black/6 bg-white/76 p-5 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Why start here</p>
-                    <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">{featuredSeries.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">
-                      {String(featuredSeries.status || "").toLowerCase() === "completed"
-                        ? "A finished run makes the first visit easier because you can keep going without waiting."
-                        : Number(featuredSeries.freeEpisodeCount || 0) > 0
-                          ? `${Number(featuredSeries.freeEpisodeCount || 0)} free chapter${Number(featuredSeries.freeEpisodeCount || 0) === 1 ? "" : "s"} let you test the hook before you spend anything.`
-                          : "Reader momentum and a strong opening make this a better first click than a random catalog pick."}
-                    </p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Start signal</p>
+                      <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                        A safer first click than a random catalog pick.
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-slate-600">
+                        {String(featuredSeries.status || "").toLowerCase() === "completed"
+                          ? "A finished run means you can keep going right away instead of landing on a cliffhanger."
+                          : Number(featuredSeries.freeEpisodeCount || 0) > 0
+                            ? `${Number(featuredSeries.freeEpisodeCount || 0)} free chapter${Number(featuredSeries.freeEpisodeCount || 0) === 1 ? "" : "s"} give you a real sample before you spend anything.`
+                            : "Reader momentum and a strong opening make this the better first tap."}
+                      </p>
 
-                    <div className="mt-6 space-y-3">
-                      {formatRating(featuredSeries.rating) ? (
+                      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                        {formatRating(featuredSeries.rating) ? (
+                          <div className="rounded-[20px] border border-black/6 bg-[#f8f9fc] p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Reader signal</p>
+                            <p className="mt-1 text-sm text-slate-900">
+                              {formatRating(featuredSeries.rating)} stars from {formatCompactNumber(featuredSeries.ratingCount)} readers
+                            </p>
+                          </div>
+                        ) : null}
                         <div className="rounded-[20px] border border-black/6 bg-[#f8f9fc] p-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Reader signal</p>
-                          <p className="mt-1 text-sm text-slate-900">
-                            {formatRating(featuredSeries.rating)} stars from {formatCompactNumber(featuredSeries.ratingCount)} readers
-                          </p>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Reading pace</p>
+                          <p className="mt-1 text-sm text-slate-900">{getReadingState(featuredSeries)}</p>
                         </div>
-                      ) : null}
-                      <div className="rounded-[20px] border border-black/6 bg-[#f8f9fc] p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Reading pace</p>
-                        <p className="mt-1 text-sm text-slate-900">{getReadingState(featuredSeries)}</p>
                       </div>
                     </div>
-                  </div>
                     {heroSupportingItems.length > 0 ? (
                       <div className="rounded-[30px] border border-black/6 bg-white/76 p-5 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">One more pick</p>
@@ -778,26 +822,26 @@ function HomeContent() {
           <ValueCard
             icon={BookOpenText}
             eyebrow="Start free"
-            title="Try a series before you commit."
-            description="Look for free chapters and quick preview access before you unlock more."
+            title="Free chapters make the first click easier."
+            description="Sample the hook before you unlock anything."
           />
           <ValueCard
             icon={WalletCards}
             eyebrow="Clear pricing"
-            title="Points for unlocks, membership for regular readers."
-            description="The site shows packs, plans, and purchase history in one place instead of hiding the rules."
+            title="Points for locked chapters. Membership for regular reading."
+            description="Packs, plans, and purchase history stay easy to find."
           />
           <ValueCard
             icon={BookOpen}
             eyebrow="Reader account"
-            title="Keep reading across devices."
-            description="Library, purchases, progress, and notifications stay easier to manage once you sign in."
+            title="Library, receipts, and progress stay together."
+            description="Sign in once and keep every return visit cleaner."
           />
           <ValueCard
             icon={CheckCircle2}
             eyebrow="Control"
-            title="Mature-content access stays in your hands."
-            description="Turn 18+ titles on only when you want them and keep the settings easy to find."
+            title="18+ visibility stays under your control."
+            description="Turn mature titles on only when you want them."
           />
         </section>
 
@@ -860,10 +904,10 @@ function HomeContent() {
                   <div className="max-w-2xl">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Keep browsing</p>
                     <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
-                      New releases that keep the browse moving.
+                      Latest releases worth opening next.
                     </h2>
                     <p className="mt-3 text-sm leading-7 text-slate-600">
-                      If you already checked Top Series or Start Free, these are the latest reads worth opening next without dumping the whole catalog in your lap.
+                      If you already checked Top Series or Start Free, this row keeps discovery moving without throwing the whole catalog at you.
                     </p>
                   </div>
                   <Button
@@ -897,10 +941,10 @@ function HomeContent() {
               <CardContent className="p-5 sm:p-6">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Know the basics</p>
                 <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
-                  Know where pricing, support, and account rules live.
+                  Pricing, support, and account rules stay close.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  A good first visit should explain points, billing help, FAQ answers, and 18+ controls without making you hunt through account pages.
+                  A good first visit should show points, billing help, FAQ answers, and 18+ controls without making you hunt for them.
                 </p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -944,6 +988,32 @@ function HomeContent() {
                     />
                   ))}
                 </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <TrustContactCard
+                    eyebrow="Support"
+                    title={siteConfig.supportEmail}
+                    description="Billing, account, and access help with a direct contact path."
+                    label="Email support"
+                    href={`mailto:${siteConfig.supportEmail}`}
+                    external
+                  />
+                  <TrustContactCard
+                    eyebrow="Privacy"
+                    title={siteConfig.privacyEmail}
+                    description="Privacy questions and data requests should not be buried."
+                    label="Email privacy"
+                    href={`mailto:${siteConfig.privacyEmail}`}
+                    external
+                  />
+                  <TrustContactCard
+                    eyebrow="Company"
+                    title={siteConfig.companyName}
+                    description="About, terms, and policy links stay visible when trust matters."
+                    label="About Gush"
+                    onClick={() => router.push("/about")}
+                  />
+                </div>
               </CardContent>
             </Card>
           </section>
@@ -954,7 +1024,7 @@ function HomeContent() {
             <CardContent className="p-5 sm:p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">How Gush works</p>
               <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
-                A quick way to understand the product.
+                How it works in three quick steps.
               </h2>
               <div className="mt-6 grid gap-3 md:grid-cols-3">
                 {[

@@ -215,10 +215,10 @@ export default function OrdersPageClient() {
   const orderStats = useMemo(() => {
     if (loading) {
       return [
-        { label: "Orders", value: "Syncing", hint: "Pulling receipts and order IDs now." },
-        { label: "Paid", value: "Syncing", hint: "Completed purchases will show up here." },
-        { label: "Refunds", value: "Syncing", hint: "Refund activity updates on this page." },
-        { label: "Spent", value: "Checking", hint: "Totals appear once purchase history is ready." },
+        { label: "Orders", value: "Receipts", hint: "Recent purchases show up here once the page is ready." },
+        { label: "Paid", value: "Charges", hint: "Completed purchases stay attached to your account." },
+        { label: "Refunds", value: "Support", hint: "Refund requests and billing help stay on this page." },
+        { label: "Spent", value: "Totals", hint: "Spend totals appear as soon as purchase history loads." },
       ];
     }
 
@@ -336,7 +336,7 @@ export default function OrdersPageClient() {
                 className={primaryButtonClass}
                 disabled={!hydrated || !isSignedIn || workingId === "refresh"}
               >
-                {workingId === "refresh" ? "Updating..." : "Refresh purchases"}
+                {workingId === "refresh" ? "Refreshing..." : "Refresh purchases"}
               </button>
               <button
                 type="button"
@@ -583,6 +583,21 @@ export default function OrdersPageClient() {
                 className={secondaryButtonClass}
               >
                 Billing help
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    buildPathWithAttribution("/subscribe", {
+                      entryPoint: "ORDERS_EMPTY_STATE",
+                      sourcePath: "/orders",
+                      returnTo: "/orders",
+                    }),
+                  )
+                }
+                className={secondaryButtonClass}
+              >
+                Compare membership
               </button>
             </div>
           </SurfacePanel>
