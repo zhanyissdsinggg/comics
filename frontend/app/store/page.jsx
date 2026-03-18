@@ -3,8 +3,8 @@ import { CouponProvider } from "../../store/useCouponStore";
 import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
-  title: "Store & Buy Points",
-  description: "Buy points, redeem coupons, and review subscriber savings before checkout.",
+  title: "Store",
+  description: "Review point packs, free reading options, coupon entry, and membership savings before checkout.",
   path: "/store",
 });
 

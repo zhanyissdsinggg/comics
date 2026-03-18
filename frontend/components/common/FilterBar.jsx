@@ -231,7 +231,7 @@ export default function FilterBar({
             : "border-white/10 bg-white/[0.03] text-neutral-400"
         }`}
       >
-        <p>{loading ? "Loading catalog signals..." : `${totalCount.toLocaleString()} series found`}</p>
+        <p>{loading ? "Updating the shelf..." : `${totalCount.toLocaleString()} series found`}</p>
         <p>
           {activeFilterCount > 0
             ? `${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"} active`

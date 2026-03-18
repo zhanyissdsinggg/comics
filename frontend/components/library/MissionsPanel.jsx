@@ -4,7 +4,13 @@ export default function MissionsPanel({ missions, onClaim, workingId }) {
   if (!missions) {
     return (
       <section className="rounded-[28px] border border-black/6 bg-white/86 p-6 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
-        <p className="text-sm text-slate-500">Loading reading missions...</p>
+        <div className="space-y-3" aria-hidden="true">
+          <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
+          <div className="h-7 w-44 animate-pulse rounded-2xl bg-slate-200" />
+          <div className="h-16 w-full animate-pulse rounded-[22px] bg-slate-100" />
+          <div className="h-16 w-full animate-pulse rounded-[22px] bg-slate-100" />
+        </div>
+        <p className="mt-4 text-sm text-slate-500">Reading missions are getting ready.</p>
       </section>
     );
   }
@@ -20,7 +26,9 @@ export default function MissionsPanel({ missions, onClaim, workingId }) {
           <p className="text-sm font-semibold text-slate-950">{mission.title}</p>
           <p className="text-xs text-slate-500">{mission.desc}</p>
           <p className="mt-1 text-xs text-slate-400">
-            {mission.progress}/{mission.target} done · +{mission.reward} bonus points
+            {done
+              ? `Complete · +${mission.reward} bonus points`
+              : `${mission.progress}/${mission.target} complete · +${mission.reward} bonus points`}
           </p>
         </div>
         <button

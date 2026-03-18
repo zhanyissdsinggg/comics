@@ -4,8 +4,8 @@ import Skeleton from "../../components/common/Skeleton";
 import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
-  title: "Rankings",
-  description: "Browse popular, new, completed, and free unlock charts across comics and novels.",
+  title: "Top Series",
+  description: "Browse popular, new, completed, and free-start charts across comics and novels on Gush.",
   path: "/rankings",
 });
 

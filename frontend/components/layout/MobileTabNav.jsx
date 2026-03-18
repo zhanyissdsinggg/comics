@@ -32,7 +32,7 @@ export default function MobileTabNav({ variant = "default" }) {
     },
     {
       id: "store",
-      label: "Points",
+      label: "Store",
       icon: Wallet,
       path: "/store",
       isActive: pathname.startsWith("/store") || pathname.startsWith("/subscribe"),

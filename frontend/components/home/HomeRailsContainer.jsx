@@ -147,16 +147,20 @@ export default function HomeRailsContainer({
       <EmptyState
         appearance={appearance === "light" ? "light" : "default"}
         icon={activeGenre === "all" ? "inbox" : "search"}
-        title={activeGenre === "all" ? "No content available" : `No ${activeGenre} series found`}
+        title={
+          activeGenre === "all"
+            ? "Fresh picks are on the way."
+            : `No ${activeGenre} picks are ready yet.`
+        }
         description={
           activeGenre === "all"
-            ? "Check back later for new content."
-            : "Try browsing all genres or adjust your filters."
+            ? "We are lining up new series for this shelf. Browse the catalog or check back after the next update."
+            : "Try all genres instead, or clear the filter to jump back into the full catalog."
         }
         action={
           activeGenre !== "all"
             ? {
-                label: "Show All",
+                label: "See all genres",
                 onClick: () => {
                   if (typeof onResetGenre === "function") {
                     onResetGenre();

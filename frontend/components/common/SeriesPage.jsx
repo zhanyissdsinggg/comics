@@ -57,6 +57,54 @@ function getPopularityScore(series) {
   );
 }
 
+function toTimestamp(value) {
+  const parsed = typeof value === "number" ? value : Date.parse(value || "");
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function getSeriesBadge(series) {
+  if (String(series?.status || "").toLowerCase() === "completed") {
+    return "Completed";
+  }
+  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
+    return "Free";
+  }
+  const badgeTokens = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
+    .filter(Boolean)
+    .map((badge) => String(badge).trim().toUpperCase());
+  if (badgeTokens.includes("NEW")) {
+    return "New";
+  }
+  if (badgeTokens.includes("HOT")) {
+    return "Trending";
+  }
+  return "";
+}
+
+function getSeriesSubtitle(series) {
+  if (Array.isArray(series?.genres) && series.genres.length > 0) {
+    return series.genres.slice(0, 2).join(" / ");
+  }
+  if (String(series?.status || "").toLowerCase() === "completed") {
+    return "Completed series";
+  }
+  if (Number(series?.freeEpisodeCount || 0) > 0) {
+    return `${Number(series.freeEpisodeCount).toLocaleString()} free chapter${Number(series.freeEpisodeCount) === 1 ? "" : "s"}`;
+  }
+  return series?.author || "Updated series";
+}
+
+function mapSeriesCardItem(series) {
+  return {
+    id: series.id,
+    title: series.title,
+    subtitle: getSeriesSubtitle(series),
+    coverUrl: series.coverUrl,
+    coverTone: series.coverTone,
+    badge: getSeriesBadge(series),
+  };
+}
+
 export default function SeriesPage({ type = "comic" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -169,6 +217,84 @@ export default function SeriesPage({ type = "comic" }) {
     sortBy !== "popular" ? sortBy : "",
   ].filter(Boolean).length;
 
+  const discoveryShelves = useMemo(() => {
+    const freeStart = [...series]
+      .filter((item) => Number(item?.freeEpisodeCount || 0) > 0 || item?.hasFreeEpisodes)
+      .sort((left, right) => {
+        const freeDelta = Number(right?.freeEpisodeCount || 0) - Number(left?.freeEpisodeCount || 0);
+        if (freeDelta !== 0) {
+          return freeDelta;
+        }
+        return getPopularityScore(right) - getPopularityScore(left);
+      })
+      .slice(0, 4)
+      .map(mapSeriesCardItem);
+
+    const trending = [...series]
+      .sort((left, right) => getPopularityScore(right) - getPopularityScore(left))
+      .slice(0, 4)
+      .map(mapSeriesCardItem);
+
+    const latest = [...series]
+      .sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt))
+      .slice(0, 4)
+      .map((item) => ({
+        ...mapSeriesCardItem(item),
+        subtitle: toTimestamp(item?.updatedAt)
+          ? `Updated ${new Date(item.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+          : getSeriesSubtitle(item),
+      }));
+
+    const completed = [...series]
+      .filter((item) => normalizeStatus(item?.status) === "completed")
+      .sort((left, right) => getPopularityScore(right) - getPopularityScore(left))
+      .slice(0, 4)
+      .map(mapSeriesCardItem);
+
+    return [
+      {
+        id: "start-free",
+        eyebrow: "Start here",
+        title: "Free first chapters",
+        description:
+          "The easiest first click for a new reader. Sample the hook before spending points.",
+        ctaLabel: "Start reading free",
+        href: "/rankings?type=ttf&window=all",
+        items: freeStart,
+      },
+      {
+        id: "trending",
+        eyebrow: "Trending now",
+        title: `Popular ${config.title.toLowerCase()}`,
+        description:
+          "These titles already have reader momentum, so they are safer entry points than random catalog picks.",
+        ctaLabel: "Open top series",
+        href: "/rankings?type=popular&window=week",
+        items: trending,
+      },
+      {
+        id: "latest",
+        eyebrow: "New updates",
+        title: "Fresh drops",
+        description:
+          "Open the most recently updated titles if you want the catalog to feel current instead of static.",
+        ctaLabel: "See latest",
+        href: `${config.pathname}?sort=latest`,
+        items: latest,
+      },
+      {
+        id: "completed",
+        eyebrow: "Binge ready",
+        title: "Completed picks",
+        description:
+          "Finished runs are easier first reads when you want payoff without waiting on updates.",
+        ctaLabel: "See finished reads",
+        href: `${config.pathname}?status=completed`,
+        items: completed,
+      },
+    ].filter((shelf) => shelf.items.length > 0);
+  }, [config.pathname, config.title, series]);
+
   const handleSeriesClick = useCallback(
     (seriesId) => {
       router.push(`/series/${seriesId}`);
@@ -252,6 +378,62 @@ export default function SeriesPage({ type = "comic" }) {
           }
         />
 
+        {loading ? (
+          <div className="grid gap-4 xl:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <SurfacePanel key={index} className="space-y-5" appearance="light" accent="blue">
+                <div className="space-y-3">
+                  <div className="h-3 w-24 rounded-full bg-slate-200" />
+                  <div className="h-8 w-56 rounded-full bg-slate-200" />
+                  <div className="h-4 w-full max-w-xl rounded-full bg-slate-100" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {Array.from({ length: 4 }).map((__, cardIndex) => (
+                    <SkeletonCard key={cardIndex} appearance="light" />
+                  ))}
+                </div>
+              </SurfacePanel>
+            ))}
+          </div>
+        ) : discoveryShelves.length > 0 ? (
+          <section className="grid gap-4 xl:grid-cols-2">
+            {discoveryShelves.map((shelf) => (
+              <SurfacePanel key={shelf.id} className="space-y-5" appearance="light" accent="blue">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div className="max-w-2xl">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      {shelf.eyebrow}
+                    </p>
+                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                      {shelf.title}
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{shelf.description}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => router.push(shelf.href)}
+                    className={secondaryButtonClass}
+                  >
+                    {shelf.ctaLabel}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {shelf.items.map((item) => (
+                    <PortraitCard
+                      key={`${shelf.id}-${item.id}`}
+                      item={item}
+                      tone={item.coverTone}
+                      appearance="light"
+                      onClick={() => handleSeriesClick(item.id)}
+                    />
+                  ))}
+                </div>
+              </SurfacePanel>
+            ))}
+          </section>
+        ) : null}
+
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -259,12 +441,12 @@ export default function SeriesPage({ type = "comic" }) {
                 Filters
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Narrow the list without losing the storefront feel.
+                Refine the catalog without losing your place.
               </h2>
             </div>
             <p className="text-xs text-slate-500">
               {loading
-                ? "Loading titles..."
+                ? "Getting the catalog ready..."
                 : `${filteredAndSortedSeries.length} title${filteredAndSortedSeries.length === 1 ? "" : "s"} visible`}
             </p>
           </div>
@@ -291,17 +473,33 @@ export default function SeriesPage({ type = "comic" }) {
             ))}
           </div>
         ) : filteredAndSortedSeries.length === 0 ? (
-          <SurfacePanel appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <EmptyState
               icon={config.emptyIcon}
               title={config.emptyTitle}
-              description={config.emptyDescription}
+              description={`${config.emptyDescription} If you just want a safer first click, jump to Top Series or start with free chapters.`}
               appearance="light"
               action={{
                 label: "Reset filters",
                 onClick: handleResetFilters,
               }}
             />
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => router.push("/rankings?type=popular&window=week")}
+                className={secondaryButtonClass}
+              >
+                Browse top series
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/rankings?type=ttf&window=all")}
+                className={primaryButtonClass}
+              >
+                Start free
+              </button>
+            </div>
           </SurfacePanel>
         ) : (
           <div className="space-y-6">

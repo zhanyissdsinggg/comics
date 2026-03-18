@@ -19,6 +19,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import Cover from "../common/Cover";
+import PortraitCard from "./PortraitCard";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
@@ -84,6 +85,39 @@ function formatRating(value) {
     return null;
   }
   return numeric.toFixed(1).replace(/\.0$/, "");
+}
+
+const compactDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+});
+
+function formatUpdatedLabel(value) {
+  const timestamp = toTimestamp(value);
+  if (!timestamp) {
+    return "Updated recently";
+  }
+  return `Updated ${compactDateFormatter.format(new Date(timestamp))}`;
+}
+
+function getDiscoveryBadge(series) {
+  const badgeTokens = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
+    .filter(Boolean)
+    .map((badge) => String(badge).trim().toUpperCase());
+
+  if (String(series?.status || "").toLowerCase() === "completed") {
+    return "Completed";
+  }
+  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
+    return "Free";
+  }
+  if (badgeTokens.includes("NEW")) {
+    return "New";
+  }
+  if (badgeTokens.includes("HOT")) {
+    return "Trending";
+  }
+  return "";
 }
 
 function getReadingState(series) {
@@ -184,18 +218,18 @@ function ValueCard({ icon: Icon, eyebrow, title, description }) {
   );
 }
 
-function QuickLinkCard({ eyebrow, title, description, label, onClick }) {
+function ResourceLinkCard({ eyebrow, title, description, label, onClick }) {
   return (
-    <Card className="overflow-hidden rounded-[28px] border border-black/6 bg-white/92 py-0 shadow-[0_16px_34px_rgba(15,23,42,0.05)]">
-      <CardContent className="p-5">
+    <Card className="overflow-hidden rounded-[26px] border border-black/6 bg-white/92 py-0 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
+      <CardContent className="p-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{eyebrow}</p>
-        <h3 className="mt-3 font-display text-[1.6rem] font-semibold tracking-tight text-slate-950">{title}</h3>
-        <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
+        <h3 className="mt-3 font-display text-[1.3rem] font-semibold tracking-tight text-slate-950">{title}</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
         <Button
           type="button"
           variant="outline"
           onClick={onClick}
-          className="mt-5 h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+          className="mt-4 h-10 rounded-full border-black/8 bg-white px-4 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
         >
           {label}
           <ArrowRight className="size-4" />
@@ -485,8 +519,40 @@ function HomeContent() {
       },
     ]
       .filter((card) => card.items.length > 0)
-      .slice(0, 2);
+      .slice(0, 3);
   }, [editorialSnapshot, leaderboardItems]);
+
+  const newUpdateItems = useMemo(
+    () =>
+      dedupeSeries(
+        [...editorialSnapshot.safeCatalog].sort((left, right) => {
+          const badgeDelta =
+            Number(getDiscoveryBadge(right) === "New") - Number(getDiscoveryBadge(left) === "New");
+          if (badgeDelta !== 0) {
+            return badgeDelta;
+          }
+          const timeDelta = toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt);
+          if (timeDelta !== 0) {
+            return timeDelta;
+          }
+          return getSeriesScore(right) - getSeriesScore(left);
+        }),
+      )
+        .slice(0, 4)
+        .map((series) => ({
+          id: series.id,
+          title: series.title,
+          subtitle:
+            Array.isArray(series.genres) && series.genres.length > 0
+              ? series.genres.slice(0, 2).join(" / ")
+              : getReadingState(series),
+          coverUrl: series.coverUrl,
+          coverTone: series.coverTone,
+          badge: getDiscoveryBadge(series),
+          updatedLabel: formatUpdatedLabel(series.updatedAt),
+        })),
+    [editorialSnapshot.safeCatalog],
+  );
 
   const openHomeSeries = (seriesId, entryPoint, campaignId) => {
     if (!seriesId) {
@@ -765,8 +831,105 @@ function HomeContent() {
           </section>
         ) : null}
 
+        {newUpdateItems.length > 0 ? (
+          <section className="mb-10 grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
+            <Card className="overflow-hidden rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div className="max-w-2xl">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">New this week</p>
+                    <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
+                      Fresh updates with real covers, not placeholder discovery.
+                    </h2>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                      If this is your first visit, these are the fastest current reads to sample before you dig through the full catalog.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push("/search?sort=latest")}
+                    className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  >
+                    See latest releases
+                    <ArrowRight className="size-4" />
+                  </Button>
+                </div>
+
+                <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
+                  {newUpdateItems.map((item) => (
+                    <div key={item.id} className="space-y-2">
+                      <PortraitCard
+                        item={item}
+                        tone={item.coverTone}
+                        appearance="light"
+                        onClick={() => openHomeSeries(item.id, "HOME_NEW_UPDATES", `home_new_update_${item.id}`)}
+                      />
+                      <p className="px-1 text-xs font-medium text-slate-500">{item.updatedLabel}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden rounded-[32px] border border-black/6 bg-white/94 py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+              <CardContent className="p-5 sm:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Know the basics</p>
+                <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+                  Know where pricing, support, and account rules live.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  A good first visit should explain points, billing help, FAQ answers, and 18+ controls without making you hunt through account pages.
+                </p>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {[
+                    {
+                      eyebrow: "Pricing",
+                      title: "Points and packs",
+                      description: "See what is free, what uses points, and where purchase history shows up later.",
+                      label: "See pricing",
+                      href: "/store",
+                    },
+                    {
+                      eyebrow: "FAQ",
+                      title: "Quick answers",
+                      description: "Get the plain-English version of billing, access, and common reader questions.",
+                      label: "Open FAQ",
+                      href: "/faq",
+                    },
+                    {
+                      eyebrow: "Support",
+                      title: "Billing help",
+                      description: "Know where to go if a charge, receipt, or access issue needs a real person.",
+                      label: "Contact support",
+                      href: "/support",
+                    },
+                    {
+                      eyebrow: "18+",
+                      title: "Mature content",
+                      description: "Review age checks, region visibility, and history controls before turning it on.",
+                      label: "Review settings",
+                      href: "/mature-content",
+                    },
+                  ].map((item) => (
+                    <ResourceLinkCard
+                      key={item.href}
+                      eyebrow={item.eyebrow}
+                      title={item.title}
+                      description={item.description}
+                      label={item.label}
+                      onClick={() => router.push(item.href)}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        ) : null}
+
         {homeEntryCards.length > 0 ? (
-          <section className="mb-12 grid gap-4 lg:grid-cols-2">
+          <section className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {homeEntryCards.map((card) => (
               <HomeEntryCard
                 key={card.id}
@@ -778,7 +941,7 @@ function HomeContent() {
           </section>
         ) : null}
 
-        <section className="mb-12 grid gap-4 xl:grid-cols-[1.02fr_0.98fr]">
+        <section className="mb-12">
           <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
             <CardContent className="p-5 sm:p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">How Gush works</p>
@@ -820,23 +983,6 @@ function HomeContent() {
               </Button>
             </CardContent>
           </Card>
-
-          <div className="grid gap-4">
-            <QuickLinkCard
-              eyebrow="Support"
-              title="Know where pricing, billing, and help live."
-              description="You should never have to dig through account pages to understand points, membership, receipts, or billing support."
-              label="Open support"
-              onClick={() => router.push("/support")}
-            />
-            <QuickLinkCard
-              eyebrow="Mature content"
-              title="18+ access should feel clear, not risky."
-              description="See how age checks, region settings, and Hide 18+ history work before you turn mature titles on."
-              label="Review mature content"
-              onClick={() => router.push("/mature-content")}
-            />
-          </div>
         </section>
 
         <section className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

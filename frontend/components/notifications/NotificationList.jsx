@@ -60,7 +60,7 @@ export default function NotificationList({
           isLight ? "border-black/8 bg-white text-slate-600" : "border-white/10 bg-black/10"
         }`}
       >
-        <p className={`text-sm ${isLight ? "text-slate-500" : "text-neutral-400"}`}>Loading notifications...</p>
+        <p className={`text-sm ${isLight ? "text-slate-500" : "text-neutral-400"}`}>Your inbox is getting ready.</p>
       </section>
     );
   }
@@ -72,9 +72,9 @@ export default function NotificationList({
           isLight ? "border-black/8 bg-white" : "border-white/10 bg-black/10"
         }`}
       >
-        <p className={`text-sm ${isLight ? "text-slate-600" : "text-neutral-400"}`}>Nothing here yet.</p>
+        <p className={`text-sm ${isLight ? "text-slate-600" : "text-neutral-400"}`}>Your inbox is clear.</p>
         <p className={`mt-2 text-xs ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
-          Follow a series or keep alerts on and this page will start earning its keep.
+          Follow a series or keep alerts on, and new chapters or offers will show up here.
         </p>
       </section>
     );
@@ -130,7 +130,7 @@ export default function NotificationList({
                 }`}
                 disabled={item.read || workingId === item.id || workingId === "__all__"}
               >
-                {item.read ? "Done" : workingId === item.id ? "Saving..." : "Mark done"}
+                {item.read ? "Read" : workingId === item.id ? "Saving..." : "Mark read"}
               </button>
               {item.seriesId || item.type === "PROMO" || item.type === "SUB_VOUCHER" ? (
                 <button

@@ -11,7 +11,12 @@ export default function CheckInPanel({
   if (!rewards) {
     return (
       <section className="rounded-[28px] border border-black/6 bg-white/86 p-6 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
-        <p className="text-sm text-slate-500">Loading today's check-in...</p>
+        <div className="space-y-3" aria-hidden="true">
+          <div className="h-4 w-24 animate-pulse rounded-full bg-slate-200" />
+          <div className="h-7 w-48 animate-pulse rounded-2xl bg-slate-200" />
+          <div className="h-4 w-full max-w-sm animate-pulse rounded-full bg-slate-100" />
+        </div>
+        <p className="mt-4 text-sm text-slate-500">Today's check-in is getting ready.</p>
       </section>
     );
   }

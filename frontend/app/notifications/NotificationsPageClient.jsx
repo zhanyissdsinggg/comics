@@ -20,18 +20,25 @@ export default function NotificationsPage() {
   const [error, setError] = useState(null);
   const [workingId, setWorkingId] = useState(null);
 
-  useEffect(() => {
-    trackEvent("view_notifications", {});
-    loadNotifications(isAdultMode ? "1" : "0")
+  const loadInbox = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    return loadNotifications(isAdultMode ? "1" : "0")
       .then((response) => {
         if (!response.ok) {
           setError("LOAD_ERROR");
         }
       })
       .finally(() => setLoading(false));
-  }, [loadNotifications, isAdultMode]);
+  }, [isAdultMode, loadNotifications]);
+
+  useEffect(() => {
+    trackEvent("view_notifications", {});
+    loadInbox();
+  }, [loadInbox]);
 
   const handleMarkRead = async (notificationId) => {
+    setError(null);
     setWorkingId(notificationId);
     const response = await markRead([notificationId]);
     if (!response.ok) {
@@ -46,6 +53,7 @@ export default function NotificationsPage() {
       return;
     }
 
+    setError(null);
     setWorkingId("__all__");
     const response = await markRead(unreadIds);
     if (!response.ok) {
@@ -149,22 +157,22 @@ export default function NotificationsPage() {
     return [
       {
         label: "Unread",
-        value: loading ? "..." : unreadCount.toLocaleString(),
+        value: loading ? "--" : unreadCount.toLocaleString(),
         hint: "Messages still waiting for you.",
       },
       {
         label: "Episodes",
-        value: loading ? "..." : episodes.toLocaleString(),
+        value: loading ? "--" : episodes.toLocaleString(),
         hint: "Chapter and free unlock updates.",
       },
       {
         label: "Offers",
-        value: loading ? "..." : promo.toLocaleString(),
+        value: loading ? "--" : promo.toLocaleString(),
         hint: "Promos and member offers in this inbox.",
       },
       {
         label: "Total",
-        value: loading ? "..." : total.toLocaleString(),
+        value: loading ? "--" : total.toLocaleString(),
         hint: isAdultMode ? "18+ filtering is on." : "Standard catalog is showing.",
       },
     ];
@@ -306,12 +314,47 @@ export default function NotificationsPage() {
         ) : null}
 
         {loading ? (
-          <SurfacePanel appearance="light" accent="blue">
-            <p className="text-sm text-slate-500">Loading notifications...</p>
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+            <div className="space-y-2">
+              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
+              <div className="h-9 w-64 animate-pulse rounded-2xl bg-slate-200" aria-hidden="true" />
+              <div className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
+            </div>
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  aria-hidden="true"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1 space-y-3">
+                      <div className="h-5 w-1/2 animate-pulse rounded-2xl bg-slate-200" />
+                      <div className="h-4 w-full animate-pulse rounded-full bg-slate-100" />
+                      <div className="h-4 w-2/3 animate-pulse rounded-full bg-slate-100" />
+                    </div>
+                    <div className="h-9 w-24 animate-pulse rounded-full bg-slate-200" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-slate-500">Your inbox is getting ready.</p>
           </SurfacePanel>
         ) : error ? (
           <SurfacePanel className="border border-red-200 bg-red-50 text-red-600" appearance="light" tone="danger" accent="rose">
-            <p className="text-sm">Couldn't load notifications.</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-red-600">Couldn't load notifications.</p>
+                <p className="mt-1 text-sm text-red-500">Try again to refresh your inbox and recent reading alerts.</p>
+              </div>
+              <button
+                type="button"
+                onClick={loadInbox}
+                className="rounded-full border border-red-200 bg-white px-4 py-2 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50"
+              >
+                Try again
+              </button>
+            </div>
           </SurfacePanel>
         ) : (
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">

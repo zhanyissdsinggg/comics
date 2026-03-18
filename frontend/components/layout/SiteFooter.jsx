@@ -26,7 +26,7 @@ const footerSections = [
   {
     title: "Account",
     links: [
-      { label: "Points & Packs", href: "/store" },
+      { label: "Store", href: "/store" },
       { label: "Membership", href: "/subscribe" },
       { label: "Purchases", href: "/orders" },
       { label: "Account", href: "/account" },
@@ -73,6 +73,9 @@ export default function SiteFooter({ tone = "default" }) {
               <p className={`mt-3 text-sm ${isHome ? "text-slate-500" : "text-neutral-400"}`}>
                 Start free, unlock episodes with points, compare membership, and keep support close when you need it.
               </p>
+              <p className={`mt-2 text-sm ${isHome ? "text-slate-500" : "text-neutral-400"}`}>
+                Billing questions, privacy requests, and legal notices all have a direct contact path below.
+              </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <a
@@ -94,6 +97,16 @@ export default function SiteFooter({ tone = "default" }) {
                 }`}
               >
                 {siteConfig.privacyEmail}
+              </a>
+              <a
+                href={`mailto:${siteConfig.legalEmail}`}
+                className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                  isHome
+                    ? "border-black/8 bg-black/[0.03] text-slate-600 hover:border-black/12 hover:bg-white hover:text-slate-900"
+                    : "border-white/10 bg-black/10 text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                }`}
+              >
+                {siteConfig.legalEmail}
               </a>
               {socialLinks.map((item) => (
                 <a
@@ -143,6 +156,7 @@ export default function SiteFooter({ tone = "default" }) {
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
             <span>Support: {siteConfig.supportEmail}</span>
             <span>Privacy: {siteConfig.privacyEmail}</span>
+            <span>Legal: {siteConfig.legalEmail}</span>
             {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
           </div>
         </div>

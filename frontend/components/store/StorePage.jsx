@@ -11,7 +11,7 @@ import { useWalletStore } from "../../store/useWalletStore";
 import { useCouponStore } from "../../store/useCouponStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { trackEvent } from "../../lib/trackEvent";
-import { POINTS_PACKS, OFFERS } from "../../lib/offers/catalog";
+import { POINTS_PACKS, OFFERS, SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
 import { getRegionConfig } from "../../lib/region/config";
 import { getCookie } from "../../lib/cookies";
 import { apiGet } from "../../lib/apiClient";
@@ -166,6 +166,19 @@ export default function StorePage() {
         1,
       ),
     };
+  }, []);
+
+  const membershipStartingPrice = useMemo(() => {
+    const plans = Object.values(getPlanCatalog() || {}).filter((plan) => plan && typeof plan === "object");
+    if (plans.length > 0) {
+      const cheapestPlan = [...plans].sort(
+        (left, right) => Number(left?.price || Infinity) - Number(right?.price || Infinity),
+      )[0];
+      if (cheapestPlan?.price !== undefined && cheapestPlan?.price !== null) {
+        return `${cheapestPlan.currency || "USD"} ${Number(cheapestPlan.price).toFixed(2)}`;
+      }
+    }
+    return SUBSCRIPTION_OFFERS[0]?.price?.replace("/mo", "") || "";
   }, []);
 
   const focusId = useMemo(() => {
@@ -394,11 +407,11 @@ export default function StorePage() {
       <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Point packs"
-          title="Top up once. Keep reading."
+          title="Buy points for one-time unlocks."
           description={
             purchasePreviewOnly
-              ? "Look through the live pack lineup now. Buying opens here once checkout is ready."
-              : "Pick the pack that fits your reading pace and jump back into the story."
+              ? "Look through the live pack lineup now. Some series start free, locked episodes use points, and monthly membership is for heavier readers."
+              : "Some series start free. Locked episodes use points. If you read often, compare monthly membership before you buy a bigger pack."
           }
           secondary={
             purchasePreviewOnly
@@ -467,6 +480,78 @@ export default function StorePage() {
           </SurfacePanel>
         ) : null}
 
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                How paying works
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Free chapters first, points for locked episodes, membership if you read a lot.
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                This page is for one-time point packs. If you read every week, membership is the recurring monthly option instead.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => router.push("/how-it-works")}
+                className={secondaryButtonClass}
+              >
+                See how it works
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/support")}
+                className={secondaryButtonClass}
+              >
+                Billing help
+              </button>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              {
+                eyebrow: "Free start",
+                title: "Select series begin free",
+                description: "Use free first chapters to test the hook before you spend anything.",
+              },
+              {
+                eyebrow: packageDecisionSummary?.cheapest?.priceLabel || "Points packs",
+                title: "Use points on locked episodes",
+                description: packageDecisionSummary?.largest
+                  ? `Point packs are one-time purchases. The biggest pack currently gives ${formatUSNumber(packageDecisionSummary.largest.totalPts)} total points.`
+                  : "Buy a pack once, then spend points only when you unlock locked episodes.",
+              },
+              {
+                eyebrow: membershipStartingPrice ? `${membershipStartingPrice}/month` : "Membership",
+                title: "Membership is monthly and recurring",
+                description: subscriptionStats
+                  ? `Better for regular readers: up to ${subscriptionStats.maxDiscount}% off unlocks and up to ${subscriptionStats.maxDailyFree} free reads a day.`
+                  : "Choose membership if you read often and want a lower cost per unlock.",
+              },
+              {
+                eyebrow: "After checkout",
+                title: "Receipts and support stay easy to find",
+                description: "Charges appear in Purchases. Billing questions and refund requests go through Support.",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-[24px] border border-black/6 bg-white/88 p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  {item.eyebrow}
+                </p>
+                <h3 className="mt-3 text-lg font-semibold text-slate-950">{item.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </SurfacePanel>
+
         {promotions.length > 0 ? (
           <div className="grid gap-4 xl:grid-cols-2">
             {promotions.map((promo) => (
@@ -504,24 +589,26 @@ export default function StorePage() {
 
             <SurfacePanel className="space-y-3" appearance="light" accent="blue">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Regional pricing
+                Taxes and local pricing
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Know the price before you buy.
+                See the local total before you confirm.
               </h2>
-              <p className="text-sm leading-6 text-slate-600">{regionConfig.taxHint}</p>
+              <p className="text-sm leading-6 text-slate-600">
+                {regionConfig.taxHint} The pack cards show the current regional price label before checkout.
+              </p>
             </SurfacePanel>
 
             {subscriptionStats ? (
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Weekly reader?
+                  Read every week?
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Membership fits better if you read all the time.
+                  Membership is the monthly option for regular readers.
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
-                  Get up to {subscriptionStats.maxDiscount}% off unlocks, up to {subscriptionStats.maxDailyFree} free reads a day, and shorter wait timers.
+                  It renews monthly while active and can make more sense than repeated point-pack purchases if you unlock chapters all the time.
                 </p>
                 <button
                   type="button"
@@ -592,10 +679,12 @@ export default function StorePage() {
                   Point packs
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Pick a pack.
+                  Choose a point pack.
                 </h2>
               </div>
-              <p className="text-xs text-slate-500">{orderedPackages.length} packs</p>
+              <p className="text-xs text-slate-500">
+                {orderedPackages.length} pack{orderedPackages.length === 1 ? "" : "s"} with price labels shown up front
+              </p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {orderedPackages.map((pkg) => (
@@ -626,11 +715,11 @@ export default function StorePage() {
                 Pick your rhythm
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                One-time packs or a monthly plan.
+                One-time packs or monthly membership.
               </h2>
             </div>
             <p className="text-xs text-slate-500">
-              Choose points if you dip in and out. Choose membership if you read every week.
+              Use points if you read casually. Use membership if you expect recurring monthly reading.
             </p>
           </div>
 
@@ -682,7 +771,7 @@ export default function StorePage() {
                 Better for regular reading
               </h3>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Membership makes more sense if you read often and want lower unlock prices every week.
+                Membership is the recurring monthly choice if you want lower unlock prices and daily reading perks.
               </p>
               <div className="mt-4 space-y-2 text-sm text-slate-500">
                 <p>
@@ -732,12 +821,12 @@ export default function StorePage() {
                 Need receipts or help?
               </p>
               <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                The support stuff is easy to find later.
+                Receipts and billing help stay easy to find.
               </h3>
               <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-                <li>Points stay on the signed-in account.</li>
-                <li>Purchases keeps your receipts in one place.</li>
-                <li>Support is there if a billing issue needs someone to step in.</li>
+                <li>Point packs and monthly renewals both stay attached to the signed-in account.</li>
+                <li>Purchases keeps receipts, order IDs, and membership charges in one place.</li>
+                <li>Support is the place to go if billing, refunds, or missing access need help.</li>
               </ul>
               <div className="mt-5 flex flex-wrap gap-3">
                 <button

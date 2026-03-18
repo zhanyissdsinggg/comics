@@ -91,6 +91,48 @@ function formatSeriesMeta(series) {
   return `${typeLabel} / ${statusLabel} / Rating ${ratingLabel}`;
 }
 
+function RankingsLoadingState() {
+  return (
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.32fr)_360px]">
+      <div className="space-y-6">
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div className="space-y-3">
+            <div className="h-3 w-28 rounded-full bg-slate-200" />
+            <div className="h-10 w-72 rounded-full bg-slate-200" />
+            <div className="h-4 w-full max-w-2xl rounded-full bg-slate-100" />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div
+                key={index}
+                className="rounded-[26px] border border-black/6 bg-white/88 p-4 shadow-[0_14px_32px_rgba(15,23,42,0.05)]"
+              >
+                <div className="h-44 rounded-[20px] bg-slate-200" />
+                <div className="mt-4 h-6 w-40 rounded-full bg-slate-200" />
+                <div className="mt-3 h-4 w-full rounded-full bg-slate-100" />
+              </div>
+            ))}
+          </div>
+        </SurfacePanel>
+      </div>
+
+      <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+        <div className="h-3 w-24 rounded-full bg-slate-200" />
+        <div className="h-8 w-48 rounded-full bg-slate-200" />
+        <div className="h-4 w-full rounded-full bg-slate-100" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-20 rounded-[20px] border border-black/6 bg-white/86"
+            />
+          ))}
+        </div>
+      </SurfacePanel>
+    </div>
+  );
+}
+
 export default function RankingsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -237,7 +279,7 @@ export default function RankingsPage() {
             </div>
             <p className="text-xs text-slate-500">
               {loading
-                ? "Loading titles..."
+                ? "Refreshing this board..."
                 : `${list.length} titles / ${isAdultMode ? "18+ on" : "standard view"}`}
             </p>
           </div>
@@ -270,20 +312,18 @@ export default function RankingsPage() {
         </SurfacePanel>
 
         {loading ? (
-          <SurfacePanel appearance="light" accent="blue">
-            <p className="text-sm text-slate-500">Loading rankings...</p>
-          </SurfacePanel>
+          <RankingsLoadingState />
         ) : list.length === 0 ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Empty board
+                Quiet board
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                No ranked titles are available for this chart window.
+                This chart is quiet right now.
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Try another time window or head back to search.
+                Try another time window, open Top Series, or head back to search for a broader browse.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

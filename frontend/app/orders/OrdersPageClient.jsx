@@ -221,7 +221,7 @@ export default function OrdersPageClient() {
     );
     const singleCurrency = currencies.length === 1 ? currencies[0] : "";
     const totalSpentLabel = loading
-      ? "..."
+      ? "--"
       : singleCurrency
         ? formatOrderAmount(totalAmount, singleCurrency)
         : currencies.length > 1
@@ -231,17 +231,17 @@ export default function OrdersPageClient() {
     return [
       {
         label: "Orders",
-        value: loading ? "Loading" : orders.length.toLocaleString(),
+        value: loading ? "--" : orders.length.toLocaleString(),
         hint: isSignedIn ? "Saved to your account." : "Sign in to see your saved purchases.",
       },
       {
         label: "Paid",
-        value: loading ? "Loading" : paidCount.toLocaleString(),
+        value: loading ? "--" : paidCount.toLocaleString(),
         hint: "Completed purchases in your history.",
       },
       {
         label: "Refunds",
-        value: loading ? "Loading" : refundedCount.toLocaleString(),
+        value: loading ? "--" : refundedCount.toLocaleString(),
         hint: "Orders already moving through a refund.",
       },
       {
@@ -314,7 +314,7 @@ export default function OrdersPageClient() {
                 className={primaryButtonClass}
                 disabled={!hydrated || !isSignedIn || workingId === "refresh"}
               >
-                {workingId === "refresh" ? "Refreshing..." : "Refresh purchases"}
+                {workingId === "refresh" ? "Updating..." : "Refresh purchases"}
               </button>
               <button
                 type="button"
@@ -480,12 +480,27 @@ export default function OrdersPageClient() {
         ) : null}
 
         {!hydrated || loading ? (
-          <SurfacePanel appearance="light" accent="blue">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Getting your purchases ready.
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              Receipts, order IDs, and recent charges should appear here in a moment.
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+            <div className="space-y-2">
+              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
+              <div className="h-9 w-72 animate-pulse rounded-2xl bg-slate-200" aria-hidden="true" />
+              <div className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  aria-hidden="true"
+                >
+                  <div className="h-4 w-24 animate-pulse rounded-full bg-slate-200" />
+                  <div className="mt-4 h-6 w-40 animate-pulse rounded-2xl bg-slate-200" />
+                  <div className="mt-4 h-3 w-full animate-pulse rounded-full bg-slate-100" />
+                </div>
+              ))}
+            </div>
+            <p className="text-sm leading-6 text-slate-500">
+              Receipts, order IDs, and recent charges are loading now.
             </p>
           </SurfacePanel>
         ) : !isSignedIn ? (

@@ -5,9 +5,9 @@ import ErrorBoundary from "../../components/common/ErrorBoundary";
 import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
-  title: "Novels - Browse All Series",
+  title: "Novels",
   description:
-    "Discover trending web novels and light novels. Browse by genre and find your next favorite story.",
+    "Browse trending novels, free starts, fresh updates, and completed picks across the Gush catalog.",
   path: "/novels",
 });
 

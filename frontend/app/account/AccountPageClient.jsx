@@ -272,7 +272,7 @@ export default function AccountPage() {
     () => [
       {
         label: "Status",
-        value: !hydrated ? "Loading" : isSignedIn ? "Signed in" : "Guest",
+        value: !hydrated ? "--" : isSignedIn ? "Signed in" : "Guest",
         hint: !hydrated
           ? "Preparing your account details."
           : isSignedIn
@@ -283,10 +283,12 @@ export default function AccountPage() {
       },
       {
         label: "Membership",
-        value: subscription?.active ? "Member" : "Free",
+        value: !hydrated ? "--" : subscription?.active ? "Member" : "Free",
         hint: subscription?.renewAt
           ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
-          : "Upgrade any time if you read often.",
+          : !hydrated
+            ? "Membership details will show up here."
+            : "Upgrade any time if you read often.",
       },
       {
         label: "Region",
@@ -295,7 +297,7 @@ export default function AccountPage() {
       },
       {
         label: "Purchases",
-        value: hydrated && isSignedIn ? orders.length.toLocaleString() : "0",
+        value: !hydrated || ordersLoading ? "--" : isSignedIn ? orders.length.toLocaleString() : "--",
         hint: ordersLoading
           ? "Recent purchases will appear here shortly."
           : isSignedIn
@@ -457,7 +459,7 @@ export default function AccountPage() {
                   <label className={fieldLabelClass}>Account</label>
                   <div className={`${fieldClass} text-slate-600`}>
                     {!hydrated
-                      ? "Loading account details..."
+                      ? "Preparing account details..."
                       : isSignedIn
                         ? user?.email || user?.id || "Active account"
                         : "Browsing on this device"}
@@ -661,7 +663,7 @@ export default function AccountPage() {
                     }
                     className={secondaryButtonClass}
                   >
-                    See plans
+                    View membership
                   </button>
                   <button
                     type="button"
@@ -678,7 +680,7 @@ export default function AccountPage() {
                     }}
                     className={secondaryButtonClass}
                   >
-                    End membership
+                    Cancel membership
                   </button>
                 </div>
               </div>
@@ -704,7 +706,7 @@ export default function AccountPage() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span>Google</span>
                     <span className={providers.google ? "text-[var(--gush-accent,#2f6bff)]" : "text-slate-500"}>
-                      {providersLoading ? "Loading..." : providers.google ? "Connected" : "Not connected"}
+                      {providersLoading ? "Checking" : providers.google ? "Connected" : "Not connected"}
                     </span>
                   </div>
                 </div>

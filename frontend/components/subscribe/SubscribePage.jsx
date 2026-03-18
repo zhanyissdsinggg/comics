@@ -206,22 +206,22 @@ export default function SubscribePage() {
   const billingGuardrails = useMemo(
     () => [
       {
-        title: "Pricing should be obvious",
-        body: "You should know the price and what changes before you start a plan.",
+        title: "Recurring monthly billing",
+        body: "A membership charge repeats each month while the plan stays active.",
       },
       {
-        title: "Receipts stay easy to find",
-        body: "Purchases is where renewals and charges should stay visible.",
+        title: "Cancel before renewal",
+        body: "Cancel the plan before the next renewal if you do not want another monthly charge.",
       },
       {
-        title: subscriptionPreviewOnly ? "Membership starts later" : "Changing plans stays simple",
+        title: "Receipts stay in Purchases",
+        body: "Renewals, charges, and billing records should stay visible in one place.",
+      },
+      {
+        title: subscriptionPreviewOnly ? "Starting membership is paused" : "Support stays close",
         body: subscriptionPreviewOnly
           ? "You can compare every tier now and come back when checkout is open."
-          : "Starting or canceling a plan should never feel hidden.",
-      },
-      {
-        title: "Help is still close",
-        body: "If billing gets weird, support should still be one click away.",
+          : "If billing looks wrong or access does not update, support is still one click away.",
       },
     ],
     [subscriptionPreviewOnly],
@@ -239,13 +239,13 @@ export default function SubscribePage() {
           title="Pick the plan that fits your reading rhythm."
           description={
             subscriptionPreviewOnly
-              ? "Look through every tier now. Starting membership opens here once checkout is ready."
-              : "Choose the tier that feels right for how often you read, not just for the lowest price."
+              ? "Compare every monthly tier now. Membership is the recurring option for regular readers once checkout goes live."
+              : "Membership is billed monthly while active. Choose it if you read often and want lower unlock prices, free reads, and monthly points."
           }
           secondary={
             subscriptionPreviewOnly
               ? "Plans are live to compare. Starting is still paused for now."
-              : "Everything important should be clear before you start."
+              : "Cancel before renewal if you want the plan to stop."
           }
           stats={subscriptionHeroStats}
           actions={
@@ -267,6 +267,69 @@ export default function SubscribePage() {
             </>
           }
         />
+
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Before you subscribe
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                The billing rules should be obvious before you start a plan.
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                This page is for recurring monthly membership. Point packs stay on the Store page, and charges or renewals appear in Purchases after checkout.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => router.push("/orders")}
+                className={secondaryButtonClass}
+              >
+                View purchases
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/support")}
+                className={secondaryButtonClass}
+              >
+                Billing help
+              </button>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              {
+                title: "Recurring monthly billing",
+                body: subscriptionPreviewOnly
+                  ? "Starting membership is paused right now, but this page still reflects the recurring monthly model."
+                  : "You are charged each month while the plan stays active.",
+              },
+              {
+                title: "Cancel before renewal",
+                body: "If you do not want the next monthly charge, cancel before the listed renewal date.",
+              },
+              {
+                title: "Receipts stay visible",
+                body: "Renewals, invoices, and order IDs stay in Purchases instead of disappearing into email only.",
+              },
+              {
+                title: "Your account history stays intact",
+                body: "Membership receipts stay on the account after a plan ends. Ongoing access follows the rules of each plan or purchase.",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-[24px] border border-black/6 bg-white/88 p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+              >
+                <h3 className="text-base font-semibold text-slate-950">{item.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-600">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </SurfacePanel>
 
         <SurfacePanel id="membership-plans" className="space-y-6" appearance="light" accent="blue">
           {feedback ? (
@@ -427,7 +490,7 @@ export default function SubscribePage() {
                             : "Pick this plan"}
                     </button>
                     <p className="text-xs leading-5 text-slate-500">
-                      Charges stay on your account, with receipts in Purchases and help in Support.
+                      Recurring monthly billing while active, with receipts in Purchases and billing help in Support.
                     </p>
                   </div>
                 </div>
@@ -610,7 +673,7 @@ export default function SubscribePage() {
                     : "Renewal date is not available yet."}
                 </p>
                 <p className="mt-2 text-sm text-slate-500">
-                  Purchases keeps your receipts, and Support is there if billing needs someone to step in.
+                  Cancel before the next renewal if you want the plan to stop. Purchases keeps the billing record, and Support can step in if something looks wrong.
                 </p>
               </div>
               <button

@@ -4,8 +4,8 @@ import Skeleton from "../../components/common/Skeleton";
 import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
-  title: "Subscribe",
-  description: "Compare membership plans, discounts, and daily perks before you subscribe.",
+  title: "Membership",
+  description: "Compare monthly membership options, recurring billing, perks, cancellation details, and billing help.",
   path: "/subscribe",
 });
 
