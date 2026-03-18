@@ -272,21 +272,21 @@ export default function AccountPage() {
     () => [
       {
         label: "Status",
-        value: !hydrated ? "Checking..." : isSignedIn ? "Signed in" : "Guest",
+        value: !hydrated ? "Loading" : isSignedIn ? "Signed in" : "Guest",
         hint: !hydrated
-          ? "Session status is still loading."
+          ? "Preparing your account details."
           : isSignedIn
             ? user?.emailVerified
-              ? "Ready to sync reading, purchases, and alerts."
-              : "Confirm your email to keep recovery simple."
-            : "Sign in to sync your shelf, purchases, and alerts.",
+              ? "Reading, purchases, and alerts can stay synced here."
+              : "Verify your email to keep recovery simple."
+            : "Sign in to keep library, purchases, and alerts on one account.",
       },
       {
         label: "Membership",
         value: subscription?.active ? "Member" : "Free",
         hint: subscription?.renewAt
           ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
-          : "Upgrade any time for extra perks.",
+          : "Upgrade any time if you read often.",
       },
       {
         label: "Region",
@@ -297,7 +297,7 @@ export default function AccountPage() {
         label: "Purchases",
         value: hydrated && isSignedIn ? orders.length.toLocaleString() : "0",
         hint: ordersLoading
-          ? "Loading recent purchases."
+          ? "Recent purchases will appear here shortly."
           : isSignedIn
             ? "Latest packs and memberships at a glance."
             : "Sign in to see your purchases.",
@@ -341,33 +341,39 @@ export default function AccountPage() {
           appearance="light"
           accent="blue"
           eyebrow="Reader account"
-          title="Your account, without the clutter."
-          description="Keep your name, purchases, membership, and reading setup together."
-          secondary="Use this page for the few account things that matter, then get back to reading."
+          title="Your account, purchases, and reading setup."
+          description="Keep membership, purchases, mature-content controls, and account basics in one place without digging through menus."
+          secondary="This page is for the few settings and billing details that matter, then you can get back to reading."
           stats={accountHeroStats}
           actions={
             <>
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  if (!hydrated || !isSignedIn) {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("auth:open"));
+                    }
+                    return;
+                  }
                   router.push(
                     buildPathWithAttribution("/subscribe", {
                       entryPoint: "ACCOUNT_SUBSCRIPTION",
                       sourcePath: "/account",
                       returnTo: "/account",
                     }),
-                  )
-                }
+                  );
+                }}
                 className={primaryButtonClass}
               >
-                See membership
+                {hydrated && isSignedIn ? "Manage membership" : "Sign in"}
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/orders")}
+                onClick={() => router.push(hydrated && isSignedIn ? "/orders" : "/how-it-works")}
                 className={secondaryButtonClass}
               >
-                View purchases
+                {hydrated && isSignedIn ? "View purchases" : "How it works"}
               </button>
             </>
           }
@@ -378,6 +384,40 @@ export default function AccountPage() {
             notice={commerceNotice}
             onDismiss={() => setCommerceNotice(null)}
           />
+        ) : null}
+
+        {hydrated && !isSignedIn ? (
+          <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" appearance="light" accent="blue">
+            <div>
+              <p className={sectionEyebrowClass}>Signed out</p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Sign in to keep purchases, library, and mature-content settings on one account.
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                You can still adjust local settings here, but sign-in is what keeps purchases, progress, and account recovery attached to you.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("auth:open"));
+                  }
+                }}
+                className={primaryButtonClass}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/search")}
+                className={secondaryButtonClass}
+              >
+                Browse series
+              </button>
+            </div>
+          </SurfacePanel>
         ) : null}
 
         {message ? (
@@ -417,10 +457,10 @@ export default function AccountPage() {
                   <label className={fieldLabelClass}>Account</label>
                   <div className={`${fieldClass} text-slate-600`}>
                     {!hydrated
-                      ? "Checking session..."
+                      ? "Loading account details..."
                       : isSignedIn
                         ? user?.email || user?.id || "Active account"
-                        : "Browsing as guest"}
+                        : "Browsing on this device"}
                   </div>
                 </div>
               </div>
@@ -495,7 +535,7 @@ export default function AccountPage() {
                 <p className={sectionEyebrowClass}>Reading setup</p>
                 <h2 className={sectionTitleClass}>Region, language, and 18+ history</h2>
                 <p className={mutedCopyClass}>
-                  Keep these reading defaults consistent across devices.
+                  Keep these defaults consistent so mature-content access and language feel predictable across devices.
                 </p>
               </div>
 
@@ -541,6 +581,15 @@ export default function AccountPage() {
                 />
                 Hide 18+ history
               </label>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/mature-content")}
+                  className={secondaryButtonClass}
+                >
+                  Mature content guide
+                </button>
+              </div>
             </SurfacePanel>
 
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
@@ -729,15 +778,15 @@ export default function AccountPage() {
               </div>
               {!hydrated || ordersLoading ? (
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">
-                  Loading recent purchases.
+                  Getting your recent purchases ready.
                 </div>
               ) : !isSignedIn ? (
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-600">
-                  Sign in to see purchases, refunds, and order IDs.
+                  Sign in to see receipts, refunds, order IDs, and membership charges on your account.
                 </div>
               ) : orders.length === 0 ? (
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">
-                  No purchases yet. Top-ups and membership charges will appear here.
+                  No purchases yet. Point packs and membership charges will appear here after checkout, along with the order ID you may need later.
                 </div>
               ) : (
                 <div className="space-y-3">

@@ -736,7 +736,7 @@ export default function StorePage() {
               </h3>
               <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
                 <li>Points stay on the signed-in account.</li>
-                <li>Orders keeps your receipts in one place.</li>
+                <li>Purchases keeps your receipts in one place.</li>
                 <li>Support is there if a billing issue needs someone to step in.</li>
               </ul>
               <div className="mt-5 flex flex-wrap gap-3">
@@ -745,7 +745,7 @@ export default function StorePage() {
                   onClick={() => router.push("/orders")}
                   className={primaryButtonClass}
                 >
-                  View orders
+                  View purchases
                 </button>
                 <button
                   type="button"

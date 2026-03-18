@@ -16,6 +16,7 @@ import {
   Flame,
   Gift,
   Sparkles,
+  WalletCards,
 } from "lucide-react";
 import Cover from "../common/Cover";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
@@ -166,6 +167,44 @@ function HomeEntryCard({ card, onOpenSeries, onOpenCollection }) {
   );
 }
 
+function ValueCard({ icon: Icon, eyebrow, title, description }) {
+  return (
+    <Card className="overflow-hidden rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] py-0 shadow-[0_16px_34px_rgba(15,23,42,0.05)]">
+      <CardContent className="flex h-full gap-4 p-5">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]">
+          <Icon className="size-5" />
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{eyebrow}</p>
+          <h2 className="mt-2 text-base font-semibold text-slate-950">{title}</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function QuickLinkCard({ eyebrow, title, description, label, onClick }) {
+  return (
+    <Card className="overflow-hidden rounded-[28px] border border-black/6 bg-white/92 py-0 shadow-[0_16px_34px_rgba(15,23,42,0.05)]">
+      <CardContent className="p-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{eyebrow}</p>
+        <h3 className="mt-3 font-display text-[1.6rem] font-semibold tracking-tight text-slate-950">{title}</h3>
+        <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClick}
+          className="mt-5 h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+        >
+          {label}
+          <ArrowRight className="size-4" />
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -263,6 +302,15 @@ function HomeContent() {
           coverTone: series.coverTone,
         })),
     [heroItems, seriesById],
+  );
+  const heroTrustItems = useMemo(
+    () => [
+      "Free chapters on select series",
+      "Unlock episodes with points",
+      "Membership for regular readers",
+      "18+ controls when you want them",
+    ],
+    [],
   );
 
   const progressEntries = useMemo(
@@ -405,9 +453,9 @@ function HomeContent() {
       {
         id: "trending",
         eyebrow: "Right now",
-        title: "Trending",
-        description: "Start with what already has real reader momentum.",
-        ctaLabel: "See all",
+        title: "Top Series",
+        description: "Start with what already has real reader momentum this week.",
+        ctaLabel: "Browse top series",
         href: "/rankings?type=popular&window=week",
         icon: Flame,
         entryPoint: "HOME_TRENDING_CARD",
@@ -417,7 +465,7 @@ function HomeContent() {
         id: "start-free",
         eyebrow: "Easy entry",
         title: "Start Free",
-        description: "Try the first few chapters before you commit.",
+        description: "Try the first few chapters before you commit to a paid unlock.",
         ctaLabel: "See free chapters",
         href: "/rankings?type=ttf&window=all",
         icon: BookOpenText,
@@ -495,16 +543,16 @@ function HomeContent() {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(247,249,252,0.96))]" />
               <CardContent className="relative grid gap-8 p-5 sm:p-7 xl:grid-cols-[1.04fr_0.96fr] xl:items-start xl:p-8">
                 <div className="max-w-3xl">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Featured this week</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Start here</p>
                   <h1 className="mt-4 max-w-3xl font-display text-[2.45rem] font-semibold tracking-tight text-slate-950 sm:text-[3.1rem] xl:text-[3.8rem]">
-                    Read something worth staying up for.
+                    Read comics and novels, start free, and unlock more when you&apos;re ready.
                   </h1>
                   <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">
-                    Start with <span className="font-semibold text-slate-950">{featuredSeries.title}</span>, try a few free chapters, or jump straight into a finished series.
+                    Gush is a reading home for comics and novels with clear pricing, quick support, and a cleaner path from free chapters to paid episodes.
                   </p>
 
                   <div className="mt-5 flex flex-wrap gap-2.5">
-                    {featuredSignals.map((signal) => (
+                    {heroTrustItems.map((signal) => (
                       <span
                         key={signal}
                         className="rounded-full border border-black/6 bg-white/72 px-3 py-1.5 text-xs font-medium text-slate-700"
@@ -518,26 +566,44 @@ function HomeContent() {
                     <Button
                       type="button"
                       size="lg"
-                      onClick={() => openHomeSeries(featuredSeries.id, "HOME_HERO", "home_hero_primary")}
+                      onClick={() => router.push("/rankings?type=ttf&window=all")}
                       className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
                     >
-                      Start reading
+                      Start reading free
                     </Button>
                     <Button
                       type="button"
                       size="lg"
                       variant="outline"
-                      onClick={() => router.push("/rankings?type=ttf&window=all")}
+                      onClick={() => router.push("/rankings?type=popular&window=week")}
                       className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
                     >
-                      See free chapters
+                      Browse top series
                     </Button>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-500">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/how-it-works")}
+                      className="font-medium text-slate-700 transition hover:text-slate-950"
+                    >
+                      How points and membership work
+                    </button>
+                    <span className="text-slate-300">/</span>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/mature-content")}
+                      className="font-medium text-slate-700 transition hover:text-slate-950"
+                    >
+                      Mature content settings
+                    </button>
                   </div>
 
                   <div className="mt-8 rounded-[30px] border border-black/6 bg-white/72 p-5 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Today&apos;s pick</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Start here</p>
                         <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
                           {featuredSeries.title}
                         </h2>
@@ -554,6 +620,18 @@ function HomeContent() {
                     {featuredSeries.description ? (
                       <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{featuredSeries.description}</p>
                     ) : null}
+                    {featuredSignals.length > 0 ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {featuredSignals.map((signal) => (
+                          <span
+                            key={signal}
+                            className="rounded-full border border-black/6 bg-[#f8f9fc] px-3 py-1.5 text-xs font-medium text-slate-700"
+                          >
+                            {signal}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -563,14 +641,14 @@ function HomeContent() {
                   </div>
                   <div className="space-y-4">
                     <div className="rounded-[30px] border border-black/6 bg-white/76 p-5 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Why this one</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Why start here</p>
                     <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">{featuredSeries.title}</h3>
                     <p className="mt-3 text-sm leading-7 text-slate-600">
                       {String(featuredSeries.status || "").toLowerCase() === "completed"
-                        ? "A finished run is the easiest way to trust the site with your time."
+                        ? "A finished run makes the first visit easier because you can keep going without waiting."
                         : Number(featuredSeries.freeEpisodeCount || 0) > 0
-                          ? `${Number(featuredSeries.freeEpisodeCount || 0)} free chapter${Number(featuredSeries.freeEpisodeCount || 0) === 1 ? "" : "s"} make it easy to know fast if it is for you.`
-                          : "A strong hook and clear reader momentum make this a better first click than a random catalog pick."}
+                          ? `${Number(featuredSeries.freeEpisodeCount || 0)} free chapter${Number(featuredSeries.freeEpisodeCount || 0) === 1 ? "" : "s"} let you test the hook before you spend anything.`
+                          : "Reader momentum and a strong opening make this a better first click than a random catalog pick."}
                     </p>
 
                     <div className="mt-6 space-y-3">
@@ -607,6 +685,33 @@ function HomeContent() {
               </CardContent>
             </Card>
           ) : null}
+        </section>
+
+        <section className="mb-10 grid gap-3 lg:grid-cols-4">
+          <ValueCard
+            icon={BookOpenText}
+            eyebrow="Start free"
+            title="Try a series before you commit."
+            description="Look for free chapters and quick preview access before you unlock more."
+          />
+          <ValueCard
+            icon={WalletCards}
+            eyebrow="Clear pricing"
+            title="Points for unlocks, membership for regular readers."
+            description="The site shows packs, plans, and purchase history in one place instead of hiding the rules."
+          />
+          <ValueCard
+            icon={BookOpen}
+            eyebrow="Reader account"
+            title="Keep reading across devices."
+            description="Library, purchases, progress, and notifications stay easier to manage once you sign in."
+          />
+          <ValueCard
+            icon={CheckCircle2}
+            eyebrow="Control"
+            title="Mature-content access stays in your hands."
+            description="Turn 18+ titles on only when you want them and keep the settings easy to find."
+          />
         </section>
 
         {commerceNotice ? (
@@ -673,11 +778,72 @@ function HomeContent() {
           </section>
         ) : null}
 
+        <section className="mb-12 grid gap-4 xl:grid-cols-[1.02fr_0.98fr]">
+          <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+            <CardContent className="p-5 sm:p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">How Gush works</p>
+              <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
+                A quick way to understand the product.
+              </h2>
+              <div className="mt-6 grid gap-3 md:grid-cols-3">
+                {[
+                  {
+                    eyebrow: "1. Browse",
+                    body: "Open comics and novels, then start with free chapters when they are available.",
+                  },
+                  {
+                    eyebrow: "2. Unlock",
+                    body: "Use points when a chapter is locked, or compare membership if you read often.",
+                  },
+                  {
+                    eyebrow: "3. Keep track",
+                    body: "Save your library, purchases, and progress so the next visit feels immediate.",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.eyebrow}
+                    className="rounded-[24px] border border-black/6 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">{item.eyebrow}</p>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">{item.body}</p>
+                  </div>
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/how-it-works")}
+                className="mt-5 h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                See how it works
+                <ArrowRight className="size-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-4">
+            <QuickLinkCard
+              eyebrow="Support"
+              title="Know where pricing, billing, and help live."
+              description="You should never have to dig through account pages to understand points, membership, receipts, or billing support."
+              label="Open support"
+              onClick={() => router.push("/support")}
+            />
+            <QuickLinkCard
+              eyebrow="Mature content"
+              title="18+ access should feel clear, not risky."
+              description="See how age checks, region settings, and Hide 18+ history work before you turn mature titles on."
+              label="Review mature content"
+              onClick={() => router.push("/mature-content")}
+            />
+          </div>
+        </section>
+
         <section className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Keep browsing</p>
-            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">A few more picks. Nothing extra.</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-600">The shelves below stay short on purpose, so browsing still feels calm.</p>
+            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">Trending, new updates, and easier places to start.</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">The shelves below stay short on purpose so discovery still feels calm, not like a dashboard.</p>
           </div>
           <Button
             type="button"

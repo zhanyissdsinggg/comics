@@ -128,7 +128,7 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <p className="max-w-3xl text-sm leading-7 text-slate-600">
-                If a charge looks wrong, a page breaks, or you just need an answer, start with Help. If you want the fine print, Privacy and Terms are right here.
+                If a charge looks wrong, a page breaks, or you just need an answer, start with Support. If you want the fine print, Privacy and Terms are right here.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link

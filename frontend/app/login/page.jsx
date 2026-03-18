@@ -1,15 +1,24 @@
-"use client";
+import { redirect } from "next/navigation";
+import { createPageMetadata } from "../../lib/seo";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import AuthRedirectPage from "../../components/auth/AuthRedirectPage";
+export const metadata = createPageMetadata({
+  title: "Sign In",
+  description: "Sign in to your Gush account.",
+  path: "/login",
+  robots: {
+    index: false,
+    follow: false,
+  },
+});
 
-export default function LoginPage() {
-  const router = useRouter();
+export default async function LoginPage({ searchParams }) {
+  const resolvedSearchParams = await Promise.resolve(searchParams);
+  const returnTo = Array.isArray(resolvedSearchParams?.returnTo)
+    ? resolvedSearchParams.returnTo[0]
+    : resolvedSearchParams?.returnTo;
+  const href = returnTo
+    ? `/?openLogin=1&returnTo=${encodeURIComponent(String(returnTo))}`
+    : "/?openLogin=1";
 
-  useEffect(() => {
-    router.replace("/?openLogin=1");
-  }, [router]);
-
-  return <AuthRedirectPage title="Opening sign in" description="You'll be back to reading in a moment." />;
+  redirect(href);
 }

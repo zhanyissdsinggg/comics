@@ -148,7 +148,7 @@ function VerifyPageContent() {
             Account confirmation
           </p>
           <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
-            {hasToken ? "Checking your email link" : "Need another verification email?"}
+            {hasToken ? "Verifying your email link" : "Need another verification email?"}
           </h2>
           <p className="mt-3 text-sm leading-6 text-slate-600">
             {hasToken
@@ -168,7 +168,7 @@ function VerifyPageContent() {
               onClick={handleVerify}
               className={primaryButtonClass}
             >
-              {submitting ? "Checking..." : "Verify again"}
+              {submitting ? "Verifying..." : "Verify again"}
             </button>
             <button
               type="button"

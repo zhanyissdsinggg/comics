@@ -25,19 +25,19 @@ const QUICK_LINKS = [
     title: "Get help",
     description: "Message us about a charge, a broken page, or an access problem.",
     href: "/support",
-    label: "Contact us",
+    label: "Open support",
   },
   {
-    title: "Purchases",
-    description: "Check what you bought and grab an order ID if you need one.",
-    href: "/orders",
-    label: "View purchases",
+    title: "How it works",
+    description: "See what is free, how points work, and where membership fits in.",
+    href: "/how-it-works",
+    label: "Read how it works",
   },
   {
-    title: "Account",
-    description: "Manage membership, history, and reading settings.",
-    href: "/account",
-    label: "Open account",
+    title: "Mature content",
+    description: "Understand age checks, region settings, and Hide 18+ history.",
+    href: "/mature-content",
+    label: "Review 18+ access",
   },
 ];
 
@@ -99,9 +99,9 @@ export default function FAQPage() {
                 hint: "If the FAQ is not enough, a person is one click away.",
               },
               {
-                label: "Purchases",
-                value: "Orders page",
-                hint: "Check purchases and order IDs there.",
+                label: "How it works",
+                value: "Points + plans",
+                hint: "See what is free, what costs points, and where membership fits in.",
               },
               {
                 label: "18+ access",

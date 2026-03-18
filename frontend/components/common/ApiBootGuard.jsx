@@ -48,29 +48,32 @@ export function ApiBootGuard({ children }) {
     if (!shouldBlock) {
       return null;
     }
+
     return (
-      <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 p-4 text-xs text-yellow-200">
-        Backend is offline. Start it with `npm run start:dev` inside `backend`.
-        {countdown > 0 ? ` Retrying in ${countdown}s...` : ""}
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <p className="font-semibold text-amber-900">Some live account features are temporarily unavailable.</p>
+        <p className="mt-1 text-amber-800/90">
+          Browsing can still work with saved data, but sign-in, checkout, or account updates may not respond right away.
+          {countdown > 0 ? ` Trying again in ${countdown}s.` : ""}
+        </p>
       </div>
     );
   }, [shouldBlock, countdown]);
 
-  // 老王修改：后端离线时不阻断页面，只显示警告banner，让用户仍能看到UI
   return (
     <>
-      {shouldBlock && content && (
+      {shouldBlock && content ? (
         <div className="flex items-center gap-2 px-4 py-2">
           {content}
           <button
             type="button"
             onClick={() => router.refresh()}
-            className="rounded-full border border-yellow-500/60 px-3 py-1 text-xs text-yellow-200 whitespace-nowrap"
+            className="whitespace-nowrap rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold text-amber-800 transition hover:border-amber-400 hover:bg-amber-100"
           >
             Retry
           </button>
         </div>
-      )}
+      ) : null}
       {children}
     </>
   );

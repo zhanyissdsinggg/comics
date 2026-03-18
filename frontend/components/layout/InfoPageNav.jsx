@@ -3,9 +3,11 @@
 import Link from "next/link";
 
 const INFO_LINKS = [
+  { key: "how-it-works", href: "/how-it-works", label: "How it works" },
+  { key: "mature-content", href: "/mature-content", label: "Mature Content" },
   { key: "about", href: "/about", label: "About" },
   { key: "faq", href: "/faq", label: "FAQ" },
-  { key: "support", href: "/support", label: "Contact" },
+  { key: "support", href: "/support", label: "Support" },
   { key: "privacy", href: "/privacy-policy", label: "Privacy" },
   { key: "terms", href: "/terms-of-service", label: "Terms" },
 ];

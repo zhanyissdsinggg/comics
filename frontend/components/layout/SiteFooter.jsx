@@ -7,23 +7,35 @@ const footerSections = [
   {
     title: "Browse",
     links: [
+      { label: "Home", href: "/" },
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
       { label: "Creators", href: "/creators" },
-      { label: "Library", href: "/library" },
+      { label: "Top Series", href: "/rankings" },
     ],
   },
   {
-    title: "Company",
+    title: "Help",
     links: [
-      { label: "About", href: "/about" },
-      { label: "Support", href: "/support" },
+      { label: "How It Works", href: "/how-it-works" },
       { label: "FAQ", href: "/faq" },
+      { label: "Support", href: "/support" },
+      { label: "Mature Content", href: "/mature-content" },
+    ],
+  },
+  {
+    title: "Account",
+    links: [
+      { label: "Points & Packs", href: "/store" },
+      { label: "Membership", href: "/subscribe" },
+      { label: "Purchases", href: "/orders" },
+      { label: "Account", href: "/account" },
     ],
   },
   {
     title: "Legal",
     links: [
+      { label: "About", href: "/about" },
       { label: "Terms of Service", href: "/terms-of-service" },
       { label: "Privacy Policy", href: "/privacy-policy" },
     ],
@@ -51,13 +63,16 @@ export default function SiteFooter({ tone = "default" }) {
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
           <div className="max-w-xl space-y-4">
             <p className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400" : "text-emerald-300/75"}`}>
-              Stories first
+              Read comics and novels
             </p>
             <div>
               <Link href="/" className={`font-display text-3xl font-semibold tracking-tight ${isHome ? "text-slate-950" : "text-white"}`}>
                 {siteConfig.siteName}
               </Link>
               <p className={`mt-3 text-sm leading-7 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>{siteConfig.aboutSummary}</p>
+              <p className={`mt-3 text-sm ${isHome ? "text-slate-500" : "text-neutral-400"}`}>
+                Start free, unlock episodes with points, compare membership, and keep support close when you need it.
+              </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <a
@@ -69,6 +84,16 @@ export default function SiteFooter({ tone = "default" }) {
                 }`}
               >
                 {siteConfig.supportEmail}
+              </a>
+              <a
+                href={`mailto:${siteConfig.privacyEmail}`}
+                className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                  isHome
+                    ? "border-black/8 bg-black/[0.03] text-slate-600 hover:border-black/12 hover:bg-white hover:text-slate-900"
+                    : "border-white/10 bg-black/10 text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                }`}
+              >
+                {siteConfig.privacyEmail}
               </a>
               {socialLinks.map((item) => (
                 <a
@@ -88,7 +113,7 @@ export default function SiteFooter({ tone = "default" }) {
             </div>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-4">
                 <h4 className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400" : "text-neutral-400"}`}>
@@ -116,7 +141,8 @@ export default function SiteFooter({ tone = "default" }) {
             © {currentYear} {siteConfig.companyName}. All rights reserved.
           </p>
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-            <span>{siteConfig.supportEmail}</span>
+            <span>Support: {siteConfig.supportEmail}</span>
+            <span>Privacy: {siteConfig.privacyEmail}</span>
             {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
           </div>
         </div>

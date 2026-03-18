@@ -78,6 +78,68 @@ function buildPublisherEntity() {
   };
 }
 
+export function buildOrganizationStructuredData() {
+  const sameAs = [siteConfig.twitterUrl].filter(Boolean);
+
+  return cleanObject({
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${absoluteUrl("/")}#organization`,
+    name: siteConfig.companyName,
+    alternateName:
+      siteConfig.siteName !== siteConfig.companyName ? siteConfig.siteName : undefined,
+    url: absoluteUrl("/"),
+    email: siteConfig.supportEmail || undefined,
+    sameAs: sameAs.length > 0 ? sameAs : undefined,
+    contactPoint: [
+      siteConfig.supportEmail
+        ? {
+            "@type": "ContactPoint",
+            contactType: "customer support",
+            email: siteConfig.supportEmail,
+            availableLanguage: ["English"],
+            url: absoluteUrl("/support"),
+          }
+        : null,
+      siteConfig.privacyEmail
+        ? {
+            "@type": "ContactPoint",
+            contactType: "privacy inquiries",
+            email: siteConfig.privacyEmail,
+            availableLanguage: ["English"],
+            url: absoluteUrl("/privacy-policy"),
+          }
+        : null,
+    ].filter(Boolean),
+    address: siteConfig.companyAddress
+      ? {
+          "@type": "PostalAddress",
+          streetAddress: siteConfig.companyAddress,
+        }
+      : undefined,
+  });
+}
+
+export function buildWebsiteStructuredData({
+  description = siteConfig.defaultDescription,
+} = {}) {
+  return cleanObject({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${absoluteUrl("/")}#website`,
+    name: siteConfig.siteName,
+    alternateName: siteConfig.companyName,
+    url: absoluteUrl("/"),
+    description,
+    publisher: { "@id": `${absoluteUrl("/")}#organization` },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${absoluteUrl("/search")}?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  });
+}
+
 function buildCreatorEntity(creatorName, creatorPath) {
   const normalizedName = normalizeCreatorName(creatorName);
   if (!normalizedName) {

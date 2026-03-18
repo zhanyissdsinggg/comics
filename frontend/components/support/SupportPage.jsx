@@ -35,11 +35,31 @@ function buildSupportDraft(subject, body, supportEmail) {
 }
 
 const SUPPORT_TOPIC_PRESETS = [
-  { id: "billing", label: "Charge issue", subject: "Charge issue" },
-  { id: "refund", label: "Refund question", subject: "Refund question" },
+  { id: "billing", label: "Billing issue", subject: "Billing issue" },
+  { id: "refund", label: "Refund request", subject: "Refund request" },
   { id: "account", label: "Sign-in help", subject: "Sign-in help" },
-  { id: "reader", label: "Reader bug", subject: "Reader bug" },
-  { id: "content", label: "Title report", subject: "Title report" },
+  { id: "reader", label: "Reader issue", subject: "Reader issue" },
+  { id: "adult", label: "Age-check help", subject: "Mature content access" },
+  { id: "content", label: "Content report", subject: "Content report" },
+];
+
+const SUPPORT_CATEGORIES = [
+  {
+    title: "Billing & refunds",
+    description: "Wrong charge, duplicate payment, missing points, refund eligibility, or receipt questions.",
+  },
+  {
+    title: "Account & sign-in",
+    description: "Email verification, password reset, social sign-in, or account access problems.",
+  },
+  {
+    title: "Reader & content",
+    description: "Broken reader pages, missing chapters, cover issues, translation problems, or title reports.",
+  },
+  {
+    title: "Mature content",
+    description: "18+ access, age check, hidden titles, region settings, or Hide 18+ history questions.",
+  },
 ];
 
 export default function SupportPage() {
@@ -201,10 +221,10 @@ export default function SupportPage() {
       <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <InfoPageNav current="support" appearance="light" />
         <EditorialHero
-          eyebrow="Help"
-          title="Need help?"
-          description="Tell us what went wrong and how we can reach you."
-          secondary="Signed-in readers can send a message here. If you are browsing as a guest, we will build the email for you."
+          eyebrow="Support"
+          title="Billing, account, and reader help."
+          description="Tell us what happened, how to reach you, and any order ID or page URL that helps us find the problem faster."
+          secondary="Most replies arrive within 1 to 2 business days. Signed-in readers can send a message here. Guests can copy an email draft or open their mail app."
           appearance="light"
         />
 
@@ -214,6 +234,20 @@ export default function SupportPage() {
             onDismiss={() => setCommerceNotice(null)}
           />
         ) : null}
+
+        <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+          {SUPPORT_CATEGORIES.map((item) => (
+            <SurfacePanel key={item.title} appearance="light" accent="blue">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Category
+              </p>
+              <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                {item.title}
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+            </SurfacePanel>
+          ))}
+        </section>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
@@ -231,7 +265,7 @@ export default function SupportPage() {
 
             <div className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Quick picks
+                Common topics
               </p>
               <div className="flex flex-wrap gap-2">
                 {SUPPORT_TOPIC_PRESETS.map((preset) => (
@@ -322,7 +356,7 @@ export default function SupportPage() {
                 disabled={submitting}
                 className={primaryButtonClass}
               >
-                {submitting ? "Sending..." : hydrated && isSignedIn ? "Send message" : "Copy draft"}
+                {submitting ? "Sending..." : hydrated && isSignedIn ? "Send message" : "Copy email draft"}
               </button>
               {!isSignedIn ? (
                 <button
@@ -354,7 +388,7 @@ export default function SupportPage() {
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Before you send
+                  What to include
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   A few details help a lot.
@@ -362,40 +396,52 @@ export default function SupportPage() {
               </div>
               <ul className="space-y-3 text-sm leading-6 text-slate-600">
                 <li>We usually reply within 1 to 2 business days.</li>
-                <li>Add the order ID if this is about a charge.</li>
-                <li>Include screenshots, the page URL, and your device if something looks broken.</li>
+                <li>Add the order ID if this is about a charge, points, or a renewal.</li>
+                <li>Include the page URL, title name, and the device or browser if something looks broken.</li>
+                <li>Screenshots help, especially for reader bugs, billing screens, and 18+ access problems.</li>
               </ul>
             </SurfacePanel>
 
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Need purchase details?
+                  Fast links
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Check your purchases first.
+                  Answers you may want before you write in.
                 </h2>
               </div>
-              <p className="text-sm leading-6 text-slate-600">
-                Use Orders to grab the order ID or confirm what you bought before you message us.
-              </p>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={() => router.push("/orders")}
-                  className={primaryButtonClass}
-                >
-                  View purchases
-                </button>
-                <button
-                  type="button"
                   onClick={() => router.push("/faq")}
-                  className={secondaryButtonClass}
+                  className={primaryButtonClass}
                 >
                   FAQ
                 </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/how-it-works")}
+                  className={secondaryButtonClass}
+                >
+                  How it works
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/mature-content")}
+                  className={secondaryButtonClass}
+                >
+                  Mature content
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/orders")}
+                  className={secondaryButtonClass}
+                >
+                  View purchases
+                </button>
               </div>
-              <p className="text-sm text-slate-500">Email us directly: {siteConfig.supportEmail}</p>
+              <p className="text-sm text-slate-500">Direct email: {siteConfig.supportEmail}</p>
             </SurfacePanel>
           </div>
         </div>

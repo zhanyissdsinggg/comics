@@ -211,7 +211,7 @@ export default function SubscribePage() {
       },
       {
         title: "Receipts stay easy to find",
-        body: "Orders is where renewals and charges should stay visible.",
+        body: "Purchases is where renewals and charges should stay visible.",
       },
       {
         title: subscriptionPreviewOnly ? "Membership starts later" : "Changing plans stays simple",
@@ -427,7 +427,7 @@ export default function SubscribePage() {
                             : "Pick this plan"}
                     </button>
                     <p className="text-xs leading-5 text-slate-500">
-                      Charges stay on your account, with receipts in Orders and help in Support.
+                      Charges stay on your account, with receipts in Purchases and help in Support.
                     </p>
                   </div>
                 </div>
@@ -535,7 +535,7 @@ export default function SubscribePage() {
                 onClick={() => router.push("/orders")}
                 className={primaryButtonClass}
               >
-                View orders
+                View purchases
               </button>
               <button
                 type="button"
@@ -610,7 +610,7 @@ export default function SubscribePage() {
                     : "Renewal date is not available yet."}
                 </p>
                 <p className="mt-2 text-sm text-slate-500">
-                  Orders keeps your receipts, and Support is there if billing needs someone to step in.
+                  Purchases keeps your receipts, and Support is there if billing needs someone to step in.
                 </p>
               </div>
               <button

@@ -22,8 +22,8 @@ export default function BackendHealthBanner() {
   }
 
   return (
-    <div className="border-b border-yellow-500/40 bg-yellow-500/10 px-4 py-2 text-xs text-yellow-200">
-      Backend is not reachable. Start `backend` with `npm run start:dev`.
+    <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800">
+      Some live account and checkout features are temporarily unavailable.
     </div>
   );
 }

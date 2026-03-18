@@ -231,17 +231,17 @@ export default function OrdersPageClient() {
     return [
       {
         label: "Orders",
-        value: loading ? "..." : orders.length.toLocaleString(),
+        value: loading ? "Loading" : orders.length.toLocaleString(),
         hint: isSignedIn ? "Saved to your account." : "Sign in to see your saved purchases.",
       },
       {
         label: "Paid",
-        value: loading ? "..." : paidCount.toLocaleString(),
+        value: loading ? "Loading" : paidCount.toLocaleString(),
         hint: "Completed purchases in your history.",
       },
       {
         label: "Refunds",
-        value: loading ? "..." : refundedCount.toLocaleString(),
+        value: loading ? "Loading" : refundedCount.toLocaleString(),
         hint: "Orders already moving through a refund.",
       },
       {
@@ -272,12 +272,12 @@ export default function OrdersPageClient() {
           title={
             latestPaidOrder
               ? "See what you bought and jump back into reading."
-              : "Your purchases, all in one place."
+              : "Your purchases, receipts, and order IDs."
           }
           description={
             latestPaidOrder
               ? "Your latest purchase is here, along with quick ways to keep reading or get help."
-              : "Point packs and memberships show up here so you can check them without digging through settings."
+              : "Point packs and memberships show up here so you can check receipts, charges, and billing details without digging through settings."
           }
           secondary={
             latestPaidOrder
@@ -481,7 +481,12 @@ export default function OrdersPageClient() {
 
         {!hydrated || loading ? (
           <SurfacePanel appearance="light" accent="blue">
-            <p className="text-sm text-slate-500">Loading your purchases...</p>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              Getting your purchases ready.
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Receipts, order IDs, and recent charges should appear here in a moment.
+            </p>
           </SurfacePanel>
         ) : !isSignedIn ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
@@ -489,19 +494,63 @@ export default function OrdersPageClient() {
               Sign in to view your purchases
             </h2>
             <p className="text-sm leading-6 text-slate-600">
-              Purchases live on your account, so you will need to sign in first.
+              Purchases live on your account, so you will need to sign in first. This is also where you will find receipts, order IDs, and membership charges.
             </p>
-            <button
-              type="button"
-              onClick={() => router.push("/signin?returnTo=/orders")}
-              className={primaryButtonClass}
-            >
-              Sign in
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => router.push("/signin?returnTo=/orders")}
+                className={primaryButtonClass}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/how-it-works")}
+                className={secondaryButtonClass}
+              >
+                How it works
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/support")}
+                className={secondaryButtonClass}
+              >
+                Support
+              </button>
+            </div>
           </SurfacePanel>
         ) : orders.length === 0 ? (
-          <SurfacePanel appearance="light" accent="blue">
-            <p className="text-sm text-slate-500">No purchases yet. Point packs and memberships will show up here after you buy them.</p>
+          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              No purchases yet.
+            </h2>
+            <p className="text-sm leading-6 text-slate-600">
+              Point packs and memberships will show up here after checkout, along with the order ID you may need for billing help.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => router.push("/how-it-works")}
+                className={primaryButtonClass}
+              >
+                How points work
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/store")}
+                className={secondaryButtonClass}
+              >
+                See point packs
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/support")}
+                className={secondaryButtonClass}
+              >
+                Billing help
+              </button>
+            </div>
           </SurfacePanel>
         ) : (
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">

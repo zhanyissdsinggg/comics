@@ -1,6 +1,17 @@
 import { Suspense } from "react";
 import AdultGatePage from "../../components/adult/AdultGatePage";
 import Skeleton from "../../components/common/Skeleton";
+import { createPageMetadata } from "../../lib/seo";
+
+export const metadata = createPageMetadata({
+  title: "18+ Access Check",
+  description: "Sign in and confirm your age to access mature content on Gush.",
+  path: "/adult-gate",
+  robots: {
+    index: false,
+    follow: false,
+  },
+});
 
 export default function Page() {
   return (

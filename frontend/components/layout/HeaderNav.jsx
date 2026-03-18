@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
   { id: "creators", label: "Creators", href: "/creators" },
-  { id: "rankings", label: "Rankings", href: "/rankings" },
+  { id: "rankings", label: "Top Series", href: "/rankings" },
 ];
 
 export default function HeaderNav({ variant = "default" }) {

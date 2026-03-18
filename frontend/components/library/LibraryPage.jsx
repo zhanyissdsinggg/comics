@@ -560,19 +560,28 @@ export default function LibraryPage() {
                     Account sync
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Take this library with you.
+                    Take this library, purchase history, and progress with you.
                   </h2>
                   <p className="mt-3 text-sm leading-6 text-slate-600">
-                    Sign in once and keep your shelf, reading history, and rewards synced.
+                    Sign in once and keep your shelf, reading history, rewards, and reading progress synced across visits.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={openAuthPrompt}
-                  className={primaryButtonClass}
-                >
-                  Sign in
-                </button>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={openAuthPrompt}
+                    className={primaryButtonClass}
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/rankings?type=ttf&window=all")}
+                    className={secondaryButtonClass}
+                  >
+                    Start free
+                  </button>
+                </div>
               </SurfacePanel>
             )}
 
@@ -589,19 +598,19 @@ export default function LibraryPage() {
                     Get started
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Start a series or save a favorite.
+                    Start a series, save a favorite, and this page becomes useful fast.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Read a chapter, follow a title, or open this week's chart so your library has something worth returning to.
+                    Read a free chapter, follow a title, or open this week&apos;s chart so your library has something worth returning to.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => router.push("/search")}
+                    onClick={() => router.push("/rankings?type=ttf&window=all")}
                     className={primaryButtonClass}
                   >
-                    Search all series
+                    Start reading free
                   </button>
                   <button
                     type="button"
@@ -619,7 +628,40 @@ export default function LibraryPage() {
                       Sign in for sync
                     </button>
                   ) : null}
+                  <button
+                    type="button"
+                    onClick={() => router.push("/how-it-works")}
+                    className={secondaryButtonClass}
+                  >
+                    How it works
+                  </button>
                 </div>
+                {recommendedItems.slice(0, 3).length > 0 ? (
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {recommendedItems.slice(0, 3).map((item) => (
+                      <button
+                        key={item.seriesId}
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            buildLibrarySeriesHref(
+                              item.seriesId,
+                              item.entryPoint || "LIBRARY_EMPTY_STATE",
+                              item.campaignId || "library_empty_state",
+                            ),
+                          )
+                        }
+                        className="rounded-[24px] border border-black/8 bg-white px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-[#fbfcff]"
+                      >
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                          {item.eyebrow || "Start here"}
+                        </p>
+                        <p className="mt-3 text-base font-semibold text-slate-950">{item.title}</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">{item.subtitle}</p>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </SurfacePanel>
             ) : null}
 

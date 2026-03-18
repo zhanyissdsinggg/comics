@@ -1,6 +1,6 @@
 "use client";
 
-export default function GlobalError({ error, reset }) {
+export default function GlobalError({ reset }) {
   return (
     <html lang="en">
       <body className="bg-[#f4f6fb] text-slate-900">
@@ -12,15 +12,26 @@ export default function GlobalError({ error, reset }) {
             </span>
             <h1 className="mt-5 text-3xl font-semibold text-slate-950">Something went wrong</h1>
             <p className="mt-3 text-sm leading-7 text-slate-600">
-              {error?.message || "Please try again."}
+              We could not load this page cleanly. Please try again, go back home, or contact support if the problem keeps happening.
             </p>
-            <button
-              type="button"
-              onClick={() => reset()}
-              className="mt-6 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              Retry
-            </button>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => reset()}
+                className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Retry
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = "/";
+                }}
+                className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                Go home
+              </button>
+            </div>
           </div>
         </main>
       </body>

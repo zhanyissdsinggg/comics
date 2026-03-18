@@ -19,6 +19,10 @@ export async function generateMetadata({ searchParams }) {
       ? `Browse search results for ${query}.`
       : "Search the catalog by title, genre, or keyword.",
     path: query ? `/search?q=${encodeURIComponent(query)}` : "/search",
+    robots: {
+      index: false,
+      follow: true,
+    },
   });
 }
 
