@@ -473,7 +473,7 @@ export default function CreatorPage({ creatorSlug }) {
             eyebrow={isStudioShelf ? "Studio" : "Creator"}
             title={`No public titles from ${creatorName} yet.`}
             description="This page resolves correctly, but nothing visible is attached to it in the current catalog view."
-            secondary="Try search, the weekly chart, or your last series instead."
+            secondary="Try search, Top Series, or your last series instead."
             stats={[
               {
                 label: "Creator",
@@ -500,7 +500,7 @@ export default function CreatorPage({ creatorSlug }) {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className={secondaryButtonClass}
                 >
-                  Browse weekly hits
+                  Browse Top Series
                 </button>
                 <button
                   type="button"
@@ -519,7 +519,7 @@ export default function CreatorPage({ creatorSlug }) {
               icon="book"
               eyebrow="Nothing to read"
               title="No visible titles on this page."
-              description="Jump back to search or the weekly chart so the browse flow does not stop here."
+              description="Jump back to search or Top Series so the browse flow does not stop here."
               action={{
                 label: "Search series",
                 onClick: () => router.push("/search"),
@@ -556,7 +556,7 @@ export default function CreatorPage({ creatorSlug }) {
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className={primaryButtonClass}
               >
-                Browse weekly hits
+                Browse Top Series
               </button>
               <button
                 type="button"

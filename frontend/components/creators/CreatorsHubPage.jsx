@@ -313,7 +313,7 @@ export default function CreatorsHubPage() {
             eyebrow="Creators"
             title="No creator pages are showing yet."
             description="As more titles get clean writer, artist, and studio credits, they will land here automatically."
-            secondary="Until then, head back to search or the weekly chart to keep browsing."
+            secondary="Until then, head back to search or open Top Series to keep browsing."
             stats={heroStats}
             actions={
               <>
@@ -329,7 +329,7 @@ export default function CreatorsHubPage() {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className={secondaryButtonClass}
                 >
-                  Browse weekly hits
+                  Browse Top Series
                 </button>
               </>
             }
@@ -360,7 +360,7 @@ export default function CreatorsHubPage() {
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className={primaryButtonClass}
               >
-                Browse weekly hits
+                Browse Top Series
               </button>
               <button
                 type="button"

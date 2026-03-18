@@ -702,7 +702,7 @@ export default function SearchPage() {
             title: "Start with a free chapter before you commit.",
             description:
               "Free unlocks are one of the easiest ways to test a series before spending.",
-            ctaLabel: "Open free unlock chart",
+            ctaLabel: "Open free-start picks",
             onClick: () => router.push("/rankings?type=ttf&window=all"),
             accentClass: lightFeatureAccentClass,
           },
@@ -899,7 +899,7 @@ export default function SearchPage() {
             signalLabel: "Chart",
             signalValue: "TTF",
             signalHint: "Timed free unlocks available now",
-            ctaLabel: "Open free unlock chart",
+            ctaLabel: "Open free-start picks",
             onClick: () => router.push("/rankings?type=ttf&window=all"),
             accentClass: lightFeatureAccentClass,
           },
@@ -1005,7 +1005,7 @@ export default function SearchPage() {
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className={secondaryButtonClass}
               >
-                Weekly chart
+                Top Series
               </button>
             )
           }
@@ -1073,7 +1073,7 @@ export default function SearchPage() {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className={secondaryButtonClass}
                 >
-                  Weekly chart
+                  Top Series
                 </button>
               )}
             </div>
@@ -1401,7 +1401,7 @@ export default function SearchPage() {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className={secondaryButtonClass}
                 >
-                  This week&apos;s chart
+                  Open Top Series
                 </button>
               )}
               {completedPick ? (
@@ -1463,10 +1463,10 @@ export default function SearchPage() {
               ))}
               <button
                 type="button"
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/rankings?type=popular&window=week")}
                 className={accentButtonClass}
               >
-                Browse popular
+                Browse Top Series
               </button>
             </div>
             <div className="pt-2">{browsePathGrid}</div>
@@ -1536,7 +1536,7 @@ export default function SearchPage() {
                       onClick={() => router.push("/rankings?type=popular&window=week")}
                       className={secondaryButtonClass}
                     >
-                      Compare with the chart
+                      Compare with Top Series
                     </button>
                   )}
                   {completedPick ? (

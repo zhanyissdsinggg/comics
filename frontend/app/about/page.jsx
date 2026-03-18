@@ -14,6 +14,7 @@ export const metadata = createPageMetadata({
 
 const CONTACT_LINKS = [
   { label: "Email support", href: `mailto:${siteConfig.supportEmail}`, external: true },
+  { label: "Legal contact", href: `mailto:${siteConfig.legalEmail}`, external: true },
   { label: "FAQ", href: "/faq", external: false },
   { label: "Privacy", href: "/privacy-policy", external: false },
   { label: "Terms", href: "/terms-of-service", external: false },
@@ -91,6 +92,9 @@ export default function AboutPage() {
                 </p>
                 <p>
                   <span className="font-semibold text-slate-950">Privacy:</span> {siteConfig.privacyEmail}
+                </p>
+                <p>
+                  <span className="font-semibold text-slate-950">Legal:</span> {siteConfig.legalEmail}
                 </p>
                 {siteConfig.companyAddress ? (
                   <p>

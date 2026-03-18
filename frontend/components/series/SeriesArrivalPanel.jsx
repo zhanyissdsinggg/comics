@@ -110,7 +110,7 @@ export default function SeriesArrivalPanel({
           onClick={() => router.push("/rankings?type=popular&window=week")}
           className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
         >
-          See weekly chart
+          Open Top Series
         </button>
       </div>
     </SurfacePanel>

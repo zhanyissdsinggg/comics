@@ -275,7 +275,7 @@ export default function AdultHubPage() {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className="rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800"
                 >
-                  See 18+ chart
+                  Open 18+ Top Series
                 </button>
                 <button
                   type="button"
@@ -319,9 +319,9 @@ export default function AdultHubPage() {
             <EmptyState
               icon="search"
               title="No adult titles are currently available"
-              description="Try the weekly chart or switch back to the standard catalog until more 18+ titles are available."
+              description="Open 18+ Top Series or switch back to the standard catalog until more mature titles are available."
               action={{
-                label: "See charts",
+                label: "Open Top Series",
                 onClick: () => router.push("/rankings?type=popular&window=week"),
               }}
               appearance="light"
@@ -335,7 +335,7 @@ export default function AdultHubPage() {
                 items={spotlightItems}
                 reason="Popular 18+ titles worth opening first."
                 href="/rankings?type=popular&window=week"
-                ctaLabel="See chart"
+                ctaLabel="Open Top Series"
                 appearance="light"
                 onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
               />

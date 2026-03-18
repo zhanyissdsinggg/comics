@@ -62,21 +62,21 @@ const CHART_GUIDES = {
   },
   new: {
     audience: "Best when you want something early, not something overexposed.",
-    signal: "Use this chart to catch rising books before they feel obvious.",
+    signal: "Use this Top Series view to catch rising books before they feel obvious.",
     nextMove: "Open the strongest launch, then see what else is still new.",
     searchHref: "/search?sort=latest",
     searchLabel: "See latest releases",
   },
   completed: {
     audience: "Best when you want payoff without waiting on updates.",
-    signal: "Completed charts go straight to finished stories you can read straight through.",
+    signal: "This completed view goes straight to finished stories you can read straight through.",
     nextMove: "Start with the top finished title, then compare length and genre if you want another one.",
     searchHref: "/search?status=Completed&sort=popular",
     searchLabel: "See finished series",
   },
   ttf: {
     audience: "Best when you want to try the hook before you spend.",
-    signal: "This chart highlights the titles with the strongest free start right now.",
+    signal: "This free-start view highlights the titles with the strongest free entry right now.",
     nextMove: "Start free here, then decide later if the story is worth more of your time.",
     searchHref: "/search?sort=popular",
     searchLabel: "See more free starts",
@@ -233,7 +233,7 @@ export default function RankingsPage() {
       <SiteHeader variant="light" />
       <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow="Charts"
+          eyebrow="Top Series"
           title={activeTab.title}
           description={activeTab.description}
           secondary={`${activeWindow.label} view. Move between windows and keep the same reading mood.`}
@@ -274,7 +274,7 @@ export default function RankingsPage() {
                 Pick the board
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Choose a chart and time window.
+                Choose a Top Series view.
               </h2>
             </div>
             <p className="text-xs text-slate-500">
@@ -320,7 +320,7 @@ export default function RankingsPage() {
                 Quiet board
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                This chart is quiet right now.
+                This Top Series view is quiet right now.
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
                 Try another time window, open Top Series, or head back to search for a broader browse.
@@ -433,7 +433,7 @@ export default function RankingsPage() {
                         Keep going
                       </p>
                       <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                        Continue down the chart.
+                        Continue through Top Series.
                       </h2>
                     </div>
                     <p className="text-xs text-slate-500">
@@ -481,7 +481,7 @@ export default function RankingsPage() {
                         Start here
                       </p>
                       <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                        Read the chart leader first.
+                        Read the lead pick first.
                       </h2>
                     </div>
                     <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
@@ -556,7 +556,7 @@ export default function RankingsPage() {
                     What this board is good at
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Read the chart like an editor&apos;s shelf.
+                    Use Top Series like an editor&apos;s shelf.
                   </h2>
                 </div>
                 <p className="text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
@@ -570,7 +570,7 @@ export default function RankingsPage() {
                 entryPoint="RANKINGS_CREATOR_CHIP"
                 campaignId={`${tab}_${selectedWindow}_spotlight_creator`}
                 sourcePath={rankingsPath}
-                label="Chart creators"
+                label="Top Series creators"
                 title="Try the creators behind these picks"
                 description="If one of these titles lands, the same creator pages are the next smart click."
                 maxCreators={6}

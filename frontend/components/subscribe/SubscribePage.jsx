@@ -20,6 +20,7 @@ import {
 import { trackEvent } from "../../lib/trackEvent";
 import { persistCommerceSuccess } from "../../lib/commerceSuccess";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+import { siteConfig } from "../../lib/siteConfig";
 
 const PLAN_FIT_GUIDE = {
   basic: {
@@ -691,6 +692,57 @@ export default function SubscribePage() {
             </div>
           </SurfacePanel>
         ) : null}
+
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Membership accountability
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Monthly billing should come with clear contacts and clear exits.
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                Use Purchases for receipts, Support for billing help, and the contact paths below when privacy or legal questions matter.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <a href={`mailto:${siteConfig.supportEmail}`} className={secondaryButtonClass}>
+                {siteConfig.supportEmail}
+              </a>
+              <a href={`mailto:${siteConfig.privacyEmail}`} className={secondaryButtonClass}>
+                {siteConfig.privacyEmail}
+              </a>
+              <a href={`mailto:${siteConfig.legalEmail}`} className={secondaryButtonClass}>
+                {siteConfig.legalEmail}
+              </a>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => router.push("/orders")}
+              className={primaryButtonClass}
+            >
+              View purchases
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/support")}
+              className={secondaryButtonClass}
+            >
+              Billing help
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/how-it-works")}
+              className={secondaryButtonClass}
+            >
+              How it works
+            </button>
+          </div>
+        </SurfacePanel>
       </main>
     </div>
   );

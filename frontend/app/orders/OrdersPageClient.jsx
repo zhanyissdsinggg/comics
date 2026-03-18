@@ -213,6 +213,24 @@ export default function OrdersPageClient() {
   );
 
   const orderStats = useMemo(() => {
+    if (loading) {
+      return [
+        { label: "Orders", value: "Syncing", hint: "Pulling receipts and order IDs now." },
+        { label: "Paid", value: "Syncing", hint: "Completed purchases will show up here." },
+        { label: "Refunds", value: "Syncing", hint: "Refund activity updates on this page." },
+        { label: "Spent", value: "Checking", hint: "Totals appear once purchase history is ready." },
+      ];
+    }
+
+    if (!isSignedIn) {
+      return [
+        { label: "Orders", value: "Sign in", hint: "Purchases stay on your account, not just this device." },
+        { label: "Billing", value: "Clear", hint: "Point packs and membership charges both show up here." },
+        { label: "Help", value: "Fast", hint: "Use Support when a charge or receipt looks wrong." },
+        { label: "Receipts", value: "Saved", hint: "Order IDs stay here after checkout." },
+      ];
+    }
+
     const paidCount = orders.filter((order) => order.status === "PAID").length;
     const refundedCount = orders.filter((order) => String(order.status).includes("REFUND")).length;
     const totalAmount = orders.reduce((sum, order) => sum + Number(order.amount || 0), 0);
@@ -220,9 +238,7 @@ export default function OrdersPageClient() {
       new Set(orders.map((order) => String(order.currency || "").toUpperCase()).filter(Boolean)),
     );
     const singleCurrency = currencies.length === 1 ? currencies[0] : "";
-    const totalSpentLabel = loading
-      ? "--"
-      : singleCurrency
+    const totalSpentLabel = singleCurrency
         ? formatOrderAmount(totalAmount, singleCurrency)
         : currencies.length > 1
           ? "Multiple"
@@ -231,17 +247,17 @@ export default function OrdersPageClient() {
     return [
       {
         label: "Orders",
-        value: loading ? "--" : orders.length.toLocaleString(),
+        value: orders.length.toLocaleString(),
         hint: isSignedIn ? "Saved to your account." : "Sign in to see your saved purchases.",
       },
       {
         label: "Paid",
-        value: loading ? "--" : paidCount.toLocaleString(),
+        value: paidCount.toLocaleString(),
         hint: "Completed purchases in your history.",
       },
       {
         label: "Refunds",
-        value: loading ? "--" : refundedCount.toLocaleString(),
+        value: refundedCount.toLocaleString(),
         hint: "Orders already moving through a refund.",
       },
       {
@@ -272,17 +288,23 @@ export default function OrdersPageClient() {
           title={
             latestPaidOrder
               ? "See what you bought and jump back into reading."
-              : "Your purchases, receipts, and order IDs."
+              : isSignedIn
+                ? "Your purchases, receipts, and order IDs."
+                : "Purchases live on your account."
           }
           description={
             latestPaidOrder
               ? "Your latest purchase is here, along with quick ways to keep reading or get help."
-              : "Point packs and memberships show up here so you can check receipts, charges, and billing details without digging through settings."
+              : isSignedIn
+                ? "Point packs and memberships show up here so you can check receipts, charges, and billing details without digging through settings."
+                : "Sign in to see receipts, order IDs, membership charges, and billing help in one place."
           }
           secondary={
             latestPaidOrder
               ? `Latest order: ${latestPaidOrder.orderId} | ${formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)}`
-              : "New purchases usually appear here shortly after checkout."
+              : isSignedIn
+                ? "New purchases usually appear here shortly after checkout."
+                : "After checkout, this page is where charges, receipts, and order IDs stay easy to find."
           }
           stats={orderStats}
           actions={
@@ -499,9 +521,6 @@ export default function OrdersPageClient() {
                 </div>
               ))}
             </div>
-            <p className="text-sm leading-6 text-slate-500">
-              Receipts, order IDs, and recent charges are loading now.
-            </p>
           </SurfacePanel>
         ) : !isSignedIn ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
@@ -521,10 +540,10 @@ export default function OrdersPageClient() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/how-it-works")}
+                onClick={() => router.push("/store")}
                 className={secondaryButtonClass}
               >
-                How it works
+                See point packs
               </button>
               <button
                 type="button"

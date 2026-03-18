@@ -601,7 +601,7 @@ export default function LibraryPage() {
                     Start a series, save a favorite, and this page becomes useful fast.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Read a free chapter, follow a title, or open this week&apos;s chart so your library has something worth returning to.
+                    Read a free chapter, follow a title, or open Top Series so your library has something worth returning to.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -617,7 +617,7 @@ export default function LibraryPage() {
                     onClick={() => router.push("/rankings?type=popular&window=week")}
                     className={secondaryButtonClass}
                   >
-                    See weekly chart
+                    Browse Top Series
                   </button>
                   {!isSignedIn ? (
                     <button

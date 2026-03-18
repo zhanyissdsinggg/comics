@@ -468,17 +468,25 @@ function HomeContent() {
         coverTone: series.coverTone,
       }));
 
-    const completedItems = dedupeSeries([
-      editorialSnapshot.completedPick,
-      ...editorialSnapshot.safeCatalog
-        .filter((series) => String(series?.status || "").toLowerCase() === "completed")
-        .sort((left, right) => getSeriesScore(right) - getSeriesScore(left)),
-    ])
+    const newItems = dedupeSeries(
+      [...editorialSnapshot.safeCatalog].sort((left, right) => {
+        const badgeDelta =
+          Number(getDiscoveryBadge(right) === "New") - Number(getDiscoveryBadge(left) === "New");
+        if (badgeDelta !== 0) {
+          return badgeDelta;
+        }
+        const timeDelta = toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt);
+        if (timeDelta !== 0) {
+          return timeDelta;
+        }
+        return getSeriesScore(right) - getSeriesScore(left);
+      }),
+    )
       .slice(0, 2)
       .map((series) => ({
         id: series.id,
         title: series.title,
-        meta: `${Number(series?.episodeCount || 0).toLocaleString()} episodes`,
+        meta: formatUpdatedLabel(series.updatedAt),
         coverUrl: series.coverUrl,
         coverTone: series.coverTone,
       }));
@@ -496,6 +504,17 @@ function HomeContent() {
         items: trendingItems,
       },
       {
+        id: "new-updates",
+        eyebrow: "New updates",
+        title: "Fresh this week",
+        description: "Open something current before the catalog starts to blur together.",
+        ctaLabel: "See latest releases",
+        href: "/search?sort=latest",
+        icon: Sparkles,
+        entryPoint: "HOME_NEW_CARD",
+        items: newItems,
+      },
+      {
         id: "start-free",
         eyebrow: "Easy entry",
         title: "Start Free",
@@ -505,17 +524,6 @@ function HomeContent() {
         icon: BookOpenText,
         entryPoint: "HOME_FREE_CARD",
         items: freeItems,
-      },
-      {
-        id: "completed",
-        eyebrow: "No waiting",
-        title: "Finished Series",
-        description: "For readers who would rather binge than wait.",
-        ctaLabel: "See finished series",
-        href: "/search?status=Completed&sort=popular",
-        icon: CheckCircle2,
-        entryPoint: "HOME_COMPLETED_CARD",
-        items: completedItems,
       },
     ]
       .filter((card) => card.items.length > 0)
@@ -753,6 +761,19 @@ function HomeContent() {
           ) : null}
         </section>
 
+        {homeEntryCards.length > 0 ? (
+          <section className="mb-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {homeEntryCards.map((card) => (
+              <HomeEntryCard
+                key={card.id}
+                card={card}
+                onOpenSeries={openHomeSeries}
+                onOpenCollection={(href) => router.push(href)}
+              />
+            ))}
+          </section>
+        ) : null}
+
         <section className="mb-10 grid gap-3 lg:grid-cols-4">
           <ValueCard
             icon={BookOpenText}
@@ -837,12 +858,12 @@ function HomeContent() {
               <CardContent className="p-5 sm:p-6">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div className="max-w-2xl">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">New this week</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Keep browsing</p>
                     <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
-                      Fresh updates with real covers, not placeholder discovery.
+                      New releases that keep the browse moving.
                     </h2>
                     <p className="mt-3 text-sm leading-7 text-slate-600">
-                      If this is your first visit, these are the fastest current reads to sample before you dig through the full catalog.
+                      If you already checked Top Series or Start Free, these are the latest reads worth opening next without dumping the whole catalog in your lap.
                     </p>
                   </div>
                   <Button
@@ -925,19 +946,6 @@ function HomeContent() {
                 </div>
               </CardContent>
             </Card>
-          </section>
-        ) : null}
-
-        {homeEntryCards.length > 0 ? (
-          <section className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {homeEntryCards.map((card) => (
-              <HomeEntryCard
-                key={card.id}
-                card={card}
-                onOpenSeries={openHomeSeries}
-                onOpenCollection={(href) => router.push(href)}
-              />
-            ))}
           </section>
         ) : null}
 

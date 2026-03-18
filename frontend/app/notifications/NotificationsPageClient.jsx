@@ -249,13 +249,13 @@ export default function NotificationsPage() {
       {
         id: "chart-backup",
         eyebrow: "Keep browsing",
-        title: "If the inbox is light, go straight to the charts.",
+        title: "If the inbox is light, go straight to Top Series.",
         description:
-          "Notifications should help readers return, but charts should always be close when the inbox is quiet.",
+          "Notifications should help readers return, but Top Series should stay close when the inbox is quiet.",
         signalLabel: "Discovery",
-        signalValue: "Charts",
-        signalHint: "Weekly charts stay live",
-        ctaLabel: "See charts",
+        signalValue: "Top Series",
+        signalHint: "Fresh leaderboards stay close",
+        ctaLabel: "Open Top Series",
         onClick: () => router.push("/rankings?type=popular&window=week"),
         accentClass:
           "group border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
@@ -289,7 +289,7 @@ export default function NotificationsPage() {
                 onClick={() => router.push("/rankings")}
                 className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
-                Charts
+                Top Series
               </button>
               <button
                 type="button"

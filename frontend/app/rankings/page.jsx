@@ -5,7 +5,7 @@ import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
   title: "Top Series",
-  description: "Browse popular, new, completed, and free-start charts across comics and novels on Gush.",
+  description: "Browse Top Series, new releases, completed picks, and free-start favorites across comics and novels on Gush.",
   path: "/rankings",
 });
 

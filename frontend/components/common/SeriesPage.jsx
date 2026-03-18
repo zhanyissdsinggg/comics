@@ -18,24 +18,74 @@ import { apiGet } from "../../lib/apiClient";
 
 const PAGE_CONFIG = {
   comic: {
+    eyebrow: "Comics",
+    heroTitle: "Browse comics with faster first clicks.",
     title: "Comics",
-    description: "Browse weekly hits, completed binge picks, and standout comic series in one place.",
+    description: "Browse Top Series, completed binge picks, and standout comic series in one place.",
     secondary:
       "Use filters to narrow by genre, popularity, or completion status and jump in when something clicks.",
     emptyIcon: "search",
     emptyTitle: "No comics match this filter set",
-    emptyDescription: "Reset the current filters or open the charts to widen the selection.",
+    emptyDescription: "Reset the current filters or open Top Series to widen the selection.",
     pathname: "/comics",
+    browseGuides: [
+      {
+        eyebrow: "Top Series",
+        title: "Start with proven momentum.",
+        body: "If you want the safest comic first click, Top Series is still the easiest place to begin.",
+        ctaLabel: "Browse Top Series",
+        href: "/rankings?type=popular&window=week",
+      },
+      {
+        eyebrow: "Start free",
+        title: "Sample the hook before you pay.",
+        body: "Free first chapters are the fastest way to test pacing, art, and tone without guessing.",
+        ctaLabel: "See free starts",
+        href: "/rankings?type=ttf&window=all",
+      },
+      {
+        eyebrow: "Finished runs",
+        title: "Binge-ready comics stay close.",
+        body: "Completed series work better when you want payoff now instead of waiting on future updates.",
+        ctaLabel: "See completed comics",
+        href: "/comics?status=completed",
+      },
+    ],
   },
   novel: {
+    eyebrow: "Novels",
+    heroTitle: "Browse novels with room to settle in.",
     title: "Novels",
     description: "Browse serialized novels, premium web fiction, and long-form stories in one place.",
     secondary:
       "Sort by popularity or latest updates, narrow by genre, and find finished reads faster.",
     emptyIcon: "book",
     emptyTitle: "No novels match this filter set",
-    emptyDescription: "Reset the current filters or open the charts to find more to read.",
+    emptyDescription: "Reset the current filters or open Top Series to find more to read.",
     pathname: "/novels",
+    browseGuides: [
+      {
+        eyebrow: "Top Series",
+        title: "Use the leaders as your entry point.",
+        body: "When a novel catalog feels too wide, Top Series narrows it down to safer starts.",
+        ctaLabel: "Browse Top Series",
+        href: "/rankings?type=popular&window=week",
+      },
+      {
+        eyebrow: "Latest updates",
+        title: "Keep the catalog feeling current.",
+        body: "Open recently updated novels when you want active stories instead of back-catalog drift.",
+        ctaLabel: "See latest novels",
+        href: "/novels?sort=latest",
+      },
+      {
+        eyebrow: "Finished reads",
+        title: "Find a full story arc fast.",
+        body: "Completed novels are still the cleanest first choice when you want to settle into a longer read.",
+        ctaLabel: "See completed novels",
+        href: "/novels?status=completed",
+      },
+    ],
   },
 };
 
@@ -268,7 +318,7 @@ export default function SeriesPage({ type = "comic" }) {
         title: `Popular ${config.title.toLowerCase()}`,
         description:
           "These titles already have reader momentum, so they are safer entry points than random catalog picks.",
-        ctaLabel: "Open top series",
+        ctaLabel: "Browse Top Series",
         href: "/rankings?type=popular&window=week",
         items: trending,
       },
@@ -352,8 +402,8 @@ export default function SeriesPage({ type = "comic" }) {
 
       <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
-          eyebrow={type === "comic" ? "Comics" : "Novels"}
-          title={`Browse ${config.title.toLowerCase()} in one place.`}
+          eyebrow={config.eyebrow}
+          title={config.heroTitle}
           description={config.description}
           secondary={config.secondary}
           stats={heroStats}
@@ -372,7 +422,7 @@ export default function SeriesPage({ type = "comic" }) {
                 onClick={() => router.push("/rankings")}
                 className={secondaryButtonClass}
               >
-                See charts
+                Top Series
               </button>
             </>
           }
@@ -429,6 +479,31 @@ export default function SeriesPage({ type = "comic" }) {
                     />
                   ))}
                 </div>
+              </SurfacePanel>
+            ))}
+          </section>
+        ) : null}
+
+        {!loading && Array.isArray(config.browseGuides) && config.browseGuides.length > 0 ? (
+          <section className="grid gap-4 xl:grid-cols-3">
+            {config.browseGuides.map((item) => (
+              <SurfacePanel key={item.title} className="space-y-4" appearance="light" accent="blue">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    {item.eyebrow}
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    {item.title}
+                  </h2>
+                </div>
+                <p className="text-sm leading-7 text-slate-600">{item.body}</p>
+                <button
+                  type="button"
+                  onClick={() => router.push(item.href)}
+                  className={secondaryButtonClass}
+                >
+                  {item.ctaLabel}
+                </button>
               </SurfacePanel>
             ))}
           </section>

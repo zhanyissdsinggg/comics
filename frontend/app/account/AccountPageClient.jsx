@@ -272,9 +272,9 @@ export default function AccountPage() {
     () => [
       {
         label: "Status",
-        value: !hydrated ? "--" : isSignedIn ? "Signed in" : "Guest",
+        value: !hydrated ? "Syncing" : isSignedIn ? "Signed in" : "Guest",
         hint: !hydrated
-          ? "Preparing your account details."
+          ? "Account status is syncing now."
           : isSignedIn
             ? user?.emailVerified
               ? "Reading, purchases, and alerts can stay synced here."
@@ -283,11 +283,11 @@ export default function AccountPage() {
       },
       {
         label: "Membership",
-        value: !hydrated ? "--" : subscription?.active ? "Member" : "Free",
+        value: !hydrated ? "Checking" : subscription?.active ? "Member" : "Free",
         hint: subscription?.renewAt
           ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
           : !hydrated
-            ? "Membership details will show up here."
+            ? "Plan details will appear here."
             : "Upgrade any time if you read often.",
       },
       {
@@ -297,12 +297,12 @@ export default function AccountPage() {
       },
       {
         label: "Purchases",
-        value: !hydrated || ordersLoading ? "--" : isSignedIn ? orders.length.toLocaleString() : "--",
+        value: !hydrated || ordersLoading ? "Updating" : isSignedIn ? orders.length.toLocaleString() : "Sign in",
         hint: ordersLoading
-          ? "Recent purchases will appear here shortly."
+          ? "Purchase history is syncing now."
           : isSignedIn
             ? "Latest packs and memberships at a glance."
-            : "Sign in to see your purchases.",
+            : "Sign in to see receipts and order IDs.",
       },
     ],
     [
@@ -418,6 +418,13 @@ export default function AccountPage() {
               >
                 Browse series
               </button>
+              <button
+                type="button"
+                onClick={() => router.push("/store")}
+                className={secondaryButtonClass}
+              >
+                Store
+              </button>
             </div>
           </SurfacePanel>
         ) : null}
@@ -457,13 +464,18 @@ export default function AccountPage() {
                 </div>
                 <div>
                   <label className={fieldLabelClass}>Account</label>
-                  <div className={`${fieldClass} text-slate-600`}>
-                    {!hydrated
-                      ? "Preparing account details..."
-                      : isSignedIn
+                  {!hydrated ? (
+                    <div className={`${fieldClass} flex flex-col justify-center gap-2`} aria-hidden="true">
+                      <div className="h-3 w-28 animate-pulse rounded-full bg-slate-200" />
+                      <div className="h-3 w-40 animate-pulse rounded-full bg-slate-100" />
+                    </div>
+                  ) : (
+                    <div className={`${fieldClass} text-slate-600`}>
+                      {isSignedIn
                         ? user?.email || user?.id || "Active account"
                         : "Browsing on this device"}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -779,8 +791,14 @@ export default function AccountPage() {
                 </p>
               </div>
               {!hydrated || ordersLoading ? (
-                <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">
-                  Getting your recent purchases ready.
+                <div className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4" aria-hidden="true">
+                  {Array.from({ length: 2 }).map((_, index) => (
+                    <div key={index} className="rounded-[20px] border border-black/6 bg-white px-4 py-4">
+                      <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
+                      <div className="mt-3 h-3 w-40 animate-pulse rounded-full bg-slate-100" />
+                      <div className="mt-3 h-3 w-full animate-pulse rounded-full bg-slate-100" />
+                    </div>
+                  ))}
                 </div>
               ) : !isSignedIn ? (
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-600">
