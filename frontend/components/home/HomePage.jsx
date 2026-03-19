@@ -32,7 +32,6 @@ import { consumeCommerceSuccessForPath, getCommerceSuccessPresentation } from ".
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { buildHomeHeroItems, getHomeEditorialSnapshot, getSeriesScore } from "../../lib/homeMerchandising";
-import { siteConfig } from "../../lib/siteConfig";
 import { getSearchParam } from "../../lib/pageSearchParams";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -267,34 +266,6 @@ function FallbackDiscoveryCard({ eyebrow, title, description, label, onClick }) 
         </Button>
       </CardContent>
     </Card>
-  );
-}
-
-function TrustContactCard({ eyebrow, title, description, label, href, onClick, external = false }) {
-  const className =
-    "block rounded-[24px] border border-black/6 bg-[#f8f9fc] p-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/10 hover:bg-white";
-
-  const content = (
-    <>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">{eyebrow}</p>
-      <h3 className="mt-2 text-base font-semibold text-slate-950">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-      <span className="mt-3 inline-flex text-sm font-semibold text-slate-700">{label}</span>
-    </>
-  );
-
-  if (external) {
-    return (
-      <a href={href} className={className}>
-        {content}
-      </a>
-    );
-  }
-
-  return (
-    <button type="button" onClick={onClick} className={className}>
-      {content}
-    </button>
   );
 }
 
@@ -1118,31 +1089,6 @@ function HomeContent({ initialSearchParams = {} }) {
                   ))}
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  <TrustContactCard
-                    eyebrow="Support"
-                    title={siteConfig.supportEmail}
-                    description="Billing, account, and access help with a direct contact path."
-                    label="Email support"
-                    href={`mailto:${siteConfig.supportEmail}`}
-                    external
-                  />
-                  <TrustContactCard
-                    eyebrow="Privacy"
-                    title={siteConfig.privacyEmail}
-                    description="Privacy questions and data requests should not be buried."
-                    label="Email privacy"
-                    href={`mailto:${siteConfig.privacyEmail}`}
-                    external
-                  />
-                  <TrustContactCard
-                    eyebrow="Company"
-                    title={siteConfig.companyName}
-                    description="About, terms, and policy links stay visible when trust matters."
-                    label="About Gush"
-                    onClick={() => router.push("/about")}
-                  />
-                </div>
               </CardContent>
             </Card>
           </section>
@@ -1218,31 +1164,6 @@ function HomeContent({ initialSearchParams = {} }) {
                   ))}
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  <TrustContactCard
-                    eyebrow="Support"
-                    title={siteConfig.supportEmail}
-                    description="Billing, account, and access help with a direct contact path."
-                    label="Email support"
-                    href={`mailto:${siteConfig.supportEmail}`}
-                    external
-                  />
-                  <TrustContactCard
-                    eyebrow="Privacy"
-                    title={siteConfig.privacyEmail}
-                    description="Privacy questions and data requests should not be buried."
-                    label="Email privacy"
-                    href={`mailto:${siteConfig.privacyEmail}`}
-                    external
-                  />
-                  <TrustContactCard
-                    eyebrow="Company"
-                    title={siteConfig.companyName}
-                    description="About, terms, and policy links stay visible when trust matters."
-                    label="About Gush"
-                    onClick={() => router.push("/about")}
-                  />
-                </div>
               </CardContent>
             </Card>
           </section>
@@ -1322,6 +1243,50 @@ function HomeContent({ initialSearchParams = {} }) {
             )}
           </>
         ) : null}
+
+        <section className="mb-12">
+          <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.99))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+            <CardContent className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Final step</p>
+                <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+                  Leave the homepage with a cleaner next click.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Start free, browse Top Series, or compare one-time packs against membership before the footer closes the page.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={() => router.push("/rankings?type=ttf&window=all")}
+                  className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
+                >
+                  Start reading free
+                </Button>
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="outline"
+                  onClick={() => router.push("/rankings?type=popular&window=week")}
+                  className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                >
+                  Browse top series
+                </Button>
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="outline"
+                  onClick={() => router.push("/store")}
+                  className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                >
+                  Compare packs and membership
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
         <LoginPrompt
           isOpen={showLoginPrompt}

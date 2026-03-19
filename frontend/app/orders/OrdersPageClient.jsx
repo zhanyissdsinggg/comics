@@ -510,6 +510,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
+  const heroPrimaryButtonClass =
+    "h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800";
+  const heroSecondaryButtonClass =
+    "h-11 rounded-full border border-black/8 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
 
   return (
     <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
@@ -522,24 +526,17 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           eyebrow="Purchases"
           title={
             latestPaidOrder
-              ? "See what you bought and jump back into reading."
+              ? "Get your receipt, fix a charge, or keep reading."
               : viewerSignedIn
-                ? "Find receipts, fix charges, and keep order IDs close."
-                : "Purchases live on your account."
+                ? "Get your receipt, fix a charge, or buy more points."
+                : "Sign in, compare plans, or get billing help."
           }
           description={
             latestPaidOrder
-              ? "Your latest purchase is here, along with quick ways to keep reading or get help."
+              ? "Start with the action you need first. Purchase history and your latest unlock stay lower on the page."
               : viewerSignedIn
-                ? "Point packs and memberships show up here so you can handle receipts, charges, and billing questions without digging through settings."
-                : "Sign in to keep receipts, order IDs, membership charges, and billing help in one place."
-          }
-          secondary={
-            latestPaidOrder
-              ? `Latest order: ${latestPaidOrder.orderId} | ${formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)}`
-              : viewerSignedIn
-                ? "New purchases usually appear here shortly after checkout."
-                : "After checkout, this page is where charges, receipts, and order IDs stay easy to find."
+                ? "Receipts, membership charges, missing points, and billing help should all be one tap away from the top."
+                : "Sign in to keep receipts and membership charges on one account, or jump straight to billing help and plan comparison."
           }
           actions={
             viewerSignedIn ? (
@@ -547,16 +544,37 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 <button
                   type="button"
                   onClick={() => scrollToSection("purchase-history")}
-                  className={primaryButtonClass}
+                  className={heroPrimaryButtonClass}
                 >
                   View receipts
                 </button>
                 <button
                   type="button"
+                  onClick={() => scrollToSection("purchase-history")}
+                  className={heroSecondaryButtonClass}
+                >
+                  See membership charges
+                </button>
+                <button
+                  type="button"
                   onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
-                  className={secondaryButtonClass}
+                  className={heroSecondaryButtonClass}
+                >
+                  Missing points?
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
+                  className={heroSecondaryButtonClass}
                 >
                   Get billing help
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/store")}
+                  className={heroSecondaryButtonClass}
+                >
+                  Buy more points
                 </button>
               </>
             ) : (
@@ -564,14 +582,36 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 <button
                   type="button"
                   onClick={signInToOrders}
-                  className={primaryButtonClass}
+                  className={heroPrimaryButtonClass}
                 >
                   Sign in
                 </button>
                 <button
                   type="button"
+                  onClick={() => router.push("/store")}
+                  className={heroSecondaryButtonClass}
+                >
+                  {STOREFRONT_TERMS.viewPointPacks}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      buildPathWithAttribution("/subscribe", {
+                        entryPoint: "ORDERS_HERO",
+                        sourcePath: "/orders",
+                        returnTo: "/orders",
+                      }),
+                    )
+                  }
+                  className={heroSecondaryButtonClass}
+                >
+                  {STOREFRONT_TERMS.compareMembership}
+                </button>
+                <button
+                  type="button"
                   onClick={() => router.push(buildSupportHref("", "billing"))}
-                  className={secondaryButtonClass}
+                  className={heroSecondaryButtonClass}
                 >
                   Get billing help
                 </button>
