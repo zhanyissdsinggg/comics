@@ -227,27 +227,6 @@ function ValueCard({ icon: Icon, eyebrow, title, description }) {
   );
 }
 
-function ResourceLinkCard({ eyebrow, title, description, label, onClick }) {
-  return (
-    <Card className="overflow-hidden rounded-[26px] border border-black/6 bg-white/92 py-0 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
-      <CardContent className="p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{eyebrow}</p>
-        <h3 className="mt-3 font-display text-[1.3rem] font-semibold tracking-tight text-slate-950">{title}</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onClick}
-          className="mt-4 h-10 rounded-full border-black/8 bg-white px-4 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
-        >
-          {label}
-          <ArrowRight className="size-4" />
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
 function FallbackDiscoveryCard({ eyebrow, title, description, label, onClick }) {
   return (
     <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
@@ -1026,7 +1005,7 @@ function HomeContent({ initialSearchParams = {} }) {
         ) : null}
 
         {newUpdateItems.length > 0 ? (
-          <section className="mb-10 grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
+          <section className="mb-10">
             <Card className="overflow-hidden rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
               <CardContent className="p-5 sm:p-6">
                 <div className="flex flex-wrap items-end justify-between gap-3">
@@ -1066,34 +1045,9 @@ function HomeContent({ initialSearchParams = {} }) {
               </CardContent>
             </Card>
 
-            <Card className="overflow-hidden rounded-[32px] border border-black/6 bg-white/94 py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-              <CardContent className="p-5 sm:p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Know the basics</p>
-                <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
-                  Pricing, support, and account rules stay close.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  A good first visit should show points, billing help, FAQ answers, and 18+ controls without making you hunt for them.
-                </p>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {helpResourceCards.map((item) => (
-                    <ResourceLinkCard
-                      key={item.href}
-                      eyebrow={item.eyebrow}
-                      title={item.title}
-                      description={item.description}
-                      label={item.label}
-                      onClick={() => router.push(item.href)}
-                    />
-                  ))}
-                </div>
-
-              </CardContent>
-            </Card>
           </section>
         ) : showCatalogFallback ? (
-          <section className="mb-10 grid gap-4 xl:grid-cols-[0.96fr_1.04fr]">
+          <section className="mb-10">
             <Card className="overflow-hidden rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
               <CardContent className="p-5 sm:p-6">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">First visit basics</p>
@@ -1141,31 +1095,6 @@ function HomeContent({ initialSearchParams = {} }) {
               </CardContent>
             </Card>
 
-            <Card className="overflow-hidden rounded-[32px] border border-black/6 bg-white/94 py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-              <CardContent className="p-5 sm:p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Keep help close</p>
-                <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
-                  Pricing, support, and account rules stay visible.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Even before the full catalog is live, the homepage should still explain how points, billing help, and 18+ controls work.
-                </p>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {helpResourceCards.map((item) => (
-                    <ResourceLinkCard
-                      key={item.href}
-                      eyebrow={item.eyebrow}
-                      title={item.title}
-                      description={item.description}
-                      label={item.label}
-                      onClick={() => router.push(item.href)}
-                    />
-                  ))}
-                </div>
-
-              </CardContent>
-            </Card>
           </section>
         ) : null}
 
@@ -1246,43 +1175,61 @@ function HomeContent({ initialSearchParams = {} }) {
 
         <section className="mb-12">
           <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.99))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-            <CardContent className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Final step</p>
-                <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
-                  Leave the homepage with a cleaner next click.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Start free, browse Top Series, or compare one-time packs against membership before the footer closes the page.
-                </p>
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-3xl">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Final step</p>
+                  <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+                    Leave the homepage with a cleaner next click.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    Start free, browse Top Series, or compare one-time packs against membership before the footer closes the page.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={() => router.push("/rankings?type=ttf&window=all")}
+                    className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
+                  >
+                    Start reading free
+                  </Button>
+                  <Button
+                    type="button"
+                    size="lg"
+                    variant="outline"
+                    onClick={() => router.push("/rankings?type=popular&window=week")}
+                    className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  >
+                    Browse top series
+                  </Button>
+                  <Button
+                    type="button"
+                    size="lg"
+                    variant="outline"
+                    onClick={() => router.push("/store")}
+                    className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  >
+                    Compare packs and membership
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  size="lg"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
-                >
-                  Start reading free
-                </Button>
-                <Button
-                  type="button"
-                  size="lg"
-                  variant="outline"
-                  onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
-                >
-                  Browse top series
-                </Button>
-                <Button
-                  type="button"
-                  size="lg"
-                  variant="outline"
-                  onClick={() => router.push("/store")}
-                  className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
-                >
-                  Compare packs and membership
-                </Button>
+
+              <div className="mt-6 border-t border-black/6 pt-5">
+                <div className="flex flex-wrap gap-2.5">
+                  {helpResourceCards.map((item) => (
+                    <Button
+                      key={item.href}
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.push(item.href)}
+                      className="h-10 rounded-full border-black/8 bg-white px-4 text-sm font-semibold text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
