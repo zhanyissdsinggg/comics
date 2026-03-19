@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import EditorialHero from "../../components/common/EditorialHero";
@@ -140,6 +140,32 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
     [latestPaidOrder?.packageId],
   );
   const hasRecentPaidOrder = Boolean(latestPaidOrder?.createdAt && isRecentOrder(latestPaidOrder.createdAt));
+  const signInToOrders = useCallback(() => {
+    router.push("/signin?returnTo=/orders");
+  }, [router]);
+  const refreshOrders = useCallback(async () => {
+    if (!viewerSignedIn) {
+      signInToOrders();
+      return;
+    }
+
+    setWorkingId("refresh");
+    const response = await apiGet("/api/orders", {
+      suppressAuthModal: true,
+      bust: true,
+      dedupeMs: 0,
+    });
+    if (response.ok) {
+      setOrders(response.data?.orders || []);
+      setFeedback({ type: "success", text: "Purchase list updated." });
+    } else {
+      setFeedback({
+        type: "error",
+        text: getFriendlyMessage(response.error, response.message || "Refresh failed."),
+      });
+    }
+    setWorkingId("");
+  }, [signInToOrders, viewerSignedIn]);
   const postPurchaseCards = useMemo(
     () => [
       {
@@ -328,61 +354,118 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   const orderStats = useMemo(() => {
     if (loading) {
       return [
-        { label: "Orders", value: "Receipts", hint: "Recent purchases show up here once the page is ready." },
-        { label: "Paid", value: "Charges", hint: "Completed purchases stay attached to your account." },
-        { label: "Refunds", value: "Support", hint: "Refund requests and billing help stay on this page." },
-        { label: "Spent", value: "Totals", hint: "Spend totals appear as soon as purchase history loads." },
+        { label: "Receipts", value: "Loading", hint: "Recent charges and order IDs show up here once purchase history finishes loading." },
+        { label: "Billing help", value: "Ready", hint: "Support and refund paths stay close to purchase history." },
+        { label: "Point packs", value: "Store", hint: "Buy one-time packs when you want flexible unlocks." },
+        { label: "Membership", value: "Monthly", hint: "Compare membership if you read often." },
       ];
     }
 
     if (!viewerSignedIn) {
       return [
-        { label: "Orders", value: "Sign in", hint: "Purchases stay on your account, not just this device." },
-        { label: "Billing", value: "Clear", hint: "Point packs and membership charges both show up here." },
-        { label: "Help", value: "Fast", hint: "Use Support when a charge or receipt looks wrong." },
-        { label: "Receipts", value: "Saved", hint: "Order IDs stay here after checkout." },
+        { label: "Receipts", value: "Sign in", hint: "Purchases, renewals, and order IDs stay on your account after checkout." },
+        { label: "Billing help", value: "Support", hint: "Use Support when a receipt is missing or a charge looks wrong." },
+        { label: "Point packs", value: "One-time", hint: "Store is for flexible unlocks without a monthly charge." },
+        { label: "Membership", value: "Monthly", hint: "Membership is the recurring option for readers who unlock often." },
       ];
     }
 
-    const paidCount = orders.filter((order) => order.status === "PAID").length;
-    const refundedCount = orders.filter((order) => String(order.status).includes("REFUND")).length;
-    const totalAmount = orders.reduce((sum, order) => sum + Number(order.amount || 0), 0);
-    const currencies = Array.from(
-      new Set(orders.map((order) => String(order.currency || "").toUpperCase()).filter(Boolean)),
-    );
-    const singleCurrency = currencies.length === 1 ? currencies[0] : "";
-    const totalSpentLabel = singleCurrency
-        ? formatOrderAmount(totalAmount, singleCurrency)
-        : currencies.length > 1
-          ? "Multiple"
-          : formatUSCurrency(0);
-
     return [
       {
-        label: "Orders",
-        value: orders.length.toLocaleString(),
-        hint: viewerSignedIn ? "Saved to your account." : "Sign in to see your saved purchases.",
+        label: "Latest receipt",
+        value: latestPaidOrder?.orderId || (orders.length > 0 ? "Recent charge" : "None yet"),
+        hint: latestPaidOrder
+          ? `Placed ${formatOrderDate(latestPaidOrder.createdAt)}. Keep this order ID handy for billing help.`
+          : "Refresh after checkout to pull in receipts and order IDs.",
       },
       {
-        label: "Paid",
-        value: paidCount.toLocaleString(),
-        hint: "Completed purchases in your history.",
+        label: "Latest charge",
+        value: latestPaidOrder
+          ? formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)
+          : "No charges",
+        hint: latestPaidOrder
+          ? `${latestPaidOrder.packageId} is the most recent paid order on this account.`
+          : "Point packs and membership renewals will both appear here.",
       },
       {
-        label: "Refunds",
-        value: refundedCount.toLocaleString(),
-        hint: "Orders already moving through a refund.",
+        label: "Billing help",
+        value: refundActionsEnabled ? "Support + refunds" : "Support",
+        hint: refundActionsEnabled
+          ? "Refund requests and charge questions both route from this page."
+          : "Use Support for wrong charges, missing points, or missing receipts.",
       },
       {
-        label: "Spent",
-        value: totalSpentLabel,
-        hint:
-          currencies.length > 1
-            ? "Loaded in more than one currency."
-            : "Visible total for the purchases on this page.",
+        label: "Next step",
+        value: latestPaidOrder ? latestOrderGuide.nextCta : STOREFRONT_TERMS.viewPointPacks,
+        hint: latestPaidOrder
+          ? "Keep reading, compare membership, or buy another pack without leaving purchase history."
+          : "Store and Membership stay close when you are ready to buy.",
       },
     ];
-  }, [viewerSignedIn, loading, orders]);
+  }, [latestOrderGuide.nextCta, latestPaidOrder, loading, orders, refundActionsEnabled, viewerSignedIn]);
+
+  const billingTaskCards = useMemo(
+    () => [
+      {
+        id: "receipt",
+        eyebrow: "Receipts",
+        title: viewerSignedIn
+          ? latestPaidOrder
+            ? `Receipt ${latestPaidOrder.orderId} is ready.`
+            : orders.length > 0
+              ? "Refresh to pull in the latest receipt."
+              : "Your first receipt will land here."
+          : "Sign in to keep receipts on one account.",
+        description: viewerSignedIn
+          ? latestPaidOrder
+            ? "Use the order ID when a charge, receipt, or points balance needs a closer look."
+            : "Recent charges and order IDs appear here shortly after checkout."
+          : "Receipts, renewals, and order IDs stay on your account after checkout instead of getting stranded on one device.",
+        cta: viewerSignedIn ? "Refresh list" : "Sign in",
+        onClick: viewerSignedIn ? refreshOrders : signInToOrders,
+        accentClass:
+          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+      },
+      {
+        id: "billing-help",
+        eyebrow: "Billing help",
+        title: latestPaidOrder
+          ? refundActionsEnabled
+            ? "Wrong charge or refund question?"
+            : `Need help with ${latestPaidOrder.orderId}?`
+          : "Missing receipt or charge question?",
+        description: refundActionsEnabled
+          ? "Completed purchases can still be reviewed here. Support is the fallback when a charge needs a human check."
+          : "Use Support for missing receipts, missing points, wrong charges, or anything else that looks off.",
+        cta: "Get help",
+        onClick: () => router.push(buildSupportHref(latestPaidOrder?.orderId)),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "next",
+        eyebrow: "Next step",
+        title: latestPaidOrder ? "Need more unlocks or a better fit?" : "Choose packs or membership before checkout.",
+        description: latestPaidOrder
+          ? "Point packs stay flexible. Membership is the better fit when repeated top-ups start to add up."
+          : "Store is the one-time path. Membership is the recurring path for frequent readers.",
+        cta: latestPaidOrder ? STOREFRONT_TERMS.compareMembership : STOREFRONT_TERMS.viewPointPacks,
+        onClick: () =>
+          latestPaidOrder
+            ? router.push(
+                buildPathWithAttribution("/subscribe", {
+                  entryPoint: "ORDERS_BILLING_TASKS",
+                  sourcePath: "/orders",
+                  returnTo: "/orders",
+                }),
+              )
+            : router.push("/store"),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+    ],
+    [latestPaidOrder, orders.length, refreshOrders, refundActionsEnabled, router, signInToOrders, viewerSignedIn],
+  );
 
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
@@ -402,15 +485,15 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             latestPaidOrder
               ? "See what you bought and jump back into reading."
               : viewerSignedIn
-                ? "Your purchases, receipts, and order IDs."
+                ? "Find receipts, fix charges, and keep order IDs close."
                 : "Purchases live on your account."
           }
           description={
             latestPaidOrder
               ? "Your latest purchase is here, along with quick ways to keep reading or get help."
               : viewerSignedIn
-                ? "Point packs and memberships show up here so you can check receipts, charges, and billing details without digging through settings."
-                : "Sign in to see receipts, order IDs, membership charges, and billing help in one place."
+                ? "Point packs and memberships show up here so you can handle receipts, charges, and billing questions without digging through settings."
+                : "Sign in to keep receipts, order IDs, membership charges, and billing help in one place."
           }
           secondary={
             latestPaidOrder
@@ -424,39 +507,22 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             <>
               <button
                 type="button"
-                onClick={async () => {
-                  if (!viewerSignedIn) {
-                    router.push("/signin?returnTo=/orders");
-                    return;
-                  }
-                  setWorkingId("refresh");
-                  const response = await apiGet("/api/orders", {
-                    suppressAuthModal: true,
-                    bust: true,
-                    dedupeMs: 0,
-                  });
-                  if (response.ok) {
-                    setOrders(response.data?.orders || []);
-                    setFeedback({ type: "success", text: "Purchase list updated." });
-                  } else {
-                    setFeedback({
-                      type: "error",
-                      text: getFriendlyMessage(response.error, response.message || "Refresh failed."),
-                    });
-                  }
-                  setWorkingId("");
-                }}
+                onClick={refreshOrders}
                 className={primaryButtonClass}
-                disabled={!viewerSignedIn || (!hydrated && initialSignedIn) || workingId === "refresh"}
+                disabled={viewerSignedIn ? (!hydrated && initialSignedIn) || workingId === "refresh" : false}
               >
-                {workingId === "refresh" ? "Refreshing..." : "Refresh purchases"}
+                {!viewerSignedIn ? "Sign in" : workingId === "refresh" ? "Refreshing..." : "Refresh purchases"}
               </button>
               <button
                 type="button"
-                onClick={() => router.push(viewerSignedIn ? "/account" : "/signin?returnTo=/orders")}
+                onClick={() =>
+                  viewerSignedIn
+                    ? router.push(buildSupportHref(latestPaidOrder?.orderId))
+                    : router.push(buildSupportHref("", "billing"))
+                }
                 className={secondaryButtonClass}
               >
-                {viewerSignedIn ? "Account" : "Sign in"}
+                Billing help
               </button>
             </>
           }
@@ -564,53 +630,29 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               </SurfacePanel>
             ) : null}
 
-          <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Refunds
+                  Common billing tasks
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Not every purchase can be refunded.
+                  Find the receipt, fix the charge, or choose what to buy next.
                 </h2>
-              </div>
-              <ul className="space-y-3 text-sm leading-6 text-slate-600">
-                <li>Only completed purchases can be reviewed.</li>
-                <li>If points from the purchase were already used, it may no longer qualify.</li>
-                <li>If you do not see a refund button, send us a message with the order ID.</li>
-              </ul>
-            </SurfacePanel>
-
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-              <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Need help?
+                <p className="text-sm leading-6 text-slate-600">
+                  Purchases should answer the next job quickly instead of making you scan summary tiles first.
                 </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Keep the order ID handy.
-                </h2>
               </div>
-              <p className="text-sm leading-6 text-slate-600">
-                If a charge looks wrong, send us a message and include the order ID so we can start in the right place.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
-                  className={primaryButtonClass}
-                >
-                  Get help
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/account")}
-                  className={secondaryButtonClass}
-                >
-                  Account
-                </button>
+              <StorefrontPathwaysGrid
+                cards={billingTaskCards}
+                columnsClassName="md:grid-cols-3"
+                appearance="light"
+              />
+              <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm text-slate-600">
+                {refundActionsEnabled
+                  ? "Refund requests only appear on purchases that still qualify. If the button is missing or the charge still looks wrong, use billing help and include the order ID."
+                  : "Refunds are not self-serve right now. Use billing help and include the order ID if a charge needs review."}
               </div>
             </SurfacePanel>
-          </div>
           </>
         ) : null}
 

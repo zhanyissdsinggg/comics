@@ -7,7 +7,7 @@ import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import PackageCard from "./PackageCard";
-import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
+import CommerceRouteSummary from "../common/CommerceRouteSummary";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useCouponStore } from "../../store/useCouponStore";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -325,122 +325,6 @@ export default function StorePage({
       }),
     [orderedPackages],
   );
-  const storeActionCards = useMemo(
-    () => [
-      {
-        id: "free-starts",
-        eyebrow: "Start free",
-        title: "Use free chapters before your first paid unlock.",
-        description:
-          "Top Series and free starts are still the safest first click while you compare one-time packs.",
-        cta: "Browse free starts",
-        onClick: () => router.push("/rankings?type=ttf&window=all"),
-        accentClass:
-          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
-      },
-      {
-        id: "membership",
-        eyebrow: "Membership",
-        title: purchasePreviewOnly
-          ? "Compare monthly plans while pack checkout is paused."
-          : purchaseStateUnknown
-            ? "Compare monthly plans while checkout status is still unavailable."
-          : "Compare monthly plans if you read often.",
-        description: purchasePreviewOnly
-          ? "Store is the one-time option. Membership is still the recurring path to compare while launch work finishes."
-          : purchaseStateUnknown
-            ? "Pack pricing is visible, but membership still gives you the clearer recurring option while billing status catches up."
-          : "Use membership when repeated top-ups start to feel heavier than a monthly plan.",
-        cta: STOREFRONT_TERMS.compareMembership,
-        onClick: () =>
-          router.push(
-            buildPathWithAttribution("/subscribe", {
-              promotionId: promotionId || undefined,
-              campaignId: campaignId || undefined,
-              entryPoint: "STORE_ACTIONS",
-              sourcePath,
-              sourceSeriesId: sourceSeriesId || undefined,
-              sourceEpisodeId: sourceEpisodeId || undefined,
-              returnTo,
-            }),
-          ),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: "purchases",
-        eyebrow: "Purchases",
-        title: "Keep receipts, renewals, and order IDs easy to find.",
-        description:
-          "Purchases is the first stop after checkout when you need proof of charge, receipts, or renewal history.",
-        cta: "View purchases",
-        onClick: () => router.push("/orders"),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: isSignedIn ? "account" : "support",
-        eyebrow: isSignedIn ? "Account" : "Billing help",
-        title: isSignedIn
-          ? "Manage billing, sync, and recovery from one place."
-          : "Need billing help or launch updates before checkout is live?",
-        description: isSignedIn
-          ? "Account keeps purchases, membership, recovery, and reading setup together without sending you through settings soup."
-          : "Support is the calm fallback for preview-state questions, wrong-charge concerns, or account confusion.",
-        cta: isSignedIn ? "Open account" : "Get help",
-        onClick: () =>
-          isSignedIn
-            ? router.push("/account")
-            : router.push(buildSupportPath({ topic: "billing", context: "Store preview or billing help" })),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-    ],
-    [
-      campaignId,
-      isSignedIn,
-      promotionId,
-      purchasePreviewOnly,
-      purchaseStateUnknown,
-      returnTo,
-      router,
-      sourceEpisodeId,
-      sourcePath,
-      sourceSeriesId,
-    ],
-  );
-  const storeDecisionCards = useMemo(
-    () => [
-      {
-        eyebrow: purchasePreviewOnly ? "Preview" : "Point packs",
-        title: purchasePreviewOnly
-          ? "Pack checkout is paused, but the one-time model is still clear here."
-          : purchaseStateUnknown
-            ? "Pack pricing is visible while checkout status is still unavailable."
-          : "Point packs work best when you unlock only when needed.",
-        description: packageDecisionSummary?.cheapest?.priceLabel
-          ? `The quickest entry is ${packageDecisionSummary.cheapest.name} at ${packageDecisionSummary.cheapest.priceLabel}, then you can top up again only when you need more points.`
-          : "Use point packs when you want flexible, one-time unlocks without starting a monthly charge.",
-      },
-      {
-        eyebrow: "Membership",
-        title: membershipStartingPrice
-          ? `Membership starts around ${membershipStartingPrice}/month for regular readers.`
-          : "Membership is the recurring monthly option for regular readers.",
-        description: subscriptionStats
-          ? `It is the better fit when you unlock often: up to ${subscriptionStats.maxDiscount}% off locked chapters and up to ${subscriptionStats.maxDailyFree} free reads a day.`
-          : "Use membership when repeated top-ups start to feel heavier than one monthly plan.",
-      },
-      {
-        eyebrow: "Receipts & help",
-        title: "Purchases and Support stay close after checkout.",
-        description:
-          "Receipts, charges, and order IDs live in Purchases. Billing questions, missing points, and refund requests route through Support.",
-      },
-    ],
-    [membershipStartingPrice, packageDecisionSummary, purchasePreviewOnly, purchaseStateUnknown, subscriptionStats],
-  );
-
   const handleBuy = async (packageId) => {
     if (!isSignedIn) {
       setErrorMessage("Sign in to buy points and keep them on your account.");
@@ -618,7 +502,7 @@ export default function StorePage({
                 onClick={() => scrollToSection("point-packs")}
                 className={primaryButtonClass}
               >
-                {purchaseActionsEnabled ? "View point packs" : purchasePreviewOnly ? "Compare packs" : "See point packs"}
+                {purchaseActionsEnabled ? "View point packs" : purchasePreviewOnly ? "Compare point packs" : "See point packs"}
               </button>
               {subscriptionStats ? (
                 <button
@@ -662,7 +546,7 @@ export default function StorePage({
           <SurfacePanel tone="warning" appearance="light" accent="amber">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-amber-700">Preview mode</p>
+                <p className="text-sm font-semibold text-amber-700">Point packs preview</p>
                 <p className="text-sm text-amber-700/80">
                   You can compare every pack right now. Checkout is still paused, so use this page to understand the model and line up your next move.
                 </p>
@@ -740,25 +624,6 @@ export default function StorePage({
             </div>
           </SurfacePanel>
         ) : null}
-
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              What do you need next?
-            </p>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Use Store like a task page, not a dead end.
-            </h2>
-            <p className="text-sm leading-6 text-slate-600">
-              Compare one-time packs, jump to membership, find receipts, or get billing help without backing out of the purchase flow.
-            </p>
-          </div>
-          <StorefrontPathwaysGrid
-            cards={storeActionCards}
-            columnsClassName="md:grid-cols-2 xl:grid-cols-4"
-            appearance="light"
-          />
-        </SurfacePanel>
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -867,29 +732,35 @@ export default function StorePage({
               </SurfacePanel>
             ) : null}
 
-            <SurfacePanel className="space-y-3" appearance="light" accent="blue">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Taxes and local pricing
-              </p>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                See the local total before you confirm.
-              </h2>
-              <p className="text-sm leading-6 text-slate-600">
-                {regionConfig.taxHint} The pack cards show the current regional price label before checkout.
-              </p>
-            </SurfacePanel>
-
-            {subscriptionStats ? (
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+              <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Read every week?
+                  Before checkout
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Membership is the monthly option for regular readers.
+                  Know the total, the monthly alternative, and where receipts land.
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
-                  It renews monthly while active and can make more sense than repeated point-pack purchases if you unlock chapters all the time.
+                  Point packs stay one-time. Membership stays monthly. Purchases and Support stay close after either path.
                 </p>
+              </div>
+              <div className="grid gap-3">
+                <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
+                  <p className="text-sm font-semibold text-slate-950">Local total stays visible</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {regionConfig.taxHint} Pack cards show the current regional price label before checkout.
+                  </p>
+                </div>
+                <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
+                  <p className="text-sm font-semibold text-slate-950">Membership is the monthly alternative</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {subscriptionStats
+                      ? `Use packs for one-time unlocks. Membership starts around ${membershipStartingPrice || "the current plan price"} a month and can save up to ${subscriptionStats.maxDiscount}% when you read often.`
+                      : "Use packs for one-time unlocks. Compare membership if repeated top-ups start feeling heavier than one monthly plan."}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() =>
@@ -897,7 +768,7 @@ export default function StorePage({
                       buildPathWithAttribution("/subscribe", {
                         promotionId: promotionId || undefined,
                         campaignId: campaignId || undefined,
-                        entryPoint: "STORE_UPSELL",
+                        entryPoint: "STORE_SIDEBAR_COMPARE",
                         sourcePath,
                         sourceSeriesId: sourceSeriesId || undefined,
                         sourceEpisodeId: sourceEpisodeId || undefined,
@@ -909,8 +780,15 @@ export default function StorePage({
                 >
                   {STOREFRONT_TERMS.compareMembership}
                 </button>
-              </SurfacePanel>
-            ) : null}
+                <button
+                  type="button"
+                  onClick={() => router.push("/orders")}
+                  className={secondaryButtonClass}
+                >
+                  View purchases
+                </button>
+              </div>
+            </SurfacePanel>
 
             <SurfacePanel id="wallet-codes" className="space-y-4" appearance="light" accent="blue">
               <div className="flex items-center justify-between gap-3">
@@ -1007,7 +885,7 @@ export default function StorePage({
                     ctaLabel={
                       !purchaseActionsEnabled
                         ? purchasePreviewOnly
-                          ? "Compare only"
+                          ? "Preview only"
                           : "Status unavailable"
                         : isSignedIn
                           ? "Get this pack"
@@ -1039,66 +917,70 @@ export default function StorePage({
           </SurfacePanel>
         </div>
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Compare the paths
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Point packs are one-time. Membership is the monthly path.
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Use packs when you want flexible unlocks. Use membership when you read every week. Purchases and Support stay close either way, without adding another giant trust wall under the page.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    buildPathWithAttribution("/subscribe", {
-                      promotionId: promotionId || undefined,
-                      campaignId: campaignId || undefined,
-                      entryPoint: "STORE_VALUE_COMPARE",
-                      sourcePath,
-                      sourceSeriesId: sourceSeriesId || undefined,
-                      sourceEpisodeId: sourceEpisodeId || undefined,
-                      returnTo,
-                    }),
-                  )
-                }
-                className={primaryButtonClass}
-              >
-                {STOREFRONT_TERMS.compareMembership}
-              </button>
-              {purchasePreviewOnly || purchaseStateUnknown ? (
-                <button
-                  type="button"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className={secondaryButtonClass}
-                >
-                  Browse free starts
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {storeDecisionCards.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-[24px] border border-black/6 bg-white/84 p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  {item.eyebrow}
-                </p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950">{item.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </SurfacePanel>
+        <CommerceRouteSummary
+          eyebrow="Compare the paths"
+          title="Point packs are one-time. Membership is the monthly path."
+          description="Use packs when you want flexible unlocks. Use membership when you read every week. Purchases and Support stay close either way."
+          primary={{
+            eyebrow: purchasePreviewOnly ? "Point packs preview" : purchaseStateUnknown ? "Point packs" : "Point packs",
+            title: purchasePreviewOnly
+              ? "Compare one-time packs while checkout is paused."
+              : purchaseStateUnknown
+                ? "Pack prices are visible while billing status catches up."
+                : "Buy a pack only when you need more unlocks.",
+            description: packageDecisionSummary?.cheapest?.priceLabel
+              ? `The fastest entry is ${packageDecisionSummary.cheapest.name} at ${packageDecisionSummary.cheapest.priceLabel}, then you top up only when you need more points.`
+              : "Use point packs when you want flexible, one-time unlocks without starting a monthly charge.",
+            tags: [
+              packageDecisionSummary?.cheapest?.priceLabel ? `Starts ${packageDecisionSummary.cheapest.priceLabel}` : "",
+              packageDecisionSummary?.largest ? `${formatUSNumber(packageDecisionSummary.largest.totalPts)} pts max` : "",
+              isSignedIn ? "Receipts on your account" : "Sign in before buying",
+            ].filter(Boolean),
+            cta: purchaseActionsEnabled ? "View point packs" : purchasePreviewOnly ? "Compare point packs" : "See point packs",
+            onClick: () => scrollToSection("point-packs"),
+            secondaryCta: !isSignedIn ? "Sign in" : "",
+            onSecondaryClick: !isSignedIn ? openAuthPrompt : null,
+          }}
+          secondary={{
+            eyebrow: "Membership",
+            title: membershipStartingPrice
+              ? `Membership starts around ${membershipStartingPrice}/month.`
+              : "Membership is the recurring option for regular readers.",
+            description: subscriptionStats
+              ? `Use membership when repeated top-ups start to feel heavier than one monthly plan: up to ${subscriptionStats.maxDiscount}% off locked chapters and up to ${subscriptionStats.maxDailyFree} free reads a day.`
+              : "Use membership when repeated top-ups start to feel heavier than one monthly plan.",
+            tags: [
+              subscriptionStats?.maxDiscount ? `${subscriptionStats.maxDiscount}% off unlocks` : "",
+              subscriptionStats?.maxDailyFree ? `${subscriptionStats.maxDailyFree} free reads / day` : "",
+              "Recurring monthly billing",
+            ].filter(Boolean),
+            cta: STOREFRONT_TERMS.compareMembership,
+            onClick: () =>
+              router.push(
+                buildPathWithAttribution("/subscribe", {
+                  promotionId: promotionId || undefined,
+                  campaignId: campaignId || undefined,
+                  entryPoint: "STORE_VALUE_COMPARE",
+                  sourcePath,
+                  sourceSeriesId: sourceSeriesId || undefined,
+                  sourceEpisodeId: sourceEpisodeId || undefined,
+                  returnTo,
+                }),
+              ),
+          }}
+          support={{
+            eyebrow: "After checkout",
+            title: "Receipts, charges, and billing help stay close.",
+            description:
+              "Purchases keeps order IDs and charges easy to find. Support handles missing points, wrong charges, and launch questions without sending readers into legal pages.",
+            tags: ["Purchases", "Billing help"],
+            cta: "View purchases",
+            onClick: () => router.push("/orders"),
+            secondaryCta: "Billing help",
+            onSecondaryClick: () =>
+              router.push(buildSupportPath({ topic: "billing", context: "Store billing help or purchase question" })),
+          }}
+        />
       </main>
     </div>
   );

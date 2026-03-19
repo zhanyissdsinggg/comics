@@ -6,7 +6,7 @@ import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
-import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
+import CommerceRouteSummary from "../common/CommerceRouteSummary";
 import { SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
 import { getPlanCatalog, setPlanCatalog } from "../../lib/subscriptions";
 import { apiGet } from "../../lib/apiClient";
@@ -265,102 +265,6 @@ export default function SubscribePage({
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
-
-  const membershipActionCards = useMemo(
-    () => [
-      {
-        id: "point-packs",
-        eyebrow: "Point packs",
-        title: "Need flexible unlocks instead of a monthly plan?",
-        description:
-          "Store is the better fit when you want one-time packs rather than a recurring membership charge.",
-        cta: STOREFRONT_TERMS.viewPointPacks,
-        onClick: () => router.push("/store"),
-        accentClass:
-          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
-      },
-      {
-        id: "purchases",
-        eyebrow: "Purchases",
-        title: "Find receipts, renewals, and order IDs in one place.",
-        description:
-          "Membership charges show up in Purchases after checkout so billing history stays easy to verify later.",
-        cta: "View purchases",
-        onClick: () => router.push("/orders"),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: "account",
-        eyebrow: "Account",
-        title: isSignedIn ? "Manage membership, recovery, and reading setup together." : "Sign in before you start a plan.",
-        description: isSignedIn
-          ? "Account keeps billing, recovery, mature-content controls, and reading settings together without a settings dump."
-          : "Membership should belong to one account so receipts, renewals, and cancellation history do not get stranded on one browser.",
-        cta: isSignedIn ? "Open account" : "Sign in",
-        onClick: () => {
-          if (isSignedIn) {
-            router.push("/account");
-            return;
-          }
-          openAuthPrompt();
-        },
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: "support",
-        eyebrow: "Billing help",
-        title: subscriptionPreviewOnly
-          ? "Need help while membership is still preview-only?"
-          : subscriptionStateUnknown
-            ? "Need help while membership status is still unavailable?"
-          : "Know where billing help lives before you subscribe.",
-        description: subscriptionPreviewOnly
-          ? "Support is the fallback if launch timing, preview-state rules, or account setup still need clarification."
-          : subscriptionStateUnknown
-            ? "Use Support if activation status, billing setup, or account readiness still looks unclear."
-          : "Use Support for wrong charges, missing access, cancellation questions, or anything that feels off after checkout.",
-        cta: "Billing help",
-        onClick: () =>
-          router.push(buildSupportPath({ topic: "billing", context: "Membership billing help or preview question" })),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-    ],
-    [isSignedIn, router, subscriptionPreviewOnly, subscriptionStateUnknown],
-  );
-  const membershipDecisionCards = useMemo(
-    () => [
-      {
-        eyebrow: subscriptionPreviewOnly ? "Preview" : subscriptionStateUnknown ? "Status" : "Recurring monthly",
-        title: subscriptionPreviewOnly
-          ? "Plans are live to compare while activation stays paused."
-          : subscriptionStateUnknown
-            ? "Plan pricing is visible while activation status is still unavailable."
-          : "Membership renews monthly while the plan stays active.",
-        description: subscriptionPreviewOnly
-          ? "Use this page to compare tiers now, then come back when starting a plan is available."
-          : subscriptionStateUnknown
-            ? "Use this page to compare tiers now, then check back once activation status resolves cleanly."
-          : "Cancel before the listed renewal date if you do not want the next monthly charge.",
-      },
-      {
-        eyebrow: "Point packs",
-        title: "Use Store if you unlock only once in a while.",
-        description:
-          "Point packs fit casual reading better. Membership is the stronger fit when repeated top-ups start feeling heavier than one plan.",
-      },
-      {
-        eyebrow: "Receipts & help",
-        title: "Purchases and Support should answer the follow-up fast.",
-        description:
-          "Renewals, receipts, and charges stay in Purchases. Billing, cancellation, and missing-access issues route through Support.",
-      },
-    ],
-    [subscriptionPreviewOnly, subscriptionStateUnknown],
-  );
-
   return (
     <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
@@ -488,25 +392,6 @@ export default function SubscribePage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              What do you need next?
-            </p>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Use Membership like a task page, not a compare-only page.
-            </h2>
-            <p className="text-sm leading-6 text-slate-600">
-              Compare point packs, check purchases, open account, or get billing help without losing the membership path.
-            </p>
-          </div>
-          <StorefrontPathwaysGrid
-            cards={membershipActionCards}
-            columnsClassName="md:grid-cols-2 xl:grid-cols-4"
-            appearance="light"
-          />
-        </SurfacePanel>
-
         <SurfacePanel id="membership-plans" className="space-y-6" appearance="light" accent="blue">
           {feedback ? (
             <div className="rounded-[24px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -515,7 +400,7 @@ export default function SubscribePage({
           ) : null}
           {subscriptionPreviewOnly ? (
             <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-              Starting membership is not live yet. Use this page to compare tiers, then browse free starts or point packs while checkout is still paused.
+              Membership is in preview right now. Use this page to compare tiers, then browse free starts or point packs while activation is still paused.
             </div>
           ) : subscriptionStateUnknown ? (
             <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
@@ -690,7 +575,7 @@ export default function SubscribePage({
                         : subscriptionStateUnknown
                           ? "Status unavailable"
                           : !subscriptionActionsEnabled
-                          ? "Compare plan"
+                          ? "Preview only"
                           : !isSignedIn
                             ? "Sign in to start"
                             : workingId === key
@@ -814,54 +699,54 @@ export default function SubscribePage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Compare the paths
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Membership is monthly. Point packs stay flexible. Help should stay obvious.
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Pick membership when you read often, use point packs when you unlock occasionally, and keep Purchases plus Support close when billing questions show up later.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => router.push("/store")}
-                className={primaryButtonClass}
-              >
-                {STOREFRONT_TERMS.viewPointPacks}
-              </button>
-              {subscriptionPreviewOnly || subscriptionStateUnknown ? (
-                <button
-                  type="button"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className={secondaryButtonClass}
-                >
-                  Browse free starts
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {membershipDecisionCards.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-[24px] border border-black/6 bg-white/84 p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  {item.eyebrow}
-                </p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950">{item.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </SurfacePanel>
+        <CommerceRouteSummary
+          eyebrow="Compare the paths"
+          title="Membership is monthly. Point packs stay flexible. Help should stay obvious."
+          description="Pick membership when you read often, use point packs when you unlock occasionally, and keep Purchases plus Support close when billing questions show up later."
+          primary={{
+            eyebrow: subscriptionPreviewOnly ? "Membership preview" : subscriptionStateUnknown ? "Membership" : "Membership",
+            title: subscriptionPreviewOnly
+              ? "Compare monthly plans while activation is paused."
+              : subscriptionStateUnknown
+                ? "Plan pricing is visible while activation status catches up."
+                : "Start a monthly plan when you read often.",
+            description: subscriptionPreviewOnly
+              ? "Use this page to compare tiers now, then come back when starting a plan is available."
+              : subscriptionStateUnknown
+                ? "Use this page to compare tiers now, then check back once activation status resolves cleanly."
+                : "Cancel before the listed renewal date if you do not want the next monthly charge.",
+            tags: [
+              "Recurring monthly billing",
+              isActive && subscription?.renewAt ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}` : "",
+              isActive ? "Current plan active" : "For frequent readers",
+            ].filter(Boolean),
+            cta: subscriptionActionsEnabled ? "Compare plans" : subscriptionPreviewOnly ? "Compare plans" : "See plans",
+            onClick: () => scrollToSection("membership-plans"),
+            secondaryCta: !isSignedIn && !isActive ? "Sign in" : "",
+            onSecondaryClick: !isSignedIn && !isActive ? openAuthPrompt : null,
+          }}
+          secondary={{
+            eyebrow: "Point packs",
+            title: "Use Store if you unlock only once in a while.",
+            description:
+              "Point packs fit casual reading better. Membership is the stronger fit when repeated top-ups start feeling heavier than one plan.",
+            tags: ["One-time packs", "Flexible unlocks", "No recurring charge"],
+            cta: STOREFRONT_TERMS.viewPointPacks,
+            onClick: () => router.push("/store"),
+          }}
+          support={{
+            eyebrow: "After checkout",
+            title: "Receipts, renewals, and billing help stay close.",
+            description:
+              "Purchases keeps charges and renewals easy to verify later. Support handles cancellation questions, missing access, and billing issues.",
+            tags: ["Purchases", "Billing help"],
+            cta: "View purchases",
+            onClick: () => router.push("/orders"),
+            secondaryCta: "Billing help",
+            onSecondaryClick: () =>
+              router.push(buildSupportPath({ topic: "billing", context: "Membership billing help or purchase question" })),
+          }}
+        />
       </main>
     </div>
   );

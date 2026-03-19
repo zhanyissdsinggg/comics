@@ -23,9 +23,9 @@ const footerSections = [
     ],
   },
   {
-    title: "Account",
+    title: "Account & Billing",
     links: [
-      { label: "Store", href: "/store" },
+      { label: "Point packs", href: "/store" },
       { label: "Membership", href: "/subscribe" },
       { label: "Purchases", href: "/orders" },
       { label: "Account", href: "/account" },
@@ -57,9 +57,9 @@ const compactFooterSections = [
     ],
   },
   {
-    title: "Account",
+    title: "Account & Billing",
     links: [
-      { label: "Store", href: "/store" },
+      { label: "Point packs", href: "/store" },
       { label: "Membership", href: "/subscribe" },
       { label: "Purchases", href: "/orders" },
       { label: "Account", href: "/account" },
@@ -69,9 +69,6 @@ const compactFooterSections = [
 
 const compactFooterMetaLinks = [
   { label: "Support", href: "/support" },
-  { label: "FAQ", href: "/faq" },
-  { label: "About", href: "/about" },
-  { label: "Mature Content", href: "/mature-content" },
   { label: "Privacy", href: "/privacy-policy" },
   { label: "Terms", href: "/terms-of-service" },
 ];
@@ -129,7 +126,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                 {siteConfig.siteName}
               </Link>
               <p className={`text-sm leading-7 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
-                Read comics and novels with point packs, membership, receipts in one place, and direct support when billing or access needs help.
+                Read comics and novels, compare point packs or membership, and keep support close when billing or access needs help.
               </p>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                 <a
@@ -178,7 +175,6 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                   {link.label}
                 </Link>
               ))}
-              {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
             </div>
           </div>
         </div>

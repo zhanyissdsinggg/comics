@@ -30,7 +30,7 @@ const ROUTES = [
     route: "/creators",
     expectedTitle: "Creators & Studios",
     expectedH1: "Find the creators worth following.",
-    expectedNeedles: ["Search by creator, studio, or genre.", "Creator spotlight", "Browse every visible creator page."],
+    expectedNeedles: ["Search by creator, studio, or genre.", "Creator spotlight", "Use comics and novels while creator shelves keep filling in."],
   },
   {
     route: "/rankings",
@@ -59,8 +59,8 @@ const ROUTES = [
   {
     route: "/account",
     expectedTitle: "Account",
-    expectedH1: "Your account, purchases, and reading setup.",
-    expectedNeedles: ["Sign in to keep purchases, library, and mature-content settings on one account.", "Browse series", "Store"],
+    expectedH1: "Sign in for receipts and recovery. Keep local reading setup here now.",
+    expectedNeedles: ["Sign in to keep purchases, library, and mature-content settings on one account.", "Reset password", "Works on this device right now"],
   },
   {
     route: "/series/demo-series",

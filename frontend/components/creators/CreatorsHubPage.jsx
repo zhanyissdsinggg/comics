@@ -96,29 +96,33 @@ function buildCreatorDirectoryHeroStats({
   stats,
 }) {
   const leadCreator = spotlightCreators[0] || creators[0] || null;
+  const leadStudio = featuredStudios[0] || creators.find((creator) => creator?.creditType === "studio") || null;
+  const leadSeries = leadCreator?.spotlightSeries || creators[0]?.spotlightSeries || null;
 
   return [
     {
-      label: "Coverage",
-      value: stats.creators > 0 ? `${stats.creators} live page${stats.creators === 1 ? "" : "s"}` : "Expanding",
-      hint: "Creator pages only show when credits are visible enough to browse cleanly.",
-    },
-    {
-      label: "Studios",
-      value: featuredStudios.length > 0 ? `${featuredStudios.length} surfaced` : "Adding more",
-      hint: featuredStudios.length > 0
-        ? "Studio shelves are grouped when multi-title credits are visible."
-        : "Studio grouping expands as more catalog credits become public.",
-    },
-    {
-      label: "Best first click",
-      value: leadCreator?.name || "Top Series",
+      label: "Start here",
+      value: leadCreator?.name || leadSeries?.title || "Top Series",
       hint: leadCreator
-        ? "Open a strong shelf first, then fan out from the visible credits behind it."
-        : "Use Top Series until more creator shelves are public.",
+        ? `Open ${leadCreator.name} to branch into linked titles from one strong creator shelf.`
+        : "Use Top Series while creator-linked shelves are still filling in.",
     },
     {
-      label: "Strongest lane",
+      label: "Free starts",
+      value: stats.freeStarts > 0 ? `${stats.freeStarts} visible` : "Use title pages",
+      hint: stats.freeStarts > 0
+        ? "Creator shelves already surface titles with free first episodes."
+        : "Free first episodes still show on title pages even when creator coverage is thin.",
+    },
+    {
+      label: "Studio lane",
+      value: leadStudio?.name || "Selected credits",
+      hint: leadStudio
+        ? "Studios with multiple visible titles get their own grouped shelf here."
+        : "Studio grouping appears as soon as multi-title credits are visible.",
+    },
+    {
+      label: "Top genre",
       value: genreOptions[0] || "Mixed catalog",
       hint: genreOptions[0]
         ? `${genreOptions[0]} is the clearest creator-led lane in the public directory right now.`
@@ -328,10 +332,10 @@ export default function CreatorsHubPage({
         href: "/rankings?type=popular&window=week",
       },
       {
-        eyebrow: "Full list",
-        title: "Browse every visible creator page.",
+        eyebrow: "Live catalog",
+        title: "Use comics and novels while creator shelves keep filling in.",
         description:
-          "This directory fills in automatically as more titles expose clean writer, artist, and studio credits.",
+          "Visible title pages already carry creator and studio credits, so you can keep browsing even when a dedicated creator page is not public yet.",
         label: "Browse comics",
         href: "/comics",
       },
@@ -361,6 +365,19 @@ export default function CreatorsHubPage({
         ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
         : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-900"
     }`;
+  const jumpToCreatorBrowse = (nextCredit = "all") => {
+    setQuery("");
+    setActiveGenre("All");
+    setCreditFilter(nextCredit);
+
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      document.getElementById("creator-filters")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   const openCreator = (creator, entryPoint = "CREATORS_HUB_GRID") => {
     if (!creator?.path) {
@@ -469,7 +486,7 @@ export default function CreatorsHubPage({
             eyebrow="Creators"
             title="Find the creators worth following."
             description="Move from one favorite title to the writer, artist, or studio behind it, then keep browsing from the same creative voice."
-            secondary="Creator pages are still expanding. Until every credit is public, search by creator, studio, or genre and use Top Series as the cleaner fallback."
+            secondary="Visible creator shelves come from public title credits. When a specific credit is not surfaced yet, search, Top Series, comics, and novels stay the clean fallback."
             stats={heroStats}
             actions={
               <>
@@ -625,28 +642,61 @@ export default function CreatorsHubPage({
           <SurfacePanel appearance="light" accent="blue" className="space-y-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Creator browse
+                Pick a lane
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Not every title exposes clean credits yet.
+                Browse by studio, creator, search, or fallback chart.
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                When a creator or studio page exists, it is the fastest way to branch into related work. When the credit is still missing, Search and Top Series should keep you moving instead of dead-ending.
+                This page should help you move instead of explaining why metadata is incomplete. Pick the browse path that matches what you already know.
               </p>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {[
-                "Use creator pages when you want the clearest follow-up after one strong title.",
-                "Use Search if you already know the creator name, studio, genre, or lead series.",
-                "Use Top Series when a creator shelf is still thin and you want the safer first click.",
-                "Use Comics or Novels when you want the wider catalog before narrowing to one voice.",
+                {
+                  eyebrow: "Studios",
+                  title: featuredStudios.length > 0 ? `Open ${featuredStudios.length} visible studio shelves.` : "Browse studio-led shelves first.",
+                  description: "Filter to studios when you want the fastest grouped shelf built from visible multi-title credits.",
+                  cta: "See studios",
+                  onClick: () => jumpToCreatorBrowse("studio"),
+                },
+                {
+                  eyebrow: "Creators",
+                  title: spotlightCreators[0]?.name ? `Start with ${spotlightCreators[0].name}.` : "Browse creator-led shelves.",
+                  description: "Filter to creator pages when you want the clearest voice-led follow-up after one strong title.",
+                  cta: "See creators",
+                  onClick: () => jumpToCreatorBrowse("creator"),
+                },
+                {
+                  eyebrow: "Search",
+                  title: "Search title, creator, or studio.",
+                  description: "Use Search when you already know the credit name, lead title, or genre lane you want.",
+                  cta: "Open search",
+                  onClick: () => router.push("/search"),
+                },
+                {
+                  eyebrow: "Fallback",
+                  title: "Use Top Series when creator shelves are still thin.",
+                  description: "Top Series stays the safer first click when a creator credit is missing or you just want the strongest public entry point.",
+                  cta: "Browse Top Series",
+                  onClick: () => router.push("/rankings?type=popular&window=week"),
+                },
               ].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600"
+                <button
+                  key={item.title}
+                  type="button"
+                  onClick={item.onClick}
+                  className="rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4 text-left transition hover:border-black/12 hover:bg-white"
                 >
-                  {item}
-                </div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    {item.eyebrow}
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-slate-950">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
+                  <span className="mt-4 inline-flex text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                    {item.cta}
+                  </span>
+                </button>
               ))}
             </div>
           </SurfacePanel>
@@ -662,56 +712,82 @@ export default function CreatorsHubPage({
                 </h2>
               </div>
               <p className="text-xs text-slate-500">
-                {featuredStudios.length > 0 ? `${featuredStudios.length} studios surfaced` : "More studios appear as credits get cleaner"}
+                {[featuredStudios.length > 0 ? `${featuredStudios.length} studio shelves` : "", featuredVoices.length > 0 ? `${featuredVoices.length} creator shelves` : ""]
+                  .filter(Boolean)
+                  .join(" | ") || "More shelves appear as credits get cleaner"}
               </p>
             </div>
 
-            <div className="space-y-3">
-              {(featuredStudios.length > 0 ? featuredStudios : featuredVoices).map((creator) => (
-                <button
-                  key={`featured-${creator.slug}`}
-                  type="button"
-                  onClick={() => openCreator(creator, "CREATORS_HUB_FEATURED")}
-                  className="w-full rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-white"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        {formatCreditTypeLabel(creator.creditType)}
-                      </p>
-                      <h3 className="mt-2 text-lg font-semibold text-slate-950">{creator.name}</h3>
-                    </div>
-                    <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
-                      {creator.titleCount} titles
-                    </span>
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
-                    {summarizeLeadCopy(
-                      creator.leadSummary,
-                      creator.spotlightSeries?.title
-                        ? `Start with ${creator.spotlightSeries.title}, then fan out through the rest of this shelf.`
-                        : "Open the creator page to see every visible title in one place.",
-                    )}
-                  </p>
-                  {getCreatorTopTitles(creator, 2).length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {getCreatorTopTitles(creator, 2).map((title) => (
-                        <span
-                          key={`${creator.slug}-featured-title-${title}`}
-                          className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
-                        >
-                          {title}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                  <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
-                    {buildCreatorShelfMeta(creator).map((item) => (
-                      <span key={`${creator.slug}-featured-meta-${item}`}>{item}</span>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {[
+                featuredStudios.length > 0
+                  ? {
+                      id: "studios",
+                      title: "Studios with visible multi-title shelves",
+                      items: featuredStudios,
+                    }
+                  : null,
+                featuredVoices.length > 0
+                  ? {
+                      id: "creators",
+                      title: "Creators worth opening first",
+                      items: featuredVoices,
+                    }
+                  : null,
+              ]
+                .filter(Boolean)
+                .map((group) => (
+                  <div key={group.id} className="space-y-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      {group.title}
+                    </p>
+                    {group.items.map((creator) => (
+                      <button
+                        key={`featured-${group.id}-${creator.slug}`}
+                        type="button"
+                        onClick={() => openCreator(creator, "CREATORS_HUB_FEATURED")}
+                        className="w-full rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-white"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                              {formatCreditTypeLabel(creator.creditType)}
+                            </p>
+                            <h3 className="mt-2 text-lg font-semibold text-slate-950">{creator.name}</h3>
+                          </div>
+                          <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
+                            {creator.titleCount} titles
+                          </span>
+                        </div>
+                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                          {summarizeLeadCopy(
+                            creator.leadSummary,
+                            creator.spotlightSeries?.title
+                              ? `Start with ${creator.spotlightSeries.title}, then fan out through the rest of this shelf.`
+                              : "Open the creator page to see every visible title in one place.",
+                          )}
+                        </p>
+                        {getCreatorTopTitles(creator, 2).length > 0 ? (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {getCreatorTopTitles(creator, 2).map((title) => (
+                              <span
+                                key={`${group.id}-${creator.slug}-featured-title-${title}`}
+                                className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
+                              >
+                                {title}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                        <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
+                          {buildCreatorShelfMeta(creator).map((item) => (
+                            <span key={`${group.id}-${creator.slug}-featured-meta-${item}`}>{item}</span>
+                          ))}
+                        </div>
+                      </button>
                     ))}
                   </div>
-                </button>
-              ))}
+                ))}
             </div>
           </SurfacePanel>
         </section>
@@ -802,7 +878,7 @@ export default function CreatorsHubPage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+        <SurfacePanel id="creator-filters" appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
