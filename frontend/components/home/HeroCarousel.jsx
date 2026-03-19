@@ -4,8 +4,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { ensureArray } from "../../lib/validators";
 import { trackEvent } from "../../lib/trackEvent";
@@ -14,6 +14,7 @@ import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
 import { getReadingCadenceLabel, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
+import Cover from "../common/Cover";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,9 +59,9 @@ export default function HeroCarousel({ items }) {
   const isFollowing = activeSeriesId ? followedSeriesIds.includes(activeSeriesId) : false;
   const rawBannerUrl = active?.bannerUrl || active?.coverUrl;
   const bannerUrl = normalizePlaceholdImageUrl(rawBannerUrl);
-  const coverUrl = normalizePlaceholdImageUrl(active?.coverUrl);
   const gradient = TONE_GRADIENTS[active?.coverTone] || TONE_GRADIENTS.default;
   const campaign = getStorefrontCampaign(active);
+  const activeSeriesHref = activeSeriesId ? `/series/${encodeURIComponent(activeSeriesId)}` : "#";
   const heroSignals = useMemo(
     () =>
       Array.from(
@@ -300,20 +301,28 @@ export default function HeroCarousel({ items }) {
           )}
 
           <div className="ml-auto w-full max-w-[360px]">
-            <div className="rounded-[28px] border border-white/10 bg-black/35 p-4 shadow-[0_22px_80px_rgba(0,0,0,0.26)] backdrop-blur-md">
+            <Link
+              href={activeSeriesHref}
+              onClick={() => {
+                if (!activeSeriesId) {
+                  return;
+                }
+                trackEvent("hero_snapshot_open", { seriesId: activeSeriesId });
+              }}
+              aria-label={active?.title ? `Open ${active.title}` : "Open featured series"}
+              className="group block rounded-[28px] border border-white/10 bg-black/35 p-4 shadow-[0_22px_80px_rgba(0,0,0,0.26)] backdrop-blur-md transition-transform duration-300 hover:-translate-y-0.5 hover:border-white/20"
+            >
               <div className="grid gap-4 sm:grid-cols-[132px_1fr] lg:grid-cols-1">
-                {coverUrl ? (
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-[22px] border border-white/10 bg-neutral-900">
-                    <Image
-                      src={coverUrl}
-                      alt={active?.title || ""}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 132px, 320px"
-                      priority
-                    />
-                  </div>
-                ) : null}
+                <div className="relative aspect-[3/4] overflow-hidden rounded-[22px] border border-white/10 bg-neutral-900">
+                  <Cover
+                    tone={active?.coverTone}
+                    coverUrl={active?.coverUrl}
+                    label={active?.title}
+                    eyebrow={campaign?.eyebrow || "Featured"}
+                    badge={active?.badge}
+                    className="h-full w-full transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
+                </div>
 
                 <div className="space-y-4">
                   <div>
@@ -349,7 +358,7 @@ export default function HeroCarousel({ items }) {
                   </p>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>

@@ -73,8 +73,17 @@ function sortCreatorSeries(items) {
 }
 
 export const loadSeriesSeoPayload = cache(async (seriesId) => {
+  const routePayload = await loadSeriesRoutePayload(seriesId);
+  return routePayload?.payload || null;
+});
+
+export const loadSeriesRoutePayload = cache(async (seriesId) => {
   if (!seriesId) {
-    return null;
+    return {
+      payload: null,
+      state: "not-found",
+      gateReason: null,
+    };
   }
 
   try {
@@ -88,14 +97,51 @@ export const loadSeriesSeoPayload = cache(async (seriesId) => {
       },
     );
 
+    if (response.status === 404) {
+      return {
+        payload: null,
+        state: "not-found",
+        gateReason: null,
+      };
+    }
+
+    if (response.status === 403) {
+      const payload = await response.json().catch(() => null);
+      return {
+        payload: null,
+        state: payload?.error === "ADULT_GATED" ? "adult-gated" : "unavailable",
+        gateReason: payload?.reason || null,
+      };
+    }
+
     if (!response.ok) {
-      return null;
+      return {
+        payload: null,
+        state: "unavailable",
+        gateReason: null,
+      };
     }
 
     const payload = await response.json();
-    return payload?.series ? payload : null;
+    if (payload?.series) {
+      return {
+        payload,
+        state: "ready",
+        gateReason: null,
+      };
+    }
+
+    return {
+      payload: null,
+      state: payload?.error === "NOT_FOUND" ? "not-found" : "unavailable",
+      gateReason: payload?.reason || null,
+    };
   } catch {
-    return null;
+    return {
+      payload: null,
+      state: "unavailable",
+      gateReason: null,
+    };
   }
 });
 

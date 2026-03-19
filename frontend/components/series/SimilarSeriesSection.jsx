@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Sparkles, Star } from "lucide-react";
 import { useSimilarRecommendations } from "../../hooks/useAIRecommendations";
 import Skeleton from "../common/Skeleton";
@@ -9,7 +9,6 @@ import SurfacePanel from "../common/SurfacePanel";
 import StorefrontContinuationStrip from "../common/StorefrontContinuationStrip";
 
 export default function SimilarSeriesSection({ seriesId, series }) {
-  const router = useRouter();
   const { data: similarSeries, loading, error } = useSimilarRecommendations(seriesId, 6);
 
   if (loading) {
@@ -64,16 +63,19 @@ export default function SimilarSeriesSection({ seriesId, series }) {
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {similarSeries.map((item) => (
-          <button
+          <Link
             key={item.id}
-            type="button"
-            onClick={() => router.push(`/series/${item.id}`)}
+            href={`/series/${encodeURIComponent(item.id)}`}
             className="group overflow-hidden rounded-[26px] border border-black/6 bg-white text-left shadow-[0_16px_36px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
+            aria-label={`Open ${item.title}`}
           >
             <div className="relative">
               <Cover
                 tone={item.coverTone}
                 coverUrl={item.coverUrl}
+                label={item.title}
+                eyebrow={item.author || item.subtitle || "Recommended next"}
+                badge={item.badge}
                 className="aspect-[3/4] w-full"
               />
               {item.badge ? (
@@ -99,7 +101,7 @@ export default function SimilarSeriesSection({ seriesId, series }) {
                 {item.subtitle ? <span>{item.subtitle}</span> : null}
               </div>
             </div>
-          </button>
+          </Link>
         ))}
       </div>
     </SurfacePanel>

@@ -34,7 +34,11 @@ const ROUTES = [
     route: "/creators",
     expectedTitle: "Creators & Studios",
     expectedH1: "Find the creators worth following.",
-    expectedNeedles: ["Search by creator, studio, or genre.", "Creator spotlight", "Use comics and novels while creator shelves keep filling in."],
+    expectedNeedles: [
+      "Search by creator, studio, or genre.",
+      "Creator spotlight",
+      "Use live titles until creator credits catch up.",
+    ],
   },
   {
     route: "/rankings",
@@ -82,8 +86,8 @@ const ROUTES = [
   {
     route: "/series/demo-series",
     expectedTitle: "Series",
-    expectedH1: "We're pulling the full series page now.",
-    expectedNeedles: ["Loading title", "Browse Top Series", "See point packs"],
+    expectedH1: "This title is not available in the public catalog.",
+    expectedNeedles: ["Series unavailable", "Browse Top Series", "Search titles"],
   },
   {
     route: "/read/demo-series/demo-episode",
@@ -164,7 +168,10 @@ async function run() {
   const baseUrl = `http://127.0.0.1:${port}`;
   const nextBin = path.join(frontendRoot, "node_modules", "next", "dist", "bin", "next");
   const backendCommand = process.platform === "win32" ? "cmd.exe" : "npm";
-  const backendArgs = process.platform === "win32" ? ["/c", "npm", "run", "start"] : ["run", "start"];
+  const backendArgs =
+    process.platform === "win32"
+      ? ["/c", "npm", "run", "start:prod"]
+      : ["run", "start:prod"];
   const backendChild = spawn(backendCommand, backendArgs, {
     cwd: backendRoot,
     stdio: ["ignore", "pipe", "pipe"],

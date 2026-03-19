@@ -6,7 +6,7 @@ import { RewardsProvider } from "../../../store/useRewardsStore";
 import { createPageMetadata } from "../../../lib/seo";
 import { siteConfig } from "../../../lib/siteConfig";
 import { buildSeriesStructuredData } from "../../../lib/structuredData";
-import { loadSeriesSeoPayload } from "../../../lib/storefrontSeo";
+import { loadSeriesRoutePayload, loadSeriesSeoPayload } from "../../../lib/storefrontSeo";
 
 export const revalidate = 300;
 
@@ -51,8 +51,8 @@ export async function generateMetadata({ params }) {
 
 export default async function SeriesRoutePage({ params }) {
   const resolvedParams = await Promise.resolve(params);
-  const payload = await loadSeriesSeoPayload(resolvedParams.id);
-  const structuredData = payload ? buildSeriesStructuredData(payload) : [];
+  const routePayload = await loadSeriesRoutePayload(resolvedParams.id);
+  const structuredData = routePayload?.payload ? buildSeriesStructuredData(routePayload.payload) : [];
 
   return (
     <>
@@ -60,7 +60,12 @@ export default async function SeriesRoutePage({ params }) {
       <RewardsProvider>
         <EntitlementProvider>
           <CouponProvider>
-            <SeriesPage seriesId={resolvedParams.id} />
+            <SeriesPage
+              seriesId={resolvedParams.id}
+              initialSeriesPayload={routePayload?.payload || null}
+              initialSeriesState={routePayload?.state || "unavailable"}
+              initialGateStatus={routePayload?.gateReason || "OK"}
+            />
           </CouponProvider>
         </EntitlementProvider>
       </RewardsProvider>

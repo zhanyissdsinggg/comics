@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -11,10 +10,7 @@ import HeaderLogo from "./HeaderLogo";
 import HeaderNav from "./HeaderNav";
 import MobileTabNav from "./MobileTabNav";
 import HeaderActions from "./HeaderActions";
-
-const HeaderSearch = dynamic(() => import("./HeaderSearch"), {
-  ssr: false,
-});
+import HeaderSearch from "./HeaderSearch";
 
 export default function SiteHeader({ onSearch, variant = "default" }) {
   const { isAdultMode, legalAge, requestAdultToggle } = useAdultGateStore();
