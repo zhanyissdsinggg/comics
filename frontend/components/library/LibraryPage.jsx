@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import Rail from "../home/Rail";
@@ -9,6 +9,7 @@ import Skeleton from "../common/Skeleton";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
+import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
 import { apiGet } from "../../lib/apiClient";
@@ -123,7 +124,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const showStale = useStaleNotice(seriesResponse);
   const showHomepageSlotsStale = useStaleNotice(homepageSlotsResponse);
   const { shouldRetry } = useRetryPolicy();
-  const openAuthPrompt = () => window.dispatchEvent(new CustomEvent("auth:open"));
+  const openAuthPrompt = useCallback(() => {
+    window.dispatchEvent(new CustomEvent("auth:open"));
+  }, []);
   const seriesById = useMemo(
     () => new Map(seriesList.map((series) => [series.id, series])),
     [seriesList],
@@ -162,29 +165,35 @@ export default function LibraryPage({ initialSignedIn = false }) {
     [progressEntries, seriesById],
   );
 
-  const buildLibrarySeriesHref = (seriesId, entryPoint = "LIBRARY_SHELF", campaignId = "library_shelf") =>
-    buildPathWithAttribution(`/series/${seriesId}`, {
-      entryPoint,
-      campaignId,
-      sourcePath: "/library",
-      sourceSeriesId: seriesId,
-      returnTo: `/series/${seriesId}`,
-    });
+  const buildLibrarySeriesHref = useCallback(
+    (seriesId, entryPoint = "LIBRARY_SHELF", campaignId = "library_shelf") =>
+      buildPathWithAttribution(`/series/${seriesId}`, {
+        entryPoint,
+        campaignId,
+        sourcePath: "/library",
+        sourceSeriesId: seriesId,
+        returnTo: `/series/${seriesId}`,
+      }),
+    [],
+  );
 
-  const buildLibraryReadHref = (
-    seriesId,
-    episodeId,
-    entryPoint = "LIBRARY_RESUME",
-    campaignId = "library_resume",
-  ) =>
-    buildPathWithAttribution(`/read/${seriesId}/${episodeId}`, {
-      entryPoint,
-      campaignId,
-      sourcePath: "/library",
-      sourceSeriesId: seriesId,
-      sourceEpisodeId: episodeId,
-      returnTo: `/read/${seriesId}/${episodeId}`,
-    });
+  const buildLibraryReadHref = useCallback(
+    (
+      seriesId,
+      episodeId,
+      entryPoint = "LIBRARY_RESUME",
+      campaignId = "library_resume",
+    ) =>
+      buildPathWithAttribution(`/read/${seriesId}/${episodeId}`, {
+        entryPoint,
+        campaignId,
+        sourcePath: "/library",
+        sourceSeriesId: seriesId,
+        sourceEpisodeId: episodeId,
+        returnTo: `/read/${seriesId}/${episodeId}`,
+      }),
+    [],
+  );
 
   const historyRail = useMemo(
     () =>
@@ -434,31 +443,187 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const hasLibrarySignals =
     continueRailItems.length > 0 || historyRail.length > 0 || visibleLibraryItems.length > 0;
   const libraryStats = useMemo(
-    () => [
-      {
-        label: "Continue",
-        value: continueRailItems.length.toLocaleString(),
-        hint: "Jump back to the last opened chapter",
-      },
-      {
-        label: "History",
-        value: historyRail.length.toLocaleString(),
-        hint: "Recently opened series and episodes",
-      },
-      {
-        label: "Saved",
-        value: visibleLibraryItems.length.toLocaleString(),
-        hint: "Pinned titles in the current mode",
-      },
-      {
-        label: "Mode",
-        value: isAdultMode ? "18+" : "Standard",
-        hint: viewerSignedIn ? "Account sync available" : "Sign in to unlock rewards",
-      },
+    () =>
+      hasLibrarySignals
+        ? [
+            {
+              label: "Continue",
+              value: continueRailItems.length.toLocaleString(),
+              hint: "Jump back to the last opened chapter",
+            },
+            {
+              label: "History",
+              value: historyRail.length.toLocaleString(),
+              hint: "Recently opened series and episodes",
+            },
+            {
+              label: "Saved",
+              value: visibleLibraryItems.length.toLocaleString(),
+              hint: "Pinned titles in the current mode",
+            },
+            {
+              label: "Mode",
+              value: isAdultMode ? "18+" : "Standard",
+              hint: viewerSignedIn ? "Account sync available" : "Sign in to unlock rewards",
+            },
+          ]
+        : [
+            {
+              label: "Start free",
+              value: "Ready",
+              hint: "Use free starts to seed your shelf fast",
+            },
+            {
+              label: "Top Series",
+              value: "Browse",
+              hint: "The safest first click before your shelf fills in",
+            },
+            {
+              label: "Sync",
+              value: viewerSignedIn ? "On" : "Sign in",
+              hint: viewerSignedIn
+                ? "Progress and saved titles stay on this account"
+                : "Sign in when you want library and progress on one account",
+            },
+            {
+              label: "Mode",
+              value: isAdultMode ? "18+" : "Standard",
+              hint: isAdultMode ? "18+ titles are visible right now" : "Main catalog is active",
+            },
+          ],
+    [
+      continueRailItems.length,
+      hasLibrarySignals,
+      historyRail.length,
+      isAdultMode,
+      viewerSignedIn,
+      visibleLibraryItems.length,
     ],
-    [continueRailItems.length, historyRail.length, isAdultMode, viewerSignedIn, visibleLibraryItems.length],
   );
   const resumeSpotlight = continueRailItems[0] || historyRail[0] || null;
+  const libraryActionCards = useMemo(() => {
+    const commonAccentClass =
+      "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]";
+
+    if (!hasLibrarySignals) {
+      return [
+        {
+          id: "free-starts",
+          eyebrow: "Start free",
+          title: "Open a free start before your shelf feels empty.",
+          description:
+            "A free first chapter is still the fastest way to make this page useful without guessing.",
+          cta: "Start reading free",
+          onClick: () => router.push("/rankings?type=ttf&window=all"),
+          accentClass:
+            "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+        },
+        {
+          id: "top-series",
+          eyebrow: "Top Series",
+          title: "Use the safest browse path first.",
+          description:
+            "Top Series narrows the catalog down faster when your own shelf has not started to take shape yet.",
+          cta: "Browse Top Series",
+          onClick: () => router.push("/rankings?type=popular&window=week"),
+          accentClass: commonAccentClass,
+        },
+        {
+          id: "search",
+          eyebrow: "Search",
+          title: "Search by title, genre, or creator.",
+          description:
+            "Search is the better move when you already know the tone, creator, or title you want.",
+          cta: "Open search",
+          onClick: () => router.push("/search"),
+          accentClass: commonAccentClass,
+        },
+        {
+          id: "sync",
+          eyebrow: "Sync",
+          title: viewerSignedIn ? "Your library is already attached to this account." : "Sign in before you build a bigger shelf.",
+          description: viewerSignedIn
+            ? "Saved titles, progress, and rewards already have an account home."
+            : "Sign in once and keep progress, library, purchases, and rewards together.",
+          cta: viewerSignedIn ? "Open account" : "Sign in",
+          onClick: () => (viewerSignedIn ? router.push("/account") : openAuthPrompt()),
+          accentClass: commonAccentClass,
+        },
+      ];
+    }
+
+    return [
+      resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
+        ? {
+            id: "resume",
+            eyebrow: "Continue",
+            title: "Jump straight back into your last chapter.",
+            description:
+              "The quickest path back into reading should stay one click away from the top of Library.",
+            cta: "Resume now",
+            onClick: () =>
+              router.push(
+                buildLibraryReadHref(
+                  resumeSpotlight.seriesId,
+                  resumeSpotlight.episodeId,
+                  "LIBRARY_ACTIONS",
+                  "library_actions_resume",
+                ),
+              ),
+            accentClass:
+              "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+          }
+        : {
+            id: "library",
+            eyebrow: "Shelf",
+            title: "Open your saved titles and recent reads.",
+            description:
+              "Library should still keep the next title obvious even when you are not resuming one chapter in particular.",
+            cta: "Open shelf",
+            onClick: () => router.push("/library"),
+            accentClass:
+              "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+          },
+      {
+        id: "saved",
+        eyebrow: "Saved titles",
+        title: "Compare what you saved against Top Series.",
+        description:
+          "If your shelf feels stale, Top Series is still the cleanest way to find the next thing worth keeping.",
+        cta: "Browse Top Series",
+        onClick: () => router.push("/rankings?type=popular&window=week"),
+        accentClass: commonAccentClass,
+      },
+      {
+        id: "search",
+        eyebrow: "Search",
+        title: "Use search when you already know the lane.",
+        description:
+          "Search by title, genre, or creator instead of scrolling your whole shelf when you want something specific.",
+        cta: "Open search",
+        onClick: () => router.push("/search"),
+        accentClass: commonAccentClass,
+      },
+      {
+        id: "account",
+        eyebrow: "Account",
+        title: viewerSignedIn ? "Manage sync, purchases, and reading settings." : "Sign in before purchases and sync matter.",
+        description: viewerSignedIn
+          ? "Account keeps membership, purchases, and reading setup together without burying the next step."
+          : "Sign in when you want your library, progress, and purchases tied to one account.",
+        cta: viewerSignedIn ? "Open account" : "Sign in",
+        onClick: () => (viewerSignedIn ? router.push("/account") : openAuthPrompt()),
+        accentClass: commonAccentClass,
+      },
+    ].filter(Boolean);
+  }, [
+    buildLibraryReadHref,
+    hasLibrarySignals,
+    openAuthPrompt,
+    resumeSpotlight,
+    router,
+    viewerSignedIn,
+  ]);
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
   const secondaryButtonClass =
@@ -598,6 +763,22 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 </div>
               </SurfacePanel>
             )}
+
+            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  What do you want to do next?
+                </p>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Start with the next useful move.
+                </h2>
+                <p className="text-sm leading-6 text-slate-600">
+                  Library works best when resuming, browsing, search, and account actions stay close instead of hiding
+                  under one long shelf.
+                </p>
+              </div>
+              <StorefrontPathwaysGrid cards={libraryActionCards} columnsClassName="md:grid-cols-2 xl:grid-cols-4" appearance="light" />
+            </SurfacePanel>
 
             {showCollectionManager ? (
               <SurfacePanel appearance="light" accent="blue">

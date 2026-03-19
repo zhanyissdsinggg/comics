@@ -80,6 +80,14 @@ function getCreatorTopTitles(creator, limit = 3) {
     .slice(0, limit);
 }
 
+function getCreatorLeadSeries(creator) {
+  const series = Array.isArray(creator?.series) ? creator.series : [];
+  if (creator?.spotlightSeries?.id) {
+    return creator.spotlightSeries;
+  }
+  return series.find((item) => item?.id) || null;
+}
+
 function CreatorDirectorySkeleton() {
   return (
     <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
@@ -332,6 +340,50 @@ export default function CreatorsHubPage({
       }),
     );
   };
+
+  const openSeriesFromCreator = (series, creator, entryPoint = "CREATORS_HUB_TITLE") => {
+    if (!series?.id) {
+      return;
+    }
+
+    const targetPath = `/series/${series.id}`;
+    trackEvent("creator_directory_series_click", {
+      entryPoint,
+      creatorName: creator?.name,
+      creatorSlug: creator?.slug,
+      seriesId: series.id,
+      seriesTitle: series.title,
+    });
+
+    router.push(
+      buildPathWithAttribution(targetPath, {
+        entryPoint,
+        campaignId: creator?.slug || "creators_hub",
+        sourcePath: "/creators",
+        sourceSeriesId: series.id,
+        returnTo: targetPath,
+      }),
+    );
+  };
+
+  const creatorEntryTitles = useMemo(
+    () =>
+      spotlightCreators
+        .map((creator) => {
+          const series = getCreatorLeadSeries(creator);
+          if (!series?.id) {
+            return null;
+          }
+
+          return {
+            creator,
+            series,
+            freeStarts: Number(series?.freeEpisodeCount || 0),
+          };
+        })
+        .filter(Boolean),
+    [spotlightCreators],
+  );
 
   if (loading) {
     return <CreatorDirectorySkeleton />;
@@ -619,6 +671,92 @@ export default function CreatorsHubPage({
             </div>
           </SurfacePanel>
         </section>
+
+        {creatorEntryTitles.length > 0 ? (
+          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Start from a title
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  Open one strong title, then branch into the creator shelf.
+                </h2>
+              </div>
+              <p className="text-sm text-slate-500">
+                Useful when you want a faster first click than browsing the full directory.
+              </p>
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-3">
+              {creatorEntryTitles.map(({ creator, series, freeStarts }) => (
+                <div
+                  key={`${creator.slug}-${series.id}`}
+                  className="rounded-[28px] border border-black/6 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
+                >
+                  <Cover
+                    tone={series?.coverTone}
+                    coverUrl={series?.coverUrl}
+                    className="h-56 rounded-[22px]"
+                  />
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                          {formatCreditTypeLabel(creator.creditType)}
+                        </p>
+                        <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                          {series.title}
+                        </h3>
+                      </div>
+                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
+                        {creator.name}
+                      </span>
+                    </div>
+
+                    <p className="text-sm leading-6 text-slate-600">
+                      {summarizeLeadCopy(
+                        series?.description,
+                        `Start with ${series.title}, then open ${creator.name}'s full shelf if the voice lands.`,
+                      )}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
+                      {freeStarts > 0 ? (
+                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-[var(--gush-accent,#2f6bff)]">
+                          {freeStarts} free start{freeStarts === 1 ? "" : "s"}
+                        </span>
+                      ) : null}
+                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
+                        {series?.type || "Series"}
+                      </span>
+                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
+                        {series?.status || "Ongoing"}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => openSeriesFromCreator(series, creator, "CREATORS_HUB_ENTRY_TITLE")}
+                        className={primaryButtonClass}
+                      >
+                        Open title
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openCreator(creator, "CREATORS_HUB_ENTRY_SHELF")}
+                        className={secondaryButtonClass}
+                      >
+                        Open creator
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SurfacePanel>
+        ) : null}
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

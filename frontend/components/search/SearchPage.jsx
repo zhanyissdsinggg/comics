@@ -666,13 +666,14 @@ export default function SearchPage() {
       ? "Refreshing matches..."
       : `${total.toLocaleString()} match${total === 1 ? "" : "es"} right now.`
     : "Use the search box, trending terms, or a fast lane below. The page should help before the filter sheet ever does.";
+  const loadingResultLabel = "Updating";
   const heroStats = useMemo(
     () => [
       {
         label: query ? "Matches" : "Trending now",
         value: query
           ? loading
-            ? "--"
+            ? loadingResultLabel
             : total.toLocaleString()
           : (hotKeywords[0]?.label || keywords[0]?.label || "Live"),
         hint: query ? "Visible results for this search" : "A quick way into the catalog",
@@ -688,7 +689,7 @@ export default function SearchPage() {
         hint: isAdultMode ? "18+ titles visible" : "Main catalog",
       },
     ],
-    [activeFilterCount, hotKeywords, isAdultMode, keywords, loading, query, total],
+    [activeFilterCount, hotKeywords, isAdultMode, keywords, loading, loadingResultLabel, query, total],
   );
   const recoPanelTitle = !query
     ? "If you are still deciding, start here."
@@ -870,7 +871,11 @@ export default function SearchPage() {
                 ? "Your search came up empty, so this is the closest strong pick to try next."
                 : "If you are still browsing, start with one strong pick instead of a blank search box.",
             signalLabel: hasDirectMatch ? "Results" : "Featured",
-            signalValue: hasDirectMatch ? (loading ? "--" : total.toLocaleString()) : breakoutPick ? "Trending" : "Editors' pick",
+            signalValue: hasDirectMatch
+              ? (loading ? loadingResultLabel : total.toLocaleString())
+              : breakoutPick
+                ? "Trending"
+                : "Editors' pick",
             signalHint: hasDirectMatch
               ? `Sorted by ${sortLabel}`
               : leadHotKeyword?.hint || "Picked from one of the strongest home recommendations",
@@ -998,6 +1003,7 @@ export default function SearchPage() {
     router,
     sort,
     total,
+    loadingResultLabel,
     updateParams,
   ]);
   return (

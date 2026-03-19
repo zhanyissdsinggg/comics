@@ -212,6 +212,118 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
     ],
     [hasRecentPaidOrder, latestOrderGuide, latestPaidOrder, router],
   );
+  const signedOutActionCards = useMemo(
+    () => [
+      {
+        id: "signin",
+        eyebrow: "Account",
+        title: "Sign in and keep every receipt on one account.",
+        description:
+          "Receipts, membership charges, and order IDs land here after checkout, so sign-in is the cleanest first step.",
+        cta: "Sign in",
+        onClick: () => router.push("/signin?returnTo=/orders"),
+        accentClass:
+          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+      },
+      {
+        id: "store",
+        eyebrow: "Point packs",
+        title: "See one-time packs before you buy.",
+        description:
+          "Store is the faster path when you want flexible unlocks instead of a recurring plan.",
+        cta: STOREFRONT_TERMS.viewPointPacks,
+        onClick: () => router.push("/store"),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "membership",
+        eyebrow: "Membership",
+        title: "Compare recurring plans before checkout.",
+        description:
+          "Membership is the monthly path for frequent readers. Compare it here before your first charge lands.",
+        cta: STOREFRONT_TERMS.compareMembership,
+        onClick: () =>
+          router.push(
+            buildPathWithAttribution("/subscribe", {
+              entryPoint: "ORDERS_SIGNED_OUT",
+              sourcePath: "/orders",
+              returnTo: "/orders",
+            }),
+          ),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "support",
+        eyebrow: "Billing help",
+        title: "Get help with a missing receipt or wrong charge.",
+        description:
+          "Use Support when the payment email never arrives, points look off, or a charge needs review.",
+        cta: "Get help",
+        onClick: () => router.push(buildSupportHref("", "billing")),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+    ],
+    [router],
+  );
+  const emptyOrderActionCards = useMemo(
+    () => [
+      {
+        id: "packs",
+        eyebrow: "Point packs",
+        title: "Buy a pack when you only need flexible unlocks.",
+        description:
+          "A point pack is the one-time option for unlocking chapters without starting a monthly plan.",
+        cta: STOREFRONT_TERMS.viewPointPacks,
+        onClick: () => router.push("/store"),
+        accentClass:
+          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+      },
+      {
+        id: "membership",
+        eyebrow: "Membership",
+        title: "Compare monthly plans before your first checkout.",
+        description:
+          "If you expect to read often, compare membership before you keep buying packs one at a time.",
+        cta: STOREFRONT_TERMS.compareMembership,
+        onClick: () =>
+          router.push(
+            buildPathWithAttribution("/subscribe", {
+              entryPoint: "ORDERS_EMPTY_STATE",
+              sourcePath: "/orders",
+              returnTo: "/orders",
+            }),
+          ),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "how-it-works",
+        eyebrow: "How it works",
+        title: "See when free starts, points, and membership kick in.",
+        description:
+          "This is the faster explainer if you want to understand the purchase model before anything shows up here.",
+        cta: "How points work",
+        onClick: () => router.push("/how-it-works"),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "support",
+        eyebrow: "Support",
+        title: "Know where to go if the first charge looks wrong.",
+        description:
+          "Billing help stays useful even before you have a purchase history loaded on this page.",
+        cta: "Billing help",
+        onClick: () => router.push(buildSupportHref("", "billing")),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+    ],
+    [router],
+  );
 
   const orderStats = useMemo(() => {
     if (loading) {
@@ -510,29 +622,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             <p className="text-sm leading-6 text-slate-600">
               Purchases live on your account, so you will need to sign in first. This is also where you will find receipts, order IDs, and membership charges.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => router.push("/signin?returnTo=/orders")}
-                className={primaryButtonClass}
-              >
-                Sign in
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/store")}
-                className={secondaryButtonClass}
-              >
-                See point packs
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push(buildSupportHref("", "billing"))}
-                className={secondaryButtonClass}
-              >
-                Support
-              </button>
-            </div>
+            <StorefrontPathwaysGrid
+              cards={signedOutActionCards}
+              columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+              appearance="light"
+            />
           </SurfacePanel>
         ) : !hydrated || loading ? (
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
@@ -563,44 +657,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             <p className="text-sm leading-6 text-slate-600">
               Point packs and memberships will show up here after checkout, along with the order ID you may need for billing help.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => router.push("/how-it-works")}
-                className={primaryButtonClass}
-              >
-                How points work
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/store")}
-                className={secondaryButtonClass}
-              >
-                See point packs
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push(buildSupportHref("", "billing"))}
-                className={secondaryButtonClass}
-              >
-                Billing help
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    buildPathWithAttribution("/subscribe", {
-                      entryPoint: "ORDERS_EMPTY_STATE",
-                      sourcePath: "/orders",
-                      returnTo: "/orders",
-                    }),
-                  )
-                }
-                className={secondaryButtonClass}
-              >
-                Compare membership
-              </button>
-            </div>
+            <StorefrontPathwaysGrid
+              cards={emptyOrderActionCards}
+              columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+              appearance="light"
+            />
           </SurfacePanel>
         ) : (
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">

@@ -281,6 +281,19 @@ export default function ReaderPage({ seriesId, episodeId }) {
       }),
     [activeAttribution, episodeId, readerPath, seriesId],
   );
+  const openReaderAuthPrompt = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("auth:open", {
+        detail: {
+          returnTo: readerPath,
+        },
+      }),
+    );
+  }, [readerPath]);
 
   const handleReturnToDiscovery = useCallback(() => {
     if (!discoveryContext?.sourcePath) {
@@ -1090,6 +1103,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   const handleUnlockCurrent = async () => {
     trackEvent("paywall_unlock_click", { seriesId, episodeId });
+    if (!isSignedIn) {
+      openReaderAuthPrompt();
+      setModalState({
+        type: "INFO",
+        title: "Sign in to unlock",
+        description: "Sign in so unlocks, points, and reading progress stay on one account.",
+      });
+      return;
+    }
     const response = await handleUnlock(episodeId);
     if (response.ok) {
       setModalState({
@@ -1100,7 +1122,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       return;
     }
     if (response.status === 401) {
-      window.dispatchEvent(new CustomEvent("auth:open"));
+      openReaderAuthPrompt();
       setModalState({
         type: "ERROR",
         title: "Sign in required",
@@ -1130,13 +1152,22 @@ export default function ReaderPage({ seriesId, episodeId }) {
     if (!nextEpisode) {
       return;
     }
+    if (!isSignedIn) {
+      openReaderAuthPrompt();
+      setModalState({
+        type: "INFO",
+        title: "Sign in to unlock",
+        description: "Sign in so unlocks, points, and reading progress stay on one account.",
+      });
+      return;
+    }
     const response = await handleUnlock(nextEpisode.id);
     if (response.ok) {
       router.push(buildEpisodeHref(nextEpisode.id));
       return;
     }
     if (response.status === 401) {
-      window.dispatchEvent(new CustomEvent("auth:open"));
+      openReaderAuthPrompt();
       setModalState({
         type: "ERROR",
         title: "Sign in required",
@@ -1529,8 +1560,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Your balance
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-950">{walletBalance} points</p>
-                <p className="mt-1 text-xs text-slate-500">Points ready on this account.</p>
+                <p className="mt-2 text-lg font-semibold text-slate-950">
+                  {isSignedIn ? `${walletBalance} points` : "Sign in"}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {isSignedIn
+                    ? "Points ready on this account."
+                    : "Unlocks, points, and progress stay on one account after sign-in."}
+                </p>
               </div>
               <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
@@ -1551,9 +1588,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Your access
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-950">{isSubscriber ? "Member" : "Points"}</p>
+                <p className="mt-2 text-lg font-semibold text-slate-950">
+                  {!isSignedIn ? "Guest" : isSubscriber ? "Member" : "Points"}
+                </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  {isSubscriber
+                  {!isSignedIn
+                    ? "Sign in first, then choose points or membership."
+                    : isSubscriber
                     ? "Members get free reads and lower prices."
                     : "Use points now or pick a pack."}
                 </p>
@@ -1604,9 +1645,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
               }`}
               style={{ willChange: "transform" }}
             >
-              {currentPricing.finalPrice === 0
-                ? "Continue free"
-                : `Unlock for ${currentPricing.finalPrice} points`}
+              {!isSignedIn
+                ? "Sign in to unlock"
+                : currentPricing.finalPrice === 0
+                  ? "Continue free"
+                  : `Unlock for ${currentPricing.finalPrice} points`}
             </button>
             <div className="mt-4 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-left text-[11px] text-slate-600">
               <div className="font-semibold text-slate-950">Worth knowing</div>

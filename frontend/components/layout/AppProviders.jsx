@@ -35,14 +35,7 @@ const PerfMonitorBadge = dynamic(() => import("../common/PerfMonitorBadge"), {
 });
 const SiteFooter = dynamic(() => import("./SiteFooter"));
 
-const FULL_FOOTER_PATHS = [
-  "/",
-  "/comics",
-  "/novels",
-  "/creators",
-  "/rankings",
-  "/search",
-];
+const FULL_FOOTER_PATHS = ["/"];
 
 function matchesPath(pathname, prefix) {
   if (!pathname || !prefix) {

@@ -7,6 +7,7 @@ import ReadingStats from "../../components/account/ReadingStats";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import CommerceSuccessBanner from "../../components/common/CommerceSuccessBanner";
+import StorefrontPathwaysGrid from "../../components/common/StorefrontPathwaysGrid";
 import { LANGUAGE_OPTIONS, REGION_KEYS, getRegionConfig } from "../../lib/region/config";
 import { setCookie } from "../../lib/cookies";
 import { applyPreferencesToStorage } from "../../lib/preferencesClient";
@@ -88,11 +89,11 @@ export default function AccountPage({ initialSignedIn = false }) {
   const [commerceNotice, setCommerceNotice] = useState(null);
   const googleAuthEnabled = isGoogleAuthEnabled();
   const viewerSignedIn = hydrated ? isSignedIn : initialSignedIn;
-  const openAuthPrompt = () => {
+  const openAuthPrompt = useCallback(() => {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("auth:open"));
     }
-  };
+  }, []);
 
   useEffect(() => {
     const storedRegion = readStorage(REGION_KEY, "global");
@@ -332,6 +333,133 @@ export default function AccountPage({ initialSignedIn = false }) {
     ],
   );
 
+  const accountActionCards = useMemo(() => {
+    if (!viewerSignedIn) {
+      return [
+        {
+          id: "signin",
+          eyebrow: "Account",
+          title: "Sign in and keep everything on one account.",
+          description:
+            "Library progress, purchases, mature-content settings, and recovery details make more sense once they stop living on one device only.",
+          cta: "Sign in",
+          onClick: openAuthPrompt,
+          accentClass:
+            "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+        },
+        {
+          id: "recover",
+          eyebrow: "Recovery",
+          title: "Lost access? Reset your password.",
+          description:
+            "Use reset if you signed up with email and password. If billing or sign-in still looks wrong, support is the faster backup path.",
+          cta: "Reset password",
+          onClick: () => router.push("/auth/reset"),
+          accentClass:
+            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+        },
+        {
+          id: "membership",
+          eyebrow: "Membership",
+          title: "Compare monthly plans before you start.",
+          description:
+            "Membership is the recurring option for regular readers. Compare the tiers first, then sign in when you are ready to start one.",
+          cta: "Compare plans",
+          onClick: () =>
+            router.push(
+              buildPathWithAttribution("/subscribe", {
+                entryPoint: "ACCOUNT_ACTIONS",
+                sourcePath: "/account",
+                returnTo: "/account",
+              }),
+            ),
+          accentClass:
+            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+        },
+        {
+          id: "store",
+          eyebrow: "Point packs",
+          title: "See one-time packs and current pricing.",
+          description:
+            "Store is for point packs, not membership. Use it when you want flexible one-off unlocking instead of a monthly plan.",
+          cta: "See point packs",
+          onClick: () => router.push("/store"),
+          accentClass:
+            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+        },
+      ];
+    }
+
+    return [
+      {
+        id: "membership",
+        eyebrow: "Membership",
+        title: subscription?.active ? "Manage renewal and plan details." : "Compare membership before your next purchase.",
+        description: subscription?.active
+          ? subscription?.renewAt
+            ? `Your plan renews on ${new Date(subscription.renewAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}. Cancellation and billing rules stay in one place.`
+            : "Open membership to review renewal timing, monthly perks, and cancellation."
+          : "If you keep topping up, membership may fit better before your next pack purchase.",
+        cta: subscription?.active ? "Manage membership" : "Compare plans",
+        onClick: () =>
+          router.push(
+            buildPathWithAttribution("/subscribe", {
+              entryPoint: "ACCOUNT_ACTIONS",
+              sourcePath: "/account",
+              returnTo: "/account",
+            }),
+          ),
+        accentClass:
+          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+      },
+      {
+        id: "purchases",
+        eyebrow: "Purchases",
+        title: orders.length > 0 ? "Find receipts and order IDs fast." : "Keep receipts and charges easy to find.",
+        description: orders.length > 0
+          ? "Purchases is where your latest point packs, membership renewals, and billing records stay easy to review."
+          : "After checkout, this is still where pack receipts, membership charges, and order IDs show up.",
+        cta: "View purchases",
+        onClick: () => router.push("/orders"),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "library",
+        eyebrow: "Reading",
+        title: "Open your library and keep reading.",
+        description:
+          "Library keeps saved titles, recent reading, and progress closer than a settings page ever should.",
+        cta: "Open library",
+        onClick: () => router.push("/library"),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "support",
+        eyebrow: "Support",
+        title: "Get account or billing help fast.",
+        description:
+          "Use Support for sign-in trouble, wrong charges, missing points, or mature-content access issues without hunting through legal pages.",
+        cta: "Get help",
+        onClick: () => router.push(buildSupportPath({ topic: "account", context: "Account help from account page" })),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+    ];
+  }, [
+    openAuthPrompt,
+    orders.length,
+    router,
+    subscription?.active,
+    subscription?.renewAt,
+    viewerSignedIn,
+  ]);
+
   const sectionEyebrowClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const sectionTitleClass = "font-display text-2xl font-semibold tracking-tight text-slate-950";
   const mutedCopyClass = "text-sm leading-6 text-slate-600";
@@ -355,7 +483,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         <EditorialHero
           appearance="light"
           accent="blue"
-          eyebrow="Reader account"
+          eyebrow="Account"
           title="Your account, purchases, and reading setup."
           description="Keep membership, purchases, mature-content controls, and account basics in one place without digging through menus."
           secondary="This page is for the few settings and billing details that matter, then you can get back to reading."
@@ -445,6 +573,18 @@ export default function AccountPage({ initialSignedIn = false }) {
             <p className="text-sm text-slate-700">{message}</p>
           </SurfacePanel>
         ) : null}
+
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div className="space-y-2">
+            <p className={sectionEyebrowClass}>What do you need to do?</p>
+            <h2 className={sectionTitleClass}>Start with the task, not the settings.</h2>
+            <p className={mutedCopyClass}>
+              Account should make the next step obvious whether you are here for billing, membership, reading progress,
+              or recovery.
+            </p>
+          </div>
+          <StorefrontPathwaysGrid cards={accountActionCards} columnsClassName="md:grid-cols-2 xl:grid-cols-4" appearance="light" />
+        </SurfacePanel>
 
         {hydrated && isSignedIn ? <ReadingStats /> : null}
 
@@ -682,51 +822,87 @@ export default function AccountPage({ initialSignedIn = false }) {
                 <p className={sectionEyebrowClass}>Membership</p>
                 <h2 className={sectionTitleClass}>Plan and renewal</h2>
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-600">
-                <div>
-                  <div className={fieldLabelClass}>Current plan</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-950">{subscriptionLabel}</div>
-                  {subscription?.renewAt ? (
-                    <div className="mt-1 text-xs text-slate-500">
-                      Renews on {new Date(subscription.renewAt).toLocaleDateString()}
-                    </div>
-                  ) : null}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push(
-                        buildPathWithAttribution("/subscribe", {
-                          entryPoint: "ACCOUNT_SUBSCRIPTION",
-                          sourcePath: "/account",
-                          returnTo: "/account",
-                        }),
-                      )
-                    }
-                    className={secondaryButtonClass}
-                  >
-                    View membership
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!subscription?.active || working === "cancel"}
-                    onClick={async () => {
-                      setWorking("cancel");
-                      const response = await cancelSubscription();
-                      if (response.ok) {
-                        setMessage("Membership ended.");
-                      } else {
-                        setMessage(response.error || "Couldn't end the membership.");
+              {!viewerSignedIn ? (
+                <div className="space-y-4 rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-600">
+                  <p>
+                    Membership starts after sign-in so the plan, renewals, receipts, and cancellation history stay on
+                    one account instead of one browser.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={openAuthPrompt} className={secondaryButtonClass}>
+                      Sign in
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          buildPathWithAttribution("/subscribe", {
+                            entryPoint: "ACCOUNT_SUBSCRIPTION",
+                            sourcePath: "/account",
+                            returnTo: "/account",
+                          }),
+                        )
                       }
-                      setWorking("");
-                    }}
-                    className={secondaryButtonClass}
-                  >
-                    Cancel membership
-                  </button>
+                      className={secondaryButtonClass}
+                    >
+                      Compare plans
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push(buildSupportPath({ topic: "billing", context: "Membership help from account page" }))}
+                      className={secondaryButtonClass}
+                    >
+                      Billing help
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-600">
+                  <div>
+                    <div className={fieldLabelClass}>Current plan</div>
+                    <div className="mt-1 text-sm font-semibold text-slate-950">{subscriptionLabel}</div>
+                    {subscription?.renewAt ? (
+                      <div className="mt-1 text-xs text-slate-500">
+                        Renews on {new Date(subscription.renewAt).toLocaleDateString()}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          buildPathWithAttribution("/subscribe", {
+                            entryPoint: "ACCOUNT_SUBSCRIPTION",
+                            sourcePath: "/account",
+                            returnTo: "/account",
+                          }),
+                        )
+                      }
+                      className={secondaryButtonClass}
+                    >
+                      View membership
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!subscription?.active || working === "cancel"}
+                      onClick={async () => {
+                        setWorking("cancel");
+                        const response = await cancelSubscription();
+                        if (response.ok) {
+                          setMessage("Membership ended.");
+                        } else {
+                          setMessage(response.error || "Couldn't end the membership.");
+                        }
+                        setWorking("");
+                      }}
+                      className={secondaryButtonClass}
+                    >
+                      Cancel membership
+                    </button>
+                  </div>
+                </div>
+              )}
             </SurfacePanel>
 
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
@@ -737,6 +913,30 @@ export default function AccountPage({ initialSignedIn = false }) {
                   See which sign-in methods are connected and send a reset email without extra digging.
                 </p>
               </div>
+
+              {!viewerSignedIn ? (
+                <div className="space-y-4 rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-600">
+                  <p>
+                    Sign in to keep purchases, library progress, and preferences attached to one account. If you used
+                    email and password before, reset access first instead of guessing.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={openAuthPrompt} className={secondaryButtonClass}>
+                      Sign in
+                    </button>
+                    <button type="button" onClick={() => router.push("/auth/reset")} className={secondaryButtonClass}>
+                      Reset password
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push(buildSupportPath({ topic: "account", context: "Sign-in trouble from account page" }))}
+                      className={secondaryButtonClass}
+                    >
+                      Get help
+                    </button>
+                  </div>
+                </div>
+              ) : null}
 
               {hydrated && isSignedIn ? (
                 <div className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm text-slate-700">
@@ -808,14 +1008,16 @@ export default function AccountPage({ initialSignedIn = false }) {
                 <div className="text-xs text-slate-500">Google login is not configured.</div>
               ) : null}
 
-              <button
-                type="button"
-                disabled={!hydrated || !isSignedIn}
-                onClick={handleRequestPasswordReset}
-                className={secondaryButtonClass}
-              >
-                Send password reset email
-              </button>
+              {viewerSignedIn ? (
+                <button
+                  type="button"
+                  disabled={!hydrated || !isSignedIn}
+                  onClick={handleRequestPasswordReset}
+                  className={secondaryButtonClass}
+                >
+                  Send password reset email
+                </button>
+              ) : null}
               {securityStatus ? <div className="text-xs text-slate-600">{securityStatus}</div> : null}
               {providerStatus ? <div className="text-xs text-slate-600">{providerStatus}</div> : null}
             </SurfacePanel>

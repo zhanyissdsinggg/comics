@@ -6,6 +6,7 @@ import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
+import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
 import { getPlanCatalog, setPlanCatalog } from "../../lib/subscriptions";
 import { apiGet } from "../../lib/apiClient";
@@ -24,6 +25,7 @@ import { siteConfig } from "../../lib/siteConfig";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 import { buildSupportPath } from "../../lib/supportRouting";
 import { useAuthStore } from "../../store/useAuthStore";
+import { formatUSCurrency } from "../../lib/localization";
 
 function openAuthPrompt() {
   if (typeof window === "undefined") {
@@ -47,6 +49,21 @@ const PLAN_FIT_GUIDE = {
     description: "Built for readers who use Gush constantly and want the fullest set of monthly benefits.",
   },
 };
+
+function formatPlanPrice(amount, currency = "USD") {
+  const numericAmount = Number(amount);
+  const normalizedCurrency = String(currency || "USD").toUpperCase();
+
+  if (!Number.isFinite(numericAmount)) {
+    return "";
+  }
+
+  if (normalizedCurrency === "USD") {
+    return formatUSCurrency(numericAmount);
+  }
+
+  return `${normalizedCurrency} ${numericAmount.toFixed(2)}`;
+}
 
 export default function SubscribePage({
   initialSearchParams = {},
@@ -249,6 +266,66 @@ export default function SubscribePage({
     ],
     [subscriptionPreviewOnly],
   );
+  const membershipActionCards = useMemo(
+    () => [
+      {
+        id: "point-packs",
+        eyebrow: "Point packs",
+        title: "Need flexible unlocks instead of a monthly plan?",
+        description:
+          "Store is the better fit when you want one-time packs rather than a recurring membership charge.",
+        cta: STOREFRONT_TERMS.viewPointPacks,
+        onClick: () => router.push("/store"),
+        accentClass:
+          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+      },
+      {
+        id: "purchases",
+        eyebrow: "Purchases",
+        title: "Find receipts, renewals, and order IDs in one place.",
+        description:
+          "Membership charges show up in Purchases after checkout so billing history stays easy to verify later.",
+        cta: "View purchases",
+        onClick: () => router.push("/orders"),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "account",
+        eyebrow: "Account",
+        title: isSignedIn ? "Manage membership, recovery, and reading setup together." : "Sign in before you start a plan.",
+        description: isSignedIn
+          ? "Account keeps billing, recovery, mature-content controls, and reading settings together without a settings dump."
+          : "Membership should belong to one account so receipts, renewals, and cancellation history do not get stranded on one browser.",
+        cta: isSignedIn ? "Open account" : "Sign in",
+        onClick: () => {
+          if (isSignedIn) {
+            router.push("/account");
+            return;
+          }
+          openAuthPrompt();
+        },
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "support",
+        eyebrow: "Billing help",
+        title: subscriptionPreviewOnly
+          ? "Need help while membership is still preview-only?"
+          : "Know where billing help lives before you subscribe.",
+        description: subscriptionPreviewOnly
+          ? "Support is the fallback if launch timing, preview-state rules, or account setup still need clarification."
+          : "Use Support for wrong charges, missing access, cancellation questions, or anything that feels off after checkout.",
+        cta: "Billing help",
+        onClick: () =>
+          router.push(buildSupportPath({ topic: "billing", context: "Membership billing help or preview question" })),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+    ],
+    [isSignedIn, router, subscriptionPreviewOnly],
+  );
 
   return (
     <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
@@ -392,6 +469,25 @@ export default function SubscribePage({
           </SurfacePanel>
         ) : null}
 
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              What do you need next?
+            </p>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              Use Membership like a task page, not a compare-only page.
+            </h2>
+            <p className="text-sm leading-6 text-slate-600">
+              Compare point packs, check purchases, open account, or get billing help without losing the membership path.
+            </p>
+          </div>
+          <StorefrontPathwaysGrid
+            cards={membershipActionCards}
+            columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+            appearance="light"
+          />
+        </SurfacePanel>
+
         <SurfacePanel id="membership-plans" className="space-y-6" appearance="light" accent="blue">
           {feedback ? (
             <div className="rounded-[24px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -450,7 +546,7 @@ export default function SubscribePage({
               const isCurrent = isActive && subscription?.planId === key;
               const priceLabel =
                 perks?.price !== undefined
-                  ? `${perks.currency || "USD"} ${Number(perks.price).toFixed(2)}`
+                  ? formatPlanPrice(perks.price, perks.currency || "USD")
                   : plan.price;
 
               return (
@@ -569,7 +665,7 @@ export default function SubscribePage({
                     {isCurrent
                       ? "Current plan"
                       : !subscriptionActionsEnabled
-                        ? "Coming soon"
+                        ? "Preview only"
                         : !isSignedIn
                           ? "Sign in to start"
                         : workingId === key

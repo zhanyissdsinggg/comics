@@ -991,7 +991,7 @@ function HomeContent({ initialSearchParams = {} }) {
           />
           <ValueCard
             icon={BookOpen}
-            eyebrow="Reader account"
+            eyebrow="Account"
             title="Library, receipts, and progress stay together."
             description="Sign in once and keep every return visit cleaner."
           />

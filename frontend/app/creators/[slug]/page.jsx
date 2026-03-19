@@ -39,7 +39,11 @@ export default async function CreatorRoutePage({ params }) {
   return (
     <>
       <StructuredDataScript id={`creator-jsonld-${creatorSlug}`} data={structuredData} />
-      <CreatorPage creatorSlug={creatorSlug} />
+      <CreatorPage
+        creatorSlug={creatorSlug}
+        initialCatalog={creatorPayload?.items || []}
+        hasInitialCatalog={Boolean(creatorPayload)}
+      />
     </>
   );
 }

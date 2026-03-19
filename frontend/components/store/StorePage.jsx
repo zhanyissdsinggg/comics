@@ -7,6 +7,7 @@ import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import PackageCard from "./PackageCard";
+import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useCouponStore } from "../../store/useCouponStore";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -17,7 +18,7 @@ import { getCookie } from "../../lib/cookies";
 import { apiGet } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
-import { formatUSNumber } from "../../lib/localization";
+import { formatUSCurrency, formatUSNumber } from "../../lib/localization";
 import {
   buildPathWithAttribution,
   mergePaymentAttribution,
@@ -68,6 +69,21 @@ const PACKAGE_FIT_GUIDE = {
   value: "Regular weekly reading with a better bonus.",
   mega: "Heavy unlocking across multiple series.",
 };
+
+function formatPriceLabel(amount, currency = "USD") {
+  const numericAmount = Number(amount);
+  const normalizedCurrency = String(currency || "USD").toUpperCase();
+
+  if (!Number.isFinite(numericAmount)) {
+    return "";
+  }
+
+  if (normalizedCurrency === "USD") {
+    return formatUSCurrency(numericAmount);
+  }
+
+  return `${normalizedCurrency} ${numericAmount.toFixed(2)}`;
+}
 
 export default function StorePage({
   initialSearchParams = {},
@@ -189,7 +205,7 @@ export default function StorePage({
         (left, right) => Number(left?.price || Infinity) - Number(right?.price || Infinity),
       )[0];
       if (cheapestPlan?.price !== undefined && cheapestPlan?.price !== null) {
-        return `${cheapestPlan.currency || "USD"} ${Number(cheapestPlan.price).toFixed(2)}`;
+        return formatPriceLabel(cheapestPlan.price, cheapestPlan.currency || "USD");
       }
     }
     return SUBSCRIPTION_OFFERS[0]?.price?.replace("/mo", "") || "";
@@ -236,7 +252,7 @@ export default function StorePage({
         price,
         priceLabel:
           price !== null && price !== undefined
-            ? `${currency} ${Number(price).toFixed(2)}`
+            ? formatPriceLabel(price, currency)
             : getRegionConfig(region).pointsPackages?.[id]?.priceLabel || "",
       };
     });
@@ -299,6 +315,85 @@ export default function StorePage({
         };
       }),
     [orderedPackages],
+  );
+  const storeActionCards = useMemo(
+    () => [
+      {
+        id: "free-starts",
+        eyebrow: "Start free",
+        title: "Use free chapters before your first paid unlock.",
+        description:
+          "Top Series and free starts are still the safest first click while you compare one-time packs.",
+        cta: "Browse free starts",
+        onClick: () => router.push("/rankings?type=ttf&window=all"),
+        accentClass:
+          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+      },
+      {
+        id: "membership",
+        eyebrow: "Membership",
+        title: purchasePreviewOnly
+          ? "Compare monthly plans while pack checkout is paused."
+          : "Compare monthly plans if you read often.",
+        description: purchasePreviewOnly
+          ? "Store is the one-time option. Membership is still the recurring path to compare while launch work finishes."
+          : "Use membership when repeated top-ups start to feel heavier than a monthly plan.",
+        cta: STOREFRONT_TERMS.compareMembership,
+        onClick: () =>
+          router.push(
+            buildPathWithAttribution("/subscribe", {
+              promotionId: promotionId || undefined,
+              campaignId: campaignId || undefined,
+              entryPoint: "STORE_ACTIONS",
+              sourcePath,
+              sourceSeriesId: sourceSeriesId || undefined,
+              sourceEpisodeId: sourceEpisodeId || undefined,
+              returnTo,
+            }),
+          ),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "purchases",
+        eyebrow: "Purchases",
+        title: "Keep receipts, renewals, and order IDs easy to find.",
+        description:
+          "Purchases is the first stop after checkout when you need proof of charge, receipts, or renewal history.",
+        cta: "View purchases",
+        onClick: () => router.push("/orders"),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: isSignedIn ? "account" : "support",
+        eyebrow: isSignedIn ? "Account" : "Billing help",
+        title: isSignedIn
+          ? "Manage billing, sync, and recovery from one place."
+          : "Need billing help or launch updates before checkout is live?",
+        description: isSignedIn
+          ? "Account keeps purchases, membership, recovery, and reading setup together without sending you through settings soup."
+          : "Support is the calm fallback for preview-state questions, wrong-charge concerns, or account confusion.",
+        cta: isSignedIn ? "Open account" : "Get help",
+        onClick: () =>
+          isSignedIn
+            ? router.push("/account")
+            : router.push(buildSupportPath({ topic: "billing", context: "Store preview or billing help" })),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+    ],
+    [
+      campaignId,
+      isSignedIn,
+      promotionId,
+      purchasePreviewOnly,
+      returnTo,
+      router,
+      sourceEpisodeId,
+      sourcePath,
+      sourceSeriesId,
+    ],
   );
 
   const handleBuy = async (packageId) => {
@@ -420,10 +515,20 @@ export default function StorePage({
       {
         label: "Offers",
         value: (promotions.length > 0 ? promotions.length : isNewPayer ? 1 : 0).toLocaleString(),
-        hint: `${regionConfig.label} pricing`,
+        hint: purchasePreviewOnly ? `${regionConfig.label} pricing preview` : `${regionConfig.label} pricing`,
       },
     ],
-    [bonusPts, coupons.length, isNewPayer, isSignedIn, isSubscriber, paidPts, promotions.length, regionConfig.label],
+    [
+      bonusPts,
+      coupons.length,
+      isNewPayer,
+      isSignedIn,
+      isSubscriber,
+      paidPts,
+      promotions.length,
+      purchasePreviewOnly,
+      regionConfig.label,
+    ],
   );
 
   const secondaryButtonClass =
@@ -539,6 +644,25 @@ export default function StorePage({
             </div>
           </SurfacePanel>
         ) : null}
+
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              What do you need next?
+            </p>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              Use Store like a task page, not a dead end.
+            </h2>
+            <p className="text-sm leading-6 text-slate-600">
+              Compare one-time packs, jump to membership, find receipts, or get billing help without backing out of the purchase flow.
+            </p>
+          </div>
+          <StorefrontPathwaysGrid
+            cards={storeActionCards}
+            columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+            appearance="light"
+          />
+        </SurfacePanel>
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">

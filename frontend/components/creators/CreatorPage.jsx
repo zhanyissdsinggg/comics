@@ -11,6 +11,7 @@ import SkeletonCard from "../common/SkeletonCard";
 import PortraitCard from "../home/PortraitCard";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import StorefrontCampaignPanel from "../common/StorefrontCampaignPanel";
+import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { apiGet } from "../../lib/apiClient";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import {
@@ -197,12 +198,16 @@ function CreatorPageSkeleton() {
   );
 }
 
-export default function CreatorPage({ creatorSlug }) {
+export default function CreatorPage({
+  creatorSlug,
+  initialCatalog = [],
+  hasInitialCatalog = false,
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
-  const [catalog, setCatalog] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [catalog, setCatalog] = useState(Array.isArray(initialCatalog) ? initialCatalog : []);
+  const [loading, setLoading] = useState(!hasInitialCatalog);
   const [error, setError] = useState("");
   const [commerceNotice, setCommerceNotice] = useState(null);
   const requestRef = useRef(0);
@@ -240,7 +245,9 @@ export default function CreatorPage({ creatorSlug }) {
     const requestId = requestRef.current + 1;
     requestRef.current = requestId;
     const adultFlag = isAdultMode ? "1" : "0";
-    setLoading(true);
+    if (!hasInitialCatalog) {
+      setLoading(true);
+    }
     setError("");
 
     const isCurrentRequest = () => requestRef.current === requestId;
@@ -255,8 +262,10 @@ export default function CreatorPage({ creatorSlug }) {
           setCatalog([]);
           setError("");
         } else {
-          setCatalog([]);
-          setError(response.error || "Unable to load creator page.");
+          if (!hasInitialCatalog) {
+            setCatalog([]);
+            setError(response.error || "Unable to load creator page.");
+          }
         }
         return true;
       }
@@ -288,7 +297,7 @@ export default function CreatorPage({ creatorSlug }) {
         });
       }
     });
-  }, [forceDisableAdultMode, isAdultMode]);
+  }, [forceDisableAdultMode, hasInitialCatalog, isAdultMode]);
 
   const creatorItems = useMemo(
     () => buildCreatorItems(catalog, creatorSlug),
@@ -432,6 +441,107 @@ export default function CreatorPage({ creatorSlug }) {
       })),
     [creatorItems],
   );
+  const creatorPathways = useMemo(
+    () => [
+      spotlightSeries
+        ? {
+            id: "lead-title",
+            eyebrow: "Spotlight",
+            title: `Open ${spotlightSeries.title} first.`,
+            description:
+              "Start with the clearest entry point on this shelf, then fan back out into the rest of the creator page.",
+            cta: "Open title",
+            onClick: () => handleOpenTitle(spotlightSeries),
+            accentClass:
+              "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+          }
+        : null,
+      {
+        id: "search-creator",
+        eyebrow: "Search",
+        title: `Search ${creatorName} across the catalog.`,
+        description:
+          "Search is still the quickest fallback when a creator shelf is smaller than you expected.",
+        cta: "Search creator",
+        onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=popular`),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "genre",
+        eyebrow: "Browse lane",
+        title: topGenres[0] ? `Browse more ${topGenres[0]} reads.` : "Browse similar reads.",
+        description:
+          "Use the strongest genre signal on this page to widen discovery without losing the same vibe.",
+        cta: topGenres[0] ? `Browse ${topGenres[0]}` : "Browse similar",
+        onClick: handleBrowseGenre,
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "return",
+        eyebrow: "Return path",
+        title: originSeries ? `Go back to ${originSeries.title}.` : "Go back to your last browse path.",
+        description: originSeries
+          ? "Jump back after checking the creator shelf so discovery keeps moving instead of turning into a dead end."
+          : "Use your last path or Top Series if you only wanted one quick detour through creator credits.",
+        cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
+        onClick: handleReturn,
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+    ].filter(Boolean),
+    [creatorName, handleBrowseGenre, handleOpenTitle, handleReturn, originSeries, router, spotlightSeries, topGenres],
+  );
+  const emptyCreatorPathways = useMemo(
+    () => [
+      {
+        id: "search-series",
+        eyebrow: "Search",
+        title: `Search ${creatorName} or a related title.`,
+        description:
+          "When the creator shelf is empty, search is still the fastest backup path into the visible catalog.",
+        cta: "Search series",
+        onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=popular`),
+        accentClass:
+          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+      },
+      {
+        id: "top-series",
+        eyebrow: "Top Series",
+        title: "Use the safer first click while credits fill in.",
+        description:
+          "Top Series is still the cleanest fallback when a creator page resolves but the public shelf is thin.",
+        cta: "Browse Top Series",
+        onClick: () => router.push("/rankings?type=popular&window=week"),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "catalog",
+        eyebrow: "Browse",
+        title: "Open the wider catalog instead of dead-ending here.",
+        description:
+          "Comics and novels stay useful even when creator credits are still expanding title by title.",
+        cta: "Browse comics",
+        onClick: () => router.push("/comics"),
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+      {
+        id: "return",
+        eyebrow: "Return path",
+        title: originSeries ? `Go back to ${originSeries.title}.` : "Go back to your last browse path.",
+        description:
+          "If you came here from a title, jump back there. If not, head back to search and keep the session moving.",
+        cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
+        onClick: handleReturn,
+        accentClass:
+          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+      },
+    ],
+    [creatorName, handleReturn, originSeries, router],
+  );
 
   if (loading) {
     return <CreatorPageSkeleton />;
@@ -524,6 +634,25 @@ export default function CreatorPage({ creatorSlug }) {
                 label: "Search series",
                 onClick: () => router.push("/search"),
               }}
+            />
+          </SurfacePanel>
+
+          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+                Keep browsing
+              </p>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                Use this creator page as a beta waypoint, not a dead end.
+              </h2>
+              <p className="text-sm leading-7 text-slate-600">
+                Credits are still expanding. Until this shelf fills in, jump back into search, Top Series, or the wider catalog.
+              </p>
+            </div>
+            <StorefrontPathwaysGrid
+              cards={emptyCreatorPathways}
+              columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+              appearance="light"
             />
           </SurfacePanel>
         </div>
@@ -675,6 +804,25 @@ export default function CreatorPage({ creatorSlug }) {
             appearance="light"
           />
         ) : null}
+
+        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+              What do you want to do next?
+            </p>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+              Use this creator page like a real browse path.
+            </h2>
+            <p className="text-sm leading-7 text-slate-600">
+              Open the lead title, widen into a genre, search the creator name, or jump back to where you came from.
+            </p>
+          </div>
+          <StorefrontPathwaysGrid
+            cards={creatorPathways}
+            columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+            appearance="light"
+          />
+        </SurfacePanel>
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
