@@ -39,6 +39,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), { ssr: false });
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
+const SiteFooter = dynamic(() => import("../layout/SiteFooter"));
 const HomeRailsContainer = dynamic(() => import("./HomeRailsContainer"), {
   loading: () => (
     <div className="space-y-10">
@@ -1251,6 +1252,7 @@ function HomeContent({ initialSearchParams = {} }) {
           ]}
         />
       </main>
+      <SiteFooter tone="light" variant="compact" pathname="/" />
     </div>
   );
 }

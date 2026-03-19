@@ -85,7 +85,8 @@ export default function AppProviders({ children }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
-  const shouldShowFooter = !isAdminRoute && !isReaderRoute;
+  const isHomeRoute = pathname === "/";
+  const shouldShowFooter = !isAdminRoute && !isReaderRoute && !isHomeRoute;
   const useFullFooter = FULL_FOOTER_PATHS.some((prefix) => matchesPath(pathname, prefix));
   const footerTone = shouldShowFooter ? "light" : "default";
   const footerVariant = useFullFooter ? "full" : "compact";
