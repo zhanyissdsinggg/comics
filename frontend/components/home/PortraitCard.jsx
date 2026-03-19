@@ -2,6 +2,7 @@
  * Portrait card: calmer storefront card shared by home, search, and creator pages.
  */
 import { memo } from "react";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Cover from "../common/Cover";
 import { Badge } from "@/components/ui/badge";
@@ -56,18 +57,43 @@ function BadgePill({ badge }) {
   );
 }
 
-function PortraitCard({ item, tone, onClick, appearance = "default" }) {
+function isModifiedEvent(event) {
+  return Boolean(
+    event.metaKey ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.button !== 0,
+  );
+}
+
+function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }) {
   const metaLine = item.subtitle || item.eyebrow || "";
   const progressPercent = Number(item.progressPercent || 0);
   const progressWidth = Math.max(0, Math.min(progressPercent <= 1 ? progressPercent * 100 : progressPercent, 100));
   const isLight = appearance === "light";
+  const resolvedHref = href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
+
+  const handleClick = (event) => {
+    if (typeof onClick !== "function") {
+      return;
+    }
+
+    if (isModifiedEvent(event)) {
+      return;
+    }
+
+    event.preventDefault();
+    onClick(event);
+  };
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group relative w-full text-left"
+    <Link
+      href={resolvedHref || "#"}
+      onClick={handleClick}
+      className="group relative block w-full text-left"
       style={{ WebkitTapHighlightColor: "transparent" }}
+      aria-label={item?.title ? `Open ${item.title}` : "Open title"}
     >
       <div
         className={cn(
@@ -81,6 +107,9 @@ function PortraitCard({ item, tone, onClick, appearance = "default" }) {
           <Cover
             tone={tone || item.coverTone}
             coverUrl={item.coverUrl}
+            label={item.title}
+            eyebrow={metaLine}
+            badge={item.badge}
             className="h-full w-full transition-transform duration-700 group-hover:scale-[1.04]"
           />
           <div className={cn("absolute inset-0", isLight ? "bg-gradient-to-t from-black/45 via-transparent to-transparent" : "bg-gradient-to-t from-black/85 via-black/18 to-transparent")} />
@@ -112,7 +141,7 @@ function PortraitCard({ item, tone, onClick, appearance = "default" }) {
           </div>
         </div>
       </div>
-    </button>
+    </Link>
   );
 }
 

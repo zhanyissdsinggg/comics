@@ -723,6 +723,9 @@ export default function CreatorPage({
                   <Cover
                     tone={spotlightSeries.coverTone}
                     coverUrl={spotlightSeries.coverUrl}
+                    label={spotlightSeries.title}
+                    eyebrow={creatorName}
+                    badge={spotlightSeries.badge}
                     className="h-full w-full"
                   />
                 </div>

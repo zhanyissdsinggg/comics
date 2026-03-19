@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
@@ -60,6 +61,49 @@ function formatCreditTypeLabel(creditType) {
   return creditType === "studio" ? "Studio" : "Creator";
 }
 
+function toNumber(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function getSeriesSignalScore(series) {
+  return Math.max(
+    toNumber(series?.followers),
+    toNumber(series?.views),
+    toNumber(series?.ratingCount),
+    Math.round(toNumber(series?.rating) * 100),
+  );
+}
+
+function getFallbackSeriesBadge(series) {
+  if (String(series?.status || "").toLowerCase() === "completed") {
+    return "Completed";
+  }
+  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
+    return "Free";
+  }
+
+  const badges = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
+    .filter(Boolean)
+    .map((badge) => String(badge).trim());
+
+  return badges[0] || "";
+}
+
+function buildFallbackSeriesSubtitle(series) {
+  if (Array.isArray(series?.genres) && series.genres.length > 0) {
+    return series.genres.slice(0, 2).join(" / ");
+  }
+  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
+    const freeCount = Number(series?.freeEpisodeCount || 0);
+    return `${freeCount} free chapter${freeCount === 1 ? "" : "s"}`;
+  }
+  if (series?.updatedAt) {
+    return formatDateLabel(series.updatedAt);
+  }
+  return String(series?.type || "Series");
+}
+
 function summarizeLeadCopy(text, fallback) {
   const source = String(text || "").replace(/\s+/g, " ").trim();
   if (!source) {
@@ -86,6 +130,16 @@ function getCreatorLeadSeries(creator) {
     return creator.spotlightSeries;
   }
   return series.find((item) => item?.id) || null;
+}
+
+function isModifiedEvent(event) {
+  return Boolean(
+    event.metaKey ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.button !== 0,
+  );
 }
 
 function buildCreatorDirectoryHeroStats({
@@ -313,6 +367,53 @@ export default function CreatorsHubPage({
     [creators],
   );
   const stats = useMemo(() => getCreatorDirectoryStats(creators), [creators]);
+  const fallbackEntryTitles = useMemo(
+    () =>
+      [...catalog]
+        .filter((series) => series?.id)
+        .sort((left, right) => {
+          const rightFree = Number(right?.freeEpisodeCount || 0) > 0 || right?.hasFreeEpisodes ? 1 : 0;
+          const leftFree = Number(left?.freeEpisodeCount || 0) > 0 || left?.hasFreeEpisodes ? 1 : 0;
+          if (rightFree !== leftFree) {
+            return rightFree - leftFree;
+          }
+
+          const scoreDelta = getSeriesSignalScore(right) - getSeriesSignalScore(left);
+          if (scoreDelta !== 0) {
+            return scoreDelta;
+          }
+
+          return Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0);
+        })
+        .slice(0, 4)
+        .map((series) => ({
+          id: series.id,
+          title: series.title,
+          subtitle: buildFallbackSeriesSubtitle(series),
+          coverUrl: series.coverUrl,
+          coverTone: series.coverTone,
+          badge: getFallbackSeriesBadge(series),
+        })),
+    [catalog],
+  );
+  const fallbackGenrePicks = useMemo(() => {
+    const counts = new Map();
+
+    catalog.forEach((series) => {
+      (Array.isArray(series?.genres) ? series.genres : []).forEach((genre) => {
+        const key = String(genre || "").trim();
+        if (!key) {
+          return;
+        }
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+    });
+
+    return Array.from(counts.entries())
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .slice(0, 6)
+      .map(([genre, count]) => ({ genre, count }));
+  }, [catalog]);
   const creatorFallbackCards = useMemo(
     () => [
       {
@@ -379,8 +480,23 @@ export default function CreatorsHubPage({
     });
   };
 
-  const openCreator = (creator, entryPoint = "CREATORS_HUB_GRID") => {
+  const buildCreatorHref = (creator, entryPoint = "CREATORS_HUB_GRID") => {
     if (!creator?.path) {
+      return "#";
+    }
+
+    return buildPathWithAttribution(creator.path, {
+      entryPoint,
+      campaignId: creator.slug,
+      sourcePath: "/creators",
+      sourceSeriesId: creator.spotlightSeries?.id || undefined,
+      returnTo: creator.path,
+    });
+  };
+
+  const handleCreatorLinkClick = (event, creator, entryPoint = "CREATORS_HUB_GRID") => {
+    if (!creator?.path) {
+      event.preventDefault();
       return;
     }
 
@@ -391,23 +507,37 @@ export default function CreatorsHubPage({
       sourceSeriesId: creator.spotlightSeries?.id || undefined,
     });
 
-    router.push(
-      buildPathWithAttribution(creator.path, {
-        entryPoint,
-        campaignId: creator.slug,
-        sourcePath: "/creators",
-        sourceSeriesId: creator.spotlightSeries?.id || undefined,
-        returnTo: creator.path,
-      }),
-    );
+    if (isModifiedEvent(event)) {
+      return;
+    }
   };
 
-  const openSeriesFromCreator = (series, creator, entryPoint = "CREATORS_HUB_TITLE") => {
+  const buildSeriesHref = (series, creator, entryPoint = "CREATORS_HUB_TITLE") => {
     if (!series?.id) {
+      return "#";
+    }
+
+    const targetPath = `/series/${encodeURIComponent(series.id)}`;
+    return buildPathWithAttribution(targetPath, {
+      entryPoint,
+      campaignId: creator?.slug || "creators_hub",
+      sourcePath: "/creators",
+      sourceSeriesId: series.id,
+      returnTo: targetPath,
+    });
+  };
+
+  const handleCreatorSeriesLinkClick = (
+    event,
+    series,
+    creator,
+    entryPoint = "CREATORS_HUB_TITLE",
+  ) => {
+    if (!series?.id) {
+      event.preventDefault();
       return;
     }
 
-    const targetPath = `/series/${series.id}`;
     trackEvent("creator_directory_series_click", {
       entryPoint,
       creatorName: creator?.name,
@@ -416,15 +546,39 @@ export default function CreatorsHubPage({
       seriesTitle: series.title,
     });
 
-    router.push(
-      buildPathWithAttribution(targetPath, {
-        entryPoint,
-        campaignId: creator?.slug || "creators_hub",
-        sourcePath: "/creators",
-        sourceSeriesId: series.id,
-        returnTo: targetPath,
-      }),
-    );
+    if (isModifiedEvent(event)) {
+      return;
+    }
+  };
+  const buildFallbackTitleHref = (series) => {
+    if (!series?.id) {
+      return "#";
+    }
+
+    const targetPath = `/series/${encodeURIComponent(series.id)}`;
+    return buildPathWithAttribution(targetPath, {
+      entryPoint: "CREATORS_HUB_FALLBACK_TITLE",
+      campaignId: "creators_fallback",
+      sourcePath: "/creators",
+      sourceSeriesId: series.id,
+      returnTo: targetPath,
+    });
+  };
+  const handleFallbackTitleLinkClick = (event, series) => {
+    if (!series?.id) {
+      event.preventDefault();
+      return;
+    }
+
+    trackEvent("creator_directory_fallback_title_click", {
+      entryPoint: "CREATORS_HUB_FALLBACK_TITLE",
+      seriesId: series.id,
+      seriesTitle: series.title,
+    });
+
+    if (isModifiedEvent(event)) {
+      return;
+    }
   };
 
   const creatorEntryTitles = useMemo(
@@ -542,30 +696,65 @@ export default function CreatorsHubPage({
             <SurfacePanel appearance="light" accent="blue" className="space-y-5">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Directory view
+                  Start from a title
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  {creatorFallbackCards[2].title}
+                  Use live titles until creator credits catch up.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  {creatorFallbackCards[2].description}
+                  When public creator credits are missing, the clean fallback is still to open a strong title first, then keep moving through comics, novels, Top Series, or search.
                 </p>
               </div>
 
-              <div className="grid gap-3">
-                {[
-                  "Search still works better than guessing when you know the creator name already.",
-                  "Top Series is the faster detour when you want a title worth opening before the creator directory fills in.",
-                  "Comics and novels stay the best browse routes until more creator credits are public.",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600"
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
+              {fallbackEntryTitles.length > 0 ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {fallbackEntryTitles.map((series) => (
+                    <Link
+                      key={`creator-fallback-${series.id}`}
+                      href={buildFallbackTitleHref(series)}
+                      onClick={(event) => handleFallbackTitleLinkClick(event, series)}
+                      className="group block overflow-hidden rounded-[28px] border border-black/6 bg-white text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                      aria-label={`Open ${series.title}`}
+                    >
+                      <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900">
+                        <Cover
+                          tone={series.coverTone}
+                          coverUrl={series.coverUrl}
+                          label={series.title}
+                          eyebrow={series.subtitle}
+                          badge={series.badge}
+                          className="h-full w-full transition-transform duration-700 group-hover:scale-[1.04]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+                      </div>
+                      <div className="space-y-2.5 px-4 py-4">
+                        <p className="line-clamp-2 text-[15px] font-semibold leading-5 text-slate-900 transition-colors group-hover:text-slate-950">
+                          {series.title}
+                        </p>
+                        <p className="line-clamp-1 text-xs text-slate-500 transition-colors group-hover:text-slate-600">
+                          {series.subtitle}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+
+              {fallbackGenrePicks.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {fallbackGenrePicks.map((item) => (
+                    <button
+                      key={`creator-fallback-genre-${item.genre}`}
+                      type="button"
+                      onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=popular`)}
+                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
+                    >
+                      {item.genre}
+                      <span className="ml-2 text-xs text-slate-400">{item.count}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
 
               <div className="flex flex-wrap gap-3">
                 <button
@@ -742,11 +931,12 @@ export default function CreatorsHubPage({
                       {group.title}
                     </p>
                     {group.items.map((creator) => (
-                      <button
+                      <Link
                         key={`featured-${group.id}-${creator.slug}`}
-                        type="button"
-                        onClick={() => openCreator(creator, "CREATORS_HUB_FEATURED")}
-                        className="w-full rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-white"
+                        href={buildCreatorHref(creator, "CREATORS_HUB_FEATURED")}
+                        onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_FEATURED")}
+                        className="block w-full rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-white"
+                        aria-label={`Open ${creator.name}`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
@@ -784,7 +974,7 @@ export default function CreatorsHubPage({
                             <span key={`${group.id}-${creator.slug}-featured-meta-${item}`}>{item}</span>
                           ))}
                         </div>
-                      </button>
+                      </Link>
                     ))}
                   </div>
                 ))}
@@ -814,11 +1004,23 @@ export default function CreatorsHubPage({
                   key={`${creator.slug}-${series.id}`}
                   className="rounded-[28px] border border-black/6 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
                 >
-                  <Cover
-                    tone={series?.coverTone}
-                    coverUrl={series?.coverUrl}
-                    className="h-56 rounded-[22px]"
-                  />
+                  <Link
+                    href={buildSeriesHref(series, creator, "CREATORS_HUB_ENTRY_TITLE")}
+                    onClick={(event) =>
+                      handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_ENTRY_TITLE")
+                    }
+                    className="group block overflow-hidden rounded-[22px]"
+                    aria-label={`Open ${series.title}`}
+                  >
+                    <Cover
+                      tone={series?.coverTone}
+                      coverUrl={series?.coverUrl}
+                      label={series?.title}
+                      eyebrow={creator?.name}
+                      badge={series?.badge}
+                      className="h-56 rounded-[22px] transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+                  </Link>
                   <div className="mt-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -826,7 +1028,15 @@ export default function CreatorsHubPage({
                           {formatCreditTypeLabel(creator.creditType)}
                         </p>
                         <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                          {series.title}
+                          <Link
+                            href={buildSeriesHref(series, creator, "CREATORS_HUB_ENTRY_TITLE")}
+                            onClick={(event) =>
+                              handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_ENTRY_TITLE")
+                            }
+                            className="transition-colors hover:text-[var(--gush-accent,#2f6bff)]"
+                          >
+                            {series.title}
+                          </Link>
                         </h3>
                       </div>
                       <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
@@ -856,20 +1066,22 @@ export default function CreatorsHubPage({
                     </div>
 
                     <div className="flex flex-wrap gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => openSeriesFromCreator(series, creator, "CREATORS_HUB_ENTRY_TITLE")}
+                      <Link
+                        href={buildSeriesHref(series, creator, "CREATORS_HUB_ENTRY_TITLE")}
+                        onClick={(event) =>
+                          handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_ENTRY_TITLE")
+                        }
                         className={primaryButtonClass}
                       >
                         Open title
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openCreator(creator, "CREATORS_HUB_ENTRY_SHELF")}
+                      </Link>
+                      <Link
+                        href={buildCreatorHref(creator, "CREATORS_HUB_ENTRY_SHELF")}
+                        onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_ENTRY_SHELF")}
                         className={secondaryButtonClass}
                       >
                         Open creator
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -970,15 +1182,19 @@ export default function CreatorsHubPage({
                 const creatorTopTitles = getCreatorTopTitles(creator, 3);
 
                 return (
-                  <button
+                  <Link
                     key={creator.slug}
-                    type="button"
-                    onClick={() => openCreator(creator, "CREATORS_HUB_SPOTLIGHT")}
-                    className="group rounded-[30px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                    href={buildCreatorHref(creator, "CREATORS_HUB_SPOTLIGHT")}
+                    onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_SPOTLIGHT")}
+                    className="group block rounded-[30px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                    aria-label={`Open ${creator.name}`}
                   >
                     <Cover
                       tone={creator.spotlightSeries?.coverTone}
                       coverUrl={creator.spotlightSeries?.coverUrl}
+                      label={creator.spotlightSeries?.title || creator.name}
+                      eyebrow={creator.name}
+                      badge={creator.spotlightSeries?.badge}
                       className="h-56 rounded-[22px]"
                     />
                     <div className="mt-4 space-y-3">
@@ -1037,7 +1253,7 @@ export default function CreatorsHubPage({
                         ))}
                       </div>
                     </div>
-                  </button>
+                  </Link>
                 );
               })}
             </div>
@@ -1087,22 +1303,26 @@ export default function CreatorsHubPage({
                 const creatorTopTitles = getCreatorTopTitles(creator, 3);
 
                 return (
-                  <button
+                  <Link
                     key={creator.slug}
-                    type="button"
-                    onClick={() => openCreator(creator)}
-                    className="group rounded-[28px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                    href={buildCreatorHref(creator)}
+                    onClick={(event) => handleCreatorLinkClick(event, creator)}
+                    className="group block rounded-[28px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                    aria-label={`Open ${creator.name}`}
                   >
                     <div className="grid gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
                       <Cover
                         tone={creator.spotlightSeries?.coverTone}
                         coverUrl={creator.spotlightSeries?.coverUrl}
+                        label={creator.spotlightSeries?.title || creator.name}
+                        eyebrow={creator.name}
+                        badge={creator.spotlightSeries?.badge}
                         className="h-44 rounded-[20px]"
                       />
                       <div className="min-w-0">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
                               {formatCreditTypeLabel(creator.creditType)}
                             </p>
                             <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
@@ -1156,7 +1376,7 @@ export default function CreatorsHubPage({
                         </div>
                       </div>
                     </div>
-                  </button>
+                  </Link>
                 );
               })}
             </div>

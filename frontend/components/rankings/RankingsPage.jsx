@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
@@ -134,6 +135,16 @@ function RankingsLoadingState() {
   );
 }
 
+function isModifiedEvent(event) {
+  return Boolean(
+    event.metaKey ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.button !== 0,
+  );
+}
+
 export default function RankingsPage({
   initialSearchParams = {},
   initialRankings = [],
@@ -173,6 +184,17 @@ export default function RankingsPage({
       );
     },
     [rankingsPath, router, selectedWindow, tab],
+  );
+  const handleSeriesLinkClick = useCallback(
+    (event, seriesId, entryPoint = "RANKINGS_BOARD", campaignId = `${tab}_${selectedWindow}`) => {
+      if (isModifiedEvent(event)) {
+        return;
+      }
+
+      event.preventDefault();
+      handleSeriesClick(seriesId, entryPoint, campaignId);
+    },
+    [handleSeriesClick, selectedWindow, tab],
   );
 
   useEffect(() => {
@@ -482,13 +504,21 @@ export default function RankingsPage({
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.32fr)_360px]">
             <div className="space-y-6">
               {leadEntry ? (
-                <button
-                  type="button"
-                  onClick={() => handleSeriesClick(leadEntry.id, "RANKINGS_LEAD")}
+                <Link
+                  href={`/series/${encodeURIComponent(leadEntry.id)}`}
+                  onClick={(event) => handleSeriesLinkClick(event, leadEntry.id, "RANKINGS_LEAD")}
                   className="w-full rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-5 text-left shadow-[0_22px_52px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-black/10"
+                  aria-label={`Open ${leadEntry.title}`}
                 >
                   <div className="grid gap-5 lg:grid-cols-[200px_minmax(0,1fr)]">
-                    <Cover tone={leadEntry.coverTone} coverUrl={leadEntry.coverUrl} className="h-64 rounded-[24px] lg:h-full" />
+                    <Cover
+                      tone={leadEntry.coverTone}
+                      coverUrl={leadEntry.coverUrl}
+                      label={leadEntry.title}
+                      eyebrow={activeTab.label}
+                      badge={leadEntry.badge}
+                      className="h-64 rounded-[24px] lg:h-full"
+                    />
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
@@ -528,17 +558,18 @@ export default function RankingsPage({
                       </div>
                     </div>
                   </div>
-                </button>
+                </Link>
               ) : null}
 
               {supportingEntries.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2">
                   {supportingEntries.map((series, index) => (
-                    <button
+                    <Link
                       key={series.id}
-                      type="button"
-                      onClick={() => handleSeriesClick(series.id, "RANKINGS_SUPPORTING")}
+                      href={`/series/${encodeURIComponent(series.id)}`}
+                      onClick={(event) => handleSeriesLinkClick(event, series.id, "RANKINGS_SUPPORTING")}
                       className="rounded-[26px] border border-black/6 bg-white/88 p-4 text-left shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-black/10"
+                      aria-label={`Open ${series.title}`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -551,9 +582,16 @@ export default function RankingsPage({
                         </div>
                         {series.badge ? <Pill appearance="light">{series.badge}</Pill> : null}
                       </div>
-                      <Cover tone={series.coverTone} coverUrl={series.coverUrl} className="mt-4 h-48 rounded-[20px]" />
+                      <Cover
+                        tone={series.coverTone}
+                        coverUrl={series.coverUrl}
+                        label={series.title}
+                        eyebrow={`Rank #${index + 2}`}
+                        badge={series.badge}
+                        className="mt-4 h-48 rounded-[20px]"
+                      />
                       <p className="mt-4 text-sm text-slate-500">{formatSeriesMeta(series)}</p>
-                    </button>
+                    </Link>
                   ))}
                 </div>
               ) : null}
@@ -576,18 +614,26 @@ export default function RankingsPage({
 
                   <div className="space-y-3">
                     {boardEntries.map((series, index) => (
-                      <button
+                      <Link
                         key={series.id}
-                        type="button"
-                        onClick={() => handleSeriesClick(series.id, "RANKINGS_BOARD_LIST")}
+                        href={`/series/${encodeURIComponent(series.id)}`}
+                        onClick={(event) => handleSeriesLinkClick(event, series.id, "RANKINGS_BOARD_LIST")}
                         className="flex w-full items-center gap-4 rounded-[24px] border border-black/6 bg-white/86 p-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-black/10"
+                        aria-label={`Open ${series.title}`}
                       >
                         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-[18px] border border-black/8 bg-[#f8f9fc]">
                           <span className="font-display text-xl font-semibold tracking-tight text-slate-950">
                             #{index + 4}
                           </span>
                         </div>
-                        <Cover tone={series.coverTone} coverUrl={series.coverUrl} className="h-20 w-16 flex-shrink-0 rounded-[16px]" />
+                        <Cover
+                          tone={series.coverTone}
+                          coverUrl={series.coverUrl}
+                          label={series.title}
+                          eyebrow={`Rank #${index + 4}`}
+                          badge={series.badge}
+                          className="h-20 w-16 flex-shrink-0 rounded-[16px]"
+                        />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-base font-semibold text-slate-950">{series.title}</p>
                           <p className="mt-1 text-xs text-slate-500">{formatSeriesMeta(series)}</p>
@@ -598,7 +644,7 @@ export default function RankingsPage({
                         <span className="hidden rounded-full border border-black/8 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-500 sm:inline-flex">
                           Open
                         </span>
-                      </button>
+                      </Link>
                     ))}
                   </div>
                 </SurfacePanel>

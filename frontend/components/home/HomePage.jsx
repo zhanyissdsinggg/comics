@@ -5,6 +5,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
@@ -20,7 +21,9 @@ import {
 } from "lucide-react";
 import Cover from "../common/Cover";
 import SiteHeader from "../layout/SiteHeader";
+import SiteFooter from "../layout/SiteFooter";
 import PortraitCard from "./PortraitCard";
+import HomeRailsContainer from "./HomeRailsContainer";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
@@ -39,15 +42,6 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), { ssr: false });
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
-const SiteFooter = dynamic(() => import("../layout/SiteFooter"));
-const HomeRailsContainer = dynamic(() => import("./HomeRailsContainer"), {
-  loading: () => (
-    <div className="space-y-10">
-      <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
-      <div className="h-72 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
-    </div>
-  ),
-});
 
 function toTimestamp(value) {
   const parsed = typeof value === "number" ? value : Date.parse(value || "");
@@ -154,17 +148,38 @@ function dedupeSeries(seriesList) {
   });
 }
 
+function isModifiedEvent(event) {
+  return Boolean(
+    event.metaKey ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.button !== 0,
+  );
+}
+
 function SpotlightItem({ item, onClick }) {
+  const href = item?.id ? `/series/${encodeURIComponent(item.id)}` : "#";
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <Link
+      href={href}
+      onClick={(event) => {
+        if (!onClick || isModifiedEvent(event)) {
+          return;
+        }
+        event.preventDefault();
+        onClick();
+      }}
       className="group flex w-full items-center gap-3 rounded-[22px] border border-black/6 bg-white/72 p-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:border-black/10 hover:bg-white"
+      aria-label={item?.title ? `Open ${item.title}` : "Open title"}
     >
       <div className="h-16 w-11 shrink-0 overflow-hidden rounded-[14px] border border-black/6 bg-slate-200">
         <Cover
           tone={item.coverTone}
           coverUrl={item.coverUrl}
+          label={item.title}
+          eyebrow={item.meta}
           className="h-full w-full transition-transform duration-500 group-hover:scale-[1.03]"
         />
       </div>
@@ -173,7 +188,7 @@ function SpotlightItem({ item, onClick }) {
         <p className="mt-1 truncate text-xs text-slate-500">{item.meta}</p>
       </div>
       <ArrowRight className="size-4 shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-900" />
-    </button>
+    </Link>
   );
 }
 
@@ -788,7 +803,14 @@ function HomeContent({ initialSearchParams = {} }) {
 
                 <div className="grid gap-4 sm:grid-cols-[228px_1fr] xl:grid-cols-[264px_1fr]">
                   <div className="overflow-hidden rounded-[30px] border border-black/6 bg-slate-200 shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
-                    <Cover tone={featuredSeries.coverTone} coverUrl={featuredSeries.coverUrl} className="aspect-[3/4] w-full" />
+                    <Cover
+                      tone={featuredSeries.coverTone}
+                      coverUrl={featuredSeries.coverUrl}
+                      label={featuredSeries.title}
+                      eyebrow={Array.isArray(featuredSeries.genres) ? featuredSeries.genres.slice(0, 2).join(" / ") : ""}
+                      badge={featuredSeries.badge}
+                      className="aspect-[3/4] w-full"
+                    />
                   </div>
                   <div className="space-y-4">
                     <div className="rounded-[30px] border border-black/6 bg-white/76 p-5 shadow-[0_12px_32px_rgba(15,23,42,0.04)]">
@@ -986,7 +1008,16 @@ function HomeContent({ initialSearchParams = {} }) {
                 </div>
                 <div className="rounded-[28px] border border-black/6 bg-white/72 p-4 sm:p-5">
                   <div className="grid gap-4 sm:grid-cols-[148px_1fr]">
-                    <div className="aspect-[3/4] rounded-[24px] border border-black/6 bg-neutral-900 bg-cover bg-center shadow-[0_16px_32px_rgba(15,23,42,0.08)]" style={resumeSeries.coverUrl ? { backgroundImage: `linear-gradient(180deg,rgba(12,18,24,0.04),rgba(12,18,24,0.24)), url(${resumeSeries.coverUrl})` } : undefined} />
+                    <div className="aspect-[3/4] overflow-hidden rounded-[24px] border border-black/6 bg-neutral-900 shadow-[0_16px_32px_rgba(15,23,42,0.08)]">
+                      <Cover
+                        tone={resumeSeries.coverTone}
+                        coverUrl={resumeSeries.coverUrl}
+                        label={resumeSeries.title}
+                        eyebrow={resumeSpotlight?.episodeId ? formatEpisodeLabel(resumeSpotlight.episodeId) : "Continue reading"}
+                        badge={resumeSeries.badge}
+                        className="h-full w-full"
+                      />
+                    </div>
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Up next</p>
                       <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">{resumeSeries.title}</h3>

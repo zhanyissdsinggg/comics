@@ -4,6 +4,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
@@ -424,6 +425,10 @@ export default function SeriesPage({
     },
     [router],
   );
+  const buildSeriesHref = useCallback(
+    (seriesId) => (seriesId ? `/series/${encodeURIComponent(seriesId)}` : "#"),
+    [],
+  );
 
   const handleResetFilters = useCallback(() => {
     router.replace(config.pathname);
@@ -767,6 +772,9 @@ export default function SeriesPage({
                 <Cover
                   tone={entrySpotlight.primary.coverTone}
                   coverUrl={entrySpotlight.primary.coverUrl}
+                  label={entrySpotlight.primary.title}
+                  eyebrow={type === "comic" ? "Best first click" : "Best place to settle in"}
+                  badge={getSeriesBadge(entrySpotlight.primary)}
                   className="h-72 rounded-[24px]"
                 />
                 <div className="min-w-0">
@@ -922,15 +930,18 @@ export default function SeriesPage({
               {curatedShelfCards.map((card) => {
                 const item = card.series;
                 return (
-                  <button
+                  <Link
                     key={`curated-${card.eyebrow}-${item.id}`}
-                    type="button"
-                    onClick={() => handleSeriesClick(item.id)}
-                    className="group rounded-[28px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                    href={buildSeriesHref(item.id)}
+                    className="group block rounded-[28px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                    aria-label={`Open ${item.title}`}
                   >
                     <Cover
                       tone={item.coverTone}
                       coverUrl={item.coverUrl}
+                      label={item.title}
+                      eyebrow={card.eyebrow}
+                      badge={getSeriesBadge(item)}
                       className="h-56 rounded-[22px]"
                     />
                     <div className="mt-4 space-y-3">
@@ -955,7 +966,7 @@ export default function SeriesPage({
                       </div>
                       <p className="text-xs font-semibold text-slate-950">{card.ctaLabel}</p>
                     </div>
-                  </button>
+                  </Link>
                 );
               })}
             </div>

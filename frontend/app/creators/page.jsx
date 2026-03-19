@@ -2,9 +2,13 @@ import CreatorsHubPage from "../../components/creators/CreatorsHubPage";
 import StructuredDataScript from "../../components/common/StructuredDataScript";
 import { createPageMetadata } from "../../lib/seo";
 import { buildCreatorsDirectoryStructuredData } from "../../lib/structuredData";
-import { loadCreatorsDirectorySeoPayload } from "../../lib/storefrontSeo";
+import {
+  loadCreatorsDirectorySeoPayload,
+  loadSeriesCatalogSeoPayload,
+} from "../../lib/storefrontSeo";
 
 export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const payload = await loadCreatorsDirectorySeoPayload();
@@ -20,10 +24,15 @@ export async function generateMetadata() {
 }
 
 export default async function CreatorsPageRoute() {
-  const payload = await loadCreatorsDirectorySeoPayload();
-  const initialCatalog = (payload?.creators || []).flatMap((creator) =>
+  const [payload, catalogPayload] = await Promise.all([
+    loadCreatorsDirectorySeoPayload(),
+    loadSeriesCatalogSeoPayload(),
+  ]);
+  const creatorCatalog = (payload?.creators || []).flatMap((creator) =>
     Array.isArray(creator?.series) ? creator.series : [],
   );
+  const initialCatalog =
+    creatorCatalog.length > 0 ? creatorCatalog : catalogPayload?.series || [];
   const structuredData = buildCreatorsDirectoryStructuredData({
     creators: payload?.creators || [],
   });
