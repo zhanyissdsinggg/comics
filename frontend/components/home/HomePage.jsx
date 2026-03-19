@@ -1216,15 +1216,15 @@ function HomeContent({ initialSearchParams = {} }) {
                 </div>
               </div>
 
-              <div className="mt-6 border-t border-black/6 pt-5">
-                <div className="flex flex-wrap gap-2.5">
+              <div className="mt-4 flex flex-wrap gap-2 sm:gap-2.5">
+                <div className="flex flex-wrap gap-2 sm:gap-2.5">
                   {helpResourceCards.map((item) => (
                     <Button
                       key={item.href}
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => router.push(item.href)}
-                      className="h-10 rounded-full border-black/8 bg-white px-4 text-sm font-semibold text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
+                      className="h-8 rounded-full px-3 text-xs font-semibold text-slate-500 hover:bg-white/72 hover:text-slate-900"
                     >
                       {item.label}
                     </Button>
