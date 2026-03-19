@@ -54,7 +54,7 @@ const ROUTES = [
     route: "/orders",
     expectedTitle: "Purchases",
     expectedH1: "Purchases live on your account.",
-    expectedNeedles: ["Sign in to view your purchases", "See point packs", "Support"],
+    expectedNeedles: ["Sign in, or get billing help now.", "Get billing help", "Get help with a missing receipt or wrong charge."],
   },
   {
     route: "/account",
