@@ -50,9 +50,9 @@ const compactFooterSections = [
   {
     title: "Browse",
     links: [
-      { label: "Home", href: "/" },
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
+      { label: "Creators", href: "/creators" },
       { label: "Top Series", href: "/rankings" },
     ],
   },
@@ -65,16 +65,20 @@ const compactFooterSections = [
       { label: "Account", href: "/account" },
     ],
   },
-  {
-    title: "Help",
-    links: [
-      { label: "Support", href: "/support" },
-      { label: "FAQ", href: "/faq" },
-      { label: "Privacy", href: "/privacy-policy" },
-      { label: "Terms", href: "/terms-of-service" },
-    ],
-  },
 ];
+
+const compactFooterMetaLinks = [
+  { label: "Support", href: "/support" },
+  { label: "FAQ", href: "/faq" },
+  { label: "About", href: "/about" },
+  { label: "Mature Content", href: "/mature-content" },
+  { label: "Privacy", href: "/privacy-policy" },
+  { label: "Terms", href: "/terms-of-service" },
+];
+
+function normalizeFooterPath(href) {
+  return String(href || "").split("?")[0];
+}
 
 const trustPanels = [
   {
@@ -97,10 +101,17 @@ const trustPanels = [
   },
 ];
 
-export default function SiteFooter({ tone = "default", variant = "full" }) {
+export default function SiteFooter({ tone = "default", variant = "full", pathname = "" }) {
   const currentYear = new Date().getFullYear();
   const isHome = tone === "home" || tone === "light";
   const isCompact = variant === "compact";
+  const compactSections = compactFooterSections
+    .map((section) => ({
+      ...section,
+      links: section.links.filter((link) => normalizeFooterPath(link.href) !== pathname),
+    }))
+    .filter((section) => section.links.length > 0);
+  const compactMetaLinks = compactFooterMetaLinks.filter((link) => normalizeFooterPath(link.href) !== pathname);
 
   if (isCompact) {
     return (
@@ -111,56 +122,27 @@ export default function SiteFooter({ tone = "default", variant = "full" }) {
             : "border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))] text-white"
         }`}
       >
-        <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-xl space-y-4">
-              <p className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400" : "text-emerald-300/75"}`}>
-                Need help fast?
+        <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-lg space-y-3">
+              <Link href="/" className={`font-display text-2xl font-semibold tracking-tight ${isHome ? "text-slate-950" : "text-white"}`}>
+                {siteConfig.siteName}
+              </Link>
+              <p className={`text-sm leading-7 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
+                Read comics and novels with point packs, membership, receipts in one place, and direct support when billing or access needs help.
               </p>
-              <div>
-                <Link href="/" className={`font-display text-2xl font-semibold tracking-tight ${isHome ? "text-slate-950" : "text-white"}`}>
-                  {siteConfig.siteName}
-                </Link>
-                <p className={`mt-3 text-sm leading-7 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
-                  Read comics and novels with clear pricing, direct support, and account tools that do not bury the next step.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                 <a
                   href={`mailto:${siteConfig.supportEmail}`}
-                  className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                    isHome
-                      ? "border-black/8 bg-white/80 text-slate-800 hover:border-black/12 hover:bg-white"
-                      : "border-white/12 bg-white/[0.04] text-white hover:border-white/20 hover:bg-white/[0.08]"
-                  }`}
+                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-300 transition-colors hover:text-white"}
                 >
                   {siteConfig.supportEmail}
-                </a>
-                <a
-                  href={`mailto:${siteConfig.privacyEmail}`}
-                  className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                    isHome
-                      ? "border-black/8 bg-black/[0.03] text-slate-600 hover:border-black/12 hover:bg-white hover:text-slate-900"
-                      : "border-white/10 bg-black/10 text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-                  }`}
-                >
-                  {siteConfig.privacyEmail}
-                </a>
-                <a
-                  href={`mailto:${siteConfig.legalEmail}`}
-                  className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                    isHome
-                      ? "border-black/8 bg-black/[0.03] text-slate-600 hover:border-black/12 hover:bg-white hover:text-slate-900"
-                      : "border-white/10 bg-black/10 text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-                  }`}
-                >
-                  {siteConfig.legalEmail}
                 </a>
               </div>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-3">
-              {compactFooterSections.map((section) => (
+            <div className="grid gap-6 sm:grid-cols-2">
+              {compactSections.map((section) => (
                 <div key={section.title} className="space-y-3">
                   <h4 className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400" : "text-neutral-400"}`}>
                     {section.title}
@@ -182,17 +164,20 @@ export default function SiteFooter({ tone = "default", variant = "full" }) {
             </div>
           </div>
 
-          <div className={`mt-8 flex flex-col gap-3 border-t pt-4 text-sm lg:flex-row lg:items-center lg:justify-between ${isHome ? "border-black/6 text-slate-400" : "border-white/10 text-neutral-500"}`}>
+          <div className={`mt-6 flex flex-col gap-3 border-t pt-4 text-sm lg:flex-row lg:items-center lg:justify-between ${isHome ? "border-black/6 text-slate-400" : "border-white/10 text-neutral-500"}`}>
             <p>
               © {currentYear} {siteConfig.companyName}. All rights reserved.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link href="/support" className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}>
-                Support
-              </Link>
-              <Link href="/about" className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}>
-                About
-              </Link>
+              {compactMetaLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
+                >
+                  {link.label}
+                </Link>
+              ))}
               {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
             </div>
           </div>

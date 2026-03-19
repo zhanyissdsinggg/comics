@@ -88,6 +88,64 @@ function getCreatorLeadSeries(creator) {
   return series.find((item) => item?.id) || null;
 }
 
+function buildCreatorDirectoryHeroStats({
+  creators,
+  featuredStudios,
+  genreOptions,
+  spotlightCreators,
+  stats,
+}) {
+  const leadCreator = spotlightCreators[0] || creators[0] || null;
+
+  return [
+    {
+      label: "Coverage",
+      value: stats.creators > 0 ? `${stats.creators} live page${stats.creators === 1 ? "" : "s"}` : "Expanding",
+      hint: "Creator pages only show when credits are visible enough to browse cleanly.",
+    },
+    {
+      label: "Studios",
+      value: featuredStudios.length > 0 ? `${featuredStudios.length} surfaced` : "Adding more",
+      hint: featuredStudios.length > 0
+        ? "Studio shelves are grouped when multi-title credits are visible."
+        : "Studio grouping expands as more catalog credits become public.",
+    },
+    {
+      label: "Best first click",
+      value: leadCreator?.name || "Top Series",
+      hint: leadCreator
+        ? "Open a strong shelf first, then fan out from the visible credits behind it."
+        : "Use Top Series until more creator shelves are public.",
+    },
+    {
+      label: "Strongest lane",
+      value: genreOptions[0] || "Mixed catalog",
+      hint: genreOptions[0]
+        ? `${genreOptions[0]} is the clearest creator-led lane in the public directory right now.`
+        : "Genre tags fill in as more creator-linked titles appear.",
+    },
+  ];
+}
+
+function buildCreatorShelfMeta(creator) {
+  const meta = [];
+
+  if (Number(creator?.freeStartCount || 0) > 0) {
+    meta.push(`${creator.freeStartCount} start free`);
+  }
+  if (Number(creator?.ongoingCount || 0) > 0) {
+    meta.push(`${creator.ongoingCount} active`);
+  }
+  if (Number(creator?.completedCount || 0) > 0) {
+    meta.push(`${creator.completedCount} completed`);
+  }
+  if (creator?.latestUpdatedAt) {
+    meta.push(formatDateLabel(creator.latestUpdatedAt));
+  }
+
+  return meta.length > 0 ? meta : ["Credits expanding"];
+}
+
 function CreatorDirectorySkeleton() {
   return (
     <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
@@ -282,29 +340,15 @@ export default function CreatorsHubPage({
   );
 
   const heroStats = useMemo(
-    () => [
-      {
-        label: "Creators",
-        value: stats.creators.toLocaleString(),
-        hint: "Writers, artists, and studios with a visible page right now.",
-      },
-      {
-        label: "Studios",
-        value: stats.studios.toLocaleString(),
-        hint: "Multi-title teams and studio credits with a visible page.",
-      },
-      {
-        label: "Series",
-        value: stats.titles.toLocaleString(),
-        hint: "Titles already tied back to a creator page.",
-      },
-      {
-        label: "Free starts",
-        value: stats.freeStarts.toLocaleString(),
-        hint: "Creator-linked titles that still give readers a low-risk first click.",
-      },
-    ],
-    [stats.creators, stats.freeStarts, stats.studios, stats.titles],
+    () =>
+      buildCreatorDirectoryHeroStats({
+        creators,
+        featuredStudios,
+        genreOptions,
+        spotlightCreators,
+        stats,
+      }),
+    [creators, featuredStudios, genreOptions, spotlightCreators, stats],
   );
 
   const primaryButtonClass =
@@ -548,7 +592,7 @@ export default function CreatorsHubPage({
           eyebrow="Creators"
           title="Find the creators worth following."
           description="Jump from one favorite series to the writer, artist, or studio behind it, then keep reading from the same voice."
-          secondary="Creator pages are live in beta. Use them when credits are visible, then fall back to Search or Top Series when a shelf is still filling in."
+          secondary="Creator pages open when credits are visible enough to browse cleanly. When a shelf is still thin, keep moving through Search or Top Series instead."
           stats={heroStats}
           actions={
             <>
@@ -564,7 +608,7 @@ export default function CreatorsHubPage({
                 onClick={() => router.push("/search")}
                 className={secondaryButtonClass}
               >
-                Search all series
+                Search series
               </button>
             </>
           }
@@ -581,7 +625,7 @@ export default function CreatorsHubPage({
           <SurfacePanel appearance="light" accent="blue" className="space-y-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Creator pages beta
+                Creator browse
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Not every title exposes clean credits yet.
@@ -662,9 +706,9 @@ export default function CreatorsHubPage({
                     </div>
                   ) : null}
                   <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
-                    {creator.freeStartCount > 0 ? <span>{creator.freeStartCount} start free</span> : null}
-                    <span>{creator.ongoingCount} active</span>
-                    <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
+                    {buildCreatorShelfMeta(creator).map((item) => (
+                      <span key={`${creator.slug}-featured-meta-${item}`}>{item}</span>
+                    ))}
                   </div>
                 </button>
               ))}
@@ -912,10 +956,9 @@ export default function CreatorsHubPage({
                       ) : null}
 
                       <div className="flex flex-wrap gap-3 text-xs text-slate-500">
-                        {creator.freeStartCount > 0 ? <span>{creator.freeStartCount} start free</span> : null}
-                        <span>{creator.ongoingCount} active</span>
-                        <span>{creator.completedCount} completed</span>
-                        <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
+                        {buildCreatorShelfMeta(creator).map((item) => (
+                          <span key={`${creator.slug}-spotlight-meta-${item}`}>{item}</span>
+                        ))}
                       </div>
                     </div>
                   </button>
@@ -1031,10 +1074,9 @@ export default function CreatorsHubPage({
                         ) : null}
 
                         <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
-                          {creator.freeStartCount > 0 ? <span>{creator.freeStartCount} start free</span> : null}
-                          <span>{creator.ongoingCount} active</span>
-                          <span>{creator.completedCount} completed</span>
-                          <span>{formatDateLabel(creator.latestUpdatedAt)}</span>
+                          {buildCreatorShelfMeta(creator).map((item) => (
+                            <span key={`${creator.slug}-list-meta-${item}`}>{item}</span>
+                          ))}
                         </div>
                       </div>
                     </div>

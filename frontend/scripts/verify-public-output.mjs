@@ -42,13 +42,13 @@ const ROUTES = [
     route: "/store",
     expectedTitle: "Store",
     expectedH1: "Buy points for one-time unlocks.",
-    expectedNeedles: ["How paying works", "Point packs", "Billing accountability"],
+    expectedNeedles: ["How paying works", "Point packs", "Point packs are one-time. Membership is the monthly path."],
   },
   {
     route: "/subscribe",
     expectedTitle: "Membership",
     expectedH1: "Pick the plan that fits your reading rhythm.",
-    expectedNeedles: ["Recurring monthly billing", "Three tiers. Three reading habits.", "Membership accountability"],
+    expectedNeedles: ["Recurring monthly billing", "Three tiers. Three reading habits.", "Membership is monthly. Point packs stay flexible. Help should stay obvious."],
   },
   {
     route: "/orders",

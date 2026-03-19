@@ -118,7 +118,7 @@ export default function AppProviders({ children }) {
                             <BehaviorProvider>
                               <HistoryProvider>
                                 {children}
-                                {shouldShowFooter ? <SiteFooter tone={footerTone} variant={footerVariant} /> : null}
+                                {shouldShowFooter ? <SiteFooter tone={footerTone} variant={footerVariant} pathname={pathname || ""} /> : null}
                                 <PWAInstallPrompt />
                               </HistoryProvider>
                             </BehaviorProvider>

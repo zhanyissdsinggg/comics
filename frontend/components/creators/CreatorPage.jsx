@@ -340,19 +340,21 @@ export default function CreatorPage({
 
     return [
       {
-        label: "Series",
+        label: "Shelf",
         value: formatTitleCountLabel(creatorItems.length),
         hint: "Everything public on this creator shelf right now.",
       },
       {
-        label: "Completed",
-        value: String(completedCount),
+        label: "Reading mode",
+        value: completedCount > 0 ? `${completedCount} complete` : "Mostly ongoing",
         hint: completedCount > 0 ? "Finished reads are ready to binge." : "This page leans ongoing right now.",
       },
       {
-        label: "Readers",
-        value: formatCompactCount(readerProof),
-        hint: "Visible audience activity across this creator's titles.",
+        label: "Audience",
+        value: readerProof > 0 ? `${formatCompactCount(readerProof)} readers` : "Fresh shelf",
+        hint: readerProof > 0
+          ? "Visible audience activity across this creator's titles."
+          : "This shelf is live, but audience proof is still thin in the visible data.",
       },
       {
         label: "Best known for",
@@ -370,9 +372,10 @@ export default function CreatorPage({
     }
 
     const isCompleted = String(spotlightSeries?.status || "").toLowerCase() === "completed";
+    const popularityScore = getPopularityScore(spotlightSeries);
 
     return [
-      `${formatCompactCount(getPopularityScore(spotlightSeries))} readers`,
+      popularityScore > 0 ? `${formatCompactCount(popularityScore)} readers` : null,
       isCompleted ? "Completed" : `Updated ${formatDateLabel(spotlightSeries?.updatedAt)}`,
       Array.isArray(spotlightSeries?.genres) && spotlightSeries.genres.length > 0
         ? spotlightSeries.genres.slice(0, 2).join(" / ")
@@ -638,16 +641,16 @@ export default function CreatorPage({
           </SurfacePanel>
 
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
-                Keep browsing
-              </p>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Use this creator page as a beta waypoint, not a dead end.
-              </h2>
-              <p className="text-sm leading-7 text-slate-600">
-                Credits are still expanding. Until this shelf fills in, jump back into search, Top Series, or the wider catalog.
-              </p>
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+                  Keep browsing
+                </p>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  Use this creator page as a browse waypoint, not a dead end.
+                </h2>
+                <p className="text-sm leading-7 text-slate-600">
+                  Credits are still expanding. Until this shelf fills in, jump back into search, Top Series, or the wider catalog.
+                </p>
             </div>
             <StorefrontPathwaysGrid
               cards={emptyCreatorPathways}
