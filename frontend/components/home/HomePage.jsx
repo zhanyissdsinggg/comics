@@ -1099,6 +1099,68 @@ function HomeContent({ initialSearchParams = {} }) {
         ) : null}
 
         <section className="mb-12">
+          <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.99))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-3xl">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Next step</p>
+                  <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
+                    Leave the homepage with a cleaner next click.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    Start free, browse Top Series, or compare one-time packs against membership before the footer closes the page.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={() => router.push("/rankings?type=ttf&window=all")}
+                    className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
+                  >
+                    Start reading free
+                  </Button>
+                  <Button
+                    type="button"
+                    size="lg"
+                    variant="outline"
+                    onClick={() => router.push("/rankings?type=popular&window=week")}
+                    className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  >
+                    Browse top series
+                  </Button>
+                  <Button
+                    type="button"
+                    size="lg"
+                    variant="outline"
+                    onClick={() => router.push("/store")}
+                    className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  >
+                    Compare packs and membership
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2 sm:gap-2.5">
+                <div className="flex flex-wrap gap-2 sm:gap-2.5">
+                  {helpResourceCards.map((item) => (
+                    <Button
+                      key={item.href}
+                      type="button"
+                      variant="ghost"
+                      onClick={() => router.push(item.href)}
+                      className="h-8 rounded-full px-3 text-xs font-semibold text-slate-500 hover:bg-white/72 hover:text-slate-900"
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section className="mb-12">
           <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
             <CardContent className="p-5 sm:p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">How Gush works</p>
@@ -1172,68 +1234,6 @@ function HomeContent({ initialSearchParams = {} }) {
             )}
           </>
         ) : null}
-
-        <section className="mb-12">
-          <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.99))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
-            <CardContent className="p-5 sm:p-6">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                <div className="max-w-3xl">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Final step</p>
-                  <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
-                    Leave the homepage with a cleaner next click.
-                  </h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Start free, browse Top Series, or compare one-time packs against membership before the footer closes the page.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    type="button"
-                    size="lg"
-                    onClick={() => router.push("/rankings?type=ttf&window=all")}
-                    className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
-                  >
-                    Start reading free
-                  </Button>
-                  <Button
-                    type="button"
-                    size="lg"
-                    variant="outline"
-                    onClick={() => router.push("/rankings?type=popular&window=week")}
-                    className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
-                  >
-                    Browse top series
-                  </Button>
-                  <Button
-                    type="button"
-                    size="lg"
-                    variant="outline"
-                    onClick={() => router.push("/store")}
-                    className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
-                  >
-                    Compare packs and membership
-                  </Button>
-                </div>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2 sm:gap-2.5">
-                <div className="flex flex-wrap gap-2 sm:gap-2.5">
-                  {helpResourceCards.map((item) => (
-                    <Button
-                      key={item.href}
-                      type="button"
-                      variant="ghost"
-                      onClick={() => router.push(item.href)}
-                      className="h-8 rounded-full px-3 text-xs font-semibold text-slate-500 hover:bg-white/72 hover:text-slate-900"
-                    >
-                      {item.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
 
         <LoginPrompt
           isOpen={showLoginPrompt}
