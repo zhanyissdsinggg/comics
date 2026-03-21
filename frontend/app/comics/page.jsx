@@ -23,7 +23,7 @@ export default async function Page({ searchParams }) {
       <ComicsPage
         initialSearchParams={initialSearchParams}
         initialSeries={initialSeries}
-        hasInitialSeries={Boolean(payload)}
+        hasInitialSeries={payload?.ready === true}
       />
     </ErrorBoundary>
   );

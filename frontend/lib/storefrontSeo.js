@@ -149,6 +149,7 @@ export const loadSeriesCatalogSeoPayload = cache(async () => {
   const payload = await fetchSeoApiJson("/api/series?adult=0", "series-catalog");
   return {
     series: Array.isArray(payload?.series) ? payload.series : [],
+    ready: Boolean(payload),
   };
 });
 
@@ -175,6 +176,7 @@ export const loadRankingsSeoPayload = cache(async (type = "popular", window = "a
 
   return {
     rankings: Array.isArray(payload?.rankings) ? payload.rankings : [],
+    ready: Boolean(payload),
   };
 });
 
@@ -184,6 +186,7 @@ export const loadTopupCatalogSeoPayload = cache(async () => {
   return {
     packages: Array.isArray(payload?.packages) ? payload.packages : [],
     billing: payload?.billing || null,
+    ready: Boolean(payload),
   };
 });
 
@@ -203,6 +206,7 @@ export const loadSubscriptionPlansSeoPayload = cache(async () => {
       return catalog;
     }, {}),
     billing: payload?.billing || null,
+    ready: Boolean(payload),
   };
 });
 
@@ -270,10 +274,12 @@ export const loadCreatorsDirectorySeoPayload = cache(async () => {
 
     return {
       creators: buildCreatorDirectory(seriesList),
+      ready: true,
     };
   } catch {
     return {
       creators: [],
+      ready: false,
     };
   }
 });

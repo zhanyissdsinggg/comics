@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
@@ -117,6 +118,33 @@ export default function SeriesHeader({
       ? "border-[rgba(47,107,255,0.3)] bg-[rgba(47,107,255,0.08)] text-slate-950 shadow-[0_0_0_1px_rgba(47,107,255,0.12),0_22px_60px_rgba(47,107,255,0.14)]"
       : "border-black/8 bg-slate-950 text-white hover:bg-slate-800",
   ].join(" ");
+  const mobilePrimaryActions = primaryAction ? (
+    <div className="grid gap-3 sm:hidden">
+      {highlightPrimaryAction ? (
+        <p className="text-center text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+          Unlocked. Keep reading.
+        </p>
+      ) : null}
+      <button
+        ref={mobilePrimaryActionRef}
+        type="button"
+        onClick={primaryAction}
+        className={`flex ${primaryActionClassName}`}
+      >
+        <BookOpen size={18} />
+        <span>{primaryActionLabel}</span>
+      </button>
+      {secondaryAction ? (
+        <button
+          type="button"
+          onClick={secondaryAction}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
+        >
+          <span>{secondaryActionLabel}</span>
+        </button>
+      ) : null}
+    </div>
+  ) : null;
   const quickFacts = [
     {
       label: "Latest update",
@@ -150,7 +178,13 @@ export default function SeriesHeader({
           <div className="space-y-4">
             <div className="overflow-hidden rounded-[28px] border border-black/6 bg-white/80 shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
               <div className="aspect-[3/4] w-full overflow-hidden">
-                <Cover tone={series.coverTone} coverUrl={series.coverUrl} />
+                <Cover
+                  tone={series.coverTone}
+                  coverUrl={series.coverUrl}
+                  label={series.title}
+                  eyebrow={series.author || formatSeriesKind(series.type)}
+                  badge={hasFreeEpisodes ? "Free" : series.badge}
+                />
               </div>
             </div>
 
@@ -219,19 +253,20 @@ export default function SeriesHeader({
               ))}
             </div>
 
+            <div className="mt-5">{mobilePrimaryActions}</div>
+
             <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-slate-500">
               <span>{episodeCount ? `${episodeCount} episodes` : "New series"}</span>
               <span className="text-slate-300">|</span>
               <span>{capitalize(series.status || "updating")}</span>
               <span className="text-slate-300">|</span>
               {creatorHref ? (
-                <button
-                  type="button"
-                  onClick={() => router.push(creatorHref)}
+                <Link
+                  href={creatorHref}
                   className="font-semibold text-slate-900 transition hover:text-[var(--gush-accent,#2f6bff)]"
                 >
                   {series.author || "Studio"}
-                </button>
+                </Link>
               ) : (
                 <span>{series.author || "Studio"}</span>
               )}
@@ -326,34 +361,6 @@ export default function SeriesHeader({
             </div>
           </div>
         </div>
-
-        {primaryAction ? (
-          <div className="grid gap-3 px-5 pb-5 sm:hidden">
-            {highlightPrimaryAction ? (
-              <p className="text-center text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
-                Unlocked. Keep reading.
-              </p>
-            ) : null}
-            <button
-              ref={mobilePrimaryActionRef}
-              type="button"
-              onClick={primaryAction}
-              className={`flex ${primaryActionClassName}`}
-            >
-              <BookOpen size={18} />
-              <span>{primaryActionLabel}</span>
-            </button>
-            {secondaryAction ? (
-              <button
-                type="button"
-                onClick={secondaryAction}
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
-                <span>{secondaryActionLabel}</span>
-              </button>
-            ) : null}
-          </div>
-        ) : null}
       </SurfacePanel>
     </header>
   );

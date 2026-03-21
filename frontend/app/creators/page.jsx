@@ -42,7 +42,10 @@ export default async function CreatorsPageRoute() {
       <StructuredDataScript id="creators-directory-jsonld" data={structuredData} />
       <CreatorsHubPage
         initialCatalog={initialCatalog}
-        hasInitialCatalog={Boolean(payload)}
+        hasInitialCatalog={Boolean(
+          (payload?.ready === true && creatorCatalog.length > 0) ||
+            (catalogPayload?.ready === true && initialCatalog.length > 0)
+        )}
       />
     </>
   );

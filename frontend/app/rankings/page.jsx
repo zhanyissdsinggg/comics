@@ -18,7 +18,7 @@ export default async function Page({ searchParams }) {
     <RankingsPage
       initialSearchParams={initialSearchParams}
       initialRankings={payload?.rankings || []}
-      hasInitialRankings={Boolean(payload)}
+      hasInitialRankings={payload?.ready === true}
     />
   );
 }
