@@ -15,7 +15,7 @@ function SummaryCard({
 }) {
   const cardClass =
     emphasis === "primary"
-      ? "border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))]"
+      ? "border-[rgba(49,87,214,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,249,252,0.96))]"
       : "border-black/8 bg-white/92";
   const primaryButtonClass =
     emphasis === "primary"
@@ -35,7 +35,7 @@ function SummaryCard({
       {tags.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-slate-500">
           {tags.map((tag) => (
-            <span key={`${title}-${tag}`} className="rounded-full border border-black/8 bg-white px-3 py-1">
+            <span key={`${title}-${tag}`} className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1">
               {tag}
             </span>
           ))}
@@ -78,7 +78,7 @@ export default function CommerceRouteSummary({
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_1fr_0.86fr]">
+      <div className="grid gap-4 lg:grid-cols-3">
         <SummaryCard {...primary} emphasis="primary" />
         <SummaryCard {...secondary} />
         <SummaryCard {...support} />

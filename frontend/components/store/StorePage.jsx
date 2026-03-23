@@ -484,12 +484,13 @@ export default function StorePage({
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
   const fieldClass =
     "flex-1 rounded-full border border-black/8 bg-white px-4 py-2 text-xs text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
+  const packCountLabel = `${orderedPackages.length} ${orderedPackages.length === 1 ? "pack" : "packs"} shown with pricing up front`;
 
   return (
-    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <div className="gush-page-shell">
+      <div className="gush-page-ambient" />
       <SiteHeader variant="light" />
-      <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+      <main className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow="Point packs"
           title={purchaseActionsEnabled ? "Buy points for one-time unlocks." : "Review point-pack pricing before launch."}
@@ -886,7 +887,7 @@ export default function StorePage({
                 </h2>
               </div>
               <p className="text-xs text-slate-500">
-                {orderedPackages.length} pack{orderedPackages.length === 1 ? "" : "s"} with price labels shown up front
+                {packCountLabel}
               </p>
             </div>
 

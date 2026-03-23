@@ -792,10 +792,10 @@ export default function SeriesPage({
 
   if (loading) {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <main className="gush-page-shell overflow-hidden">
+        <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="light" />
-        <div className="relative mx-auto max-w-[1280px] px-4 pb-24 pt-6 sm:px-6 sm:pb-8">
+        <div className="gush-page-main">
           <section className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
               <Skeleton className="aspect-[3/4] w-full rounded-[28px]" />
@@ -847,10 +847,10 @@ export default function SeriesPage({
 
   if (error === "NOT_FOUND") {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <main className="gush-page-shell overflow-hidden">
+        <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="light" />
-        <div className="relative mx-auto max-w-[960px] px-4 py-8 sm:px-6">
+        <div className="gush-page-main max-w-[960px]">
           <div className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
               Series unavailable
@@ -894,10 +894,10 @@ export default function SeriesPage({
     const isUnavailable = error === "UNAVAILABLE";
 
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <main className="gush-page-shell overflow-hidden">
+        <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="light" />
-        <div className="relative mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+        <div className="gush-page-main">
           <div className="rounded-[28px] border border-red-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.98))] p-6 text-center shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
             <p className="mb-2 text-sm font-semibold text-red-600">
               {isUnavailable ? "Series details are catching up" : "Series details could not load"}
@@ -938,8 +938,8 @@ export default function SeriesPage({
 
   if ((series?.adult || error === "ADULT_GATED") && gateStatus !== "OK") {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <main className="gush-page-shell overflow-hidden">
+        <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="light" />
 
         <AdultGateBlockingPanel status={gateStatus} onOpenModal={openGateModal} />
@@ -968,11 +968,10 @@ export default function SeriesPage({
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <main className="gush-page-shell overflow-hidden">
+      <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
       <SiteHeader variant="light" />
-
-      <div className="relative mx-auto max-w-[1280px] px-4 pb-24 sm:px-6 sm:pb-8 lg:px-8">
+      <div className="gush-page-main">
         {commerceNotice ? (
           <div className="pt-6">
             <CommerceSuccessBanner

@@ -94,7 +94,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
       <footer
         className={`mt-16 border-t ${
           isHome
-            ? "border-black/6 bg-[linear-gradient(180deg,#f7f8fb,#eef2f7)] text-slate-900"
+            ? "border-black/8 bg-[rgba(246,243,237,0.82)] text-slate-900"
             : "border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))] text-white"
         }`}
       >
@@ -127,7 +127,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
 
           <div
             className={`mt-4 flex flex-col gap-3 border-t pt-3 text-sm lg:flex-row lg:items-center lg:justify-between ${
-              isHome ? "border-black/6 text-slate-400" : "border-white/10 text-neutral-500"
+              isHome ? "border-black/8 text-slate-400" : "border-white/10 text-neutral-500"
             }`}
           >
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -160,7 +160,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
     <footer
       className={`mt-16 border-t ${
         isHome
-          ? "border-black/6 bg-[linear-gradient(180deg,#f4f6fa,#eef2f7)] text-slate-900"
+          ? "border-black/8 bg-[rgba(246,243,237,0.86)] text-slate-900"
           : "border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))] text-white"
       }`}
     >
@@ -190,7 +190,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                     href={item.href}
                     className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${
                       isHome
-                        ? "border-black/8 bg-white/75 text-slate-700 hover:border-black/12 hover:bg-white hover:text-slate-950"
+                        ? "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-950"
                         : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
                     }`}
                   >
@@ -202,7 +202,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                     href={item.href}
                     className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${
                       isHome
-                        ? "border-black/8 bg-white/75 text-slate-700 hover:border-black/12 hover:bg-white hover:text-slate-950"
+                        ? "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-950"
                         : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
                     }`}
                   >
@@ -238,7 +238,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
 
         <div
           className={`mt-6 flex flex-col gap-3 border-t pt-4 text-sm lg:flex-row lg:items-center lg:justify-between ${
-            isHome ? "border-black/6 text-slate-400" : "border-white/10 text-neutral-500"
+            isHome ? "border-black/8 text-slate-400" : "border-white/10 text-neutral-500"
           }`}
         >
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">

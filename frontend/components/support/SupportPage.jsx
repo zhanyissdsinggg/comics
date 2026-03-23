@@ -265,10 +265,10 @@ export default function SupportPage() {
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
-    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <div className="gush-page-shell">
+      <div className="gush-page-ambient" />
       <SiteHeader variant="light" />
-      <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+      <main className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow="Support"
           title="Send a request without leaving the site."

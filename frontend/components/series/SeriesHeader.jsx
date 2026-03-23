@@ -105,6 +105,17 @@ export default function SeriesHeader({
   const followers = Number(series.followers || 0);
   const ratingCount = Number(series.ratingCount || 0);
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.id || latestEpisode?.number || "");
+  const accessCounts = accessSummary?.counts || {};
+  const accessFactHint = accessSummary?.startsFree
+    ? (accessCounts.points > 0 || accessCounts.membership > 0 || accessCounts.locked > 0
+        ? "Later chapters unlock with points or membership."
+        : "")
+    : accessSummary?.entryHint ||
+      (hasFreeEpisodes
+        ? ""
+        : isCompleted
+          ? "A finished run if you want payoff without waiting."
+          : "Open the first episode, then use points or membership when needed.");
   const readerPulseItems = [
     ratingCount > 0 ? `${ratingValue} stars` : ratingValue === "New" ? "New release" : `${ratingValue} stars`,
     followers > 0
@@ -112,8 +123,8 @@ export default function SeriesHeader({
       : isFollowing
         ? "Saved"
         : "Fresh pick",
-    accessSummary?.badgeLabel ||
-      (hasFreeEpisodes
+    (!accessSummary?.heroBadgeLabel && accessSummary?.badgeLabel) ||
+      (!accessSummary?.heroBadgeLabel && hasFreeEpisodes
         ? `${series.freeEpisodeCount || 0} free to start`
         : isCompleted
           ? "Finished run"
@@ -124,13 +135,13 @@ export default function SeriesHeader({
   const primaryActionClassName = [
     "inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition-colors",
     highlightPrimaryAction
-      ? "border-[rgba(47,107,255,0.3)] bg-[rgba(47,107,255,0.08)] text-slate-950 shadow-[0_0_0_1px_rgba(47,107,255,0.12),0_22px_60px_rgba(47,107,255,0.14)]"
+      ? "border-[rgba(49,87,214,0.24)] bg-[rgba(49,87,214,0.08)] text-slate-950 shadow-[0_0_0_1px_rgba(49,87,214,0.12),0_22px_60px_rgba(49,87,214,0.12)]"
       : "border-black/8 bg-slate-950 text-white hover:bg-slate-800",
   ].join(" ");
   const mobilePrimaryActions = primaryAction ? (
     <div className="grid gap-3 sm:hidden">
       {highlightPrimaryAction ? (
-        <p className="text-center text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+        <p className="text-center text-xs font-semibold text-[var(--gush-accent,#3157d6)]">
           Unlocked. Keep reading.
         </p>
       ) : null}
@@ -147,7 +158,7 @@ export default function SeriesHeader({
         <button
           type="button"
           onClick={secondaryAction}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
         >
           <span>{secondaryActionLabel}</span>
         </button>
@@ -169,15 +180,9 @@ export default function SeriesHeader({
         (onContinue
           ? "Continue where you stopped"
           : hasFreeEpisodes
-            ? "Use the free start"
+            ? "Free start"
             : "Unlock as you go"),
-      hint:
-        accessSummary?.entryHint ||
-        (hasFreeEpisodes
-          ? `${series.freeEpisodeCount || 0} free to test before points.`
-          : isCompleted
-            ? "A finished run if you want payoff without waiting."
-            : "Open the first episode, then use points or membership when needed."),
+      hint: accessFactHint,
     },
     {
       label: creatorHref ? "Creator shelf" : "Creator credit",
@@ -191,10 +196,9 @@ export default function SeriesHeader({
   return (
     <header className="py-4 sm:py-6">
       <SurfacePanel className="relative overflow-hidden p-0" appearance="light" accent="blue">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.12),transparent_30%),radial-gradient(circle_at_82%_16%,rgba(255,255,255,0.74),transparent_24%)]" />
         <div className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-[28px] border border-black/6 bg-white/80 shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
+            <div className="overflow-hidden rounded-[28px] border border-black/8 bg-white/90 shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
               <div className="aspect-[3/4] w-full overflow-hidden">
                 <Cover
                   tone={series.coverTone}
@@ -211,7 +215,7 @@ export default function SeriesHeader({
             {primaryAction ? (
               <div className="hidden w-full gap-3 sm:flex sm:flex-col">
                 {highlightPrimaryAction ? (
-                  <p className="text-center text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                  <p className="text-center text-xs font-semibold text-[var(--gush-accent,#3157d6)]">
                     Unlocked. Keep reading.
                   </p>
                 ) : null}
@@ -228,7 +232,7 @@ export default function SeriesHeader({
                   <button
                     type="button"
                     onClick={secondaryAction}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
                   >
                     <span>{secondaryActionLabel}</span>
                   </button>
@@ -239,7 +243,7 @@ export default function SeriesHeader({
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              <span className="rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 {formatSeriesKind(series.type)}
               </span>
               {isAdult ? (
@@ -248,7 +252,7 @@ export default function SeriesHeader({
                 </span>
               ) : null}
               {accessSummary?.heroBadgeLabel ? (
-                <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent,#2f6bff)]">
+                <span className="rounded-full border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.06)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--gush-accent,#3157d6)]">
                   {accessSummary.heroBadgeLabel}
                 </span>
               ) : null}
@@ -260,7 +264,7 @@ export default function SeriesHeader({
 
             <div className="mt-5">{mobilePrimaryActions}</div>
             {readingHint ? (
-              <p className="mt-3 text-sm font-medium text-[var(--gush-accent,#2f6bff)]">
+              <p className="mt-3 text-sm font-medium text-[var(--gush-accent,#3157d6)]">
                 {readingHint}
               </p>
             ) : null}
@@ -273,7 +277,7 @@ export default function SeriesHeader({
               {readerPulseItems.map((item, index) => (
                 <span
                   key={item}
-                  className={`rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-sm text-slate-700 ${
+                  className={`rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1.5 text-sm text-slate-700 ${
                     index > 1 ? "hidden sm:inline-flex" : ""
                   }`}
                 >
@@ -290,7 +294,7 @@ export default function SeriesHeader({
               {creatorHref ? (
                 <Link
                   href={creatorHref}
-                  className="font-semibold text-slate-900 transition hover:text-[var(--gush-accent,#2f6bff)]"
+                  className="font-semibold text-slate-900 transition hover:text-[var(--gush-accent,#3157d6)]"
                 >
                   {series.author || "Studio"}
                 </Link>
@@ -306,12 +310,14 @@ export default function SeriesHeader({
             </div>
 
             {mobileLeadFact ? (
-              <div className="mt-5 rounded-[22px] border border-black/6 bg-white/88 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] sm:hidden">
+              <div className="mt-5 rounded-[22px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] sm:hidden">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                   {mobileLeadFact.label}
                 </p>
                 <p className="mt-2 text-sm font-semibold text-slate-950">{mobileLeadFact.value}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{mobileLeadFact.hint}</p>
+                {mobileLeadFact.hint ? (
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{mobileLeadFact.hint}</p>
+                ) : null}
               </div>
             ) : null}
 
@@ -319,13 +325,15 @@ export default function SeriesHeader({
               {quickFacts.map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  className="rounded-[22px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                 >
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                     {item.label}
                   </p>
                   <p className="mt-2 text-sm font-semibold text-slate-950">{item.value}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.hint}</p>
+                  {item.hint ? (
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{item.hint}</p>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -335,7 +343,7 @@ export default function SeriesHeader({
                 {badges.map((badge) => (
                   <span
                     key={badge}
-                    className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs font-semibold text-slate-700"
+                    className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
                   >
                     {badge}
                   </span>
@@ -343,7 +351,7 @@ export default function SeriesHeader({
                 {genres.map((genre) => (
                   <span
                     key={genre}
-                    className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-500"
+                    className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1 text-xs text-slate-500"
                   >
                     {genre}
                   </span>
@@ -363,7 +371,7 @@ export default function SeriesHeader({
                   className={`group relative inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
                     isFollowing
                       ? "border border-pink-200 bg-pink-50 text-slate-950 shadow-[0_18px_40px_rgba(236,72,153,0.08)]"
-                      : "border border-black/8 bg-white/84 text-slate-700 hover:border-pink-200 hover:bg-pink-50"
+                      : "border border-black/8 bg-white text-slate-700 hover:border-pink-200 hover:bg-pink-50"
                   }`}
                   aria-label={isFollowing ? "Remove from library" : "Save to library"}
                 >
@@ -375,13 +383,13 @@ export default function SeriesHeader({
                 url={typeof window !== "undefined" ? window.location.href : ""}
                 title={series.title || "Check out this series"}
                 description={series.description || ""}
-                className="min-h-[44px] rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
               />
               {onOpenStore ? (
                 <button
                   type="button"
                   onClick={onOpenStore}
-                  className="min-h-[44px] rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                  className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
                 >
                   Point packs
                 </button>
@@ -390,7 +398,7 @@ export default function SeriesHeader({
                 <button
                   type="button"
                   onClick={onOpenMembership}
-                  className="min-h-[44px] rounded-full border border-black/8 bg-[#f8f9fc] px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                  className="min-h-[44px] rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
                 >
                   Membership
                 </button>

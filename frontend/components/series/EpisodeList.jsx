@@ -285,10 +285,10 @@ export default function EpisodeList({
 
   return (
     <section
-      className="mt-6 rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:mt-8 sm:p-6"
+      className="mt-6 rounded-[28px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,246,242,0.94))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-md sm:mt-8 sm:p-6"
       data-wallet-total={walletTotal}
     >
-      <div className="mb-5 border-b border-black/6 pb-5">
+      <div className="mb-5 border-b border-black/8 pb-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl space-y-3">
             <div className="flex items-center gap-2">
@@ -304,7 +304,7 @@ export default function EpisodeList({
                 {summaryItems.map((item) => (
                   <span
                     key={item}
-                    className="rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs text-slate-600"
+                    className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1.5 text-xs text-slate-600"
                   >
                     {item}
                   </span>
@@ -314,7 +314,7 @@ export default function EpisodeList({
           </div>
 
           {primaryReadAction?.label ? (
-            <div className="rounded-[24px] border border-black/6 bg-white/88 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)] xl:min-w-[320px]">
+            <div className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)] xl:min-w-[320px]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                 Start here
               </p>
@@ -351,7 +351,7 @@ export default function EpisodeList({
             <select
               value={filter}
               onChange={(event) => setFilter(event.target.value)}
-              className="min-h-[44px] rounded-full border border-black/8 bg-white/88 px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#2f6bff)]"
+              className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
             >
               {filterOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -362,7 +362,7 @@ export default function EpisodeList({
             <select
               value={sortOrder}
               onChange={(event) => setSortOrder(event.target.value)}
-              className="min-h-[44px] rounded-full border border-black/8 bg-white/88 px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#2f6bff)]"
+              className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
             >
               <option value="oldest">Oldest first</option>
               <option value="newest">Newest first</option>
@@ -379,7 +379,7 @@ export default function EpisodeList({
             <button
               type="button"
               onClick={handleOpenMembership}
-              className="rounded-full border border-black/8 bg-[#f8f9fc] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white"
+              className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white"
             >
               {STOREFRONT_TERMS.compareMembership}
             </button>

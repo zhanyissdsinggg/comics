@@ -6,7 +6,7 @@ import { formatUSNumber } from "../../lib/localization";
 function BenefitRow({ children }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+      <span className="h-1.5 w-1.5 rounded-full bg-[var(--gush-accent,#3157d6)]" aria-hidden="true" />
       <span>{children}</span>
     </div>
   );
@@ -25,18 +25,20 @@ export default function PackageCard({
   const totalPts = (pkg.paidPts || 0) + (pkg.bonusPts || 0);
   const bonusPct =
     pkg.paidPts && pkg.bonusPts ? Math.round((pkg.bonusPts / pkg.paidPts) * 100) : 0;
+  const normalizedTag = String(pkg.tag || "").trim().toLowerCase();
+  const showTag = Boolean(pkg.tag) && !(highlighted && normalizedTag === "best value");
 
   return (
     <div
       className={`group rounded-[28px] border p-5 transition-all duration-300 hover:-translate-y-1 ${
         highlighted
-          ? "border-[rgba(47,107,255,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] shadow-[0_20px_44px_rgba(15,23,42,0.08)]"
-          : "border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] shadow-[0_16px_34px_rgba(15,23,42,0.05)]"
+          ? "border-[rgba(49,87,214,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.96))] shadow-[0_20px_44px_rgba(15,23,42,0.08)]"
+          : "border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,246,242,0.94))] shadow-[0_16px_34px_rgba(15,23,42,0.05)]"
       }`}
       style={{ willChange: "transform" }}
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-950 transition-colors group-hover:text-[var(--gush-accent,#2f6bff)]">
+        <h2 className="text-lg font-semibold text-slate-950 transition-colors group-hover:text-[var(--gush-accent,#3157d6)]">
           {pkg.name}
         </h2>
         {highlighted ? <Pill appearance="light" tone="accent">Best value</Pill> : null}
@@ -51,10 +53,10 @@ export default function PackageCard({
       </p>
 
       {bonusPct > 0 ? (
-        <div className="mt-3 rounded-[18px] border border-[rgba(47,107,255,0.12)] bg-[rgba(47,107,255,0.06)] px-3 py-2">
+        <div className="mt-3 rounded-[18px] border border-[rgba(49,87,214,0.12)] bg-[rgba(49,87,214,0.06)] px-3 py-2">
           <div className="flex items-center gap-2">
             <svg
-              className="h-4 w-4 flex-shrink-0 text-[var(--gush-accent,#2f6bff)]"
+              className="h-4 w-4 flex-shrink-0 text-[var(--gush-accent,#3157d6)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -74,7 +76,7 @@ export default function PackageCard({
       ) : null}
 
       {pkg.priceLabel ? <p className="mt-3 text-sm font-semibold text-slate-950">{pkg.priceLabel}</p> : null}
-      {pkg.tag ? (
+      {showTag ? (
         <div className="mt-2">
           <Pill appearance="light">{pkg.tag}</Pill>
         </div>

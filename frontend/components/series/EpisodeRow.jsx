@@ -55,7 +55,7 @@ function formatPackLabel(value) {
 
 function getSignalClass(tone) {
   if (tone === "free" || tone === "ready" || tone === "membership") {
-    return "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] text-[var(--gush-accent,#2f6bff)]";
+    return "border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.06)] text-[var(--gush-accent,#3157d6)]";
   }
   if (tone === "preview") {
     return "border-amber-200 bg-amber-50 text-amber-700";
@@ -185,6 +185,10 @@ function EpisodeRow({
     progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
       ? `${Math.round(progress.percent * 100)}% read`
       : "";
+  const sideLabel =
+    progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
+      ? `${Math.round(progress.percent * 100)}% read`
+      : accessState.shortLabel;
   const rowHelperText = accessState.rowHelperText ?? accessState.helperText;
   const compareItems =
     modalState?.type === "SHORTFALL" && recommendedUnlockOffer?.episodes > 1
@@ -352,9 +356,9 @@ function EpisodeRow({
 
   const actionClassName =
     accessState.actionKind === "claim" || accessState.actionKind === "read" || accessState.actionKind === "preview"
-      ? "min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#2f6bff)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#255af0] active:scale-95 active:bg-[#1e4dd4] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
-      : accessState.actionKind === "subscribe"
-        ? "min-h-[44px] w-full rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-black/12 hover:bg-[#f8f9fc] active:scale-95 active:bg-[#eef2f8] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
+      ? "min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#3157d6)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--gush-accent-strong,#2444af)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
+        : accessState.actionKind === "subscribe"
+        ? "min-h-[44px] w-full rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
         : "min-h-[44px] w-full rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 active:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]";
 
   const actionNode = (
@@ -372,10 +376,10 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden rounded-[24px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10"
+      className="group overflow-hidden rounded-[24px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.94))] p-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10"
     >
       <div className="grid gap-3 sm:grid-cols-[76px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
-        <div className="relative h-24 overflow-hidden rounded-[18px] border border-black/6 bg-[#eef2f8] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[104px]">
+        <div className="relative h-24 overflow-hidden rounded-[18px] border border-black/8 bg-[rgba(246,243,237,0.92)] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[104px]">
           {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
             <Image
               src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
@@ -386,9 +390,9 @@ function EpisodeRow({
               loading="lazy"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#eef2f8_0%,#dbe5f4_100%)] text-slate-400">
-              <span className="text-lg font-semibold tracking-tight">Ep {episode?.number}</span>
-            </div>
+              <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#f4f1eb_0%,#ebe7df_100%)] text-slate-400">
+                <span className="text-lg font-semibold tracking-tight">Ep {episode?.number}</span>
+              </div>
           )}
         </div>
 
@@ -441,7 +445,7 @@ function EpisodeRow({
           {progress?.lastEpisodeId === episode?.id ? (
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/6">
               <div
-                className="h-full rounded-full bg-[rgba(47,107,255,0.76)]"
+                className="h-full rounded-full bg-[var(--gush-accent,#3157d6)]"
                 style={{ width: `${Math.round((progress.percent || 0) * 100)}%` }}
               />
             </div>
@@ -449,11 +453,11 @@ function EpisodeRow({
         </div>
 
         <div className="flex flex-col gap-2 sm:min-w-[176px] sm:items-end">
-          <p className="text-xs font-medium text-slate-500 sm:text-right">
-            {progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
-              ? `${Math.round(progress.percent * 100)}% read`
-              : accessState.shortLabel}
-          </p>
+          {sideLabel ? (
+            <p className="text-xs font-medium text-slate-500 sm:text-right">
+              {sideLabel}
+            </p>
+          ) : null}
           {actionNode}
         </div>
       </div>

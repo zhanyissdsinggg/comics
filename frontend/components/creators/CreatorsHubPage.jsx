@@ -207,10 +207,10 @@ function buildCreatorShelfMeta(creator) {
 
 function CreatorDirectorySkeleton() {
   return (
-    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <main className="gush-page-shell">
+      <div className="gush-page-ambient" />
       <SiteHeader variant="light" />
-      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+      <div className="gush-page-main gush-section-stack">
         <SurfacePanel appearance="light" accent="blue" className="space-y-6">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-center">
             <div className="space-y-3">
@@ -671,8 +671,8 @@ export default function CreatorsHubPage({
 
   if (error) {
     return (
-      <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <main className="gush-page-shell">
+        <div className="gush-page-ambient" />
         <SiteHeader variant="light" />
         <div className="relative mx-auto max-w-[960px] px-4 py-12 sm:px-6">
           <SurfacePanel appearance="light" tone="danger" accent="rose">
@@ -695,8 +695,8 @@ export default function CreatorsHubPage({
 
   if (!creators.length) {
     return (
-      <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+      <main className="gush-page-shell">
+        <div className="gush-page-ambient" />
         <SiteHeader variant="light" />
         <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
           <EditorialHero
@@ -852,8 +852,8 @@ export default function CreatorsHubPage({
   }
 
   return (
-    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <main className="gush-page-shell">
+      <div className="gush-page-ambient" />
       <SiteHeader variant="light" />
 
       <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">

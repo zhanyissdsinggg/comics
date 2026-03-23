@@ -75,11 +75,10 @@ function CoverFallback({
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.2) 0%, transparent 24%), radial-gradient(circle at 82% 18%, ${artDirection.accentSoft} 0%, transparent 26%), linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.42) 100%)`,
+          backgroundImage: `radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.16) 0%, transparent 24%), radial-gradient(circle at 82% 18%, ${artDirection.accentSoft} 0%, transparent 26%), linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(0, 0, 0, 0.36) 100%)`,
         }}
       />
       <div className="absolute inset-3 rounded-[24px] border" style={{ borderColor: artDirection.border }} />
-      <div className="absolute -right-12 top-6 h-32 w-32 rounded-full border border-white/10 bg-white/5" />
       <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
         <div className="flex max-w-[70%] flex-wrap gap-2">
           <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/82">
@@ -99,7 +98,7 @@ function CoverFallback({
       </div>
       <div className="absolute inset-x-0 top-[26%] flex justify-center">
         <div
-          className="rounded-[28px] border bg-black/18 px-5 py-3 text-[2.75rem] font-semibold tracking-[0.2em] text-white/18 shadow-[0_18px_50px_rgba(0,0,0,0.16)] backdrop-blur-[2px]"
+          className="rounded-[28px] border bg-black/14 px-5 py-3 text-[2.75rem] font-semibold tracking-[0.2em] text-white/16 shadow-[0_18px_50px_rgba(0,0,0,0.14)] backdrop-blur-[2px]"
           style={{ borderColor: artDirection.border }}
         >
           {initials}
@@ -220,7 +219,7 @@ export default function Cover({
               priority={false}
             />
             <div className="pointer-events-none absolute inset-0" style={overlayStyle} />
-            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/8" />
+            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/6" />
           </>
         )}
       </div>

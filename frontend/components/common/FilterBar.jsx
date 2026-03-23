@@ -64,22 +64,18 @@ export default function FilterBar({
 
   const filterSectionClass =
     isLight
-      ? "rounded-[24px] border border-black/6 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+      ? "rounded-[24px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
       : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <div
-            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] ${
-              isLight
-                ? "border-black/8 bg-white text-slate-500"
-                : "border-white/10 bg-white/[0.04] text-neutral-300"
-            }`}
-          >
-            <SlidersHorizontal size={14} className={isLight ? "text-[var(--gush-accent,#2f6bff)]" : "text-emerald-200"} />
-            Browse
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal size={14} className={isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-200"} />
+            <p className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${isLight ? "text-slate-500" : "text-neutral-300"}`}>
+              Filters
+            </p>
           </div>
           <h3 className={`mt-3 font-display text-xl font-semibold tracking-tight sm:text-2xl ${isLight ? "text-slate-950" : "text-white"}`}>
             {loading ? "Refreshing the shelf..." : `${totalCount.toLocaleString()} titles, ready when you are.`}
@@ -93,7 +89,7 @@ export default function FilterBar({
                 key={item}
                 className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] ${
                   isLight
-                    ? "border-black/8 bg-white text-slate-500"
+                    ? "border-black/8 bg-[rgba(246,243,237,0.92)] text-slate-500"
                     : "border-white/10 bg-white/[0.04] text-neutral-300"
                 }`}
               >
@@ -104,7 +100,7 @@ export default function FilterBar({
             <span
               className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] ${
                 isLight
-                  ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-[var(--gush-accent,#2f6bff)]"
+                  ? "border-[rgba(49,87,214,0.16)] bg-[rgba(49,87,214,0.06)] text-[var(--gush-accent,#3157d6)]"
                   : "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-100"
               }`}
             >
@@ -132,7 +128,7 @@ export default function FilterBar({
       <div className="grid gap-3 xl:grid-cols-[0.92fr_0.92fr_1.16fr]">
         <div className={filterSectionClass}>
           <div className="flex items-center gap-2">
-            <ArrowDownUp size={16} className={isLight ? "text-[var(--gush-accent,#2f6bff)]" : "text-emerald-200"} />
+            <ArrowDownUp size={16} className={isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-200"} />
             <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-400"}`}>
               Sort
             </p>
@@ -147,7 +143,6 @@ export default function FilterBar({
                   appearance={appearance}
                   className={cn("tracking-[0.16em]", sortBy === option.id && !isLight ? "text-white" : "")}
                 />
-                <p className={`mt-1 text-[11px] ${isLight ? "text-slate-400" : "text-neutral-500"}`}>{option.icon}</p>
               </div>
             ))}
           </div>
@@ -155,7 +150,7 @@ export default function FilterBar({
 
         <div className={filterSectionClass}>
           <div className="flex items-center gap-2">
-            <Sparkles size={16} className={isLight ? "text-[var(--gush-accent,#2f6bff)]" : "text-emerald-200"} />
+            <Sparkles size={16} className={isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-200"} />
             <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-400"}`}>
               Status
             </p>
@@ -188,7 +183,7 @@ export default function FilterBar({
                   onClick={() => setShowAllGenres(!showAllGenres)}
                   className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors ${
                     isLight
-                      ? "border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc]"
+                      ? "border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
                       : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08]"
                   }`}
                 >
@@ -222,21 +217,6 @@ export default function FilterBar({
             </p>
           </div>
         )}
-      </div>
-
-      <div
-        className={`flex items-center justify-between rounded-[22px] border px-4 py-3 text-xs ${
-          isLight
-            ? "border-black/6 bg-white/76 text-slate-500"
-            : "border-white/10 bg-white/[0.03] text-neutral-400"
-        }`}
-      >
-        <p>{loading ? "Updating the shelf..." : `${totalCount.toLocaleString()} series found`}</p>
-        <p>
-          {activeFilterCount > 0
-            ? `${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"} active`
-            : "All titles"}
-        </p>
       </div>
     </div>
   );

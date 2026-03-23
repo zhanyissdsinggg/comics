@@ -179,6 +179,18 @@ export default function SubscribePage({
       }),
     [planCatalog],
   );
+  const getPlanBadgeLabel = (plan, isBest) => {
+    const tag = String(plan?.tag || "").trim();
+    if (!tag) {
+      return "";
+    }
+
+    if (isBest && tag.toLowerCase() === "best value") {
+      return "";
+    }
+
+    return tag;
+  };
 
   const handleSubscribe = async (planId) => {
     if (!isSignedIn) {
@@ -304,10 +316,10 @@ export default function SubscribePage({
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
   return (
-    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <div className="gush-page-shell">
+      <div className="gush-page-ambient" />
       <SiteHeader variant="light" />
-      <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+      <main className="gush-page-main gush-section-stack">
         <EditorialHero
           appearance="light"
           accent="blue"
@@ -524,6 +536,7 @@ export default function SubscribePage({
               const perks = planCatalog?.[key];
               const isBest = bestPlanId === key;
               const isCurrent = isActive && subscription?.planId === key;
+              const planBadgeLabel = getPlanBadgeLabel(plan, isBest);
               const priceLabel =
                 perks?.price !== undefined
                   ? formatPlanPrice(perks.price, perks.currency || "USD")
@@ -562,9 +575,11 @@ export default function SubscribePage({
                           {getPlanIcon(plan.id)}
                         </div>
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                            {plan.tag}
-                          </p>
+                          {planBadgeLabel ? (
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                              {planBadgeLabel}
+                            </p>
+                          ) : null}
                           <h3 className="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-950">
                             {plan.title}
                           </h3>

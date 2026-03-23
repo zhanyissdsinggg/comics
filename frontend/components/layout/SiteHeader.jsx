@@ -151,29 +151,15 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
           isLight
             ? scrolled
-              ? "border-black/8 bg-[rgba(246,247,251,0.82)] shadow-[0_16px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl"
-              : "border-transparent bg-[rgba(246,247,251,0.62)] backdrop-blur-xl"
+              ? "border-black/8 bg-[rgba(244,242,237,0.9)] shadow-[0_12px_34px_rgba(15,23,42,0.05)] backdrop-blur-xl"
+              : "border-transparent bg-[rgba(244,242,237,0.76)] backdrop-blur-xl"
             : scrolled
               ? "border-white/10 bg-neutral-950/90 shadow-[0_18px_56px_rgba(0,0,0,0.26)] backdrop-blur-2xl"
               : "border-white/8 bg-neutral-950/76 backdrop-blur-xl"
         }`}
       >
-        <div
-          className={`pointer-events-none absolute inset-x-0 top-0 h-px ${
-            isLight
-              ? "bg-gradient-to-r from-transparent via-black/10 to-transparent"
-              : "bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent"
-          }`}
-        />
-        <div
-          className={`pointer-events-none absolute inset-0 ${
-            isLight
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.06),transparent_30%),radial-gradient(circle_at_85%_0%,rgba(255,255,255,0.28),transparent_24%)] opacity-90"
-              : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.06),transparent_32%),radial-gradient(circle_at_85%_0%,rgba(34,211,238,0.04),transparent_24%)] opacity-90"
-          }`}
-        />
         <div className="relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8">
-          <div className="flex min-h-[62px] items-center gap-2 py-2 sm:min-h-[68px] sm:gap-4 sm:py-2.5 lg:gap-6">
+          <div className="flex min-h-[60px] items-center gap-2 py-2 sm:min-h-[66px] sm:gap-4 sm:py-2.5 lg:gap-6">
             <HeaderLogo variant={variant} />
             <HomeProvider>
               <HeaderNav variant={variant} />

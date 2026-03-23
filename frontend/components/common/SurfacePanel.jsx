@@ -4,45 +4,52 @@ import { cn } from "@/lib/utils";
 
 const toneClasses = {
   dark: {
-    default:
-      "border-white/10 bg-[linear-gradient(180deg,rgba(15,21,31,0.92),rgba(7,10,16,0.98))]",
-    muted:
-      "border-white/8 bg-[linear-gradient(180deg,rgba(15,19,28,0.84),rgba(8,11,16,0.94))]",
-    highlight:
-      "border-emerald-400/18 bg-[linear-gradient(180deg,rgba(11,32,29,0.9),rgba(7,13,18,0.98))]",
-    warning:
-      "border-amber-400/18 bg-[linear-gradient(180deg,rgba(49,36,18,0.9),rgba(20,14,8,0.98))]",
-    danger:
-      "border-red-400/18 bg-[linear-gradient(180deg,rgba(56,18,24,0.9),rgba(22,10,14,0.98))]",
+    default: "border-white/10 bg-[rgba(11,15,22,0.9)] text-white",
+    muted: "border-white/8 bg-[rgba(16,21,31,0.84)] text-white",
+    highlight: "border-white/12 bg-[linear-gradient(180deg,rgba(15,21,31,0.92),rgba(11,15,22,0.9))] text-white",
+    warning: "border-amber-400/20 bg-[rgba(59,41,13,0.9)] text-white",
+    danger: "border-red-400/20 bg-[rgba(64,20,26,0.9)] text-white",
   },
   light: {
-    default:
-      "border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))]",
-    muted:
-      "border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(248,250,253,0.96))]",
-    highlight:
-      "border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))]",
-    warning:
-      "border-amber-200 bg-[linear-gradient(180deg,rgba(255,251,235,0.98),rgba(255,247,237,0.98))]",
-    danger:
-      "border-red-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.98))]",
+    default: "border-black/8 bg-white/90 text-slate-900",
+    muted: "border-black/6 bg-[rgba(246,243,237,0.88)] text-slate-900",
+    highlight: "border-[rgba(49,87,214,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(249,250,252,0.94))] text-slate-900",
+    warning: "border-amber-200 bg-[rgba(255,251,235,0.94)] text-slate-900",
+    danger: "border-red-200 bg-[rgba(255,241,242,0.94)] text-slate-900",
   },
 };
 
-const accentClasses = {
+const accentLineClasses = {
   dark: {
-    emerald: "via-emerald-300/55",
-    cyan: "via-cyan-300/50",
-    amber: "via-amber-300/50",
-    rose: "via-rose-300/50",
-    blue: "via-sky-300/50",
+    emerald: "via-emerald-300/60",
+    cyan: "via-cyan-300/55",
+    amber: "via-amber-300/55",
+    rose: "via-rose-300/55",
+    blue: "via-sky-300/55",
   },
   light: {
-    emerald: "via-emerald-500/35",
-    cyan: "via-cyan-500/35",
-    amber: "via-amber-500/35",
-    rose: "via-rose-500/35",
-    blue: "via-[rgba(47,107,255,0.36)]",
+    emerald: "via-emerald-500/45",
+    cyan: "via-cyan-500/42",
+    amber: "via-amber-500/42",
+    rose: "via-rose-500/42",
+    blue: "via-[rgba(49,87,214,0.42)]",
+  },
+};
+
+const cornerGlowClasses = {
+  dark: {
+    blue: "bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_34%)]",
+    emerald: "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%)]",
+    cyan: "bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_34%)]",
+    amber: "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%)]",
+    rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.16),transparent_34%)]",
+  },
+  light: {
+    blue: "bg-[radial-gradient(circle_at_top_left,rgba(49,87,214,0.1),transparent_32%)]",
+    emerald: "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_32%)]",
+    cyan: "bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.08),transparent_32%)]",
+    amber: "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.08),transparent_32%)]",
+    rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.08),transparent_32%)]",
   },
 };
 
@@ -50,7 +57,7 @@ export default function SurfacePanel({
   children,
   className = "",
   tone = "default",
-  accent = "emerald",
+  accent = "blue",
   appearance = "default",
 }) {
   const isLight = appearance === "light";
@@ -59,34 +66,30 @@ export default function SurfacePanel({
   return (
     <section
       className={cn(
-        "group relative overflow-hidden rounded-[30px] border p-5 sm:p-6",
-        isLight
-          ? "shadow-[0_22px_52px_rgba(15,23,42,0.06)] backdrop-blur-xl"
-          : "shadow-[0_28px_100px_rgba(0,0,0,0.28)] backdrop-blur-2xl",
+        "relative overflow-hidden rounded-[30px] border p-5 shadow-[var(--gush-shadow-soft)] sm:p-6",
         toneClasses[resolvedAppearance]?.[tone] || toneClasses[resolvedAppearance].default,
+        isLight ? "backdrop-blur-md" : "backdrop-blur-xl",
         className,
       )}
     >
       <div
         className={cn(
-          "pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-80",
-          accentClasses[resolvedAppearance]?.[accent] || accentClasses[resolvedAppearance].emerald,
+          "pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent to-transparent",
+          accentLineClasses[resolvedAppearance]?.[accent] || accentLineClasses[resolvedAppearance].blue,
+        )}
+      />
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0 opacity-90",
+          cornerGlowClasses[resolvedAppearance]?.[accent] || cornerGlowClasses[resolvedAppearance].blue,
         )}
       />
       <div
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.06),transparent_28%),radial-gradient(circle_at_86%_0%,rgba(255,255,255,0.68),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.6),transparent_24%,transparent_76%,rgba(255,255,255,0.24))]"
-            : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_30%),radial-gradient(circle_at_86%_0%,rgba(16,185,129,0.14),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_24%,transparent_76%,rgba(255,255,255,0.03))]",
-        )}
-      />
-      <div
-        className={cn(
-          "pointer-events-none absolute inset-0",
-          isLight
-            ? "opacity-[0.04] [background-image:linear-gradient(rgba(15,23,42,0.24)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.24)_1px,transparent_1px)] [background-size:30px_30px]"
-            : "opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.55)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:30px_30px]",
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.32),transparent_38%)]"
+            : "bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_34%)]",
         )}
       />
       <div className="relative">{children}</div>

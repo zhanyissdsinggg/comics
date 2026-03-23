@@ -13,7 +13,7 @@ function AuthSkeleton({ variant = "default" }) {
   return (
     <div
       className={`hidden h-10 w-24 animate-pulse rounded-full border sm:block ${
-        isLight ? "border-black/8 bg-white/80" : "border-white/10 bg-white/[0.04]"
+        isLight ? "border-black/8 bg-white/90" : "border-white/10 bg-white/[0.04]"
       }`}
       aria-hidden="true"
     />
@@ -40,7 +40,7 @@ export default function HeaderActions({
   const showWallet = hydrated && isSignedIn;
   const isLight = variant === "home" || variant === "light";
   const iconButtonClass = isLight
-    ? "relative h-10 w-10 rounded-full border border-black/8 bg-white/78 text-slate-600 shadow-[0_8px_24px_rgba(15,23,42,0.05)] hover:border-black/12 hover:bg-white hover:text-slate-900"
+    ? "relative h-10 w-10 rounded-full border border-black/8 bg-white text-slate-600 shadow-[0_10px_24px_rgba(15,23,42,0.05)] hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-900"
     : ICON_BUTTON_CLASS;
 
   return (
@@ -53,7 +53,7 @@ export default function HeaderActions({
           onClick={onWalletClick}
           className={`hidden h-10 rounded-full px-4 lg:inline-flex ${
             isLight
-              ? "border-black/8 bg-white/78 text-slate-800 hover:border-black/12 hover:bg-white"
+              ? "border-black/8 bg-white text-slate-800 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
               : "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]"
           }`}
           aria-label="Wallet"
@@ -92,7 +92,7 @@ export default function HeaderActions({
           isLight
             ? isAdultMode
               ? "border-red-300/30 bg-red-500/[0.08] text-red-600 hover:border-red-400/40 hover:bg-red-500/[0.12]"
-              : "border-black/8 bg-white/78 text-slate-600 hover:border-red-300/35 hover:bg-red-500/[0.05] hover:text-red-600"
+              : "border-black/8 bg-white text-slate-600 hover:border-red-300/35 hover:bg-red-500/[0.05] hover:text-red-600"
             : isAdultMode
               ? "border-red-400/30 bg-red-500/[0.12] text-red-200 hover:border-red-300/45 hover:bg-red-500/[0.18]"
               : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-white",
@@ -126,11 +126,11 @@ export default function HeaderActions({
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => router.push("/account")}
-            className={`hidden h-10 rounded-full px-4 text-sm font-semibold sm:inline-flex ${
-              isLight
-                ? "border-black/8 bg-white/78 text-slate-900 hover:border-black/12 hover:bg-white"
-                : "border-white/10 bg-white/[0.04] text-white hover:border-white/20 hover:bg-white/[0.08]"
+          onClick={() => router.push("/account")}
+          className={`hidden h-10 rounded-full px-4 text-sm font-semibold sm:inline-flex ${
+            isLight
+              ? "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
+              : "border-white/10 bg-white/[0.04] text-white hover:border-white/20 hover:bg-white/[0.08]"
             }`}
           >
             <User className="size-4" />

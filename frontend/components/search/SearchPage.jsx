@@ -1007,10 +1007,10 @@ export default function SearchPage() {
     updateParams,
   ]);
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <main className="gush-page-shell overflow-hidden">
+      <div className="gush-page-ambient h-[clamp(20rem,40vw,32rem)]" />
       <SiteHeader variant="light" />
-      <div className="mx-auto max-w-[1280px] space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="gush-page-main gush-section-stack">
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">

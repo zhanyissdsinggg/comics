@@ -569,27 +569,27 @@ function HomeContent({ initialSearchParams = {} }) {
     : "Top Series and free starts get you reading faster.";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.14),transparent_24%),radial-gradient(circle_at_78%_10%,rgba(255,255,255,0.72),transparent_22%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <div className="gush-page-shell overflow-hidden">
+      <div className="gush-page-ambient h-[clamp(21rem,42vw,34rem)]" />
       <SiteHeader variant="home" />
 
-      <main className="relative mx-auto max-w-[1320px] px-4 pb-16 sm:px-6 sm:pb-12 lg:px-8">
-        <section className="py-3 md:py-5">
+      <main className="gush-page-main gush-page-main--wide">
+        <section className="pb-4 pt-1 md:pb-6">
           {loading ? (
             <div className="aspect-[5/6] w-full animate-pulse rounded-[34px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.06)] sm:aspect-[21/11] lg:aspect-[21/8]" />
           ) : (
-            <Card className="relative overflow-hidden rounded-[34px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.98))] py-0 shadow-[0_24px_56px_rgba(15,23,42,0.08)]">
+            <Card className="relative overflow-hidden rounded-[34px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.96))] py-0 shadow-[0_24px_56px_rgba(15,23,42,0.08)]">
               {featuredBannerUrl ? (
                 <div
-                  className="absolute inset-0 bg-cover bg-center opacity-[0.08]"
+                  className="absolute inset-0 bg-cover bg-center opacity-[0.06]"
                   style={{ backgroundImage: `url(${featuredBannerUrl})` }}
                 />
               ) : null}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.74),rgba(247,249,252,0.96))]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(49,87,214,0.08),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.82),rgba(248,246,242,0.96))]" />
 
               <CardContent className="relative grid gap-5 p-4 sm:p-6 xl:grid-cols-[1.02fr_0.98fr] xl:items-center xl:p-8">
                 <div className="max-w-2xl">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                     {heroEyebrow}
                   </p>
                   <h1 className="mt-3 max-w-3xl font-display text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.9rem] xl:text-[3.4rem]">
@@ -625,7 +625,7 @@ function HomeContent({ initialSearchParams = {} }) {
                 </div>
 
                 {heroSeries ? (
-                  <div className="rounded-[28px] border border-black/6 bg-white/80 p-4 shadow-[0_12px_32px_rgba(15,23,42,0.04)] sm:p-5">
+                  <div className="rounded-[28px] border border-black/8 bg-white/86 p-4 shadow-[0_12px_32px_rgba(15,23,42,0.04)] sm:p-5">
                     <div className="grid grid-cols-[104px_1fr] gap-4 sm:grid-cols-[140px_1fr] sm:items-start">
                       <div className="overflow-hidden rounded-[24px] border border-black/6 bg-neutral-900 shadow-[0_16px_32px_rgba(15,23,42,0.08)]">
                         <Cover
@@ -672,7 +672,7 @@ function HomeContent({ initialSearchParams = {} }) {
                             {heroSignals.slice(0, 2).map((signal) => (
                               <span
                                 key={signal}
-                                className="rounded-full border border-black/6 bg-[#f8f9fc] px-3 py-1.5 text-xs font-medium text-slate-700"
+                                className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1.5 text-xs font-medium text-slate-700"
                               >
                                 {signal}
                               </span>
@@ -689,7 +689,7 @@ function HomeContent({ initialSearchParams = {} }) {
         </section>
 
         {commerceNotice ? (
-          <div className="mb-8">
+          <div className="mb-6">
             <CommerceSuccessBanner
               notice={commerceNotice}
               onDismiss={() => setCommerceNotice(null)}
@@ -746,7 +746,7 @@ function HomeContent({ initialSearchParams = {} }) {
         )}
 
         <section className="mb-6">
-          <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.99))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+          <Card className="overflow-hidden rounded-[30px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.96))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
             <CardContent className="grid gap-5 p-5 sm:p-6 xl:grid-cols-[1.02fr_0.98fr] xl:items-center">
               <div className="max-w-2xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
@@ -781,8 +781,8 @@ function HomeContent({ initialSearchParams = {} }) {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[24px] border border-black/6 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
-                  <div className="flex size-10 items-center justify-center rounded-2xl bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]">
+                <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                  <div className="flex size-10 items-center justify-center rounded-2xl bg-[rgba(49,87,214,0.08)] text-[var(--gush-accent,#3157d6)]">
                     <WalletCards className="size-5" />
                   </div>
                   <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
@@ -796,8 +796,8 @@ function HomeContent({ initialSearchParams = {} }) {
                   </p>
                 </div>
 
-                <div className="rounded-[24px] border border-black/6 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
-                  <div className="flex size-10 items-center justify-center rounded-2xl bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]">
+                <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                  <div className="flex size-10 items-center justify-center rounded-2xl bg-[rgba(49,87,214,0.08)] text-[var(--gush-accent,#3157d6)]">
                     <BookOpenText className="size-5" />
                   </div>
                   <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">

@@ -621,11 +621,11 @@ export default function SeriesPage({
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <main className="gush-page-shell overflow-hidden">
+      <div className="gush-page-ambient" />
       <SiteHeader variant="light" />
 
-      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+      <div className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow={config.eyebrow}
           title={config.heroTitle}

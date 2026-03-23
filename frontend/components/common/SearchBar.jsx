@@ -190,8 +190,8 @@ const SearchBar = memo(function SearchBar({
           "relative flex items-center gap-2 rounded-full border px-4 py-2.5 transition-all duration-200 touch-manipulation",
           isLight
             ? isFocused
-              ? "border-black/10 bg-white shadow-[0_0_0_4px_rgba(47,107,255,0.08)]"
-              : "border-black/8 bg-white/78 shadow-[0_8px_24px_rgba(15,23,42,0.05)] hover:border-black/12 hover:bg-white"
+              ? "border-black/12 bg-white shadow-[0_0_0_4px_rgba(49,87,214,0.08)]"
+              : "border-black/8 bg-white/90 shadow-[0_12px_26px_rgba(15,23,42,0.05)] hover:border-black/12 hover:bg-white"
             : isFocused
               ? "border-emerald-400/35 bg-white/[0.08] shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"
               : "border-white/8 bg-white/[0.04] hover:border-white/14 hover:bg-white/[0.06]",
@@ -204,7 +204,7 @@ const SearchBar = memo(function SearchBar({
             "transition-colors duration-200 md:h-4 md:w-4",
             isLight
               ? isFocused
-                ? "text-[var(--gush-accent,#2f6bff)]"
+                ? "text-[var(--gush-accent,#3157d6)]"
                 : "text-slate-400"
               : isFocused
                 ? "text-emerald-300"
@@ -214,7 +214,7 @@ const SearchBar = memo(function SearchBar({
         {isSearching ? (
           <Loader2
             size={16}
-            className={cn("animate-spin", isLight ? "text-[var(--gush-accent,#2f6bff)]" : "text-emerald-300")}
+            className={cn("animate-spin", isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-300")}
           />
         ) : null}
         <input
@@ -266,7 +266,7 @@ const SearchBar = memo(function SearchBar({
           <kbd
             className={cn(
               "hidden rounded-full px-2.5 py-1 text-[10px] font-medium md:block",
-              isLight ? "border border-black/8 bg-black/[0.03] text-slate-400" : "border border-white/10 bg-black/20 text-neutral-400",
+              isLight ? "border border-black/8 bg-[rgba(246,243,237,0.92)] text-slate-400" : "border border-white/10 bg-black/20 text-neutral-400",
             )}
           >
             {shortcutLabel}
@@ -278,9 +278,9 @@ const SearchBar = memo(function SearchBar({
         <div
           id={listboxId}
           className={cn(
-            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[24px] border backdrop-blur-xl",
+            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[24px] border backdrop-blur-md",
             isLight
-              ? "border-black/8 bg-[rgba(255,255,255,0.88)] shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
+              ? "border-black/8 bg-[rgba(255,255,255,0.92)] shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
               : "border-white/10 bg-neutral-950/95 shadow-[0_24px_80px_rgba(0,0,0,0.28)]",
           )}
         >
@@ -289,8 +289,8 @@ const SearchBar = memo(function SearchBar({
               <div>
                 <div className="mb-2 flex items-center justify-between px-3 py-1">
                   <div className="flex items-center gap-2">
-                    <TrendingUp size={14} className={cn(isLight ? "text-[var(--gush-accent,#2f6bff)]" : "text-emerald-300")} />
-                    <span className={cn("text-xs font-semibold uppercase tracking-[0.18em]", isLight ? "text-slate-500" : "text-emerald-200/80")}>
+                    <TrendingUp size={14} className={cn(isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-300")} />
+                    <span className={cn("text-xs font-semibold", isLight ? "text-slate-500" : "text-emerald-200/80")}>
                       Recent
                     </span>
                   </div>
@@ -316,7 +316,7 @@ const SearchBar = memo(function SearchBar({
                       key={`${query}-${index}`}
                       className={cn(
                         "flex items-center gap-2 rounded-[16px] px-2 py-1",
-                        isLight ? "hover:bg-black/[0.03]" : "hover:bg-white/[0.04]",
+                        isLight ? "hover:bg-[rgba(246,243,237,0.9)]" : "hover:bg-white/[0.04]",
                       )}
                     >
                       <Button
@@ -353,7 +353,7 @@ const SearchBar = memo(function SearchBar({
             <div className={cn(searchHistory.length > 0 ? (isLight ? "mt-2 border-t border-black/6 pt-2" : "mt-2 border-t border-white/8 pt-2") : "")}>
               <div className="mb-2 flex items-center gap-2 px-3 py-1">
                 <Search size={14} className={cn(isLight ? "text-slate-400" : "text-neutral-400")} />
-                <span className={cn("text-xs font-semibold uppercase tracking-[0.18em]", isLight ? "text-slate-500" : "text-neutral-300")}>
+                <span className={cn("text-xs font-semibold", isLight ? "text-slate-500" : "text-neutral-300")}>
                   Start with
                 </span>
               </div>
@@ -366,14 +366,14 @@ const SearchBar = memo(function SearchBar({
                     onClick={() => handleLaneClick(lane)}
                     className={cn(
                       "h-auto w-full justify-between rounded-[16px] px-3 py-3 text-left",
-                      isLight ? "hover:bg-black/[0.03]" : "hover:bg-white/[0.04]",
+                      isLight ? "hover:bg-[rgba(246,243,237,0.9)]" : "hover:bg-white/[0.04]",
                     )}
                   >
                     <span className="min-w-0">
                       <span className={cn("block text-sm font-medium", isLight ? "text-slate-800" : "text-neutral-200")}>{lane.label}</span>
                       <span className={cn("mt-0.5 block text-xs", isLight ? "text-slate-500" : "text-neutral-500")}>{lane.hint}</span>
                     </span>
-                    <span className={cn("inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.16em]", isLight ? "text-slate-400" : "text-neutral-500")}>
+                    <span className={cn("inline-flex items-center gap-1 text-xs font-semibold", isLight ? "text-slate-400" : "text-neutral-500")}>
                       Go
                       <ArrowUpRight className="size-3" />
                     </span>
