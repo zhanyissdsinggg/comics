@@ -8,7 +8,6 @@ import { getCookie } from "../../lib/cookies";
 import { trackEvent } from "../../lib/trackEvent";
 import HeaderLogo from "./HeaderLogo";
 import HeaderNav from "./HeaderNav";
-import MobileTabNav from "./MobileTabNav";
 import HeaderActions from "./HeaderActions";
 import HeaderSearch from "./HeaderSearch";
 
@@ -129,6 +128,10 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
     setActiveModal("login");
   };
 
+  const handleMenuClick = () => {
+    setActiveModal("menu");
+  };
+
   const handleWalletClick = () => setActiveModal("topup");
 
   const handleModalClose = (nextModal = null, openNext = false) => {
@@ -144,6 +147,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
     <>
       <header
         data-site-header="1"
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
           isLight
             ? scrolled
@@ -168,8 +172,8 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
               : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.06),transparent_32%),radial-gradient(circle_at_85%_0%,rgba(34,211,238,0.04),transparent_24%)] opacity-90"
           }`}
         />
-        <div className="relative mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
-          <div className="flex min-h-[68px] items-center gap-3 py-2.5 sm:gap-4 lg:gap-6">
+        <div className="relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8">
+          <div className="flex min-h-[62px] items-center gap-2 py-2 sm:min-h-[68px] sm:gap-4 sm:py-2.5 lg:gap-6">
             <HeaderLogo variant={variant} />
             <HomeProvider>
               <HeaderNav variant={variant} />
@@ -181,6 +185,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
               onWalletClick={handleWalletClick}
               onAdultToggleClick={handleAdultToggle}
               onLoginClick={handleLoginClick}
+              onMenuClick={handleMenuClick}
               isAdultMode={isAdultMode}
               legalAge={legalAge}
               variant={variant}
@@ -188,8 +193,6 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
           </div>
         </div>
       </header>
-
-      <MobileTabNav variant={variant} />
 
       {activeModal && HeaderModalsComponent ? (
         <HeaderModalsComponent

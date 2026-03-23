@@ -199,6 +199,14 @@ function mapSeriesCardItem(series) {
     id: series.id,
     title: series.title,
     subtitle: getSeriesSubtitle(series),
+    genres: Array.isArray(series?.genres) ? series.genres : [],
+    type: series?.type || "",
+    seriesType: series?.type || "",
+    status: series?.status || "",
+    adult: Boolean(series?.adult),
+    freeEpisodeCount: Number(series?.freeEpisodeCount || 0),
+    hasFreeEpisodes: Boolean(series?.hasFreeEpisodes || Number(series?.freeEpisodeCount || 0) > 0),
+    author: series?.author || "",
     coverUrl: series.coverUrl,
     coverTone: series.coverTone,
     badge: getSeriesBadge(series),
@@ -775,7 +783,9 @@ export default function SeriesPage({
                   label={entrySpotlight.primary.title}
                   eyebrow={type === "comic" ? "Best first click" : "Best place to settle in"}
                   badge={getSeriesBadge(entrySpotlight.primary)}
-                  className="h-72 rounded-[24px]"
+                  genres={entrySpotlight.primary.genres}
+                  seriesType={entrySpotlight.primary.type}
+                  className="mx-auto aspect-[3/4] w-full max-w-[210px] rounded-[24px] sm:mx-0"
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -942,7 +952,9 @@ export default function SeriesPage({
                       label={item.title}
                       eyebrow={card.eyebrow}
                       badge={getSeriesBadge(item)}
-                      className="h-56 rounded-[22px]"
+                      genres={item.genres}
+                      seriesType={item.type}
+                      className="aspect-[3/4] w-full rounded-[22px]"
                     />
                     <div className="mt-4 space-y-3">
                       <div>

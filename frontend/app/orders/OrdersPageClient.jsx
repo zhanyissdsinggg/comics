@@ -100,19 +100,6 @@ function formatOrderPackageLabel(packageId) {
     .join(" ");
 }
 
-function isRecentOrder(value, maxAgeDays = 5) {
-  if (!value) {
-    return false;
-  }
-
-  const timestamp = Date.parse(value);
-  if (Number.isNaN(timestamp)) {
-    return false;
-  }
-
-  return Date.now() - timestamp <= maxAgeDays * 24 * 60 * 60 * 1000;
-}
-
 function buildSupportHref(orderId, topic = "billing") {
   return buildSupportPath({
     topic,
@@ -190,15 +177,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
     () => orders.find((order) => order.status === "PAID") || null,
     [orders],
   );
-  const latestOrderGuide = useMemo(
-    () => getCommerceJourneyGuide(latestPaidOrder?.packageId),
-    [latestPaidOrder?.packageId],
-  );
   const latestMembershipOrder = useMemo(
     () => orders.find((order) => order.status === "PAID" && isMembershipCharge(order.packageId)) || null,
     [orders],
   );
-  const hasRecentPaidOrder = Boolean(latestPaidOrder?.createdAt && isRecentOrder(latestPaidOrder.createdAt));
   const scrollToSection = useCallback((id) => {
     if (typeof document === "undefined") {
       return;
@@ -231,78 +213,6 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
     }
     setWorkingId("");
   }, [signInToOrders, viewerSignedIn]);
-  const postPurchaseCards = useMemo(
-    () => [
-      {
-        id: "resume",
-        eyebrow: latestOrderGuide.eyebrow,
-        title: hasRecentPaidOrder
-          ? "Go use your latest purchase."
-          : "Jump back into reading.",
-        description: latestPaidOrder
-          ? latestOrderGuide.description
-          : "Your latest purchase should point you back to a series, not just sit in a list.",
-        cta: latestOrderGuide.nextCta,
-        onClick: () => router.push(latestOrderGuide.nextHref),
-        accentClass:
-          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
-      },
-      {
-        id: "membership",
-        eyebrow: "Plans",
-        title: "Read often? Compare membership.",
-        description:
-          "If you keep buying packs, membership may be the better fit before your next purchase.",
-        cta: STOREFRONT_TERMS.compareMembership,
-        onClick: () =>
-          router.push(
-            buildPathWithAttribution("/subscribe", {
-              entryPoint: "ORDERS_POST_PURCHASE",
-              sourcePath: "/orders",
-              returnTo: "/orders",
-            }),
-          ),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: "store",
-        eyebrow: "Point packs",
-        title: "Need a quick top-up?",
-        description:
-          "Grab another pack when you are ready to unlock more chapters.",
-        cta: STOREFRONT_TERMS.viewPointPacks,
-        onClick: () =>
-          router.push(
-            buildPathWithAttribution(
-              "/store",
-              {
-                entryPoint: "ORDERS_POST_PURCHASE",
-                sourcePath: "/orders",
-                returnTo: "/orders",
-              },
-              { focus: "auto" },
-            ),
-          ),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: "support",
-        eyebrow: "Billing help",
-        title: latestPaidOrder
-          ? `Something off with ${latestPaidOrder.orderId}?`
-          : "Need help with a purchase?",
-        description:
-          "Send us a message and include the order ID so we can find it faster.",
-        cta: "Get billing help",
-        onClick: () => router.push(buildSupportHref(latestPaidOrder?.orderId)),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-    ],
-    [hasRecentPaidOrder, latestOrderGuide, latestPaidOrder, router],
-  );
   const signedOutActionCards = useMemo(
     () => [
       {
@@ -324,35 +234,6 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           "Use Support when the payment email never arrives, points look off, or a charge needs review.",
         cta: "Get billing help",
         onClick: () => router.push(buildSupportHref("", "billing")),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: "store",
-        eyebrow: "Point packs",
-        title: "See one-time packs before you buy.",
-        description:
-          "Store is the faster path when you want flexible unlocks instead of a recurring plan.",
-        cta: STOREFRONT_TERMS.viewPointPacks,
-        onClick: () => router.push("/store"),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: "membership",
-        eyebrow: "Membership",
-        title: "Compare recurring plans before checkout.",
-        description:
-          "Membership is the monthly path for frequent readers. Compare it here before your first charge lands.",
-        cta: STOREFRONT_TERMS.compareMembership,
-        onClick: () =>
-          router.push(
-            buildPathWithAttribution("/subscribe", {
-              entryPoint: "ORDERS_SIGNED_OUT",
-              sourcePath: "/orders",
-              returnTo: "/orders",
-            }),
-          ),
         accentClass:
           "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
@@ -523,20 +404,16 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         <EditorialHero
           appearance="light"
           accent="blue"
-          eyebrow="Purchases"
+          eyebrow="Orders"
           title={
-            latestPaidOrder
-              ? "Get your receipt, fix a charge, or keep reading."
-              : viewerSignedIn
-                ? "Get your receipt, fix a charge, or buy more points."
-                : "Sign in, compare plans, or get billing help."
+            viewerSignedIn
+              ? "Receipts, charges, and billing help."
+              : "Billing history and receipts live here after sign-in."
           }
           description={
-            latestPaidOrder
-              ? "Start with the action you need first. Purchase history and your latest unlock stay lower on the page."
-              : viewerSignedIn
-                ? "Receipts, membership charges, missing points, and billing help should all be one tap away from the top."
-                : "Sign in to keep receipts and membership charges on one account, or jump straight to billing help and plan comparison."
+            viewerSignedIn
+              ? "View receipts first, then handle membership charges, missing points, or charge help."
+              : "Sign in to see receipts, membership charges, and billing history on this account. Support stays available if something looks wrong."
           }
           actions={
             viewerSignedIn ? (
@@ -585,28 +462,6 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   className={heroPrimaryButtonClass}
                 >
                   Sign in
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/store")}
-                  className={heroSecondaryButtonClass}
-                >
-                  {STOREFRONT_TERMS.viewPointPacks}
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      buildPathWithAttribution("/subscribe", {
-                        entryPoint: "ORDERS_HERO",
-                        sourcePath: "/orders",
-                        returnTo: "/orders",
-                      }),
-                    )
-                  }
-                  className={heroSecondaryButtonClass}
-                >
-                  {STOREFRONT_TERMS.compareMembership}
                 </button>
                 <button
                   type="button"
@@ -666,14 +521,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             <SurfacePanel className="space-y-5" appearance="light" accent="blue">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Quick tasks
+                  Billing tasks
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Find the receipt, fix the charge, or buy more points.
+                  Find the receipt, check membership charges, or get help.
                 </h2>
-                <p className="text-sm leading-6 text-slate-600">
-                  Purchases should answer the next job first, then let the history sit underneath as proof.
-                </p>
               </div>
               <StorefrontPathwaysGrid
                 cards={billingTaskCards}
@@ -686,78 +538,20 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   : "Refunds are not self-serve right now. Use billing help and include the order ID if a charge needs review."}
               </div>
             </SurfacePanel>
-
-            {latestPaidOrder ? (
-              <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      Keep reading
-                    </p>
-                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                      Use your latest purchase right away.
-                    </h2>
-                    <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
-                      Once receipts and billing help are easy to reach, the next useful move is getting back into reading.
-                    </p>
-                  </div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
-                    {latestOrderGuide.eyebrow}
-                  </p>
-                </div>
-
-                <div className="grid gap-6 xl:grid-cols-[0.86fr_1.14fr]">
-                  <div className="rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] p-5">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      Latest purchase
-                    </p>
-                    <h3 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
-                      {latestOrderGuide.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{latestOrderGuide.description}</p>
-                    <div className="mt-5 flex flex-wrap gap-2 text-[11px] text-slate-600">
-                      <span className="rounded-full border border-black/8 bg-white px-3 py-1">
-                        {formatOrderPackageLabel(latestPaidOrder.packageId)}
-                      </span>
-                      <span className="rounded-full border border-black/8 bg-white px-3 py-1">
-                        {formatOrderAmount(latestPaidOrder.amount, latestPaidOrder.currency)}
-                      </span>
-                      <span className="rounded-full border border-black/8 bg-white px-3 py-1">
-                        Paid {formatOrderDate(latestPaidOrder.createdAt)}
-                      </span>
-                      {hasRecentPaidOrder ? (
-                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-white px-3 py-1 text-[var(--gush-accent,#2f6bff)]">
-                          Recent purchase
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <StorefrontPathwaysGrid
-                    cards={postPurchaseCards.map((card) => ({
-                      ...card,
-                      ctaLabel: card.cta,
-                    }))}
-                    columnsClassName="md:grid-cols-2"
-                    appearance="light"
-                  />
-                </div>
-              </SurfacePanel>
-            ) : null}
           </>
         ) : null}
 
         {!viewerSignedIn ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Sign in, or get billing help now.
+              Sign in to see receipts and billing history.
             </h2>
             <p className="text-sm leading-6 text-slate-600">
-              Receipts, order IDs, and membership charges land here after checkout, but billing help still stays one tap away before you sign in.
+              This page becomes your billing center after sign-in. Receipts, order IDs, and membership charges appear here, while billing help stays available right away.
             </p>
             <StorefrontPathwaysGrid
               cards={signedOutActionCards}
-              columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+              columnsClassName="md:grid-cols-2"
               appearance="light"
             />
           </SurfacePanel>

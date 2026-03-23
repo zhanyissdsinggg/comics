@@ -16,6 +16,7 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
+import { slugifyCreatorName } from "../../lib/creators";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -159,28 +160,28 @@ function buildCreatorDirectoryHeroStats({
       value: leadCreator?.name || leadSeries?.title || "Top Series",
       hint: leadCreator
         ? `Open ${leadCreator.name} to branch into linked titles from one strong creator shelf.`
-        : "Use Top Series while creator-linked shelves are still filling in.",
+        : "Start from Top Series, then branch into the next creator or studio link from a strong title page.",
     },
     {
       label: "Free starts",
-      value: stats.freeStarts > 0 ? `${stats.freeStarts} visible` : "Use title pages",
+      value: stats.freeStarts > 0 ? `${stats.freeStarts} free starts` : "Use title pages",
       hint: stats.freeStarts > 0
         ? "Creator shelves already surface titles with free first episodes."
-        : "Free first episodes still show on title pages even when creator coverage is thin.",
+        : "Free first episodes still show on title pages, so story-first discovery stays quick.",
     },
     {
       label: "Studio lane",
-      value: leadStudio?.name || "Selected credits",
+      value: leadStudio?.name || "Studio picks",
       hint: leadStudio
-        ? "Studios with multiple visible titles get their own grouped shelf here."
-        : "Studio grouping appears as soon as multi-title credits are visible.",
+        ? "Studios with more than one standout title get a grouped shelf here."
+        : "Use creator shelves, title pages, and search to move through grouped credits across the catalog.",
     },
     {
       label: "Top genre",
       value: genreOptions[0] || "Mixed catalog",
       hint: genreOptions[0]
-        ? `${genreOptions[0]} is the clearest creator-led lane in the public directory right now.`
-        : "Genre tags fill in as more creator-linked titles appear.",
+        ? `${genreOptions[0]} is one of the strongest creator-led lanes in the directory.`
+        : "Browse mixed catalog voices across comics and novels when you want a broader first pass.",
     },
   ];
 }
@@ -201,7 +202,7 @@ function buildCreatorShelfMeta(creator) {
     meta.push(formatDateLabel(creator.latestUpdatedAt));
   }
 
-  return meta.length > 0 ? meta : ["Credits expanding"];
+  return meta.length > 0 ? meta : ["Curated shelf"];
 }
 
 function CreatorDirectorySkeleton() {
@@ -390,6 +391,13 @@ export default function CreatorsHubPage({
           id: series.id,
           title: series.title,
           subtitle: buildFallbackSeriesSubtitle(series),
+          genres: Array.isArray(series?.genres) ? series.genres : [],
+          type: series?.type || "",
+          seriesType: series?.type || "",
+          status: series?.status || "",
+          freeEpisodeCount: Number(series?.freeEpisodeCount || 0),
+          author: series?.author || "",
+          adult: Boolean(series?.adult),
           coverUrl: series.coverUrl,
           coverTone: series.coverTone,
           badge: getFallbackSeriesBadge(series),
@@ -418,30 +426,34 @@ export default function CreatorsHubPage({
     () => [
       {
         eyebrow: "Find a creator",
-        title: "Search by creator, studio, or genre.",
+        title: "Search by creator, studio, or title.",
         description:
-          "Start from search when you already know a creator name, a studio, or just the lane of story you want.",
+          "Start from search when you already know the name, the team, or the story lane you want.",
         label: "Search series",
         href: "/search",
       },
       {
-        eyebrow: "Start here",
-        title: "Creator spotlight",
+        eyebrow: "Editor picks",
+        title: "Open strong creator-led titles first.",
         description:
-          "Top Series is still the easiest first stop when creator pages are sparse. Open a strong title first, then follow the creator trail as more credits appear.",
+          "Top Series is a fast first stop when you want the strongest public entry point into creator discovery.",
         label: "Browse Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
-        eyebrow: "Live catalog",
-        title: "Use comics and novels while creator shelves keep filling in.",
+        eyebrow: "Browse more",
+        title: "Browse by format and story lane.",
         description:
-          "Visible title pages already carry creator and studio credits, so you can keep browsing even when a dedicated creator page is not public yet.",
+          "Move through comics, novels, genres, and title pages, then follow the creator links that land.",
         label: "Browse comics",
         href: "/comics",
       },
     ],
     [],
+  );
+  const creatorLookup = useMemo(
+    () => new Map(creators.map((creator) => [creator.slug, creator])),
+    [creators],
   );
 
   const heroStats = useMemo(
@@ -470,6 +482,19 @@ export default function CreatorsHubPage({
     setQuery("");
     setActiveGenre("All");
     setCreditFilter(nextCredit);
+
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      document.getElementById("creator-filters")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+  const jumpToGenreBrowse = (genre) => {
+    setQuery("");
+    setCreditFilter("all");
+    setActiveGenre(genre || "All");
 
     if (typeof document === "undefined") {
       return;
@@ -599,6 +624,46 @@ export default function CreatorsHubPage({
         .filter(Boolean),
     [spotlightCreators],
   );
+  const guidedDiscoveryEntries = useMemo(() => {
+    const entries = [];
+    const seenSeriesIds = new Set();
+
+    creatorEntryTitles.forEach(({ creator, series, freeStarts }) => {
+      if (!series?.id || seenSeriesIds.has(series.id)) {
+        return;
+      }
+
+      seenSeriesIds.add(series.id);
+      entries.push({
+        id: `creator-${series.id}`,
+        mode: "creator",
+        creator,
+        series,
+        freeStarts,
+      });
+    });
+
+    fallbackEntryTitles.forEach((series) => {
+      if (!series?.id || seenSeriesIds.has(series.id) || entries.length >= 4) {
+        return;
+      }
+
+      const linkedCreator = series.author
+        ? creatorLookup.get(slugifyCreatorName(series.author))
+        : null;
+
+      seenSeriesIds.add(series.id);
+      entries.push({
+        id: `story-${series.id}`,
+        mode: linkedCreator ? "creator" : "story",
+        creator: linkedCreator,
+        series,
+        freeStarts: Number(series?.freeEpisodeCount || 0),
+      });
+    });
+
+    return entries.slice(0, 4);
+  }, [creatorEntryTitles, creatorLookup, fallbackEntryTitles]);
 
   if (loading) {
     return <CreatorDirectorySkeleton />;
@@ -615,8 +680,8 @@ export default function CreatorsHubPage({
               appearance="light"
               icon="alert"
               eyebrow="Load issue"
-              title="Creators are unavailable right now."
-              description="The page did not load cleanly. Try again, or jump back into search while this recovers."
+              title="Couldn't open the creator directory."
+              description="Reload the page, or jump into Search while the directory reconnects."
               action={{
                 label: "Try again",
                 onClick: () => window.location.reload(),
@@ -640,7 +705,7 @@ export default function CreatorsHubPage({
             eyebrow="Creators"
             title="Find the creators worth following."
             description="Move from one favorite title to the writer, artist, or studio behind it, then keep browsing from the same creative voice."
-            secondary="Visible creator shelves come from public title credits. When a specific credit is not surfaced yet, search, Top Series, comics, and novels stay the clean fallback."
+            secondary="Search, Top Series, comics, and novels keep creator discovery moving from any strong first title."
             stats={heroStats}
             actions={
               <>
@@ -699,10 +764,10 @@ export default function CreatorsHubPage({
                   Start from a title
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Use live titles until creator credits catch up.
+                  Start from standout titles.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  When public creator credits are missing, the clean fallback is still to open a strong title first, then keep moving through comics, novels, Top Series, or search.
+                  Open a standout title, then use credits, tags, and Top Series to keep moving through the next creator or studio.
                 </p>
               </div>
 
@@ -798,7 +863,7 @@ export default function CreatorsHubPage({
           eyebrow="Creators"
           title="Find the creators worth following."
           description="Jump from one favorite series to the writer, artist, or studio behind it, then keep reading from the same voice."
-          secondary="Creator pages open when credits are visible enough to browse cleanly. When a shelf is still thin, keep moving through Search or Top Series instead."
+          secondary="Use creator shelves for grouped browsing, or jump into Search, Top Series, comics, and novels for a faster first click."
           stats={heroStats}
           actions={
             <>
@@ -831,21 +896,21 @@ export default function CreatorsHubPage({
           <SurfacePanel appearance="light" accent="blue" className="space-y-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Pick a lane
+                Browse paths
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Browse by studio, creator, search, or fallback chart.
+                Choose the fastest path into the next strong shelf.
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                This page should help you move instead of explaining why metadata is incomplete. Pick the browse path that matches what you already know.
+                Pick the route that matches how you browse: grouped studios, distinct creator voices, quick search, or story-led lanes.
               </p>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {[
                 {
                   eyebrow: "Studios",
-                  title: featuredStudios.length > 0 ? `Open ${featuredStudios.length} visible studio shelves.` : "Browse studio-led shelves first.",
-                  description: "Filter to studios when you want the fastest grouped shelf built from visible multi-title credits.",
+                  title: featuredStudios.length > 0 ? `Open ${featuredStudios.length} studio shelves.` : "Browse studio shelves first.",
+                  description: "Filter to studios when you want grouped reading paths from shared teams and stronger catalogs.",
                   cta: "See studios",
                   onClick: () => jumpToCreatorBrowse("studio"),
                 },
@@ -858,17 +923,20 @@ export default function CreatorsHubPage({
                 },
                 {
                   eyebrow: "Search",
-                  title: "Search title, creator, or studio.",
+                  title: "Search a creator, studio, or title.",
                   description: "Use Search when you already know the credit name, lead title, or genre lane you want.",
                   cta: "Open search",
                   onClick: () => router.push("/search"),
                 },
                 {
-                  eyebrow: "Fallback",
-                  title: "Use Top Series when creator shelves are still thin.",
-                  description: "Top Series stays the safer first click when a creator credit is missing or you just want the strongest public entry point.",
-                  cta: "Browse Top Series",
-                  onClick: () => router.push("/rankings?type=popular&window=week"),
+                  eyebrow: "Story lanes",
+                  title: genreOptions[0] ? `Browse ${genreOptions[0]} voices.` : "Browse story-led discovery.",
+                  description: genreOptions[0]
+                    ? `Jump straight into ${genreOptions[0]} when you want the fastest route from genre to creator and studio shelves.`
+                    : "Open a strong story lane first, then branch into creators and studios from the titles that land.",
+                  cta: genreOptions[0] ? `Open ${genreOptions[0]}` : "Browse Top Series",
+                  onClick: () =>
+                    genreOptions[0] ? jumpToGenreBrowse(genreOptions[0]) : router.push("/rankings?type=popular&window=week"),
                 },
               ].map((item) => (
                 <button
@@ -903,7 +971,7 @@ export default function CreatorsHubPage({
               <p className="text-xs text-slate-500">
                 {[featuredStudios.length > 0 ? `${featuredStudios.length} studio shelves` : "", featuredVoices.length > 0 ? `${featuredVoices.length} creator shelves` : ""]
                   .filter(Boolean)
-                  .join(" | ") || "More shelves appear as credits get cleaner"}
+                  .join(" | ") || "Curated shelves for a fast first click"}
               </p>
             </div>
 
@@ -912,14 +980,14 @@ export default function CreatorsHubPage({
                 featuredStudios.length > 0
                   ? {
                       id: "studios",
-                      title: "Studios with visible multi-title shelves",
+                      title: "Studios with standout catalogs",
                       items: featuredStudios,
                     }
                   : null,
                 featuredVoices.length > 0
                   ? {
                       id: "creators",
-                      title: "Creators worth opening first",
+                      title: "Creators worth following next",
                       items: featuredVoices,
                     }
                   : null,
@@ -954,7 +1022,7 @@ export default function CreatorsHubPage({
                             creator.leadSummary,
                             creator.spotlightSeries?.title
                               ? `Start with ${creator.spotlightSeries.title}, then fan out through the rest of this shelf.`
-                              : "Open the creator page to see every visible title in one place.",
+                              : "Open the shelf to browse this creator or studio in one place.",
                           )}
                         </p>
                         {getCreatorTopTitles(creator, 2).length > 0 ? (
@@ -982,33 +1050,41 @@ export default function CreatorsHubPage({
           </SurfacePanel>
         </section>
 
-        {creatorEntryTitles.length > 0 ? (
+        {guidedDiscoveryEntries.length > 0 ? (
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Start from a title
+                  Editor-led discovery
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Open one strong title, then branch into the creator shelf.
+                  Open a standout work, then follow the creator trail.
                 </h2>
               </div>
               <p className="text-sm text-slate-500">
-                Useful when you want a faster first click than browsing the full directory.
+                Picked to make the next creator click feel immediate.
               </p>
             </div>
 
-            <div className="grid gap-4 xl:grid-cols-3">
-              {creatorEntryTitles.map(({ creator, series, freeStarts }) => (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {guidedDiscoveryEntries.map(({ id, creator, series, freeStarts, mode }) => (
                 <div
-                  key={`${creator.slug}-${series.id}`}
+                  key={id}
                   className="rounded-[28px] border border-black/6 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
                 >
                   <Link
-                    href={buildSeriesHref(series, creator, "CREATORS_HUB_ENTRY_TITLE")}
-                    onClick={(event) =>
-                      handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_ENTRY_TITLE")
+                    href={
+                      creator
+                        ? buildSeriesHref(series, creator, "CREATORS_HUB_GUIDED_TITLE")
+                        : buildFallbackTitleHref(series)
                     }
+                    onClick={(event) => {
+                      if (creator) {
+                        handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_GUIDED_TITLE");
+                        return;
+                      }
+                      handleFallbackTitleLinkClick(event, series);
+                    }}
                     className="group block overflow-hidden rounded-[22px]"
                     aria-label={`Open ${series.title}`}
                   >
@@ -1016,7 +1092,7 @@ export default function CreatorsHubPage({
                       tone={series?.coverTone}
                       coverUrl={series?.coverUrl}
                       label={series?.title}
-                      eyebrow={creator?.name}
+                      eyebrow={creator?.name || series?.subtitle || "Featured title"}
                       badge={series?.badge}
                       className="h-56 rounded-[22px] transition-transform duration-500 group-hover:scale-[1.02]"
                     />
@@ -1025,14 +1101,22 @@ export default function CreatorsHubPage({
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                          {formatCreditTypeLabel(creator.creditType)}
+                          {creator ? formatCreditTypeLabel(creator.creditType) : "Story pick"}
                         </p>
-                        <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                        <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-slate-950">
                           <Link
-                            href={buildSeriesHref(series, creator, "CREATORS_HUB_ENTRY_TITLE")}
-                            onClick={(event) =>
-                              handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_ENTRY_TITLE")
+                            href={
+                              creator
+                                ? buildSeriesHref(series, creator, "CREATORS_HUB_GUIDED_TITLE")
+                                : buildFallbackTitleHref(series)
                             }
+                            onClick={(event) => {
+                              if (creator) {
+                                handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_GUIDED_TITLE");
+                                return;
+                              }
+                              handleFallbackTitleLinkClick(event, series);
+                            }}
                             className="transition-colors hover:text-[var(--gush-accent,#2f6bff)]"
                           >
                             {series.title}
@@ -1040,14 +1124,16 @@ export default function CreatorsHubPage({
                         </h3>
                       </div>
                       <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
-                        {creator.name}
+                        {creator?.name || series?.type || "Series"}
                       </span>
                     </div>
 
                     <p className="text-sm leading-6 text-slate-600">
                       {summarizeLeadCopy(
                         series?.description,
-                        `Start with ${series.title}, then open ${creator.name}'s full shelf if the voice lands.`,
+                        creator
+                          ? `Start with ${series.title}, then open ${creator.name}'s full shelf for more from the same voice.`
+                          : `Start with ${series.title} for a clean first click into this story lane.`,
                       )}
                     </p>
 
@@ -1067,26 +1153,68 @@ export default function CreatorsHubPage({
 
                     <div className="flex flex-wrap gap-2 pt-1">
                       <Link
-                        href={buildSeriesHref(series, creator, "CREATORS_HUB_ENTRY_TITLE")}
-                        onClick={(event) =>
-                          handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_ENTRY_TITLE")
+                        href={
+                          creator
+                            ? buildSeriesHref(series, creator, "CREATORS_HUB_GUIDED_TITLE")
+                            : buildFallbackTitleHref(series)
                         }
+                        onClick={(event) => {
+                          if (creator) {
+                            handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_GUIDED_TITLE");
+                            return;
+                          }
+                          handleFallbackTitleLinkClick(event, series);
+                        }}
                         className={primaryButtonClass}
                       >
                         Open title
                       </Link>
-                      <Link
-                        href={buildCreatorHref(creator, "CREATORS_HUB_ENTRY_SHELF")}
-                        onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_ENTRY_SHELF")}
-                        className={secondaryButtonClass}
-                      >
-                        Open creator
-                      </Link>
+                      {creator ? (
+                        <Link
+                          href={buildCreatorHref(creator, "CREATORS_HUB_GUIDED_SHELF")}
+                          onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_GUIDED_SHELF")}
+                          className={secondaryButtonClass}
+                        >
+                          Open creator
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            router.push(
+                              series?.genres?.[0]
+                                ? `/search?q=${encodeURIComponent(series.genres[0])}&sort=popular`
+                                : series?.type === "novel"
+                                  ? "/novels"
+                                  : "/comics",
+                            )
+                          }
+                          className={secondaryButtonClass}
+                        >
+                          Browse this lane
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+
+            {fallbackGenrePicks.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {fallbackGenrePicks.slice(0, 6).map((item) => (
+                  <button
+                    key={`creator-guided-genre-${item.genre}`}
+                    type="button"
+                    onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=popular`)}
+                    className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
+                  >
+                    {item.genre}
+                    <span className="ml-2 text-xs text-slate-400">{item.count}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </SurfacePanel>
         ) : null}
 
@@ -1097,12 +1225,12 @@ export default function CreatorsHubPage({
                   Find a creator
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Search by creator, studio, or genre.
+                  Search creators, studios, or genres.
                 </h2>
               </div>
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm text-slate-500">
-                {filteredCreators.length.toLocaleString()} creator page{filteredCreators.length === 1 ? "" : "s"} shown
+                {filteredCreators.length.toLocaleString()} creator shel{filteredCreators.length === 1 ? "f" : "ves"} shown
               </p>
               {query || activeGenre !== "All" || creditFilter !== "all" ? (
                 <button
@@ -1124,7 +1252,7 @@ export default function CreatorsHubPage({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search creators or studios"
+              placeholder="Search creators, studios, or titles"
               className="rounded-[20px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.18)] focus:ring-4 focus:ring-[rgba(47,107,255,0.08)]"
             />
 
@@ -1145,18 +1273,43 @@ export default function CreatorsHubPage({
               ))}
             </div>
 
-            <div className="flex flex-wrap gap-2.5">
-              {["All", ...genreOptions].map((genre) => (
-                <button
-                  key={genre}
-                  type="button"
-                  onClick={() => setActiveGenre(genre)}
-                  className={filterButtonClass(activeGenre === genre)}
-                >
-                  {genre}
-                </button>
-              ))}
-            </div>
+            {genreOptions.length > 0 ? (
+              <>
+                <details className="overflow-hidden rounded-[20px] border border-black/8 bg-white sm:hidden">
+                  <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-slate-900">
+                    Browse genres
+                    <span className="ml-2 text-xs font-normal text-slate-500">
+                      {activeGenre === "All" ? `${genreOptions.length} lanes` : activeGenre}
+                    </span>
+                  </summary>
+                  <div className="flex flex-wrap gap-2.5 border-t border-black/8 px-4 py-4">
+                    {["All", ...genreOptions].map((genre) => (
+                      <button
+                        key={`mobile-${genre}`}
+                        type="button"
+                        onClick={() => setActiveGenre(genre)}
+                        className={filterButtonClass(activeGenre === genre)}
+                      >
+                        {genre}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+
+                <div className="hidden flex-wrap gap-2.5 sm:flex">
+                  {["All", ...genreOptions].map((genre) => (
+                    <button
+                      key={genre}
+                      type="button"
+                      onClick={() => setActiveGenre(genre)}
+                      className={filterButtonClass(activeGenre === genre)}
+                    >
+                      {genre}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
           </div>
         </SurfacePanel>
 
@@ -1168,11 +1321,11 @@ export default function CreatorsHubPage({
                   Start here
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  A few creator pages worth opening first.
+                  Start with these creator shelves.
                 </h2>
               </div>
               <p className="text-sm text-slate-500">
-                Picked from the strongest visible creator shelves.
+                Chosen for strong titles, clear voice, and quick next clicks.
               </p>
             </div>
 
@@ -1217,7 +1370,7 @@ export default function CreatorsHubPage({
                           creator.leadSummary,
                           creator.spotlightSeries?.title
                             ? `Start with ${creator.spotlightSeries.title}, then keep moving through the rest of this shelf.`
-                            : "Open this page to see every visible series from this creator or studio in one place.",
+                            : "Open this shelf to browse the strongest linked titles from this creator or studio.",
                         )}
                       </p>
 
@@ -1265,9 +1418,9 @@ export default function CreatorsHubPage({
             <EmptyState
               appearance="light"
               icon="search"
-              eyebrow="No matches"
-              title="Nothing matches this filter yet."
-              description="Try a broader search or remove the active genre to bring the full creator list back."
+              eyebrow="Try another lane"
+              title="Try a wider creator lane."
+              description="Clear a filter or widen the search to bring more creator shelves into view."
               action={{
                 label: "Show all creators",
                 onClick: () => {
@@ -1286,7 +1439,7 @@ export default function CreatorsHubPage({
                   Full list
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Browse every visible creator page.
+                  Browse the full creator directory.
                 </h2>
               </div>
               <p className="text-sm text-slate-500">
@@ -1338,8 +1491,8 @@ export default function CreatorsHubPage({
                           {summarizeLeadCopy(
                             creator.leadSummary,
                             creator.spotlightSeries?.title
-                              ? `Best entry: ${creator.spotlightSeries.title}.`
-                              : "Open the page to see every visible series from this creator or studio.",
+                              ? `Start with ${creator.spotlightSeries.title}.`
+                              : "Open the shelf to browse this creator or studio in one place.",
                           )}
                         </p>
 

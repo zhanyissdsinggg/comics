@@ -491,18 +491,22 @@ model SeriesViewStat {
 }
 
 model SupportTicket {
-  id        String   @id @default(cuid())
-  userId    String
-  subject   String
-  message   String
-  status    String   @default("open")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  userId     String?
+  replyEmail String?
+  orderId    String?
+  topic      String?
+  subject    String
+  message    String
+  status     String   @default("open")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // 老王新增：与User的关系，级联删除
-  user      User     @relation("UserSupportTickets", fields: [userId], references: [id], onDelete: Cascade)
+  user       User?    @relation("UserSupportTickets", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([replyEmail])
   @@map("support_tickets")
 }
 

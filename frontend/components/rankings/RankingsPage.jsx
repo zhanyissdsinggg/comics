@@ -517,7 +517,9 @@ export default function RankingsPage({
                       label={leadEntry.title}
                       eyebrow={activeTab.label}
                       badge={leadEntry.badge}
-                      className="h-64 rounded-[24px] lg:h-full"
+                      genres={leadEntry.genres}
+                      seriesType={leadEntry.type}
+                      className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] lg:mx-0"
                     />
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -588,7 +590,9 @@ export default function RankingsPage({
                         label={series.title}
                         eyebrow={`Rank #${index + 2}`}
                         badge={series.badge}
-                        className="mt-4 h-48 rounded-[20px]"
+                        genres={series.genres}
+                        seriesType={series.type}
+                        className="mt-4 aspect-[3/4] w-full rounded-[20px]"
                       />
                       <p className="mt-4 text-sm text-slate-500">{formatSeriesMeta(series)}</p>
                     </Link>
@@ -632,7 +636,9 @@ export default function RankingsPage({
                           label={series.title}
                           eyebrow={`Rank #${index + 4}`}
                           badge={series.badge}
-                          className="h-20 w-16 flex-shrink-0 rounded-[16px]"
+                          genres={series.genres}
+                          seriesType={series.type}
+                          className="aspect-[3/4] w-[4.5rem] flex-shrink-0 rounded-[16px]"
                         />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-base font-semibold text-slate-950">{series.title}</p>

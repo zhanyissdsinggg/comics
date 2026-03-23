@@ -44,18 +44,18 @@ async function installBillingPreviewMocks(page: Page): Promise<void> {
   });
 }
 
-test.describe("Billing preview states", () => {
-  test("store disables purchase buttons when checkout is preview-only", async ({ page }) => {
+test.describe("Billing prelaunch states", () => {
+  test("store keeps point packs in a clear prelaunch state when checkout is unavailable", async ({ page }) => {
     await installBillingPreviewMocks(page);
     const runtimeIssues = collectRuntimeIssues(page);
 
     const response = await page.goto("/store", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Checkout coming soon", { exact: true }).first()).toBeVisible({
+    await expect(page.getByText("Point-pack checkout is not live yet", { exact: true }).first()).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Coming soon" }).first()).toBeDisabled({
+    await expect(page.getByRole("button", { name: "Not on sale yet" }).first()).toBeDisabled({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
 
@@ -63,17 +63,17 @@ test.describe("Billing preview states", () => {
     await expectNoRuntimeIssues("/store", runtimeIssues);
   });
 
-  test("subscribe disables plan actions when secure billing is unavailable", async ({ page }) => {
+  test("subscribe keeps membership plans in a clear prelaunch state when billing is unavailable", async ({ page }) => {
     await installBillingPreviewMocks(page);
     const runtimeIssues = collectRuntimeIssues(page);
 
     const response = await page.goto("/subscribe", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Starting membership is not live yet. You can still compare every tier here.")).toBeVisible({
+    await expect(page.getByText("Membership starts are not live yet", { exact: true }).first()).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Coming soon" }).first()).toBeDisabled({
+    await expect(page.getByRole("button", { name: "Not live yet" }).first()).toBeDisabled({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
 

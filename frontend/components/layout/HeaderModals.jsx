@@ -9,6 +9,8 @@ import AgeGateModal from "./AgeGateModal";
 import WalletTopUpPrompt from "../wallet/WalletTopUpPrompt";
 import { LOGIN_GATE_DESCRIPTION } from "../../lib/adultGateCopy";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import HeaderMenuModal from "./HeaderMenuModal";
+
 export default function HeaderModals({
   activeModal,
   onModalClose,
@@ -95,6 +97,12 @@ export default function HeaderModals({
 
   return (
     <>
+      <HeaderMenuModal
+        open={activeModal === "menu"}
+        onClose={() => onModalClose("menu")}
+        onOpenLogin={() => onModalClose("login", true)}
+      />
+
       <LoginGateModal
         open={activeModal === "login"}
         onClose={() => {

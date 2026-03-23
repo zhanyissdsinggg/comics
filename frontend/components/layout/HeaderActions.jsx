@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Coins, User } from "lucide-react";
+import { Bell, Coins, Menu, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -11,20 +11,12 @@ import { Button } from "@/components/ui/button";
 function AuthSkeleton({ variant = "default" }) {
   const isLight = variant === "home" || variant === "light";
   return (
-    <>
-      <div
-        className={`hidden h-10 w-24 animate-pulse rounded-full border sm:block ${
-          isLight ? "border-black/8 bg-white/80" : "border-white/10 bg-white/[0.04]"
-        }`}
-        aria-hidden="true"
-      />
-      <div
-        className={`h-10 w-10 animate-pulse rounded-full border sm:hidden ${
-          isLight ? "border-black/8 bg-white/80" : "border-white/10 bg-white/[0.04]"
-        }`}
-        aria-hidden="true"
-      />
-    </>
+    <div
+      className={`hidden h-10 w-24 animate-pulse rounded-full border sm:block ${
+        isLight ? "border-black/8 bg-white/80" : "border-white/10 bg-white/[0.04]"
+      }`}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -35,6 +27,7 @@ export default function HeaderActions({
   onWalletClick,
   onAdultToggleClick,
   onLoginClick,
+  onMenuClick,
   isAdultMode,
   legalAge,
   variant = "default",
@@ -51,7 +44,7 @@ export default function HeaderActions({
     : ICON_BUTTON_CLASS;
 
   return (
-    <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
       {showWallet ? (
         <Button
           type="button"
@@ -77,7 +70,7 @@ export default function HeaderActions({
           size="icon"
           variant="outline"
           onClick={() => router.push("/notifications")}
-          className={iconButtonClass}
+          className={cn(iconButtonClass, "hidden sm:inline-flex")}
           aria-label="Notifications"
         >
           <Bell className="size-4" />
@@ -95,7 +88,7 @@ export default function HeaderActions({
         variant="outline"
         onClick={onAdultToggleClick}
         className={cn(
-          "h-10 rounded-full px-3 text-xs font-semibold sm:px-3.5",
+          "h-10 min-w-[3rem] rounded-full px-3 text-xs font-semibold sm:px-3.5",
           isLight
             ? isAdultMode
               ? "border-red-300/30 bg-red-500/[0.08] text-red-600 hover:border-red-400/40 hover:bg-red-500/[0.12]"
@@ -111,6 +104,18 @@ export default function HeaderActions({
       >
         <span>{legalAge}+</span>
         <span className="hidden md:inline">{isAdultMode ? " unlocked" : ""}</span>
+      </Button>
+
+      <Button
+        type="button"
+        size="icon"
+        variant="outline"
+        onClick={onMenuClick}
+        className={cn(iconButtonClass, "sm:hidden")}
+        aria-label={hydrated && isSignedIn ? "Open menu and account" : "Open menu"}
+        title="Open menu"
+      >
+        <Menu className="size-4" />
       </Button>
 
       {!hydrated ? (
@@ -131,43 +136,19 @@ export default function HeaderActions({
             <User className="size-4" />
             Account
           </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={() => router.push("/account")}
-            className={cn(isLight ? iconButtonClass : "h-10 w-10 rounded-full border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]", "sm:hidden")}
-            aria-label="Profile"
-            title="Open account"
-          >
-            <User className="size-4" />
-          </Button>
         </>
       ) : (
-        <>
-          <Button
-            type="button"
-            size="sm"
-            variant="default"
-            onClick={onLoginClick}
-            className={`hidden h-10 rounded-full px-5 text-sm font-semibold sm:inline-flex ${
-              isLight ? "bg-slate-950 text-white hover:bg-slate-800" : "bg-white text-neutral-950 hover:bg-neutral-200"
-            }`}
-          >
-            Sign in
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={onLoginClick}
-            className={cn(iconButtonClass, "sm:hidden")}
-            aria-label="Sign in"
-            title="Sign in"
-          >
-            <User className="size-4" />
-          </Button>
-        </>
+        <Button
+          type="button"
+          size="sm"
+          variant="default"
+          onClick={onLoginClick}
+          className={`hidden h-10 rounded-full px-5 text-sm font-semibold sm:inline-flex ${
+            isLight ? "bg-slate-950 text-white hover:bg-slate-800" : "bg-white text-neutral-950 hover:bg-neutral-200"
+          }`}
+        >
+          Sign in
+        </Button>
       )}
     </div>
   );

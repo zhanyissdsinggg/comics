@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const configuredWorkers = Number(process.env.PLAYWRIGHT_WORKERS || 2);
+const usePrebuiltServer = process.env.PLAYWRIGHT_USE_PREBUILT === "1";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -26,9 +27,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build && npx next start -p 4173 -H 127.0.0.1",
+    command: usePrebuiltServer
+      ? "npx next start -p 4173 -H 127.0.0.1"
+      : "npm run build && npx next start -p 4173 -H 127.0.0.1",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
-    timeout: 180000,
+    timeout: usePrebuiltServer ? 60000 : 180000,
   },
 });

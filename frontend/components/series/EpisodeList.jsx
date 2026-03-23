@@ -7,7 +7,10 @@ import { useProgressStore } from "../../store/useProgressStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import {
-  getEpisodeAccessState,
+  EPISODE_PRIMARY_STATE_META,
+  EPISODE_PRIMARY_STATE_ORDER,
+  buildEpisodeAccessStateMap,
+  getEpisodeAvailabilitySummary,
   getSeriesPrimaryReadAction,
 } from "../../lib/episodeAccessState";
 
@@ -58,27 +61,19 @@ export default function EpisodeList({
   );
   const seriesProgress = series?.id ? getProgress(series.id) : null;
   const walletTotal = (wallet?.paidPts || 0) + (wallet?.bonusPts || 0);
-  const isSubscriber = Boolean(wallet?.subscription?.active);
   const totalEpisodes = Array.isArray(episodes) ? episodes.length : 0;
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   const episodeStateMap = useMemo(() => {
-    const map = new Map();
-    (Array.isArray(episodes) ? episodes : []).forEach((episode) => {
-      map.set(
-        episode?.id,
-        getEpisodeAccessState({
-          episode,
-          unlocked: unlockedEpisodeIds.includes(episode?.id),
-          subscription: wallet?.subscription,
-          subscriptionUsage: wallet?.subscriptionUsage,
-          coupons,
-          nowMs,
-          fallbackPrice: series?.pricing?.episodePrice ?? 0,
-        }),
-      );
+    return buildEpisodeAccessStateMap({
+      episodes,
+      unlockedEpisodeIds,
+      subscription: wallet?.subscription,
+      subscriptionUsage: wallet?.subscriptionUsage,
+      coupons,
+      nowMs,
+      fallbackPrice: series?.pricing?.episodePrice ?? 0,
     });
-    return map;
   }, [
     coupons,
     episodes,
@@ -89,19 +84,15 @@ export default function EpisodeList({
     wallet?.subscriptionUsage,
   ]);
 
-  const readyCount = useMemo(
+  const availabilitySummary = useMemo(
     () =>
-      Array.from(episodeStateMap.values()).filter((state) =>
-        ["unlocked", "free", "membership"].includes(state.kind),
-      ).length,
-    [episodeStateMap],
+      getEpisodeAvailabilitySummary({
+        episodes,
+        episodeStateMap,
+      }),
+    [episodeStateMap, episodes],
   );
-  const previewCount = useMemo(
-    () =>
-      Array.from(episodeStateMap.values()).filter((state) => state.kind === "preview").length,
-    [episodeStateMap],
-  );
-  const lockedCount = Math.max(0, totalEpisodes - readyCount - previewCount);
+  const availabilityCounts = availabilitySummary.counts;
 
   const primaryReadAction = useMemo(
     () =>
@@ -143,11 +134,8 @@ export default function EpisodeList({
     : null;
 
   const needsCountdown = useMemo(
-    () =>
-      Array.from(episodeStateMap.values()).some(
-        (state) => state.kind === "locked" && Number(state.countdownMs || 0) > 0,
-      ),
-    [episodeStateMap],
+    () => availabilitySummary.hasCountdown,
+    [availabilitySummary.hasCountdown],
   );
 
   useEffect(() => {
@@ -160,20 +148,8 @@ export default function EpisodeList({
 
   const filteredEpisodes = useMemo(() => {
     const list = Array.isArray(episodes) ? episodes : [];
-    if (filter === "ready") {
-      return list.filter((episode) => {
-        const state = episodeStateMap.get(episode?.id);
-        return state && ["unlocked", "free", "membership"].includes(state.kind);
-      });
-    }
-    if (filter === "preview") {
-      return list.filter((episode) => episodeStateMap.get(episode?.id)?.kind === "preview");
-    }
-    if (filter === "locked") {
-      return list.filter((episode) => {
-        const state = episodeStateMap.get(episode?.id);
-        return state && ["locked", "points"].includes(state.kind);
-      });
+    if (filter !== "all") {
+      return list.filter((episode) => episodeStateMap.get(episode?.id)?.primaryState === filter);
     }
     return list;
   }, [episodeStateMap, episodes, filter]);
@@ -183,26 +159,31 @@ export default function EpisodeList({
     [filteredEpisodes, sortOrder],
   );
 
-  const summaryItems = [
-    `${readyCount.toLocaleString()} ready`,
-    previewCount > 0 ? `${previewCount.toLocaleString()} preview` : "No previews",
-    lockedCount > 0 ? `${lockedCount.toLocaleString()} locked` : "All ready",
-    isSubscriber ? "Membership active" : `${walletTotal.toLocaleString()} points`,
-  ];
-  const mobileSummary = [
-    `${readyCount.toLocaleString()} ready`,
-    previewCount > 0 ? `${previewCount.toLocaleString()} preview` : null,
-    lockedCount > 0 ? `${lockedCount.toLocaleString()} locked` : null,
-  ]
-    .filter(Boolean)
-    .join(" | ");
+  const summaryItems = availabilitySummary.summaryItems;
+  const mobileSummary = availabilitySummary.mobileSummary;
+  const explainer = availabilitySummary.explainer;
 
-  const explainer =
-    Number(series?.freeEpisodeCount || 0) > 0
-      ? "Start with free chapters. Locked chapters can be unlocked with points or membership."
-      : previewCount > 0
-        ? "Start with the preview chapters. Locked chapters can be unlocked with points or membership."
-        : "Start at chapter 1. Locked chapters can be unlocked with points or membership.";
+  const filterOptions = useMemo(
+    () => [
+      { value: "all", label: "All chapters" },
+      ...EPISODE_PRIMARY_STATE_ORDER.filter((state) => availabilityCounts[state] > 0).map(
+        (state) => ({
+          value: state,
+          label: EPISODE_PRIMARY_STATE_META[state].filterLabel,
+        }),
+      ),
+    ],
+    [availabilityCounts],
+  );
+
+  useEffect(() => {
+    if (filter === "all") {
+      return;
+    }
+    if (!filterOptions.some((option) => option.value === filter)) {
+      setFilter("all");
+    }
+  }, [filter, filterOptions]);
 
   const handleOpenStore = () =>
     router.push(
@@ -228,25 +209,32 @@ export default function EpisodeList({
       }),
     );
 
+  const primaryActionKind =
+    primaryReadAction?.actionKind || primaryEpisodeState?.actionKind || null;
+
   const handlePrimaryAction = async () => {
-    if (!primaryReadAction?.episodeId || !primaryEpisode || !primaryEpisodeState || topActionWorking) {
-      if (primaryReadAction?.label === "Join Membership") {
+    if (topActionWorking) {
+      return;
+    }
+
+    if (!primaryReadAction?.episodeId || !primaryEpisode || !primaryActionKind) {
+      if (primaryActionKind === "subscribe") {
         onSubscribe(series?.id, primaryReadAction?.episodeId || null);
       }
       return;
     }
 
-    if (primaryReadAction.label === "Join Membership" || primaryEpisodeState.actionKind === "subscribe") {
+    if (primaryActionKind === "subscribe") {
       onSubscribe(series?.id, primaryEpisode.id);
       return;
     }
 
-    if (primaryEpisodeState.actionKind === "read" || primaryEpisodeState.actionKind === "preview") {
+    if (primaryActionKind === "read" || primaryActionKind === "preview") {
       onRead(series?.id, primaryEpisode.id);
       return;
     }
 
-    if (primaryEpisodeState.actionKind === "claim") {
+    if (primaryActionKind === "claim") {
       setTopActionWorking(true);
       let response;
       try {
@@ -263,7 +251,7 @@ export default function EpisodeList({
       return;
     }
 
-    if (primaryEpisodeState.actionKind === "unlock") {
+    if (primaryActionKind === "unlock") {
       setTopActionWorking(true);
       const idempotencyKey = createIdempotencyKey();
       let response;
@@ -285,9 +273,9 @@ export default function EpisodeList({
   };
 
   const topActionClassName =
-    primaryReadAction?.label === "Join Membership"
+    primaryActionKind === "subscribe"
       ? "rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-60"
-      : primaryReadAction?.label === "Unlock Episode"
+      : primaryActionKind === "unlock"
         ? "rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
         : "rounded-full bg-[var(--gush-accent,#2f6bff)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#255af0] disabled:cursor-not-allowed disabled:opacity-60";
 
@@ -301,20 +289,24 @@ export default function EpisodeList({
           <div className="max-w-3xl space-y-3">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-slate-950">Episodes</h2>
-              <span className="text-sm text-slate-500">{episodes.length}</span>
+              <span className="text-sm text-slate-500">{totalEpisodes}</span>
             </div>
             <p className="text-sm leading-6 text-slate-600">{explainer}</p>
-            <p className="text-sm font-medium text-slate-500 sm:hidden">{mobileSummary}</p>
-            <div className="hidden flex-wrap gap-2 sm:flex">
-              {summaryItems.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs text-slate-600"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
+            {mobileSummary ? (
+              <p className="text-sm font-medium text-slate-500 sm:hidden">{mobileSummary}</p>
+            ) : null}
+            {summaryItems.length > 0 ? (
+              <div className="hidden flex-wrap gap-2 sm:flex">
+                {summaryItems.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs text-slate-600"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           {primaryReadAction?.label ? (
@@ -355,10 +347,11 @@ export default function EpisodeList({
               onChange={(event) => setFilter(event.target.value)}
               className="min-h-[44px] rounded-full border border-black/8 bg-white/88 px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#2f6bff)]"
             >
-              <option value="all">All chapters</option>
-              <option value="ready">Ready now</option>
-              <option value="preview">Preview</option>
-              <option value="locked">Locked</option>
+              {filterOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
             <select
               value={sortOrder}

@@ -11,9 +11,9 @@ import { decideOffers } from "../../lib/offers/decide";
 import { getBucket, getOrCreateUserId, trackExposure } from "../../lib/experiments/ab";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
-import { calculatePrice } from "../../lib/pricing";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+import { getEpisodeAccessState } from "../../lib/episodeAccessState";
 
 function createIdempotencyKey() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -44,16 +44,6 @@ function formatDate(value) {
   }).format(new Date(parsed));
 }
 
-function formatCountdown(ms) {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-}
-
 function formatPointsLabel(value) {
   return `${Number(value || 0)} points`;
 }
@@ -64,8 +54,17 @@ function formatPackLabel(value) {
 }
 
 function getSignalClass(tone) {
-  if (tone === "emerald") {
+  if (tone === "free" || tone === "ready" || tone === "membership") {
     return "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] text-[var(--gush-accent,#2f6bff)]";
+  }
+  if (tone === "preview") {
+    return "border-amber-200 bg-amber-50 text-amber-700";
+  }
+  if (tone === "points") {
+    return "border-black/10 bg-white text-slate-700";
+  }
+  if (tone === "locked") {
+    return "border-black/8 bg-[#f8f9fc] text-slate-500";
   }
 
   return "border-black/8 bg-[#f8f9fc] text-slate-500";
@@ -93,11 +92,7 @@ function EpisodeRow({
   const [modalState, setModalState] = useState(null);
   const [isWorking, setIsWorking] = useState(false);
   const impressionRef = useRef(false);
-  const readyAtMs = ttfStatus?.readyAt ? Date.parse(ttfStatus.readyAt) : null;
   const now = typeof nowMs === "number" ? nowMs : Date.now();
-  const remainingMs = readyAtMs ? readyAtMs - now : null;
-  const isReady = !readyAtMs ? true : remainingMs <= 0;
-  const formatted = isReady ? null : formatCountdown(remainingMs);
 
   const isSubscriber = Boolean(subscription?.active);
   const walletBalance = (paidPts || 0) + (bonusPts || 0);
@@ -163,103 +158,33 @@ function EpisodeRow({
   const savingsText = recommendedUnlockOffer?.savingsPct
     ? `You save ${recommendedUnlockOffer.savingsPct}%`
     : null;
-  const pricing = useMemo(
+  const accessState = useMemo(
     () =>
-      calculatePrice({
-        basePrice: pricePts,
-        subscription: subscription?.active ? subscription : null,
+      getEpisodeAccessState({
+        episode: {
+          ...episode,
+          ttfEligible: ttfStatus?.eligible,
+          ttfReadyAt: ttfStatus?.readyAt,
+        },
+        unlocked,
+        subscription,
+        subscriptionUsage,
         coupons,
-        method: "WALLET",
-        applyDailyFree: Boolean(subscriptionUsage?.remaining),
+        nowMs: now,
+        fallbackPrice: pricePts,
       }),
-    [pricePts, subscription, coupons, subscriptionUsage?.remaining],
+    [coupons, episode, now, pricePts, subscription, subscriptionUsage, ttfStatus?.eligible, ttfStatus?.readyAt, unlocked],
   );
-  const effectivePrice = pricing.finalPrice ?? pricePts;
-  const discountLabel =
-    pricing.appliedCoupon?.label ||
-    (pricing.discountPct ? `Member ${pricing.discountPct}% off` : "");
-  const dailyFreeLabel = !unlocked && subscriptionUsage?.remaining ? "Free now" : "";
+  const effectivePrice = accessState.effectivePrice;
   const episodeDisplayTitle =
     episode?.title && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title)
       ? ["Ep ", episode?.number, " - ", episode.title].join("")
       : `Episode ${episode?.number}`;
-  const shortfallValue =
-    !ttfStatus?.eligible && effectivePrice > 0 ? Math.max(0, effectivePrice - walletBalance) : 0;
-  const episodeSignals = useMemo(() => {
-    const list = [];
-
-    if (unlocked) {
-      list.push({
-        id: "access",
-        label:
-          progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
-            ? `${Math.round(progress.percent * 100)}% read`
-            : "Ready now",
-        tone: "emerald",
-      });
-    } else if (ttfStatus?.eligible && isReady) {
-      list.push({ id: "free-ready", label: "Free now", tone: "emerald" });
-      list.push({ id: "points", label: "No points needed", tone: "neutral" });
-    } else if (ttfStatus?.eligible && !isReady) {
-      list.push({
-        id: "countdown",
-        label: `Unlock in ${formatted || "--:--:--"}`,
-        tone: "neutral",
-      });
-      list.push({
-        id: "member",
-        label: isSubscriber ? "Shorter member wait" : "Members wait less",
-        tone: isSubscriber ? "emerald" : "neutral",
-      });
-    } else {
-      list.push({
-        id: "price",
-        label: effectivePrice === 0 ? "Free now" : `${effectivePrice} points`,
-        tone: effectivePrice === 0 ? "emerald" : "neutral",
-      });
-      if (dailyFreeLabel) {
-        list.push({ id: "daily-free", label: dailyFreeLabel, tone: "emerald" });
-      } else if (discountLabel) {
-        list.push({ id: "discount", label: discountLabel, tone: "neutral" });
-      }
-
-      if (effectivePrice > 0) {
-        list.push({
-          id: "wallet",
-          label:
-            walletBalance >= effectivePrice
-              ? "You have enough"
-              : `Need ${shortfallValue} more`,
-          tone: walletBalance >= effectivePrice ? "emerald" : "neutral",
-        });
-      }
-    }
-
-    if (episode?.previewFreePages) {
-      list.push({
-        id: "preview",
-        label: `${episode.previewFreePages} preview page${episode.previewFreePages === 1 ? "" : "s"}`,
-        tone: "neutral",
-      });
-    }
-
-    return list.slice(0, 4);
-  }, [
-    dailyFreeLabel,
-    discountLabel,
-    effectivePrice,
-    episode?.id,
-    episode?.previewFreePages,
-    formatted,
-    isReady,
-    isSubscriber,
-    progress?.lastEpisodeId,
-    progress?.percent,
-    shortfallValue,
-    ttfStatus?.eligible,
-    unlocked,
-    walletBalance,
-  ]);
+  const shortfallValue = effectivePrice > 0 ? Math.max(0, effectivePrice - walletBalance) : 0;
+  const stateMetaLabel =
+    progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
+      ? `${Math.round(progress.percent * 100)}% read`
+      : accessState.shortLabel;
   const compareItems =
     modalState?.type === "SHORTFALL" && recommendedUnlockOffer?.episodes > 1
       ? [
@@ -304,171 +229,159 @@ function EpisodeRow({
     }
   }, [modalState?.type, recommendedUnlockOffer?.id]);
 
-  let actionNode = null;
-  let metaNode = null;
-
-  if (unlocked) {
-    actionNode = (
-      <button
-        type="button"
-        onClick={() => onRead(seriesId, episode?.id)}
-        disabled={isWorking}
-        className="min-h-[44px] w-full rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 active:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
-        style={{ willChange: "transform" }}
-      >
-        Read now
-      </button>
-    );
-    if (progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0) {
-      metaNode = <span>{Math.round(progress.percent * 100)}% read</span>;
+  const handleClaimAccess = async () => {
+    setIsWorking(true);
+    trackEvent("ttf_claim", { seriesId, episodeId: episode?.id });
+    let response;
+    try {
+      response = await onClaim(seriesId, episode?.id);
+    } catch {
+      response = { ok: false, status: 500, error: "CLAIM_FAILED" };
     }
-  } else if (ttfStatus?.eligible && isReady) {
-    metaNode = <span>Free now</span>;
-    actionNode = (
-      <button
-        type="button"
-        onClick={async () => {
-          setIsWorking(true);
-          trackEvent("ttf_claim", { seriesId, episodeId: episode?.id });
-          let response;
-          try {
-            response = await onClaim(seriesId, episode?.id);
-          } catch {
-            response = { ok: false, status: 500, error: "CLAIM_FAILED" };
-          }
-            if (response.ok) {
-              trackEvent("ttf_claim_success", { seriesId, episodeId: episode?.id });
-              setModalState({
-                type: "SUCCESS",
-                title: "Episode unlocked",
-                description: "You're all set. Start reading.",
-              });
-            } else {
-            trackEvent("ttf_claim_fail", {
-              seriesId,
-              episodeId: episode?.id,
-              status: response.status,
-              errorCode: response.error,
-              requestId: response.requestId,
-            });
-            if (response.status === 401) {
-              openAuthModal();
-            }
-            const nextDescription =
-              response.status === 409
-                ? "That free read is not ready yet."
-                : response.error || "We couldn't open that free read right now.";
-            setModalState({
-              type: "ERROR",
-              title: "Free read unavailable",
-              description: nextDescription,
-            });
-          }
-          setIsWorking(false);
-        }}
-        disabled={isWorking}
-        className="min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#2f6bff)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#255af0] active:scale-95 active:bg-[#1e4dd4] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
-        style={{ willChange: "transform" }}
-      >
-        Read free
-      </button>
-    );
-  } else if (ttfStatus?.eligible && !isReady) {
-    metaNode = <span>Free in {formatted || "--:--:--"}</span>;
-    actionNode = (
-      <button
-        type="button"
-        onClick={() => onSubscribe(seriesId, episode?.id)}
-        disabled={isWorking}
-        className="min-h-[44px] w-full rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-black/12 hover:bg-[#f8f9fc] active:scale-95 active:bg-[#eef2f8] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
-        style={{ willChange: "transform" }}
-      >
-        See membership
-      </button>
-    );
-  } else {
-    if (pricing.appliedDailyFree) {
-      metaNode = <span>Free now</span>;
-    } else if (effectivePrice !== pricePts) {
-      metaNode = <span>{discountLabel || "Member price active"}</span>;
+    if (response.ok) {
+      trackEvent("ttf_claim_success", { seriesId, episodeId: episode?.id });
+      setModalState({
+        type: "SUCCESS",
+        title: "Episode unlocked",
+        description: "You're all set. Start reading.",
+      });
+      setIsWorking(false);
+      return;
     }
-    actionNode = (
-      <button
-        type="button"
-        onClick={async () => {
-          setIsWorking(true);
-          trackEvent("click_unlock", { seriesId, episodeId: episode?.id });
-          const idempotencyKey = createIdempotencyKey();
-          let response;
-          try {
-            response = await onUnlock(seriesId, episode?.id, idempotencyKey);
-          } catch {
-            response = { ok: false, status: 500, error: "UNLOCK_FAILED" };
-          }
-          if (response.ok) {
-            trackEvent("unlock_success", { seriesId, episodeId: episode?.id });
-            recordUnlock(seriesId, episode?.id);
-            setModalState({
-              type: "SUCCESS",
-              title: "Episode unlocked",
-              description: "You're all set. Start reading.",
-            });
-            setIsWorking(false);
-            return;
-          }
 
-          trackEvent("unlock_fail", {
-            seriesId,
-            episodeId: episode?.id,
-            status: response.status,
-            errorCode: response.error,
-            requestId: response.requestId,
-          });
+    trackEvent("ttf_claim_fail", {
+      seriesId,
+      episodeId: episode?.id,
+      status: response.status,
+      errorCode: response.error,
+      requestId: response.requestId,
+    });
+    if (response.status === 401) {
+      openAuthModal();
+    }
+    setModalState({
+      type: "ERROR",
+      title: "Free read unavailable",
+      description:
+        response.status === 409
+          ? "That free read is not ready yet."
+          : response.error || "We couldn't open that free read right now.",
+    });
+    setIsWorking(false);
+  };
 
-          if (response.status === 401) {
-            openAuthModal();
-            setModalState({
-              type: "ERROR",
-              title: "Sign in required",
-              description: "Sign in to unlock this episode and keep your place.",
-            });
-          } else if (response.status === 402) {
-            setModalState({
-              type: "SHORTFALL",
-              title: "Need more points",
-              description: "Add points or check membership to keep reading.",
-              shortfallPts: response.shortfallPts || 0,
-              offerId: recommendedTopup?.id,
-            });
-          } else {
-            setModalState({
-              type: "ERROR",
-              title: "Couldn't unlock",
-              description: response.error || "Please try again in a moment.",
-            });
-          }
-          setIsWorking(false);
-        }}
-        disabled={isWorking}
-        className="min-h-[44px] w-full rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 active:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
-        style={{ willChange: "transform" }}
-      >
-        {effectivePrice === 0 ? "Read free" : `Unlock for ${effectivePrice} points`}
-      </button>
-    );
-  }
+  const handleUnlockAccess = async () => {
+    setIsWorking(true);
+    trackEvent("click_unlock", { seriesId, episodeId: episode?.id });
+    const idempotencyKey = createIdempotencyKey();
+    let response;
+    try {
+      response = await onUnlock(seriesId, episode?.id, idempotencyKey);
+    } catch {
+      response = { ok: false, status: 500, error: "UNLOCK_FAILED" };
+    }
+
+    if (response.ok) {
+      trackEvent("unlock_success", { seriesId, episodeId: episode?.id });
+      recordUnlock(seriesId, episode?.id);
+      setModalState({
+        type: "SUCCESS",
+        title: "Episode unlocked",
+        description: "You're all set. Start reading.",
+      });
+      setIsWorking(false);
+      return;
+    }
+
+    trackEvent("unlock_fail", {
+      seriesId,
+      episodeId: episode?.id,
+      status: response.status,
+      errorCode: response.error,
+      requestId: response.requestId,
+    });
+
+    if (response.status === 401) {
+      openAuthModal();
+      setModalState({
+        type: "ERROR",
+        title: "Sign in required",
+        description: "Sign in to unlock this episode and keep your place.",
+      });
+    } else if (response.status === 402) {
+      setModalState({
+        type: "SHORTFALL",
+        title: "Need more points",
+        description: "Add points or check membership to keep reading.",
+        shortfallPts: response.shortfallPts || 0,
+        offerId: recommendedTopup?.id,
+      });
+    } else {
+      setModalState({
+        type: "ERROR",
+        title: "Couldn't unlock",
+        description: response.error || "Please try again in a moment.",
+      });
+    }
+    setIsWorking(false);
+  };
+
+  const handlePrimaryAction = async () => {
+    if (isWorking) {
+      return;
+    }
+
+    if (accessState.actionKind === "read" || accessState.actionKind === "preview") {
+      onRead(seriesId, episode?.id);
+      return;
+    }
+
+    if (accessState.actionKind === "claim") {
+      await handleClaimAccess();
+      return;
+    }
+
+    if (accessState.actionKind === "unlock") {
+      await handleUnlockAccess();
+      return;
+    }
+
+    onSubscribe(seriesId, episode?.id);
+  };
+
+  const actionClassName =
+    accessState.actionKind === "claim" || accessState.actionKind === "read" || accessState.actionKind === "preview"
+      ? "min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#2f6bff)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#255af0] active:scale-95 active:bg-[#1e4dd4] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
+      : accessState.actionKind === "subscribe"
+        ? "min-h-[44px] w-full rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-black/12 hover:bg-[#f8f9fc] active:scale-95 active:bg-[#eef2f8] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
+        : "min-h-[44px] w-full rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 active:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]";
+
+  const actionNode = (
+    <button
+      type="button"
+      onClick={handlePrimaryAction}
+      disabled={isWorking}
+      className={actionClassName}
+      style={{ willChange: "transform" }}
+    >
+      {accessState.actionLabel}
+    </button>
+  );
 
   return (
-    <li className="group overflow-hidden rounded-[26px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10">
-      <div className="grid gap-4 sm:grid-cols-[84px_minmax(0,1fr)_auto] sm:items-center">
-        <div className="relative h-28 overflow-hidden rounded-[20px] border border-black/6 bg-[#eef2f8] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[112px]">
+    <li
+      id={`episode-${episode?.id}`}
+      className="group overflow-hidden rounded-[24px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10"
+    >
+      <div className="grid gap-3 sm:grid-cols-[76px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
+        <div className="relative h-24 overflow-hidden rounded-[18px] border border-black/6 bg-[#eef2f8] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[104px]">
           {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
             <Image
               src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
               alt={`Episode ${episode?.number} thumbnail`}
               fill
               className="object-cover"
-              sizes="(max-width: 640px) 100vw, 84px"
+              sizes="(max-width: 640px) 76px, 96px"
               loading="lazy"
             />
           ) : (
@@ -489,12 +402,11 @@ function EpisodeRow({
             <strong className="text-base font-semibold tracking-tight text-slate-950">
               {episodeDisplayTitle}
             </strong>
-            {unlocked ? <Pill appearance="light">Unlocked</Pill> : null}
-            {ttfStatus?.eligible && isReady ? (
-              <Pill appearance="light" tone="accent">
-                Free to read
-              </Pill>
-            ) : null}
+            <span
+              className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.stateTone)}`}
+            >
+              {accessState.stateLabel}
+            </span>
             {progress?.lastEpisodeId === episode?.id ? (
               <Pill appearance="light" tone="subtle">
                 Last read
@@ -504,26 +416,24 @@ function EpisodeRow({
 
           <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
             <span>{formatDate(episode?.releasedAt)}</span>
-            {episode?.previewFreePages ? (
-              <span>
-                {episode.previewFreePages} preview page
-                {episode.previewFreePages === 1 ? "" : "s"}
+            <span>{stateMetaLabel}</span>
+          </div>
+
+          <div className="mt-3 space-y-2">
+            <p className="text-sm leading-6 text-slate-600">{accessState.helperText}</p>
+            {accessState.supportLabel ? (
+              <span
+                className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.supportTone)}`}
+              >
+                {accessState.supportLabel}
+              </span>
+            ) : null}
+            {accessState.kind === "points" && shortfallValue > 0 ? (
+              <span className="inline-flex rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-[11px] font-semibold text-slate-500">
+                Need {shortfallValue} more points
               </span>
             ) : null}
           </div>
-
-          {episodeSignals.length > 0 ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {episodeSignals.map((signal) => (
-                <span
-                  key={signal.id}
-                  className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(signal.tone)}`}
-                >
-                  {signal.label}
-                </span>
-              ))}
-            </div>
-          ) : null}
 
           {progress?.lastEpisodeId === episode?.id ? (
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/6">
@@ -536,11 +446,11 @@ function EpisodeRow({
         </div>
 
         <div className="flex flex-col gap-2 sm:min-w-[176px] sm:items-end">
-          {metaNode ? (
-            <p className="text-xs font-medium text-slate-500 sm:text-right">{metaNode}</p>
-          ) : (
-            <div className="hidden h-5 sm:block" aria-hidden="true" />
-          )}
+          <p className="text-xs font-medium text-slate-500 sm:text-right">
+            {progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
+              ? `${Math.round(progress.percent * 100)}% read`
+              : accessState.shortLabel}
+          </p>
           {actionNode}
         </div>
       </div>

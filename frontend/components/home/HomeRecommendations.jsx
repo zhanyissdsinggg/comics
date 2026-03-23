@@ -33,9 +33,16 @@ function createRailItem(series, overrides = {}) {
     title: series.title,
     author: series.author || "",
     subtitle: series.status || "Series",
+    type: series.type || "",
+    seriesType: series.type || "",
+    status: series.status || "",
+    genres: Array.isArray(series.genres) ? series.genres : [],
     coverTone: series.coverTone,
     coverUrl: series.coverUrl,
     badge: series.badge,
+    adult: Boolean(series.adult),
+    freeEpisodeCount: Number(series.freeEpisodeCount || 0),
+    hasFreeEpisodes: Boolean(series.hasFreeEpisodes || Number(series.freeEpisodeCount || 0) > 0),
     ...overrides,
   };
 }

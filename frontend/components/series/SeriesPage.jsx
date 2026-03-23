@@ -33,6 +33,11 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { buildCreatorHref, slugifyCreatorName } from "../../lib/creators";
+import {
+  buildEpisodeAccessStateMap,
+  getEpisodeAvailabilitySummary,
+  getSeriesPrimaryReadAction,
+} from "../../lib/episodeAccessState";
 
 function EpisodeListSkeleton() {
   return (
@@ -141,6 +146,20 @@ function getInitialSeriesError(hasPayload, initialState) {
   return null;
 }
 
+function createIdempotencyKey() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `idem_${Date.now()}_${Math.random().toString(16).slice(2, 10)}`;
+}
+
+function openAuthModal() {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.dispatchEvent(new CustomEvent("auth:open"));
+}
+
 export default function SeriesPage({
   seriesId,
   initialSeriesPayload = null,
@@ -211,7 +230,7 @@ export default function SeriesPage({
     if (maxPreview <= 0) {
       return "";
     }
-    return `Free preview: up to ${maxPreview} pages`;
+    return `Preview up to ${maxPreview} page${maxPreview === 1 ? "" : "s"} on eligible episodes.`;
   }, [episodes]);
   const entitlement = bySeriesId[seriesId] || { seriesId, unlockedEpisodeIds: [] };
   const firstEpisodeId = useMemo(
@@ -222,6 +241,13 @@ export default function SeriesPage({
   const progress = useMemo(
     () => progressBySeriesId?.[seriesId] || getProgress(seriesId),
     [progressBySeriesId, getProgress, seriesId]
+  );
+  const lastReadEpisode = useMemo(
+    () =>
+      progress?.lastEpisodeId
+        ? episodes.find((episode) => episode?.id === progress.lastEpisodeId) || null
+        : null,
+    [episodes, progress?.lastEpisodeId],
   );
 
   useEffect(() => {
@@ -619,6 +645,115 @@ export default function SeriesPage({
 
     return [...episodes].sort((left, right) => Number(right?.number || 0) - Number(left?.number || 0))[0] || null;
   }, [episodes]);
+  const primaryReadAction = useMemo(
+    () =>
+      getSeriesPrimaryReadAction({
+        series,
+        episodes,
+        progress,
+        unlockedEpisodeIds: entitlement?.unlockedEpisodeIds || [],
+        subscription: walletStore?.subscription,
+        subscriptionUsage: walletStore?.subscriptionUsage,
+        coupons,
+        isSignedIn,
+      }),
+    [
+      coupons,
+      entitlement?.unlockedEpisodeIds,
+      episodes,
+      isSignedIn,
+      progress,
+      series,
+      walletStore?.subscription,
+      walletStore?.subscriptionUsage,
+    ],
+  );
+  const seriesAccessSummary = useMemo(() => {
+    const episodeStateMap = buildEpisodeAccessStateMap({
+      episodes,
+      unlockedEpisodeIds: entitlement?.unlockedEpisodeIds || [],
+      subscription: walletStore?.subscription,
+      subscriptionUsage: walletStore?.subscriptionUsage,
+      coupons,
+      fallbackPrice: series?.pricing?.episodePrice ?? 0,
+    });
+
+    return getEpisodeAvailabilitySummary({
+      episodes,
+      episodeStateMap,
+    });
+  }, [
+    coupons,
+    entitlement?.unlockedEpisodeIds,
+    episodes,
+    series?.pricing?.episodePrice,
+    walletStore?.subscription,
+    walletStore?.subscriptionUsage,
+  ]);
+  const handleSeriesPrimaryAction = useCallback(async () => {
+    if (!primaryReadAction) {
+      return;
+    }
+
+    const targetEpisodeId = primaryReadAction.episodeId;
+    if (!targetEpisodeId) {
+      if (primaryReadAction.actionKind === "subscribe") {
+        handleSubscribe(seriesId, null);
+      }
+      return;
+    }
+
+    if (primaryReadAction.actionKind === "read" || primaryReadAction.actionKind === "preview") {
+      handleRead(seriesId, targetEpisodeId);
+      return;
+    }
+
+    if (primaryReadAction.actionKind === "claim") {
+      let response;
+      try {
+        response = await handleClaim(seriesId, targetEpisodeId);
+      } catch {
+        response = { ok: false, status: 500, error: "CLAIM_FAILED" };
+      }
+
+      if (response.ok) {
+        handleRead(seriesId, targetEpisodeId);
+      } else if (response.status === 401) {
+        openAuthModal();
+      }
+      return;
+    }
+
+    if (primaryReadAction.actionKind === "unlock") {
+      let response;
+      try {
+        response = await handleUnlock(seriesId, targetEpisodeId, createIdempotencyKey());
+      } catch {
+        response = { ok: false, status: 500, error: "UNLOCK_FAILED" };
+      }
+
+      if (response.ok) {
+        handleRead(seriesId, targetEpisodeId);
+      } else if (response.status === 401) {
+        openAuthModal();
+      } else if (response.status === 402) {
+        handleOpenStore();
+      }
+      return;
+    }
+
+    if (primaryReadAction.actionKind === "subscribe") {
+      handleSubscribe(seriesId, targetEpisodeId);
+    }
+  }, [
+    handleClaim,
+    handleOpenStore,
+    handleRead,
+    handleSubscribe,
+    handleUnlock,
+    primaryReadAction,
+    seriesId,
+  ]);
 
   const isFollowing = followedSeriesIds.includes(seriesId);
 
@@ -846,10 +981,15 @@ export default function SeriesPage({
           series={series}
           previewHint={previewHint}
           progress={progress}
+          lastReadEpisode={lastReadEpisode}
           episodeCount={episodes.length}
           latestEpisode={latestEpisode}
+          onPrimaryAction={handleSeriesPrimaryAction}
           onContinue={handleContinue}
           onStart={handleStart}
+          primaryActionLabelOverride={primaryReadAction?.label || ""}
+          readingHint={primaryReadAction?.note || ""}
+          accessSummary={seriesAccessSummary}
           onFollowToggle={handleFollowToggle}
           isFollowing={isFollowing}
           desktopPrimaryActionRef={desktopPrimaryActionRef}
@@ -860,22 +1000,23 @@ export default function SeriesPage({
           onOpenMembership={handleOpenMembership}
         />
 
-        <SeriesArrivalPanel
-          series={series}
-          attribution={routeAttribution}
-          creatorHref={creatorHref}
-        />
-
         <EpisodeList
           series={series}
           episodes={episodes}
           entitlement={entitlement}
           wallet={walletStore}
           coupons={coupons}
+          isSignedIn={isSignedIn}
           onRead={handleRead}
           onUnlock={handleUnlock}
           onClaim={handleClaim}
           onSubscribe={handleSubscribe}
+        />
+
+        <SeriesArrivalPanel
+          series={series}
+          attribution={routeAttribution}
+          creatorHref={creatorHref}
         />
 
         <div ref={secondarySectionsRef} className="mt-8 h-px w-full" />

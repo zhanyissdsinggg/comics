@@ -53,7 +53,7 @@ main {
 
 @media (max-width: 767px) {
   body {
-    padding-bottom: 60px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   body.reader-page {

@@ -32,7 +32,7 @@ export default function EditorialHero({
             : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.22),transparent_34%),radial-gradient(circle_at_84%_14%,rgba(34,211,238,0.16),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_38%,rgba(255,255,255,0.02))]",
         )}
       />
-      <div className="relative grid gap-5 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-center">
+      <div className="relative grid gap-4 px-4 py-4 sm:gap-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-center">
         <div className="max-w-3xl">
           {eyebrow ? (
             <div
@@ -49,7 +49,7 @@ export default function EditorialHero({
 
           <h1
             className={cn(
-              "mt-4 max-w-4xl font-display text-3xl font-semibold leading-[0.96] tracking-tight sm:text-4xl xl:text-[3.1rem]",
+              "mt-3 max-w-4xl font-display text-[2rem] font-semibold leading-[0.96] tracking-tight sm:mt-4 sm:text-4xl xl:text-[3.1rem]",
               isLight ? "text-slate-950" : "text-white",
             )}
           >
@@ -59,7 +59,7 @@ export default function EditorialHero({
           {description ? (
             <p
               className={cn(
-                "mt-3 max-w-2xl text-sm leading-6 sm:text-base",
+                "mt-2.5 max-w-2xl text-sm leading-6 sm:mt-3 sm:text-base",
                 isLight ? "text-slate-600" : "text-neutral-200",
               )}
             >
@@ -70,7 +70,7 @@ export default function EditorialHero({
           {secondary ? (
             <p
               className={cn(
-                "mt-3 max-w-2xl text-sm leading-6",
+                "mt-2.5 max-w-2xl text-sm leading-6 sm:mt-3",
                 isLight ? "text-slate-500" : "text-neutral-400",
               )}
             >
@@ -79,14 +79,14 @@ export default function EditorialHero({
           ) : null}
 
           {actions ? (
-            <div className="mt-5 flex flex-wrap gap-3 [&>a]:rounded-full [&>a]:px-5 [&>a]:py-2.5 [&>a]:shadow-[0_18px_50px_rgba(0,0,0,0.16)] [&>button]:rounded-full [&>button]:px-5 [&>button]:py-2.5 [&>button]:shadow-[0_18px_50px_rgba(0,0,0,0.16)]">
+            <div className="mt-4 flex flex-wrap gap-2.5 sm:mt-5 sm:gap-3 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:inline-flex [&>a]:min-h-11 [&>a]:rounded-full [&>a]:px-4 [&>a]:py-2.5 [&>a]:shadow-[0_18px_50px_rgba(0,0,0,0.16)] sm:[&>a]:px-5 [&>button]:min-h-11 [&>button]:rounded-full [&>button]:px-4 [&>button]:py-2.5 [&>button]:shadow-[0_18px_50px_rgba(0,0,0,0.16)] sm:[&>button]:px-5">
               {actions}
             </div>
           ) : null}
         </div>
 
         {hasStats ? (
-          <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-2">
+          <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-2 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:block">
             {stats.map((stat, index) => (
               <div
                 key={stat.label}

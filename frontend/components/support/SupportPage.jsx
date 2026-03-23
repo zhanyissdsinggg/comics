@@ -14,10 +14,17 @@ import {
 import { focusInteractiveTarget } from "../../lib/focusTarget";
 import { useAuthStore } from "../../store/useAuthStore";
 import { siteConfig } from "../../lib/siteConfig";
-import { getSupportTopicPreset, SUPPORT_TOPICS } from "../../lib/supportRouting";
+import {
+  getSupportTopicPreset,
+  SUPPORT_PRIMARY_TOPICS,
+  SUPPORT_TOPICS,
+} from "../../lib/supportRouting";
 
-function buildSupportBody(message, replyEmail, orderId) {
+function buildSupportBody(message, topicLabel, replyEmail, orderId) {
   const notes = [];
+  if (topicLabel) {
+    notes.push(`Issue type: ${topicLabel}`);
+  }
   if (replyEmail) {
     notes.push(`Reply email: ${replyEmail}`);
   }
@@ -30,8 +37,8 @@ function buildSupportBody(message, replyEmail, orderId) {
   return `${notes.join("\n")}\n\n${message}`;
 }
 
-function buildSupportDraft(subject, body, supportEmail) {
-  return `To: ${supportEmail}\nSubject: ${subject}\n\n${body}`;
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
 
 export default function SupportPage() {
@@ -44,50 +51,46 @@ export default function SupportPage() {
   const [activeTopic, setActiveTopic] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const [successState, setSuccessState] = useState(null);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const orderIdInputRef = useRef(null);
+  const signedInReader = hydrated && isSignedIn;
+  const activePreset = useMemo(() => getSupportTopicPreset(activeTopic), [activeTopic]);
   const quickIssueCards = [
     {
-      id: "wrong-charge",
-      label: "Wrong charge",
+      id: "billing",
+      label: "Billing",
       topic: "billing",
-      subject: "Wrong charge",
-      context: "A charge amount, renewal, or duplicate payment looks wrong.",
+      subject: "Billing issue",
+      context: "A charge, receipt, refund, or point pack does not look right.",
     },
     {
-      id: "missing-points",
-      label: "Missing points",
-      topic: "billing",
-      subject: "Missing points",
-      context: "A paid pack or renewal finished but the points balance did not update.",
+      id: "login",
+      label: "Login",
+      topic: "login",
+      subject: "Login help",
+      context: "I cannot sign in, verify my email, or access the right account.",
     },
     {
-      id: "missing-receipt",
-      label: "Missing receipt",
-      topic: "billing",
-      subject: "Missing receipt",
-      context: "A purchase went through but the receipt or order confirmation is missing.",
+      id: "subscription",
+      label: "Subscription",
+      topic: "subscription",
+      subject: "Membership help",
+      context: "A membership charge, renewal, or included access looks wrong.",
     },
     {
-      id: "sign-in-trouble",
-      label: "Sign-in trouble",
-      topic: "account",
-      subject: "Sign-in help",
-      context: "Sign-in, reset, or account access is failing.",
+      id: "content",
+      label: "Content issue",
+      topic: "content",
+      subject: "Content report",
+      context: "A title page, chapter, cover, or metadata entry needs review.",
     },
     {
-      id: "broken-chapter",
-      label: "Broken chapter",
-      topic: "reader",
-      subject: "Reader issue",
-      context: "A chapter or episode is broken, missing, or not loading.",
-    },
-    {
-      id: "age-check",
-      label: "Age-check issue",
-      topic: "adult",
-      subject: "Mature content access",
-      context: "Age check or mature visibility settings are blocking access unexpectedly.",
+      id: "technical",
+      label: "Technical issue",
+      topic: "technical",
+      subject: "Technical issue",
+      context: "A page, reader, or purchase screen is broken or not loading.",
     },
   ];
 
@@ -97,13 +100,18 @@ export default function SupportPage() {
     }
   }, [hydrated, isSignedIn, user?.email]);
 
-  const applyTopicPreset = (preset, { preserveMessage = false } = {}) => {
+  const applyTopicPreset = (preset, { preserveMessage = false, forceSubject = false } = {}) => {
     if (!preset) {
       return;
     }
 
     setActiveTopic(preset.id);
-    setSubject(preset.subject || "");
+    setSubject((current) => {
+      if (!forceSubject && current.trim()) {
+        return current;
+      }
+      return preset.subject || "";
+    });
     if (!preserveMessage) {
       setMessage((current) => current || preset.draft || "");
     }
@@ -127,7 +135,8 @@ export default function SupportPage() {
     }
 
     if (preset) {
-      applyTopicPreset(preset, { preserveMessage: true });
+      setActiveTopic(preset.id);
+      setSubject((current) => current || preset.subject || "");
     }
 
     if (seededSubject) {
@@ -170,100 +179,78 @@ export default function SupportPage() {
   const trimmedEmail = email.trim();
   const trimmedSubject = subject.trim();
   const trimmedMessage = message.trim();
+  const trimmedOrderId = orderId.trim();
   const supportBody = useMemo(
-    () => buildSupportBody(trimmedMessage, trimmedEmail, orderId.trim()),
-    [trimmedEmail, trimmedMessage, orderId],
+    () => buildSupportBody(trimmedMessage, activePreset?.title || activePreset?.label, trimmedEmail, trimmedOrderId),
+    [activePreset?.label, activePreset?.title, trimmedEmail, trimmedMessage, trimmedOrderId],
   );
-  const canPrepareGuestEmail = Boolean(trimmedSubject && trimmedMessage);
 
-  const openGuestMailApp = () => {
-    if (!canPrepareGuestEmail) {
-      setFeedback({ type: "error", text: "Please add both a subject and a message." });
+  const resetForAnotherRequest = () => {
+    setFeedback({ type: "", text: "" });
+    setSuccessState(null);
+    setSubject("");
+    setOrderId("");
+    setMessage("");
+    setActiveTopic("");
+    if (signedInReader) {
+      setEmail(user?.email || "");
+      return;
+    }
+    setEmail(trimmedEmail);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!activePreset) {
+      setFeedback({ type: "error", text: "Choose an issue type so we can route this faster." });
       return;
     }
 
-    const mailto = `mailto:${siteConfig.supportEmail}?subject=${encodeURIComponent(trimmedSubject)}&body=${encodeURIComponent(supportBody)}`;
-    if (typeof window !== "undefined") {
-      window.location.href = mailto;
-    }
-  };
-
-  const copyGuestDraft = async () => {
-    const draft = buildSupportDraft(trimmedSubject, supportBody, siteConfig.supportEmail);
-    if (!canPrepareGuestEmail) {
-      setFeedback({ type: "error", text: "Please add both a subject and a message." });
-      return false;
+    if (!trimmedEmail) {
+      setFeedback({ type: "error", text: "Add the best reply email so we know where to answer." });
+      return;
     }
 
-    try {
-      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(draft);
-        setFeedback({
-          type: "success",
-          text: `Draft copied. Paste it into an email to ${siteConfig.supportEmail}, or use Open mail app.`,
-        });
-        return true;
-      }
-    } catch {
-      // fall through to the fallback message below
+    if (!isValidEmail(trimmedEmail)) {
+      setFeedback({ type: "error", text: "Enter a valid reply email address." });
+      return;
     }
 
-    setFeedback({
-      type: "success",
-      text: `Your message is ready. Send it to ${siteConfig.supportEmail}, or use Open mail app if your device supports it.`,
-    });
-    return true;
-  };
-
-  const handleSubmit = async () => {
     if (!trimmedSubject || !trimmedMessage) {
       setFeedback({ type: "error", text: "Please add both a subject and a message." });
       return;
     }
 
-    if (!hydrated && !trimmedEmail) {
-      setFeedback({
-        type: "error",
-        text: "Add a reply email so we know where to answer.",
-      });
-      return;
-    }
-
-    if (!isSignedIn && !trimmedEmail) {
-      setFeedback({ type: "error", text: "Please add a reply email so we know where to answer." });
-      return;
-    }
-
     setSubmitting(true);
     setFeedback({ type: "", text: "" });
+    setSuccessState(null);
 
     try {
-      if (!hydrated || !isSignedIn) {
-        await copyGuestDraft();
-        return;
-      }
-
       const response = await apiPost("/api/support", {
+        topic: activePreset.id,
+        replyEmail: trimmedEmail,
+        orderId: trimmedOrderId || undefined,
         subject: trimmedSubject,
         message: supportBody,
       });
 
       if (response.ok) {
-        setFeedback({
-          type: "success",
-          text: `Message sent. We usually reply within 1 to 2 business days at ${user?.email || trimmedEmail}.`,
+        setSuccessState({
+          replyEmail: trimmedEmail,
+          topicLabel: activePreset.title,
+          signedInReader,
         });
         setSubject("");
         setOrderId("");
         setMessage("");
         setActiveTopic("");
-        setEmail(user?.email || trimmedEmail);
         return;
       }
 
-      setFeedback({ type: "error", text: response.error || "Could not send your message." });
+      setFeedback({ type: "error", text: response.error || "Could not send your request." });
     } catch {
-      setFeedback({ type: "error", text: "Could not send your message. Please try again." });
+      setFeedback({ type: "error", text: "Could not send your request. Please try again." });
     } finally {
       setSubmitting(false);
     }
@@ -284,9 +271,9 @@ export default function SupportPage() {
       <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Support"
-          title="Billing, account, and reader help."
-          description="Tell us what happened, how to reach you, and any order ID or page URL that helps us find the problem faster."
-          secondary="Most replies arrive within 1 to 2 business days. Signed-in readers can send a message here. Guests can copy an email draft or open their mail app."
+          title="Send a request without leaving the site."
+          description="Choose the issue, add the best reply email, and tell us what happened. Billing, login, subscription, content, and technical help all start here."
+          secondary="Most replies arrive within 1 to 2 business days. Signed-in readers keep their account context. Guests can submit the same in-page form."
           appearance="light"
         />
 
@@ -297,203 +284,252 @@ export default function SupportPage() {
           />
         ) : null}
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {SUPPORT_TOPICS.map((item) => (
-            <SurfacePanel key={item.title} appearance="light" accent="blue">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Category</p>
-              <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                {item.title}
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
-              <button
-                type="button"
-                onClick={() => applyTopicPreset(item)}
-                className="mt-4 rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
-                Use this topic
-              </button>
-            </SurfacePanel>
-          ))}
-        </section>
-
         <SurfacePanel className="space-y-4" appearance="light" accent="blue">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              Fast issue shortcuts
+              Quick start
             </p>
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Start with the exact problem if you already know it.
+              Pick the closest issue and keep moving.
             </h2>
             <p className="text-sm leading-6 text-slate-600">
-              These shortcuts prefill the topic and subject so billing, account, and reader issues do not start from a blank form.
+              These shortcuts fill the issue type and a clean subject so you do not start from a blank form on mobile.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {quickIssueCards.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  const preset = getSupportTopicPreset(item.topic);
-                  applyTopicPreset(preset, { preserveMessage: true });
-                  setSubject(item.subject);
-                  setMessage((current) => current || `Context: ${item.context}`);
-                }}
-                className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
-                {item.label}
-              </button>
-            ))}
+            {quickIssueCards.map((item) => {
+              const isActive = activeTopic === item.topic;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    const preset = getSupportTopicPreset(item.topic);
+                    applyTopicPreset(preset, { preserveMessage: true, forceSubject: true });
+                    setSubject(item.subject);
+                    setMessage((current) => current || `Context: ${item.context}`);
+                    setFeedback({ type: "", text: "" });
+                    setSuccessState(null);
+                  }}
+                  className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                    isActive
+                      ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
+                      : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
         </SurfacePanel>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Send a message
-              </p>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                What happened?
-              </h2>
-              <p className="text-sm leading-6 text-slate-600">
-                A short note works best. Tell us what broke, what you expected, and where it happened.
-              </p>
-              <p className="text-xs text-slate-500">
-                If this came from Purchases, Store, Membership, or a broken chapter, keep the order ID, page URL, or episode number in the note.
-              </p>
-            </div>
+            {successState ? (
+              <div className="space-y-5">
+                <div className="rounded-[28px] border border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] p-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
+                    Request received
+                  </p>
+                  <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
+                    We have your support request.
+                  </h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span> within 1 to 2 business days. If this is a billing or subscription issue, keep the order ID and the affected page handy so follow-up stays fast.
+                  </p>
+                </div>
 
-            <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Common topics
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {SUPPORT_TOPICS.map((preset) => (
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Routed as
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-slate-900">{successState.topicLabel}</p>
+                  </div>
+                  <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Reply path
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-slate-900">
+                      {successState.signedInReader ? "Account + email context" : "Email reply"}
+                    </p>
+                  </div>
+                  <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Next step
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-slate-900">Watch your inbox</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
                   <button
-                    key={preset.id}
                     type="button"
-                    onClick={() => applyTopicPreset(preset)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                      activeTopic === preset.id
-                        ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
-                        : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
-                    }`}
+                    onClick={resetForAnotherRequest}
+                    className={primaryButtonClass}
                   >
-                    {preset.label}
+                    Send another request
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => router.push("/orders")}
+                    className={secondaryButtonClass}
+                  >
+                    View purchases
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/faq")}
+                    className={secondaryButtonClass}
+                  >
+                    Browse FAQ
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <form className="space-y-5" onSubmit={handleSubmit}>
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Send a request
+                  </p>
+                  <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    What do you need help with?
+                  </h2>
+                  <p className="text-sm leading-6 text-slate-600">
+                    Keep it short and specific. A clear subject, the best reply email, and the order ID or page URL usually get the fastest answer.
+                  </p>
+                </div>
 
-            {feedback.text ? (
-              <div
-                className={[
-                  "rounded-[24px] border px-4 py-3 text-sm",
-                  feedback.type === "success"
-                    ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-700"
-                    : "border-red-200 bg-red-50 text-red-600",
-                ].join(" ")}
-              >
-                {feedback.text}
-              </div>
-            ) : null}
+                {feedback.text ? (
+                  <div
+                    className={[
+                      "rounded-[24px] border px-4 py-3 text-sm",
+                      feedback.type === "success"
+                        ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-700"
+                        : "border-red-200 bg-red-50 text-red-600",
+                    ].join(" ")}
+                  >
+                    {feedback.text}
+                  </div>
+                ) : null}
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className={fieldLabelClass}>Reply email</label>
-                <input
-                  id="support-email"
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="name@example.com"
-                  className={fieldClass}
-                />
-                <p className="mt-2 text-xs text-slate-500">
-                  {hydrated && isSignedIn
-                    ? "We filled in your account email, but you can change it if another inbox is better."
-                    : "If you are not signed in, add the inbox you want us to reply to."}
-                </p>
-              </div>
-              <div>
-                <label className={fieldLabelClass}>Order ID</label>
-                <input
-                  ref={orderIdInputRef}
-                  id="support-order-id"
-                  type="text"
-                  value={orderId}
-                  onChange={(event) => setOrderId(event.target.value)}
-                  placeholder="ord_12345"
-                  className={fieldClass}
-                />
-              </div>
-            </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="support-topic" className={fieldLabelClass}>
+                      Issue type
+                    </label>
+                    <select
+                      id="support-topic"
+                      value={activeTopic}
+                      onChange={(event) => {
+                        const nextPreset = getSupportTopicPreset(event.target.value);
+                        setSuccessState(null);
+                        applyTopicPreset(nextPreset, { forceSubject: true });
+                      }}
+                      className={fieldClass}
+                    >
+                      <option value="">Choose an issue type</option>
+                      {SUPPORT_TOPICS.map((preset) => (
+                        <option key={preset.id} value={preset.id}>
+                          {preset.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-            <div>
-              <label className={fieldLabelClass}>Subject</label>
-              <input
-                id="support-subject"
-                type="text"
-                value={subject}
-                onChange={(event) => setSubject(event.target.value)}
-                placeholder="Charge issue / Sign-in help / Reader bug"
-                className={fieldClass}
-              />
-            </div>
+                  <div>
+                    <label htmlFor="support-email" className={fieldLabelClass}>
+                      Reply email
+                    </label>
+                    <input
+                      id="support-email"
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="name@example.com"
+                      className={fieldClass}
+                    />
+                    <p className="mt-2 text-xs text-slate-500">
+                      {signedInReader
+                        ? "Your account email is prefilled, but you can change it if another inbox is better."
+                        : "Guests can submit here too. Add the inbox where you want the reply."}
+                    </p>
+                  </div>
+                </div>
 
-            <div>
-              <label className={fieldLabelClass}>Message</label>
-              <textarea
-                id="support-message"
-                rows={7}
-                value={message}
-                onChange={(event) => setMessage(event.target.value)}
-                placeholder="Tell us what happened, what you expected, and any steps you already tried."
-                className={fieldClass}
-              />
-            </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="support-order-id" className={fieldLabelClass}>
+                      Order ID
+                    </label>
+                    <input
+                      ref={orderIdInputRef}
+                      id="support-order-id"
+                      type="text"
+                      value={orderId}
+                      onChange={(event) => setOrderId(event.target.value)}
+                      placeholder="ord_12345"
+                      className={fieldClass}
+                    />
+                  </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={submitting}
-                className={primaryButtonClass}
-              >
-                {submitting ? "Sending..." : hydrated && isSignedIn ? "Send message" : "Copy email draft"}
-              </button>
-              {!isSignedIn ? (
-                <button
-                  type="button"
-                  onClick={openGuestMailApp}
-                  disabled={!canPrepareGuestEmail}
-                  className={secondaryButtonClass}
-                >
-                  Open mail app
-                </button>
-              ) : null}
-              {hydrated && !isSignedIn ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window !== "undefined") {
-                      window.dispatchEvent(new CustomEvent("auth:open"));
-                    }
-                  }}
-                  className={secondaryButtonClass}
-                >
-                  Sign in to send here
-                </button>
-              ) : null}
-            </div>
+                  <div>
+                    <label htmlFor="support-subject" className={fieldLabelClass}>
+                      Subject
+                    </label>
+                    <input
+                      id="support-subject"
+                      type="text"
+                      value={subject}
+                      onChange={(event) => setSubject(event.target.value)}
+                      placeholder="Billing issue / Login help / Technical issue"
+                      className={fieldClass}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="support-message" className={fieldLabelClass}>
+                    Message
+                  </label>
+                  <textarea
+                    id="support-message"
+                    rows={7}
+                    value={message}
+                    onChange={(event) => setMessage(event.target.value)}
+                    placeholder="Tell us what happened, what you expected, and any page URL, title, or episode number that helps us find it faster."
+                    className={fieldClass}
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button type="submit" disabled={submitting} className={primaryButtonClass}>
+                    {submitting ? "Sending..." : "Send request"}
+                  </button>
+                  {!signedInReader ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== "undefined") {
+                          window.dispatchEvent(new CustomEvent("auth:open"));
+                        }
+                      }}
+                      className={secondaryButtonClass}
+                    >
+                      Sign in instead
+                    </button>
+                  ) : null}
+                </div>
+              </form>
+            )}
           </SurfacePanel>
 
           <div className="space-y-4">
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  What to include
+                  Before you send
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   A few details help a lot.
@@ -501,9 +537,9 @@ export default function SupportPage() {
               </div>
               <ul className="space-y-3 text-sm leading-6 text-slate-600">
                 <li>We usually reply within 1 to 2 business days.</li>
-                <li>Add the order ID if this is about a charge, points, or a renewal.</li>
-                <li>Include the page URL, title name, and the device or browser if something looks broken.</li>
-                <li>Screenshots help, especially for reader bugs, billing screens, and 18+ access problems.</li>
+                <li>Add the order ID for charges, receipts, points, or renewals.</li>
+                <li>Include the title name, episode number, or page URL if something looks broken.</li>
+                <li>If you are signed in, we keep the request tied to your account context too.</li>
               </ul>
             </SurfacePanel>
 
@@ -513,7 +549,7 @@ export default function SupportPage() {
                   Fast links
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Answers you may want before you write in.
+                  Try these first if the answer is already there.
                 </h2>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -526,30 +562,45 @@ export default function SupportPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push("/how-it-works")}
-                  className={secondaryButtonClass}
-                >
-                  How it works
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/mature-content")}
-                  className={secondaryButtonClass}
-                >
-                  Mature content
-                </button>
-                <button
-                  type="button"
                   onClick={() => router.push("/orders")}
                   className={secondaryButtonClass}
                 >
                   View purchases
                 </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/how-it-works")}
+                  className={secondaryButtonClass}
+                >
+                  How it works
+                </button>
               </div>
-              <p className="text-sm text-slate-500">Direct email: {siteConfig.supportEmail}</p>
+              <p className="text-xs text-slate-500">Backup email only: {siteConfig.supportEmail}</p>
             </SurfacePanel>
           </div>
         </div>
+
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {SUPPORT_PRIMARY_TOPICS.map((item) => (
+            <SurfacePanel key={item.id} appearance="light" accent="blue">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Issue type</p>
+              <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                {item.title}
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  applyTopicPreset(item, { forceSubject: true });
+                  setSuccessState(null);
+                }}
+                className="mt-4 rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                Use this topic
+              </button>
+            </SurfacePanel>
+          ))}
+        </section>
       </main>
     </div>
   );

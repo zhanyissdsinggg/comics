@@ -54,6 +54,9 @@ export class AdminSupportController {
       where.OR = [
         { id: { contains: search, mode: "insensitive" } },
         { userId: { contains: search, mode: "insensitive" } },
+        { replyEmail: { contains: search, mode: "insensitive" } },
+        { orderId: { contains: search, mode: "insensitive" } },
+        { topic: { contains: search, mode: "insensitive" } },
         { subject: { contains: search, mode: "insensitive" } },
         { message: { contains: search, mode: "insensitive" } },
         {
@@ -87,10 +90,13 @@ export class AdminSupportController {
     const normalized = tickets.map((ticket: (typeof tickets)[number]) => ({
       id: ticket.id,
       userId: ticket.userId,
+      replyEmail: ticket.replyEmail,
+      orderId: ticket.orderId,
+      topic: ticket.topic,
       subject: ticket.subject,
       message: ticket.message,
       status: ticket.status,
-      userEmail: ticket.user?.email || null,
+      userEmail: ticket.user?.email || ticket.replyEmail || null,
       createdAt: ticket.createdAt,
       updatedAt: ticket.updatedAt,
     }));

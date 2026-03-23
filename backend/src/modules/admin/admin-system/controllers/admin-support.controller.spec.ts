@@ -31,6 +31,9 @@ describe("AdminSupportController", () => {
       {
         id: "ticket-1",
         userId: "user-1",
+        replyEmail: null,
+        orderId: "ord_123",
+        topic: "billing",
         subject: "Checkout help",
         message: "Need refund",
         status: "open",
@@ -137,6 +140,57 @@ describe("AdminSupportController", () => {
     expect(prisma.supportTicket.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         orderBy: { status: "asc" },
+      }),
+    );
+  });
+
+  it("falls back to reply email for guest tickets", async () => {
+    prisma.supportTicket.findMany.mockResolvedValue([
+      {
+        id: "ticket-guest-1",
+        userId: null,
+        replyEmail: "guest@example.com",
+        orderId: "ord_guest_1",
+        topic: "technical",
+        subject: "Reader issue",
+        message: "Chapter will not open",
+        status: "open",
+        createdAt: new Date("2026-03-12T08:00:00.000Z"),
+        updatedAt: new Date("2026-03-12T08:00:00.000Z"),
+        user: null,
+      },
+    ]);
+    prisma.supportTicket.count.mockResolvedValue(1);
+
+    const result = await controller.list({
+      query: {
+        search: "guest@example.com",
+      },
+    } as never);
+
+    expect(prisma.supportTicket.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          OR: expect.arrayContaining([
+            {
+              replyEmail: { contains: "guest@example.com", mode: "insensitive" },
+            },
+          ]),
+        },
+      }),
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({
+            id: "ticket-guest-1",
+            userEmail: "guest@example.com",
+            replyEmail: "guest@example.com",
+            orderId: "ord_guest_1",
+            topic: "technical",
+          }),
+        ],
       }),
     );
   });

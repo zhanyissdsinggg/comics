@@ -354,7 +354,7 @@ export default function CreatorPage({
         value: readerProof > 0 ? `${formatCompactCount(readerProof)} readers` : "Fresh shelf",
         hint: readerProof > 0
           ? "Visible audience activity across this creator's titles."
-          : "This shelf is live, but audience proof is still thin in the visible data.",
+          : "Open the lead title for the clearest read on this shelf.",
       },
       {
         label: "Best known for",
@@ -464,7 +464,7 @@ export default function CreatorPage({
         eyebrow: "Search",
         title: `Search ${creatorName} across the catalog.`,
         description:
-          "Search is still the quickest fallback when a creator shelf is smaller than you expected.",
+          "Search the credit name, a lead title, or a related genre when you want a wider pass through the catalog.",
         cta: "Search creator",
         onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=popular`),
         accentClass:
@@ -503,7 +503,7 @@ export default function CreatorPage({
         eyebrow: "Search",
         title: `Search ${creatorName} or a related title.`,
         description:
-          "When the creator shelf is empty, search is still the fastest backup path into the visible catalog.",
+          "Search the credit name, a lead title, or a genre to open a broader path through the visible catalog.",
         cta: "Search series",
         onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=popular`),
         accentClass:
@@ -512,9 +512,9 @@ export default function CreatorPage({
       {
         id: "top-series",
         eyebrow: "Top Series",
-        title: "Use the safer first click while credits fill in.",
+        title: "Open a stronger browse lane next.",
         description:
-          "Top Series is still the cleanest fallback when a creator page resolves but the public shelf is thin.",
+          "Top Series is the fastest broad browse lane when you want another strong entry point right away.",
         cta: "Browse Top Series",
         onClick: () => router.push("/rankings?type=popular&window=week"),
         accentClass:
@@ -523,9 +523,9 @@ export default function CreatorPage({
       {
         id: "catalog",
         eyebrow: "Browse",
-        title: "Open the wider catalog instead of dead-ending here.",
+        title: "Open the wider catalog next.",
         description:
-          "Comics and novels stay useful even when creator credits are still expanding title by title.",
+          "Jump into comics or novels to keep the same discovery session moving through a wider shelf.",
         cta: "Browse comics",
         onClick: () => router.push("/comics"),
         accentClass:
@@ -584,19 +584,19 @@ export default function CreatorPage({
             appearance="light"
             accent="blue"
             eyebrow={isStudioShelf ? "Studio" : "Creator"}
-            title={`No public titles from ${creatorName} yet.`}
-            description="This page resolves correctly, but nothing visible is attached to it in the current catalog view."
-            secondary="Try search, Top Series, or your last series instead."
+            title={`Browse more ways into ${creatorName}.`}
+            description="Use search, Top Series, or the wider catalog to keep moving through related titles from this name, studio, or shelf."
+            secondary="Open another lane below when you want the next strong click quickly."
             stats={[
               {
-                label: "Creator",
+                label: isStudioShelf ? "Studio" : "Creator",
                 value: creatorName,
-                hint: "The page exists, but the shelf is empty right now.",
+                hint: "Use the name as a browse signal across search, Top Series, and related titles.",
               },
               {
                 label: "Catalog",
                 value: isAdultMode ? "18+" : "Standard",
-                hint: isAdultMode ? "18+ titles can appear here." : "18+ titles stay hidden here.",
+                hint: isAdultMode ? "This browse path can include 18+ titles." : "Adult-only titles stay hidden on this pass.",
               },
             ]}
             actions={
@@ -630,9 +630,9 @@ export default function CreatorPage({
             <EmptyState
               appearance="light"
               icon="book"
-              eyebrow="Nothing to read"
-              title="No visible titles on this page."
-              description="Jump back to search or Top Series so the browse flow does not stop here."
+              eyebrow="Keep browsing"
+              title="Open another browse lane."
+              description="Jump back to search or Top Series so discovery keeps moving from a stronger shelf."
               action={{
                 label: "Search series",
                 onClick: () => router.push("/search"),
@@ -646,10 +646,10 @@ export default function CreatorPage({
                   Keep browsing
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Use this creator page as a browse waypoint, not a dead end.
+                  Use this creator page as a browse waypoint.
                 </h2>
                 <p className="text-sm leading-7 text-slate-600">
-                  Credits are still expanding. Until this shelf fills in, jump back into search, Top Series, or the wider catalog.
+                  Jump into search, Top Series, or the wider catalog to keep the same session moving through related reads.
                 </p>
             </div>
             <StorefrontPathwaysGrid

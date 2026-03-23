@@ -47,10 +47,11 @@ const SearchBar = memo(function SearchBar({
   placeholder = "Search series",
   variant = "default",
   showShortcut = true,
+  initialValue = "",
 }) {
   const router = useRouter();
   const listboxId = useId();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
@@ -64,6 +65,10 @@ const SearchBar = memo(function SearchBar({
     setSearchHistory(readSearchHistory({ limit: MAX_HISTORY_ITEMS }));
     return subscribeSearchHistory(setSearchHistory, { limit: MAX_HISTORY_ITEMS });
   }, []);
+
+  useEffect(() => {
+    setValue(initialValue || "");
+  }, [initialValue]);
 
   const openSuggestions = useCallback(() => {
     setShowSuggestions(true);

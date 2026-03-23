@@ -7,41 +7,19 @@ import { ArrowRight } from "lucide-react";
 import Cover from "../common/Cover";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { getCoverCardMeta, normalizeCoverBadge } from "../../lib/coverPresentation";
 
 const badgeConfig = {
-  TRENDING: "bg-rose-500 text-white",
-  NEW: "bg-sky-500 text-white",
-  FREE: "bg-emerald-500 text-neutral-950",
-  COMPLETED: "bg-teal-500 text-neutral-950",
+  Trending: "bg-rose-500 text-white",
+  New: "bg-sky-500 text-white",
+  Free: "bg-emerald-500 text-neutral-950",
+  Completed: "bg-teal-500 text-neutral-950",
   "18+": "bg-red-600 text-white",
 };
 
-function normalizeBadge(badge) {
-  const raw = String(badge || "").trim().toUpperCase();
-  if (!raw) {
-    return null;
-  }
-  if (raw.includes("18")) {
-    return "18+";
-  }
-  if (raw.includes("TTF") || raw.includes("FREE")) {
-    return "FREE";
-  }
-  if (raw.includes("COMPLETE")) {
-    return "COMPLETED";
-  }
-  if (raw.includes("NEW")) {
-    return "NEW";
-  }
-  if (raw.includes("HOT") || raw.includes("POPULAR")) {
-    return "TRENDING";
-  }
-  return null;
-}
-
 function BadgePill({ badge }) {
-  const key = normalizeBadge(badge);
-  if (!key) {
+  const label = normalizeCoverBadge(badge);
+  if (!label) {
     return null;
   }
 
@@ -49,10 +27,10 @@ function BadgePill({ badge }) {
     <Badge
       className={cn(
         "absolute left-3 top-3 z-10 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] shadow-lg",
-        badgeConfig[key] || "bg-white text-neutral-950",
+        badgeConfig[label] || "bg-white text-neutral-950",
       )}
     >
-      {key}
+      {label}
     </Badge>
   );
 }
@@ -73,6 +51,8 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
   const progressWidth = Math.max(0, Math.min(progressPercent <= 1 ? progressPercent * 100 : progressPercent, 100));
   const isLight = appearance === "light";
   const resolvedHref = href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
+  const coverMeta = getCoverCardMeta(item);
+  const detailCopy = item.statusLabel || item.metaLabel || coverMeta.detailText || "";
 
   const handleClick = (event) => {
     if (typeof onClick !== "function") {
@@ -110,6 +90,8 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
             label={item.title}
             eyebrow={metaLine}
             badge={item.badge}
+            genres={item.genres}
+            seriesType={item.seriesType || item.type}
             className="h-full w-full transition-transform duration-700 group-hover:scale-[1.04]"
           />
           <div className={cn("absolute inset-0", isLight ? "bg-gradient-to-t from-black/45 via-transparent to-transparent" : "bg-gradient-to-t from-black/85 via-black/18 to-transparent")} />
@@ -126,19 +108,73 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
           ) : null}
         </div>
 
-        <div className="space-y-2.5 px-4 py-4">
+        <div className="space-y-3 px-4 py-4">
           <p className={cn("line-clamp-2 text-[15px] font-semibold leading-5 transition-colors", isLight ? "text-slate-900 group-hover:text-slate-950" : "text-neutral-100 group-hover:text-white")}>
             {item.title}
           </p>
-          {metaLine ? (
+
+          {coverMeta.chips.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {coverMeta.chips.map((chip) => (
+                <span
+                  key={`${item?.id || item?.title}-${chip.id}-${chip.label}`}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
+                    chip.tone === "accent"
+                      ? isLight
+                        ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
+                        : "border-white/12 bg-white/10 text-white/80"
+                      : chip.tone === "danger"
+                        ? "border-red-200 bg-red-50 text-red-600"
+                        : chip.tone === "soft"
+                          ? isLight
+                            ? "border-black/8 bg-[#f8f9fc] text-slate-500"
+                            : "border-white/10 bg-white/8 text-neutral-400"
+                          : isLight
+                            ? "border-black/8 bg-white text-slate-600"
+                            : "border-white/10 bg-white/10 text-neutral-300",
+                  )}
+                >
+                  {chip.label}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          {detailCopy ? (
+            <div className="flex items-start justify-between gap-3 pt-0.5">
+              <p
+                className={cn(
+                  "line-clamp-2 text-xs leading-5 transition-colors",
+                  isLight ? "text-slate-500 group-hover:text-slate-600" : "text-neutral-400 group-hover:text-neutral-300",
+                )}
+              >
+                {detailCopy}
+              </p>
+              <ArrowRight className={cn("mt-0.5 size-4 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1", isLight ? "text-slate-400" : "text-white")} />
+            </div>
+          ) : (
+            <div className="flex items-center justify-end pt-1">
+              <ArrowRight className={cn("size-4 transition-transform duration-300 group-hover:translate-x-1", isLight ? "text-slate-400" : "text-white")} />
+            </div>
+          )}
+
+          {!detailCopy && metaLine ? (
             <p className={cn("line-clamp-1 text-xs transition-colors", isLight ? "text-slate-500 group-hover:text-slate-600" : "text-neutral-400 group-hover:text-neutral-300")}>
               {metaLine}
             </p>
           ) : null}
-
-          <div className="flex items-center justify-end pt-1">
-            <ArrowRight className={cn("size-4 transition-transform duration-300 group-hover:translate-x-1", isLight ? "text-slate-400" : "text-white")} />
-          </div>
+          {detailCopy && !item.statusLabel && !item.metaLabel && metaLine && detailCopy !== metaLine ? (
+            <p className={cn("line-clamp-1 text-[11px] transition-colors", isLight ? "text-slate-400 group-hover:text-slate-500" : "text-neutral-500 group-hover:text-neutral-400")}>
+              {metaLine}
+            </p>
+          ) : null}
+          {typeof item.progressPercent === "number" && item.progressPercent > 0 ? (
+            <p className={cn("text-[11px] font-medium", isLight ? "text-slate-400" : "text-neutral-500")}>
+              Reading progress {Math.round(progressWidth)}%
+            </p>
+          ) : null}
+          <div className="sr-only">Open title details</div>
         </div>
       </div>
     </Link>

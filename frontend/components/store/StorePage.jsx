@@ -24,11 +24,12 @@ import {
   mergePaymentAttribution,
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
-import { getPlanCatalog } from "../../lib/subscriptions";
+import { SUBSCRIPTION_PLANS } from "../../lib/subscriptions";
 import { persistCommerceSuccess } from "../../lib/commerceSuccess";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 import { buildSupportPath } from "../../lib/supportRouting";
+import { resolvePublicCommerceMode } from "../../lib/storefrontBillingState";
 
 const PromoBanner = dynamic(() => import("./PromoBanner"));
 
@@ -96,6 +97,7 @@ export default function StorePage({
   initialSearchParams = {},
   initialTopupCatalog = [],
   initialBillingAvailability = null,
+  initialPlanCatalog = null,
 }) {
   const router = useRouter();
   const { topup, paidPts, bonusPts, subscription } = useWalletStore();
@@ -103,7 +105,7 @@ export default function StorePage({
   const { isSignedIn } = useAuthStore();
   const [busyId, setBusyId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [region, setRegion] = useState("global");
+  const [region, setRegion] = useState("us");
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
   const [promotions, setPromotions] = useState([]);
@@ -126,6 +128,14 @@ export default function StorePage({
   const sourcePath = routeAttribution?.sourcePath || returnTo || "/store";
   const isSubscriber = Boolean(subscription?.active);
   const returnLabel = getReturnLabel(returnTo, sourceEntry);
+  const launchAccessLabel = isSignedIn ? "Open account" : "Sign in for launch access";
+  const handleLaunchAccess = () => {
+    if (isSignedIn) {
+      router.push("/account");
+      return;
+    }
+    openAuthPrompt();
+  };
 
   useEffect(() => {
     trackEvent("store_view", {
@@ -139,7 +149,7 @@ export default function StorePage({
   useEffect(() => {
     const stored = typeof window !== "undefined" ? window.localStorage.getItem("mn_region") : null;
     const cookieRegion = getCookie("mn_region");
-    setRegion(stored || cookieRegion || "global");
+    setRegion(stored || cookieRegion || "us");
   }, []);
 
   useEffect(() => {
@@ -190,7 +200,7 @@ export default function StorePage({
   }, []);
 
   const subscriptionStats = useMemo(() => {
-    const plans = Object.values(getPlanCatalog() || {});
+    const plans = Object.values(initialPlanCatalog || SUBSCRIPTION_PLANS || {});
     if (!plans.length) {
       return null;
     }
@@ -206,7 +216,9 @@ export default function StorePage({
   }, []);
 
   const membershipStartingPrice = useMemo(() => {
-    const plans = Object.values(getPlanCatalog() || {}).filter((plan) => plan && typeof plan === "object");
+    const plans = Object.values(initialPlanCatalog || SUBSCRIPTION_PLANS || {}).filter(
+      (plan) => plan && typeof plan === "object",
+    );
     if (plans.length > 0) {
       const cheapestPlan = [...plans].sort(
         (left, right) => Number(left?.price || Infinity) - Number(right?.price || Infinity),
@@ -276,10 +288,12 @@ export default function StorePage({
     return [selected, ...packages.filter((pkg) => pkg.id !== focusId)];
   }, [focusId, region, topupCatalog]);
 
-  const purchaseActionsFlag = billingAvailability?.purchaseActionsEnabled;
-  const purchaseActionsEnabled = purchaseActionsFlag === true;
-  const purchasePreviewOnly = purchaseActionsFlag === false;
-  const purchaseStateUnknown = typeof purchaseActionsFlag !== "boolean";
+  const purchaseMode = resolvePublicCommerceMode(billingAvailability, "purchaseActionsEnabled");
+  const purchaseActionsEnabled = purchaseMode.isRealCommerceLive;
+  const purchasePrelaunch = purchaseMode.isPrelaunch;
+  const purchaseAvailabilityLabel = purchaseActionsEnabled
+    ? "Buy now"
+    : "Prelaunch";
   const packageDecisionSummary = useMemo(() => {
     if (!orderedPackages.length) {
       return null;
@@ -334,7 +348,7 @@ export default function StorePage({
 
     if (!purchaseActionsEnabled) {
       setErrorMessage(
-        "You can compare packs here right now. Buying will open once checkout is live.",
+        "Point-pack checkout is not open yet. Sign in for launch access, compare membership, or contact billing support.",
       );
       return;
     }
@@ -423,43 +437,43 @@ export default function StorePage({
   const storeHeroStats = useMemo(
     () => [
       {
-        label: "Checkout",
-        value: purchaseActionsEnabled ? "Live" : purchasePreviewOnly ? "Preview" : "Checking",
+        label: "Availability",
+        value: purchaseAvailabilityLabel,
         hint: purchaseActionsEnabled
           ? "Point-pack checkout is available from this page."
-          : purchasePreviewOnly
-            ? "Compare packs here now. Buying opens when checkout is turned on."
-            : "Pack lineup is visible, but billing status has not resolved yet.",
+          : "Review the planned pack pricing here. Checkout is not open from this page.",
       },
       {
-        label: "Best for",
-        value: "One-time unlocks",
+        label: "Model",
+        value: "One-time packs",
         hint: isSubscriber
           ? "You already have membership, but point packs still work for extra unlock flexibility."
-          : "Buy packs when you want flexibility instead of a monthly charge.",
+          : "Buy once, keep the points on your account, and spend them only when you unlock a locked chapter.",
       },
       {
         label: "Membership",
-        value: membershipStartingPrice ? `${membershipStartingPrice}/month` : "Monthly option",
+        value: membershipStartingPrice ? `${membershipStartingPrice}/mo` : "Monthly option",
         hint: subscriptionStats
           ? `Better for regular readers: up to ${subscriptionStats.maxDiscount}% off locked chapters.`
           : "Membership is the recurring option if you read often.",
       },
       {
         label: "Receipts",
-        value: isSignedIn ? "On your account" : "Sign in first",
-        hint: isSignedIn
-          ? "Purchases and billing history stay attached to the signed-in account."
-          : "Sign in before buying or redeeming codes so points and receipts do not get stranded.",
+        value: purchaseActionsEnabled ? "In Purchases" : "After launch",
+        hint: purchaseActionsEnabled
+          ? "Charges and receipts stay attached to the signed-in account in Purchases."
+          : isSignedIn
+            ? "When checkout opens, charges and receipts will show up in Purchases on this account."
+            : "Sign in before launch so future receipts and point balances stay attached to one account.",
       },
     ],
     [
+      purchaseAvailabilityLabel,
       isSignedIn,
       isSubscriber,
       membershipStartingPrice,
       purchaseActionsEnabled,
-      purchasePreviewOnly,
-      purchaseStateUnknown,
+      purchasePrelaunch,
       subscriptionStats,
     ],
   );
@@ -478,20 +492,16 @@ export default function StorePage({
       <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Point packs"
-          title="Buy points for one-time unlocks."
+          title={purchaseActionsEnabled ? "Buy points for one-time unlocks." : "Review point-pack pricing before launch."}
           description={
             purchaseActionsEnabled
               ? "Some series start free. Locked episodes use points. If you read often, compare monthly membership before you buy a bigger pack."
-              : purchasePreviewOnly
-              ? "Look through the live pack lineup now. Some series start free, locked episodes use points, and monthly membership is for heavier readers."
-              : "Pack pricing and the full one-time lineup are visible now. While billing status is unavailable, use this page to compare packs and decide whether points or membership fits you better."
+              : "See planned pack pricing, point totals, and the difference between one-time packs and recurring membership before checkout opens."
           }
           secondary={
             purchaseActionsEnabled
               ? `${regionConfig.label} pricing | ${regionConfig.taxHint}`
-              : purchasePreviewOnly
-              ? `${regionConfig.label} pricing | preview only`
-              : `${regionConfig.label} pricing | checkout status unavailable`
+              : `${regionConfig.label} pricing shown up front | checkout opens later`
           }
           stats={storeHeroStats}
           appearance="light"
@@ -499,10 +509,10 @@ export default function StorePage({
             <>
               <button
                 type="button"
-                onClick={() => scrollToSection("point-packs")}
+                onClick={purchaseActionsEnabled ? () => scrollToSection("point-packs") : handleLaunchAccess}
                 className={primaryButtonClass}
               >
-                {purchaseActionsEnabled ? "View point packs" : purchasePreviewOnly ? "Compare point packs" : "See point packs"}
+                {purchaseActionsEnabled ? "Buy point packs" : launchAccessLabel}
               </button>
               {subscriptionStats ? (
                 <button
@@ -542,85 +552,72 @@ export default function StorePage({
           </SurfacePanel>
         ) : null}
 
-        {purchasePreviewOnly ? (
-          <SurfacePanel tone="warning" appearance="light" accent="amber">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-amber-700">Point packs preview</p>
-                <p className="text-sm text-amber-700/80">
-                  You can compare every pack right now. Checkout is still paused, so use this page to understand the model and line up your next move.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {!isSignedIn ? (
-                  <button
-                    type="button"
-                    onClick={openAuthPrompt}
-                    className={secondaryButtonClass}
-                  >
-                    Sign in ahead of launch
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className={secondaryButtonClass}
-                >
-                  Browse free starts
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/subscribe")}
-                  className={secondaryButtonClass}
-                >
-                  Compare membership
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(buildSupportPath({ topic: "billing", context: "Point-pack checkout preview" }))
-                  }
-                  className={secondaryButtonClass}
-                >
-                  Billing help
-                </button>
-              </div>
+        {purchasePrelaunch ? (
+          <SurfacePanel tone="warning" appearance="light" accent="amber" className="space-y-5">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-amber-700">Point-pack checkout is not open yet</p>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Compare point packs now. Checkout opens later.
+              </h2>
+              <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
+                Prices and point totals are live on the page so you can compare one-time packs against membership without a fake checkout flow. No purchase completes from this page today.
+              </p>
             </div>
-          </SurfacePanel>
-        ) : purchaseStateUnknown ? (
-          <SurfacePanel tone="warning" appearance="light" accent="amber">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-amber-700">Checkout status unavailable</p>
-                <p className="text-sm text-amber-700/80">
-                  You can still compare packs, points, and membership right now. Buying is paused here until billing status resolves cleanly.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => scrollToSection("point-packs")}
-                  className={secondaryButtonClass}
+            <div className="grid gap-3 md:grid-cols-3">
+              {[
+                {
+                  title: "No charge today",
+                  body: "There is no live checkout on this page yet.",
+                },
+                {
+                  title: "Receipts land in Purchases",
+                  body: "When checkout opens, charges and order IDs will appear in Purchases on the signed-in account you use.",
+                },
+                {
+                  title: "Billing help stays obvious",
+                  body: "Support handles launch questions, wrong charges, and receipt issues without pushing readers into an email-app flow.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-[22px] border border-amber-200/80 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                 >
-                  Compare packs
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/subscribe")}
-                  className={secondaryButtonClass}
-                >
-                  Compare membership
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(buildSupportPath({ topic: "billing", context: "Point-pack checkout status unavailable" }))
-                  }
-                  className={secondaryButtonClass}
-                >
-                  Billing help
-                </button>
-              </div>
+                  <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={handleLaunchAccess}
+                className={secondaryButtonClass}
+              >
+                {launchAccessLabel}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/rankings?type=ttf&window=all")}
+                className={secondaryButtonClass}
+              >
+                Browse free starts
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/subscribe")}
+                className={secondaryButtonClass}
+              >
+                Compare membership
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(buildSupportPath({ topic: "billing", context: "Point-pack launch or billing question" }))
+                }
+                className={secondaryButtonClass}
+              >
+                Billing help
+              </button>
             </div>
           </SurfacePanel>
         ) : null}
@@ -662,9 +659,11 @@ export default function StorePage({
                   : "Choose membership if you read often and want a lower cost per unlock.",
               },
               {
-                eyebrow: "After checkout",
+                eyebrow: purchaseActionsEnabled ? "After checkout" : "After launch",
                 title: "Receipts and support stay easy to find",
-                description: "Charges appear in Purchases. Billing questions and refund requests go through Support.",
+                description: purchaseActionsEnabled
+                  ? "Charges appear in Purchases. Billing questions and refund requests go through Support."
+                  : "When packs launch, charges will appear in Purchases. Billing questions and refund requests still go through Support.",
               },
             ].map((item) => (
               <div
@@ -681,13 +680,13 @@ export default function StorePage({
           </div>
         </SurfacePanel>
 
-        {promotions.length > 0 ? (
+        {purchaseActionsEnabled && promotions.length > 0 ? (
           <div className="grid gap-4 xl:grid-cols-2">
             {promotions.map((promo) => (
               <PromoBanner key={promo.id} promotion={promo} />
             ))}
           </div>
-        ) : isNewPayer ? (
+        ) : purchaseActionsEnabled && isNewPayer ? (
           <PromoBanner offer={OFFERS.first_purchase_bonus} />
         ) : null}
 
@@ -697,13 +696,17 @@ export default function StorePage({
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Sign in
+                    {purchaseActionsEnabled ? "Sign in" : "Launch access"}
                   </p>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Sign in before you buy or redeem a code.
+                    {purchaseActionsEnabled
+                      ? "Sign in before you buy or redeem a code."
+                      : "Sign in once so launch access, receipts, and points stay on one account."}
                   </h2>
                   <p className="text-sm leading-6 text-slate-600">
-                    Points, codes, and purchase history should stay attached to one account.
+                    {purchaseActionsEnabled
+                      ? "Points, codes, and purchase history should stay attached to one account."
+                      : "Signing in now keeps future receipts, points, and billing history on one account before checkout opens."}
                   </p>
                 </div>
                 <button
@@ -711,7 +714,7 @@ export default function StorePage({
                   onClick={openAuthPrompt}
                   className={primaryButtonClass}
                 >
-                  Sign in
+                  {purchaseActionsEnabled ? "Sign in" : "Sign in for launch access"}
                 </button>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -735,10 +738,12 @@ export default function StorePage({
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Before checkout
+                  {purchaseActionsEnabled ? "Before checkout" : "Before launch"}
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Know the total, the monthly alternative, and where receipts land.
+                  {purchaseActionsEnabled
+                    ? "Know the total, the monthly alternative, and where receipts land."
+                    : "Know the planned price, the monthly alternative, and where receipts will land."}
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
                   Point packs stay one-time. Membership stays monthly. Purchases and Support stay close after either path.
@@ -746,9 +751,13 @@ export default function StorePage({
               </div>
               <div className="grid gap-3">
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
-                  <p className="text-sm font-semibold text-slate-950">Local total stays visible</p>
+                  <p className="text-sm font-semibold text-slate-950">
+                    {purchaseActionsEnabled ? "Local total stays visible" : "Planned pricing stays visible"}
+                  </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {regionConfig.taxHint} Pack cards show the current regional price label before checkout.
+                    {purchaseActionsEnabled
+                      ? `${regionConfig.taxHint} Pack cards show the current regional price label before checkout.`
+                      : `${regionConfig.taxHint} These pack cards show the launch pricing up front so you can judge the real cost before checkout opens.`}
                   </p>
                 </div>
                 <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
@@ -785,49 +794,83 @@ export default function StorePage({
                   onClick={() => router.push("/orders")}
                   className={secondaryButtonClass}
                 >
-                  View purchases
+                  {purchaseActionsEnabled ? "View purchases" : "Where receipts will land"}
                 </button>
               </div>
             </SurfacePanel>
 
-            <SurfacePanel id="wallet-codes" className="space-y-4" appearance="light" accent="blue">
-              <div className="flex items-center justify-between gap-3">
+            {purchaseActionsEnabled ? (
+              <SurfacePanel id="wallet-codes" className="space-y-4" appearance="light" accent="blue">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Codes
+                    </p>
+                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                      Redeem a code
+                    </h2>
+                  </div>
+                  <span className="text-xs text-slate-500">{coupons.length} available</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    value={couponCode}
+                    onChange={(event) => setCouponCode(event.target.value)}
+                    placeholder="Enter your code"
+                    className={fieldClass}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleClaim}
+                    className={secondaryButtonClass}
+                  >
+                    {isSignedIn ? "Redeem" : "Sign in to redeem"}
+                  </button>
+                </div>
+                {couponMessage ? <p className="text-xs text-slate-500">{couponMessage}</p> : null}
+                {coupons.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 text-[10px] text-slate-600">
+                    {coupons.map((coupon) => (
+                      <span key={coupon.id} className="rounded-full border border-black/8 bg-white/84 px-3 py-1">
+                        {coupon.label || coupon.code}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </SurfacePanel>
+            ) : (
+              <SurfacePanel id="wallet-codes" className="space-y-4" appearance="light" accent="blue">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Codes
+                    Promo codes
                   </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Redeem a code
-                  </h2>
-                </div>
-                <span className="text-xs text-slate-500">{coupons.length} available</span>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Keep promo or creator codes ready for launch.
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                    Checkout is not open yet, so purchase-related codes do not redeem from this page today. Keep the code ready for launch day, or contact Support if you were told to use it now.
+                </p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <input
-                  value={couponCode}
-                  onChange={(event) => setCouponCode(event.target.value)}
-                  placeholder="Enter your code"
-                  className={fieldClass}
-                />
-                <button
-                  type="button"
-                  onClick={handleClaim}
-                  className={secondaryButtonClass}
-                >
-                  {isSignedIn ? "Redeem" : "Sign in to redeem"}
-                </button>
-              </div>
-              {couponMessage ? <p className="text-xs text-slate-500">{couponMessage}</p> : null}
-              {coupons.length > 0 ? (
-                <div className="flex flex-wrap gap-2 text-[10px] text-slate-600">
-                  {coupons.map((coupon) => (
-                    <span key={coupon.id} className="rounded-full border border-black/8 bg-white/84 px-3 py-1">
-                      {coupon.label || coupon.code}
-                    </span>
-                  ))}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleLaunchAccess}
+                    className={secondaryButtonClass}
+                  >
+                    {launchAccessLabel}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(buildSupportPath({ topic: "billing", context: "Promo code or launch code question" }))
+                    }
+                    className={secondaryButtonClass}
+                  >
+                    Ask about a code
+                  </button>
                 </div>
-              ) : null}
-            </SurfacePanel>
+              </SurfacePanel>
+            )}
           </div>
 
           <SurfacePanel id="point-packs" className="space-y-5" appearance="light" accent="blue">
@@ -837,7 +880,9 @@ export default function StorePage({
                   Point packs
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Choose a point pack, then unlock chapters as you go.
+                  {purchaseActionsEnabled
+                    ? "Choose a point pack, then unlock chapters as you go."
+                    : "Planned point packs at launch."}
                 </h2>
               </div>
               <p className="text-xs text-slate-500">
@@ -846,32 +891,54 @@ export default function StorePage({
             </div>
 
             {packageComparisonRows.length > 0 ? (
-              <div className="overflow-hidden rounded-[26px] border border-black/8 bg-[#f8f9fc]">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-black/8 text-left text-slate-500">
-                        <th className="px-4 py-3 font-semibold">Pack</th>
-                        <th className="px-4 py-3 font-semibold">Price</th>
-                        <th className="px-4 py-3 font-semibold">Total points</th>
-                        <th className="px-4 py-3 font-semibold">Bonus</th>
-                        <th className="px-4 py-3 font-semibold">Best for</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-black/8 bg-white/84">
-                      {packageComparisonRows.map((pkg) => (
-                        <tr key={pkg.id}>
-                          <td className="px-4 py-3 font-semibold text-slate-950">{pkg.name}</td>
-                          <td className="px-4 py-3 text-slate-600">{pkg.priceLabel}</td>
-                          <td className="px-4 py-3 text-slate-600">{formatUSNumber(pkg.totalPts)} pts</td>
-                          <td className="px-4 py-3 text-slate-600">{pkg.bonusLabel}</td>
-                          <td className="px-4 py-3 text-slate-600">{pkg.bestFor}</td>
+              <>
+                <details className="overflow-hidden rounded-[26px] border border-black/8 bg-[#f8f9fc] md:hidden">
+                  <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-slate-950">
+                    Compare pack details
+                  </summary>
+                  <div className="space-y-3 border-t border-black/8 px-4 py-4">
+                    {packageComparisonRows.map((pkg) => (
+                      <div key={pkg.id} className="rounded-[20px] border border-black/8 bg-white px-4 py-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-semibold text-slate-950">{pkg.name}</p>
+                          <span className="text-sm font-semibold text-slate-950">{pkg.priceLabel}</span>
+                        </div>
+                        <div className="mt-3 grid gap-2 text-sm text-slate-600">
+                          <p>{formatUSNumber(pkg.totalPts)} total points</p>
+                          <p>{pkg.bonusLabel}</p>
+                          <p>{pkg.bestFor}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+                <div className="hidden overflow-hidden rounded-[26px] border border-black/8 bg-[#f8f9fc] md:block">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-black/8 text-left text-slate-500">
+                          <th className="px-4 py-3 font-semibold">Pack</th>
+                          <th className="px-4 py-3 font-semibold">Price</th>
+                          <th className="px-4 py-3 font-semibold">Total points</th>
+                          <th className="px-4 py-3 font-semibold">Bonus</th>
+                          <th className="px-4 py-3 font-semibold">Best for</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-black/8 bg-white/84">
+                        {packageComparisonRows.map((pkg) => (
+                          <tr key={pkg.id}>
+                            <td className="px-4 py-3 font-semibold text-slate-950">{pkg.name}</td>
+                            <td className="px-4 py-3 text-slate-600">{pkg.priceLabel}</td>
+                            <td className="px-4 py-3 text-slate-600">{formatUSNumber(pkg.totalPts)} pts</td>
+                            <td className="px-4 py-3 text-slate-600">{pkg.bonusLabel}</td>
+                            <td className="px-4 py-3 text-slate-600">{pkg.bestFor}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
+              </>
             ) : null}
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -882,14 +949,17 @@ export default function StorePage({
                     highlighted={pkg.id === focusId}
                     onSelect={handleBuy}
                     disabled={!purchaseActionsEnabled}
+                    hideAction={purchasePrelaunch}
+                    statusLabel={purchasePrelaunch ? "Prelaunch pricing" : ""}
+                    statusNote={
+                      purchaseActionsEnabled
+                        ? "Receipts and charges appear in Purchases after checkout."
+                        : "Checkout opens later. Receipts land in Purchases on the signed-in account you use."
+                    }
                     ctaLabel={
-                      !purchaseActionsEnabled
-                        ? purchasePreviewOnly
-                          ? "Preview only"
-                          : "Status unavailable"
-                        : isSignedIn
-                          ? "Get this pack"
-                          : "Sign in to get it"
+                      isSignedIn
+                        ? "Get this pack"
+                        : "Sign in to get it"
                     }
                   />
                 </div>
@@ -902,7 +972,7 @@ export default function StorePage({
                 onClick={() => router.push("/orders")}
                 className={secondaryButtonClass}
               >
-                View purchases
+                {purchaseActionsEnabled ? "View purchases" : "Where receipts will land"}
               </button>
               <button
                 type="button"
@@ -922,24 +992,24 @@ export default function StorePage({
           title="Point packs are one-time. Membership is the monthly path."
           description="Use packs when you want flexible unlocks. Use membership when you read every week. Purchases and Support stay close either way."
           primary={{
-            eyebrow: purchasePreviewOnly ? "Point packs preview" : purchaseStateUnknown ? "Point packs" : "Point packs",
-            title: purchasePreviewOnly
-              ? "Compare one-time packs while checkout is paused."
-              : purchaseStateUnknown
-                ? "Pack prices are visible while billing status catches up."
+            eyebrow: "Point packs",
+            title: purchasePrelaunch
+              ? "Review one-time packs before checkout opens."
                 : "Buy a pack only when you need more unlocks.",
-            description: packageDecisionSummary?.cheapest?.priceLabel
-              ? `The fastest entry is ${packageDecisionSummary.cheapest.name} at ${packageDecisionSummary.cheapest.priceLabel}, then you top up only when you need more points.`
-              : "Use point packs when you want flexible, one-time unlocks without starting a monthly charge.",
+            description: purchasePrelaunch
+              ? "Use this page to compare launch pricing, see how many points each pack includes, and decide whether one-time packs or membership fits better."
+              : packageDecisionSummary?.cheapest?.priceLabel
+                ? `The fastest entry is ${packageDecisionSummary.cheapest.name} at ${packageDecisionSummary.cheapest.priceLabel}, then you top up only when you need more points.`
+                : "Use point packs when you want flexible, one-time unlocks without starting a monthly charge.",
             tags: [
               packageDecisionSummary?.cheapest?.priceLabel ? `Starts ${packageDecisionSummary.cheapest.priceLabel}` : "",
               packageDecisionSummary?.largest ? `${formatUSNumber(packageDecisionSummary.largest.totalPts)} pts max` : "",
-              isSignedIn ? "Receipts on your account" : "Sign in before buying",
+              purchaseActionsEnabled ? "Receipts in Purchases" : "No charge today",
             ].filter(Boolean),
-            cta: purchaseActionsEnabled ? "View point packs" : purchasePreviewOnly ? "Compare point packs" : "See point packs",
+            cta: purchaseActionsEnabled ? "Buy point packs" : "Review point packs",
             onClick: () => scrollToSection("point-packs"),
-            secondaryCta: !isSignedIn ? "Sign in" : "",
-            onSecondaryClick: !isSignedIn ? openAuthPrompt : null,
+            secondaryCta: purchaseActionsEnabled ? (!isSignedIn ? "Sign in" : "") : launchAccessLabel,
+            onSecondaryClick: purchaseActionsEnabled ? (!isSignedIn ? openAuthPrompt : null) : handleLaunchAccess,
           }}
           secondary={{
             eyebrow: "Membership",
@@ -969,12 +1039,14 @@ export default function StorePage({
               ),
           }}
           support={{
-            eyebrow: "After checkout",
-            title: "Receipts, charges, and billing help stay close.",
+            eyebrow: purchaseActionsEnabled ? "After checkout" : "Before launch",
+            title: purchaseActionsEnabled ? "Receipts, charges, and billing help stay close." : "Receipts and billing help are already mapped out.",
             description:
-              "Purchases keeps order IDs and charges easy to find. Support handles missing points, wrong charges, and launch questions without sending readers into legal pages.",
+              purchaseActionsEnabled
+                ? "Purchases keeps order IDs and charges easy to find. Support handles missing points, wrong charges, and launch questions without sending readers into legal pages."
+                : "When point-pack checkout opens, Purchases will keep order IDs and charges easy to find. Support is still the path for billing questions, wrong charges, and refund requests.",
             tags: ["Purchases", "Billing help"],
-            cta: "View purchases",
+            cta: purchaseActionsEnabled ? "View purchases" : "Where receipts will land",
             onClick: () => router.push("/orders"),
             secondaryCta: "Billing help",
             onSecondaryClick: () =>

@@ -17,7 +17,10 @@ export default function PackageCard({
   highlighted,
   onSelect,
   disabled = false,
+  hideAction = false,
   ctaLabel = "Get this pack",
+  statusLabel = "",
+  statusNote = "",
 }) {
   const totalPts = (pkg.paidPts || 0) + (pkg.bonusPts || 0);
   const bonusPct =
@@ -76,6 +79,11 @@ export default function PackageCard({
           <Pill appearance="light">{pkg.tag}</Pill>
         </div>
       ) : null}
+      {statusLabel ? (
+        <div className="mt-2">
+          <Pill appearance="light" tone="accent">{statusLabel}</Pill>
+        </div>
+      ) : null}
 
       <div className="mt-3 space-y-1 text-[10px] text-slate-500">
         <BenefitRow>Keep points ready for later reads</BenefitRow>
@@ -84,19 +92,26 @@ export default function PackageCard({
         {bonusPct > 0 ? <BenefitRow>Extra points already included</BenefitRow> : null}
       </div>
 
-      <button
-        type="button"
-        className={`mt-4 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold transition-all ${
-          disabled
-            ? "cursor-not-allowed bg-slate-200 text-slate-500"
-            : "bg-slate-950 text-white hover:bg-slate-800 active:scale-95 active:bg-slate-900"
-        }`}
-        onClick={() => onSelect?.(pkg.id)}
-        disabled={disabled}
-        style={{ willChange: "transform" }}
-      >
-        {ctaLabel}
-      </button>
+      {!hideAction ? (
+        <button
+          type="button"
+          className={`mt-4 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+            disabled
+              ? "cursor-not-allowed bg-slate-200 text-slate-500"
+              : "bg-slate-950 text-white hover:bg-slate-800 active:scale-95 active:bg-slate-900"
+          }`}
+          onClick={() => onSelect?.(pkg.id)}
+          disabled={disabled}
+          style={{ willChange: "transform" }}
+        >
+          {ctaLabel}
+        </button>
+      ) : null}
+      {statusNote ? (
+        <p className={`${hideAction ? "mt-4" : "mt-3"} text-xs leading-5 text-slate-500`}>
+          {statusNote}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -61,9 +61,11 @@ function formatUpdateLabel(value) {
 export default function SeriesHeader({
   series,
   previewHint,
+  accessSummary = null,
   lastReadEpisode = null,
   episodeCount = 0,
   latestEpisode = null,
+  onPrimaryAction = null,
   onContinue,
   onStart,
   primaryActionLabelOverride = "",
@@ -81,11 +83,14 @@ export default function SeriesHeader({
   const genres = series.genres || [];
   const badges = series.badges || [];
   const isAdult = Boolean(series.adult);
-  const hasFreeEpisodes = series.hasFreeEpisodes || series.freeEpisodeCount > 0;
+  const hasFreeEpisodes =
+    accessSummary?.startsFree ||
+    series.hasFreeEpisodes ||
+    series.freeEpisodeCount > 0;
   const isCompleted = String(series.status || "").toLowerCase() === "completed";
   const ratingValue = series.rating ? Number(series.rating).toFixed(1) : "New";
   const lastEpisodeLabel = formatEpisodeNumber(lastReadEpisode?.number || "");
-  const primaryAction = onContinue || onStart || null;
+  const primaryAction = onPrimaryAction || onContinue || onStart || null;
   const primaryActionLabel = primaryActionLabelOverride || (onContinue
     ? lastEpisodeLabel
       ? "Continue Reading"
@@ -107,13 +112,14 @@ export default function SeriesHeader({
       : isFollowing
         ? "Saved"
         : "Fresh pick",
-    hasFreeEpisodes
-      ? `${series.freeEpisodeCount || 0} free to start`
-      : isCompleted
-        ? "Finished run"
-        : episodeCount > 0
-          ? `${episodeCount} episodes`
-          : "New series",
+    accessSummary?.badgeLabel ||
+      (hasFreeEpisodes
+        ? `${series.freeEpisodeCount || 0} free to start`
+        : isCompleted
+          ? "Finished run"
+          : episodeCount > 0
+            ? `${episodeCount} episodes`
+            : "New series"),
   ];
   const primaryActionClassName = [
     "inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition-colors",
@@ -157,13 +163,21 @@ export default function SeriesHeader({
         : formatUpdateLabel(series.updatedAt),
     },
     {
-      label: "Start here",
-      value: onContinue ? "Continue where you stopped" : hasFreeEpisodes ? "Use the free start" : "Unlock as you go",
-      hint: hasFreeEpisodes
-        ? `${series.freeEpisodeCount || 0} free to test before points.`
-        : isCompleted
-          ? "A finished run if you want payoff without waiting."
-          : "Open the first episode, then use points or membership when needed.",
+      label: "Access",
+      value:
+        accessSummary?.entryLabel ||
+        (onContinue
+          ? "Continue where you stopped"
+          : hasFreeEpisodes
+            ? "Use the free start"
+            : "Unlock as you go"),
+      hint:
+        accessSummary?.entryHint ||
+        (hasFreeEpisodes
+          ? `${series.freeEpisodeCount || 0} free to test before points.`
+          : isCompleted
+            ? "A finished run if you want payoff without waiting."
+            : "Open the first episode, then use points or membership when needed."),
     },
     {
       label: creatorHref ? "Creator shelf" : "Creator credit",
@@ -233,9 +247,9 @@ export default function SeriesHeader({
                   18+
                 </span>
               ) : null}
-              {hasFreeEpisodes ? (
+              {accessSummary?.heroBadgeLabel ? (
                 <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent,#2f6bff)]">
-                  Starts free
+                  {accessSummary.heroBadgeLabel}
                 </span>
               ) : null}
             </div>

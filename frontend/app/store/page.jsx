@@ -1,7 +1,7 @@
 import { CouponProvider } from "../../store/useCouponStore";
 import { createPageMetadata } from "../../lib/seo";
 import StorePage from "../../components/store/StorePage";
-import { loadTopupCatalogSeoPayload } from "../../lib/storefrontSeo";
+import { loadSubscriptionPlansSeoPayload, loadTopupCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Store",
@@ -11,14 +11,18 @@ export const metadata = createPageMetadata({
 
 export default async function Page({ searchParams }) {
   const initialSearchParams = (await searchParams) || {};
-  const payload = await loadTopupCatalogSeoPayload();
+  const [topupPayload, subscriptionPayload] = await Promise.all([
+    loadTopupCatalogSeoPayload(),
+    loadSubscriptionPlansSeoPayload(),
+  ]);
 
   return (
     <CouponProvider>
       <StorePage
         initialSearchParams={initialSearchParams}
-        initialTopupCatalog={payload?.packages || []}
-        initialBillingAvailability={payload?.billing || null}
+        initialTopupCatalog={topupPayload?.packages || []}
+        initialBillingAvailability={topupPayload?.billing || null}
+        initialPlanCatalog={subscriptionPayload?.planCatalog || null}
       />
     </CouponProvider>
   );
