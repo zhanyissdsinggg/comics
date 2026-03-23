@@ -211,6 +211,10 @@ export default function EpisodeList({
 
   const primaryActionKind =
     primaryReadAction?.actionKind || primaryEpisodeState?.actionKind || null;
+  const primaryActionNote =
+    primaryReadAction?.note && primaryReadAction.note !== explainer
+      ? primaryReadAction.note
+      : "";
 
   const handlePrimaryAction = async () => {
     if (topActionWorking) {
@@ -314,9 +318,11 @@ export default function EpisodeList({
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                 Start here
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                {primaryReadAction.note}
-              </p>
+              {primaryActionNote ? (
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {primaryActionNote}
+                </p>
+              ) : null}
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"

@@ -181,10 +181,11 @@ function EpisodeRow({
       ? ["Ep ", episode?.number, " - ", episode.title].join("")
       : `Episode ${episode?.number}`;
   const shortfallValue = effectivePrice > 0 ? Math.max(0, effectivePrice - walletBalance) : 0;
-  const stateMetaLabel =
+  const progressMetaLabel =
     progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
       ? `${Math.round(progress.percent * 100)}% read`
-      : accessState.shortLabel;
+      : "";
+  const rowHelperText = accessState.rowHelperText ?? accessState.helperText;
   const compareItems =
     modalState?.type === "SHORTFALL" && recommendedUnlockOffer?.episodes > 1
       ? [
@@ -416,11 +417,13 @@ function EpisodeRow({
 
           <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
             <span>{formatDate(episode?.releasedAt)}</span>
-            <span>{stateMetaLabel}</span>
+            {progressMetaLabel ? <span>{progressMetaLabel}</span> : null}
           </div>
 
           <div className="mt-3 space-y-2">
-            <p className="text-sm leading-6 text-slate-600">{accessState.helperText}</p>
+            {rowHelperText ? (
+              <p className="text-sm leading-6 text-slate-600">{rowHelperText}</p>
+            ) : null}
             {accessState.supportLabel ? (
               <span
                 className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.supportTone)}`}

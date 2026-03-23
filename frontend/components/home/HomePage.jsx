@@ -183,14 +183,14 @@ function HomeShelfSection({
   }
 
   return (
-    <section className="mb-8">
+    <section className="mb-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
           <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
             {Icon ? <Icon className="size-3.5" /> : null}
             {eyebrow}
           </p>
-          <h2 className="mt-3 font-display text-[1.85rem] font-semibold tracking-tight text-slate-950 sm:text-[2.15rem]">
+          <h2 className="mt-3 font-display text-[1.65rem] font-semibold tracking-tight text-slate-950 sm:text-[1.95rem]">
             {title}
           </h2>
           {description ? (
@@ -565,8 +565,8 @@ function HomeContent({ initialSearchParams = {} }) {
 
   const heroEyebrow = resumeSeries ? "Continue reading" : "Start reading";
   const heroDescription = resumeSeries
-    ? "Pick up your next chapter fast, or switch to a stronger pick when you want something new."
-    : "Top Series and free starts put your next read near the top.";
+    ? "Pick up your next chapter fast, or switch to something new."
+    : "Top Series and free starts keep the next read near the top.";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
@@ -745,7 +745,7 @@ function HomeContent({ initialSearchParams = {} }) {
           </>
         )}
 
-        <section className="mb-8">
+        <section className="mb-6">
           <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,248,252,0.99))] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
             <CardContent className="grid gap-5 p-5 sm:p-6 xl:grid-cols-[1.02fr_0.98fr] xl:items-center">
               <div className="max-w-2xl">
@@ -756,7 +756,7 @@ function HomeContent({ initialSearchParams = {} }) {
                   Points for one-offs. Membership for steady reading.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-                  Choose packs for specific unlocks or membership for a regular reading habit.
+                  Use point packs for select unlocks, or compare membership if you read every week.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -792,7 +792,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     Unlock select chapters.
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Buy points once and spend them where you need them.
+                    Buy points once and use them where you need them.
                   </p>
                 </div>
 
@@ -807,7 +807,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     Best for regular reading.
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Compare plans quickly if you read every week.
+                    Compare plans if you read every week.
                   </p>
                 </div>
               </div>

@@ -316,12 +316,12 @@ export default function SubscribePage({
           description={
             subscriptionActionsEnabled
               ? "Membership is billed monthly while active. Choose it if you read often and want lower unlock prices, free reads, and monthly points."
-              : "Use this page to compare planned monthly pricing, perks, cancellation rules, and the difference between recurring membership and one-time point packs before subscriptions open."
+              : "Compare planned monthly pricing, perks, and the difference between recurring membership and one-time point packs before subscriptions open."
           }
           secondary={
             subscriptionActionsEnabled
               ? "Cancel before renewal if you want the plan to stop."
-              : "Planned monthly pricing | no membership starts from this page today"
+              : "Planned monthly pricing | no membership starts here today"
           }
           stats={subscriptionHeroStats}
           actions={
@@ -361,7 +361,7 @@ export default function SubscribePage({
                   : "The monthly billing rules should be obvious before membership opens."}
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                This page is for recurring monthly membership. Point packs stay on the Store page, and membership charges or renewals appear in Purchases once billing opens.
+                Membership stays recurring and point packs stay separate on the Store page.
               </p>
             </div>
           </div>
@@ -413,7 +413,7 @@ export default function SubscribePage({
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   {subscriptionActionsEnabled
                     ? "Sign in before you start a plan so renewals, receipts, cancellation, and support all stay attached to one account."
-                    : "Membership is still in prelaunch. Signing in now keeps future renewals, receipts, and cancellation history on one account."}
+                    : "Signing in now keeps future renewals, receipts, and cancellation history on one account."}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -446,14 +446,14 @@ export default function SubscribePage({
                   Compare monthly tiers now. Start membership later.
                 </h2>
                 <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                  These plan prices and perks are here so readers can compare the recurring model before launch. No membership starts from this page today.
+                  These plan prices and perks are here so readers can compare the recurring model before launch.
                 </p>
               </div>
               <div className="grid gap-3 md:grid-cols-3">
                 {[
                   {
                     title: "No monthly charge today",
-                    body: "Use this page to compare tiers. Membership starts later from a signed-in account once billing opens.",
+                    body: "Use this page to compare tiers. Membership starts later from a signed-in account.",
                   },
                   {
                     title: "Cancellation is still the rule",
@@ -461,7 +461,7 @@ export default function SubscribePage({
                   },
                   {
                     title: "Receipts and billing help stay obvious",
-                    body: "Membership charges will land in Purchases, and Support stays the path for billing or refund questions.",
+                    body: "Charges land in Purchases after launch, and Support stays the billing path.",
                   },
                 ].map((item) => (
                   <div
@@ -661,7 +661,7 @@ export default function SubscribePage({
                         ? "This plan is already active on your account. Renewal timing and receipts stay visible in Purchases."
                         : subscriptionActionsEnabled
                           ? "Recurring monthly billing while active, with receipts in Purchases and billing help in Support."
-                          : "Planned pricing only. No membership starts from this page today."}
+                          : "Pricing preview only. No membership starts from this page today."}
                     </p>
                   </div>
                 </div>
@@ -810,7 +810,7 @@ export default function SubscribePage({
               ? "Review monthly tiers before membership opens."
                 : "Start a monthly plan when you read often.",
             description: subscriptionPrelaunch
-              ? "Use this page to compare recurring pricing, perks, cancellation rules, and the difference between membership and one-time point packs before launch."
+              ? "Compare recurring pricing, perks, and the difference between membership and one-time point packs before launch."
                 : "Cancel before the listed renewal date if you do not want the next monthly charge.",
             tags: [
               "Recurring monthly billing",
@@ -840,7 +840,7 @@ export default function SubscribePage({
             description:
               subscriptionActionsEnabled
                 ? "Purchases keeps charges and renewals easy to verify later. Support handles cancellation questions, missing access, and billing issues."
-                : "When membership launches, Purchases will keep renewals and receipts easy to verify later. Support is still the path for billing, cancellation, and refund questions.",
+                : "After launch, Purchases keeps renewals and receipts easy to verify, and Support stays the path for billing or cancellation questions.",
             tags: ["Purchases", "Billing help"],
             cta: subscriptionActionsEnabled ? "View purchases" : "Where receipts will land",
             onClick: () => router.push("/orders"),
