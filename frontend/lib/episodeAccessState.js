@@ -61,42 +61,42 @@ function toEpisodeStateList(episodeStateMap) {
 
 function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
   if (counts.free > 0 && counts.preview > 0) {
-    return "Start free. Later chapters unlock with points or membership.";
+    return "Start free, then unlock later.";
   }
 
   if (counts.free > 0) {
     return counts.points > 0 || counts.membership > 0 || counts.locked > 0
-      ? "Start free. Later chapters unlock with points or membership."
+      ? "Start free, then unlock later."
       : "Start free.";
   }
 
   if (counts.preview > 0) {
-    return "Preview first, then unlock later.";
+    return "Preview first, then unlock.";
   }
 
   if (counts.points > 0 && hasCountdown) {
-    return "Unlock now, or wait for timed openings.";
+    return "Unlock now, or wait.";
   }
 
   if (counts.points > 0 && counts.membership > 0) {
-    return "Use points for standard unlocks, or membership where included.";
+    return "Use points, or membership where included.";
   }
 
   if (counts.membership > 0) {
     return counts.points > 0
-      ? "Membership covers eligible episodes. The rest use points."
-      : "Membership covers the main access on this page.";
+      ? "Membership covers eligible episodes."
+      : "Membership included.";
   }
 
   if (hasCountdown) {
-    return "Some episodes open later on a timer.";
+    return "Some episodes open later.";
   }
 
   if (counts.points > 0) {
-    return "Episodes on this page unlock with points.";
+    return "Unlock with points.";
   }
 
-  return "Episodes on this page are locked right now.";
+  return "Locked right now.";
 }
 
 function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
@@ -109,11 +109,11 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
   }
 
   if (firstState.primaryState === "free") {
-    return "Free start";
+    return "Starts free";
   }
 
   if (firstState.primaryState === "preview") {
-    return "Preview open";
+    return "Preview first";
   }
 
   if (firstState.primaryState === "membership") {
@@ -135,11 +135,11 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
 
 function getEpisodeAvailabilityBadge(counts, hasCountdown) {
   if (counts.free > 0) {
-    return "Free start";
+    return "Starts free";
   }
 
   if (counts.preview > 0) {
-    return "Preview open";
+    return "Preview";
   }
 
   if (counts.membership > 0) {
@@ -230,7 +230,7 @@ export function getEpisodeAccessState({
       previewPages,
       countdownMs,
       shortLabel: "",
-      helperText: "This episode is already unlocked on this account.",
+      helperText: "",
       rowHelperText: "",
       supportLabel: "",
       supportTone: "muted",
@@ -249,7 +249,7 @@ export function getEpisodeAccessState({
       previewPages,
       countdownMs,
       shortLabel: "",
-      helperText: "Membership includes this episode right now.",
+      helperText: "",
       rowHelperText: "",
       supportLabel: "",
       supportTone: "muted",
@@ -269,9 +269,7 @@ export function getEpisodeAccessState({
       previewPages,
       countdownMs,
       shortLabel: "",
-      helperText: hasTtf && isTtfReady
-        ? "This timed unlock is ready now."
-        : "Start this episode free.",
+      helperText: "",
       rowHelperText: "",
       supportLabel: "",
       supportTone: "muted",
@@ -281,7 +279,7 @@ export function getEpisodeAccessState({
   if (hasPreview) {
     return buildEpisodeAccessState("preview", {
       kind: "preview",
-      actionLabel: "Read Free",
+      actionLabel: "Preview Episode",
       actionKind: "preview",
       claimRequired: false,
       pricing,
@@ -289,12 +287,12 @@ export function getEpisodeAccessState({
       basePrice,
       previewPages,
       countdownMs,
-      shortLabel: `${previewPages} preview page${previewPages === 1 ? "" : "s"}`,
-      helperText:
+      shortLabel: `${previewPages} page${previewPages === 1 ? "" : "s"}`,
+      helperText: "",
+      rowHelperText:
         effectivePrice > 0
-          ? `Preview ${previewPages} page${previewPages === 1 ? "" : "s"} now. Unlock the full episode later with points or membership.`
-          : `Preview ${previewPages} page${previewPages === 1 ? "" : "s"} right now.`,
-      rowHelperText: "",
+          ? `Preview ${previewPages} page${previewPages === 1 ? "" : "s"}, then unlock later.`
+          : `Preview ${previewPages} page${previewPages === 1 ? "" : "s"}.`,
       supportLabel: effectivePrice > 0 ? `Full unlock: ${effectivePrice} points` : "",
       supportTone: effectivePrice > 0 ? "points" : "muted",
     });
@@ -312,11 +310,11 @@ export function getEpisodeAccessState({
       previewPages,
       countdownMs,
       shortLabel: `${effectivePrice} pts`,
-      helperText:
+      helperText: "",
+      rowHelperText:
         hasTtf && !isTtfReady && countdownMs
-          ? `Unlock now with ${effectivePrice} points, or wait ${formatEpisodeCountdown(countdownMs)}.`
-          : `Unlock with ${effectivePrice} points.`,
-      rowHelperText: "",
+          ? `Or wait ${formatEpisodeCountdown(countdownMs)}.`
+          : "",
       supportLabel:
         hasTtf && !isTtfReady && countdownMs
           ? `Available in ${formatEpisodeCountdown(countdownMs)}`
@@ -346,8 +344,8 @@ export function getEpisodeAccessState({
       previewPages,
       countdownMs,
       shortLabel: countdownMs ? `In ${formatEpisodeCountdown(countdownMs)}` : "Locked",
-      helperText: "This episode opens later on a timer.",
-      rowHelperText: "",
+      helperText: "",
+      rowHelperText: "This episode opens later.",
       supportLabel: "",
       supportTone: "muted",
     });
@@ -364,8 +362,8 @@ export function getEpisodeAccessState({
     previewPages,
     countdownMs,
     shortLabel: "Locked",
-    helperText: "Membership or points are needed for this episode.",
-    rowHelperText: "",
+    helperText: "",
+    rowHelperText: "Membership or points required.",
     supportLabel: "",
     supportTone: "muted",
   });
@@ -437,12 +435,12 @@ export function getEpisodeAvailabilitySummary({
   return {
     counts,
     summaryItems,
-    mobileSummary: summaryItems.slice(0, 2).join(" · "),
+    mobileSummary: summaryItems.slice(0, 2).join(" / "),
     explainer,
     hasCountdown,
     startsFree: counts.free > 0 || counts.preview > 0,
     heroBadgeLabel:
-      counts.free > 0 ? "Free start" : counts.preview > 0 ? "Preview open" : "",
+      counts.free > 0 ? "Starts free" : counts.preview > 0 ? "Preview" : "",
     badgeLabel: getEpisodeAvailabilityBadge(counts, hasCountdown),
     entryLabel: getEpisodeEntryLabel(firstState, counts, hasCountdown),
     entryHint: explainer,
@@ -511,7 +509,7 @@ export function getSeriesPrimaryReadAction({
   if (state.primaryState === "free" || state.primaryState === "preview") {
     return {
       type: state.primaryState,
-      label: "Read Free",
+      label: state.primaryState === "preview" ? "Preview Episode" : "Read Free",
       episodeId: firstEpisode.id,
       actionKind: state.actionKind,
       note: "",

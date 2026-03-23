@@ -565,8 +565,8 @@ function HomeContent({ initialSearchParams = {} }) {
 
   const heroEyebrow = resumeSeries ? "Continue reading" : "Start reading";
   const heroDescription = resumeSeries
-    ? "Pick up your next chapter fast, or switch to something new."
-    : "Top Series and free starts get you reading faster.";
+    ? "Pick up your next chapter fast."
+    : "Open something strong on the first tap.";
 
   return (
     <div className="gush-page-shell overflow-hidden">
@@ -593,7 +593,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     {heroEyebrow}
                   </p>
                   <h1 className="mt-3 max-w-3xl font-display text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.9rem] xl:text-[3.4rem]">
-                    Comics and novels worth opening right away.
+                    Stories worth opening on the first tap.
                   </h1>
                   <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
                     {heroDescription}
@@ -664,7 +664,7 @@ function HomeContent({ initialSearchParams = {} }) {
                                     )} complete.`
                                   : " is ready to reopen."
                               }`
-                            : clampText(heroSeries.description, 120) || getReadingState(heroSeries)}
+                            : clampText(heroSeries.description, 110) || getReadingState(heroSeries)}
                         </p>
 
                         {heroSignals.length > 0 ? (
@@ -753,10 +753,10 @@ function HomeContent({ initialSearchParams = {} }) {
                   Pricing
                 </p>
                 <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
-                  Points for one-offs. Membership for steady reading.
+                  One-time packs or a monthly plan.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-                  Use point packs for one-offs, or membership if you read every week.
+                  Pick the path that matches how often you read.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -789,10 +789,10 @@ function HomeContent({ initialSearchParams = {} }) {
                     Point packs
                   </p>
                   <h3 className="mt-2 text-lg font-semibold text-slate-950">
-                    Unlock select chapters.
+                    Use points as needed.
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Buy once and use them where needed.
+                    Flexible one-time unlocks.
                   </p>
                 </div>
 
@@ -804,10 +804,10 @@ function HomeContent({ initialSearchParams = {} }) {
                     Membership
                   </p>
                   <h3 className="mt-2 text-lg font-semibold text-slate-950">
-                    Best for regular reading.
+                    Read weekly for less.
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Compare plans if you read every week.
+                    Better for regular reading.
                   </p>
                 </div>
               </div>

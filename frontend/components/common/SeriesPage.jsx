@@ -22,11 +22,10 @@ import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 const PAGE_CONFIG = {
   comic: {
     eyebrow: "Comics",
-    heroTitle: "Browse comics with faster first clicks.",
+    heroTitle: "Browse comics worth the tap.",
     title: "Comics",
-    description: "Browse Top Series, completed binge picks, and standout comic series in one place.",
-    secondary:
-      "Use filters to narrow by genre, popularity, or completion status and jump in when something clicks.",
+    description: "Top Series, free starts, and standout comic reads in one place.",
+    secondary: "Filter by genre, popularity, or completion.",
     emptyIcon: "search",
     emptyTitle: "No comics match this filter set",
     emptyDescription: "Reset the current filters or open Top Series to widen the selection.",
@@ -35,21 +34,21 @@ const PAGE_CONFIG = {
       {
         eyebrow: "Top Series",
         title: "Start with proven momentum.",
-        body: "If you want the safest comic first click, Top Series is still the easiest place to begin.",
+        body: "Start with the comics already pulling readers in.",
         ctaLabel: "Browse Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
         eyebrow: "Start free",
         title: "Sample the hook before you pay.",
-        body: "Free first chapters are the fastest way to test pacing, art, and tone without guessing.",
+        body: "Free first chapters are the fastest way to test art and tone.",
         ctaLabel: "See free starts",
         href: "/rankings?type=ttf&window=all",
       },
       {
         eyebrow: "Finished runs",
         title: "Binge-ready comics stay close.",
-        body: "Completed series work better when you want payoff now instead of waiting on future updates.",
+        body: "Finished runs are easier when you want payoff now.",
         ctaLabel: "See completed comics",
         href: "/comics?status=completed",
       },
@@ -58,14 +57,14 @@ const PAGE_CONFIG = {
       {
         eyebrow: "Start here",
         title: "Free first chapters",
-        body: "Use free starts when you want to test art, pacing, and translation quality before spending points.",
+        body: "Test the hook before you spend points.",
         ctaLabel: "Start reading free",
         href: "/rankings?type=ttf&window=all",
       },
       {
         eyebrow: "Trending now",
         title: "Popular comics",
-        body: "When the full comic catalog is still settling in, Top Series gives you the safer first click.",
+        body: "Start with the comics already pulling readers in.",
         ctaLabel: "Browse Top Series",
         href: "/rankings?type=popular&window=week",
       },
@@ -74,11 +73,10 @@ const PAGE_CONFIG = {
   },
   novel: {
     eyebrow: "Novels",
-    heroTitle: "Browse novels with room to settle in.",
+    heroTitle: "Browse novels worth settling into.",
     title: "Novels",
-    description: "Browse serialized novels, premium web fiction, and long-form stories in one place.",
-    secondary:
-      "Sort by popularity or latest updates, narrow by genre, and find finished reads faster.",
+    description: "Serialized novels, premium web fiction, and finished reads in one place.",
+    secondary: "Sort by popularity, latest updates, or completion.",
     emptyIcon: "book",
     emptyTitle: "No novels match this filter set",
     emptyDescription: "Reset the current filters or open Top Series to find more to read.",
@@ -87,21 +85,21 @@ const PAGE_CONFIG = {
       {
         eyebrow: "Top Series",
         title: "Use the leaders as your entry point.",
-        body: "When a novel catalog feels too wide, Top Series narrows it down to safer starts.",
+        body: "Start with the novels already pulling readers in.",
         ctaLabel: "Browse Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
         eyebrow: "Latest updates",
         title: "Keep the catalog feeling current.",
-        body: "Open recently updated novels when you want active stories instead of back-catalog drift.",
+        body: "Open recently updated novels when you want something current.",
         ctaLabel: "See latest novels",
         href: "/novels?sort=latest",
       },
       {
         eyebrow: "Finished reads",
         title: "Find a full story arc fast.",
-        body: "Completed novels are still the cleanest first choice when you want to settle into a longer read.",
+        body: "Finished novels are the cleanest way into a longer read.",
         ctaLabel: "See completed novels",
         href: "/novels?status=completed",
       },
@@ -110,14 +108,14 @@ const PAGE_CONFIG = {
       {
         eyebrow: "Trending now",
         title: "Popular novels",
-        body: "If you want the safest first long-form read, start with the novels already pulling readers in.",
+        body: "Start with the novels already pulling readers in.",
         ctaLabel: "Browse Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
         eyebrow: "New updates",
         title: "Fresh drops",
-        body: "Latest releases keep the novel catalog feeling alive while you wait for deeper shelves to fill in.",
+        body: "Latest releases keep the shelf feeling current.",
         ctaLabel: "See latest novels",
         href: "/novels?sort=latest",
       },
@@ -371,8 +369,7 @@ export default function SeriesPage({
         id: "start-free",
         eyebrow: "Start here",
         title: "Free first chapters",
-        description:
-          "The easiest first click for a new reader. Sample the hook before spending points.",
+        description: "Sample the hook before spending points.",
         ctaLabel: "Start reading free",
         href: "/rankings?type=ttf&window=all",
         items: freeStart,
@@ -381,8 +378,7 @@ export default function SeriesPage({
         id: "trending",
         eyebrow: "Trending now",
         title: `Popular ${config.title.toLowerCase()}`,
-        description:
-          "These titles already have reader momentum, so they are safer entry points than random catalog picks.",
+        description: "These titles already have reader momentum.",
         ctaLabel: "Browse Top Series",
         href: "/rankings?type=popular&window=week",
         items: trending,
@@ -391,8 +387,7 @@ export default function SeriesPage({
         id: "latest",
         eyebrow: "New updates",
         title: "Fresh drops",
-        description:
-          "Open the most recently updated titles if you want the catalog to feel current instead of static.",
+        description: "Open the most recently updated titles first.",
         ctaLabel: "See latest",
         href: `${config.pathname}?sort=latest`,
         items: latest,
@@ -401,8 +396,7 @@ export default function SeriesPage({
         id: "completed",
         eyebrow: "Binge ready",
         title: "Completed picks",
-        description:
-          "Finished runs are easier first reads when you want payoff without waiting on updates.",
+        description: "Finished runs are easier when you want payoff now.",
         ctaLabel: "See finished reads",
         href: `${config.pathname}?status=completed`,
         items: completed,
@@ -413,11 +407,11 @@ export default function SeriesPage({
   const emptyStateCopy = useMemo(() => {
     if (!loading && series.length === 0) {
       return {
-        title: type === "comic" ? "Comic shelves are still filling in." : "Novel shelves are still filling in.",
+        title: type === "comic" ? "Try another comic lane." : "Try another novel lane.",
         description:
           type === "comic"
-            ? "Browse Top Series, start with free chapters, or search by genre while the live comic catalog catches up."
-            : "Browse Top Series, check the latest novel updates, or search by genre while the live novel catalog catches up.",
+            ? "Open Top Series, start free, or search by genre for another way in."
+            : "Open Top Series, browse latest updates, or search by genre for another way in.",
       };
     }
 
@@ -741,7 +735,7 @@ export default function SeriesPage({
                   Quick genre picks
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Use genre-led search when the live shelves are still thin and you just want a clean way into the catalog.
+                  Open a genre and jump straight into the catalog.
                 </p>
               </div>
 
@@ -759,16 +753,6 @@ export default function SeriesPage({
                 ))}
               </div>
 
-              <div className="rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  Better next move
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {type === "comic"
-                    ? "Use free starts first, then compare Top Series and completed comics before you wander into the full grid."
-                    : "Use Top Series first, then compare fresh drops and completed novels before you settle into a longer read."}
-                </p>
-              </div>
             </SurfacePanel>
           </section>
         ) : null}
@@ -861,7 +845,7 @@ export default function SeriesPage({
                     Quick genre picks
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Jump by genre before opening filters.
+                    Browse by genre.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -886,7 +870,7 @@ export default function SeriesPage({
                       Best lanes
                     </p>
                     <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                      Pick a lane before the full grid.
+                      Start with a lane.
                     </h2>
                   </div>
                   <div className="space-y-3">
@@ -992,12 +976,12 @@ export default function SeriesPage({
                 Filters
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Refine the catalog without losing your place.
+                Refine the catalog.
               </h2>
             </div>
             <p className="text-xs text-slate-500">
               {loading
-                ? "The live catalog is settling in."
+                ? "Refreshing catalog..."
                 : `${filteredAndSortedSeries.length} title${filteredAndSortedSeries.length === 1 ? "" : "s"} visible`}
             </p>
           </div>

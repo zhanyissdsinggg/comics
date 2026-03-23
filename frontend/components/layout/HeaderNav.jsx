@@ -19,7 +19,13 @@ export default function HeaderNav({ variant = "default" }) {
 
   return (
     <nav className="hidden flex-1 justify-center md:flex">
-      <div className="inline-flex items-center gap-1 rounded-full">
+      <div
+        className={`inline-flex items-center gap-1 rounded-full p-1 ${
+          isLight
+            ? "border border-black/6 bg-white/55 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
+            : "border border-white/8 bg-white/[0.04]"
+        }`}
+      >
         {NAV_ITEMS.map((item) => {
           const isActive =
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -37,7 +43,7 @@ export default function HeaderNav({ variant = "default" }) {
               className={`relative rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 isActive
                   ? isLight
-                    ? "bg-white text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+                    ? "bg-white text-slate-950 shadow-[0_10px_18px_rgba(15,23,42,0.05)]"
                     : "bg-white text-neutral-950 shadow-[0_10px_30px_rgba(255,255,255,0.12)]"
                   : isLight
                     ? "text-slate-500 hover:bg-white/80 hover:text-slate-950"

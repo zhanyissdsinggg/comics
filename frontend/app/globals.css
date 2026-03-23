@@ -8,34 +8,35 @@
   color-scheme: light;
   --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --gush-accent: #3157d6;
-  --gush-accent-strong: #2444af;
-  --gush-page-bg: #f4f2ed;
-  --gush-page-bg-elevated: #faf8f4;
-  --gush-page-bg-muted: #eeebe4;
-  --gush-surface: rgba(255, 255, 255, 0.9);
+  --gush-accent: #2f58c6;
+  --gush-accent-strong: #2144a8;
+  --gush-page-bg: #f4f1ea;
+  --gush-page-bg-elevated: #faf7f1;
+  --gush-page-bg-muted: #ece7dd;
+  --gush-surface: rgba(255, 255, 255, 0.92);
   --gush-surface-strong: #ffffff;
-  --gush-surface-muted: rgba(246, 243, 237, 0.92);
-  --gush-surface-accent: rgba(49, 87, 214, 0.08);
-  --gush-border: rgba(15, 23, 42, 0.08);
+  --gush-surface-muted: rgba(250, 247, 241, 0.94);
+  --gush-surface-accent: rgba(47, 88, 198, 0.07);
+  --gush-border: rgba(15, 23, 42, 0.075);
   --gush-border-strong: rgba(15, 23, 42, 0.14);
-  --gush-ink-strong: #111827;
-  --gush-ink: #243041;
-  --gush-ink-soft: #536074;
-  --gush-ink-faint: #7f8997;
+  --gush-ink-strong: #141b24;
+  --gush-ink: #263241;
+  --gush-ink-soft: #5c6675;
+  --gush-ink-faint: #808896;
   --gush-success: #0f766e;
   --gush-warning: #a16207;
   --gush-danger: #b42318;
-  --gush-shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.05);
-  --gush-shadow-panel: 0 28px 68px rgba(15, 23, 42, 0.06);
-  --gush-shadow-floating: 0 18px 32px rgba(15, 23, 42, 0.08);
-  --gush-radius-sm: 14px;
-  --gush-radius-md: 18px;
-  --gush-radius-lg: 24px;
-  --gush-radius-xl: 30px;
+  --gush-shadow-soft: 0 14px 34px rgba(15, 23, 42, 0.045);
+  --gush-shadow-panel: 0 22px 54px rgba(15, 23, 42, 0.055);
+  --gush-shadow-floating: 0 12px 24px rgba(15, 23, 42, 0.065);
+  --gush-radius-sm: 12px;
+  --gush-radius-md: 16px;
+  --gush-radius-lg: 22px;
+  --gush-radius-xl: 28px;
   --gush-page-gutter: clamp(1rem, 3vw, 2rem);
   --gush-page-max: 1280px;
   --gush-page-max-wide: 1320px;
+  --gush-section-gap: clamp(1.5rem, 3vw, 2.4rem);
 }
 
 html.dark {
@@ -53,9 +54,9 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(49, 87, 214, 0.08), transparent 26%),
-    radial-gradient(circle at 82% 0%, rgba(255, 255, 255, 0.78), transparent 22%),
-    linear-gradient(180deg, #f7f4ef 0%, var(--gush-page-bg) 26%, var(--gush-page-bg) 100%);
+    radial-gradient(circle at 12% 0%, rgba(47, 88, 198, 0.07), transparent 22%),
+    radial-gradient(circle at 88% 4%, rgba(255, 255, 255, 0.7), transparent 18%),
+    linear-gradient(180deg, #f8f5ef 0%, var(--gush-page-bg) 24%, #f1ede5 100%);
   color: var(--gush-ink-strong);
   font-family: var(--font-body);
   letter-spacing: -0.01em;
@@ -199,17 +200,17 @@ textarea {
   top: 0;
   height: clamp(19rem, 36vw, 30rem);
   background:
-    radial-gradient(circle at top left, rgba(49, 87, 214, 0.1), transparent 24%),
-    radial-gradient(circle at 84% 0%, rgba(255, 255, 255, 0.76), transparent 20%),
-    linear-gradient(180deg, rgba(247, 244, 239, 0.96) 0%, rgba(244, 242, 237, 0) 100%);
+    radial-gradient(circle at 14% 2%, rgba(47, 88, 198, 0.09), transparent 22%),
+    radial-gradient(circle at 84% 0%, rgba(255, 255, 255, 0.72), transparent 18%),
+    linear-gradient(180deg, rgba(248, 245, 239, 0.94) 0%, rgba(244, 241, 234, 0.04) 100%);
 }
 
 .gush-page-main {
   position: relative;
   width: min(var(--gush-page-max), calc(100% - (var(--gush-page-gutter) * 2)));
   margin-inline: auto;
-  padding-top: clamp(1.25rem, 2vw, 2rem);
-  padding-bottom: clamp(3rem, 8vw, 5rem);
+  padding-top: clamp(1rem, 1.8vw, 1.75rem);
+  padding-bottom: clamp(3rem, 7vw, 5rem);
 }
 
 .gush-page-main--wide {
@@ -219,7 +220,7 @@ textarea {
 .gush-section-stack {
   display: flex;
   flex-direction: column;
-  gap: clamp(1.25rem, 2.2vw, 1.75rem);
+  gap: var(--gush-section-gap);
 }
 
 .gush-surface-muted {
@@ -250,6 +251,15 @@ textarea {
 
 .gush-subtle {
   color: var(--gush-ink-faint);
+}
+
+.gush-body-copy {
+  color: var(--gush-ink-soft);
+  line-height: 1.7;
+}
+
+.gush-panel-divider {
+  border-top: 1px solid var(--gush-border);
 }
 
 @media (max-width: 767px) {

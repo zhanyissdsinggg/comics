@@ -114,8 +114,8 @@ export default function SeriesHeader({
       (hasFreeEpisodes
         ? ""
         : isCompleted
-          ? "A finished run if you want payoff without waiting."
-          : "Open the first episode, then use points or membership when needed.");
+          ? "A finished run with no wait."
+          : "Use points or membership when the free start ends.");
   const readerPulseItems = [
     ratingCount > 0 ? `${ratingValue} stars` : ratingValue === "New" ? "New release" : `${ratingValue} stars`,
     followers > 0
@@ -123,9 +123,9 @@ export default function SeriesHeader({
       : isFollowing
         ? "Saved"
         : "Fresh pick",
-    (!accessSummary?.heroBadgeLabel && accessSummary?.badgeLabel) ||
-      (!accessSummary?.heroBadgeLabel && hasFreeEpisodes
-        ? `${series.freeEpisodeCount || 0} free to start`
+    accessSummary?.heroBadgeLabel ||
+      (hasFreeEpisodes
+        ? "Starts free"
         : isCompleted
           ? "Finished run"
           : episodeCount > 0
@@ -184,13 +184,6 @@ export default function SeriesHeader({
             : "Unlock as you go"),
       hint: accessFactHint,
     },
-    {
-      label: creatorHref ? "Creator shelf" : "Creator credit",
-      value: series.author || "Studio",
-      hint: creatorHref
-        ? "Open the creator page to compare related titles from the same voice."
-        : "Creator or studio credit attached to this series.",
-    },
   ];
   const mobileLeadFact = quickFacts[1] || quickFacts[0] || null;
   return (
@@ -205,7 +198,7 @@ export default function SeriesHeader({
                   coverUrl={series.coverUrl}
                   label={series.title}
                   eyebrow={series.author || formatSeriesKind(series.type)}
-                  badge={hasFreeEpisodes ? "Free" : series.badge}
+                  badge={accessSummary?.heroBadgeLabel || (hasFreeEpisodes ? "Free" : series.badge)}
                   genres={series.genres}
                   seriesType={series.type}
                 />
@@ -263,7 +256,7 @@ export default function SeriesHeader({
             </h1>
 
             <div className="mt-5">{mobilePrimaryActions}</div>
-            {readingHint ? (
+            {readingHint && readingHint !== accessFactHint ? (
               <p className="mt-3 text-sm font-medium text-[var(--gush-accent,#3157d6)]">
                 {readingHint}
               </p>
@@ -274,12 +267,10 @@ export default function SeriesHeader({
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              {readerPulseItems.map((item, index) => (
+              {readerPulseItems.filter(Boolean).slice(0, 2).map((item) => (
                 <span
                   key={item}
-                  className={`rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1.5 text-sm text-slate-700 ${
-                    index > 1 ? "hidden sm:inline-flex" : ""
-                  }`}
+                  className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1.5 text-sm text-slate-700"
                 >
                   {item}
                 </span>
@@ -321,7 +312,7 @@ export default function SeriesHeader({
               </div>
             ) : null}
 
-            <div className="mt-5 hidden gap-3 sm:grid md:grid-cols-3">
+            <div className="mt-5 hidden gap-3 sm:grid md:grid-cols-2">
               {quickFacts.map((item) => (
                 <div
                   key={item.label}
@@ -340,7 +331,7 @@ export default function SeriesHeader({
 
             {badges.length > 0 || genres.length > 0 ? (
               <div className="mt-5 flex flex-wrap gap-2">
-                {badges.map((badge) => (
+                {badges.slice(0, 2).map((badge) => (
                   <span
                     key={badge}
                     className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
@@ -348,7 +339,7 @@ export default function SeriesHeader({
                     {badge}
                   </span>
                 ))}
-                {genres.map((genre) => (
+                {genres.slice(0, 3).map((genre) => (
                   <span
                     key={genre}
                     className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1 text-xs text-slate-500"

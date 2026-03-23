@@ -190,8 +190,8 @@ const SearchBar = memo(function SearchBar({
           "relative flex items-center gap-2 rounded-full border px-4 py-2.5 transition-all duration-200 touch-manipulation",
           isLight
             ? isFocused
-              ? "border-black/12 bg-white shadow-[0_0_0_4px_rgba(49,87,214,0.08)]"
-              : "border-black/8 bg-white/90 shadow-[0_12px_26px_rgba(15,23,42,0.05)] hover:border-black/12 hover:bg-white"
+              ? "border-black/12 bg-white shadow-[0_0_0_4px_rgba(47,88,198,0.08)]"
+              : "border-black/8 bg-white/92 shadow-[0_10px_22px_rgba(15,23,42,0.045)] hover:border-black/12 hover:bg-white"
             : isFocused
               ? "border-emerald-400/35 bg-white/[0.08] shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"
               : "border-white/8 bg-white/[0.04] hover:border-white/14 hover:bg-white/[0.06]",
@@ -278,9 +278,9 @@ const SearchBar = memo(function SearchBar({
         <div
           id={listboxId}
           className={cn(
-            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[24px] border backdrop-blur-md",
+            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[22px] border backdrop-blur-md",
             isLight
-              ? "border-black/8 bg-[rgba(255,255,255,0.92)] shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
+              ? "border-black/8 bg-[rgba(255,255,255,0.95)] shadow-[0_16px_34px_rgba(15,23,42,0.08)]"
               : "border-white/10 bg-neutral-950/95 shadow-[0_24px_80px_rgba(0,0,0,0.28)]",
           )}
         >

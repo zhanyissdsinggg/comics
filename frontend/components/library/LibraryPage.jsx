@@ -670,7 +670,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           description={
             viewerSignedIn
               ? "Resume Reading, Saved Series, Recent Activity, and Progress stay close at the top."
-              : "Start with a free chapter, then sign in when you want your library and progress tied to one account."
+              : "Start with a free chapter, then sign in when you want your library and progress on one account."
           }
           secondary=""
           stats={libraryStats}
@@ -781,7 +781,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     Start a series and this page becomes useful fast.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Start free, save a favorite, or open Top Series so Library has something real to work with.
+                    Start free, save a favorite, or open Top Series so Library has something real to track.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">

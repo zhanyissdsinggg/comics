@@ -43,8 +43,8 @@ const TABS = [
   {
     id: "ttf",
     label: "Free Episodes",
-    title: "Start with series that let you read before you pay.",
-    description: "The easiest way to find titles that give you a real first sample.",
+    title: "Start free before you unlock.",
+    description: "The fastest way to find titles with a real first sample.",
   },
 ];
 
@@ -264,7 +264,7 @@ export default function RankingsPage({
           eyebrow="Top Series"
           title={activeTab.title}
           description={activeTab.description}
-          secondary={`${activeWindow.label} view. Move between windows and keep the same reading mood.`}
+          secondary={`${activeWindow.label} view.`}
           appearance="light"
           actions={
             <>
@@ -299,10 +299,10 @@ export default function RankingsPage({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Pick the board
+                Views
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Choose a Top Series view.
+                Choose the shelf.
               </h2>
             </div>
             <p className="text-xs text-slate-500">
@@ -738,16 +738,13 @@ export default function RankingsPage({
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    What this board is good at
+                    Board note
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Use Top Series like an editor&apos;s shelf.
+                    Use this shelf for faster first clicks.
                   </h2>
                 </div>
                 <p className="text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
-                <p className="text-sm leading-6 text-slate-500">
-                  Move from the lead pick to the next two, then keep going if the mood still feels right.
-                </p>
               </SurfacePanel>
 
               <CreatorShelfLinks
@@ -757,7 +754,7 @@ export default function RankingsPage({
                 sourcePath={rankingsPath}
                 label="Top Series creators"
                 title="Try the creators behind these picks"
-                description="If one of these titles lands, the same creator pages are the next smart click."
+                description="If one title lands, open the same creator next."
                 maxCreators={6}
                 compact
                 appearance="light"

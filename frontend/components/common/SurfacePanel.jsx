@@ -6,50 +6,50 @@ const toneClasses = {
   dark: {
     default: "border-white/10 bg-[rgba(11,15,22,0.9)] text-white",
     muted: "border-white/8 bg-[rgba(16,21,31,0.84)] text-white",
-    highlight: "border-white/12 bg-[linear-gradient(180deg,rgba(15,21,31,0.92),rgba(11,15,22,0.9))] text-white",
+    highlight: "border-white/12 bg-[linear-gradient(180deg,rgba(14,19,28,0.92),rgba(10,14,21,0.9))] text-white",
     warning: "border-amber-400/20 bg-[rgba(59,41,13,0.9)] text-white",
     danger: "border-red-400/20 bg-[rgba(64,20,26,0.9)] text-white",
   },
   light: {
-    default: "border-black/8 bg-white/90 text-slate-900",
-    muted: "border-black/6 bg-[rgba(246,243,237,0.88)] text-slate-900",
-    highlight: "border-[rgba(49,87,214,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(249,250,252,0.94))] text-slate-900",
+    default: "border-black/8 bg-[rgba(255,255,255,0.9)] text-slate-900",
+    muted: "border-black/6 bg-[rgba(250,247,241,0.92)] text-slate-900",
+    highlight: "border-[rgba(47,88,198,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(250,247,241,0.94))] text-slate-900",
     warning: "border-amber-200 bg-[rgba(255,251,235,0.94)] text-slate-900",
     danger: "border-red-200 bg-[rgba(255,241,242,0.94)] text-slate-900",
   },
 };
 
-const accentLineClasses = {
+const accentEdgeClasses = {
   dark: {
-    emerald: "via-emerald-300/60",
-    cyan: "via-cyan-300/55",
-    amber: "via-amber-300/55",
-    rose: "via-rose-300/55",
-    blue: "via-sky-300/55",
+    emerald: "bg-emerald-300/55",
+    cyan: "bg-cyan-300/52",
+    amber: "bg-amber-300/52",
+    rose: "bg-rose-300/52",
+    blue: "bg-sky-300/55",
   },
   light: {
-    emerald: "via-emerald-500/45",
-    cyan: "via-cyan-500/42",
-    amber: "via-amber-500/42",
-    rose: "via-rose-500/42",
-    blue: "via-[rgba(49,87,214,0.42)]",
+    emerald: "bg-emerald-500/42",
+    cyan: "bg-cyan-500/38",
+    amber: "bg-amber-500/42",
+    rose: "bg-rose-500/42",
+    blue: "bg-[rgba(47,88,198,0.42)]",
   },
 };
 
-const cornerGlowClasses = {
+const accentWashClasses = {
   dark: {
-    blue: "bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_34%)]",
-    emerald: "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%)]",
-    cyan: "bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_34%)]",
-    amber: "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_34%)]",
-    rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.16),transparent_34%)]",
+    blue: "bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_34%)]",
+    emerald: "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.12),transparent_34%)]",
+    cyan: "bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_34%)]",
+    amber: "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.12),transparent_34%)]",
+    rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.12),transparent_34%)]",
   },
   light: {
-    blue: "bg-[radial-gradient(circle_at_top_left,rgba(49,87,214,0.1),transparent_32%)]",
-    emerald: "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_32%)]",
-    cyan: "bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.08),transparent_32%)]",
-    amber: "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.08),transparent_32%)]",
-    rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.08),transparent_32%)]",
+    blue: "bg-[radial-gradient(circle_at_top_left,rgba(47,88,198,0.07),transparent_30%)]",
+    emerald: "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.06),transparent_30%)]",
+    cyan: "bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.06),transparent_30%)]",
+    amber: "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.06),transparent_30%)]",
+    rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.06),transparent_30%)]",
   },
 };
 
@@ -66,30 +66,30 @@ export default function SurfacePanel({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-[30px] border p-5 shadow-[var(--gush-shadow-soft)] sm:p-6",
+        "relative overflow-hidden rounded-[var(--gush-radius-xl)] border p-5 shadow-[var(--gush-shadow-soft)] sm:p-6",
         toneClasses[resolvedAppearance]?.[tone] || toneClasses[resolvedAppearance].default,
-        isLight ? "backdrop-blur-md" : "backdrop-blur-xl",
+        isLight ? "" : "backdrop-blur-xl",
         className,
       )}
     >
       <div
         className={cn(
-          "pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent to-transparent",
-          accentLineClasses[resolvedAppearance]?.[accent] || accentLineClasses[resolvedAppearance].blue,
+          "pointer-events-none absolute left-5 top-0 h-px w-16 rounded-full sm:left-6 sm:w-20",
+          accentEdgeClasses[resolvedAppearance]?.[accent] || accentEdgeClasses[resolvedAppearance].blue,
         )}
       />
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 opacity-90",
-          cornerGlowClasses[resolvedAppearance]?.[accent] || cornerGlowClasses[resolvedAppearance].blue,
+          "pointer-events-none absolute inset-0 opacity-85",
+          accentWashClasses[resolvedAppearance]?.[accent] || accentWashClasses[resolvedAppearance].blue,
         )}
       />
       <div
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.32),transparent_38%)]"
-            : "bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_34%)]",
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.18),transparent_36%)]"
+            : "bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_34%)]",
         )}
       />
       <div className="relative">{children}</div>

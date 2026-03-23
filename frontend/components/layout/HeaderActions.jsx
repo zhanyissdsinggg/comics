@@ -40,7 +40,7 @@ export default function HeaderActions({
   const showWallet = hydrated && isSignedIn;
   const isLight = variant === "home" || variant === "light";
   const iconButtonClass = isLight
-    ? "relative h-10 w-10 rounded-full border border-black/8 bg-white text-slate-600 shadow-[0_10px_24px_rgba(15,23,42,0.05)] hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-900"
+    ? "relative h-10 w-10 rounded-full border border-black/8 bg-white text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.04)] hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-900"
     : ICON_BUTTON_CLASS;
 
   return (

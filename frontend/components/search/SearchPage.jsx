@@ -657,15 +657,13 @@ export default function SearchPage() {
     () => [...hotKeywords, ...keywords].filter(Boolean).slice(0, 8),
     [hotKeywords, keywords],
   );
-  const heroTitle = query ? `Results for "${query}"` : "Search titles, genres, or creators.";
+  const heroTitle = query ? `Results for "${query}"` : "Search the catalog.";
   const heroDescription = query
-    ? "Best matches first. Refine only if the list feels off."
-    : "Start typing, use a recent search, or open something popular right away.";
-  const heroSecondary = query
     ? loading
       ? "Refreshing matches..."
-      : `${total.toLocaleString()} match${total === 1 ? "" : "es"} right now.`
-    : "Recent searches, trending terms, and popular titles are ready below.";
+      : `${total.toLocaleString()} match${total === 1 ? "" : "es"}${activeFilterCount > 0 ? ` / ${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"}` : ""}.`
+    : "Search titles, genres, or creators, or jump into a popular lane.";
+  const heroSecondary = query && activeFilterCount > 0 ? "Clear filters if the list feels too tight." : "";
   const loadingResultLabel = "Updating";
   const heroStats = useMemo(
     () => [
@@ -1023,7 +1021,9 @@ export default function SearchPage() {
               <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
                 {heroDescription}
               </p>
-              <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
+              {heroSecondary ? (
+                <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
+              ) : null}
             </div>
             <div className="flex flex-wrap gap-2">
               {!query ? (
@@ -1113,7 +1113,7 @@ export default function SearchPage() {
 
             <div className="rounded-[24px] border border-black/6 bg-white/82 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                {query ? "Fast pivots" : "Start fast"}
+                Quick starts
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {discoveryKeywords.slice(0, 6).map((item) => (
@@ -1393,10 +1393,10 @@ export default function SearchPage() {
                 No direct matches
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                No exact matches for this search.
+                Try a wider search.
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Try a broader keyword, clear the filters, or jump into one of these better options.
+                Clear filters, broaden the keyword, or open one of these stronger paths.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">

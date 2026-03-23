@@ -6,16 +6,16 @@ import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-transparent text-sm font-semibold transition-all duration-200 outline-none select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 focus-visible:ring-[3px] focus-visible:ring-[rgba(49,87,214,0.16)] active:translate-y-px",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-transparent text-sm font-semibold tracking-[-0.01em] transition-all duration-200 outline-none select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 focus-visible:ring-[3px] focus-visible:ring-[rgba(49,87,214,0.16)] active:translate-y-px",
   {
     variants: {
       variant: {
         default:
-          "bg-slate-950 text-white shadow-[0_14px_28px_rgba(15,23,42,0.12)] hover:bg-slate-800",
+          "bg-slate-950 text-white shadow-[0_10px_22px_rgba(15,23,42,0.11)] hover:bg-slate-800",
         outline:
-          "border-black/8 bg-white text-slate-700 shadow-[0_10px_22px_rgba(15,23,42,0.04)] hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
+          "border-black/8 bg-white text-slate-700 shadow-none hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
         secondary:
-          "border-transparent bg-[rgba(15,23,42,0.05)] text-slate-700 hover:bg-[rgba(15,23,42,0.08)] hover:text-slate-950",
+          "border-transparent bg-[rgba(15,23,42,0.05)] text-slate-700 shadow-none hover:bg-[rgba(15,23,42,0.08)] hover:text-slate-950",
         ghost:
           "bg-transparent text-slate-600 hover:bg-[rgba(15,23,42,0.05)] hover:text-slate-950",
         destructive:

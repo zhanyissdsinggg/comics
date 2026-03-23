@@ -900,12 +900,12 @@ export default function SeriesPage({
         <div className="gush-page-main">
           <div className="rounded-[28px] border border-red-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.98))] p-6 text-center shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
             <p className="mb-2 text-sm font-semibold text-red-600">
-              {isUnavailable ? "Series details are catching up" : "Series details could not load"}
+              {isUnavailable ? "Series details are unavailable right now" : "Series details could not load"}
             </p>
             <p className="mb-4 text-xs text-red-500">
               {isUnavailable
-                ? "This deep link is public, but the cover, episode list, or access details are not ready yet. Retry, search, or jump back into Top Series while it reconnects."
-                : "We could not pull the cover, episode list, or access details for this title. Retry first, or head back to Top Series while this page catches up."}
+                ? "Retry in a moment, search for another title, or head back to Top Series."
+                : "We could not load the cover, episode list, or access details for this title. Retry, search, or head back to Top Series."}
             </p>
             <div className="flex gap-2 justify-center">
               <button

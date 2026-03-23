@@ -272,8 +272,8 @@ export default function SupportPage() {
         <EditorialHero
           eyebrow="Support"
           title="Send a request without leaving the site."
-          description="Choose the issue, add the best reply email, and tell us what happened. Billing, login, subscription, content, and technical help all start here."
-          secondary="Most replies arrive within 1 to 2 business days. Signed-in readers keep their account context. Guests can submit the same in-page form."
+          description="Choose the issue, add the best reply email, and tell us what happened."
+          secondary="Most replies arrive within 1 to 2 business days."
           appearance="light"
         />
 
@@ -293,7 +293,7 @@ export default function SupportPage() {
               Pick the closest issue and keep moving.
             </h2>
             <p className="text-sm leading-6 text-slate-600">
-              These shortcuts fill the issue type and a clean subject so you do not start from a blank form on mobile.
+              These shortcuts fill the issue type and subject so you do not start from a blank form on mobile.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -397,7 +397,7 @@ export default function SupportPage() {
                     What do you need help with?
                   </h2>
                   <p className="text-sm leading-6 text-slate-600">
-                    Keep it short and specific. A clear subject, the best reply email, and the order ID or page URL usually get the fastest answer.
+                    Keep it short and specific. A clear subject plus the right order ID or page URL gets the fastest answer.
                   </p>
                 </div>
 

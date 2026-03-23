@@ -10,11 +10,11 @@ import { cn } from "@/lib/utils";
 import { getCoverCardMeta, normalizeCoverBadge } from "../../lib/coverPresentation";
 
 const badgeConfig = {
-  Trending: "bg-rose-500 text-white",
-  New: "bg-sky-500 text-white",
-  Free: "bg-emerald-500 text-neutral-950",
-  Completed: "bg-teal-500 text-neutral-950",
-  "18+": "bg-red-600 text-white",
+  Trending: "border-rose-200 bg-rose-50 text-rose-700",
+  New: "border-sky-200 bg-sky-50 text-sky-700",
+  Free: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  Completed: "border-teal-200 bg-teal-50 text-teal-700",
+  "18+": "border-red-200 bg-red-50 text-red-600",
 };
 
 function BadgePill({ badge }) {
@@ -26,8 +26,8 @@ function BadgePill({ badge }) {
   return (
     <Badge
       className={cn(
-        "absolute left-3 top-3 z-10 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] shadow-lg",
-        badgeConfig[label] || "bg-white text-neutral-950",
+        "absolute left-3 top-3 z-10 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] shadow-[0_8px_18px_rgba(15,23,42,0.08)]",
+        badgeConfig[label] || "border-white/80 bg-white text-neutral-950",
       )}
     >
       {label}
@@ -52,7 +52,7 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
   const isLight = appearance === "light";
   const resolvedHref = href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
   const coverMeta = getCoverCardMeta(item);
-  const coverChips = coverMeta.chips.slice(0, 2);
+  const coverChips = coverMeta.chips.slice(0, 1);
   const detailCopy = item.statusLabel || item.metaLabel || coverMeta.detailText || "";
 
   const handleClick = (event) => {
@@ -78,9 +78,9 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
     >
       <div
         className={cn(
-          "overflow-hidden rounded-[28px] transition-all duration-300 group-hover:-translate-y-0.5",
+          "overflow-hidden rounded-[26px] transition-all duration-300 group-hover:-translate-y-0.5",
           isLight
-            ? "border border-black/8 bg-white shadow-[0_14px_36px_rgba(15,23,42,0.06)] group-hover:border-black/10 group-hover:shadow-[0_18px_42px_rgba(15,23,42,0.08)]"
+            ? "border border-black/8 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.05)] group-hover:border-black/10 group-hover:shadow-[0_16px_34px_rgba(15,23,42,0.07)]"
             : "border border-white/10 bg-[linear-gradient(180deg,rgba(16,21,31,0.88),rgba(8,11,18,0.98))] shadow-[0_20px_70px_rgba(0,0,0,0.2)] group-hover:border-white/20 group-hover:shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
         )}
       >
@@ -109,7 +109,7 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
           ) : null}
         </div>
 
-        <div className="space-y-3 px-4 py-4">
+        <div className="space-y-2.5 px-4 py-4">
           <div className="space-y-1.5">
             {metaLine ? (
               <p className={cn("line-clamp-1 text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors", isLight ? "text-slate-400 group-hover:text-slate-500" : "text-neutral-500 group-hover:text-neutral-400")}>
@@ -124,7 +124,7 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
           {detailCopy ? (
             <p
               className={cn(
-                "line-clamp-2 text-sm leading-6 transition-colors",
+                "line-clamp-1 text-sm leading-6 transition-colors",
                 isLight ? "text-slate-600 group-hover:text-slate-700" : "text-neutral-400 group-hover:text-neutral-300",
               )}
             >
@@ -163,11 +163,11 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
           <div className="flex items-center justify-between pt-1">
             {typeof item.progressPercent === "number" && item.progressPercent > 0 ? (
               <p className={cn("text-[11px] font-medium", isLight ? "text-slate-400" : "text-neutral-500")}>
-                Reading progress {Math.round(progressWidth)}%
+                {Math.round(progressWidth)}% read
               </p>
             ) : (
               <span className={cn("text-[11px] font-medium", isLight ? "text-slate-400" : "text-neutral-500")}>
-                Open title
+                Open details
               </span>
             )}
             <ArrowRight className={cn("size-4 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1", isLight ? "text-slate-400" : "text-white")} />

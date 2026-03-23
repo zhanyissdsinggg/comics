@@ -159,8 +159,7 @@ export default function EpisodeList({
     [filteredEpisodes, sortOrder],
   );
 
-  const summaryItems = availabilitySummary.summaryItems;
-  const mobileSummary = availabilitySummary.mobileSummary;
+  const summaryItems = availabilitySummary.summaryItems.slice(0, 3);
   const explainer = availabilitySummary.explainer;
 
   const filterOptions = useMemo(
@@ -296,9 +295,6 @@ export default function EpisodeList({
               <span className="text-sm text-slate-500">{totalEpisodes}</span>
             </div>
             <p className="text-sm leading-6 text-slate-600">{explainer}</p>
-            {mobileSummary ? (
-              <p className="text-sm font-medium text-slate-500 sm:hidden">{mobileSummary}</p>
-            ) : null}
             {summaryItems.length > 0 ? (
               <div className="hidden flex-wrap gap-2 sm:flex">
                 {summaryItems.map((item) => (
@@ -316,7 +312,7 @@ export default function EpisodeList({
           {primaryReadAction?.label ? (
             <div className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)] xl:min-w-[320px]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Start here
+                Read next
               </p>
               {primaryActionNote ? (
                 <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -384,7 +380,7 @@ export default function EpisodeList({
               {STOREFRONT_TERMS.compareMembership}
             </button>
           </div>
-          <span className="text-xs text-slate-500 sm:ml-auto">{sortedEpisodes.length} visible</span>
+          <span className="text-xs text-slate-500 sm:ml-auto">{sortedEpisodes.length} shown</span>
         </div>
       </div>
 

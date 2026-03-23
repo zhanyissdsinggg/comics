@@ -189,7 +189,14 @@ function EpisodeRow({
     progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
       ? `${Math.round(progress.percent * 100)}% read`
       : accessState.shortLabel;
-  const rowHelperText = accessState.rowHelperText ?? accessState.helperText;
+  const rowHelperText = accessState.rowHelperText || "";
+  const supportDetail =
+    progressMetaLabel
+      ? ""
+      : accessState.supportLabel ||
+        (accessState.kind === "points" && shortfallValue > 0
+          ? `Need ${shortfallValue} more points`
+          : rowHelperText);
   const compareItems =
     modalState?.type === "SHORTFALL" && recommendedUnlockOffer?.episodes > 1
       ? [
@@ -356,10 +363,10 @@ function EpisodeRow({
 
   const actionClassName =
     accessState.actionKind === "claim" || accessState.actionKind === "read" || accessState.actionKind === "preview"
-      ? "min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#3157d6)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--gush-accent-strong,#2444af)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
+      ? "min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#3157d6)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--gush-accent-strong,#2444af)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
         : accessState.actionKind === "subscribe"
-        ? "min-h-[44px] w-full rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]"
-        : "min-h-[44px] w-full rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 active:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[176px]";
+        ? "min-h-[44px] w-full rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
+        : "min-h-[44px] w-full rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 active:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
 
   const actionNode = (
     <button
@@ -376,7 +383,7 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden rounded-[24px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.94))] p-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10"
+      className="group overflow-hidden rounded-[22px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.94))] p-3 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10"
     >
       <div className="grid gap-3 sm:grid-cols-[76px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
         <div className="relative h-24 overflow-hidden rounded-[18px] border border-black/8 bg-[rgba(246,243,237,0.92)] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[104px]">
@@ -424,23 +431,9 @@ function EpisodeRow({
             {progressMetaLabel ? <span>{progressMetaLabel}</span> : null}
           </div>
 
-          <div className="mt-3 space-y-2">
-            {rowHelperText ? (
-              <p className="text-sm leading-6 text-slate-600">{rowHelperText}</p>
-            ) : null}
-            {accessState.supportLabel ? (
-              <span
-                className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.supportTone)}`}
-              >
-                {accessState.supportLabel}
-              </span>
-            ) : null}
-            {accessState.kind === "points" && shortfallValue > 0 ? (
-              <span className="inline-flex rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-[11px] font-semibold text-slate-500">
-                Need {shortfallValue} more points
-              </span>
-            ) : null}
-          </div>
+          {supportDetail ? (
+            <p className="mt-3 text-sm leading-6 text-slate-600">{supportDetail}</p>
+          ) : null}
 
           {progress?.lastEpisodeId === episode?.id ? (
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/6">
@@ -452,7 +445,7 @@ function EpisodeRow({
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-2 sm:min-w-[176px] sm:items-end">
+        <div className="flex flex-col gap-2 sm:min-w-[172px] sm:items-end">
           {sideLabel ? (
             <p className="text-xs font-medium text-slate-500 sm:text-right">
               {sideLabel}

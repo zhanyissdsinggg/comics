@@ -15,7 +15,7 @@ function SummaryCard({
 }) {
   const cardClass =
     emphasis === "primary"
-      ? "border-[rgba(49,87,214,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,249,252,0.96))]"
+      ? "border-[rgba(47,88,198,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,247,241,0.94))]"
       : "border-black/8 bg-white/92";
   const primaryButtonClass =
     emphasis === "primary"
@@ -25,16 +25,16 @@ function SummaryCard({
     "rounded-full border border-black/8 bg-[#f8f9fc] px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white";
 
   return (
-    <div className={`flex h-full flex-col rounded-[26px] border p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ${cardClass}`}>
+    <div className={`flex h-full flex-col rounded-[24px] border p-5 shadow-[0_10px_24px_rgba(15,23,42,0.035)] ${cardClass}`}>
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">{eyebrow}</p>
-        <h3 className="mt-3 text-xl font-semibold text-slate-950">{title}</h3>
-        <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
+        <h3 className="mt-3 text-lg font-semibold text-slate-950">{title}</h3>
+        <p className="mt-2.5 text-sm leading-6 text-slate-600">{description}</p>
       </div>
 
       {tags.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-slate-500">
-          {tags.map((tag) => (
+          {tags.slice(0, 3).map((tag) => (
             <span key={`${title}-${tag}`} className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1">
               {tag}
             </span>
@@ -70,11 +70,11 @@ export default function CommerceRouteSummary({
 }) {
   return (
     <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">{eyebrow}</p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">{title}</h2>
-          {description ? <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p> : null}
+          {description ? <p className="mt-2.5 text-sm leading-6 text-slate-600">{description}</p> : null}
         </div>
       </div>
 

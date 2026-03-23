@@ -427,24 +427,21 @@ export default function CreatorsHubPage({
       {
         eyebrow: "Find a creator",
         title: "Search by creator, studio, or title.",
-        description:
-          "Start from search when you already know the name, the team, or the story lane you want.",
+        description: "Use search when you already know the name or title.",
         label: "Search series",
         href: "/search",
       },
       {
         eyebrow: "Editor picks",
         title: "Open strong creator-led titles first.",
-        description:
-          "Top Series is a fast first stop when you want the strongest public entry point into creator discovery.",
+        description: "Top Series is the fastest public entry into creator discovery.",
         label: "Browse Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
         eyebrow: "Browse more",
         title: "Browse by format and story lane.",
-        description:
-          "Move through comics, novels, genres, and title pages, then follow the creator links that land.",
+        description: "Move through comics, novels, and genre-led shelves.",
         label: "Browse comics",
         href: "/comics",
       },
@@ -704,8 +701,8 @@ export default function CreatorsHubPage({
             accent="blue"
             eyebrow="Creators"
             title="Find the creators worth following."
-            description="Move from one favorite title to the writer, artist, or studio behind it, then keep browsing from the same creative voice."
-            secondary="Search, Top Series, comics, and novels keep creator discovery moving from any strong first title."
+            description="Move from a title you like to the writer, artist, or studio behind it."
+            secondary="Search, Top Series, and title pages keep discovery moving."
             stats={heroStats}
             actions={
               <>
@@ -767,7 +764,7 @@ export default function CreatorsHubPage({
                   Start from standout titles.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Open a standout title, then use credits, tags, and Top Series to keep moving through the next creator or studio.
+                  Open a standout title, then follow the strongest credits from there.
                 </p>
               </div>
 
@@ -862,8 +859,8 @@ export default function CreatorsHubPage({
           accent="blue"
           eyebrow="Creators"
           title="Find the creators worth following."
-          description="Jump from one favorite series to the writer, artist, or studio behind it, then keep reading from the same voice."
-          secondary="Use creator shelves for grouped browsing, or jump into Search, Top Series, comics, and novels for a faster first click."
+          description="Jump from a favorite series to the writer, artist, or studio behind it."
+          secondary="Use creator shelves, search, or Top Series for the next click."
           stats={heroStats}
           actions={
             <>
@@ -899,10 +896,10 @@ export default function CreatorsHubPage({
                 Browse paths
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Choose the fastest path into the next strong shelf.
+                Choose a creator path.
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Pick the route that matches how you browse: grouped studios, distinct creator voices, quick search, or story-led lanes.
+                Studios, creator voices, search, and genre-led browsing all start here.
               </p>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
@@ -910,21 +907,21 @@ export default function CreatorsHubPage({
                 {
                   eyebrow: "Studios",
                   title: featuredStudios.length > 0 ? `Open ${featuredStudios.length} studio shelves.` : "Browse studio shelves first.",
-                  description: "Filter to studios when you want grouped reading paths from shared teams and stronger catalogs.",
+                  description: "Use studios for grouped reading paths from shared teams.",
                   cta: "See studios",
                   onClick: () => jumpToCreatorBrowse("studio"),
                 },
                 {
                   eyebrow: "Creators",
                   title: spotlightCreators[0]?.name ? `Start with ${spotlightCreators[0].name}.` : "Browse creator-led shelves.",
-                  description: "Filter to creator pages when you want the clearest voice-led follow-up after one strong title.",
+                  description: "Use creator shelves when one strong title makes you want the same voice again.",
                   cta: "See creators",
                   onClick: () => jumpToCreatorBrowse("creator"),
                 },
                 {
                   eyebrow: "Search",
                   title: "Search a creator, studio, or title.",
-                  description: "Use Search when you already know the credit name, lead title, or genre lane you want.",
+                  description: "Use Search when you already know the name or lead title.",
                   cta: "Open search",
                   onClick: () => router.push("/search"),
                 },
@@ -932,8 +929,8 @@ export default function CreatorsHubPage({
                   eyebrow: "Story lanes",
                   title: genreOptions[0] ? `Browse ${genreOptions[0]} voices.` : "Browse story-led discovery.",
                   description: genreOptions[0]
-                    ? `Jump straight into ${genreOptions[0]} when you want the fastest route from genre to creator and studio shelves.`
-                    : "Open a strong story lane first, then branch into creators and studios from the titles that land.",
+                    ? `Jump into ${genreOptions[0]} when you want the fastest route from genre to creator shelves.`
+                    : "Open a strong story lane first, then branch into creators from the titles that land.",
                   cta: genreOptions[0] ? `Open ${genreOptions[0]}` : "Browse Top Series",
                   onClick: () =>
                     genreOptions[0] ? jumpToGenreBrowse(genreOptions[0]) : router.push("/rankings?type=popular&window=week"),
@@ -1225,7 +1222,7 @@ export default function CreatorsHubPage({
                   Find a creator
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Search creators, studios, or genres.
+                  Search creators, studios, or titles.
                 </h2>
               </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -1321,11 +1318,11 @@ export default function CreatorsHubPage({
                   Start here
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Start with these creator shelves.
+                  Featured creator shelves.
                 </h2>
               </div>
               <p className="text-sm text-slate-500">
-                Chosen for strong titles, clear voice, and quick next clicks.
+                Strong voices, standout titles, quick next clicks.
               </p>
             </div>
 

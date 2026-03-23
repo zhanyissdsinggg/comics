@@ -200,7 +200,7 @@ export default function SubscribePage({
     }
 
     if (!subscriptionActionsEnabled) {
-      setFeedback("Membership is in prelaunch. Sign in for launch access, compare point packs, or contact billing support.");
+      setFeedback("Membership is in prelaunch. Sign in for launch access or contact billing support.");
       return;
     }
 
@@ -324,16 +324,16 @@ export default function SubscribePage({
           appearance="light"
           accent="blue"
           eyebrow="Membership"
-          title={subscriptionActionsEnabled ? "Pick the plan that fits your reading rhythm." : "Review membership pricing before launch."}
+          title={subscriptionActionsEnabled ? "Pick the plan that fits your reading rhythm." : "Review membership before launch."}
           description={
             subscriptionActionsEnabled
               ? "Membership is billed monthly while active. Choose it if you read often and want lower unlock prices, free reads, and monthly points."
-              : "Compare monthly pricing, perks, and point packs before launch."
+              : "Monthly pricing and perks are visible now."
           }
           secondary={
             subscriptionActionsEnabled
               ? "Cancel before renewal if you want the plan to stop."
-              : "Planned monthly pricing | no charge today"
+              : "No monthly charge today"
           }
           stats={subscriptionHeroStats}
           actions={
@@ -364,16 +364,16 @@ export default function SubscribePage({
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                {subscriptionActionsEnabled ? "Before you subscribe" : "Before launch"}
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                {subscriptionActionsEnabled
-                  ? "The billing rules should be obvious before you start a plan."
-                  : "Know the billing rules before membership opens."}
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Membership stays recurring and point packs stay separate on the Store page.
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  {subscriptionActionsEnabled ? "Before you subscribe" : "Before launch"}
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  {subscriptionActionsEnabled
+                    ? "The billing rules should be obvious first."
+                    : "Keep the monthly rules clear."}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Membership stays recurring and point packs stay separate on the Store page.
               </p>
             </div>
           </div>
@@ -416,12 +416,12 @@ export default function SubscribePage({
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {subscriptionActionsEnabled
                     ? "Membership belongs to your account, not just this browser."
-                    : "Sign in now so launch access and later billing history stay on one account."}
+                    : "Sign in once for launch access."}
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   {subscriptionActionsEnabled
                     ? "Sign in before you start a plan so renewals, receipts, cancellation, and support all stay attached to one account."
-                    : "Keep future renewals, receipts, and cancellation history on one account."}
+                    : "Future renewals, receipts, and cancellation history stay on that account."}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -446,41 +446,37 @@ export default function SubscribePage({
               {feedback}
             </div>
           ) : null}
-          {subscriptionPrelaunch ? (
-            <SurfacePanel tone="warning" appearance="light" accent="amber" className="space-y-5">
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-amber-700">Membership starts are not live yet</p>
+        {subscriptionPrelaunch ? (
+          <SurfacePanel tone="warning" appearance="light" accent="amber" className="space-y-5">
+            <div className="space-y-2">
+                <p className="text-sm font-semibold text-amber-700">Prelaunch</p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Compare monthly tiers before launch.
+                  Membership opens later.
                 </h2>
                 <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                  Prices and perks are visible now. Membership does not start here yet.
+                  Prices and perks are visible now. No monthly charge starts here today.
                 </p>
               </div>
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid gap-3 md:grid-cols-2">
                 {[
                   {
                     title: "No monthly charge today",
                     body: "Use this page to compare tiers.",
                   },
                   {
-                    title: "Recurring billing stays the model",
-                    body: "When membership opens, it renews monthly until canceled.",
-                  },
-                  {
-                    title: "Receipts later",
-                    body: "Purchases will hold renewals and receipts after launch. Support stays the billing path.",
+                    title: "Monthly billing later",
+                    body: "When membership opens, renewals and receipts stay in Purchases.",
                   },
                 ].map((item) => (
                   <div
                     key={item.title}
-                    className="rounded-[22px] border border-amber-200/80 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-                  >
-                    <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
-                  </div>
-                ))}
-              </div>
+                      className="rounded-[22px] border border-amber-200/80 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                    >
+                      <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+                    </div>
+                  ))}
+                </div>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
@@ -542,9 +538,9 @@ export default function SubscribePage({
                   ? formatPlanPrice(perks.price, perks.currency || "USD")
                   : plan.price;
               const planNote = isCurrent
-                ? "This plan is already active on your account. Renewal timing and receipts stay visible in Purchases."
+                ? "This plan is already active on your account."
                 : subscriptionActionsEnabled
-                  ? "Recurring monthly billing while active, with receipts in Purchases and billing help in Support."
+                  ? "Recurring monthly billing while active."
                   : "";
 
               return (
@@ -813,15 +809,15 @@ export default function SubscribePage({
         <CommerceRouteSummary
           eyebrow="Compare the paths"
           title="Membership is monthly. Point packs stay flexible. Help should stay obvious."
-          description="Pick membership when you read often, use point packs when you unlock occasionally, and keep Purchases plus Support close when billing questions show up later."
+          description="Pick membership when you read often. Use point packs when you unlock occasionally."
           primary={{
             eyebrow: "Membership",
             title: subscriptionPrelaunch
               ? "Review monthly tiers before launch."
                 : "Start a monthly plan when you read often.",
             description: subscriptionPrelaunch
-              ? "Compare recurring pricing, perks, and point packs before launch."
-                : "Cancel before the listed renewal date if you do not want the next monthly charge.",
+              ? "Compare recurring pricing and perks before launch."
+              : "Cancel before the listed renewal date if you do not want the next monthly charge.",
             tags: [
               "Recurring monthly billing",
               isActive && subscription?.renewAt ? `Renews ${formatUSDate(subscription.renewAt)}` : "",
@@ -849,10 +845,10 @@ export default function SubscribePage({
               : "Receipts, cancellation rules, and billing help are mapped out.",
             description:
               subscriptionActionsEnabled
-                ? "Purchases keeps charges and renewals easy to verify later. Support handles cancellation questions, missing access, and billing issues."
+                ? "Purchases keeps charges and renewals easy to verify later. Support handles billing issues."
                 : "Purchases will keep renewals and receipts easy to verify after launch. Support stays the path for billing questions.",
             tags: ["Purchases", "Billing help"],
-            cta: subscriptionActionsEnabled ? "View purchases" : "Where receipts will land",
+            cta: subscriptionActionsEnabled ? "View purchases" : "Receipt location",
             onClick: () => router.push("/orders"),
             secondaryCta: "Billing help",
             onSecondaryClick: () =>

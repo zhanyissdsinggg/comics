@@ -24,7 +24,7 @@ export default function EditorialHero({
       accent={accent}
       appearance={appearance}
     >
-      <div className="relative grid gap-8 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+      <div className="relative grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)] xl:items-start">
         <div className="max-w-3xl">
           {eyebrow ? (
             <p
@@ -39,7 +39,7 @@ export default function EditorialHero({
 
           <h1
             className={cn(
-              "mt-3 max-w-4xl font-display text-[2rem] font-semibold leading-[0.96] tracking-tight sm:text-[2.45rem] xl:text-[3.15rem]",
+              "mt-3 max-w-4xl font-display text-[1.95rem] font-semibold leading-[0.96] tracking-tight sm:text-[2.35rem] xl:text-[3rem]",
               isLight ? "text-slate-950" : "text-white",
             )}
           >
@@ -49,7 +49,7 @@ export default function EditorialHero({
           {description ? (
             <p
               className={cn(
-                "mt-4 max-w-2xl text-sm leading-7 sm:text-base",
+                "mt-4 max-w-2xl text-sm leading-6 sm:text-[15px] sm:leading-7",
                 isLight ? "text-slate-600" : "text-neutral-200",
               )}
             >
@@ -60,7 +60,7 @@ export default function EditorialHero({
           {secondary ? (
             <p
               className={cn(
-                "mt-3 max-w-2xl text-sm leading-6",
+                "mt-2.5 max-w-xl text-sm leading-6",
                 isLight ? "text-slate-500" : "text-neutral-400",
               )}
             >
@@ -69,25 +69,25 @@ export default function EditorialHero({
           ) : null}
 
           {actions ? (
-            <div className="mt-5 flex flex-wrap gap-2.5 sm:gap-3 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:inline-flex [&>a]:min-h-11 [&>a]:rounded-full [&>a]:px-4 sm:[&>a]:px-5 [&>button]:min-h-11 [&>button]:rounded-full [&>button]:px-4 sm:[&>button]:px-5">
+            <div className="mt-5 flex flex-wrap gap-2.5 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:inline-flex [&>a]:min-h-11 [&>a]:rounded-full [&>a]:px-4 sm:[&>a]:px-5 [&>button]:min-h-11 [&>button]:rounded-full [&>button]:px-4 sm:[&>button]:px-5">
               {actions}
             </div>
           ) : null}
         </div>
 
         {hasStats ? (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 xl:gap-0 xl:divide-y xl:divide-black/8 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:block">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 xl:gap-3 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:block">
             {stats.map((stat, index) => (
               <div
                 key={stat.label}
                 title={stat.hint || ""}
                 className={cn(
-                  "rounded-[22px] border px-4 py-4 xl:rounded-none xl:border-0 xl:px-0 xl:py-4",
+                  "rounded-[20px] border px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
                   isLight
                     ? index === 0
-                      ? "border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.07)]"
-                      : "border-black/6 bg-white/78"
-                    : "border-white/10 bg-white/[0.04]",
+                      ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)]"
+                      : "border-black/6 bg-white/76"
+                    : "border-white/10 bg-white/[0.04] shadow-none",
                 )}
               >
                 <p
@@ -100,7 +100,7 @@ export default function EditorialHero({
                 </p>
                 <p
                   className={cn(
-                    "mt-2 font-display text-2xl font-semibold tracking-tight",
+                    "mt-2 font-display text-[1.55rem] font-semibold tracking-tight",
                     isLight ? "text-slate-950" : "text-white",
                   )}
                 >
