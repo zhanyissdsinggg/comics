@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
@@ -62,11 +61,14 @@ function formatUpdateLabel(value) {
 export default function SeriesHeader({
   series,
   previewHint,
-  progress,
+  lastReadEpisode = null,
   episodeCount = 0,
   latestEpisode = null,
   onContinue,
   onStart,
+  primaryActionLabelOverride = "",
+  secondaryActionLabelOverride = "",
+  readingHint = "",
   onFollowToggle,
   isFollowing,
   desktopPrimaryActionRef,
@@ -76,24 +78,25 @@ export default function SeriesHeader({
   onOpenStore,
   onOpenMembership,
 }) {
-  const router = useRouter();
   const genres = series.genres || [];
   const badges = series.badges || [];
   const isAdult = Boolean(series.adult);
   const hasFreeEpisodes = series.hasFreeEpisodes || series.freeEpisodeCount > 0;
   const isCompleted = String(series.status || "").toLowerCase() === "completed";
   const ratingValue = series.rating ? Number(series.rating).toFixed(1) : "New";
-  const lastEpisodeLabel = formatEpisodeNumber(progress?.lastEpisodeId);
+  const lastEpisodeLabel = formatEpisodeNumber(lastReadEpisode?.number || "");
   const primaryAction = onContinue || onStart || null;
-  const primaryActionLabel = onContinue
+  const primaryActionLabel = primaryActionLabelOverride || (onContinue
     ? lastEpisodeLabel
-      ? `Continue Episode ${lastEpisodeLabel}`
-      : "Continue reading"
+      ? "Continue Reading"
+      : "Continue Reading"
     : hasFreeEpisodes
-      ? "Start free"
-      : "Start reading";
+      ? "Read Free"
+      : "Start Reading");
   const secondaryAction = onContinue && onStart ? onStart : null;
-  const secondaryActionLabel = secondaryAction ? "Start at Episode 1" : "";
+  const secondaryActionLabel = secondaryAction
+    ? secondaryActionLabelOverride || "Start at Episode 1"
+    : "";
   const followers = Number(series.followers || 0);
   const ratingCount = Number(series.ratingCount || 0);
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.id || latestEpisode?.number || "");
@@ -170,6 +173,7 @@ export default function SeriesHeader({
         : "Creator or studio credit attached to this series.",
     },
   ];
+  const mobileLeadFact = quickFacts[1] || quickFacts[0] || null;
   return (
     <header className="py-4 sm:py-6">
       <SurfacePanel className="relative overflow-hidden p-0" appearance="light" accent="blue">
@@ -184,6 +188,8 @@ export default function SeriesHeader({
                   label={series.title}
                   eyebrow={series.author || formatSeriesKind(series.type)}
                   badge={hasFreeEpisodes ? "Free" : series.badge}
+                  genres={series.genres}
+                  seriesType={series.type}
                 />
               </div>
             </div>
@@ -238,22 +244,29 @@ export default function SeriesHeader({
               {series.title || "Series"}
             </h1>
 
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+            <div className="mt-5">{mobilePrimaryActions}</div>
+            {readingHint ? (
+              <p className="mt-3 text-sm font-medium text-[var(--gush-accent,#2f6bff)]">
+                {readingHint}
+              </p>
+            ) : null}
+
+            <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
               {series.description || "Start at Episode 1 and see if this one pulls you in."}
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              {readerPulseItems.map((item) => (
+              {readerPulseItems.map((item, index) => (
                 <span
                   key={item}
-                  className="rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-sm text-slate-700"
+                  className={`rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-sm text-slate-700 ${
+                    index > 1 ? "hidden sm:inline-flex" : ""
+                  }`}
                 >
                   {item}
                 </span>
               ))}
             </div>
-
-            <div className="mt-5">{mobilePrimaryActions}</div>
 
             <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-slate-500">
               <span>{episodeCount ? `${episodeCount} episodes` : "New series"}</span>
@@ -278,7 +291,17 @@ export default function SeriesHeader({
               ) : null}
             </div>
 
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {mobileLeadFact ? (
+              <div className="mt-5 rounded-[22px] border border-black/6 bg-white/88 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] sm:hidden">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  {mobileLeadFact.label}
+                </p>
+                <p className="mt-2 text-sm font-semibold text-slate-950">{mobileLeadFact.value}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{mobileLeadFact.hint}</p>
+              </div>
+            ) : null}
+
+            <div className="mt-5 hidden gap-3 sm:grid md:grid-cols-3">
               {quickFacts.map((item) => (
                 <div
                   key={item.label}
@@ -315,15 +338,15 @@ export default function SeriesHeader({
             ) : null}
 
             {previewHint ? (
-              <p className="mt-4 text-sm text-slate-500">{previewHint}</p>
+              <p className="mt-4 text-xs leading-6 text-slate-500 sm:text-sm">{previewHint}</p>
             ) : null}
 
-            <div className="mt-5 flex flex-wrap items-center gap-3">
+            <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
               {onFollowToggle ? (
                 <button
                   type="button"
                   onClick={onFollowToggle}
-                  className={`group relative inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                  className={`group relative inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
                     isFollowing
                       ? "border border-pink-200 bg-pink-50 text-slate-950 shadow-[0_18px_40px_rgba(236,72,153,0.08)]"
                       : "border border-black/8 bg-white/84 text-slate-700 hover:border-pink-200 hover:bg-pink-50"
@@ -338,13 +361,13 @@ export default function SeriesHeader({
                 url={typeof window !== "undefined" ? window.location.href : ""}
                 title={series.title || "Check out this series"}
                 description={series.description || ""}
-                className="rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                className="min-h-[44px] rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
               />
               {onOpenStore ? (
                 <button
                   type="button"
                   onClick={onOpenStore}
-                  className="rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                  className="min-h-[44px] rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
                 >
                   Point packs
                 </button>
@@ -353,7 +376,7 @@ export default function SeriesHeader({
                 <button
                   type="button"
                   onClick={onOpenMembership}
-                  className="rounded-full border border-black/8 bg-[#f8f9fc] px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                  className="min-h-[44px] rounded-full border border-black/8 bg-[#f8f9fc] px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
                 >
                   Membership
                 </button>

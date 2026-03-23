@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
 import Cover from "../common/Cover";
 import Pill from "../common/Pill";
 import { SkeletonCard } from "../common/Skeleton";
-import EditorialHero from "../common/EditorialHero";
 import SearchBar from "../common/SearchBar";
 import SurfacePanel from "../common/SurfacePanel";
 import SiteHeader from "../layout/SiteHeader";
@@ -657,15 +657,15 @@ export default function SearchPage() {
     () => [...hotKeywords, ...keywords].filter(Boolean).slice(0, 8),
     [hotKeywords, keywords],
   );
-  const heroTitle = query ? `"${query}"` : "Search without guessing.";
+  const heroTitle = query ? `Results for "${query}"` : "Search titles, genres, or creators.";
   const heroDescription = query
     ? "Best matches first. Refine only if the list feels off."
-    : "Find a title, a genre, or a creator, then get into something worth opening.";
+    : "Start typing, use a recent search, or open something popular right away.";
   const heroSecondary = query
     ? loading
       ? "Refreshing matches..."
       : `${total.toLocaleString()} match${total === 1 ? "" : "es"} right now.`
-    : "Use the search box, trending terms, or a fast lane below. The page should help before the filter sheet ever does.";
+    : "Recent searches, trending terms, and popular titles are ready below.";
   const loadingResultLabel = "Updating";
   const heroStats = useMemo(
     () => [
@@ -692,12 +692,12 @@ export default function SearchPage() {
     [activeFilterCount, hotKeywords, isAdultMode, keywords, loading, loadingResultLabel, query, total],
   );
   const recoPanelTitle = !query
-    ? "If you are still deciding, start here."
+    ? "Popular right now"
     : results.length === 0
       ? "No exact match yet. Try one of these instead."
       : "Only a few matches? Widen the net.";
   const recoPanelHint = !query
-    ? "A reading site should still feel useful before the search box does all the work."
+    ? "Open a live title first, or search from one of these stronger starting points."
     : results.length === 0
       ? "These picks keep you moving when a search comes up empty."
       : "A short result list is a good time to branch into something similar.";
@@ -842,8 +842,8 @@ export default function SearchPage() {
     items: Array.isArray(rail.items) ? rail.items.slice(0, 4) : [],
   }));
   const shouldShowReco =
-    Boolean(query) && visibleRecoRails.length > 0 && (results.length === 0 || hasSparseResults);
-  const shouldShowEventHub = !query || results.length === 0 || hasSparseResults;
+    visibleRecoRails.length > 0 && (!query || results.length === 0 || hasSparseResults);
+  const shouldShowEventHub = Boolean(query) && (results.length === 0 || hasSparseResults);
   const searchEventCards = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -1011,82 +1011,36 @@ export default function SearchPage() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
       <SiteHeader variant="light" />
       <div className="mx-auto max-w-[1280px] space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-        <EditorialHero
-          eyebrow="Search"
-          title={heroTitle}
-          description={heroDescription}
-          secondary={heroSecondary}
-          stats={heroStats}
-          appearance="light"
-          actions={
-            query ? (
-              <button
-                type="button"
-                onClick={() =>
-                  updateParams(
-                    {
-                      q: "",
-                      type: "",
-                      status: "",
-                      genre: "",
-                      sort: "relevance",
-                    },
-                    { resetPage: true },
-                  )
-                }
-                className={secondaryButtonClass}
-              >
-                Clear search
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
-                className={secondaryButtonClass}
-              >
-                Top Series
-              </button>
-            )
-          }
-        />
-
-        {commerceNotice ? (
-          <CommerceSuccessBanner
-            notice={commerceNotice}
-            onDismiss={() => setCommerceNotice(null)}
-          />
-        ) : null}
-
-        {resultsStale || catalogStale || homepageSlotsStale ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-            Showing cached data. Reconnect to refresh the latest search results.
-          </div>
-        ) : null}
-
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                {query ? "Refine this search" : "Search the catalog"}
+                Search
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                {query ? "Tighten the search before you scroll forever." : "Title, genre, or creator. Keep it simple."}
-              </h2>
+              <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                {heroTitle}
+              </h1>
+              <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
+                {heroDescription}
+              </p>
+              <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setShowAdvancedFilters(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
-                <SlidersHorizontal size={16} />
-                <span>Filters</span>
-                {activeFilterCount > 0 ? (
-                  <span className="rounded-full bg-slate-950 px-2 py-0.5 text-[11px] font-bold text-white">
-                    {activeFilterCount}
-                  </span>
-                ) : null}
-              </button>
+              {!query ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedFilters(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
+                >
+                  <SlidersHorizontal size={16} />
+                  <span>Filters</span>
+                  {activeFilterCount > 0 ? (
+                    <span className="rounded-full bg-slate-950 px-2 py-0.5 text-[11px] font-bold text-white">
+                      {activeFilterCount}
+                    </span>
+                  ) : null}
+                </button>
+              ) : null}
               {query ? (
                 <button
                   type="button"
@@ -1112,45 +1066,56 @@ export default function SearchPage() {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className={secondaryButtonClass}
                 >
-                  Top Series
+                  Browse top series
                 </button>
               )}
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_0.85fr]">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_0.82fr]">
             <div className="space-y-3">
-              <SearchBar
-                variant="light"
-                placeholder="Search titles, genres, or creators"
-                showShortcut={false}
-              />
-              {suggestions.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {suggestions.slice(0, 6).map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => updateParam("q", item)}
-                      className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
+              <div className="rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-5">
+                <SearchBar
+                  variant="light"
+                  placeholder="Search titles, genres, or creators"
+                  showShortcut={false}
+                  initialValue={query}
+                />
+                {suggestions.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {suggestions.slice(0, 6).map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => updateParam("q", item)}
+                        className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {heroStats.map((item, index) => (
+                  <span
+                    key={item.label}
+                    className={`rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs text-slate-600 ${
+                      query && index > 1 ? "hidden sm:inline-flex" : ""
+                    }`}
+                  >
+                    <span className="font-semibold text-slate-900">{item.label}:</span> {item.value}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <div className="rounded-[24px] border border-black/6 bg-white/82 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                {query ? "Fast pivots" : "Start with"}
+                {query ? "Fast pivots" : "Start fast"}
               </p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
-                {query
-                  ? "If this search feels too narrow, jump sideways instead of retyping from scratch."
-                  : "These are the fastest ways into the catalog when you do not know the exact title yet."}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {discoveryKeywords.slice(0, 6).map((item) => (
                   <button
                     key={item.id}
@@ -1194,7 +1159,7 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {!query && history.length > 0 ? (
+          {!query && (history.length > 0 || hotKeywords.length > 0 || keywords.length > 0) ? (
             <SearchHistoryPanel
               onSearch={(keyword) => updateParam("q", keyword)}
               hotKeywords={hotKeywords}
@@ -1202,6 +1167,19 @@ export default function SearchPage() {
             />
           ) : null}
         </SurfacePanel>
+
+        {commerceNotice ? (
+          <CommerceSuccessBanner
+            notice={commerceNotice}
+            onDismiss={() => setCommerceNotice(null)}
+          />
+        ) : null}
+
+        {resultsStale || catalogStale || homepageSlotsStale ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+            Showing cached data. Reconnect to refresh the latest search results.
+          </div>
+        ) : null}
 
         {shouldShowEventHub ? (
           <StorefrontEventHub
@@ -1306,65 +1284,80 @@ export default function SearchPage() {
 
         {showResultSections ? (
           <>
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Narrow it down
+            <div className="flex flex-col gap-3 rounded-[24px] border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedFilters(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
+                >
+                  <SlidersHorizontal size={16} />
+                  <span>Filters</span>
+                  {activeFilterCount > 0 ? (
+                    <span className="rounded-full bg-slate-950 px-2 py-0.5 text-[11px] font-bold text-white">
+                      {activeFilterCount}
+                    </span>
+                  ) : null}
+                </button>
+                <select
+                  value={type}
+                  onChange={(event) => updateParam("type", event.target.value)}
+                  className={`${filterSelectClass} hidden sm:block`}
+                >
+                  <option value="">All types</option>
+                  {TYPE_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={status}
+                  onChange={(event) => updateParam("status", event.target.value)}
+                  className={`${filterSelectClass} hidden sm:block`}
+                >
+                  <option value="">All status</option>
+                  {STATUS_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={sort}
+                  onChange={(event) => updateParam("sort", event.target.value)}
+                  className={filterSelectClass}
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {activeFilterCount > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateParams(
+                        {
+                          type: "",
+                          status: "",
+                          genre: "",
+                          sort: "relevance",
+                        },
+                        { resetPage: true },
+                      )
+                    }
+                    className={secondaryButtonClass}
+                  >
+                    Clear filters
+                  </button>
+                ) : null}
+              </div>
+              <p className="text-sm text-slate-500">
+                {loading ? "Refreshing titles..." : `${total.toLocaleString()} results`}
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Trim the list.
-              </h2>
             </div>
-            <p className="text-sm text-slate-500">
-              {loading ? "Refreshing titles..." : `Page ${page} of ${totalPages}`}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <select
-              value={type}
-              onChange={(event) => updateParam("type", event.target.value)}
-              className={filterSelectClass}
-            >
-              <option value="">All types</option>
-              {TYPE_OPTIONS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <select
-              value={status}
-              onChange={(event) => updateParam("status", event.target.value)}
-              className={filterSelectClass}
-            >
-              <option value="">All status</option>
-              {STATUS_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <input
-              value={genre}
-              onChange={(event) => updateParam("genre", event.target.value)}
-              placeholder="Genres"
-              className={`${filterSelectClass} placeholder:text-slate-400`}
-            />
-            <select
-              value={sort}
-              onChange={(event) => updateParam("sort", event.target.value)}
-              className={filterSelectClass}
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-            </SurfacePanel>
 
             {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -1621,14 +1614,41 @@ export default function SearchPage() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((series) => (
-                <button
+                <Link
                   key={series.id}
-                  type="button"
-                  onClick={() => handleSeriesClick(series.id)}
-                  className="group rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
+                  href={buildPathWithAttribution(`/series/${series.id}`, {
+                    entryPoint: "SEARCH_RESULTS",
+                    campaignId: query ? "search_result_grid" : "catalog_grid",
+                    sourcePath: searchPath,
+                    sourceSeriesId: series.id,
+                    returnTo: `/series/${series.id}`,
+                  })}
+                  onClick={() =>
+                    trackEvent("search_result_click", {
+                      seriesId: series.id,
+                      entryPoint: "SEARCH_RESULTS",
+                      campaignId: query ? "search_result_grid" : "catalog_grid",
+                      query: query || undefined,
+                    })
+                  }
+                  className="group block rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
+                  aria-label={`Open ${series.title}`}
                 >
-                  <Cover tone={series.coverTone} coverUrl={series.coverUrl} className="h-44 rounded-[20px]" />
-                  <div className="mt-4 space-y-3">
+                  <div className="grid gap-4 sm:grid-cols-[112px_minmax(0,1fr)]">
+                    <div className="overflow-hidden rounded-[20px] border border-black/6 bg-neutral-900 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
+                      <Cover
+                        tone={series.coverTone}
+                        coverUrl={series.coverUrl}
+                        label={series.title}
+                        eyebrow={Array.isArray(series.genres) ? series.genres.slice(0, 2).join(" / ") : ""}
+                        badge={series.badge}
+                        genres={series.genres}
+                        seriesType={series.type}
+                        className="aspect-[3/4] w-full"
+                        sizes="(max-width: 640px) 112px, 160px"
+                      />
+                    </div>
+                    <div className="min-w-0 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <h3 className="font-display text-lg font-semibold tracking-tight text-slate-950">
                         {highlight(series.title, query)}
@@ -1638,7 +1658,7 @@ export default function SearchPage() {
                     <p className="text-sm text-slate-500">
                       {formatSearchSeriesMeta(series)}
                     </p>
-                    <p className="text-sm leading-6 text-slate-600">
+                    <p className="line-clamp-3 text-sm leading-6 text-slate-600">
                       {summarizeSearchDescription(series)}
                     </p>
                     <div className="flex flex-wrap gap-2 text-xs text-slate-600">
@@ -1661,7 +1681,8 @@ export default function SearchPage() {
                     </div>
                     <p className="text-xs font-semibold text-slate-950">Open title details</p>
                   </div>
-                </button>
+                  </div>
+                </Link>
               ))}
             </div>
 

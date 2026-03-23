@@ -127,6 +127,12 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const openAuthPrompt = useCallback(() => {
     window.dispatchEvent(new CustomEvent("auth:open"));
   }, []);
+  const scrollToSection = useCallback((id) => {
+    if (typeof document === "undefined") {
+      return;
+    }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
   const seriesById = useMemo(
     () => new Map(seriesList.map((series) => [series.id, series])),
     [seriesList],
@@ -447,17 +453,17 @@ export default function LibraryPage({ initialSignedIn = false }) {
       hasLibrarySignals
         ? [
             {
-              label: "Continue",
+              label: "Resume",
               value: continueRailItems.length.toLocaleString(),
               hint: "Jump back to the last opened chapter",
             },
             {
-              label: "History",
+              label: "Recent",
               value: historyRail.length.toLocaleString(),
               hint: "Recently opened series and episodes",
             },
             {
-              label: "Saved",
+              label: "Saved Series",
               value: visibleLibraryItems.length.toLocaleString(),
               hint: "Pinned titles in the current mode",
             },
@@ -504,49 +510,59 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const libraryActionCards = useMemo(() => {
     const commonAccentClass =
       "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]";
+    const primaryAccentClass =
+      "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]";
+
+    if (!viewerSignedIn) {
+      return [
+        {
+          id: "start-free",
+          eyebrow: "Start free",
+          title: "Start a free series first.",
+          description: "The fastest way to make Library useful is to begin reading right now.",
+          cta: "Start free",
+          onClick: () => router.push("/rankings?type=ttf&window=all"),
+          accentClass: primaryAccentClass,
+        },
+        {
+          id: "sync",
+          eyebrow: "Sign in to sync",
+          title: "Keep saved series and progress on one account.",
+          description: "Sign in when you want your shelf, history, and purchases to follow you.",
+          cta: "Sign in to sync",
+          onClick: () => openAuthPrompt(),
+          accentClass: commonAccentClass,
+        },
+      ];
+    }
 
     if (!hasLibrarySignals) {
       return [
         {
           id: "free-starts",
           eyebrow: "Start free",
-          title: "Open a free start before your shelf feels empty.",
-          description:
-            "A free first chapter is still the fastest way to make this page useful without guessing.",
-          cta: "Start reading free",
+          title: "Start one series and give Library something to track.",
+          description: "A free first chapter is still the fastest way to create real progress here.",
+          cta: "Start free",
           onClick: () => router.push("/rankings?type=ttf&window=all"),
-          accentClass:
-            "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+          accentClass: primaryAccentClass,
         },
         {
-          id: "top-series",
-          eyebrow: "Top Series",
-          title: "Use the safest browse path first.",
-          description:
-            "Top Series narrows the catalog down faster when your own shelf has not started to take shape yet.",
-          cta: "Browse Top Series",
+          id: "saved",
+          eyebrow: "Saved Series",
+          title: "Your saved shelf will show up here as soon as you use it.",
+          description: "Follow a title or save a favorite to turn Library into a real utility page.",
+          cta: "Browse top series",
           onClick: () => router.push("/rankings?type=popular&window=week"),
           accentClass: commonAccentClass,
         },
         {
-          id: "search",
-          eyebrow: "Search",
-          title: "Search by title, genre, or creator.",
-          description:
-            "Search is the better move when you already know the tone, creator, or title you want.",
+          id: "recent",
+          eyebrow: "Recent activity",
+          title: "Recent reads appear here once you open a chapter.",
+          description: "Come back after a reading session and this page will show your latest activity.",
           cta: "Open search",
           onClick: () => router.push("/search"),
-          accentClass: commonAccentClass,
-        },
-        {
-          id: "sync",
-          eyebrow: "Sync",
-          title: viewerSignedIn ? "Your library is already attached to this account." : "Sign in before you build a bigger shelf.",
-          description: viewerSignedIn
-            ? "Saved titles, progress, and rewards already have an account home."
-            : "Sign in once and keep progress, library, purchases, and rewards together.",
-          cta: viewerSignedIn ? "Open account" : "Sign in",
-          onClick: () => (viewerSignedIn ? router.push("/account") : openAuthPrompt()),
           accentClass: commonAccentClass,
         },
       ];
@@ -556,11 +572,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
       resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
         ? {
             id: "resume",
-            eyebrow: "Continue",
-            title: "Jump straight back into your last chapter.",
-            description:
-              "The quickest path back into reading should stay one click away from the top of Library.",
-            cta: "Resume now",
+            eyebrow: "Resume Reading",
+            title: "Jump back into your last chapter.",
+            description: "Resume should stay one tap away from the top of Library.",
+            cta: "Resume Reading",
             onClick: () =>
               router.push(
                 buildLibraryReadHref(
@@ -570,58 +585,67 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   "library_actions_resume",
                 ),
               ),
-            accentClass:
-              "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+            accentClass: primaryAccentClass,
           }
         : {
-            id: "library",
-            eyebrow: "Shelf",
-            title: "Open your saved titles and recent reads.",
-            description:
-              "Library should still keep the next title obvious even when you are not resuming one chapter in particular.",
-            cta: "Open shelf",
-            onClick: () => router.push("/library"),
-            accentClass:
-              "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+            id: "progress",
+            eyebrow: "Progress",
+            title: continueRailItems.length > 0 ? "Your in-progress reads are ready." : "Start a title to build progress.",
+            description: continueRailItems.length > 0
+              ? "Open your active reads before you drift back into browsing."
+              : "Once you start reading, Library keeps your place here.",
+            cta: continueRailItems.length > 0 ? "View progress" : "Start free",
+            onClick: () =>
+              continueRailItems.length > 0
+                ? scrollToSection("continue-reading")
+                : router.push("/rankings?type=ttf&window=all"),
+            accentClass: primaryAccentClass,
           },
       {
         id: "saved",
         eyebrow: "Saved titles",
-        title: "Compare what you saved against Top Series.",
-        description:
-          "If your shelf feels stale, Top Series is still the cleanest way to find the next thing worth keeping.",
-        cta: "Browse Top Series",
-        onClick: () => router.push("/rankings?type=popular&window=week"),
+        title: visibleLibraryItems.length > 0 ? "Open your saved series fast." : "Save a title and it shows up here.",
+        description: visibleLibraryItems.length > 0
+          ? "Saved Series should be the second-fastest place to act after Resume."
+          : "Follow or save a series, then come back here instead of starting from scratch.",
+        cta: visibleLibraryItems.length > 0 ? "View saved series" : "Browse top series",
+        onClick: () =>
+          visibleLibraryItems.length > 0
+            ? scrollToSection("saved-series")
+            : router.push("/rankings?type=popular&window=week"),
+        accentClass: commonAccentClass,
+      },
+      {
+        id: "recent",
+        eyebrow: "Recent Activity",
+        title: historyRail.length > 0 ? "See what you opened recently." : "Recent reads will land here too.",
+        description: historyRail.length > 0
+          ? "Recent Activity makes it easier to jump back without hunting around the catalog."
+          : "Open a few chapters and Library will keep the recent trail visible.",
+        cta: historyRail.length > 0 ? "View recent activity" : "Open search",
+        onClick: () => (historyRail.length > 0 ? scrollToSection("recent-activity") : router.push("/search")),
         accentClass: commonAccentClass,
       },
       {
         id: "search",
         eyebrow: "Search",
-        title: "Use search when you already know the lane.",
-        description:
-          "Search by title, genre, or creator instead of scrolling your whole shelf when you want something specific.",
+        title: "Find another title without leaving utility mode.",
+        description: "Search is still the fastest jump when you know the title, creator, or genre.",
         cta: "Open search",
         onClick: () => router.push("/search"),
-        accentClass: commonAccentClass,
-      },
-      {
-        id: "account",
-        eyebrow: "Account",
-        title: viewerSignedIn ? "Manage sync, purchases, and reading settings." : "Sign in before purchases and sync matter.",
-        description: viewerSignedIn
-          ? "Account keeps membership, purchases, and reading setup together without burying the next step."
-          : "Sign in when you want your library, progress, and purchases tied to one account.",
-        cta: viewerSignedIn ? "Open account" : "Sign in",
-        onClick: () => (viewerSignedIn ? router.push("/account") : openAuthPrompt()),
         accentClass: commonAccentClass,
       },
     ].filter(Boolean);
   }, [
     buildLibraryReadHref,
+    continueRailItems.length,
     hasLibrarySignals,
+    historyRail.length,
     openAuthPrompt,
     resumeSpotlight,
     router,
+    scrollToSection,
+    visibleLibraryItems.length,
     viewerSignedIn,
   ]);
   const primaryButtonClass =
@@ -636,18 +660,24 @@ export default function LibraryPage({ initialSignedIn = false }) {
       <main className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
         <EditorialHero
           eyebrow="Library"
-          title="Your next read should be obvious."
-          description="Resume the last chapter fast, keep saved series in view, and stop hunting through your own shelf."
-          secondary={
+          title={
             viewerSignedIn
-              ? "Reading history, saved titles, and rewards stay tied to this account so getting back into a story feels immediate."
-              : "Sign in to keep your shelf, reading history, and rewards in one place."
+              ? resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
+                ? "Resume reading, then manage your shelf."
+                : "Saved series, recent activity, and progress."
+              : "Start free now, then sign in to sync."
           }
+          description={
+            viewerSignedIn
+              ? "Resume Reading, Saved Series, Recent Activity, and Progress stay close at the top."
+              : "Start with a free chapter, then sign in when you want your library and progress tied to one account."
+          }
+          secondary=""
           stats={libraryStats}
           appearance="light"
           actions={
             <>
-              {resumeSpotlight?.seriesId && resumeSpotlight?.episodeId ? (
+              {viewerSignedIn && resumeSpotlight?.seriesId && resumeSpotlight?.episodeId ? (
                 <button
                   type="button"
                   onClick={() =>
@@ -667,24 +697,38 @@ export default function LibraryPage({ initialSignedIn = false }) {
               ) : (
                 <button
                   type="button"
-                  onClick={() => router.push("/search")}
+                  onClick={() =>
+                    viewerSignedIn
+                      ? router.push("/rankings?type=ttf&window=all")
+                      : router.push("/rankings?type=ttf&window=all")
+                  }
                   className={primaryButtonClass}
                 >
-                  Find something to start
+                  Start free
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => {
                   if (!viewerSignedIn) {
-                    router.push("/rankings?type=popular&window=week");
+                    openAuthPrompt();
+                    return;
+                  }
+                  if (visibleLibraryItems.length > 0) {
+                    scrollToSection("saved-series");
                     return;
                   }
                   setShowCollectionManager((value) => !value);
                 }}
                 className={secondaryButtonClass}
               >
-                {viewerSignedIn ? (showCollectionManager ? "Close collections" : "Manage collections") : "Browse Top Series"}
+                {viewerSignedIn
+                  ? visibleLibraryItems.length > 0
+                    ? "Saved Series"
+                    : showCollectionManager
+                      ? "Close collections"
+                      : "Manage collections"
+                  : "Sign in to sync"}
               </button>
             </>
           }
@@ -711,80 +755,21 @@ export default function LibraryPage({ initialSignedIn = false }) {
           </div>
         ) : (
           <>
-            {viewerSignedIn ? (
-              <div className="grid gap-6 xl:grid-cols-2">
-                <CheckInPanel
-                  rewards={rewards}
-                  onCheckIn={handleCheckIn}
-                  onMakeUp={handleMakeUp}
-                  working={checkinWorking}
-                />
-                <MissionsPanel
-                  missions={missions}
-                  onClaim={handleClaim}
-                  workingId={workingId}
-                />
-              </div>
-            ) : (
-              <SurfacePanel className="flex flex-wrap items-center justify-between gap-4" appearance="light" accent="blue">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Account sync
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Take this library, purchase history, and progress with you.
-                  </h2>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
-                    Sign in once and keep your shelf, reading history, rewards, and reading progress synced across visits.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={openAuthPrompt}
-                    className={primaryButtonClass}
-                  >
-                    Sign in
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/rankings?type=ttf&window=all")}
-                    className={secondaryButtonClass}
-                  >
-                    Start free
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/how-it-works")}
-                    className={secondaryButtonClass}
-                  >
-                    How it works
-                  </button>
-                </div>
-              </SurfacePanel>
-            )}
-
             <SurfacePanel className="space-y-5" appearance="light" accent="blue">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  What do you want to do next?
+                  Quick actions
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Start with the next useful move.
+                  {viewerSignedIn ? "Start with the next library task." : "Start free or sign in to sync."}
                 </h2>
-                <p className="text-sm leading-6 text-slate-600">
-                  Library works best when resuming, browsing, search, and account actions stay close instead of hiding
-                  under one long shelf.
-                </p>
               </div>
-              <StorefrontPathwaysGrid cards={libraryActionCards} columnsClassName="md:grid-cols-2 xl:grid-cols-4" appearance="light" />
+              <StorefrontPathwaysGrid
+                cards={libraryActionCards}
+                columnsClassName={viewerSignedIn ? "md:grid-cols-2 xl:grid-cols-4" : "md:grid-cols-2"}
+                appearance="light"
+              />
             </SurfacePanel>
-
-            {showCollectionManager ? (
-              <SurfacePanel appearance="light" accent="blue">
-                <CollectionManager onClose={() => setShowCollectionManager(false)} />
-              </SurfacePanel>
-            ) : null}
 
             {!hasLibrarySignals ? (
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
@@ -793,10 +778,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     Get started
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Start a series, save a favorite, and this page becomes useful fast.
+                    Start a series and this page becomes useful fast.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Read a free chapter, follow a title, or open Top Series so your library has something worth returning to.
+                    Start free, save a favorite, or open Top Series so Library has something real to work with.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -820,15 +805,15 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       onClick={openAuthPrompt}
                       className={secondaryButtonClass}
                     >
-                      Sign in for sync
+                      Sign in to sync
                     </button>
                   ) : null}
                   <button
                     type="button"
-                    onClick={() => router.push("/how-it-works")}
+                    onClick={() => router.push("/search")}
                     className={secondaryButtonClass}
                   >
-                    How it works
+                    Open search
                   </button>
                 </div>
                 {recommendedItems.slice(0, 3).length > 0 ? (
@@ -862,91 +847,119 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
             <div className="grid gap-6">
               {continueRailItems.length > 0 ? (
-                <Rail
-                  title="Continue Reading"
-                  items={continueRailItems}
-                  reason="Pick up where you left off before the thread goes cold."
-                  ctaLabel="Resume reading"
-                  href="/library"
-                  appearance="light"
-                  onItemClick={(item) => {
-                    if (item.seriesId && item.episodeId) {
-                      router.push(
-                        buildLibraryReadHref(
-                          item.seriesId,
-                          item.episodeId,
-                          "LIBRARY_CONTINUE_RAIL",
-                          "continue_rail",
-                        ),
-                      );
-                      return;
-                    }
-                    if (item.seriesId) {
-                      router.push(
-                        buildLibrarySeriesHref(
-                          item.seriesId,
-                          "LIBRARY_CONTINUE_RAIL",
-                          "continue_rail",
-                        ),
-                      );
-                    }
-                  }}
-                />
-              ) : null}
-
-              {historyRail.length > 0 ? (
-                <Rail
-                  title="Reading History"
-                  items={historyRail}
-                  reason="Recent sessions stay close when you want to retrace a title."
-                  ctaLabel="Review History"
-                  href="/library"
-                  appearance="light"
-                  onItemClick={(item) => {
-                    if (item.seriesId && item.episodeId) {
-                      router.push(
-                        buildLibraryReadHref(
-                          item.seriesId,
-                          item.episodeId,
-                          "LIBRARY_HISTORY_RAIL",
-                          "history_rail",
-                        ),
-                      );
-                      return;
-                    }
-                    if (item.seriesId) {
-                      router.push(
-                        buildLibrarySeriesHref(
-                          item.seriesId,
-                          "LIBRARY_HISTORY_RAIL",
-                          "history_rail",
-                        ),
-                      );
-                    }
-                  }}
-                />
+                <div id="continue-reading">
+                  <Rail
+                    title="Resume Reading"
+                    items={continueRailItems}
+                    reason="Pick up where you left off before the thread goes cold."
+                    ctaLabel="Resume reading"
+                    href="/library"
+                    appearance="light"
+                    onItemClick={(item) => {
+                      if (item.seriesId && item.episodeId) {
+                        router.push(
+                          buildLibraryReadHref(
+                            item.seriesId,
+                            item.episodeId,
+                            "LIBRARY_CONTINUE_RAIL",
+                            "continue_rail",
+                          ),
+                        );
+                        return;
+                      }
+                      if (item.seriesId) {
+                        router.push(
+                          buildLibrarySeriesHref(
+                            item.seriesId,
+                            "LIBRARY_CONTINUE_RAIL",
+                            "continue_rail",
+                          ),
+                        );
+                      }
+                    }}
+                  />
+                </div>
               ) : null}
 
               {visibleLibraryItems.length > 0 ? (
-                <Rail
-                  title="Your Library"
-                  items={visibleLibraryItems}
-                  reason="Saved and followed titles gathered into your current catalog view."
-                  ctaLabel="Manage Shelf"
-                  href="/library"
-                  appearance="light"
-                  onItemClick={(item) => {
-                    if (item.seriesId) {
-                      router.push(
-                        buildLibrarySeriesHref(
-                          item.seriesId,
-                          "LIBRARY_SHELF_RAIL",
-                          "library_shelf",
-                        ),
-                      );
-                    }
-                  }}
-                />
+                <div id="saved-series">
+                  <Rail
+                    title="Saved Series"
+                    items={visibleLibraryItems}
+                    reason="Saved and followed titles gathered into your current catalog view."
+                    ctaLabel="Manage Shelf"
+                    href="/library"
+                    appearance="light"
+                    onItemClick={(item) => {
+                      if (item.seriesId) {
+                        router.push(
+                          buildLibrarySeriesHref(
+                            item.seriesId,
+                            "LIBRARY_SHELF_RAIL",
+                            "library_shelf",
+                          ),
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
+
+              {historyRail.length > 0 ? (
+                <div id="recent-activity">
+                  <Rail
+                    title="Recent Activity"
+                    items={historyRail}
+                    reason="Recent sessions stay close when you want to retrace a title."
+                    ctaLabel="Review History"
+                    href="/library"
+                    appearance="light"
+                    onItemClick={(item) => {
+                      if (item.seriesId && item.episodeId) {
+                        router.push(
+                          buildLibraryReadHref(
+                            item.seriesId,
+                            item.episodeId,
+                            "LIBRARY_HISTORY_RAIL",
+                            "history_rail",
+                          ),
+                        );
+                        return;
+                      }
+                      if (item.seriesId) {
+                        router.push(
+                          buildLibrarySeriesHref(
+                            item.seriesId,
+                            "LIBRARY_HISTORY_RAIL",
+                            "history_rail",
+                          ),
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
+
+              {showCollectionManager ? (
+                <SurfacePanel appearance="light" accent="blue">
+                  <CollectionManager onClose={() => setShowCollectionManager(false)} />
+                </SurfacePanel>
+              ) : null}
+
+              {viewerSignedIn ? (
+                <div className="grid gap-6 xl:grid-cols-2">
+                  <CheckInPanel
+                    rewards={rewards}
+                    onCheckIn={handleCheckIn}
+                    onMakeUp={handleMakeUp}
+                    working={checkinWorking}
+                  />
+                  <MissionsPanel
+                    missions={missions}
+                    onClaim={handleClaim}
+                    workingId={workingId}
+                  />
+                </div>
               ) : null}
 
               {recommendedItems.length > 0 ? (
@@ -968,7 +981,6 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   }
                 />
               ) : null}
-
             </div>
           </>
         )}
