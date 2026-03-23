@@ -508,7 +508,7 @@ function HomeContent({ initialSearchParams = {} }) {
         id: "trending-now",
         eyebrow: "Top Series",
         title: "Open what readers already trust first.",
-        description: "Browse the strongest popular picks instead of guessing from the full catalog.",
+        description: "Browse the strongest popular picks first.",
         label: "Browse top series",
         href: "/rankings?type=popular&window=week",
       },
@@ -516,7 +516,7 @@ function HomeContent({ initialSearchParams = {} }) {
         id: "start-free",
         eyebrow: "Free to Start",
         title: "Try free chapters before you unlock anything.",
-        description: "Free starts are still the fastest way to test tone and pacing on a phone.",
+        description: "Try free chapters before you commit.",
         label: "Start reading free",
         href: "/rankings?type=ttf&window=all",
       },
@@ -566,7 +566,7 @@ function HomeContent({ initialSearchParams = {} }) {
   const heroEyebrow = resumeSeries ? "Continue reading" : "Start reading";
   const heroDescription = resumeSeries
     ? "Pick up your next chapter fast, or switch to something new."
-    : "Top Series and free starts keep the next read near the top.";
+    : "Top Series and free starts get you reading faster.";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#f4f6fb] text-slate-900">
@@ -756,7 +756,7 @@ function HomeContent({ initialSearchParams = {} }) {
                   Points for one-offs. Membership for steady reading.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-                  Use point packs for select unlocks, or compare membership if you read every week.
+                  Use point packs for one-offs, or membership if you read every week.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -792,7 +792,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     Unlock select chapters.
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Buy points once and use them where you need them.
+                    Buy once and use them where needed.
                   </p>
                 </div>
 

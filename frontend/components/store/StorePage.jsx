@@ -496,12 +496,12 @@ export default function StorePage({
           description={
             purchaseActionsEnabled
               ? "Some series start free. Locked episodes use points. If you read often, compare monthly membership before you buy a bigger pack."
-              : "Compare planned pack pricing, point totals, and the monthly alternative before checkout opens."
+              : "Compare pack pricing, point totals, and membership before launch."
           }
           secondary={
             purchaseActionsEnabled
               ? `${regionConfig.label} pricing | ${regionConfig.taxHint}`
-              : `${regionConfig.label} pricing shown up front | checkout opens later`
+              : `${regionConfig.label} pricing shown up front | no charge today`
           }
           stats={storeHeroStats}
           appearance="light"
@@ -557,25 +557,25 @@ export default function StorePage({
             <div className="space-y-2">
               <p className="text-sm font-semibold text-amber-700">Point-pack checkout is not open yet</p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Compare point packs now. Checkout opens later.
+                Compare point packs before launch.
               </h2>
               <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                Prices and point totals are visible now, so you can compare one-time packs against membership without a fake checkout flow.
+                Prices and point totals are visible now. Checkout is still closed.
               </p>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               {[
                 {
                   title: "No charge today",
-                  body: "Checkout is still closed on this page.",
+                  body: "Use this page to compare packs.",
                 },
                 {
-                  title: "Receipts land in Purchases",
-                  body: "When checkout opens, charges and order IDs appear in Purchases on the signed-in account you use.",
+                  title: "Receipts later",
+                  body: "Purchases will hold charges and order IDs after launch.",
                 },
                 {
-                  title: "Billing help stays obvious",
-                  body: "Support handles launch questions, wrong charges, and receipt issues.",
+                  title: "Billing help",
+                  body: "Support handles launch and billing questions.",
                 },
               ].map((item) => (
                 <div
@@ -701,12 +701,12 @@ export default function StorePage({
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                     {purchaseActionsEnabled
                       ? "Sign in before you buy or redeem a code."
-                      : "Sign in once so future points and receipts stay on one account."}
+                      : "Sign in once so launch access, points, and receipts stay on one account."}
                   </h2>
                   <p className="text-sm leading-6 text-slate-600">
                     {purchaseActionsEnabled
                       ? "Points, codes, and purchase history should stay attached to one account."
-                      : "Signing in now keeps future receipts, points, and billing history on one account."}
+                      : "Keep future receipts, points, and billing history on one account."}
                   </p>
                 </div>
                 <button
@@ -743,7 +743,7 @@ export default function StorePage({
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {purchaseActionsEnabled
                     ? "Know the total, the monthly alternative, and where receipts land."
-                    : "Know the planned price, the monthly alternative, and where receipts land after launch."}
+                    : "Know the price, the monthly alternative, and where receipts land."}
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
                   Point packs stay one-time. Membership stays monthly.
@@ -752,12 +752,12 @@ export default function StorePage({
               <div className="grid gap-3">
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
                   <p className="text-sm font-semibold text-slate-950">
-                    {purchaseActionsEnabled ? "Local total stays visible" : "Planned pricing stays visible"}
+                    {purchaseActionsEnabled ? "Local total stays visible" : "Pricing stays visible"}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {purchaseActionsEnabled
                       ? `${regionConfig.taxHint} Pack cards show the current regional price label before checkout.`
-                      : `${regionConfig.taxHint} Pack cards show launch pricing up front so you can judge the real cost early.`}
+                      : `${regionConfig.taxHint} Pack cards show the launch price up front.`}
                   </p>
                 </div>
                 <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
@@ -845,10 +845,10 @@ export default function StorePage({
                     Promo codes
                   </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Keep promo or creator codes ready for launch.
+                  Keep promo or creator codes for launch.
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
-                    Purchase-related codes do not redeem from this page today. Keep the code ready for launch day, or contact Support if you were told to use it now.
+                    Codes do not redeem here today. Keep the code ready for launch, or ask Support if you were told to use it now.
                 </p>
               </div>
                 <div className="flex flex-wrap gap-2">
@@ -882,7 +882,7 @@ export default function StorePage({
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {purchaseActionsEnabled
                     ? "Choose a point pack, then unlock chapters as you go."
-                    : "Planned point packs at launch."}
+                    : "Compare point packs."}
                 </h2>
               </div>
               <p className="text-xs text-slate-500">
@@ -950,11 +950,11 @@ export default function StorePage({
                     onSelect={handleBuy}
                     disabled={!purchaseActionsEnabled}
                     hideAction={purchasePrelaunch}
-                    statusLabel={purchasePrelaunch ? "Prelaunch pricing" : ""}
+                    statusLabel={purchasePrelaunch ? "Prelaunch" : ""}
                     statusNote={
                       purchaseActionsEnabled
                         ? "Receipts and charges appear in Purchases after checkout."
-                        : "Pricing preview only. Receipts land in Purchases after launch."
+                        : ""
                     }
                     ctaLabel={
                       isSignedIn
@@ -994,10 +994,10 @@ export default function StorePage({
           primary={{
             eyebrow: "Point packs",
             title: purchasePrelaunch
-              ? "Review one-time packs before checkout opens."
+              ? "Review one-time packs before launch."
                 : "Buy a pack only when you need more unlocks.",
             description: purchasePrelaunch
-              ? "Compare launch pricing, point totals, and whether one-time packs or membership fits better."
+              ? "Compare one-time packs, point totals, and membership before launch."
               : packageDecisionSummary?.cheapest?.priceLabel
                 ? `The fastest entry is ${packageDecisionSummary.cheapest.name} at ${packageDecisionSummary.cheapest.priceLabel}, then you top up only when you need more points.`
                 : "Use point packs when you want flexible, one-time unlocks without starting a monthly charge.",
@@ -1044,7 +1044,7 @@ export default function StorePage({
             description:
               purchaseActionsEnabled
                 ? "Purchases keeps order IDs and charges easy to find. Support handles missing points, wrong charges, and launch questions without sending readers into legal pages."
-                : "After launch, Purchases keeps order IDs and charges easy to find. Support stays the path for billing questions, wrong charges, and refund requests.",
+                : "Purchases will keep charges and order IDs easy to find after launch. Support stays the billing path.",
             tags: ["Purchases", "Billing help"],
             cta: purchaseActionsEnabled ? "View purchases" : "Where receipts will land",
             onClick: () => router.push("/orders"),

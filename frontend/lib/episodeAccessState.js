@@ -445,7 +445,7 @@ export function getEpisodeAvailabilitySummary({
       counts.free > 0 ? "Starts free" : counts.preview > 0 ? "Preview available" : "",
     badgeLabel: getEpisodeAvailabilityBadge(counts, hasCountdown),
     entryLabel: getEpisodeEntryLabel(firstState, counts, hasCountdown),
-    entryHint: firstState?.helperText || explainer,
+    entryHint: explainer,
     firstState,
   };
 }
@@ -473,10 +473,7 @@ export function getSeriesPrimaryReadAction({
       label: "Continue Reading",
       episodeId: progressEpisode.id,
       actionKind: "read",
-      note:
-        progress?.percent && progress.percent > 0
-          ? `Resume Episode ${progressEpisode.number}.`
-          : `Resume Episode ${progressEpisode.number}.`,
+      note: `Resume Episode ${progressEpisode.number}.`,
     };
   }
 
@@ -507,7 +504,7 @@ export function getSeriesPrimaryReadAction({
       label: "Continue Reading",
       episodeId: firstEpisode.id,
       actionKind: "read",
-      note: state.helperText,
+      note: "",
     };
   }
 
@@ -517,10 +514,7 @@ export function getSeriesPrimaryReadAction({
       label: "Read Free",
       episodeId: firstEpisode.id,
       actionKind: state.actionKind,
-      note:
-        state.primaryState === "preview"
-          ? `Preview Episode ${firstEpisode.number} first.`
-          : `Start free with Episode ${firstEpisode.number}.`,
+      note: "",
     };
   }
 
@@ -530,7 +524,7 @@ export function getSeriesPrimaryReadAction({
       label: "Included with Membership",
       episodeId: firstEpisode.id,
       actionKind: state.actionKind,
-      note: `Membership opens Episode ${firstEpisode.number} right away.`,
+      note: "",
     };
   }
 
@@ -540,7 +534,7 @@ export function getSeriesPrimaryReadAction({
       label: "Unlock with Points",
       episodeId: firstEpisode.id,
       actionKind: state.actionKind,
-      note: `Unlock Episode ${firstEpisode.number} to start.`,
+      note: "",
     };
   }
 
@@ -549,6 +543,6 @@ export function getSeriesPrimaryReadAction({
     label: state.actionLabel || "Join Membership",
     episodeId: firstEpisode.id,
     actionKind: state.actionKind,
-    note: `Use membership or points to open Episode ${firstEpisode.number}.`,
+    note: "",
   };
 }

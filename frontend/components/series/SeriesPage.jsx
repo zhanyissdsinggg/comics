@@ -690,6 +690,12 @@ export default function SeriesPage({
     walletStore?.subscription,
     walletStore?.subscriptionUsage,
   ]);
+  const headerReadingHint =
+    primaryReadAction?.note &&
+    primaryReadAction.note !== seriesAccessSummary?.entryHint &&
+    primaryReadAction.note !== seriesAccessSummary?.explainer
+      ? primaryReadAction.note
+      : "";
   const handleSeriesPrimaryAction = useCallback(async () => {
     if (!primaryReadAction) {
       return;
@@ -988,7 +994,7 @@ export default function SeriesPage({
           onContinue={handleContinue}
           onStart={handleStart}
           primaryActionLabelOverride={primaryReadAction?.label || ""}
-          readingHint={primaryReadAction?.note || ""}
+          readingHint={headerReadingHint}
           accessSummary={seriesAccessSummary}
           onFollowToggle={handleFollowToggle}
           isFollowing={isFollowing}

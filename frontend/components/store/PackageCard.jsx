@@ -86,10 +86,10 @@ export default function PackageCard({
       ) : null}
 
       <div className="mt-3 space-y-1 text-[10px] text-slate-500">
-        <BenefitRow>Keep points ready for later reads</BenefitRow>
-        <BenefitRow>Use them whenever a chapter is locked</BenefitRow>
-        <BenefitRow>Good if you do not want a monthly plan</BenefitRow>
-        {bonusPct > 0 ? <BenefitRow>Extra points already included</BenefitRow> : null}
+        <BenefitRow>One-time points for later reads</BenefitRow>
+        <BenefitRow>Unlock locked chapters as needed</BenefitRow>
+        <BenefitRow>No recurring billing</BenefitRow>
+        {bonusPct > 0 ? <BenefitRow>{bonusPct}% bonus included</BenefitRow> : null}
       </div>
 
       {!hideAction ? (
