@@ -209,6 +209,7 @@ export default function SeriesHeader({
                   badge={coverBadge}
                   genres={series.genres}
                   seriesType={series.type}
+                  className="h-full w-full"
                 />
               </div>
             </div>
