@@ -977,18 +977,10 @@ export default function SeriesPage({
           </SurfacePanel>
         ) : (
           <div className="space-y-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  All titles
-                </p>
-                <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {filteredAndSortedSeries.length.toLocaleString()} title{filteredAndSortedSeries.length === 1 ? "" : "s"}
-                </h2>
-              </div>
-              <p className="text-sm text-slate-500">
-                Sorted by {sortBy === "latest" ? "Latest" : "Popular"}
-              </p>
+            <div>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                {filteredAndSortedSeries.length.toLocaleString()} title{filteredAndSortedSeries.length === 1 ? "" : "s"}
+              </h2>
             </div>
 
             <div className={catalogGridClassName}>

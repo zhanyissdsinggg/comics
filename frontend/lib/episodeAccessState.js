@@ -260,7 +260,7 @@ export function getEpisodeAccessState({
     const claimRequired = Boolean(hasTtf && isTtfReady);
     return buildEpisodeAccessState("free", {
       kind: "free",
-      actionLabel: "Read Free",
+      actionLabel: "Read",
       actionKind: claimRequired ? "claim" : "read",
       claimRequired,
       pricing,
@@ -509,7 +509,7 @@ export function getSeriesPrimaryReadAction({
   if (state.primaryState === "free" || state.primaryState === "preview") {
     return {
       type: state.primaryState,
-      label: state.primaryState === "preview" ? "Preview Episode" : "Read Free",
+      label: state.primaryState === "preview" ? "Preview Episode 1" : "Read Episode 1",
       episodeId: firstEpisode.id,
       actionKind: state.actionKind,
       note: "",

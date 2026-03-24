@@ -481,7 +481,7 @@ export default function StorePage({
           description={
             purchaseActionsEnabled
               ? "Use packs for one-time unlocks. Use membership if you read often."
-              : "Launch pricing and point totals are visible now."
+              : "Pricing and point totals are visible now."
           }
           secondary={purchaseActionsEnabled ? regionConfig.label : ""}
           stats={storeHeroStats}
@@ -557,7 +557,7 @@ export default function StorePage({
                 onClick={() => router.push("/rankings?type=ttf&window=all")}
                 className={secondaryButtonClass}
               >
-                Browse free starts
+                Browse sample titles
               </button>
               <button
                 type="button"
@@ -644,12 +644,12 @@ export default function StorePage({
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    {purchaseActionsEnabled ? "Sign in" : "Launch access"}
+                    {purchaseActionsEnabled ? "Sign in" : "Account"}
                   </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {purchaseActionsEnabled
                     ? "Sign in before you buy or redeem a code."
-                    : "Sign in once for launch access."}
+                    : "Use one account for launch."}
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
                   {purchaseActionsEnabled
@@ -670,7 +670,7 @@ export default function StorePage({
                     onClick={() => router.push("/rankings?type=ttf&window=all")}
                     className={secondaryButtonClass}
                   >
-                    Browse free starts
+                    Browse sample titles
                   </button>
                   <button
                     type="button"

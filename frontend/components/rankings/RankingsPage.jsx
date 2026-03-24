@@ -159,7 +159,6 @@ export default function RankingsPage({
   const { isAdultMode } = useAdultGateStore();
 
   const activeTab = TABS.find((item) => item.id === tab) || TABS[0];
-  const activeWindow = WINDOWS.find((item) => item.id === selectedWindow) || WINDOWS[0];
   const chartGuide = CHART_GUIDES[tab] || CHART_GUIDES.popular;
   const rankingsPath = `/rankings?type=${tab}&window=${selectedWindow}`;
 
@@ -294,7 +293,7 @@ export default function RankingsPage({
           />
         ) : null}
 
-        <SurfacePanel className="space-y-3" appearance="light" accent="blue">
+        <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
             {TABS.map((item) => (
               <button
@@ -320,7 +319,7 @@ export default function RankingsPage({
               </button>
             ))}
           </div>
-        </SurfacePanel>
+        </div>
 
         {loading ? (
           <RankingsLoadingState />
@@ -533,14 +532,6 @@ export default function RankingsPage({
                         </div>
                       ) : null}
 
-                      <div className="mt-5 flex flex-wrap gap-2">
-                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1.5 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
-                          {activeWindow.label}
-                        </span>
-                        <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs font-semibold text-slate-500">
-                          {activeTab.label}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 </Link>
@@ -585,7 +576,7 @@ export default function RankingsPage({
 
               {boardEntries.length > 0 ? (
                 <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-                  <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                         Keep going
@@ -594,9 +585,6 @@ export default function RankingsPage({
                         Continue through Top Series.
                       </h2>
                     </div>
-                    <p className="text-xs text-slate-500">
-                      {list.length.toLocaleString()} title{list.length === 1 ? "" : "s"}
-                    </p>
                   </div>
 
                   <div className="space-y-3">
@@ -643,7 +631,7 @@ export default function RankingsPage({
             <div className="space-y-4">
               {leadEntry ? (
                 <SurfacePanel className="space-y-4" tone="muted" appearance="light" accent="blue">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                         Start here
@@ -652,13 +640,9 @@ export default function RankingsPage({
                         Read the lead pick first.
                       </h2>
                     </div>
-                    <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                      {activeWindow.label}
-                    </span>
                   </div>
 
                   <p className="text-sm leading-7 text-slate-600">{chartGuide.nextMove}</p>
-                  <p className="text-sm leading-6 text-slate-500">{chartGuide.audience}</p>
 
                   <div className="flex flex-wrap gap-2">
                     <button

@@ -322,7 +322,6 @@ export default function EpisodeList({
               <option value="newest">Newest first</option>
             </select>
           </div>
-          <span className="text-xs text-slate-500 sm:ml-auto">{sortedEpisodes.length} shown</span>
         </div>
       </div>
 

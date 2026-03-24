@@ -972,7 +972,7 @@ export default function SeriesPage({
           onPrimaryAction={handleSeriesPrimaryAction}
           onContinue={handleContinue}
           onStart={handleStart}
-          primaryActionLabelOverride={primaryReadAction?.label || ""}
+          primaryActionLabelOverride={primaryReadAction?.type === "free" ? "" : primaryReadAction?.label || ""}
           accessSummary={seriesAccessSummary}
           onFollowToggle={handleFollowToggle}
           isFollowing={isFollowing}

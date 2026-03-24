@@ -62,11 +62,11 @@ export default function FilterBar({
 
   const filterSectionClass =
     isLight
-      ? "rounded-[24px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+      ? "rounded-[20px] border border-black/6 bg-white/78 px-4 py-3"
       : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {activeSummaries.length > 0 || (activeFilterCount > 0 && typeof onReset === "function") ? (
         <div className="flex flex-wrap items-center gap-2">
           {activeSummaries.map((item) => (
@@ -99,7 +99,7 @@ export default function FilterBar({
         </div>
       ) : null}
 
-      <div className={cn("grid gap-3", genres.length > 0 ? "xl:grid-cols-[0.92fr_0.92fr_1.16fr]" : "xl:grid-cols-2")}>
+      <div className={cn("grid gap-2.5", genres.length > 0 ? "xl:grid-cols-[0.92fr_0.92fr_1.16fr]" : "xl:grid-cols-2")}>
         <div className={filterSectionClass}>
           <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-400"}`}>
             Sort

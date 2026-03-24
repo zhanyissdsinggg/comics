@@ -312,7 +312,7 @@ export default function SubscribePage({
           description={
             subscriptionActionsEnabled
               ? "Membership is monthly. Choose it if you read often."
-              : "Monthly pricing and plan perks are visible now."
+              : "Pricing and plan perks are visible now."
           }
           secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
           stats={subscriptionHeroStats}
@@ -389,12 +389,12 @@ export default function SubscribePage({
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="max-w-3xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  {subscriptionActionsEnabled ? "Sign in first" : "Launch access"}
+                  {subscriptionActionsEnabled ? "Sign in first" : "Account"}
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {subscriptionActionsEnabled
                     ? "Membership belongs to your account, not just this browser."
-                    : "Sign in once for launch access."}
+                    : "Use one account for launch."}
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   {subscriptionActionsEnabled
@@ -411,7 +411,7 @@ export default function SubscribePage({
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
                   className={secondaryButtonClass}
                 >
-                  Browse free starts
+                  Browse sample titles
                 </button>
               </div>
             </div>
@@ -448,7 +448,7 @@ export default function SubscribePage({
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
                   className={secondaryButtonClass}
                 >
-                  Browse free starts
+                  Browse sample titles
                 </button>
                 <button
                   type="button"
