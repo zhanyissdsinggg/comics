@@ -408,25 +408,28 @@ export default function StorePage({
 
   const regionConfig = getRegionConfig(region);
   const storeHeroStats = useMemo(
-    () => [
-      {
-        label: "Availability",
-        value: purchaseAvailabilityLabel,
-        hint: purchaseActionsEnabled ? "Checkout is open." : "",
-      },
-      {
-        label: "Model",
-        value: "One-time packs",
-        hint: isSubscriber ? "Separate from membership." : "One-time only.",
-      },
-      {
-        label: "Membership",
-        value: membershipStartingPrice ? `${membershipStartingPrice}/mo` : "Monthly option",
-        hint: subscriptionStats
-          ? `Up to ${subscriptionStats.maxDiscount}% off unlocks.`
-          : "Recurring monthly option.",
-      },
-    ],
+    () =>
+      [
+        purchaseActionsEnabled
+          ? {
+              label: "Availability",
+              value: purchaseAvailabilityLabel,
+              hint: "Checkout is open.",
+            }
+          : null,
+        {
+          label: "Model",
+          value: "One-time packs",
+          hint: isSubscriber ? "Separate from membership." : "One-time only.",
+        },
+        {
+          label: "Membership",
+          value: membershipStartingPrice ? `${membershipStartingPrice}/mo` : "Monthly option",
+          hint: subscriptionStats
+            ? `Up to ${subscriptionStats.maxDiscount}% off unlocks.`
+            : "Recurring monthly option.",
+        },
+      ].filter(Boolean),
     [
       purchaseAvailabilityLabel,
       isSubscriber,
@@ -455,7 +458,7 @@ export default function StorePage({
           description={
             purchaseActionsEnabled
               ? "Use packs for one-time unlocks. Use membership if you read often."
-              : ""
+              : "Checkout opens later."
           }
           secondary={purchaseActionsEnabled ? regionConfig.label : ""}
           stats={storeHeroStats}
@@ -507,43 +510,6 @@ export default function StorePage({
           </SurfacePanel>
         ) : null}
 
-        {purchasePrelaunch ? (
-          <SurfacePanel tone="warning" appearance="light" accent="amber" className="space-y-5">
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-amber-700">Prelaunch</p>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Checkout opens later.
-              </h2>
-              <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                Pricing is visible now.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={handleLaunchAccess}
-                className={secondaryButtonClass}
-              >
-                {launchAccessLabel}
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/rankings?type=ttf&window=all")}
-                className={secondaryButtonClass}
-              >
-                Browse sample titles
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/subscribe")}
-                className={secondaryButtonClass}
-              >
-                Compare membership
-              </button>
-            </div>
-          </SurfacePanel>
-        ) : null}
-
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
@@ -551,38 +517,33 @@ export default function StorePage({
                 Point-pack rules
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Keep the point-pack rules clear.
+                Keep the launch details in one place.
               </h2>
             </div>
           </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-3">
             {[
               {
-                eyebrow: "Point packs",
-                title: "Use packs for one-time unlocks",
-                description: "This page is for flexible top-ups, not monthly billing.",
+                label: "No charge today",
+                detail: "Checkout stays closed until point-pack checkout opens.",
               },
               {
-                eyebrow: "No charge today",
-                title: "Checkout stays closed for now",
-                description: "Nothing charges until point-pack checkout opens.",
+                label: "Purchases",
+                detail: "Orders and receipts appear in Purchases after launch.",
               },
               {
-                eyebrow: "Purchases & help",
-                title: "Orders appear after launch",
-                description: "Receipts land in Purchases, and billing support stays available.",
+                label: "Help",
+                detail: "Billing support stays available if you need help before checkout opens.",
               },
             ].map((item) => (
               <div
-                key={item.title}
-                className="rounded-[24px] border border-black/6 bg-white/88 p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                key={item.label}
+                className="rounded-[24px] border border-black/6 bg-white/88 px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
               >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  {item.eyebrow}
-                </p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950">{item.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3">
+                  <p className="text-sm font-semibold text-slate-950">{item.label}</p>
+                  <p className="text-sm leading-6 text-slate-600">{item.detail}</p>
+                </div>
               </div>
             ))}
           </div>

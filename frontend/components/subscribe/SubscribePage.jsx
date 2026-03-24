@@ -265,15 +265,15 @@ export default function SubscribePage({
     const maxDiscount = plans.reduce((max, plan) => Math.max(max, plan?.discountPct || 0), 0);
 
     return [
-      {
-        label: "Availability",
-        value: subscriptionAvailabilityLabel,
-        hint: isActive
-          ? `${subscription?.planId || "Membership"} is active.`
-          : subscriptionActionsEnabled
-            ? "Monthly billing is open."
-            : "",
-      },
+      isActive || subscriptionActionsEnabled
+        ? {
+            label: "Availability",
+            value: subscriptionAvailabilityLabel,
+            hint: isActive
+              ? `${subscription?.planId || "Membership"} is active.`
+              : "Monthly billing is open.",
+          }
+        : null,
       {
         label: "Model",
         value: "Monthly plan",
@@ -286,7 +286,7 @@ export default function SubscribePage({
           ? "Highest unlock discount in the current lineup."
           : "Perks appear in the current plan lineup.",
       },
-    ];
+    ].filter(Boolean);
   }, [
     isActive,
     planCatalog,
@@ -312,7 +312,7 @@ export default function SubscribePage({
           description={
             subscriptionActionsEnabled
               ? "Membership is monthly. Choose it if you read often."
-              : ""
+              : "Membership opens later."
           }
           secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
           stats={subscriptionHeroStats}
@@ -348,32 +348,34 @@ export default function SubscribePage({
                   Billing rules
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Keep the monthly rules clear.
+                  Keep the billing details in one place.
                 </h2>
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-3">
             {[
               {
                 title: "No monthly charge today",
                 body: "Billing starts when membership opens.",
               },
               {
-                title: "Cancel before renewal",
-                body: "Cancel before the listed renewal date once billing begins.",
+                title: "Purchases",
+                body: "Receipts and renewals appear in Purchases once billing begins.",
               },
               {
-                title: "Purchases & help",
-                body: "Receipts and renewals appear in Purchases, and billing support stays available.",
+                title: "Help",
+                body: "Billing support stays available if you need help before membership opens.",
               },
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-[24px] border border-black/6 bg-white/88 p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                className="rounded-[24px] border border-black/6 bg-white/88 px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
               >
-                <h3 className="text-base font-semibold text-slate-950">{item.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{item.body}</p>
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3">
+                  <h3 className="text-sm font-semibold text-slate-950">{item.title}</h3>
+                  <p className="text-sm leading-6 text-slate-600">{item.body}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -431,42 +433,6 @@ export default function SubscribePage({
             <div className="rounded-[24px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {feedback}
             </div>
-          ) : null}
-        {subscriptionPrelaunch ? (
-          <SurfacePanel tone="warning" appearance="light" accent="amber" className="space-y-5">
-            <div className="space-y-2">
-                <p className="text-sm font-semibold text-amber-700">Prelaunch</p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Membership opens later.
-                </h2>
-                <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                  Pricing and plan perks are visible now.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleLaunchAccess}
-                  className={secondaryButtonClass}
-                >
-                  {launchAccessLabel}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className={secondaryButtonClass}
-                >
-                  Browse sample titles
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/store")}
-                  className={secondaryButtonClass}
-                >
-                  Compare point packs
-                </button>
-              </div>
-            </SurfacePanel>
           ) : null}
 
           <div className="flex flex-wrap items-end justify-between gap-3">
