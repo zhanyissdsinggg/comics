@@ -58,6 +58,26 @@ function formatUpdateLabel(value) {
   })}`;
 }
 
+function isDuplicateAccessLabel(value) {
+  const text = String(value || "").replace(/\s+/g, " ").trim().toUpperCase();
+  if (!text) {
+    return false;
+  }
+
+  return /^(READ FREE|ALL FREE|FREE|STARTS? FREE|START AT EPISODE 1|EPISODE 1 OPEN|ALL EPISODES OPEN)$/.test(text);
+}
+
+function assignRef(ref, value) {
+  if (!ref) {
+    return;
+  }
+  if (typeof ref === "function") {
+    ref(value);
+    return;
+  }
+  ref.current = value;
+}
+
 export default function SeriesHeader({
   series,
   accessSummary = null,
@@ -85,6 +105,13 @@ export default function SeriesHeader({
     series.hasFreeEpisodes ||
     series.freeEpisodeCount > 0;
   const isCompleted = String(series.status || "").toLowerCase() === "completed";
+  const coverBadge =
+    hasFreeEpisodes && isDuplicateAccessLabel(series.badge)
+      ? isCompleted
+        ? "Completed"
+        : ""
+      : series.badge || (isCompleted ? "Completed" : "");
+  const visibleBadges = badges.filter((badge) => !(hasFreeEpisodes && isDuplicateAccessLabel(badge)));
   const ratingValue = series.rating ? Number(series.rating).toFixed(1) : "New";
   const lastEpisodeLabel = formatEpisodeNumber(lastReadEpisode?.number || "");
   const primaryAction = onPrimaryAction || onContinue || onStart || null;
@@ -118,15 +145,18 @@ export default function SeriesHeader({
       ? "border-[rgba(49,87,214,0.24)] bg-[rgba(49,87,214,0.08)] text-slate-950 shadow-[0_0_0_1px_rgba(49,87,214,0.12),0_22px_60px_rgba(49,87,214,0.12)]"
       : "border-black/8 bg-slate-950 text-white hover:bg-slate-800",
   ].join(" ");
-  const mobilePrimaryActions = primaryAction ? (
-    <div className="grid gap-3 sm:hidden">
+  const primaryActions = primaryAction ? (
+    <div className="grid gap-3">
       {highlightPrimaryAction ? (
         <p className="text-center text-xs font-semibold text-[var(--gush-accent,#3157d6)]">
           Unlocked. Keep reading.
         </p>
       ) : null}
       <button
-        ref={mobilePrimaryActionRef}
+        ref={(node) => {
+          assignRef(desktopPrimaryActionRef, node);
+          assignRef(mobilePrimaryActionRef, node);
+        }}
         type="button"
         onClick={primaryAction}
         className={`flex ${primaryActionClassName}`}
@@ -156,7 +186,6 @@ export default function SeriesHeader({
       hint: accessSummary?.entryHint || "",
     },
   ];
-  const mobileLeadFact = quickFacts[1] || quickFacts[0] || null;
   return (
     <header className="py-4 sm:py-6">
       <SurfacePanel className="relative overflow-hidden p-0" appearance="light" accent="blue">
@@ -169,31 +198,12 @@ export default function SeriesHeader({
                   coverUrl={series.coverUrl}
                   label={series.title}
                   eyebrow={series.author || formatSeriesKind(series.type)}
-                  badge={series.badge || (isCompleted ? "Completed" : "")}
+                  badge={coverBadge}
                   genres={series.genres}
                   seriesType={series.type}
                 />
               </div>
             </div>
-
-            {primaryAction ? (
-              <div className="hidden w-full gap-3 sm:flex sm:flex-col">
-                {highlightPrimaryAction ? (
-                  <p className="text-center text-xs font-semibold text-[var(--gush-accent,#3157d6)]">
-                    Unlocked. Keep reading.
-                  </p>
-                ) : null}
-                <button
-                  ref={desktopPrimaryActionRef}
-                  type="button"
-                  onClick={primaryAction}
-                  className={primaryActionClassName}
-                >
-                  <BookOpen size={18} />
-                  <span>{primaryActionLabel}</span>
-                </button>
-              </div>
-            ) : null}
           </div>
 
           <div className="min-w-0">
@@ -212,7 +222,7 @@ export default function SeriesHeader({
               {series.title || "Series"}
             </h1>
 
-            <div className="mt-5">{mobilePrimaryActions}</div>
+            {primaryActions ? <div className="mt-5 max-w-sm">{primaryActions}</div> : null}
 
             <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
               {series.description || "Open the first episode and see if it lands."}
@@ -252,19 +262,7 @@ export default function SeriesHeader({
               ) : null}
             </div>
 
-            {mobileLeadFact ? (
-              <div className="mt-5 rounded-[22px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] sm:hidden">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  {mobileLeadFact.label}
-                </p>
-                <p className="mt-2 text-sm font-semibold text-slate-950">{mobileLeadFact.value}</p>
-                {mobileLeadFact.hint ? (
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{mobileLeadFact.hint}</p>
-                ) : null}
-              </div>
-            ) : null}
-
-            <div className="mt-5 hidden gap-3 sm:grid md:grid-cols-2">
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
               {quickFacts.map((item) => (
                 <div
                   key={item.label}
@@ -281,9 +279,9 @@ export default function SeriesHeader({
               ))}
             </div>
 
-            {badges.length > 0 || genres.length > 0 ? (
+            {visibleBadges.length > 0 || genres.length > 0 ? (
               <div className="mt-5 flex flex-wrap gap-2">
-                {badges.slice(0, 2).map((badge) => (
+                {visibleBadges.slice(0, 2).map((badge) => (
                   <span
                     key={badge}
                     className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs font-semibold text-slate-700"

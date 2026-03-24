@@ -127,7 +127,7 @@ export default function StorePage({
   const sourcePath = routeAttribution?.sourcePath || returnTo || "/store";
   const isSubscriber = Boolean(subscription?.active);
   const returnLabel = getReturnLabel(returnTo, sourceEntry);
-  const launchAccessLabel = isSignedIn ? "Open account" : "Sign in for launch access";
+  const launchAccessLabel = isSignedIn ? "Open account" : "Sign in";
   const handleLaunchAccess = () => {
     if (isSignedIn) {
       router.push("/account");
@@ -629,18 +629,13 @@ export default function StorePage({
                     ? "Sign in before you buy or redeem a code."
                     : "Use one account."}
                 </h2>
-                <p className="text-sm leading-6 text-slate-600">
-                  {purchaseActionsEnabled
-                    ? "Keep purchases, codes, and receipts on one account."
-                    : "Keep future purchases and codes on one account."}
-                </p>
               </div>
                 <button
                   type="button"
                   onClick={openAuthPrompt}
                   className={primaryButtonClass}
                 >
-                  {purchaseActionsEnabled ? "Sign in" : "Sign in for launch access"}
+                  {purchaseActionsEnabled ? "Sign in" : "Sign in"}
                 </button>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -870,11 +865,7 @@ export default function StorePage({
                     disabled={!purchaseActionsEnabled}
                     hideAction={purchasePrelaunch}
                     statusLabel=""
-                    statusNote={
-                      purchaseActionsEnabled
-                        ? "Receipts and charges appear in Purchases after checkout."
-                        : ""
-                    }
+                    statusNote=""
                     ctaLabel={
                       isSignedIn
                         ? "Get this pack"

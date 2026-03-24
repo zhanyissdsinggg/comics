@@ -101,7 +101,20 @@ export default function EpisodeList({
   const filterOptions = useMemo(
     () => [
       { value: "all", label: "All" },
-      ...EPISODE_PRIMARY_STATE_ORDER.filter((state) => availabilityCounts[state] > 0).map(
+      ...EPISODE_PRIMARY_STATE_ORDER.filter((state) => {
+        if (availabilityCounts[state] <= 0) {
+          return false;
+        }
+        if (
+          state === "free" &&
+          EPISODE_PRIMARY_STATE_ORDER.every(
+            (candidate) => candidate === "free" || availabilityCounts[candidate] <= 0,
+          )
+        ) {
+          return false;
+        }
+        return true;
+      }).map(
         (state) => ({
           value: state,
           label: EPISODE_PRIMARY_STATE_META[state].filterLabel,

@@ -86,7 +86,7 @@ export default function SubscribePage({
   const [billingAvailability, setBillingAvailability] = useState(initialBillingAvailability);
   const isActive = Boolean(subscription?.active);
   const returnTo = getSearchParam(initialSearchParams, "returnTo", "/account");
-  const launchAccessLabel = isSignedIn ? "Open account" : "Sign in for launch access";
+  const launchAccessLabel = isSignedIn ? "Open account" : "Sign in";
   const handleLaunchAccess = () => {
     if (isSignedIn) {
       router.push("/account");
@@ -334,7 +334,7 @@ export default function SubscribePage({
               </button>
               {!isSignedIn && !isActive && subscriptionActionsEnabled ? (
                 <button type="button" onClick={openAuthPrompt} className={secondaryButtonClass}>
-                  {subscriptionActionsEnabled ? "Sign in" : "Sign in for launch access"}
+                  {subscriptionActionsEnabled ? "Sign in" : "Sign in"}
                 </button>
               ) : null}
             </>
@@ -409,15 +409,10 @@ export default function SubscribePage({
                     ? "Membership belongs to your account, not just this browser."
                     : "Use one account."}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  {subscriptionActionsEnabled
-                    ? "Keep renewals, receipts, and support on one account."
-                    : "Keep future membership and support on one account."}
-                </p>
               </div>
               <div className="flex flex-wrap gap-3">
                 <button type="button" onClick={openAuthPrompt} className={primaryButtonClass}>
-                  {subscriptionActionsEnabled ? "Sign in" : "Sign in for launch access"}
+                  {subscriptionActionsEnabled ? "Sign in" : "Sign in"}
                 </button>
                 <button
                   type="button"
