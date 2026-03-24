@@ -293,32 +293,6 @@ export default function StorePage({
   const purchaseAvailabilityLabel = purchaseActionsEnabled
     ? "Buy now"
     : "Prelaunch";
-  const packageDecisionSummary = useMemo(() => {
-    if (!orderedPackages.length) {
-      return null;
-    }
-
-    return orderedPackages.reduce(
-      (summary, pkg) => {
-        const totalPts = Number(pkg.paidPts || 0) + Number(pkg.bonusPts || 0);
-        const price = Number(pkg.price || 0);
-        const bonusPct = pkg.paidPts ? Math.round((Number(pkg.bonusPts || 0) / Number(pkg.paidPts || 1)) * 100) : 0;
-
-        if (!summary.cheapest || (price > 0 && price < Number(summary.cheapest.price || 0))) {
-          summary.cheapest = pkg;
-        }
-        if (!summary.largest || totalPts > summary.largest.totalPts) {
-          summary.largest = { ...pkg, totalPts };
-        }
-        if (!summary.highestBonus || Number(pkg.bonusPts || 0) > Number(summary.highestBonus.bonusPts || 0)) {
-          summary.highestBonus = { ...pkg, bonusPct };
-        }
-
-        return summary;
-      },
-      { cheapest: null, largest: null, highestBonus: null },
-    );
-  }, [orderedPackages]);
   const packageComparisonRows = useMemo(
     () =>
       orderedPackages.map((pkg) => {
@@ -347,7 +321,7 @@ export default function StorePage({
 
     if (!purchaseActionsEnabled) {
       setErrorMessage(
-        "Point-pack checkout is not open yet. Sign in for launch access, compare membership, or contact billing support.",
+        "Point-pack checkout opens later. Sign in for launch access or contact billing support.",
       );
       return;
     }
@@ -541,7 +515,7 @@ export default function StorePage({
                 Checkout opens later.
               </h2>
               <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                Review launch pricing now. No charge today. Purchases appear in Purchases after launch.
+                Pricing is visible now. No charge today.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -566,15 +540,6 @@ export default function StorePage({
               >
                 Compare membership
               </button>
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(buildSupportPath({ topic: "billing", context: "Point-pack launch or billing question" }))
-                }
-                className={secondaryButtonClass}
-              >
-                Billing help
-              </button>
             </div>
           </SurfacePanel>
         ) : null}
@@ -583,35 +548,30 @@ export default function StorePage({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                How paying works
+                Before launch
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Choose points or membership.
+                Keep the point-pack rules clear.
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">Point packs stay one-time. Membership stays monthly.</p>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             {[
               {
-                eyebrow: "Free start",
-                title: "Some series start free",
-                description: "Use free first chapters to test the hook before you spend anything.",
+                eyebrow: "Point packs",
+                title: "Use packs for one-time unlocks",
+                description: "This page is for flexible top-ups, not monthly billing.",
               },
               {
-                eyebrow: packageDecisionSummary?.cheapest?.priceLabel || "Points packs",
-                title: "Use points on locked episodes",
-                description: packageDecisionSummary?.largest
-                  ? `The biggest pack currently gives ${formatUSNumber(packageDecisionSummary.largest.totalPts)} total points.`
-                  : "Buy a pack once, then spend points only when you unlock locked episodes.",
+                eyebrow: "No charge today",
+                title: "Compare pricing before launch",
+                description: "Checkout stays closed until launch, so nothing charges today.",
               },
               {
-                eyebrow: membershipStartingPrice ? `${membershipStartingPrice}/month` : "Membership",
-                title: "Membership is monthly and recurring",
-                description: subscriptionStats
-                  ? `Better for regular readers: up to ${subscriptionStats.maxDiscount}% off unlocks and up to ${subscriptionStats.maxDailyFree} free reads a day.`
-                  : "Choose membership if you read often and want a lower cost per unlock.",
+                eyebrow: "Purchases & help",
+                title: "Receipts appear after launch",
+                description: "New orders show in Purchases after checkout opens. Billing support stays available.",
               },
             ].map((item) => (
               <div
@@ -625,6 +585,24 @@ export default function StorePage({
                 <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
               </div>
             ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                router.push(buildSupportPath({ topic: "billing", context: "Point-pack launch or billing question" }))
+              }
+              className={secondaryButtonClass}
+            >
+              Billing help
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/orders")}
+              className={secondaryButtonClass}
+            >
+              Receipt location
+            </button>
           </div>
         </SurfacePanel>
 
@@ -654,7 +632,7 @@ export default function StorePage({
                 <p className="text-sm leading-6 text-slate-600">
                   {purchaseActionsEnabled
                     ? "Keep purchases, codes, and receipts on one account."
-                    : "Future packs and receipts stay on that account."}
+                    : "Keep launch access and future purchases on one account."}
                 </p>
               </div>
                 <button
@@ -697,13 +675,9 @@ export default function StorePage({
               </div>
               <div className="grid gap-3">
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
-                  <p className="text-sm font-semibold text-slate-950">
-                    {purchaseActionsEnabled ? "Local total stays visible" : "Pricing stays visible"}
-                  </p>
+                  <p className="text-sm font-semibold text-slate-950">Packs stay one-time</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {purchaseActionsEnabled
-                      ? `Pack cards show the current regional price before checkout.`
-                      : `Pack cards show the launch price up front.`}
+                    Use packs only when you want one-off unlocks.
                   </p>
                 </div>
                 <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
@@ -735,13 +709,15 @@ export default function StorePage({
                 >
                   {STOREFRONT_TERMS.compareMembership}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/orders")}
-                  className={secondaryButtonClass}
-                >
-                  {purchaseActionsEnabled ? "View purchases" : "Receipt location"}
-                </button>
+                {purchaseActionsEnabled ? (
+                  <button
+                    type="button"
+                    onClick={() => router.push("/orders")}
+                    className={secondaryButtonClass}
+                  >
+                    View purchases
+                  </button>
+                ) : null}
               </div>
             </SurfacePanel>
 
@@ -909,24 +885,26 @@ export default function StorePage({
               ))}
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => router.push("/orders")}
-                className={secondaryButtonClass}
-              >
-                {purchaseActionsEnabled ? "View purchases" : "Receipt location"}
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(buildSupportPath({ topic: "billing", context: "Point-pack purchase history help" }))
-                }
-                className={secondaryButtonClass}
-              >
-                Get billing help
-              </button>
-            </div>
+            {purchaseActionsEnabled ? (
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/orders")}
+                  className={secondaryButtonClass}
+                >
+                  View purchases
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(buildSupportPath({ topic: "billing", context: "Point-pack purchase history help" }))
+                  }
+                  className={secondaryButtonClass}
+                >
+                  Get billing help
+                </button>
+              </div>
+            ) : null}
           </SurfacePanel>
         </div>
       </main>

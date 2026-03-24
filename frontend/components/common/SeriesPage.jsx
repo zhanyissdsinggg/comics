@@ -324,12 +324,6 @@ export default function SeriesPage({
     });
   }, [selectedGenre, series, sortBy, status]);
 
-  const activeFilterCount = [
-    selectedGenre !== "all" ? selectedGenre : "",
-    status !== "all" ? status : "",
-    sortBy !== "popular" ? sortBy : "",
-  ].filter(Boolean).length;
-
   const discoveryShelves = useMemo(() => {
     const freeStart = [...series]
       .filter((item) => Number(item?.freeEpisodeCount || 0) > 0 || item?.hasFreeEpisodes)

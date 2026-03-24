@@ -40,13 +40,6 @@ export default function FilterBar({
     sortBy !== "popular" ? sortBy : "",
     status !== "all" ? status : "",
   ].filter(Boolean).length;
-  const statusLabel = statusOptions.find((option) => option.id === status)?.label || "All";
-  const sortLabel = sortOptions.find((option) => option.id === sortBy)?.label || "Popular";
-  const activeSummaries = [
-    sortBy !== "popular" ? sortLabel : "",
-    status !== "all" ? statusLabel : "",
-    selectedGenre !== "all" ? selectedGenre : "",
-  ].filter(Boolean);
 
   const handleSortChange = (id) => {
     if (onSortChange) onSortChange(id);
@@ -67,35 +60,20 @@ export default function FilterBar({
 
   return (
     <div className="space-y-2.5">
-      {activeSummaries.length > 0 || (activeFilterCount > 0 && typeof onReset === "function") ? (
-        <div className="flex flex-wrap items-center gap-2">
-          {activeSummaries.map((item) => (
-            <span
-              key={item}
-              className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] ${
-                isLight
-                  ? "border-black/8 bg-[rgba(246,243,237,0.92)] text-slate-500"
-                  : "border-white/10 bg-white/[0.04] text-neutral-300"
-              }`}
-            >
-              {item}
-            </span>
-          ))}
-
-          {activeFilterCount > 0 && typeof onReset === "function" ? (
-            <button
-              type="button"
-              onClick={onReset}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors ${
-                isLight
-                  ? "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
-                  : "border-white/10 bg-black/20 text-neutral-200 hover:border-white/20 hover:bg-white/[0.08]"
-              }`}
-            >
-              <RotateCcw size={14} />
-              Reset
-            </button>
-          ) : null}
+      {activeFilterCount > 0 && typeof onReset === "function" ? (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={onReset}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors ${
+              isLight
+                ? "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
+                : "border-white/10 bg-black/20 text-neutral-200 hover:border-white/20 hover:bg-white/[0.08]"
+            }`}
+          >
+            <RotateCcw size={14} />
+            Reset
+          </button>
         </div>
       ) : null}
 

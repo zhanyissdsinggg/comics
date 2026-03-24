@@ -199,7 +199,7 @@ export default function SubscribePage({
     }
 
     if (!subscriptionActionsEnabled) {
-      setFeedback("Membership is in prelaunch. Sign in for launch access or contact billing support.");
+      setFeedback("Membership opens later. Sign in for launch access or contact billing support.");
       return;
     }
 
@@ -345,32 +345,27 @@ export default function SubscribePage({
           <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="max-w-3xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Membership rules
+                  Billing rules
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   Keep the monthly rules clear.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Membership stays recurring and point packs stay separate on the Store page.
-                </p>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             {[
               {
-                title: "Recurring monthly billing",
-                body: subscriptionPrelaunch
-                  ? "Recurring billing starts when membership opens."
-                  : "You are charged each month while active.",
+                title: "Monthly billing",
+                body: "Membership is recurring while active.",
               },
               {
                 title: "Cancel before renewal",
                 body: "Cancel before the listed renewal date.",
               },
               {
-                title: "Receipts stay visible",
-                body: "Renewals and order IDs stay in Purchases.",
+                title: "Purchases & help",
+                body: "Receipts and renewals appear in Purchases. Billing support stays available.",
               },
             ].map((item) => (
               <div
@@ -381,6 +376,24 @@ export default function SubscribePage({
                 <p className="mt-3 text-sm leading-6 text-slate-600">{item.body}</p>
               </div>
             ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                router.push(buildSupportPath({ topic: "billing", context: "Membership launch or billing question" }))
+              }
+              className={secondaryButtonClass}
+            >
+              Billing help
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/orders")}
+              className={secondaryButtonClass}
+            >
+              Receipt location
+            </button>
           </div>
         </SurfacePanel>
 
@@ -399,7 +412,7 @@ export default function SubscribePage({
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   {subscriptionActionsEnabled
                     ? "Keep renewals, receipts, and support on one account."
-                    : "Future renewals and receipts stay on that account."}
+                    : "Keep launch access and future membership on one account."}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -432,7 +445,7 @@ export default function SubscribePage({
                   Membership opens later.
                 </h2>
                 <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                  Review pricing now. No monthly charge today. Purchases appear in Purchases after launch.
+                  Pricing and plan perks are visible now. No monthly charge today.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -456,15 +469,6 @@ export default function SubscribePage({
                   className={secondaryButtonClass}
                 >
                   Compare point packs
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(buildSupportPath({ topic: "billing", context: "Membership launch or billing question" }))
-                  }
-                  className={secondaryButtonClass}
-                >
-                  Billing help
                 </button>
               </div>
             </SurfacePanel>

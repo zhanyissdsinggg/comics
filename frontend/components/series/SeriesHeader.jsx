@@ -68,7 +68,6 @@ export default function SeriesHeader({
   onContinue,
   onStart,
   primaryActionLabelOverride = "",
-  secondaryActionLabelOverride = "",
   onFollowToggle,
   isFollowing,
   desktopPrimaryActionRef,
@@ -96,10 +95,6 @@ export default function SeriesHeader({
     : hasFreeEpisodes
       ? "Read Free"
       : "Start Reading");
-  const secondaryAction = onContinue && onStart ? onStart : null;
-  const secondaryActionLabel = secondaryAction
-    ? secondaryActionLabelOverride || "Start at Episode 1"
-    : "";
   const followers = Number(series.followers || 0);
   const ratingCount = Number(series.ratingCount || 0);
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.id || latestEpisode?.number || "");
@@ -141,15 +136,6 @@ export default function SeriesHeader({
         <BookOpen size={18} />
         <span>{primaryActionLabel}</span>
       </button>
-      {secondaryAction ? (
-        <button
-          type="button"
-          onClick={secondaryAction}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
-        >
-          <span>{secondaryActionLabel}</span>
-        </button>
-      ) : null}
     </div>
   ) : null;
   const quickFacts = [
@@ -161,15 +147,15 @@ export default function SeriesHeader({
         : formatUpdateLabel(series.updatedAt),
     },
     {
-      label: "Access",
+      label: "Reading",
       value:
         accessSummary?.entryLabel ||
         (onContinue
           ? "Continue where you stopped"
           : hasFreeEpisodes
-            ? "Start at Episode 1"
+            ? "Starts free"
             : "Unlock as you go"),
-      hint: "",
+      hint: accessSummary?.entryHint || "",
     },
   ];
   const mobileLeadFact = quickFacts[1] || quickFacts[0] || null;
@@ -208,15 +194,6 @@ export default function SeriesHeader({
                   <BookOpen size={18} />
                   <span>{primaryActionLabel}</span>
                 </button>
-                {secondaryAction ? (
-                  <button
-                    type="button"
-                    onClick={secondaryAction}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
-                  >
-                    <span>{secondaryActionLabel}</span>
-                  </button>
-                ) : null}
               </div>
             ) : null}
           </div>
@@ -240,7 +217,7 @@ export default function SeriesHeader({
             <div className="mt-5">{mobilePrimaryActions}</div>
 
             <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
-              {series.description || "Start at Episode 1 and see if this one pulls you in."}
+              {series.description || "Open the first episode and see if it lands."}
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">

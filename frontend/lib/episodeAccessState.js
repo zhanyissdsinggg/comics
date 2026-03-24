@@ -61,17 +61,17 @@ function toEpisodeStateList(episodeStateMap) {
 
 function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
   if (counts.free > 0 && counts.preview > 0) {
-    return "Start here, then unlock later.";
+    return "Unlock later.";
   }
 
   if (counts.free > 0) {
     return counts.points > 0 || counts.membership > 0 || counts.locked > 0
-      ? "Start here, then unlock later."
-      : "Start here.";
+      ? "Unlock later."
+      : "";
   }
 
   if (counts.preview > 0) {
-    return "Preview first, then unlock.";
+    return "Unlock after the preview.";
   }
 
   if (counts.points > 0 && hasCountdown) {
@@ -79,13 +79,11 @@ function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
   }
 
   if (counts.points > 0 && counts.membership > 0) {
-    return "Use points, or membership where included.";
+    return "Use points or membership.";
   }
 
   if (counts.membership > 0) {
-    return counts.points > 0
-      ? "Membership covers eligible episodes."
-      : "Membership included.";
+    return counts.points > 0 ? "Membership covers eligible episodes." : "";
   }
 
   if (hasCountdown) {
@@ -93,10 +91,10 @@ function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
   }
 
   if (counts.points > 0) {
-    return "Unlock with points.";
+    return "";
   }
 
-  return "Locked right now.";
+  return "";
 }
 
 function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
@@ -109,15 +107,15 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
   }
 
   if (firstState.primaryState === "free") {
-    return "Start at Episode 1";
+    return "Starts free";
   }
 
   if (firstState.primaryState === "preview") {
-    return "Preview first";
+    return "Preview available";
   }
 
   if (firstState.primaryState === "membership") {
-    return "Membership access";
+    return "Membership included";
   }
 
   if (firstState.primaryState === "points") {
@@ -127,10 +125,10 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
   }
 
   if (hasCountdown) {
-    return "Available later";
+    return "Opens later";
   }
 
-  return "Locked for now";
+  return "Locked";
 }
 
 function getEpisodeAvailabilityBadge(counts, hasCountdown) {

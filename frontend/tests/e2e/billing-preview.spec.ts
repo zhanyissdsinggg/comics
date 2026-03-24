@@ -55,7 +55,13 @@ test.describe("Billing prelaunch states", () => {
     await expect(page.getByRole("heading", { name: "Checkout opens later." }).first()).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText("Review launch pricing now. No charge today. Purchases appear in Purchases after launch.")).toBeVisible({
+    await expect(page.getByText("Pricing is visible now. No charge today.")).toBeVisible({
+      timeout: BILLING_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("Receipts appear after launch")).toBeVisible({
+      timeout: BILLING_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("button", { name: "Billing help" }).first()).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
     await expect(page.getByRole("button", { name: "Sign in to get it" })).toHaveCount(0);
@@ -74,7 +80,13 @@ test.describe("Billing prelaunch states", () => {
     await expect(page.getByRole("heading", { name: "Membership opens later." }).first()).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText("Review pricing now. No monthly charge today. Purchases appear in Purchases after launch.")).toBeVisible({
+    await expect(page.getByText("Pricing and plan perks are visible now. No monthly charge today.")).toBeVisible({
+      timeout: BILLING_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("Purchases & help")).toBeVisible({
+      timeout: BILLING_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("button", { name: "Billing help" }).first()).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
     await expect(page.getByRole("button", { name: "Pick this plan" })).toHaveCount(0);

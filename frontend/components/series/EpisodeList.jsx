@@ -1,31 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import EpisodeRow from "./EpisodeRow";
 import { useProgressStore } from "../../store/useProgressStore";
-import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import {
   EPISODE_PRIMARY_STATE_META,
   EPISODE_PRIMARY_STATE_ORDER,
   buildEpisodeAccessStateMap,
   getEpisodeAvailabilitySummary,
-  getSeriesPrimaryReadAction,
 } from "../../lib/episodeAccessState";
-
-function createIdempotencyKey() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `idem_${Date.now()}_${Math.random().toString(16).slice(2, 10)}`;
-}
-
-function openAuthModal() {
-  if (typeof window === "undefined") {
-    return;
-  }
-  window.dispatchEvent(new CustomEvent("auth:open"));
-}
 
 function sortEpisodes(episodes, sortOrder) {
   const sorted = [...episodes];
@@ -43,22 +26,18 @@ export default function EpisodeList({
   entitlement,
   wallet,
   coupons,
-  isSignedIn = false,
   onRead,
   onUnlock,
   onClaim,
   onSubscribe,
 }) {
-  const router = useRouter();
   const { getProgress } = useProgressStore();
   const [sortOrder, setSortOrder] = useState("oldest");
   const [filter, setFilter] = useState("all");
-  const [topActionWorking, setTopActionWorking] = useState(false);
   const unlockedEpisodeIds = useMemo(
     () => entitlement?.unlockedEpisodeIds || [],
     [entitlement?.unlockedEpisodeIds],
   );
-  const seriesProgress = series?.id ? getProgress(series.id) : null;
   const walletTotal = (wallet?.paidPts || 0) + (wallet?.bonusPts || 0);
   const totalEpisodes = Array.isArray(episodes) ? episodes.length : 0;
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -93,45 +72,6 @@ export default function EpisodeList({
   );
   const availabilityCounts = availabilitySummary.counts;
 
-  const primaryReadAction = useMemo(
-    () =>
-      getSeriesPrimaryReadAction({
-        series,
-        episodes,
-        progress: seriesProgress,
-        unlockedEpisodeIds,
-        subscription: wallet?.subscription,
-        subscriptionUsage: wallet?.subscriptionUsage,
-        coupons,
-        nowMs,
-        isSignedIn,
-      }),
-    [
-      coupons,
-      episodes,
-      isSignedIn,
-      nowMs,
-      series,
-      seriesProgress,
-      unlockedEpisodeIds,
-      wallet?.subscription,
-      wallet?.subscriptionUsage,
-    ],
-  );
-
-  const primaryEpisode = useMemo(
-    () =>
-      primaryReadAction?.episodeId
-        ? (Array.isArray(episodes) ? episodes : []).find(
-            (episode) => episode?.id === primaryReadAction.episodeId,
-          ) || null
-        : null,
-    [episodes, primaryReadAction?.episodeId],
-  );
-  const primaryEpisodeState = primaryEpisode
-    ? episodeStateMap.get(primaryEpisode.id) || null
-    : null;
-
   const needsCountdown = useMemo(
     () => availabilitySummary.hasCountdown,
     [availabilitySummary.hasCountdown],
@@ -158,11 +98,9 @@ export default function EpisodeList({
     [filteredEpisodes, sortOrder],
   );
 
-  const explainer = availabilitySummary.explainer;
-
   const filterOptions = useMemo(
     () => [
-      { value: "all", label: "All chapters" },
+      { value: "all", label: "All" },
       ...EPISODE_PRIMARY_STATE_ORDER.filter((state) => availabilityCounts[state] > 0).map(
         (state) => ({
           value: state,
@@ -182,90 +120,6 @@ export default function EpisodeList({
     }
   }, [filter, filterOptions]);
 
-  const handleOpenStore = () =>
-    router.push(
-      buildPathWithAttribution(
-        "/store",
-        {
-          entryPoint: "SERIES_EPISODE_LIST",
-          sourcePath: `/series/${series?.id}`,
-          sourceSeriesId: series?.id,
-          returnTo: `/series/${series?.id}`,
-        },
-        { focus: "auto" },
-      ),
-    );
-
-  const primaryActionKind =
-    primaryReadAction?.actionKind || primaryEpisodeState?.actionKind || null;
-
-  const handlePrimaryAction = async () => {
-    if (topActionWorking) {
-      return;
-    }
-
-    if (!primaryReadAction?.episodeId || !primaryEpisode || !primaryActionKind) {
-      if (primaryActionKind === "subscribe") {
-        onSubscribe(series?.id, primaryReadAction?.episodeId || null);
-      }
-      return;
-    }
-
-    if (primaryActionKind === "subscribe") {
-      onSubscribe(series?.id, primaryEpisode.id);
-      return;
-    }
-
-    if (primaryActionKind === "read" || primaryActionKind === "preview") {
-      onRead(series?.id, primaryEpisode.id);
-      return;
-    }
-
-    if (primaryActionKind === "claim") {
-      setTopActionWorking(true);
-      let response;
-      try {
-        response = await onClaim(series?.id, primaryEpisode.id);
-      } catch {
-        response = { ok: false, status: 500, error: "CLAIM_FAILED" };
-      }
-      if (response.ok) {
-        onRead(series?.id, primaryEpisode.id);
-      } else if (response.status === 401) {
-        openAuthModal();
-      }
-      setTopActionWorking(false);
-      return;
-    }
-
-    if (primaryActionKind === "unlock") {
-      setTopActionWorking(true);
-      const idempotencyKey = createIdempotencyKey();
-      let response;
-      try {
-        response = await onUnlock(series?.id, primaryEpisode.id, idempotencyKey);
-      } catch {
-        response = { ok: false, status: 500, error: "UNLOCK_FAILED" };
-      }
-
-      if (response.ok) {
-        onRead(series?.id, primaryEpisode.id);
-      } else if (response.status === 401) {
-        openAuthModal();
-      } else if (response.status === 402) {
-        handleOpenStore();
-      }
-      setTopActionWorking(false);
-    }
-  };
-
-  const topActionClassName =
-    primaryActionKind === "subscribe"
-      ? "rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-60"
-      : primaryActionKind === "unlock"
-        ? "rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-        : "rounded-full bg-[var(--gush-accent,#2f6bff)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#255af0] disabled:cursor-not-allowed disabled:opacity-60";
-
   return (
     <section
       className="mt-6 rounded-[28px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,246,242,0.94))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-md sm:mt-8 sm:p-6"
@@ -273,31 +127,12 @@ export default function EpisodeList({
     >
       <div className="mb-5 border-b border-black/8 pb-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-3xl space-y-3">
+          <div className="max-w-3xl">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-slate-950">Episodes</h2>
               <span className="text-sm text-slate-500">{totalEpisodes}</span>
             </div>
-            <p className="text-sm leading-6 text-slate-600">{explainer}</p>
           </div>
-
-          {primaryReadAction?.label ? (
-            <div className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)] xl:min-w-[320px]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Read next
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={handlePrimaryAction}
-                  disabled={topActionWorking}
-                  className={topActionClassName}
-                >
-                  {topActionWorking ? "Working..." : primaryReadAction.label}
-                </button>
-              </div>
-            </div>
-          ) : null}
         </div>
 
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
