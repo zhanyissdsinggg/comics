@@ -458,7 +458,7 @@ export default function StorePage({
           description={
             purchaseActionsEnabled
               ? "Use packs for one-time unlocks. Use membership if you read often."
-              : "Review point-pack pricing now. Checkout opens later."
+              : "Review pricing now. Checkout opens later."
           }
           secondary={purchaseActionsEnabled ? regionConfig.label : ""}
           stats={storeHeroStats}
@@ -514,18 +514,18 @@ export default function StorePage({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Point-pack rules
+                What to know
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Keep the launch details in one place.
+                Before checkout opens.
               </h2>
             </div>
           </div>
           <div className="grid gap-3">
             {[
               {
-                label: "No charge today",
-                detail: "Checkout stays closed until point-pack checkout opens.",
+                label: "Today",
+                detail: "No charge today.",
               },
               {
                 label: "Purchases",
@@ -533,7 +533,7 @@ export default function StorePage({
               },
               {
                 label: "Help",
-                detail: "Billing support stays available if you need help before checkout opens.",
+                detail: "Billing support is here if you need it.",
               },
             ].map((item) => (
               <div
@@ -623,21 +623,21 @@ export default function StorePage({
                   Compare the models
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Keep packs and membership separate.
+                  Point packs or membership.
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
-                  Packs stay one-time. Membership stays monthly.
+                  Choose one-off unlocks or a monthly plan.
                 </p>
               </div>
               <div className="grid gap-3">
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
-                  <p className="text-sm font-semibold text-slate-950">Packs stay one-time</p>
+                  <p className="text-sm font-semibold text-slate-950">Point packs</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Use packs only when you want one-off unlocks.
+                    Use them for one-off unlocks.
                   </p>
                 </div>
                 <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
-                  <p className="text-sm font-semibold text-slate-950">Membership is the monthly alternative</p>
+                  <p className="text-sm font-semibold text-slate-950">Membership</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {subscriptionStats
                       ? `Starts around ${membershipStartingPrice || "the current plan price"} a month and can save up to ${subscriptionStats.maxDiscount}%.`

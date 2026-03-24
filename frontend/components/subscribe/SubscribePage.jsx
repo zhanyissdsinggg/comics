@@ -312,7 +312,7 @@ export default function SubscribePage({
           description={
             subscriptionActionsEnabled
               ? "Membership is monthly. Choose it if you read often."
-              : "Review pricing and plan perks now. Membership opens later."
+              : "Review plans and perks now. Membership opens later."
           }
           secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
           stats={subscriptionHeroStats}
@@ -345,10 +345,10 @@ export default function SubscribePage({
           <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="max-w-3xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Billing rules
+                  What to know
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Keep the billing details in one place.
+                  Before membership opens.
                 </h2>
             </div>
           </div>
@@ -356,16 +356,20 @@ export default function SubscribePage({
           <div className="grid gap-3">
             {[
               {
-                title: "No monthly charge today",
+                title: "Today",
+                body: "No monthly charge today.",
+              },
+              {
+                title: "Billing",
                 body: "Billing starts when membership opens.",
               },
               {
                 title: "Purchases",
-                body: "Receipts and renewals appear in Purchases once billing begins.",
+                body: "Receipts and renewals appear in Purchases.",
               },
               {
                 title: "Help",
-                body: "Billing support stays available if you need help before membership opens.",
+                body: "Billing support is here if you need it.",
               },
             ].map((item) => (
               <div
