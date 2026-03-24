@@ -219,19 +219,6 @@ export default function SeriesPage({
     () => (Array.isArray(data?.episodes) ? data.episodes : []),
     [data?.episodes]
   );
-  const previewHint = useMemo(() => {
-    if (!episodes.length) {
-      return "";
-    }
-    const maxPreview = episodes.reduce((max, ep) => {
-      const value = Number(ep?.previewFreePages || 0);
-      return value > max ? value : max;
-    }, 0);
-    if (maxPreview <= 0) {
-      return "";
-    }
-    return `Preview up to ${maxPreview} page${maxPreview === 1 ? "" : "s"} on eligible episodes.`;
-  }, [episodes]);
   const entitlement = bySeriesId[seriesId] || { seriesId, unlockedEpisodeIds: [] };
   const firstEpisodeId = useMemo(
     () => getFirstEpisodeId(episodes),
@@ -690,12 +677,6 @@ export default function SeriesPage({
     walletStore?.subscription,
     walletStore?.subscriptionUsage,
   ]);
-  const headerReadingHint =
-    primaryReadAction?.note &&
-    primaryReadAction.note !== seriesAccessSummary?.entryHint &&
-    primaryReadAction.note !== seriesAccessSummary?.explainer
-      ? primaryReadAction.note
-      : "";
   const handleSeriesPrimaryAction = useCallback(async () => {
     if (!primaryReadAction) {
       return;
@@ -984,7 +965,6 @@ export default function SeriesPage({
 
         <SeriesHeader
           series={series}
-          previewHint={previewHint}
           progress={progress}
           lastReadEpisode={lastReadEpisode}
           episodeCount={episodes.length}
@@ -993,7 +973,6 @@ export default function SeriesPage({
           onContinue={handleContinue}
           onStart={handleStart}
           primaryActionLabelOverride={primaryReadAction?.label || ""}
-          readingHint={headerReadingHint}
           accessSummary={seriesAccessSummary}
           onFollowToggle={handleFollowToggle}
           isFollowing={isFollowing}

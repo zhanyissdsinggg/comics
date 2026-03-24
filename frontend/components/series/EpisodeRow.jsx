@@ -193,10 +193,14 @@ function EpisodeRow({
   const supportDetail =
     progressMetaLabel
       ? ""
-      : accessState.supportLabel ||
-        (accessState.kind === "points" && shortfallValue > 0
-          ? `Need ${shortfallValue} more points`
-          : rowHelperText);
+      : accessState.kind === "preview"
+        ? accessState.supportLabel || ""
+        : accessState.kind === "points"
+          ? accessState.supportLabel ||
+            (shortfallValue > 0 ? `Need ${shortfallValue} more points` : "")
+          : accessState.kind === "membership"
+            ? accessState.supportLabel || ""
+            : "";
   const compareItems =
     modalState?.type === "SHORTFALL" && recommendedUnlockOffer?.episodes > 1
       ? [
@@ -431,7 +435,7 @@ function EpisodeRow({
             {progressMetaLabel ? <span>{progressMetaLabel}</span> : null}
           </div>
 
-          {supportDetail ? (
+          {supportDetail && supportDetail !== rowHelperText ? (
             <p className="mt-3 text-sm leading-6 text-slate-600">{supportDetail}</p>
           ) : null}
 

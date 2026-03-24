@@ -16,7 +16,6 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { siteConfig } from "../../lib/siteConfig";
 import {
   getSupportTopicPreset,
-  SUPPORT_PRIMARY_TOPICS,
   SUPPORT_TOPICS,
 } from "../../lib/supportRouting";
 
@@ -273,7 +272,6 @@ export default function SupportPage() {
           eyebrow="Support"
           title="Send a request without leaving the site."
           description="Choose the issue, add the best reply email, and tell us what happened."
-          secondary="Most replies arrive within 1 to 2 business days."
           appearance="light"
         />
 
@@ -292,9 +290,6 @@ export default function SupportPage() {
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
               Pick the closest issue and keep moving.
             </h2>
-            <p className="text-sm leading-6 text-slate-600">
-              These shortcuts fill the issue type and subject so you do not start from a blank form on mobile.
-            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {quickIssueCards.map((item) => {
@@ -396,9 +391,6 @@ export default function SupportPage() {
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                     What do you need help with?
                   </h2>
-                  <p className="text-sm leading-6 text-slate-600">
-                    Keep it short and specific. A clear subject plus the right order ID or page URL gets the fastest answer.
-                  </p>
                 </div>
 
                 {feedback.text ? (
@@ -450,11 +442,6 @@ export default function SupportPage() {
                       placeholder="name@example.com"
                       className={fieldClass}
                     />
-                    <p className="mt-2 text-xs text-slate-500">
-                      {signedInReader
-                        ? "Your account email is prefilled, but you can change it if another inbox is better."
-                        : "Guests can submit here too. Add the inbox where you want the reply."}
-                    </p>
                   </div>
                 </div>
 
@@ -532,14 +519,12 @@ export default function SupportPage() {
                   Before you send
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  A few details help a lot.
+                  Keep it specific.
                 </h2>
               </div>
               <ul className="space-y-3 text-sm leading-6 text-slate-600">
-                <li>We usually reply within 1 to 2 business days.</li>
                 <li>Add the order ID for charges, receipts, points, or renewals.</li>
                 <li>Include the title name, episode number, or page URL if something looks broken.</li>
-                <li>If you are signed in, we keep the request tied to your account context too.</li>
               </ul>
             </SurfacePanel>
 
@@ -575,32 +560,10 @@ export default function SupportPage() {
                   How it works
                 </button>
               </div>
-              <p className="text-xs text-slate-500">Backup email only: {siteConfig.supportEmail}</p>
+              <p className="text-xs text-slate-500">Backup email: {siteConfig.supportEmail}</p>
             </SurfacePanel>
           </div>
         </div>
-
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {SUPPORT_PRIMARY_TOPICS.map((item) => (
-            <SurfacePanel key={item.id} appearance="light" accent="blue">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Issue type</p>
-              <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                {item.title}
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  applyTopicPreset(item, { forceSubject: true });
-                  setSuccessState(null);
-                }}
-                className="mt-4 rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
-                Use this topic
-              </button>
-            </SurfacePanel>
-          ))}
-        </section>
       </main>
     </div>
   );

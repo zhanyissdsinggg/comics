@@ -60,7 +60,6 @@ function formatUpdateLabel(value) {
 
 export default function SeriesHeader({
   series,
-  previewHint,
   accessSummary = null,
   lastReadEpisode = null,
   episodeCount = 0,
@@ -70,7 +69,6 @@ export default function SeriesHeader({
   onStart,
   primaryActionLabelOverride = "",
   secondaryActionLabelOverride = "",
-  readingHint = "",
   onFollowToggle,
   isFollowing,
   desktopPrimaryActionRef,
@@ -105,17 +103,6 @@ export default function SeriesHeader({
   const followers = Number(series.followers || 0);
   const ratingCount = Number(series.ratingCount || 0);
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.id || latestEpisode?.number || "");
-  const accessCounts = accessSummary?.counts || {};
-  const accessFactHint = accessSummary?.startsFree
-    ? (accessCounts.points > 0 || accessCounts.membership > 0 || accessCounts.locked > 0
-        ? "Later chapters unlock with points or membership."
-        : "")
-    : accessSummary?.entryHint ||
-      (hasFreeEpisodes
-        ? ""
-        : isCompleted
-          ? "A finished run with no wait."
-          : "Use points or membership when the free start ends.");
   const readerPulseItems = [
     ratingCount > 0 ? `${ratingValue} stars` : ratingValue === "New" ? "New release" : `${ratingValue} stars`,
     followers > 0
@@ -182,7 +169,7 @@ export default function SeriesHeader({
           : hasFreeEpisodes
             ? "Free start"
             : "Unlock as you go"),
-      hint: accessFactHint,
+      hint: "",
     },
   ];
   const mobileLeadFact = quickFacts[1] || quickFacts[0] || null;
@@ -256,11 +243,6 @@ export default function SeriesHeader({
             </h1>
 
             <div className="mt-5">{mobilePrimaryActions}</div>
-            {readingHint && readingHint !== accessFactHint ? (
-              <p className="mt-3 text-sm font-medium text-[var(--gush-accent,#3157d6)]">
-                {readingHint}
-              </p>
-            ) : null}
 
             <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
               {series.description || "Start at Episode 1 and see if this one pulls you in."}
@@ -339,7 +321,7 @@ export default function SeriesHeader({
                     {badge}
                   </span>
                 ))}
-                {genres.slice(0, 3).map((genre) => (
+                {genres.slice(0, 2).map((genre) => (
                   <span
                     key={genre}
                     className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1 text-xs text-slate-500"
@@ -348,10 +330,6 @@ export default function SeriesHeader({
                   </span>
                 ))}
               </div>
-            ) : null}
-
-            {previewHint ? (
-              <p className="mt-4 text-xs leading-6 text-slate-500 sm:text-sm">{previewHint}</p>
             ) : null}
 
             <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-center">

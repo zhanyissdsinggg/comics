@@ -264,7 +264,6 @@ export default function RankingsPage({
           eyebrow="Top Series"
           title={activeTab.title}
           description={activeTab.description}
-          secondary={`${activeWindow.label} view.`}
           appearance="light"
           actions={
             <>
@@ -734,18 +733,6 @@ export default function RankingsPage({
                   ) : null}
                 </SurfacePanel>
               ) : null}
-
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Board note
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Use this shelf for faster first clicks.
-                  </h2>
-                </div>
-                <p className="text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
-              </SurfacePanel>
 
               <CreatorShelfLinks
                 items={spotlightEntries}

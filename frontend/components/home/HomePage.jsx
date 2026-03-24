@@ -171,12 +171,10 @@ function HomeShelfSection({
   icon: Icon,
   eyebrow,
   title,
-  description,
   ctaLabel,
   onCtaClick,
   items,
   onItemClick,
-  renderMeta,
 }) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
@@ -193,11 +191,6 @@ function HomeShelfSection({
           <h2 className="mt-3 font-display text-[1.65rem] font-semibold tracking-tight text-slate-950 sm:text-[1.95rem]">
             {title}
           </h2>
-          {description ? (
-            <p className="mt-2 text-sm leading-6 text-slate-600 sm:text-[15px]">
-              {description}
-            </p>
-          ) : null}
         </div>
 
         {ctaLabel && typeof onCtaClick === "function" ? (
@@ -215,16 +208,13 @@ function HomeShelfSection({
 
       <div className="mt-5 grid grid-cols-2 gap-4 xl:grid-cols-4">
         {items.map((item) => (
-          <div key={item.id} className="space-y-2">
+          <div key={item.id}>
             <PortraitCard
               item={item}
               tone={item.coverTone}
               appearance="light"
               onClick={() => onItemClick?.(item)}
             />
-            {typeof renderMeta === "function" ? (
-              <div className="px-1">{renderMeta(item)}</div>
-            ) : null}
           </div>
         ))}
       </div>
@@ -564,10 +554,6 @@ function HomeContent({ initialSearchParams = {} }) {
   };
 
   const heroEyebrow = resumeSeries ? "Continue reading" : "Start reading";
-  const heroDescription = resumeSeries
-    ? "Pick up your next chapter fast."
-    : "Open something strong on the first tap.";
-
   return (
     <div className="gush-page-shell overflow-hidden">
       <div className="gush-page-ambient h-[clamp(21rem,42vw,34rem)]" />
@@ -595,9 +581,6 @@ function HomeContent({ initialSearchParams = {} }) {
                   <h1 className="mt-3 max-w-3xl font-display text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.9rem] xl:text-[3.4rem]">
                     Stories worth opening on the first tap.
                   </h1>
-                  <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                    {heroDescription}
-                  </p>
 
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Button
@@ -722,9 +705,6 @@ function HomeContent({ initialSearchParams = {} }) {
               onItemClick={(item) =>
                 openHomeSeries(item.id, "HOME_TOP_SERIES", `home_top_series_${item.id}`)
               }
-              renderMeta={(item) => (
-                <p className="text-xs font-medium text-slate-500">{item.statusLabel}</p>
-              )}
             />
 
             <HomeShelfSection
@@ -737,9 +717,6 @@ function HomeContent({ initialSearchParams = {} }) {
               onItemClick={(item) =>
                 openHomeSeries(item.id, "HOME_FREE_START", `home_free_start_${item.id}`)
               }
-              renderMeta={(item) => (
-                <p className="text-xs font-medium text-slate-500">{item.metaLabel}</p>
-              )}
             />
 
           </>
@@ -755,9 +732,6 @@ function HomeContent({ initialSearchParams = {} }) {
                 <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
                   One-time packs or a monthly plan.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-                  Pick the path that matches how often you read.
-                </p>
 
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Button
@@ -791,9 +765,7 @@ function HomeContent({ initialSearchParams = {} }) {
                   <h3 className="mt-2 text-lg font-semibold text-slate-950">
                     Use points as needed.
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Flexible one-time unlocks.
-                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">One-time.</p>
                 </div>
 
                 <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
@@ -806,9 +778,7 @@ function HomeContent({ initialSearchParams = {} }) {
                   <h3 className="mt-2 text-lg font-semibold text-slate-950">
                     Read weekly for less.
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Better for regular reading.
-                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">Monthly.</p>
                 </div>
               </div>
             </CardContent>

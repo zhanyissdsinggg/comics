@@ -118,13 +118,6 @@ function summarizeLeadCopy(text, fallback) {
   return `${source.slice(0, 117).trimEnd()}...`;
 }
 
-function getCreatorTopTitles(creator, limit = 3) {
-  return (Array.isArray(creator?.series) ? creator.series : [])
-    .map((item) => String(item?.title || "").trim())
-    .filter(Boolean)
-    .slice(0, limit);
-}
-
 function getCreatorLeadSeries(creator) {
   const series = Array.isArray(creator?.series) ? creator.series : [];
   if (creator?.spotlightSeries?.id) {
@@ -702,7 +695,6 @@ export default function CreatorsHubPage({
             eyebrow="Creators"
             title="Find the creators worth following."
             description="Move from a title you like to the writer, artist, or studio behind it."
-            secondary="Search, Top Series, and title pages keep discovery moving."
             stats={heroStats}
             actions={
               <>
@@ -860,7 +852,6 @@ export default function CreatorsHubPage({
           eyebrow="Creators"
           title="Find the creators worth following."
           description="Jump from a favorite series to the writer, artist, or studio behind it."
-          secondary="Use creator shelves, search, or Top Series for the next click."
           stats={heroStats}
           actions={
             <>
@@ -898,9 +889,6 @@ export default function CreatorsHubPage({
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Choose a creator path.
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Studios, creator voices, search, and genre-led browsing all start here.
-              </p>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {[
@@ -1022,18 +1010,6 @@ export default function CreatorsHubPage({
                               : "Open the shelf to browse this creator or studio in one place.",
                           )}
                         </p>
-                        {getCreatorTopTitles(creator, 2).length > 0 ? (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {getCreatorTopTitles(creator, 2).map((title) => (
-                              <span
-                                key={`${group.id}-${creator.slug}-featured-title-${title}`}
-                                className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
-                              >
-                                {title}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
                         <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
                           {buildCreatorShelfMeta(creator).map((item) => (
                             <span key={`${group.id}-${creator.slug}-featured-meta-${item}`}>{item}</span>
@@ -1058,9 +1034,6 @@ export default function CreatorsHubPage({
                   Open a standout work, then follow the creator trail.
                 </h2>
               </div>
-              <p className="text-sm text-slate-500">
-                Picked to make the next creator click feel immediate.
-              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -1321,15 +1294,11 @@ export default function CreatorsHubPage({
                   Featured creator shelves.
                 </h2>
               </div>
-              <p className="text-sm text-slate-500">
-                Strong voices, standout titles, quick next clicks.
-              </p>
             </div>
 
             <div className="grid gap-4 xl:grid-cols-3">
               {spotlightCreators.map((creator) => {
-                const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres : [];
-                const creatorTopTitles = getCreatorTopTitles(creator, 3);
+                const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
 
                 return (
                   <Link
@@ -1379,19 +1348,6 @@ export default function CreatorsHubPage({
                               className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
                             >
                               {genre}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
-
-                      {creatorTopTitles.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {creatorTopTitles.map((title) => (
-                            <span
-                              key={`${creator.slug}-spotlight-title-${title}`}
-                              className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs text-slate-600"
-                            >
-                              {title}
                             </span>
                           ))}
                         </div>
@@ -1449,8 +1405,7 @@ export default function CreatorsHubPage({
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filteredCreators.map((creator) => {
-                const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres : [];
-                const creatorTopTitles = getCreatorTopTitles(creator, 3);
+                const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
 
                 return (
                   <Link
@@ -1501,19 +1456,6 @@ export default function CreatorsHubPage({
                                 className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-xs text-slate-600"
                               >
                                 {genre}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-
-                        {creatorTopTitles.length > 0 ? (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {creatorTopTitles.map((title) => (
-                              <span
-                                key={`${creator.slug}-grid-title-${title}`}
-                                className="rounded-full border border-black/8 bg-white px-2.5 py-1 text-xs text-slate-600"
-                              >
-                                {title}
                               </span>
                             ))}
                           </div>

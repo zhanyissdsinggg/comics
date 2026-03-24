@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import EpisodeRow from "./EpisodeRow";
 import { useProgressStore } from "../../store/useProgressStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
-import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import {
   EPISODE_PRIMARY_STATE_META,
   EPISODE_PRIMARY_STATE_ORDER,
@@ -159,7 +158,6 @@ export default function EpisodeList({
     [filteredEpisodes, sortOrder],
   );
 
-  const summaryItems = availabilitySummary.summaryItems.slice(0, 3);
   const explainer = availabilitySummary.explainer;
 
   const filterOptions = useMemo(
@@ -198,22 +196,8 @@ export default function EpisodeList({
       ),
     );
 
-  const handleOpenMembership = () =>
-    router.push(
-      buildPathWithAttribution("/subscribe", {
-        entryPoint: "SERIES_EPISODE_LIST",
-        sourcePath: `/series/${series?.id}`,
-        sourceSeriesId: series?.id,
-        returnTo: `/series/${series?.id}`,
-      }),
-    );
-
   const primaryActionKind =
     primaryReadAction?.actionKind || primaryEpisodeState?.actionKind || null;
-  const primaryActionNote =
-    primaryReadAction?.note && primaryReadAction.note !== explainer
-      ? primaryReadAction.note
-      : "";
 
   const handlePrimaryAction = async () => {
     if (topActionWorking) {
@@ -295,18 +279,6 @@ export default function EpisodeList({
               <span className="text-sm text-slate-500">{totalEpisodes}</span>
             </div>
             <p className="text-sm leading-6 text-slate-600">{explainer}</p>
-            {summaryItems.length > 0 ? (
-              <div className="hidden flex-wrap gap-2 sm:flex">
-                {summaryItems.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1.5 text-xs text-slate-600"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            ) : null}
           </div>
 
           {primaryReadAction?.label ? (
@@ -314,11 +286,6 @@ export default function EpisodeList({
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                 Read next
               </p>
-              {primaryActionNote ? (
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {primaryActionNote}
-                </p>
-              ) : null}
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -328,15 +295,6 @@ export default function EpisodeList({
                 >
                   {topActionWorking ? "Working..." : primaryReadAction.label}
                 </button>
-                {seriesProgress?.lastEpisodeId && primaryReadAction.label !== "Continue Reading" ? (
-                  <button
-                    type="button"
-                    onClick={() => onRead(series?.id, seriesProgress.lastEpisodeId)}
-                    className="rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-                  >
-                    Continue Reading
-                  </button>
-                ) : null}
               </div>
             </div>
           ) : null}
@@ -363,22 +321,6 @@ export default function EpisodeList({
               <option value="oldest">Oldest first</option>
               <option value="newest">Newest first</option>
             </select>
-          </div>
-          <div className="hidden flex-wrap items-center gap-2 sm:flex sm:gap-3">
-            <button
-              type="button"
-              onClick={handleOpenStore}
-              className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-            >
-              {STOREFRONT_TERMS.viewPointPacks}
-            </button>
-            <button
-              type="button"
-              onClick={handleOpenMembership}
-              className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white"
-            >
-              {STOREFRONT_TERMS.compareMembership}
-            </button>
           </div>
           <span className="text-xs text-slate-500 sm:ml-auto">{sortedEpisodes.length} shown</span>
         </div>

@@ -139,11 +139,9 @@ function normalizeKeywordList(items) {
 }
 
 function formatSearchSeriesMeta(series) {
-  const rating = Number(series?.rating);
   return [
     series?.type || "Series",
     series?.status || "Ongoing",
-    Number.isFinite(rating) ? `Rating ${rating.toFixed(1)}` : null,
   ]
     .filter(Boolean)
     .join(" / ");
@@ -152,7 +150,7 @@ function formatSearchSeriesMeta(series) {
 function summarizeSearchDescription(series) {
   const description = String(series?.description || "").replace(/\s+/g, " ").trim();
   if (description) {
-    return description.length > 132 ? `${description.slice(0, 129).trimEnd()}...` : description;
+    return description.length > 96 ? `${description.slice(0, 93).trimEnd()}...` : description;
   }
 
   if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
@@ -186,7 +184,7 @@ function getSearchSignals(series) {
     signals.push("18+");
   }
 
-  return signals.slice(0, 4);
+  return signals.slice(0, 2);
 }
 
 export default function SearchPage() {
@@ -662,8 +660,8 @@ export default function SearchPage() {
     ? loading
       ? "Refreshing matches..."
       : `${total.toLocaleString()} match${total === 1 ? "" : "es"}${activeFilterCount > 0 ? ` / ${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"}` : ""}.`
-    : "Search titles, genres, or creators, or jump into a popular lane.";
-  const heroSecondary = query && activeFilterCount > 0 ? "Clear filters if the list feels too tight." : "";
+    : "Search titles, genres, or creators.";
+  const heroSecondary = "";
   const loadingResultLabel = "Updating";
   const heroStats = useMemo(
     () => [
@@ -840,8 +838,8 @@ export default function SearchPage() {
     items: Array.isArray(rail.items) ? rail.items.slice(0, 4) : [],
   }));
   const shouldShowReco =
-    visibleRecoRails.length > 0 && (!query || results.length === 0 || hasSparseResults);
-  const shouldShowEventHub = Boolean(query) && (results.length === 0 || hasSparseResults);
+    visibleRecoRails.length > 0 && (!query || results.length === 0);
+  const shouldShowEventHub = false;
   const searchEventCards = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -1111,52 +1109,43 @@ export default function SearchPage() {
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-black/6 bg-white/82 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Quick starts
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {discoveryKeywords.slice(0, 6).map((item) => (
+            {!query ? (
+              <div className="rounded-[24px] border border-black/6 bg-white/82 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Quick starts
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {discoveryKeywords.slice(0, 4).map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() =>
+                        updateParams(
+                          {
+                            q: item.value,
+                            type: "",
+                            status: "",
+                            genre: "",
+                            sort: "popular",
+                          },
+                          { resetPage: true },
+                        )
+                      }
+                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
                   <button
-                    key={item.id}
                     type="button"
-                    onClick={() =>
-                      updateParams(
-                        {
-                          q: item.value,
-                          type: "",
-                          status: "",
-                          genre: "",
-                          sort: "popular",
-                        },
-                        { resetPage: true },
-                      )
-                    }
+                    onClick={() => router.push("/rankings?type=ttf&window=all")}
                     className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
                   >
-                    {item.label}
+                    Start free
                   </button>
-                ))}
-                {!query ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => router.push("/search?status=Completed&sort=popular")}
-                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
-                    >
-                      Finished series
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => router.push("/rankings?type=ttf&window=all")}
-                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
-                    >
-                      Start free
-                    </button>
-                  </>
-                ) : null}
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
 
           {!query && (history.length > 0 || hotKeywords.length > 0 || keywords.length > 0) ? (
@@ -1365,7 +1354,7 @@ export default function SearchPage() {
               <SkeletonCard key={index} />
             ))}
           </div>
-            ) : error ? (
+        ) : error ? (
           <SurfacePanel className="text-red-700" appearance="light" tone="danger" accent="rose">
             <p className="text-lg font-semibold">{error}</p>
             <p className="mt-2 text-sm text-red-600/80">Please check your connection and try again.</p>
@@ -1395,9 +1384,6 @@ export default function SearchPage() {
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 Try a wider search.
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Clear filters, broaden the keyword, or open one of these stronger paths.
-              </p>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
               {activeFilterCount > 0 ? (
@@ -1482,25 +1468,6 @@ export default function SearchPage() {
                 </button>
               )}
             </div>
-            <div className="flex flex-wrap gap-2 text-sm">
-              {hotKeywords.slice(0, 4).map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => updateParam("q", item.value)}
-                  className={secondaryButtonClass}
-                >
-                  {item.label}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
-                className={accentButtonClass}
-              >
-                Browse Top Series
-              </button>
-            </div>
             <div className="pt-2">{browsePathGrid}</div>
           </SurfacePanel>
             ) : (
@@ -1518,99 +1485,6 @@ export default function SearchPage() {
                 Sorted by {SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance"}
               </p>
             </div>
-
-            {hasSparseResults ? (
-              <SurfacePanel className="space-y-3" appearance="light" accent="blue">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      Wider picks
-                    </p>
-                    <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-slate-950">
-                      Only a few results? Open something nearby.
-                    </h3>
-                  </div>
-                  <p className="text-sm text-slate-500">
-                    Keep this search if you want, or branch into something with a similar vibe.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {activeFilterCount > 0 ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateParams(
-                          {
-                            type: "",
-                            status: "",
-                            genre: "",
-                            sort: "relevance",
-                          },
-                          { resetPage: true },
-                        )
-                      }
-                      className={secondaryButtonClass}
-                    >
-                      Widen filters
-                    </button>
-                  ) : null}
-                  {breakoutPick ? (
-                    <button
-                      type="button"
-                      onClick={() => handleSeriesClick(breakoutPick.id, "SEARCH_SPARSE_RESULTS", "search_sparse_breakout")}
-                      className={secondaryButtonClass}
-                    >
-                      Open {breakoutPick.title}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => router.push("/rankings?type=popular&window=week")}
-                      className={secondaryButtonClass}
-                    >
-                      Compare with Top Series
-                    </button>
-                  )}
-                  {completedPick ? (
-                    <button
-                      type="button"
-                      onClick={() => handleSeriesClick(completedPick.id, "SEARCH_SPARSE_RESULTS", "search_sparse_completed")}
-                      className={secondaryButtonClass}
-                    >
-                      Open {completedPick.title}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateParams(
-                          {
-                            q: "",
-                            type: "",
-                            genre: "",
-                            status: "Completed",
-                            sort: "popular",
-                          },
-                          { resetPage: true },
-                        )
-                      }
-                      className={secondaryButtonClass}
-                    >
-                      Check completed picks
-                    </button>
-                  )}
-                  {freeStartPick ? (
-                    <button
-                      type="button"
-                      onClick={() => handleSeriesClick(freeStartPick.id, "SEARCH_SPARSE_RESULTS", "search_sparse_free_start")}
-                      className={accentButtonClass}
-                    >
-                      Open {freeStartPick.title}
-                    </button>
-                  ) : null}
-                </div>
-              </SurfacePanel>
-            ) : null}
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((series) => (
@@ -1633,8 +1507,8 @@ export default function SearchPage() {
                   }
                   className="group block rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
                   aria-label={`Open ${series.title}`}
-                >
-                  <div className="grid gap-4 sm:grid-cols-[112px_minmax(0,1fr)]">
+                  >
+                    <div className="grid gap-4 sm:grid-cols-[112px_minmax(0,1fr)]">
                     <div className="overflow-hidden rounded-[20px] border border-black/6 bg-neutral-900 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                       <Cover
                         tone={series.coverTone}
@@ -1649,38 +1523,29 @@ export default function SearchPage() {
                       />
                     </div>
                     <div className="min-w-0 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-display text-lg font-semibold tracking-tight text-slate-950">
-                        {highlight(series.title, query)}
-                      </h3>
-                      {series.badge ? <Pill appearance="light">{series.badge}</Pill> : null}
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="font-display text-lg font-semibold tracking-tight text-slate-950">
+                          {highlight(series.title, query)}
+                        </h3>
+                        {series.badge ? <Pill appearance="light">{series.badge}</Pill> : null}
+                      </div>
+                      <p className="text-sm text-slate-500">
+                        {formatSearchSeriesMeta(series)}
+                      </p>
+                      <p className="line-clamp-2 text-sm leading-6 text-slate-600">
+                        {summarizeSearchDescription(series)}
+                      </p>
+                      <div className="flex flex-wrap gap-2 text-xs text-slate-600">
+                        {getSearchSignals(series).map((item) => (
+                          <span
+                            key={`${series.id}-signal-${item}`}
+                            className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-2.5 py-1"
+                          >
+                            {highlight(item, query)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-sm text-slate-500">
-                      {formatSearchSeriesMeta(series)}
-                    </p>
-                    <p className="line-clamp-3 text-sm leading-6 text-slate-600">
-                      {summarizeSearchDescription(series)}
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-xs text-slate-600">
-                      {getSearchSignals(series).map((item) => (
-                        <span
-                          key={`${series.id}-signal-${item}`}
-                          className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-2.5 py-1"
-                        >
-                          {highlight(item, query)}
-                        </span>
-                      ))}
-                      {(series.genres || []).slice(0, 2).map((item) => (
-                        <span
-                          key={item}
-                          className="rounded-full border border-black/8 bg-white/84 px-2.5 py-1"
-                        >
-                          {highlight(item, query)}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="text-xs font-semibold text-slate-950">Open title details</p>
-                  </div>
                   </div>
                 </Link>
               ))}

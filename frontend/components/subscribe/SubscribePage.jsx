@@ -6,7 +6,6 @@ import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
-import CommerceRouteSummary from "../common/CommerceRouteSummary";
 import { SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
 import { getPlanCatalog, setPlanCatalog } from "../../lib/subscriptions";
 import { apiGet } from "../../lib/apiClient";
@@ -270,45 +269,30 @@ export default function SubscribePage({
         label: "Availability",
         value: subscriptionAvailabilityLabel,
         hint: isActive
-          ? `${subscription?.planId || "Membership"} is active on this account.`
+          ? `${subscription?.planId || "Membership"} is active.`
           : subscriptionActionsEnabled
-            ? "Pick a tier when you want lower prices, free reads, and monthly points."
-            : "Review the planned monthly pricing and perks here before membership opens.",
+            ? "Monthly billing is open."
+            : "Pricing now. Billing later.",
       },
       {
         label: "Model",
         value: "Monthly plan",
-        hint: "Membership makes more sense when you unlock often and want one recurring plan.",
+        hint: "Recurring billing while active.",
       },
       {
         label: "Best savings",
         value: maxDiscount > 0 ? `${maxDiscount}% off` : "Plan perks",
         hint: maxDiscount > 0
           ? "Highest unlock discount in the current lineup."
-          : "Savings and perks appear once the current plan catalog is available.",
-      },
-      {
-        label: "Billing",
-        value: subscription?.renewAt
-          ? `Renews ${formatUSDate(subscription.renewAt)}`
-          : subscriptionActionsEnabled
-            ? "Monthly recurring"
-            : "Prelaunch",
-        hint: subscription?.renewAt
-          ? "Cancel before the renewal date if you want the plan to stop."
-          : subscriptionActionsEnabled
-            ? "Receipts and future charges stay in Purchases after checkout."
-            : "When membership opens, renewals, receipts, and cancellation history stay in Purchases.",
+          : "Perks appear in the current plan lineup.",
       },
     ];
   }, [
     isActive,
     planCatalog,
     subscription?.planId,
-    subscription?.renewAt,
     subscriptionAvailabilityLabel,
     subscriptionActionsEnabled,
-    subscriptionPrelaunch,
   ]);
 
   const primaryButtonClass =
@@ -327,13 +311,11 @@ export default function SubscribePage({
           title={subscriptionActionsEnabled ? "Pick the plan that fits your reading rhythm." : "Review membership before launch."}
           description={
             subscriptionActionsEnabled
-              ? "Membership is billed monthly while active. Choose it if you read often and want lower unlock prices, free reads, and monthly points."
-              : "Monthly pricing and perks are visible now."
+              ? "Membership is monthly. Choose it if you read often."
+              : "Monthly pricing and perks are visible now. Billing opens later."
           }
           secondary={
-            subscriptionActionsEnabled
-              ? "Cancel before renewal if you want the plan to stop."
-              : "No monthly charge today"
+            subscriptionActionsEnabled ? "Cancel before renewal." : "No monthly charge today"
           }
           stats={subscriptionHeroStats}
           actions={
@@ -374,25 +356,25 @@ export default function SubscribePage({
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   Membership stays recurring and point packs stay separate on the Store page.
-              </p>
+                </p>
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3">
             {[
               {
                 title: "Recurring monthly billing",
                 body: subscriptionPrelaunch
-                  ? "Membership follows this recurring monthly model once billing opens."
-                  : "You are charged each month while the plan stays active.",
+                  ? "This monthly model starts when billing opens."
+                  : "You are charged each month while active.",
               },
               {
                 title: "Cancel before renewal",
-                body: "If you do not want the next monthly charge, cancel before the listed renewal date.",
+                body: "Cancel before the listed renewal date.",
               },
               {
                 title: "Receipts stay visible",
-                body: "Renewals, invoices, and order IDs stay in Purchases instead of disappearing into email only.",
+                body: "Renewals and order IDs stay in Purchases.",
               },
             ].map((item) => (
               <div
@@ -420,8 +402,8 @@ export default function SubscribePage({
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   {subscriptionActionsEnabled
-                    ? "Sign in before you start a plan so renewals, receipts, cancellation, and support all stay attached to one account."
-                    : "Future renewals, receipts, and cancellation history stay on that account."}
+                    ? "Keep renewals, receipts, and support on one account."
+                    : "Future renewals and receipts stay on that account."}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -454,29 +436,9 @@ export default function SubscribePage({
                   Membership opens later.
                 </h2>
                 <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                  Prices and perks are visible now. No monthly charge starts here today.
+                  Prices and perks are visible now. No monthly charge starts here today. Purchases and receipts show up after launch.
                 </p>
               </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                {[
-                  {
-                    title: "No monthly charge today",
-                    body: "Use this page to compare tiers.",
-                  },
-                  {
-                    title: "Monthly billing later",
-                    body: "When membership opens, renewals and receipts stay in Purchases.",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.title}
-                      className="rounded-[22px] border border-amber-200/80 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-                    >
-                      <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
-                    </div>
-                  ))}
-                </div>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
@@ -786,9 +748,6 @@ export default function SubscribePage({
                     ? `Renews on ${formatUSDate(subscription.renewAt)}`
                     : "Renewal date is not available yet."}
                 </p>
-                <p className="mt-2 text-sm text-slate-500">
-                  Cancel before the next renewal if you want the plan to stop. Purchases keeps the billing record, and Support can step in if something looks wrong.
-                </p>
               </div>
               <button
                 type="button"
@@ -805,56 +764,6 @@ export default function SubscribePage({
             </div>
           </SurfacePanel>
         ) : null}
-
-        <CommerceRouteSummary
-          eyebrow="Compare the paths"
-          title="Membership is monthly. Point packs stay flexible. Help should stay obvious."
-          description="Pick membership when you read often. Use point packs when you unlock occasionally."
-          primary={{
-            eyebrow: "Membership",
-            title: subscriptionPrelaunch
-              ? "Review monthly tiers before launch."
-                : "Start a monthly plan when you read often.",
-            description: subscriptionPrelaunch
-              ? "Compare recurring pricing and perks before launch."
-              : "Cancel before the listed renewal date if you do not want the next monthly charge.",
-            tags: [
-              "Recurring monthly billing",
-              isActive && subscription?.renewAt ? `Renews ${formatUSDate(subscription.renewAt)}` : "",
-              isActive ? "Current plan active" : subscriptionPrelaunch ? "No charge today" : "For frequent readers",
-            ].filter(Boolean),
-            cta: subscriptionActionsEnabled ? "Compare plans" : "Review plans",
-            onClick: () => scrollToSection("membership-plans"),
-            secondaryCta: subscriptionActionsEnabled ? (!isSignedIn && !isActive ? "Sign in" : "") : launchAccessLabel,
-            onSecondaryClick:
-              subscriptionActionsEnabled ? (!isSignedIn && !isActive ? openAuthPrompt : null) : handleLaunchAccess,
-          }}
-          secondary={{
-            eyebrow: "Point packs",
-            title: "Use point packs when you want one-time unlocks.",
-            description:
-              "Store keeps point packs separate from membership: one-time spend, no recurring renewal, and a better fit for lighter reading habits.",
-            tags: ["One-time packs", "Flexible unlocks", "No recurring charge"],
-            cta: STOREFRONT_TERMS.viewPointPacks,
-            onClick: () => router.push("/store"),
-          }}
-          support={{
-            eyebrow: subscriptionActionsEnabled ? "After checkout" : "Before launch",
-            title: subscriptionActionsEnabled
-              ? "Receipts, renewals, and billing help stay close."
-              : "Receipts, cancellation rules, and billing help are mapped out.",
-            description:
-              subscriptionActionsEnabled
-                ? "Purchases keeps charges and renewals easy to verify later. Support handles billing issues."
-                : "Purchases will keep renewals and receipts easy to verify after launch. Support stays the path for billing questions.",
-            tags: ["Purchases", "Billing help"],
-            cta: subscriptionActionsEnabled ? "View purchases" : "Receipt location",
-            onClick: () => router.push("/orders"),
-            secondaryCta: "Billing help",
-            onSecondaryClick: () =>
-              router.push(buildSupportPath({ topic: "billing", context: "Membership billing help or purchase question" })),
-          }}
-        />
       </main>
     </div>
   );

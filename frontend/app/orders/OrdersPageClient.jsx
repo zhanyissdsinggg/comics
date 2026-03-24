@@ -219,8 +219,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "signin",
         eyebrow: "Account",
         title: "Sign in and keep every receipt on one account.",
-        description:
-          "Receipts, membership charges, and order IDs land here after checkout, so sign-in is the cleanest first step.",
+        description: "Receipts, membership charges, and order IDs land here after checkout.",
         cta: "Sign in",
         onClick: () => router.push("/signin?returnTo=/orders"),
         accentClass:
@@ -230,8 +229,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "support",
         eyebrow: "Billing help",
         title: "Get help with a missing receipt or wrong charge.",
-        description:
-          "Use Support when the payment email never arrives, points look off, or a charge needs review.",
+        description: "Use Support when a charge or receipt needs review.",
         cta: "Get billing help",
         onClick: () => router.push(buildSupportHref("", "billing")),
         accentClass:
@@ -246,8 +244,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "packs",
         eyebrow: "Point packs",
         title: "Buy a pack when you only need flexible unlocks.",
-        description:
-          "A point pack is the one-time option for unlocking chapters without starting a monthly plan.",
+        description: "Point packs are the one-time option.",
         cta: STOREFRONT_TERMS.viewPointPacks,
         onClick: () => router.push("/store"),
         accentClass:
@@ -257,8 +254,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "membership",
         eyebrow: "Membership",
         title: "Compare monthly plans before your first checkout.",
-        description:
-          "If you expect to read often, compare membership before you keep buying packs one at a time.",
+        description: "Compare membership if you expect to read often.",
         cta: STOREFRONT_TERMS.compareMembership,
         onClick: () =>
           router.push(
@@ -275,8 +271,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "how-it-works",
         eyebrow: "How it works",
         title: "See when free starts, points, and membership kick in.",
-        description:
-          "This is the faster explainer if you want to understand the purchase model before anything shows up here.",
+        description: "Use the quickest explainer before anything shows up here.",
         cta: "How points work",
         onClick: () => router.push("/how-it-works"),
         accentClass:
@@ -286,8 +281,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "support",
         eyebrow: "Billing help",
         title: "Know where to go if the first charge looks wrong.",
-        description:
-          "Billing help stays useful even before you have a purchase history loaded on this page.",
+        description: "Billing help stays available right away.",
         cta: "Get billing help",
         onClick: () => router.push(buildSupportHref("", "billing")),
         accentClass:
@@ -312,8 +306,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         description: viewerSignedIn
           ? latestPaidOrder
             ? `Latest receipt: ${latestPaidOrder.orderId}. Use the order ID when a charge, receipt, or points balance needs a closer look.`
-            : "Recent charges and order IDs appear here shortly after checkout."
-          : "Receipts, renewals, and order IDs stay on your account after checkout instead of getting stranded on one device.",
+            : "Recent charges and order IDs appear here after checkout."
+          : "Receipts, renewals, and order IDs stay on your account after checkout.",
         cta: viewerSignedIn ? "View receipts" : "Sign in",
         onClick: viewerSignedIn ? () => scrollToSection("purchase-history") : signInToOrders,
         accentClass:
@@ -330,8 +324,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         description: latestMembershipOrder
           ? `${formatOrderPackageLabel(latestMembershipOrder.packageId)} was charged on ${formatOrderDate(latestMembershipOrder.createdAt)} for ${formatOrderAmount(latestMembershipOrder.amount, latestMembershipOrder.currency)}.`
           : viewerSignedIn
-            ? "When you start or renew a membership, the receipt appears here alongside point-pack purchases."
-            : "You do not need a separate billing page later. Membership renewals and receipts stay in Purchases too.",
+            ? "Membership receipts appear here alongside point-pack purchases."
+            : "Membership renewals and receipts stay in Purchases too.",
         cta: latestMembershipOrder ? "See membership charges" : STOREFRONT_TERMS.compareMembership,
         onClick: latestMembershipOrder
           ? () => scrollToSection("purchase-history")
@@ -353,8 +347,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           ? "Report a wrong charge, refund issue, or missing points."
           : "Need billing help before or after checkout?",
         description: refundActionsEnabled
-          ? "Refund-eligible purchases can still be requested here. Use billing help when points are missing or a charge needs a human check."
-          : "Use billing help for missing receipts, missing points, wrong charges, or anything else that looks off.",
+          ? "Refund-eligible purchases can still be requested here."
+          : "Use billing help for missing receipts, missing points, or wrong charges.",
         cta: "Get billing help",
         onClick: () => router.push(buildSupportHref(latestPaidOrder?.orderId)),
         accentClass:
@@ -367,8 +361,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           ? "Buy more points when you need another unlock."
           : "Buy more points before your first receipt lands.",
         description: latestPaidOrder
-          ? "Store is still the faster path for one-time top-ups. Compare membership only when repeated pack buys start adding up."
-          : "Point packs are the one-time path. Membership is the recurring option for regular readers.",
+          ? "Store is still the faster path for one-time top-ups."
+          : "Point packs are one-time. Membership is recurring.",
         cta: "Buy more points",
         onClick: () => router.push("/store"),
         accentClass:
@@ -412,8 +406,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           }
           description={
             viewerSignedIn
-              ? "View receipts first, then handle membership charges, missing points, or charge help."
-              : "Sign in to see receipts, membership charges, and billing history on this account. Support stays available if something looks wrong."
+              ? "View receipts first, then handle billing issues."
+              : "Sign in to see receipts and billing history on this account."
           }
           actions={
             viewerSignedIn ? (
@@ -424,20 +418,6 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   className={heroPrimaryButtonClass}
                 >
                   View receipts
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollToSection("purchase-history")}
-                  className={heroSecondaryButtonClass}
-                >
-                  See membership charges
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
-                  className={heroSecondaryButtonClass}
-                >
-                  Missing points?
                 </button>
                 <button
                   type="button"
@@ -502,7 +482,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               <div className="space-y-1">
                 <p className="text-sm font-semibold">Need help with a charge?</p>
                 <p className="text-sm text-amber-700/85">
-                  You can still see every purchase here. If something looks off, send us a message and include the order ID.
+                  You can still see every purchase here. If something looks off, include the order ID.
                 </p>
               </div>
               <button
@@ -524,7 +504,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   Billing tasks
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Find the receipt, check membership charges, or get help.
+                  Find the receipt or get help.
                 </h2>
               </div>
               <StorefrontPathwaysGrid
@@ -534,21 +514,21 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               />
               <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm text-slate-600">
                 {refundActionsEnabled
-                  ? "Refund requests only appear on purchases that still qualify. If the button is missing or the charge still looks wrong, use billing help and include the order ID."
-                  : "Refunds are not self-serve right now. Use billing help and include the order ID if a charge needs review."}
+                  ? "Refund requests only appear on purchases that still qualify."
+                  : "Refunds are not self-serve right now. Use billing help if a charge needs review."}
               </div>
             </SurfacePanel>
           </>
         ) : null}
 
         {!viewerSignedIn ? (
-          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Sign in to see receipts and billing history.
-            </h2>
-            <p className="text-sm leading-6 text-slate-600">
-              This page becomes your billing center after sign-in. Receipts, order IDs, and membership charges appear here, while billing help stays available right away.
-            </p>
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Sign in to see receipts and billing history.
+              </h2>
+              <p className="text-sm leading-6 text-slate-600">
+                This page becomes your billing center after sign-in.
+              </p>
             <StorefrontPathwaysGrid
               cards={signedOutActionCards}
               columnsClassName="md:grid-cols-2"
@@ -577,13 +557,13 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             </div>
           </SurfacePanel>
         ) : orders.length === 0 ? (
-          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              No purchases yet.
-            </h2>
-            <p className="text-sm leading-6 text-slate-600">
-              Point packs and memberships will show up here after checkout, along with the order ID you may need for billing help.
-            </p>
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                No purchases yet.
+              </h2>
+              <p className="text-sm leading-6 text-slate-600">
+                Point packs and memberships show up here after checkout.
+              </p>
             <StorefrontPathwaysGrid
               cards={emptyOrderActionCards}
               columnsClassName="md:grid-cols-2 xl:grid-cols-4"
@@ -643,13 +623,6 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                       </span>
                     </div>
                     <p className="mt-3 text-sm leading-6 text-slate-600">{orderGuide.description}</p>
-                    <p className="mt-3 text-sm leading-6 text-slate-500">
-                      {order.status === "PAID"
-                        ? refundActionsEnabled
-                          ? "Keep reading now, or request a refund if this purchase still qualifies."
-                          : "Need help with this order? Send us a message and include the order ID."
-                        : "Any updates to this purchase will appear here."}
-                    </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {order.status === "PAID" && refundActionsEnabled ? (
                         <button

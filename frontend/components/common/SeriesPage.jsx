@@ -24,8 +24,8 @@ const PAGE_CONFIG = {
     eyebrow: "Comics",
     heroTitle: "Browse comics worth the tap.",
     title: "Comics",
-    description: "Top Series, free starts, and standout comic reads in one place.",
-    secondary: "Filter by genre, popularity, or completion.",
+    description: "Top Series, free starts, and standout comic reads.",
+    secondary: "",
     emptyIcon: "search",
     emptyTitle: "No comics match this filter set",
     emptyDescription: "Reset the current filters or open Top Series to widen the selection.",
@@ -75,8 +75,8 @@ const PAGE_CONFIG = {
     eyebrow: "Novels",
     heroTitle: "Browse novels worth settling into.",
     title: "Novels",
-    description: "Serialized novels, premium web fiction, and finished reads in one place.",
-    secondary: "Sort by popularity, latest updates, or completion.",
+    description: "Serialized novels, premium web fiction, and finished reads.",
+    secondary: "",
     emptyIcon: "book",
     emptyTitle: "No novels match this filter set",
     emptyDescription: "Reset the current filters or open Top Series to find more to read.",
@@ -676,7 +676,6 @@ export default function SeriesPage({
                     <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                       {shelf.title}
                     </h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{shelf.description}</p>
                   </div>
                   <button
                     type="button"
@@ -713,7 +712,6 @@ export default function SeriesPage({
                     <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                       {card.title}
                     </h2>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{card.body}</p>
                   </div>
                   <button
                     type="button"
@@ -734,9 +732,6 @@ export default function SeriesPage({
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   Quick genre picks
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Open a genre and jump straight into the catalog.
-                </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -780,8 +775,8 @@ export default function SeriesPage({
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
                     {type === "comic"
-                      ? "If you want the fastest way into this catalog, start with a book that already has momentum or free entry."
-                      : "If you want a novel worth sinking into, start with the book that already has the strongest signal in this shelf."}
+                      ? "Start with the title already carrying momentum or free entry."
+                      : "Start with the title carrying the strongest signal in this shelf."}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1.5 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
