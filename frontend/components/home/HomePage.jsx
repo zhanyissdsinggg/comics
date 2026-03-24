@@ -578,7 +578,7 @@ function HomeContent({ initialSearchParams = {} }) {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                     {heroEyebrow}
                   </p>
-                  <h1 className="mt-3 max-w-3xl font-display text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.9rem] xl:text-[3.4rem]">
+                  <h1 className="mt-3 max-w-3xl font-display text-[2rem] font-semibold leading-[1.08] tracking-tight text-slate-950 sm:text-[2.9rem] sm:leading-[1.02] xl:text-[3.4rem] xl:leading-[1]">
                     Stories worth opening on the first tap.
                   </h1>
 
