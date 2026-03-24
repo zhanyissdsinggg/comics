@@ -4,7 +4,6 @@
 
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
@@ -22,37 +21,14 @@ import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 const PAGE_CONFIG = {
   comic: {
     eyebrow: "Comics",
-    heroTitle: "Browse comics worth the tap.",
+    heroTitle: "Comics worth opening.",
     title: "Comics",
-    description: "Top Series, free starts, and standout comic reads.",
+    description: "Standout comics, free starts, and finished runs.",
     secondary: "",
     emptyIcon: "search",
     emptyTitle: "No comics match this filter set",
     emptyDescription: "Reset the current filters or open Top Series to widen the selection.",
     pathname: "/comics",
-    browseGuides: [
-      {
-        eyebrow: "Top Series",
-        title: "Start with proven momentum.",
-        body: "Start with the comics already pulling readers in.",
-        ctaLabel: "Browse Top Series",
-        href: "/rankings?type=popular&window=week",
-      },
-      {
-        eyebrow: "Start free",
-        title: "Sample the hook before you pay.",
-        body: "Free first chapters are the fastest way to test art and tone.",
-        ctaLabel: "See free starts",
-        href: "/rankings?type=ttf&window=all",
-      },
-      {
-        eyebrow: "Finished runs",
-        title: "Binge-ready comics stay close.",
-        body: "Finished runs are easier when you want payoff now.",
-        ctaLabel: "See completed comics",
-        href: "/comics?status=completed",
-      },
-    ],
     emptyBrowseCards: [
       {
         eyebrow: "Start here",
@@ -73,37 +49,14 @@ const PAGE_CONFIG = {
   },
   novel: {
     eyebrow: "Novels",
-    heroTitle: "Browse novels worth settling into.",
+    heroTitle: "Novels worth settling into.",
     title: "Novels",
-    description: "Serialized novels, premium web fiction, and finished reads.",
+    description: "Serialized fiction, finished reads, and recent updates.",
     secondary: "",
     emptyIcon: "book",
     emptyTitle: "No novels match this filter set",
     emptyDescription: "Reset the current filters or open Top Series to find more to read.",
     pathname: "/novels",
-    browseGuides: [
-      {
-        eyebrow: "Top Series",
-        title: "Use the leaders as your entry point.",
-        body: "Start with the novels already pulling readers in.",
-        ctaLabel: "Browse Top Series",
-        href: "/rankings?type=popular&window=week",
-      },
-      {
-        eyebrow: "Latest updates",
-        title: "Keep the catalog feeling current.",
-        body: "Open recently updated novels when you want something current.",
-        ctaLabel: "See latest novels",
-        href: "/novels?sort=latest",
-      },
-      {
-        eyebrow: "Finished reads",
-        title: "Find a full story arc fast.",
-        body: "Finished novels are the cleanest way into a longer read.",
-        ctaLabel: "See completed novels",
-        href: "/novels?status=completed",
-      },
-    ],
     emptyBrowseCards: [
       {
         eyebrow: "Trending now",
@@ -177,19 +130,6 @@ function getSeriesSubtitle(series) {
     return `${Number(series.freeEpisodeCount).toLocaleString()} free chapter${Number(series.freeEpisodeCount) === 1 ? "" : "s"}`;
   }
   return series?.author || "Updated series";
-}
-
-function summarizeDescription(text, fallback) {
-  const source = String(text || "").replace(/\s+/g, " ").trim();
-  if (!source) {
-    return fallback;
-  }
-
-  if (source.length <= 138) {
-    return source;
-  }
-
-  return `${source.slice(0, 135).trimEnd()}...`;
 }
 
 function mapSeriesCardItem(series) {
@@ -411,7 +351,7 @@ export default function SeriesPage({
 
     return {
       title: config.emptyTitle,
-      description: `${config.emptyDescription} If you just want a safer first click, jump to Top Series or start with free chapters.`,
+      description: `${config.emptyDescription} Top Series and free-start charts stay close if you want another way in.`,
     };
   }, [config.emptyDescription, config.emptyTitle, loading, series.length, type]);
 
@@ -421,11 +361,6 @@ export default function SeriesPage({
     },
     [router],
   );
-  const buildSeriesHref = useCallback(
-    (seriesId) => (seriesId ? `/series/${encodeURIComponent(seriesId)}` : "#"),
-    [],
-  );
-
   const handleResetFilters = useCallback(() => {
     router.replace(config.pathname);
   }, [config.pathname, router]);
@@ -449,89 +384,30 @@ export default function SeriesPage({
       completed,
     };
   }, [series, type]);
-  const lowInventoryMode = !loading && series.length > 0 && (type === "novel" || series.length <= 8);
-  const curatedShelfCards = useMemo(() => {
-    if (!lowInventoryMode) {
-      return [];
+  const secondaryEntryAction = useMemo(() => {
+    if (entrySpotlight.freeStart?.id && entrySpotlight.freeStart.id !== entrySpotlight.primary?.id) {
+      return {
+        id: entrySpotlight.freeStart.id,
+        label: "Try a free start",
+      };
     }
 
-    const seen = new Set();
-    const cards = [];
-    const byPopular = [...series].sort((left, right) => getPopularityScore(right) - getPopularityScore(left));
-    const byLatest = [...series].sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt));
+    if (entrySpotlight.completed?.id && entrySpotlight.completed.id !== entrySpotlight.primary?.id) {
+      return {
+        id: entrySpotlight.completed.id,
+        label: "Open a finished pick",
+      };
+    }
 
-    const pushCard = (seriesItem, config) => {
-      if (!seriesItem?.id || seen.has(seriesItem.id)) {
-        return;
-      }
-      seen.add(seriesItem.id);
-      cards.push({
-        ...config,
-        series: seriesItem,
-      });
-    };
+    if (entrySpotlight.secondary?.id && entrySpotlight.secondary.id !== entrySpotlight.primary?.id) {
+      return {
+        id: entrySpotlight.secondary.id,
+        label: "Open another pick",
+      };
+    }
 
-    const companionPick =
-      byPopular.find(
-        (item) =>
-          item?.id !== entrySpotlight.primary?.id &&
-          item?.id !== entrySpotlight.completed?.id &&
-          item?.id !== entrySpotlight.freeStart?.id,
-      ) || null;
-
-    pushCard(entrySpotlight.primary, {
-      eyebrow: type === "novel" ? "Best first read" : "Safest first click",
-      title:
-        type === "novel"
-          ? "Start with the novel carrying the strongest signal."
-          : "Start with the title most likely to land fast.",
-      ctaLabel: "Open this title",
-      fallbackDescription:
-        type === "novel"
-          ? "If you only open one title from this shelf first, make it the one already pulling the best signal."
-          : "When the shelf is compact, lead with the title already doing the clearest job of pulling readers in.",
-    });
-
-    pushCard(
-      type === "novel" ? entrySpotlight.secondary || byLatest[0] : companionPick || entrySpotlight.secondary,
-      {
-        eyebrow: type === "novel" ? "Next up" : "If you want a second option",
-        title:
-          type === "novel"
-            ? "Keep one contrast pick nearby."
-            : "Compare one neighboring title before you commit.",
-        ctaLabel: "Compare this title",
-        fallbackDescription:
-          type === "novel"
-            ? "A smaller novel shelf reads better when you have one backup pick with a different rhythm or status."
-            : "A second strong option keeps the catalog from feeling thinner than it really is.",
-      },
-    );
-
-    pushCard(entrySpotlight.completed || entrySpotlight.freeStart || byLatest[0], {
-      eyebrow:
-        entrySpotlight.completed || normalizeStatus(entrySpotlight.completed?.status) === "completed"
-          ? "Finished pick"
-          : entrySpotlight.freeStart
-            ? "Start free"
-            : "Fresh update",
-      title:
-        entrySpotlight.completed
-          ? "Keep a payoff-ready option close."
-          : entrySpotlight.freeStart
-            ? "Keep one low-risk entry point in view."
-            : "Keep a current title nearby.",
-      ctaLabel: "Open this title",
-      fallbackDescription:
-        entrySpotlight.completed
-          ? "Completed runs work well when you want the cleaner commitment from a small shelf."
-          : entrySpotlight.freeStart
-            ? "Free starts make the first click easier when you are still deciding if the shelf is for you."
-            : "A fresh update keeps the shelf from feeling static.",
-    });
-
-    return cards.slice(0, 3);
-  }, [entrySpotlight.completed, entrySpotlight.freeStart, entrySpotlight.primary, entrySpotlight.secondary, lowInventoryMode, series, type]);
+    return null;
+  }, [entrySpotlight.completed, entrySpotlight.freeStart, entrySpotlight.primary?.id, entrySpotlight.secondary]);
   const catalogGridClassName =
     filteredAndSortedSeries.length <= 8
       ? "grid grid-cols-2 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
@@ -622,42 +498,6 @@ export default function SeriesPage({
               </SurfacePanel>
             ))}
           </div>
-        ) : discoveryShelves.length > 0 ? (
-          <section className="grid gap-4 xl:grid-cols-2">
-            {discoveryShelves.map((shelf) => (
-              <SurfacePanel key={shelf.id} className="space-y-5" appearance="light" accent="blue">
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                  <div className="max-w-2xl">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      {shelf.eyebrow}
-                    </p>
-                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                      {shelf.title}
-                    </h2>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => router.push(shelf.href)}
-                    className={secondaryButtonClass}
-                  >
-                    {shelf.ctaLabel}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {shelf.items.map((item) => (
-                    <PortraitCard
-                      key={`${shelf.id}-${item.id}`}
-                      item={item}
-                      tone={item.coverTone}
-                      appearance="light"
-                      onClick={() => handleSeriesClick(item.id)}
-                    />
-                  ))}
-                </div>
-              </SurfacePanel>
-            ))}
-          </section>
         ) : showFallbackDiscovery ? (
           <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
             <div className="grid gap-4 md:grid-cols-2">
@@ -685,10 +525,10 @@ export default function SeriesPage({
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Quick browse
+                  Browse
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Quick genre picks
+                  Browse by genre
                 </h2>
               </div>
 
@@ -701,7 +541,6 @@ export default function SeriesPage({
                     className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
                   >
                     {item.genre}
-                    {item.count ? <span className="ml-2 text-xs text-slate-400">{item.count}</span> : null}
                   </button>
                 ))}
               </div>
@@ -711,7 +550,7 @@ export default function SeriesPage({
         ) : null}
 
         {!loading && entrySpotlight.primary ? (
-          <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
+          <section className="grid gap-4 xl:grid-cols-[1.12fr_0.88fr]">
             <SurfacePanel className="space-y-5" appearance="light" accent="blue">
               <div className="grid gap-4 sm:grid-cols-[200px_minmax(0,1fr)] sm:items-start">
                 <Cover
@@ -726,30 +565,20 @@ export default function SeriesPage({
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    {type === "comic" ? "Best first click" : "Best place to settle in"}
+                    {type === "comic" ? "Editors' pick" : "Featured read"}
                   </p>
                   <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
                     {entrySpotlight.primary.title}
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
                     {type === "comic"
-                      ? "Start with the title already carrying momentum or free entry."
-                      : "Start with the title carrying the strongest signal in this shelf."}
+                      ? "A strong place to start if you want a clean first pick."
+                      : "A strong place to settle in when you want one decisive starting point."}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1.5 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
                       {getSeriesSubtitle(entrySpotlight.primary)}
                     </span>
-                    {getSeriesBadge(entrySpotlight.primary) ? (
-                      <span className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
-                        {getSeriesBadge(entrySpotlight.primary)}
-                      </span>
-                    ) : null}
-                    {Array.isArray(entrySpotlight.primary.genres) && entrySpotlight.primary.genres.length > 0 ? (
-                      <span className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
-                        {entrySpotlight.primary.genres.slice(0, 2).join(" / ")}
-                      </span>
-                    ) : null}
                   </div>
                   <div className="mt-5 flex flex-wrap gap-3">
                     <button
@@ -759,29 +588,20 @@ export default function SeriesPage({
                     >
                       Open this title
                     </button>
-                    {entrySpotlight.freeStart ? (
+                    {secondaryEntryAction ? (
                       <button
                         type="button"
-                        onClick={() => handleSeriesClick(entrySpotlight.freeStart.id)}
+                        onClick={() => handleSeriesClick(secondaryEntryAction.id)}
                         className={secondaryButtonClass}
                       >
-                        Start with free chapters
-                      </button>
-                    ) : null}
-                    {entrySpotlight.completed ? (
-                      <button
-                        type="button"
-                        onClick={() => handleSeriesClick(entrySpotlight.completed.id)}
-                        className={secondaryButtonClass}
-                      >
-                        Try a finished read
+                        {secondaryEntryAction.label}
                       </button>
                     ) : null}
                   </div>
                   {entrySpotlight.secondary ? (
                     <div className="mt-5 rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        Next good click
+                        Also worth opening
                       </p>
                       <p className="mt-2 text-sm font-semibold text-slate-950">{entrySpotlight.secondary.title}</p>
                       <p className="mt-1 text-sm text-slate-600">{getSeriesSubtitle(entrySpotlight.secondary)}</p>
@@ -791,14 +611,14 @@ export default function SeriesPage({
               </div>
             </SurfacePanel>
 
-            <div className="grid gap-4">
+            {genreQuickPicks.length > 0 ? (
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Quick genre picks
+                    Browse by genre
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Browse by genre.
+                    Start from a story lane.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -810,116 +630,12 @@ export default function SeriesPage({
                       className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
                     >
                       {item.genre}
-                      <span className="ml-2 text-xs text-slate-400">{item.count}</span>
                     </button>
                   ))}
                 </div>
               </SurfacePanel>
-
-              {Array.isArray(config.browseGuides) && config.browseGuides.length > 0 ? (
-                <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      Best lanes
-                    </p>
-                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                      Start with a lane.
-                    </h2>
-                  </div>
-                  <div className="space-y-3">
-                    {config.browseGuides.map((item) => (
-                      <div
-                        key={item.title}
-                        className="rounded-[20px] border border-black/6 bg-white/88 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
-                      >
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                          {item.eyebrow}
-                        </p>
-                        <h3 className="mt-2 text-base font-semibold text-slate-950">{item.title}</h3>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
-                        <button
-                          type="button"
-                          onClick={() => router.push(item.href)}
-                          className={`mt-3 ${secondaryButtonClass}`}
-                        >
-                          {item.ctaLabel}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </SurfacePanel>
-              ) : null}
-            </div>
+            ) : null}
           </section>
-        ) : null}
-
-        {curatedShelfCards.length > 0 ? (
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Curated starts
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  {type === "novel"
-                    ? "This novel shelf is small enough to curate."
-                    : "A compact shelf should still feel deliberate."}
-                </h2>
-              </div>
-              <p className="text-sm text-slate-500">
-                {type === "novel"
-                  ? "Use these three picks to get into the catalog without making the page feel thin."
-                  : "A tighter catalog still needs a few distinct ways in."}
-              </p>
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-3">
-              {curatedShelfCards.map((card) => {
-                const item = card.series;
-                return (
-                  <Link
-                    key={`curated-${card.eyebrow}-${item.id}`}
-                    href={buildSeriesHref(item.id)}
-                    className="group block rounded-[28px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
-                    aria-label={`Open ${item.title}`}
-                  >
-                    <Cover
-                      tone={item.coverTone}
-                      coverUrl={item.coverUrl}
-                      label={item.title}
-                      eyebrow={card.eyebrow}
-                      badge={getSeriesBadge(item)}
-                      genres={item.genres}
-                      seriesType={item.type}
-                      className="aspect-[3/4] w-full rounded-[22px]"
-                    />
-                    <div className="mt-4 space-y-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                          {card.eyebrow}
-                        </p>
-                        <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">{item.title}</h3>
-                      </div>
-                      <p className="text-sm leading-6 text-slate-600">
-                        {summarizeDescription(item.description, card.fallbackDescription)}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
-                          {getSeriesSubtitle(item)}
-                        </span>
-                        {getSeriesBadge(item) ? (
-                          <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
-                            {getSeriesBadge(item)}
-                          </span>
-                        ) : null}
-                      </div>
-                      <p className="text-xs font-semibold text-slate-950">{card.ctaLabel}</p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </SurfacePanel>
         ) : null}
 
         <FilterBar

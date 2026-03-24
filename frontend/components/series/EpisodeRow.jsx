@@ -3,7 +3,6 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Pill from "../common/Pill";
 import ActionModal from "./ActionModal";
 import { useWalletStore } from "../../store/useWalletStore";
 import { trackEvent } from "../../lib/trackEvent";
@@ -176,10 +175,11 @@ function EpisodeRow({
     [coupons, episode, now, pricePts, subscription, subscriptionUsage, ttfStatus?.eligible, ttfStatus?.readyAt, unlocked],
   );
   const effectivePrice = accessState.effectivePrice;
-  const episodeDisplayTitle =
-    episode?.title && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title)
-      ? ["Ep ", episode?.number, " - ", episode.title].join("")
-      : `Episode ${episode?.number}`;
+  const hasCustomEpisodeTitle =
+    Boolean(episode?.title) && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title);
+  const episodeNumberLabel = `Episode ${episode?.number}`;
+  const episodeDisplayTitle = hasCustomEpisodeTitle ? `${episodeNumberLabel} - ${episode.title}` : episodeNumberLabel;
+  const episodeHeading = hasCustomEpisodeTitle ? episode.title : episodeNumberLabel;
   const shortfallValue = effectivePrice > 0 ? Math.max(0, effectivePrice - walletBalance) : 0;
   const progressMetaLabel =
     progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
@@ -389,10 +389,10 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden rounded-[22px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.94))] p-3 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10"
+      className="group overflow-hidden rounded-[24px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.9))] p-3.5 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10"
     >
-      <div className="grid gap-3 sm:grid-cols-[76px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
-        <div className="relative h-24 overflow-hidden rounded-[18px] border border-black/8 bg-[rgba(246,243,237,0.92)] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[104px]">
+      <div className="grid gap-3 sm:grid-cols-[84px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
+        <div className="relative h-24 overflow-hidden rounded-[20px] border border-black/8 bg-[rgba(246,243,237,0.92)] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[108px]">
           {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
             <Image
               src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
@@ -411,30 +411,53 @@ function EpisodeRow({
 
         <div className="min-w-0">
           <span className="sr-only">
-            {episode?.title && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title)
-              ? `Episode ${episode?.number} - ${episode.title}`
-              : `Episode ${episode?.number}`}
+            {episodeDisplayTitle}
           </span>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <strong className="text-base font-semibold tracking-tight text-slate-950">
-              {episodeDisplayTitle}
-            </strong>
-            {showStateBadge ? (
-              <span
-                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.stateTone)}`}
-              >
-                {accessState.stateLabel}
-              </span>
-            ) : null}
-            {progress?.lastEpisodeId === episode?.id ? (
-              <Pill appearance="light" tone="subtle">
-                Last read
-              </Pill>
-            ) : null}
-          </div>
+          {hasCustomEpisodeTitle ? (
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  {episodeNumberLabel}
+                </span>
+                {showStateBadge ? (
+                  <span
+                    className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.stateTone)}`}
+                  >
+                    {accessState.stateLabel}
+                  </span>
+                ) : null}
+                {progress?.lastEpisodeId === episode?.id ? (
+                  <span className="rounded-full border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--gush-accent,#3157d6)]">
+                    Last read
+                  </span>
+                ) : null}
+              </div>
+              <strong className="mt-2 block text-base font-semibold tracking-tight text-slate-950">
+                {episodeHeading}
+              </strong>
+            </>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <strong className="text-base font-semibold tracking-tight text-slate-950">
+                {episodeHeading}
+              </strong>
+              {showStateBadge ? (
+                <span
+                  className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.stateTone)}`}
+                >
+                  {accessState.stateLabel}
+                </span>
+              ) : null}
+              {progress?.lastEpisodeId === episode?.id ? (
+                <span className="rounded-full border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--gush-accent,#3157d6)]">
+                  Last read
+                </span>
+              ) : null}
+            </div>
+          )}
 
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+          <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
             <span>{formatDate(episode?.releasedAt)}</span>
             {progressMetaLabel ? <span>{progressMetaLabel}</span> : null}
           </div>

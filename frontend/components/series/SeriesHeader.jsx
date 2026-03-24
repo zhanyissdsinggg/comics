@@ -112,6 +112,10 @@ export default function SeriesHeader({
         : ""
       : series.badge || (isCompleted ? "Completed" : "");
   const visibleBadges = badges.filter((badge) => !(hasFreeEpisodes && isDuplicateAccessLabel(badge)));
+  const headerHighlights =
+    visibleBadges.length > 0
+      ? visibleBadges.slice(0, 1).map((badge) => ({ label: badge, tone: "badge" }))
+      : genres.slice(0, 2).map((genre) => ({ label: genre, tone: "genre" }));
   const ratingValue = series.rating ? Number(series.rating).toFixed(1) : "New";
   const lastEpisodeLabel = formatEpisodeNumber(lastReadEpisode?.number || "");
   const primaryAction = onPrimaryAction || onContinue || onStart || null;
@@ -125,25 +129,49 @@ export default function SeriesHeader({
   const followers = Number(series.followers || 0);
   const ratingCount = Number(series.ratingCount || 0);
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.id || latestEpisode?.number || "");
-  const readerPulseItems = [
-    ratingCount > 0 ? `${ratingValue} stars` : ratingValue === "New" ? "New release" : `${ratingValue} stars`,
-    followers > 0
-      ? `${formatCompactCount(followers)} following`
-      : isFollowing
-        ? "Saved"
-        : "Fresh pick",
-    accessSummary?.heroBadgeLabel ||
-      (isCompleted
-        ? "Finished run"
-        : episodeCount > 0
-          ? `${episodeCount} episodes`
-          : "New series"),
+  const accessValue =
+    accessSummary?.entryLabel ||
+    (onContinue
+      ? "Continue where you stopped"
+      : hasFreeEpisodes
+        ? "Episode 1 open"
+        : "Unlock as you go");
+  const accessHint =
+    accessSummary?.entryHint ||
+    (onContinue && lastEpisodeLabel ? `Resume at Episode ${lastEpisodeLabel}.` : "");
+  const heroFacts = [
+    {
+      label: "Rating",
+      value: ratingCount > 0 ? ratingValue : "New",
+      detail:
+        ratingCount > 0
+          ? `${formatCompactCount(ratingCount)} rating${ratingCount === 1 ? "" : "s"}`
+          : followers > 0
+            ? `${formatCompactCount(followers)} following`
+            : "Fresh release",
+    },
+    {
+      label: "Run",
+      value: isCompleted ? "Completed" : capitalize(series.status || "updating"),
+      detail: episodeCount > 0 ? `${episodeCount} episode${episodeCount === 1 ? "" : "s"}` : "Episodes coming soon",
+    },
+    {
+      label: "Latest",
+      value: latestEpisodeNumber ? `Ep ${latestEpisodeNumber}` : isCompleted ? "Completed" : "Live",
+      detail: latestEpisode?.title || formatUpdateLabel(latestEpisode?.publishedAt || series.updatedAt),
+    },
+    {
+      label: "Creator",
+      value: series.author || "Studio",
+      detail: creatorHref ? "View creator page" : formatSeriesKind(series.type),
+      href: creatorHref,
+    },
   ];
   const primaryActionClassName = [
-    "inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition-colors",
+    "inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-colors",
     highlightPrimaryAction
       ? "border-[rgba(49,87,214,0.24)] bg-[rgba(49,87,214,0.08)] text-slate-950 shadow-[0_0_0_1px_rgba(49,87,214,0.12),0_22px_60px_rgba(49,87,214,0.12)]"
-      : "border-black/8 bg-slate-950 text-white hover:bg-slate-800",
+      : "border-black/8 bg-slate-950 text-white shadow-[0_18px_42px_rgba(15,23,42,0.12)] hover:bg-slate-800",
   ].join(" ");
   const primaryActions = primaryAction ? (
     <div className="grid gap-3">
@@ -166,26 +194,6 @@ export default function SeriesHeader({
       </button>
     </div>
   ) : null;
-  const quickFacts = [
-    {
-      label: "Latest update",
-      value: latestEpisodeNumber ? `Episode ${latestEpisodeNumber}` : isCompleted ? "Completed run" : "Series page",
-      hint: latestEpisode?.title
-        ? `${latestEpisode.title} • ${formatUpdateLabel(latestEpisode?.publishedAt || series.updatedAt)}`
-        : formatUpdateLabel(series.updatedAt),
-    },
-    {
-      label: "Access",
-      value:
-        accessSummary?.entryLabel ||
-        (onContinue
-          ? "Continue where you stopped"
-          : hasFreeEpisodes
-            ? "Episode 1 open"
-            : "Unlock as you go"),
-      hint: accessSummary?.entryHint || "",
-    },
-  ];
   return (
     <header className="py-4 sm:py-6">
       <SurfacePanel className="relative overflow-hidden p-0" appearance="light" accent="blue">
@@ -222,85 +230,76 @@ export default function SeriesHeader({
               {series.title || "Series"}
             </h1>
 
-            {primaryActions ? <div className="mt-5 max-w-sm">{primaryActions}</div> : null}
-
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
-              {series.description || "Open the first episode and see if it lands."}
-            </p>
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              {readerPulseItems.filter(Boolean).slice(0, 2).map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1.5 text-sm text-slate-700"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-
-            <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-slate-500">
-              <span>{episodeCount ? `${episodeCount} episodes` : "New series"}</span>
-              <span className="text-slate-300">|</span>
-              <span>{capitalize(series.status || "updating")}</span>
-              <span className="text-slate-300">|</span>
-              {creatorHref ? (
-                <Link
-                  href={creatorHref}
-                  className="font-semibold text-slate-900 transition hover:text-[var(--gush-accent,#3157d6)]"
-                >
-                  {series.author || "Studio"}
-                </Link>
-              ) : (
-                <span>{series.author || "Studio"}</span>
-              )}
-              {lastEpisodeLabel ? (
-                <>
-                  <span className="text-neutral-600">|</span>
-                  <span>Last read: Episode {lastEpisodeLabel}</span>
-                </>
-              ) : null}
-            </div>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {quickFacts.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-[22px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-950">{item.value}</p>
-                  {item.hint ? (
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{item.hint}</p>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-
-            {visibleBadges.length > 0 || genres.length > 0 ? (
+            {headerHighlights.length > 0 ? (
               <div className="mt-5 flex flex-wrap gap-2">
-                {visibleBadges.slice(0, 2).map((badge) => (
+                {headerHighlights.map((item) => (
                   <span
-                    key={badge}
-                    className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+                    key={`${item.tone}-${item.label}`}
+                    className={`rounded-full border px-3 py-1 text-xs ${
+                      item.tone === "badge"
+                        ? "border-black/8 bg-white font-semibold text-slate-700"
+                        : "border-black/8 bg-[rgba(246,243,237,0.92)] text-slate-500"
+                    }`}
                   >
-                    {badge}
-                  </span>
-                ))}
-                {genres.slice(0, 2).map((genre) => (
-                  <span
-                    key={genre}
-                    className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1 text-xs text-slate-500"
-                  >
-                    {genre}
+                    {item.label}
                   </span>
                 ))}
               </div>
             ) : null}
 
-            <div className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+            <div className="mt-6 space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                Story
+              </p>
+              <p className="max-w-3xl text-[15px] leading-7 text-slate-600 sm:text-base sm:leading-8">
+                {series.description || "Open the first episode and see if it lands."}
+              </p>
+            </div>
+
+            <div className="mt-6 grid gap-3 xl:grid-cols-4">
+              {heroFacts.map((item) =>
+                item.href ? (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="rounded-[22px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      {item.label}
+                    </p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">{item.value}</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{item.detail}</p>
+                  </Link>
+                ) : (
+                  <div
+                    key={item.label}
+                    className="rounded-[22px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      {item.label}
+                    </p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">{item.value}</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{item.detail}</p>
+                  </div>
+                ),
+              )}
+            </div>
+
+            <div className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)] lg:items-start">
+              <div className="rounded-[24px] border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.06)] px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  Reading access
+                </p>
+                <p className="mt-2 text-base font-semibold text-slate-950">{accessValue}</p>
+                {accessHint ? (
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{accessHint}</p>
+                ) : null}
+              </div>
+
+              {primaryActions ? <div className="max-w-sm lg:justify-self-end">{primaryActions}</div> : null}
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
               {onFollowToggle ? (
                 <button
                   type="button"

@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
 import Cover from "../common/Cover";
-import Pill from "../common/Pill";
 import { SkeletonCard } from "../common/Skeleton";
 import SearchBar from "../common/SearchBar";
 import SurfacePanel from "../common/SurfacePanel";
@@ -162,29 +161,7 @@ function summarizeSearchDescription(series) {
     return "Completed series ready for a full-session read.";
   }
 
-  return "Open the title page to see chapters, free starts, and unlock options.";
-}
-
-function getSearchSignals(series) {
-  const signals = [];
-
-  if (series?.author) {
-    signals.push(`By ${series.author}`);
-  }
-
-  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
-    signals.push("Starts free");
-  }
-
-  if (String(series?.status || "").toLowerCase() === "completed") {
-    signals.push("Completed");
-  }
-
-  if (series?.adult) {
-    signals.push("18+");
-  }
-
-  return signals.slice(0, 2);
+  return "Open the title page to see chapters and unlock options.";
 }
 
 export default function SearchPage() {
@@ -651,52 +628,24 @@ export default function SearchPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasSparseResults = Boolean(query) && !loading && results.length > 0 && results.length < 4;
   const showResultSections = Boolean(query);
-  const discoveryKeywords = useMemo(
-    () => [...hotKeywords, ...keywords].filter(Boolean).slice(0, 8),
-    [hotKeywords, keywords],
-  );
   const heroTitle = query ? `Results for "${query}"` : "Search the catalog.";
   const heroDescription = query
     ? loading
       ? "Refreshing matches..."
-      : `${total.toLocaleString()} match${total === 1 ? "" : "es"}${activeFilterCount > 0 ? ` / ${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"}` : ""}.`
-    : "Search titles, genres, or creators.";
+      : `${total.toLocaleString()} match${total === 1 ? "" : "es"}.`
+    : "Titles, genres, and creators.";
   const heroSecondary = "";
   const loadingResultLabel = "Updating";
-  const heroStats = useMemo(
-    () => [
-      {
-        label: query ? "Matches" : "Trending now",
-        value: query
-          ? loading
-            ? loadingResultLabel
-            : total.toLocaleString()
-          : (hotKeywords[0]?.label || keywords[0]?.label || "Live"),
-        hint: query ? "Visible results for this search" : "A quick way into the catalog",
-      },
-      {
-        label: "Filters",
-        value: activeFilterCount > 0 ? String(activeFilterCount) : "Open",
-        hint: activeFilterCount > 0 ? "This search is narrowed down" : "No filters are holding the list back",
-      },
-      {
-        label: "Mode",
-        value: isAdultMode ? "18+" : "Standard",
-        hint: isAdultMode ? "18+ titles visible" : "Main catalog",
-      },
-    ],
-    [activeFilterCount, hotKeywords, isAdultMode, keywords, loading, loadingResultLabel, query, total],
-  );
   const recoPanelTitle = !query
     ? "Popular right now"
     : results.length === 0
       ? "No exact match yet. Try one of these instead."
       : "Only a few matches? Widen the net.";
   const recoPanelHint = !query
-    ? "Open a live title first, or search from one of these stronger starting points."
+    ? "A few strong places to start."
     : results.length === 0
-      ? "These picks keep you moving when a search comes up empty."
-      : "A short result list is a good time to branch into something similar.";
+      ? "A nearby title can open the catalog back up."
+      : "A short result list can still lead into something broader.";
   const lightCardAccentClass = "border-black/6 bg-white/84 hover:border-black/10 hover:bg-white";
   const lightFeatureAccentClass =
     "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]";
@@ -730,8 +679,7 @@ export default function SearchPage() {
             id: "free-unlock",
             eyebrow: "Free start",
             title: "Start with a free chapter before you commit.",
-            description:
-              "Free unlocks are one of the easiest ways to test a series before spending.",
+            description: "A simple way to sample a series before you unlock more.",
             ctaLabel: "Open free-start picks",
             onClick: () => router.push("/rankings?type=ttf&window=all"),
             accentClass: lightFeatureAccentClass,
@@ -751,8 +699,7 @@ export default function SearchPage() {
             id: "completed-binge",
             eyebrow: "Binge path",
             title: "Browse completed series for a full binge.",
-            description:
-              "Finished stories are the easiest choice when you want payoff without waiting.",
+            description: "Finished stories work well when you want payoff without waiting.",
             ctaLabel: "Browse completed",
             onClick: () =>
               updateParams(
@@ -784,8 +731,7 @@ export default function SearchPage() {
             id: "breakout-watch",
             eyebrow: "Breakout watch",
             title: `Search "${leadHotLabel}" to see what is hot right now.`,
-            description:
-              "A trending term is often the fastest way to find something new.",
+            description: "A trending term can open the catalog quickly.",
             ctaLabel: `Search ${leadHotLabel}`,
             onClick: () =>
               updateParams(
@@ -805,7 +751,7 @@ export default function SearchPage() {
             id: "adult-desk",
             eyebrow: "18+ page",
             title: "Go straight to the 18+ section.",
-            description: "Use the dedicated 18+ page when you already know you want mature reads.",
+            description: "Head straight to 18+ when you want mature reads.",
             ctaLabel: "Open 18+ page",
             onClick: () => router.push("/adult"),
             accentClass: lightCardAccentClass,
@@ -855,17 +801,17 @@ export default function SearchPage() {
             id: hasDirectMatch ? "lead-match" : query ? "lead-editorial-rescue" : "lead-editorial-push",
             eyebrow: hasDirectMatch ? "Best match" : query ? "Try this next" : "Featured",
             title: hasDirectMatch
-              ? `${leadSearchResult.title} is the best match to open first.`
+              ? `${leadSearchResult.title} is the clearest match here.`
               : query
                 ? `${leadSearchResult.title} is a strong next pick for this search.`
-                : `${leadSearchResult.title} is worth opening before you even type.`,
+                : `${leadSearchResult.title} is a strong place to begin.`,
             description: hasDirectMatch
               ? hasSparseResults
-                ? "There are only a few matches, so start with the strongest one and branch out from there."
+                ? "There are only a few matches, so start here and branch out from there."
                 : "This is the clearest match in the current results."
               : query
-                ? "Your search came up empty, so this is the closest strong pick to try next."
-                : "If you are still browsing, start with one strong pick instead of a blank search box.",
+                ? "Your search came up empty, so this is the closest strong pick nearby."
+                : "If you are still browsing, begin with one strong pick.",
             signalLabel: hasDirectMatch ? "Results" : "Featured",
             signalValue: hasDirectMatch
               ? (loading ? loadingResultLabel : total.toLocaleString())
@@ -888,8 +834,7 @@ export default function SearchPage() {
             id: "lead-trend",
             eyebrow: "Trending search",
             title: `${leadHotLabel} is trending right now.`,
-            description:
-              "Trending searches are a quick way to find something popular without guessing.",
+            description: "A live search term can open into something popular fast.",
             signalLabel: "Hot keyword",
             signalValue: leadHotLabel,
             signalHint:
@@ -928,8 +873,7 @@ export default function SearchPage() {
             id: "free-start-desk",
             eyebrow: "Free start",
             title: "Start with a free chapter first.",
-            description:
-              "Free unlocks and previews are the easiest way to keep browsing without paying up front.",
+            description: "Free unlocks and previews keep discovery light.",
             signalLabel: "Chart",
             signalValue: "TTF",
             signalHint: "Timed free unlocks available now",
@@ -1070,80 +1014,25 @@ export default function SearchPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_0.82fr]">
-            <div className="space-y-3">
-              <div className="rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-5">
-                <SearchBar
-                  variant="light"
-                  placeholder="Search titles, genres, or creators"
-                  showShortcut={false}
-                  initialValue={query}
-                />
-                {suggestions.length > 0 ? (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {suggestions.slice(0, 6).map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => updateParam("q", item)}
-                        className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {heroStats.map((item, index) => (
-                  <span
-                    key={item.label}
-                    className={`rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs text-slate-600 ${
-                      query && index > 1 ? "hidden sm:inline-flex" : ""
-                    }`}
-                  >
-                    <span className="font-semibold text-slate-900">{item.label}:</span> {item.value}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {!query ? (
-              <div className="rounded-[24px] border border-black/6 bg-white/82 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Quick starts
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {discoveryKeywords.slice(0, 4).map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() =>
-                        updateParams(
-                          {
-                            q: item.value,
-                            type: "",
-                            status: "",
-                            genre: "",
-                            sort: "popular",
-                          },
-                          { resetPage: true },
-                        )
-                      }
-                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
-                    >
-                      {item.label}
-                    </button>
-                  ))}
+          <div className="rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-5">
+            <SearchBar
+              variant="light"
+              placeholder="Search titles, genres, or creators"
+              showShortcut={false}
+              initialValue={query}
+            />
+            {suggestions.length > 0 ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {suggestions.slice(0, 6).map((item) => (
                   <button
+                    key={item}
                     type="button"
-                    onClick={() => router.push("/rankings?type=ttf&window=all")}
-                    className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                    onClick={() => updateParam("q", item)}
+                    className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
                   >
-                    Start free
+                    {item}
                   </button>
-                </div>
+                ))}
               </div>
             ) : null}
           </div>
@@ -1175,13 +1064,13 @@ export default function SearchPage() {
             eyebrow={query ? "Search picks" : "Start here"}
             title={
               query
-                ? "Open the strongest match first."
+                ? "Open the clearest match first."
                 : "Start with something readers already want."
             }
             description={
               query
-                ? "If the list feels thin, these picks keep you moving without sending you into dead ends."
-                : "Hot picks, free starts, and finished reads are the fastest way into the site."
+                ? "If the list feels thin, these picks open into a wider shelf."
+                : "A few strong picks to open the catalog."
             }
             events={searchEventCards}
             appearance="light"
@@ -1514,7 +1403,7 @@ export default function SearchPage() {
                         tone={series.coverTone}
                         coverUrl={series.coverUrl}
                         label={series.title}
-                        eyebrow={Array.isArray(series.genres) ? series.genres.slice(0, 2).join(" / ") : ""}
+                        eyebrow=""
                         badge={series.badge}
                         genres={series.genres}
                         seriesType={series.type}
@@ -1523,28 +1412,15 @@ export default function SearchPage() {
                       />
                     </div>
                     <div className="min-w-0 space-y-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-display text-lg font-semibold tracking-tight text-slate-950">
-                          {highlight(series.title, query)}
-                        </h3>
-                        {series.badge ? <Pill appearance="light">{series.badge}</Pill> : null}
-                      </div>
+                      <h3 className="font-display text-lg font-semibold tracking-tight text-slate-950">
+                        {highlight(series.title, query)}
+                      </h3>
                       <p className="text-sm text-slate-500">
                         {formatSearchSeriesMeta(series)}
                       </p>
                       <p className="line-clamp-2 text-sm leading-6 text-slate-600">
                         {summarizeSearchDescription(series)}
                       </p>
-                      <div className="flex flex-wrap gap-2 text-xs text-slate-600">
-                        {getSearchSignals(series).map((item) => (
-                          <span
-                            key={`${series.id}-signal-${item}`}
-                            className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-2.5 py-1"
-                          >
-                            {highlight(item, query)}
-                          </span>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 </Link>

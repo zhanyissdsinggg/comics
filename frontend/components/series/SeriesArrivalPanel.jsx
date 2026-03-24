@@ -24,7 +24,7 @@ export default function SeriesArrivalPanel({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
-            A better next click
+            From your last stop
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
             {context.title}
@@ -33,7 +33,7 @@ export default function SeriesArrivalPanel({
         </div>
         <div className="rounded-[24px] border border-black/6 bg-white/84 px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            If you want to go back
+            Back to source
           </p>
           <p className="mt-3 text-sm leading-6 text-slate-600">{context.returnHint}</p>
         </div>
@@ -42,13 +42,13 @@ export default function SeriesArrivalPanel({
       <div className="grid gap-3 md:grid-cols-3">
         <div className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Source
+            From
           </p>
           <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
             {context.sourceLabel}
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Where this visit started before you landed here.
+            Where this visit began before you landed here.
           </p>
         </div>
         <div className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4">
@@ -59,12 +59,12 @@ export default function SeriesArrivalPanel({
             {context.laneValue}
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            The signal that made this title worth the next click.
+            The signal that made this title stand out.
           </p>
         </div>
         <div className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Best next move
+            Keep browsing
           </p>
           <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
             {context.returnTitle}

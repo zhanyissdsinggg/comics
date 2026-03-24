@@ -3,7 +3,6 @@
 import { useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Cover from "../common/Cover";
-import Pill from "../common/Pill";
 import SurfacePanel from "../common/SurfacePanel";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
 import { normalizeCreatorName } from "../../lib/creators";
@@ -97,37 +96,34 @@ export default function SearchCreatorMatchesPanel({
 
         let matchLabel = "Creator match";
         let matchDescription =
-          "This search lines up with a creator page, which is often the fastest way to find related series.";
+          "This search lines up with a creator page and a wider linked shelf.";
         let matchScore = 0;
 
         if (exactNameMatch) {
           matchLabel = "Exact creator";
-          matchDescription = "You searched for the creator directly, so their page is the best next click.";
+          matchDescription = "You searched for the creator directly, so their page is the clearest next stop.";
           matchScore += 1200;
         } else if (prefixNameMatch) {
           matchLabel = "Creator name";
-          matchDescription =
-            "This search starts with the creator name, so opening their page should help faster than a narrow title list.";
+          matchDescription = "This search starts with the creator name, so their page should open the shelf up cleanly.";
           matchScore += 900;
         } else if (includesNameMatch) {
           matchLabel = "Creator name";
-          matchDescription = "This search still matches the creator name closely enough that their page is worth opening first.";
+          matchDescription = "This search still matches the creator name closely enough that their page is worth opening.";
           matchScore += 700;
         }
 
         if (spotlightTitleMatch) {
           if (!hasPrimaryMatch) {
             matchLabel = "Lead title";
-            matchDescription =
-              "The best title match comes from this creator, so their page gives you more good options right away.";
+            matchDescription = "The strongest title match comes from this creator, so their page keeps related work close.";
           }
           matchScore += 220;
         }
 
         if (!hasPrimaryMatch && genreMatches.length > 0) {
           matchLabel = "Genre bridge";
-          matchDescription =
-            "This search overlaps the creator's main genres, so their page is a better next stop than starting over.";
+          matchDescription = "This search overlaps the creator's main genres, so their page is a natural next stop.";
         }
 
         matchScore += genreMatches.length * 80;
@@ -224,14 +220,14 @@ export default function SearchCreatorMatchesPanel({
     resultsLength === 0
       ? "This looks more like a creator search."
       : resultsLength > 0 && resultsLength < 4
-        ? "Open the creator page before the list runs dry."
-        : "The creator behind this search should be visible early.";
+        ? "The creator page may be the better fit."
+        : "The creator behind this search is close.";
   const creatorPanelHint =
     resultsLength === 0
-      ? "If the exact title misses, the creator page is usually the quickest way back into the right shelf."
+      ? "If the exact title misses, the creator page usually keeps the right shelf nearby."
       : resultsLength > 0 && resultsLength < 4
-        ? "A creator page gives you more room to branch out without restarting the search."
-        : "If you are really looking for a writer or studio, this should feel like the smarter first click.";
+        ? "A creator page gives you a little more room to branch out."
+        : "If you are really looking for a writer or studio, start there.";
 
   return (
     <SurfacePanel className="space-y-6" appearance="light" accent="blue">
@@ -268,18 +264,13 @@ export default function SearchCreatorMatchesPanel({
               className="h-56 rounded-[22px]"
             />
             <div className="mt-4 space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    {creator.matchLabel}
-                  </p>
-                  <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    {highlight(creator.name, query)}
-                  </h3>
-                </div>
-                <Pill appearance="light">
-                  {creator.titleCount} title{creator.titleCount === 1 ? "" : "s"}
-                </Pill>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  {creator.matchLabel}
+                </p>
+                <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  {highlight(creator.name, query)}
+                </h3>
               </div>
 
               {creator.spotlightSeries?.title ? (
@@ -288,11 +279,11 @@ export default function SearchCreatorMatchesPanel({
                   <span className="font-medium text-slate-950">
                     {highlight(creator.spotlightSeries.title, query)}
                   </span>
-                  , then move through the rest of this shelf.
+                  , then stay with the rest of this shelf.
                 </p>
               ) : (
                 <p className="text-sm leading-6 text-slate-600">
-                  Open the creator page to see the strongest related titles in one place.
+                  Open the creator page to see related titles in one place.
                 </p>
               )}
 
@@ -310,6 +301,7 @@ export default function SearchCreatorMatchesPanel({
               </div>
 
               <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+                <span>{creator.titleCount} title{creator.titleCount === 1 ? "" : "s"}</span>
                 <span>{formatCompactCount(creator.readerProof)} readers</span>
                 {creator.relatedTitleCount > 0 ? <span>{creator.relatedTitleCount} title matches</span> : null}
                 {creator.completedCount > 0 ? <span>{creator.completedCount} completed</span> : null}

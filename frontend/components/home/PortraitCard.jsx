@@ -5,35 +5,8 @@ import { memo } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Cover from "../common/Cover";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { getCoverCardMeta, normalizeCoverBadge } from "../../lib/coverPresentation";
-
-const badgeConfig = {
-  Trending: "border-rose-200 bg-rose-50 text-rose-700",
-  New: "border-sky-200 bg-sky-50 text-sky-700",
-  Free: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  Completed: "border-teal-200 bg-teal-50 text-teal-700",
-  "18+": "border-red-200 bg-red-50 text-red-600",
-};
-
-function BadgePill({ badge }) {
-  const label = normalizeCoverBadge(badge);
-  if (!label) {
-    return null;
-  }
-
-  return (
-    <Badge
-      className={cn(
-        "absolute left-3 top-3 z-10 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] shadow-[0_8px_18px_rgba(15,23,42,0.08)]",
-        badgeConfig[label] || "border-white/80 bg-white text-neutral-950",
-      )}
-    >
-      {label}
-    </Badge>
-  );
-}
+import { getCoverCardMeta } from "../../lib/coverPresentation";
 
 function isModifiedEvent(event) {
   return Boolean(
@@ -52,7 +25,6 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
   const isLight = appearance === "light";
   const resolvedHref = href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
   const coverMeta = getCoverCardMeta(item);
-  const coverChips = coverMeta.chips.slice(0, 1);
   const detailCopy = item.statusLabel || item.metaLabel || coverMeta.detailText || "";
 
   const handleClick = (event) => {
@@ -97,7 +69,6 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
           />
           <div className={cn("absolute inset-0", isLight ? "bg-gradient-to-t from-black/50 via-black/8 to-transparent" : "bg-gradient-to-t from-black/85 via-black/18 to-transparent")} />
           <div className={cn("absolute inset-0", isLight ? "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.2),transparent_24%)]" : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.1),transparent_22%)]")} />
-          <BadgePill badge={item.badge} />
 
           {typeof item.progressPercent === "number" && item.progressPercent > 0 ? (
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/30">
@@ -130,34 +101,6 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
             >
               {detailCopy}
             </p>
-          ) : null}
-
-          {coverChips.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {coverChips.map((chip) => (
-                <span
-                  key={`${item?.id || item?.title}-${chip.id}-${chip.label}`}
-                  className={cn(
-                    "rounded-full border px-2.5 py-1 text-[10px] font-semibold",
-                    chip.tone === "accent"
-                      ? isLight
-                        ? "border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] text-[var(--gush-accent,#3157d6)]"
-                        : "border-white/12 bg-white/10 text-white/80"
-                      : chip.tone === "danger"
-                        ? "border-red-200 bg-red-50 text-red-600"
-                      : chip.tone === "soft"
-                          ? isLight
-                            ? "border-black/8 bg-[rgba(246,243,237,0.92)] text-slate-500"
-                            : "border-white/10 bg-white/8 text-neutral-400"
-                          : isLight
-                            ? "border-black/8 bg-white text-slate-600"
-                            : "border-white/10 bg-white/10 text-neutral-300",
-                  )}
-                >
-                  {chip.label}
-                </span>
-              ))}
-            </div>
           ) : null}
 
           <div className="flex items-center justify-between pt-1">

@@ -27,20 +27,6 @@ function readPlaceholdLabel(url) {
   }
 }
 
-function buildFallbackInitials(label) {
-  const tokens = String(label || "")
-    .replace(/[^a-z0-9\s]/gi, " ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2);
-
-  if (tokens.length === 0) {
-    return "GS";
-  }
-
-  return tokens.map((token) => token[0]?.toUpperCase() || "").join("").slice(0, 2);
-}
-
 function CoverFallback({
   label = "",
   eyebrow = "",
@@ -57,7 +43,6 @@ function CoverFallback({
     .replace(/\s+/g, " ")
     .trim();
   const chipLabel = String(badge || eyebrow || "Gush").trim() || "Gush";
-  const initials = buildFallbackInitials(title || chipLabel);
   const artDirection = getCoverArtDirection({
     tone,
     genres,
@@ -96,13 +81,15 @@ function CoverFallback({
           </span>
         ) : null}
       </div>
-      <div className="absolute inset-x-0 top-[26%] flex justify-center">
+      <div className="absolute inset-x-0 top-[25%] flex justify-center">
         <div
-          className="rounded-[28px] border bg-black/14 px-5 py-3 text-[2.75rem] font-semibold tracking-[0.2em] text-white/16 shadow-[0_18px_50px_rgba(0,0,0,0.14)] backdrop-blur-[2px]"
+          className="relative h-28 w-40 rounded-[32px] border bg-black/10 shadow-[0_18px_50px_rgba(0,0,0,0.14)] backdrop-blur-[2px]"
           style={{ borderColor: artDirection.border }}
-        >
-          {initials}
-        </div>
+        />
+        <div
+          className="absolute mt-6 h-20 w-20 rounded-full border bg-white/6 blur-[0.5px]"
+          style={{ borderColor: artDirection.border }}
+        />
       </div>
       <div className="absolute inset-x-4 bottom-4">
         <div

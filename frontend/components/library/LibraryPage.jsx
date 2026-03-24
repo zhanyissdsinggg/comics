@@ -477,12 +477,12 @@ export default function LibraryPage({ initialSignedIn = false }) {
             {
               label: "Start free",
               value: "Ready",
-              hint: "Use free starts to seed your shelf fast",
+              hint: "Free starts can open the shelf",
             },
             {
               label: "Top Series",
               value: "Browse",
-              hint: "The safest first click before your shelf fills in",
+              hint: "A strong place to find something to save",
             },
             {
               label: "Sync",
@@ -519,7 +519,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           id: "start-free",
           eyebrow: "Start free",
           title: "Start a free series first.",
-          description: "The fastest way to make Library useful.",
+          description: "A clean way to give Library its first read.",
           cta: "Start free",
           onClick: () => router.push("/rankings?type=ttf&window=all"),
           accentClass: primaryAccentClass,
@@ -542,7 +542,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           id: "free-starts",
           eyebrow: "Start free",
           title: "Start one series and give Library something to track.",
-          description: "A free first chapter is still the fastest way to create progress here.",
+          description: "One free chapter is enough to start building progress here.",
           cta: "Start free",
           onClick: () => router.push("/rankings?type=ttf&window=all"),
           accentClass: primaryAccentClass,
@@ -630,7 +630,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         id: "search",
         eyebrow: "Search",
         title: "Find another title without leaving utility mode.",
-        description: "Search is still the fastest jump when you know what you want.",
+        description: "Open search when you already know the title.",
         cta: "Open search",
         onClick: () => router.push("/search"),
         accentClass: commonAccentClass,
@@ -665,7 +665,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
               ? resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
                 ? "Resume reading, then manage your shelf."
                 : "Saved series, recent activity, and progress."
-              : "Start free now, then sign in to sync."
+              : "Start reading, then sign in to sync."
           }
           description={
             viewerSignedIn
@@ -761,7 +761,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   Quick actions
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {viewerSignedIn ? "Start with the next library task." : "Start free or sign in to sync."}
+                  {viewerSignedIn ? "Keep your reading close." : "Start reading or sign in to sync."}
                 </h2>
               </div>
               <StorefrontPathwaysGrid
@@ -778,7 +778,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   Get started
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Start a series and this page becomes useful fast.
+                  Start a series and this page begins to fill in.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   Start free, save a favorite, or open Top Series.

@@ -123,6 +123,8 @@ export default function EpisodeList({
     ],
     [availabilityCounts],
   );
+  const showFilterControl = filterOptions.length > 1;
+  const showSortControl = totalEpisodes > 1;
 
   useEffect(() => {
     if (filter === "all") {
@@ -135,42 +137,48 @@ export default function EpisodeList({
 
   return (
     <section
-      className="mt-6 rounded-[28px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,246,242,0.94))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-md sm:mt-8 sm:p-6"
+      className="mt-6 rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.92))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-md sm:mt-8 sm:p-6"
       data-wallet-total={walletTotal}
     >
       <div className="mb-5 border-b border-black/8 pb-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-slate-950">Episodes</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">Episodes</h2>
               <span className="text-sm text-slate-500">{totalEpisodes}</span>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
-            <select
-              value={filter}
-              onChange={(event) => setFilter(event.target.value)}
-              className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
-            >
-              {filterOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <select
-              value={sortOrder}
-              onChange={(event) => setSortOrder(event.target.value)}
-              className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
-            >
-              <option value="oldest">Oldest first</option>
-              <option value="newest">Newest first</option>
-            </select>
+        {showFilterControl || showSortControl ? (
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+            <div className={`grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3 ${showFilterControl && showSortControl ? "grid-cols-2" : "grid-cols-1"}`}>
+              {showFilterControl ? (
+                <select
+                  value={filter}
+                  onChange={(event) => setFilter(event.target.value)}
+                  className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
+                >
+                  {filterOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+              {showSortControl ? (
+                <select
+                  value={sortOrder}
+                  onChange={(event) => setSortOrder(event.target.value)}
+                  className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
+                >
+                  <option value="oldest">Oldest first</option>
+                  <option value="newest">Newest first</option>
+                </select>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
       {sortedEpisodes.length === 0 ? (

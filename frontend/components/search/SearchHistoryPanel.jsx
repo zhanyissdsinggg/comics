@@ -10,7 +10,6 @@ import {
 } from "../../lib/searchHistory";
 
 const MAX_HISTORY_ITEMS = 10;
-const DEFAULT_QUICK_SEARCHES = ["Romance", "Action", "Fantasy", "Comedy", "Completed", "New Releases"];
 
 function normalizeKeywordItem(item, index = 0) {
   if (typeof item === "string") {
@@ -71,9 +70,10 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
   const [history, setHistory] = useState([]);
   const normalizedHotKeywords = normalizeKeywordList(hotKeywords);
   const normalizedQuickKeywords = normalizeKeywordList(quickKeywords);
-  const quickSearches = normalizedQuickKeywords.length > 0
-    ? normalizedQuickKeywords.slice(0, 6)
-    : normalizeKeywordList(DEFAULT_QUICK_SEARCHES);
+  const trendingKeywords =
+    normalizedHotKeywords.length > 0
+      ? normalizedHotKeywords.slice(0, 6)
+      : normalizedQuickKeywords.slice(0, 6);
 
   useEffect(() => {
     setHistory(readSearchHistory({ limit: MAX_HISTORY_ITEMS }));
@@ -123,7 +123,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
               onClick={clearHistory}
               className="min-h-[44px] rounded-lg px-3 py-2 text-xs text-slate-400 hover:text-slate-700 active:bg-slate-100 md:text-sm"
             >
-              Clear All
+              Clear
             </button>
           </div>
           <div className="space-y-2">
@@ -172,11 +172,13 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
         </div>
       ) : null}
 
-      {normalizedHotKeywords.length > 0 ? (
+      {trendingKeywords.length > 0 ? (
         <div>
-          <h3 className="mb-3 text-sm font-medium text-slate-700 md:text-base">Trending searches</h3>
+          <h3 className="mb-3 text-sm font-medium text-slate-700 md:text-base">
+            {normalizedHotKeywords.length > 0 ? "Trending" : "Browse"}
+          </h3>
           <div className="space-y-2">
-            {normalizedHotKeywords.slice(0, 8).map((keyword, index) => (
+            {trendingKeywords.map((keyword, index) => (
               <button
                 key={keyword.id}
                 type="button"
@@ -202,11 +204,6 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
                     </span>
                   ) : null}
                 </span>
-                {keyword.badge ? (
-                  <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    {keyword.badge}
-                  </span>
-                ) : null}
                 <svg
                   className="h-4 w-4 flex-shrink-0 text-slate-400 md:h-5 md:w-5"
                   fill="none"
@@ -225,22 +222,6 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
           </div>
         </div>
       ) : null}
-
-      <div>
-        <h3 className="mb-3 text-sm font-medium text-slate-700 md:text-base">Browse fast</h3>
-        <div className="flex flex-wrap gap-2">
-          {quickSearches.map((suggestion) => (
-            <button
-              key={suggestion.id}
-              type="button"
-              onClick={() => handleSearch(suggestion.value)}
-              className="min-h-[44px] rounded-full border border-black/8 bg-white/84 px-4 py-2 text-xs text-slate-500 shadow-[0_8px_22px_rgba(15,23,42,0.04)] hover:border-[var(--gush-accent,#2f6bff)] hover:text-[var(--gush-accent,#2f6bff)] active:bg-[rgba(47,107,255,0.06)] md:text-sm"
-            >
-              {suggestion.label}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 });

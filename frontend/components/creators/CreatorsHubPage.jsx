@@ -152,29 +152,29 @@ function buildCreatorDirectoryHeroStats({
       label: "Start here",
       value: leadCreator?.name || leadSeries?.title || "Top Series",
       hint: leadCreator
-        ? `Open ${leadCreator.name} to branch into linked titles from one strong creator shelf.`
-        : "Start from Top Series, then branch into the next creator or studio link from a strong title page.",
+        ? `Open ${leadCreator.name} for linked titles from the same voice.`
+        : "Start from Top Series, then follow the next creator or studio link from a strong title page.",
     },
     {
       label: "Free starts",
       value: stats.freeStarts > 0 ? `${stats.freeStarts} free starts` : "Use title pages",
       hint: stats.freeStarts > 0
-        ? "Creator shelves already surface titles with free first episodes."
-        : "Free first episodes still show on title pages, so story-first discovery stays quick.",
+        ? "Creator shelves still surface titles with free first episodes."
+        : "Title pages still surface free openings when they are available.",
     },
     {
       label: "Studio lane",
       value: leadStudio?.name || "Studio picks",
       hint: leadStudio
-        ? "Studios with more than one standout title get a grouped shelf here."
-        : "Use creator shelves, title pages, and search to move through grouped credits across the catalog.",
+        ? "Studios with more than one standout title stay grouped here."
+        : "Creator pages, title pages, and search keep grouped credits close.",
     },
     {
       label: "Top genre",
       value: genreOptions[0] || "Mixed catalog",
       hint: genreOptions[0]
-        ? `${genreOptions[0]} is one of the strongest creator-led lanes in the directory.`
-        : "Browse mixed catalog voices across comics and novels when you want a broader first pass.",
+        ? `${genreOptions[0]} remains one of the strongest creator-led lanes in the directory.`
+        : "Browse mixed voices across comics and novels for a broader first pass.",
     },
   ];
 }
@@ -420,21 +420,21 @@ export default function CreatorsHubPage({
       {
         eyebrow: "Find a creator",
         title: "Search by creator, studio, or title.",
-        description: "Use search when you already know the name or title.",
+        description: "Search when you already know the name or title.",
         label: "Search series",
         href: "/search",
       },
       {
         eyebrow: "Editor picks",
         title: "Open strong creator-led titles first.",
-        description: "Top Series is the fastest public entry into creator discovery.",
+        description: "Top Series is a strong way into creator discovery.",
         label: "Browse Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
         eyebrow: "Browse more",
-        title: "Browse by format and story lane.",
-        description: "Move through comics, novels, and genre-led shelves.",
+        title: "Browse by format or story lane.",
+        description: "Browse comics, novels, and genre-led shelves.",
         label: "Browse comics",
         href: "/comics",
       },
@@ -895,21 +895,21 @@ export default function CreatorsHubPage({
                 {
                   eyebrow: "Studios",
                   title: featuredStudios.length > 0 ? `Open ${featuredStudios.length} studio shelves.` : "Browse studio shelves first.",
-                  description: "Use studios for grouped reading paths from shared teams.",
+                  description: "Studios keep shared teams and linked titles together.",
                   cta: "See studios",
                   onClick: () => jumpToCreatorBrowse("studio"),
                 },
                 {
                   eyebrow: "Creators",
                   title: spotlightCreators[0]?.name ? `Start with ${spotlightCreators[0].name}.` : "Browse creator-led shelves.",
-                  description: "Use creator shelves when one strong title makes you want the same voice again.",
+                  description: "Follow creator shelves when one strong title makes you want the same voice again.",
                   cta: "See creators",
                   onClick: () => jumpToCreatorBrowse("creator"),
                 },
                 {
                   eyebrow: "Search",
                   title: "Search a creator, studio, or title.",
-                  description: "Use Search when you already know the name or lead title.",
+                  description: "Search when you already know the name or lead title.",
                   cta: "Open search",
                   onClick: () => router.push("/search"),
                 },
@@ -917,8 +917,8 @@ export default function CreatorsHubPage({
                   eyebrow: "Story lanes",
                   title: genreOptions[0] ? `Browse ${genreOptions[0]} voices.` : "Browse story-led discovery.",
                   description: genreOptions[0]
-                    ? `Jump into ${genreOptions[0]} when you want the fastest route from genre to creator shelves.`
-                    : "Open a strong story lane first, then branch into creators from the titles that land.",
+                    ? `Start with ${genreOptions[0]} when you want creator shelves in that lane.`
+                    : "Start with a strong story lane, then branch into creators from the titles that land.",
                   cta: genreOptions[0] ? `Open ${genreOptions[0]}` : "Browse Top Series",
                   onClick: () =>
                     genreOptions[0] ? jumpToGenreBrowse(genreOptions[0]) : router.push("/rankings?type=popular&window=week"),
@@ -956,7 +956,7 @@ export default function CreatorsHubPage({
               <p className="text-xs text-slate-500">
                 {[featuredStudios.length > 0 ? `${featuredStudios.length} studio shelves` : "", featuredVoices.length > 0 ? `${featuredVoices.length} creator shelves` : ""]
                   .filter(Boolean)
-                  .join(" | ") || "Curated shelves for a fast first click"}
+                  .join(" | ") || "Curated shelves ready to browse"}
               </p>
             </div>
 
@@ -1006,7 +1006,7 @@ export default function CreatorsHubPage({
                           {summarizeLeadCopy(
                             creator.leadSummary,
                             creator.spotlightSeries?.title
-                              ? `Start with ${creator.spotlightSeries.title}, then fan out through the rest of this shelf.`
+                              ? `Start with ${creator.spotlightSeries.title}, then stay with the rest of this shelf.`
                               : "Open the shelf to browse this creator or studio in one place.",
                           )}
                         </p>
@@ -1102,8 +1102,8 @@ export default function CreatorsHubPage({
                       {summarizeLeadCopy(
                         series?.description,
                         creator
-                          ? `Start with ${series.title}, then open ${creator.name}'s full shelf for more from the same voice.`
-                          : `Start with ${series.title} for a clean first click into this story lane.`,
+                          ? `Start with ${series.title}, then open ${creator.name}'s shelf for more from the same voice.`
+                          : `Start with ${series.title} for a clean way into this story lane.`,
                       )}
                     </p>
 
@@ -1335,7 +1335,7 @@ export default function CreatorsHubPage({
                         {summarizeLeadCopy(
                           creator.leadSummary,
                           creator.spotlightSeries?.title
-                            ? `Start with ${creator.spotlightSeries.title}, then keep moving through the rest of this shelf.`
+                            ? `Start with ${creator.spotlightSeries.title}, then stay with the rest of this shelf.`
                             : "Open this shelf to browse the strongest linked titles from this creator or studio.",
                         )}
                       </p>
@@ -1373,7 +1373,7 @@ export default function CreatorsHubPage({
               icon="search"
               eyebrow="Try another lane"
               title="Try a wider creator lane."
-              description="Clear a filter or widen the search to bring more creator shelves into view."
+              description="Clear a filter or widen the search to see more creators."
               action={{
                 label: "Show all creators",
                 onClick: () => {
@@ -1392,7 +1392,7 @@ export default function CreatorsHubPage({
                   Full list
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Browse the full creator directory.
+                  Browse the creator directory.
                 </h2>
               </div>
               <p className="text-sm text-slate-500">

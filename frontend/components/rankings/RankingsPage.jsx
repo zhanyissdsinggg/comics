@@ -9,7 +9,6 @@ import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import CreatorShelfLinks from "../common/CreatorShelfLinks";
 import Cover from "../common/Cover";
-import Pill from "../common/Pill";
 import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
@@ -26,25 +25,25 @@ const TABS = [
     id: "popular",
     label: "Popular",
     title: "See what readers are opening right now.",
-    description: "The safest first click when you want something already pulling people in.",
+    description: "A live view of the titles drawing the most attention.",
   },
   {
     id: "new",
     label: "New",
-    title: "Catch fresh releases before they go obvious.",
-    description: "New launches and early risers that still feel a little ahead of the crowd.",
+    title: "Catch fresh releases early.",
+    description: "New launches and rising titles still gathering momentum.",
   },
   {
     id: "completed",
     label: "Completed",
-    title: "Find finished stories you can binge now.",
-    description: "Finished runs you can start tonight and keep reading straight through.",
+    title: "Find finished stories you can read straight through.",
+    description: "Finished runs ready for a full reading session.",
   },
   {
     id: "ttf",
-    label: "Start Here",
+    label: "Start Free",
     title: "Try the opening chapters first.",
-    description: "The quickest way to sample a hook before you unlock.",
+    description: "Sample the opening before you unlock more.",
   },
 ];
 
@@ -56,32 +55,32 @@ const WINDOWS = [
 
 const CHART_GUIDES = {
   popular: {
-    audience: "Best when you just want the safest first click.",
-    signal: "These are the titles readers are opening most right now.",
-    nextMove: "Start with the top book, then branch into something nearby if the vibe feels right.",
+    audience: "For the titles carrying the strongest momentum.",
+    signal: "These titles are drawing the most attention right now.",
+    nextMove: "Start with the lead title, then branch into nearby moods or creators.",
     searchHref: "/search?sort=popular",
-    searchLabel: "Open popular search",
+    searchLabel: "Browse related titles",
   },
   new: {
-    audience: "Best when you want something early, not something overexposed.",
-    signal: "Use this Top Series view to catch rising books before they feel obvious.",
-    nextMove: "Open the strongest launch, then see what else is still new.",
+    audience: "For readers who want something earlier in its run.",
+    signal: "A clean way to catch rising releases before they feel obvious.",
+    nextMove: "Open the strongest launch, then stay with the newest shelf.",
     searchHref: "/search?sort=latest",
     searchLabel: "See latest releases",
   },
   completed: {
-    audience: "Best when you want payoff without waiting on updates.",
-    signal: "This completed view goes straight to finished stories you can read straight through.",
-    nextMove: "Start with the top finished title, then compare length and genre if you want another one.",
+    audience: "For readers who want payoff without waiting on updates.",
+    signal: "Finished stories ready to read straight through.",
+    nextMove: "Open the lead finished title, then compare another completed pick.",
     searchHref: "/search?status=Completed&sort=popular",
     searchLabel: "See finished series",
   },
   ttf: {
-    audience: "Best when you want a sample before you spend.",
-    signal: "This shelf highlights titles with the strongest opening sample right now.",
-    nextMove: "Try the opener here, then decide if you want to keep going.",
+    audience: "For readers who want a lighter first step.",
+    signal: "A shelf built around strong openings and free starts.",
+    nextMove: "Try the opener here, then decide where you want to keep going.",
     searchHref: "/search?sort=popular",
-    searchLabel: "See more samples",
+    searchLabel: "See more to try",
   },
 };
 
@@ -280,7 +279,7 @@ export default function RankingsPage({
                 }
                 className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
-                {tab === "completed" ? "See finished reads" : "Open search"}
+                {tab === "completed" ? "See finished reads" : "Browse catalog"}
               </button>
             </>
           }
@@ -293,31 +292,33 @@ export default function RankingsPage({
           />
         ) : null}
 
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2">
-            {TABS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => router.replace(`/rankings?type=${item.id}&window=${selectedWindow}`)}
-                className={filterButtonClass(tab === item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+        <div className="rounded-[24px] border border-black/6 bg-white/82 p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {TABS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => router.replace(`/rankings?type=${item.id}&window=${selectedWindow}`)}
+                  className={filterButtonClass(tab === item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
 
-          <div className="flex flex-wrap gap-2">
-            {WINDOWS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => router.replace(`/rankings?type=${tab}&window=${item.id}`)}
-                className={filterButtonClass(selectedWindow === item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
+            <div className="flex flex-wrap gap-2">
+              {WINDOWS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => router.replace(`/rankings?type=${tab}&window=${item.id}`)}
+                  className={filterButtonClass(selectedWindow === item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -325,70 +326,27 @@ export default function RankingsPage({
           <RankingsLoadingState />
         ) : list.length === 0 ? (
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.32fr)_360px]">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-4">
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Rank #1
+                    Top Series
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Use this slot as your safest first click.
+                    This board is quiet right now.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(tab === "completed" ? "/search?status=Completed&sort=popular" : chartGuide.searchHref)
-                  }
-                  className={primaryButtonClass}
-                >
-                  {chartGuide.searchLabel}
-                </button>
-              </SurfacePanel>
-
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Rank #2
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Compare it against another board mood.
-                  </h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Switch between Popular, New, Completed, and Start Here when this one feels too quiet.
-                  </p>
-                </div>
                 <div className="flex flex-wrap gap-2">
-                  {selectedWindow !== "all" ? (
-                    <button
-                      type="button"
-                      onClick={() => router.replace(`/rankings?type=${tab}&window=all`)}
-                      className={secondaryButtonClass}
-                    >
-                      Show all time
-                    </button>
-                  ) : null}
                   <button
                     type="button"
-                    onClick={() => router.replace(`/rankings?type=popular&window=week`)}
-                    className={secondaryButtonClass}
+                    onClick={() =>
+                      router.push(tab === "completed" ? "/search?status=Completed&sort=popular" : chartGuide.searchHref)
+                    }
+                    className={primaryButtonClass}
                   >
-                    Open Popular
+                    {chartGuide.searchLabel}
                   </button>
-                </div>
-              </SurfacePanel>
-
-              <SurfacePanel className="space-y-4 md:col-span-2" appearance="light" accent="blue">
-                <div className="flex flex-wrap items-end justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      Rank #3
-                    </p>
-                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                      Keep the browse moving even without a live board.
-                    </h2>
-                  </div>
                   <button
                     type="button"
                     onClick={() => router.push("/search")}
@@ -397,21 +355,29 @@ export default function RankingsPage({
                     Search titles
                   </button>
                 </div>
-                <div className="grid gap-3 md:grid-cols-3">
+              </SurfacePanel>
+
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Other views
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Try another chart.
+                  </h2>
+                </div>
+                <div className="grid gap-3">
                   {[
                     {
                       title: "Popular",
-                      body: "Best when you just want the safest first click.",
                       href: "/rankings?type=popular&window=week",
                     },
                     {
                       title: "Completed",
-                      body: "Best when you want a finished story instead of waiting on updates.",
                       href: "/rankings?type=completed&window=all",
                     },
                     {
-                      title: "Start Here",
-                      body: "Best when you want to sample the hook before you spend points.",
+                      title: "Start Free",
                       href: "/rankings?type=ttf&window=all",
                     },
                   ].map((item) => (
@@ -419,10 +385,9 @@ export default function RankingsPage({
                       key={item.title}
                       type="button"
                       onClick={() => router.push(item.href)}
-                      className="rounded-[22px] border border-black/6 bg-white/86 p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-black/10"
+                      className="rounded-[20px] border border-black/6 bg-white/88 px-4 py-4 text-left text-sm font-semibold text-slate-900 transition hover:border-black/10 hover:bg-[#f8f9fc]"
                     >
-                      <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+                      {item.title}
                     </button>
                   ))}
                 </div>
@@ -436,11 +401,8 @@ export default function RankingsPage({
                     Top Series creators
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Follow the people behind the books that stick.
+                    Follow the people behind these books.
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    When creator pages are visible, they are the cleanest next step after a strong ranking pick.
-                  </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -463,14 +425,11 @@ export default function RankingsPage({
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Better fallback
+                    Search
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Use search when this board is empty.
+                    Search the full catalog.
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Search, Top Series, and creator pages work together. If one route is thin, the others should still keep the visit moving.
-                  </p>
                 </div>
                 <button
                   type="button"
@@ -504,34 +463,15 @@ export default function RankingsPage({
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] lg:mx-0"
                     />
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                            Rank #1
-                          </p>
-                          <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                            {leadEntry.title}
-                          </h2>
-                        </div>
-                        {leadEntry.badge ? <Pill appearance="light">{leadEntry.badge}</Pill> : null}
-                      </div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                        Rank #1
+                      </p>
+                      <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                        {leadEntry.title}
+                      </h2>
 
                       <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
                       <p className="mt-3 text-sm text-slate-500">{formatSeriesMeta(leadEntry)}</p>
-
-                      {Array.isArray(leadEntry.genres) && leadEntry.genres.length > 0 ? (
-                        <div className="mt-5 flex flex-wrap gap-2">
-                          {leadEntry.genres.slice(0, 3).map((genre) => (
-                            <span
-                              key={genre}
-                              className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600"
-                            >
-                              {genre}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
-
                     </div>
                   </div>
                 </Link>
@@ -556,7 +496,6 @@ export default function RankingsPage({
                             {series.title}
                           </h3>
                         </div>
-                        {series.badge ? <Pill appearance="light">{series.badge}</Pill> : null}
                       </div>
                       <Cover
                         tone={series.coverTone}
@@ -579,10 +518,10 @@ export default function RankingsPage({
                   <div>
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                        Keep going
+                        More from this board
                       </p>
                       <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                        Continue through Top Series.
+                        Keep reading through the chart.
                       </h2>
                     </div>
                   </div>
@@ -634,10 +573,10 @@ export default function RankingsPage({
                   <div>
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                        Start here
+                        Reading path
                       </p>
                       <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                        Read the lead pick first.
+                        Keep going from the lead title.
                       </h2>
                     </div>
                   </div>
@@ -708,8 +647,8 @@ export default function RankingsPage({
                 campaignId={`${tab}_${selectedWindow}_spotlight_creator`}
                 sourcePath={rankingsPath}
                 label="Top Series creators"
-                title="Try the creators behind these picks"
-                description="If one title lands, open the same creator next."
+                title="Creators behind these picks"
+                description="Open the same voice again if one title lands."
                 maxCreators={6}
                 compact
                 appearance="light"
