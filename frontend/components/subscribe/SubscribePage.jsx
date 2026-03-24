@@ -312,7 +312,7 @@ export default function SubscribePage({
           description={
             subscriptionActionsEnabled
               ? "Membership is monthly. Choose it if you read often."
-              : "Membership opens later."
+              : "Review pricing and plan perks now. Membership opens later."
           }
           secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
           stats={subscriptionHeroStats}

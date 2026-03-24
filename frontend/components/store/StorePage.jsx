@@ -458,7 +458,7 @@ export default function StorePage({
           description={
             purchaseActionsEnabled
               ? "Use packs for one-time unlocks. Use membership if you read often."
-              : "Checkout opens later."
+              : "Review point-pack pricing now. Checkout opens later."
           }
           secondary={purchaseActionsEnabled ? regionConfig.label : ""}
           stats={storeHeroStats}
