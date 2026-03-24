@@ -107,7 +107,9 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
   }
 
   if (firstState.primaryState === "free") {
-    return "Start at Episode 1";
+    return counts.preview === 0 && counts.points === 0 && counts.membership === 0 && counts.locked === 0
+      ? "All episodes open"
+      : "Episode 1 open";
   }
 
   if (firstState.primaryState === "preview") {

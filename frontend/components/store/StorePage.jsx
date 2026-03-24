@@ -455,7 +455,7 @@ export default function StorePage({
           description={
             purchaseActionsEnabled
               ? "Use packs for one-time unlocks. Use membership if you read often."
-              : "Pricing and point totals are visible now."
+              : ""
           }
           secondary={purchaseActionsEnabled ? regionConfig.label : ""}
           stats={storeHeroStats}
@@ -548,7 +548,7 @@ export default function StorePage({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Before launch
+                Point-pack rules
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 Keep the point-pack rules clear.
@@ -632,7 +632,7 @@ export default function StorePage({
                 <p className="text-sm leading-6 text-slate-600">
                   {purchaseActionsEnabled
                     ? "Keep purchases, codes, and receipts on one account."
-                    : "Keep future purchases, codes, and receipts on one account."}
+                    : "Keep future purchases and codes on one account."}
                 </p>
               </div>
                 <button

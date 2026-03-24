@@ -151,7 +151,7 @@ export default function SeriesHeader({
         (onContinue
           ? "Continue where you stopped"
           : hasFreeEpisodes
-            ? "Start at Episode 1"
+            ? "Episode 1 open"
             : "Unlock as you go"),
       hint: accessSummary?.entryHint || "",
     },

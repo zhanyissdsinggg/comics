@@ -312,7 +312,7 @@ export default function SubscribePage({
           description={
             subscriptionActionsEnabled
               ? "Membership is monthly. Choose it if you read often."
-              : "Pricing and plan perks are visible now."
+              : ""
           }
           secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
           stats={subscriptionHeroStats}
@@ -412,7 +412,7 @@ export default function SubscribePage({
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   {subscriptionActionsEnabled
                     ? "Keep renewals, receipts, and support on one account."
-                    : "Keep future membership, renewals, and support on one account."}
+                    : "Keep future membership and support on one account."}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
