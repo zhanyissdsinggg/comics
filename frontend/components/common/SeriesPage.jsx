@@ -435,41 +435,6 @@ export default function SeriesPage({
   const handleResetFilters = useCallback(() => {
     router.replace(config.pathname);
   }, [config.pathname, router]);
-
-  const heroStats = useMemo(
-    () => [
-      {
-        label: "Titles",
-        value: loading ? "Catalog" : series.length.toLocaleString(),
-        hint:
-          type === "comic"
-            ? "Comic series available right now"
-            : "Novel series available right now",
-      },
-      {
-        label: "Visible",
-        value: loading ? "Preview" : filteredAndSortedSeries.length.toLocaleString(),
-        hint:
-          activeFilterCount > 0
-            ? "Titles left after the current filters"
-            : "Full catalog visible right now",
-      },
-      {
-        label: "Filters",
-        value: String(activeFilterCount),
-        hint:
-          activeFilterCount > 0
-            ? "Genre, status, or sort is shaping the list"
-            : "Browsing all titles",
-      },
-      {
-        label: "Mode",
-        value: isAdultMode ? "18+" : "Standard",
-        hint: isAdultMode ? "18+ titles can appear here" : "18+ titles are hidden",
-      },
-    ],
-    [activeFilterCount, filteredAndSortedSeries.length, isAdultMode, loading, series.length, type],
-  );
   const entrySpotlight = useMemo(() => {
     const byPopular = [...series].sort((left, right) => getPopularityScore(right) - getPopularityScore(left));
     const byLatest = [...series].sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt));
@@ -625,7 +590,6 @@ export default function SeriesPage({
           title={config.heroTitle}
           description={config.description}
           secondary={config.secondary}
-          stats={heroStats}
           appearance="light"
           actions={
             <>
@@ -968,16 +932,18 @@ export default function SeriesPage({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Filters
+                Browse filters
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Refine the catalog.
+                Filter titles.
               </h2>
             </div>
             <p className="text-xs text-slate-500">
               {loading
-                ? "Refreshing catalog..."
-                : `${filteredAndSortedSeries.length} title${filteredAndSortedSeries.length === 1 ? "" : "s"} visible`}
+                ? "Refreshing..."
+                : activeFilterCount > 0
+                  ? `${activeFilterCount} active`
+                  : `${filteredAndSortedSeries.length.toLocaleString()} titles`}
             </p>
           </div>
 
@@ -1036,10 +1002,10 @@ export default function SeriesPage({
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Full catalog grid
+                  All titles
                 </p>
                 <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {filteredAndSortedSeries.length.toLocaleString()} titles in view.
+                  {filteredAndSortedSeries.length.toLocaleString()} title{filteredAndSortedSeries.length === 1 ? "" : "s"}
                 </h2>
               </div>
               <p className="text-sm text-slate-500">

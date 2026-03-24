@@ -272,12 +272,12 @@ export default function SubscribePage({
           ? `${subscription?.planId || "Membership"} is active.`
           : subscriptionActionsEnabled
             ? "Monthly billing is open."
-            : "Pricing now. Billing later.",
+            : "",
       },
       {
         label: "Model",
         value: "Monthly plan",
-        hint: "Recurring billing while active.",
+        hint: "Recurring while active.",
       },
       {
         label: "Best savings",
@@ -312,7 +312,7 @@ export default function SubscribePage({
           description={
             subscriptionActionsEnabled
               ? "Membership is monthly. Choose it if you read often."
-              : "Monthly pricing and perks are visible now. Billing opens later."
+              : "Monthly pricing and plan perks are visible now."
           }
           secondary={
             subscriptionActionsEnabled ? "Cancel before renewal." : "No monthly charge today"
@@ -345,14 +345,12 @@ export default function SubscribePage({
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="max-w-3xl">
+              <div className="max-w-3xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  {subscriptionActionsEnabled ? "Before you subscribe" : "Before launch"}
+                  Membership rules
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {subscriptionActionsEnabled
-                    ? "The billing rules should be obvious first."
-                    : "Keep the monthly rules clear."}
+                  Keep the monthly rules clear.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   Membership stays recurring and point packs stay separate on the Store page.
@@ -365,7 +363,7 @@ export default function SubscribePage({
               {
                 title: "Recurring monthly billing",
                 body: subscriptionPrelaunch
-                  ? "This monthly model starts when billing opens."
+                  ? "Recurring billing starts when membership opens."
                   : "You are charged each month while active.",
               },
               {
@@ -436,7 +434,7 @@ export default function SubscribePage({
                   Membership opens later.
                 </h2>
                 <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                  Prices and perks are visible now. No monthly charge starts here today. Purchases and receipts show up after launch.
+                  Review pricing now. No monthly charge starts today. Purchases and receipts appear in Purchases after launch.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -484,7 +482,7 @@ export default function SubscribePage({
               </h2>
             </div>
             <p className="text-xs text-slate-500">
-              {isActive ? `Current: ${subscription?.planId}` : `${SUBSCRIPTION_OFFERS.length} tiers available`}
+              {isActive ? `Current: ${subscription?.planId}` : `${SUBSCRIPTION_OFFERS.length} tiers`}
             </p>
           </div>
 

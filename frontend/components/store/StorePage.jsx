@@ -438,14 +438,12 @@ export default function StorePage({
       {
         label: "Availability",
         value: purchaseAvailabilityLabel,
-        hint: purchaseActionsEnabled
-          ? "Checkout is open."
-          : "Pricing now. Checkout later.",
+        hint: purchaseActionsEnabled ? "Checkout is open." : "",
       },
       {
         label: "Model",
         value: "One-time packs",
-        hint: isSubscriber ? "Keeps packs separate from membership." : "Buy once and use points later.",
+        hint: isSubscriber ? "Separate from membership." : "One-time only.",
       },
       {
         label: "Membership",
@@ -483,7 +481,7 @@ export default function StorePage({
           description={
             purchaseActionsEnabled
               ? "Use packs for one-time unlocks. Use membership if you read often."
-              : "Pricing and point totals are visible now. Checkout opens later."
+              : "Launch pricing and point totals are visible now."
           }
           secondary={
             purchaseActionsEnabled ? regionConfig.label : "No charge today"
@@ -545,7 +543,7 @@ export default function StorePage({
                 Checkout opens later.
               </h2>
               <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                Pricing is visible now. No charge starts from this page today. Purchases and receipts show up after launch.
+                Review launch pricing now. No charge starts today. Purchases and receipts appear in Purchases after launch.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -590,7 +588,7 @@ export default function StorePage({
                 How paying works
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Start free, then choose points or membership.
+                Choose points or membership.
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">Point packs stay one-time. Membership stays monthly.</p>
             </div>
@@ -600,7 +598,7 @@ export default function StorePage({
             {[
               {
                 eyebrow: "Free start",
-                title: "Select series begin free",
+                title: "Some series start free",
                 description: "Use free first chapters to test the hook before you spend anything.",
               },
               {
@@ -690,12 +688,10 @@ export default function StorePage({
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  {purchaseActionsEnabled ? "Before checkout" : "Before launch"}
+                  Compare the models
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {purchaseActionsEnabled
-                    ? "Know the total and the monthly alternative."
-                    : "Keep the two models clear."}
+                  Keep packs and membership separate.
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
                   Packs stay one-time. Membership stays monthly.
@@ -799,9 +795,6 @@ export default function StorePage({
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                     Save promo or creator codes for launch.
                   </h2>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
-                    Codes do not redeem here today.
-                  </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -902,7 +895,7 @@ export default function StorePage({
                     onSelect={handleBuy}
                     disabled={!purchaseActionsEnabled}
                     hideAction={purchasePrelaunch}
-                    statusLabel={purchasePrelaunch ? "Prelaunch" : ""}
+                    statusLabel=""
                     statusNote={
                       purchaseActionsEnabled
                         ? "Receipts and charges appear in Purchases after checkout."

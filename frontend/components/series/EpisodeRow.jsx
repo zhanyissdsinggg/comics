@@ -383,6 +383,8 @@ function EpisodeRow({
       {accessState.actionLabel}
     </button>
   );
+  const showStateBadge =
+    accessState.kind !== "unlocked" && accessState.primaryState !== "free";
 
   return (
     <li
@@ -418,11 +420,13 @@ function EpisodeRow({
             <strong className="text-base font-semibold tracking-tight text-slate-950">
               {episodeDisplayTitle}
             </strong>
-            <span
-              className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.stateTone)}`}
-            >
-              {accessState.stateLabel}
-            </span>
+            {showStateBadge ? (
+              <span
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.stateTone)}`}
+              >
+                {accessState.stateLabel}
+              </span>
+            ) : null}
             {progress?.lastEpisodeId === episode?.id ? (
               <Pill appearance="light" tone="subtle">
                 Last read

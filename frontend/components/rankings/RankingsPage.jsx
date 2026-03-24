@@ -294,47 +294,47 @@ export default function RankingsPage({
           />
         ) : null}
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Views
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Choose the shelf.
-              </h2>
-            </div>
-            <p className="text-xs text-slate-500">
-              {loading
-                ? "Refreshing this board..."
-                : `${list.length} titles / ${isAdultMode ? "18+ on" : "standard view"}`}
+        <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+          <div className="space-y-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Browse by shelf
             </p>
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            {TABS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => router.replace(`/rankings?type=${item.id}&window=${selectedWindow}`)}
-                className={filterButtonClass(tab === item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                Shelf
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {TABS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => router.replace(`/rankings?type=${item.id}&window=${selectedWindow}`)}
+                    className={filterButtonClass(tab === item.id)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          <div className="flex flex-wrap gap-2">
-            {WINDOWS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => router.replace(`/rankings?type=${tab}&window=${item.id}`)}
-                className={filterButtonClass(selectedWindow === item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                Window
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {WINDOWS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => router.replace(`/rankings?type=${tab}&window=${item.id}`)}
+                    className={filterButtonClass(selectedWindow === item.id)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </SurfacePanel>
 
@@ -611,7 +611,7 @@ export default function RankingsPage({
                       </h2>
                     </div>
                     <p className="text-xs text-slate-500">
-                      {list.length} ranked title{list.length === 1 ? "" : "s"} in this view
+                      {list.length.toLocaleString()} title{list.length === 1 ? "" : "s"}
                     </p>
                   </div>
 

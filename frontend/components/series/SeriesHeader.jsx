@@ -185,7 +185,7 @@ export default function SeriesHeader({
                   coverUrl={series.coverUrl}
                   label={series.title}
                   eyebrow={series.author || formatSeriesKind(series.type)}
-                  badge={accessSummary?.heroBadgeLabel || (hasFreeEpisodes ? "Free" : series.badge)}
+                  badge={series.badge || (isCompleted ? "Completed" : "")}
                   genres={series.genres}
                   seriesType={series.type}
                 />
@@ -229,11 +229,6 @@ export default function SeriesHeader({
               {isAdult ? (
                 <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-red-500">
                   18+
-                </span>
-              ) : null}
-              {accessSummary?.heroBadgeLabel ? (
-                <span className="rounded-full border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.06)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--gush-accent,#3157d6)]">
-                  {accessSummary.heroBadgeLabel}
                 </span>
               ) : null}
             </div>

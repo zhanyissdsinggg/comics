@@ -5,7 +5,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDownUp, RotateCcw, SlidersHorizontal, Sparkles } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Chip from "./Chip";
 
@@ -17,8 +17,6 @@ export default function FilterBar({
   onSortChange,
   status = "all",
   onStatusChange,
-  totalCount = 0,
-  loading = false,
   onReset,
   appearance = "default",
 }) {
@@ -45,9 +43,9 @@ export default function FilterBar({
   const statusLabel = statusOptions.find((option) => option.id === status)?.label || "All";
   const sortLabel = sortOptions.find((option) => option.id === sortBy)?.label || "Popular";
   const activeSummaries = [
-    sortBy !== "popular" ? `Sort: ${sortLabel}` : "",
-    status !== "all" ? `Status: ${statusLabel}` : "",
-    selectedGenre !== "all" ? `Genre: ${selectedGenre}` : "",
+    sortBy !== "popular" ? sortLabel : "",
+    status !== "all" ? statusLabel : "",
+    selectedGenre !== "all" ? selectedGenre : "",
   ].filter(Boolean);
 
   const handleSortChange = (id) => {
@@ -68,45 +66,21 @@ export default function FilterBar({
       : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal size={14} className={isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-200"} />
-            <p className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${isLight ? "text-slate-500" : "text-neutral-300"}`}>
-              Filters
-            </p>
-          </div>
-          <h3 className={`mt-3 font-display text-xl font-semibold tracking-tight sm:text-2xl ${isLight ? "text-slate-950" : "text-white"}`}>
-            {loading ? "Refreshing the shelf..." : `${totalCount.toLocaleString()} titles, ready when you are.`}
-          </h3>
-        </div>
-
+    <div className="space-y-3">
+      {activeSummaries.length > 0 || (activeFilterCount > 0 && typeof onReset === "function") ? (
         <div className="flex flex-wrap items-center gap-2">
-          {activeSummaries.length > 0 ? (
-            activeSummaries.map((item) => (
-              <span
-                key={item}
-                className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] ${
-                  isLight
-                    ? "border-black/8 bg-[rgba(246,243,237,0.92)] text-slate-500"
-                    : "border-white/10 bg-white/[0.04] text-neutral-300"
-                }`}
-              >
-                {item}
-              </span>
-            ))
-          ) : (
+          {activeSummaries.map((item) => (
             <span
+              key={item}
               className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] ${
                 isLight
-                  ? "border-[rgba(49,87,214,0.16)] bg-[rgba(49,87,214,0.06)] text-[var(--gush-accent,#3157d6)]"
-                  : "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-100"
+                  ? "border-black/8 bg-[rgba(246,243,237,0.92)] text-slate-500"
+                  : "border-white/10 bg-white/[0.04] text-neutral-300"
               }`}
             >
-              Showing everything
+              {item}
             </span>
-          )}
+          ))}
 
           {activeFilterCount > 0 && typeof onReset === "function" ? (
             <button
@@ -123,17 +97,14 @@ export default function FilterBar({
             </button>
           ) : null}
         </div>
-      </div>
+      ) : null}
 
-      <div className="grid gap-3 xl:grid-cols-[0.92fr_0.92fr_1.16fr]">
+      <div className={cn("grid gap-3", genres.length > 0 ? "xl:grid-cols-[0.92fr_0.92fr_1.16fr]" : "xl:grid-cols-2")}>
         <div className={filterSectionClass}>
-          <div className="flex items-center gap-2">
-            <ArrowDownUp size={16} className={isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-200"} />
-            <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-400"}`}>
-              Sort
-            </p>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-400"}`}>
+            Sort
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
             {sortOptions.map((option) => (
               <div key={option.id}>
                 <Chip
@@ -149,13 +120,10 @@ export default function FilterBar({
         </div>
 
         <div className={filterSectionClass}>
-          <div className="flex items-center gap-2">
-            <Sparkles size={16} className={isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-200"} />
-            <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-400"}`}>
-              Status
-            </p>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-400"}`}>
+            Status
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
             {statusOptions.map((option) => (
               <div key={option.id}>
                 <Chip
@@ -192,7 +160,7 @@ export default function FilterBar({
               ) : null}
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <Chip
                 label="All"
                 active={selectedGenre === "all"}
@@ -210,13 +178,7 @@ export default function FilterBar({
               ))}
             </div>
           </div>
-        ) : (
-          <div className={cn(filterSectionClass, "flex items-center")}>
-            <p className={`text-sm leading-7 ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
-              Genres will show up here once titles are tagged.
-            </p>
-          </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
