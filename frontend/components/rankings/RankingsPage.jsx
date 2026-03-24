@@ -11,7 +11,6 @@ import CreatorShelfLinks from "../common/CreatorShelfLinks";
 import Cover from "../common/Cover";
 import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
-import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
 import { trackEvent } from "../../lib/trackEvent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import {
@@ -57,28 +56,24 @@ const CHART_GUIDES = {
   popular: {
     audience: "For the titles carrying the strongest momentum.",
     signal: "These titles are drawing the most attention right now.",
-    nextMove: "Start with the lead title, then branch into nearby moods or creators.",
     searchHref: "/search?sort=popular",
     searchLabel: "Browse related titles",
   },
   new: {
     audience: "For readers who want something earlier in its run.",
     signal: "A clean way to catch rising releases before they feel obvious.",
-    nextMove: "Open the strongest launch, then stay with the newest shelf.",
     searchHref: "/search?sort=latest",
     searchLabel: "See latest releases",
   },
   completed: {
     audience: "For readers who want payoff without waiting on updates.",
     signal: "Finished stories ready to read straight through.",
-    nextMove: "Open the lead finished title, then compare another completed pick.",
     searchHref: "/search?status=Completed&sort=popular",
     searchLabel: "See finished series",
   },
   ttf: {
     audience: "For readers who want a lighter first step.",
     signal: "A shelf built around strong openings and free starts.",
-    nextMove: "Try the opener here, then decide where you want to keep going.",
     searchHref: "/search?sort=popular",
     searchLabel: "See more to try",
   },
@@ -230,28 +225,6 @@ export default function RankingsPage({
   const leadEntry = spotlightEntries[0] || null;
   const supportingEntries = list.slice(1, 3);
   const boardEntries = list.slice(3, 12);
-  const leadCampaign = useMemo(() => getStorefrontCampaign(leadEntry), [leadEntry]);
-
-  const openLeadValuePath = useCallback(() => {
-    if (!leadEntry || !leadCampaign) {
-      return;
-    }
-
-    const attribution = {
-      entryPoint: "RANKINGS_CAMPAIGN",
-      campaignId: leadCampaign.id,
-      sourcePath: rankingsPath,
-      sourceSeriesId: leadEntry.id,
-      returnTo: `/series/${leadEntry.id}`,
-    };
-
-    if (leadCampaign.valueKind === "store") {
-      router.push(buildPathWithAttribution("/store", attribution, { focus: "auto" }));
-      return;
-    }
-
-    router.push(buildPathWithAttribution("/subscribe", attribution));
-  }, [leadCampaign, leadEntry, rankingsPath, router]);
 
   return (
     <main className="gush-page-shell overflow-hidden">
@@ -263,26 +236,6 @@ export default function RankingsPage({
           title={activeTab.title}
           description={activeTab.description}
           appearance="light"
-          actions={
-            <>
-              <button
-                type="button"
-                onClick={() => router.push("/search")}
-                className={primaryButtonClass}
-              >
-                Search titles
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(tab === "completed" ? "/search?status=Completed&sort=popular" : "/search?sort=popular")
-                }
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
-                {tab === "completed" ? "See finished reads" : "Browse catalog"}
-              </button>
-            </>
-          }
         />
 
         {commerceNotice ? (
@@ -568,79 +521,6 @@ export default function RankingsPage({
             </div>
 
             <div className="space-y-4">
-              {leadEntry ? (
-                <SurfacePanel className="space-y-4" tone="muted" appearance="light" accent="blue">
-                  <div>
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                        Reading path
-                      </p>
-                      <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                        Keep going from the lead title.
-                      </h2>
-                    </div>
-                  </div>
-
-                  <p className="text-sm leading-7 text-slate-600">{chartGuide.nextMove}</p>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleSeriesClick(leadEntry.id, "RANKINGS_START_HERE")}
-                      className={primaryButtonClass}
-                    >
-                      Read #1
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => router.push(chartGuide.searchHref)}
-                      className={secondaryButtonClass}
-                    >
-                      {chartGuide.searchLabel}
-                    </button>
-                    {leadEntry.genres?.[0] ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          router.push(`/search?q=${encodeURIComponent(leadEntry.genres[0])}&sort=popular`);
-                        }}
-                        className={secondaryButtonClass}
-                      >
-                        Browse {leadEntry.genres[0]}
-                      </button>
-                    ) : null}
-                  </div>
-
-                  {leadCampaign ? (
-                    <div className="rounded-[24px] border border-black/6 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                        {leadCampaign.eyebrow || "Keep going"}
-                      </p>
-                      <p className="mt-3 text-sm font-semibold text-slate-950">{leadCampaign.title}</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
-                        {leadCampaign.nextMove || chartGuide.nextMove}
-                      </p>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => router.push(leadCampaign.discoveryHref)}
-                          className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-                        >
-                          {leadCampaign.discoveryCta}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={openLeadValuePath}
-                          className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]"
-                        >
-                          {leadCampaign.valueCta}
-                        </button>
-                      </div>
-                    </div>
-                  ) : null}
-                </SurfacePanel>
-              ) : null}
-
               <CreatorShelfLinks
                 items={spotlightEntries}
                 entryPoint="RANKINGS_CREATOR_CHIP"

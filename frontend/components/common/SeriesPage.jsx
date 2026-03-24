@@ -369,45 +369,10 @@ export default function SeriesPage({
     const byLatest = [...series].sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt));
     const freeStart = byPopular.find((item) => Number(item?.freeEpisodeCount || 0) > 0 || item?.hasFreeEpisodes) || null;
     const completed = byPopular.find((item) => normalizeStatus(item?.status) === "completed") || null;
-    const primary =
-      type === "comic"
-        ? freeStart || byPopular[0] || byLatest[0] || completed || null
-        : byPopular[0] || byLatest[0] || completed || freeStart || null;
-
-    return {
-      primary,
-      secondary:
-        type === "comic"
-          ? completed || byLatest[0] || byPopular[1] || null
-          : byLatest[0] || completed || freeStart || byPopular[1] || null,
-      freeStart,
-      completed,
-    };
+    return type === "comic"
+      ? freeStart || byPopular[0] || byLatest[0] || completed || null
+      : byPopular[0] || byLatest[0] || completed || freeStart || null;
   }, [series, type]);
-  const secondaryEntryAction = useMemo(() => {
-    if (entrySpotlight.freeStart?.id && entrySpotlight.freeStart.id !== entrySpotlight.primary?.id) {
-      return {
-        id: entrySpotlight.freeStart.id,
-        label: "Try a free start",
-      };
-    }
-
-    if (entrySpotlight.completed?.id && entrySpotlight.completed.id !== entrySpotlight.primary?.id) {
-      return {
-        id: entrySpotlight.completed.id,
-        label: "Open a finished pick",
-      };
-    }
-
-    if (entrySpotlight.secondary?.id && entrySpotlight.secondary.id !== entrySpotlight.primary?.id) {
-      return {
-        id: entrySpotlight.secondary.id,
-        label: "Open another pick",
-      };
-    }
-
-    return null;
-  }, [entrySpotlight.completed, entrySpotlight.freeStart, entrySpotlight.primary?.id, entrySpotlight.secondary]);
   const catalogGridClassName =
     filteredAndSortedSeries.length <= 8
       ? "grid grid-cols-2 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
@@ -461,24 +426,6 @@ export default function SeriesPage({
           description={config.description}
           secondary={config.secondary}
           appearance="light"
-          actions={
-            <>
-              <button
-                type="button"
-                onClick={() => router.push("/search")}
-                className={primaryButtonClass}
-              >
-                Search all series
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/rankings")}
-                className={secondaryButtonClass}
-              >
-                Browse Top Series
-              </button>
-            </>
-          }
         />
 
         {loading ? (
@@ -549,92 +496,40 @@ export default function SeriesPage({
           </section>
         ) : null}
 
-        {!loading && entrySpotlight.primary ? (
-          <section className="grid gap-4 xl:grid-cols-[1.12fr_0.88fr]">
+        {!loading && entrySpotlight ? (
+          <section>
             <SurfacePanel className="space-y-5" appearance="light" accent="blue">
               <div className="grid gap-4 sm:grid-cols-[200px_minmax(0,1fr)] sm:items-start">
                 <Cover
-                  tone={entrySpotlight.primary.coverTone}
-                  coverUrl={entrySpotlight.primary.coverUrl}
-                  label={entrySpotlight.primary.title}
-                  eyebrow={type === "comic" ? "Best first click" : "Best place to settle in"}
-                  badge={getSeriesBadge(entrySpotlight.primary)}
-                  genres={entrySpotlight.primary.genres}
-                  seriesType={entrySpotlight.primary.type}
+                  tone={entrySpotlight.coverTone}
+                  coverUrl={entrySpotlight.coverUrl}
+                  label={entrySpotlight.title}
+                  eyebrow={type === "comic" ? "Editors' pick" : "Featured read"}
+                  badge={getSeriesBadge(entrySpotlight)}
+                  genres={entrySpotlight.genres}
+                  seriesType={entrySpotlight.type}
                   className="mx-auto aspect-[3/4] w-full max-w-[210px] rounded-[24px] sm:mx-0"
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    {type === "comic" ? "Editors' pick" : "Featured read"}
+                    {type === "comic" ? "Start here" : "Settle in here"}
                   </p>
                   <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
-                    {entrySpotlight.primary.title}
+                    {entrySpotlight.title}
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    {type === "comic"
-                      ? "A strong place to start if you want a clean first pick."
-                      : "A strong place to settle in when you want one decisive starting point."}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1.5 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
-                      {getSeriesSubtitle(entrySpotlight.primary)}
-                    </span>
-                  </div>
+                  <p className="mt-3 text-sm text-slate-500">{getSeriesSubtitle(entrySpotlight)}</p>
                   <div className="mt-5 flex flex-wrap gap-3">
                     <button
                       type="button"
-                      onClick={() => handleSeriesClick(entrySpotlight.primary.id)}
+                      onClick={() => handleSeriesClick(entrySpotlight.id)}
                       className={primaryButtonClass}
                     >
                       Open this title
                     </button>
-                    {secondaryEntryAction ? (
-                      <button
-                        type="button"
-                        onClick={() => handleSeriesClick(secondaryEntryAction.id)}
-                        className={secondaryButtonClass}
-                      >
-                        {secondaryEntryAction.label}
-                      </button>
-                    ) : null}
                   </div>
-                  {entrySpotlight.secondary ? (
-                    <div className="mt-5 rounded-[22px] border border-black/6 bg-[#f8f9fc] px-4 py-4">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        Also worth opening
-                      </p>
-                      <p className="mt-2 text-sm font-semibold text-slate-950">{entrySpotlight.secondary.title}</p>
-                      <p className="mt-1 text-sm text-slate-600">{getSeriesSubtitle(entrySpotlight.secondary)}</p>
-                    </div>
-                  ) : null}
                 </div>
               </div>
             </SurfacePanel>
-
-            {genreQuickPicks.length > 0 ? (
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Browse by genre
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Start from a story lane.
-                  </h2>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {genreQuickPicks.map((item) => (
-                    <button
-                      key={item.genre}
-                      type="button"
-                      onClick={() => updateParams({ genre: item.genre })}
-                      className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
-                    >
-                      {item.genre}
-                    </button>
-                  ))}
-                </div>
-              </SurfacePanel>
-            ) : null}
           </section>
         ) : null}
 
@@ -687,11 +582,9 @@ export default function SeriesPage({
           </SurfacePanel>
         ) : (
           <div className="space-y-6">
-            <div>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                {filteredAndSortedSeries.length.toLocaleString()} title{filteredAndSortedSeries.length === 1 ? "" : "s"}
-              </h2>
-            </div>
+            <p className="text-sm text-slate-500">
+              {filteredAndSortedSeries.length.toLocaleString()} title{filteredAndSortedSeries.length === 1 ? "" : "s"}
+            </p>
 
             <div className={catalogGridClassName}>
               {filteredAndSortedSeries.map((item) => (

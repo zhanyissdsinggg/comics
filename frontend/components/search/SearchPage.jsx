@@ -38,16 +38,10 @@ const AdvancedFilterPanel = dynamic(() => import("./AdvancedFilterPanel"), {
   ssr: false,
 });
 const PortraitCard = dynamic(() => import("../home/PortraitCard"));
-const CreatorShelfLinks = dynamic(() => import("../common/CreatorShelfLinks"));
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
 const StorefrontEventHub = dynamic(() => import("../common/StorefrontEventHub"));
 const StorefrontPathwaysGrid = dynamic(() => import("../common/StorefrontPathwaysGrid"));
 
-const STATUS_OPTIONS = ["Ongoing", "Completed"];
-const TYPE_OPTIONS = [
-  { id: "comic", label: "Comics" },
-  { id: "novel", label: "Novels" },
-];
 const SORT_OPTIONS = [
   { id: "relevance", label: "Relevance" },
   { id: "popular", label: "Popular" },
@@ -641,11 +635,6 @@ export default function SearchPage() {
     : results.length === 0
       ? "No exact match yet. Try one of these instead."
       : "Only a few matches? Widen the net.";
-  const recoPanelHint = !query
-    ? "A few strong places to start."
-    : results.length === 0
-      ? "A nearby title can open the catalog back up."
-      : "A short result list can still lead into something broader.";
   const lightCardAccentClass = "border-black/6 bg-white/84 hover:border-black/10 hover:bg-white";
   const lightFeatureAccentClass =
     "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]";
@@ -779,7 +768,7 @@ export default function SearchPage() {
     />
   );
   const leadSearchResult = results[0] || breakoutPick || freeStartPick || completedPick || recoRails[0]?.items?.[0] || null;
-  const visibleRecoRails = recoRails.slice(0, 2).map((rail) => ({
+  const visibleRecoRails = recoRails.slice(0, 1).map((rail) => ({
     ...rail,
     items: Array.isArray(rail.items) ? rail.items.slice(0, 4) : [],
   }));
@@ -952,66 +941,19 @@ export default function SearchPage() {
       <SiteHeader variant="light" />
       <div className="gush-page-main gush-section-stack">
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Search
-              </p>
-              <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                {heroTitle}
-              </h1>
-              <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
-                {heroDescription}
-              </p>
-              {heroSecondary ? (
-                <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {!query ? (
-                <button
-                  type="button"
-                  onClick={() => setShowAdvancedFilters(true)}
-                  className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
-                >
-                  <SlidersHorizontal size={16} />
-                  <span>Filters</span>
-                  {activeFilterCount > 0 ? (
-                    <span className="rounded-full bg-slate-950 px-2 py-0.5 text-[11px] font-bold text-white">
-                      {activeFilterCount}
-                    </span>
-                  ) : null}
-                </button>
-              ) : null}
-              {query ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateParams(
-                      {
-                        q: "",
-                        type: "",
-                        status: "",
-                        genre: "",
-                        sort: "relevance",
-                      },
-                      { resetPage: true },
-                    )
-                  }
-                  className={secondaryButtonClass}
-                >
-                  Clear search
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className={secondaryButtonClass}
-                >
-                  Browse top series
-                </button>
-              )}
-            </div>
+          <div className="max-w-3xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Search
+            </p>
+            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+              {heroTitle}
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
+              {heroDescription}
+            </p>
+            {heroSecondary ? (
+              <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
+            ) : null}
           </div>
 
           <div className="rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-5">
@@ -1095,7 +1037,6 @@ export default function SearchPage() {
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   {recoPanelTitle}
                 </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">{recoPanelHint}</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -1126,21 +1067,7 @@ export default function SearchPage() {
             <div className="space-y-8">
               {visibleRecoRails.map((rail) => (
                 <section key={rail.id} className="space-y-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">More to try</p>
-                      <h3 className="mt-1 text-lg font-semibold text-slate-950">{rail.title}</h3>
-                    </div>
-                  </div>
-                  <CreatorShelfLinks
-                    items={rail.items}
-                    entryPoint="SEARCH_CREATOR_CHIP"
-                    campaignId={`${rail.id}_creator`}
-                    sourcePath={searchPath}
-                    label="Creators in this row"
-                    compact
-                    appearance="light"
-                  />
+                  <h3 className="text-lg font-semibold text-slate-950">{rail.title}</h3>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {rail.items.map((item) => (
                       <PortraitCard
@@ -1162,7 +1089,7 @@ export default function SearchPage() {
 
         {showResultSections ? (
           <>
-            <div className="flex flex-col gap-3 rounded-[24px] border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-2 rounded-[24px] border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -1177,30 +1104,6 @@ export default function SearchPage() {
                     </span>
                   ) : null}
                 </button>
-                <select
-                  value={type}
-                  onChange={(event) => updateParam("type", event.target.value)}
-                  className={`${filterSelectClass} hidden sm:block`}
-                >
-                  <option value="">All types</option>
-                  {TYPE_OPTIONS.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={status}
-                  onChange={(event) => updateParam("status", event.target.value)}
-                  className={`${filterSelectClass} hidden sm:block`}
-                >
-                  <option value="">All status</option>
-                  {STATUS_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
                 <select
                   value={sort}
                   onChange={(event) => updateParam("sort", event.target.value)}
@@ -1232,9 +1135,6 @@ export default function SearchPage() {
                   </button>
                 ) : null}
               </div>
-              <p className="text-sm text-slate-500">
-                {loading ? "Refreshing titles..." : `${total.toLocaleString()} results`}
-              </p>
             </div>
 
             {loading ? (
@@ -1361,20 +1261,6 @@ export default function SearchPage() {
           </SurfacePanel>
             ) : (
           <div className="space-y-5">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Results
-                </p>
-                <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {total.toLocaleString()} titles found.
-                </h2>
-              </div>
-              <p className="text-sm text-slate-500">
-                Sorted by {SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance"}
-              </p>
-            </div>
-
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((series) => (
                 <Link

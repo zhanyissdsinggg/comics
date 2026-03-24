@@ -113,49 +113,36 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4">
       {history.length > 0 ? (
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-slate-700 md:text-base">Recent</h3>
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-medium text-slate-700">Recent</h3>
             <button
               type="button"
               onClick={clearHistory}
-              className="min-h-[44px] rounded-lg px-3 py-2 text-xs text-slate-400 hover:text-slate-700 active:bg-slate-100 md:text-sm"
+              className="rounded-full px-2 py-1 text-xs font-medium text-slate-400 transition-colors hover:text-slate-700"
             >
               Clear
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
             {history.map((keyword, index) => (
               <div
                 key={`${keyword}-${index}`}
-                className="flex items-center gap-2 rounded-[20px] border border-black/6 bg-white/80 px-3 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.05)] hover:border-black/10 md:py-2"
+                className="inline-flex min-w-0 items-center gap-1 rounded-full border border-black/6 bg-white/80 px-2 py-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-black/10"
               >
-                <svg
-                  className="h-4 w-4 flex-shrink-0 text-slate-400 md:h-5 md:w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
                 <button
                   type="button"
                   onClick={() => handleSearch(keyword)}
-                  className="flex-1 text-left text-sm text-slate-700 hover:text-slate-950 active:text-[var(--gush-accent,#2f6bff)] md:text-base"
+                  className="max-w-[12rem] truncate px-2 text-sm text-slate-700 transition-colors hover:text-slate-950"
                 >
                   {keyword}
                 </button>
                 <button
                   type="button"
                   onClick={() => removeFromHistory(keyword)}
-                  className="flex min-h-[44px] min-w-[44px] flex-shrink-0 items-center justify-center text-slate-400 hover:text-slate-700 active:text-red-500"
+                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -173,20 +160,20 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
       ) : null}
 
       {trendingKeywords.length > 0 ? (
-        <div>
-          <h3 className="mb-3 text-sm font-medium text-slate-700 md:text-base">
+        <div className="space-y-2.5">
+          <h3 className="text-sm font-medium text-slate-700">
             {normalizedHotKeywords.length > 0 ? "Trending" : "Browse"}
           </h3>
-          <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
             {trendingKeywords.map((keyword, index) => (
               <button
                 key={keyword.id}
                 type="button"
                 onClick={() => handleSearch(keyword.value)}
-                className="flex min-h-[44px] w-full items-center gap-3 rounded-[20px] border border-black/6 bg-white/80 px-3 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.05)] hover:border-black/10 active:border-[var(--gush-accent,#2f6bff)] active:bg-[rgba(47,107,255,0.06)] md:py-2"
+                className="inline-flex max-w-full items-center gap-2 rounded-full border border-black/6 bg-white/80 px-3 py-2 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-black/10 hover:bg-white active:border-[var(--gush-accent,#2f6bff)] active:bg-[rgba(47,107,255,0.06)]"
               >
                 <span
-                  className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-xs font-bold md:h-5 md:w-5 md:text-[10px] ${
+                  className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                     index < 3
                       ? "bg-[var(--gush-accent,#2f6bff)] text-white"
                       : "bg-slate-100 text-slate-500"
@@ -194,29 +181,12 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
                 >
                   {index + 1}
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm text-slate-700 md:text-base">
-                    {keyword.label}
+                <span className="max-w-[11rem] truncate text-sm text-slate-700">{keyword.label}</span>
+                {keyword.hint ? (
+                  <span className="hidden max-w-[10rem] truncate text-xs text-slate-400 sm:inline">
+                    {keyword.hint}
                   </span>
-                  {keyword.hint ? (
-                    <span className="mt-0.5 block truncate text-xs text-slate-500">
-                      {keyword.hint}
-                    </span>
-                  ) : null}
-                </span>
-                <svg
-                  className="h-4 w-4 flex-shrink-0 text-slate-400 md:h-5 md:w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
+                ) : null}
               </button>
             ))}
           </div>
