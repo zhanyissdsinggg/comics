@@ -321,7 +321,7 @@ export default function StorePage({
 
     if (!purchaseActionsEnabled) {
       setErrorMessage(
-        "Point-pack checkout opens later. Sign in for launch access or contact billing support.",
+        "Point-pack checkout opens later. Sign in or contact billing support.",
       );
       return;
     }
@@ -451,7 +451,7 @@ export default function StorePage({
       <main className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow="Point packs"
-          title={purchaseActionsEnabled ? "Buy points for one-time unlocks." : "Compare point packs before launch."}
+          title={purchaseActionsEnabled ? "Buy points for one-time unlocks." : "Compare point packs."}
           description={
             purchaseActionsEnabled
               ? "Use packs for one-time unlocks. Use membership if you read often."
@@ -515,7 +515,7 @@ export default function StorePage({
                 Checkout opens later.
               </h2>
               <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                Pricing is visible now. No charge today.
+                Pricing is visible now.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -565,13 +565,13 @@ export default function StorePage({
               },
               {
                 eyebrow: "No charge today",
-                title: "Compare pricing before launch",
-                description: "Checkout stays closed until launch, so nothing charges today.",
+                title: "Checkout stays closed for now",
+                description: "Nothing charges until point-pack checkout opens.",
               },
               {
                 eyebrow: "Purchases & help",
-                title: "Receipts appear after launch",
-                description: "New orders show in Purchases after checkout opens. Billing support stays available.",
+                title: "Orders appear after launch",
+                description: "Receipts land in Purchases, and billing support stays available.",
               },
             ].map((item) => (
               <div
@@ -627,12 +627,12 @@ export default function StorePage({
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {purchaseActionsEnabled
                     ? "Sign in before you buy or redeem a code."
-                    : "Use one account for launch."}
+                    : "Use one account."}
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
                   {purchaseActionsEnabled
                     ? "Keep purchases, codes, and receipts on one account."
-                    : "Keep launch access and future purchases on one account."}
+                    : "Keep future purchases, codes, and receipts on one account."}
                 </p>
               </div>
                 <button
@@ -764,10 +764,10 @@ export default function StorePage({
               <SurfacePanel id="wallet-codes" className="space-y-4" appearance="light" accent="blue">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Promo codes
+                  Promo codes
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Save promo or creator codes for launch.
+                    Save promo or creator codes.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">

@@ -199,7 +199,7 @@ export default function SubscribePage({
     }
 
     if (!subscriptionActionsEnabled) {
-      setFeedback("Membership opens later. Sign in for launch access or contact billing support.");
+      setFeedback("Membership opens later. Sign in or contact billing support.");
       return;
     }
 
@@ -308,7 +308,7 @@ export default function SubscribePage({
           appearance="light"
           accent="blue"
           eyebrow="Membership"
-          title={subscriptionActionsEnabled ? "Pick the plan that fits your reading rhythm." : "Review membership before launch."}
+          title={subscriptionActionsEnabled ? "Pick the plan that fits your reading rhythm." : "Compare membership plans."}
           description={
             subscriptionActionsEnabled
               ? "Membership is monthly. Choose it if you read often."
@@ -356,16 +356,16 @@ export default function SubscribePage({
           <div className="grid gap-4 md:grid-cols-3">
             {[
               {
-                title: "Monthly billing",
-                body: "Membership is recurring while active.",
+                title: "No monthly charge today",
+                body: "Billing starts when membership opens.",
               },
               {
                 title: "Cancel before renewal",
-                body: "Cancel before the listed renewal date.",
+                body: "Cancel before the listed renewal date once billing begins.",
               },
               {
                 title: "Purchases & help",
-                body: "Receipts and renewals appear in Purchases. Billing support stays available.",
+                body: "Receipts and renewals appear in Purchases, and billing support stays available.",
               },
             ].map((item) => (
               <div
@@ -407,12 +407,12 @@ export default function SubscribePage({
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {subscriptionActionsEnabled
                     ? "Membership belongs to your account, not just this browser."
-                    : "Use one account for launch."}
+                    : "Use one account."}
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   {subscriptionActionsEnabled
                     ? "Keep renewals, receipts, and support on one account."
-                    : "Keep launch access and future membership on one account."}
+                    : "Keep future membership, renewals, and support on one account."}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -445,7 +445,7 @@ export default function SubscribePage({
                   Membership opens later.
                 </h2>
                 <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                  Pricing and plan perks are visible now. No monthly charge today.
+                  Pricing and plan perks are visible now.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">

@@ -106,13 +106,11 @@ export default function SeriesHeader({
         ? "Saved"
         : "Fresh pick",
     accessSummary?.heroBadgeLabel ||
-      (hasFreeEpisodes
-        ? "Start here"
-        : isCompleted
-          ? "Finished run"
-          : episodeCount > 0
-            ? `${episodeCount} episodes`
-            : "New series"),
+      (isCompleted
+        ? "Finished run"
+        : episodeCount > 0
+          ? `${episodeCount} episodes`
+          : "New series"),
   ];
   const primaryActionClassName = [
     "inline-flex w-full items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold transition-colors",
@@ -147,13 +145,13 @@ export default function SeriesHeader({
         : formatUpdateLabel(series.updatedAt),
     },
     {
-      label: "Reading",
+      label: "Access",
       value:
         accessSummary?.entryLabel ||
         (onContinue
           ? "Continue where you stopped"
           : hasFreeEpisodes
-            ? "Starts free"
+            ? "Start at Episode 1"
             : "Unlock as you go"),
       hint: accessSummary?.entryHint || "",
     },

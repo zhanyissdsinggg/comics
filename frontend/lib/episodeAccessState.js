@@ -107,7 +107,7 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
   }
 
   if (firstState.primaryState === "free") {
-    return "Starts free";
+    return "Start at Episode 1";
   }
 
   if (firstState.primaryState === "preview") {
@@ -133,7 +133,7 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
 
 function getEpisodeAvailabilityBadge(counts, hasCountdown) {
   if (counts.free > 0) {
-    return "Start here";
+    return "";
   }
 
   if (counts.preview > 0) {
@@ -437,8 +437,7 @@ export function getEpisodeAvailabilitySummary({
     explainer,
     hasCountdown,
     startsFree: counts.free > 0 || counts.preview > 0,
-    heroBadgeLabel:
-      counts.free > 0 ? "Start here" : counts.preview > 0 ? "Preview" : "",
+    heroBadgeLabel: counts.preview > 0 ? "Preview" : "",
     badgeLabel: getEpisodeAvailabilityBadge(counts, hasCountdown),
     entryLabel: getEpisodeEntryLabel(firstState, counts, hasCountdown),
     entryHint: explainer,
