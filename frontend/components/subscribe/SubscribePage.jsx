@@ -314,9 +314,7 @@ export default function SubscribePage({
               ? "Membership is monthly. Choose it if you read often."
               : "Monthly pricing and plan perks are visible now."
           }
-          secondary={
-            subscriptionActionsEnabled ? "Cancel before renewal." : "No monthly charge today"
-          }
+          secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
           stats={subscriptionHeroStats}
           actions={
             <>
@@ -434,7 +432,7 @@ export default function SubscribePage({
                   Membership opens later.
                 </h2>
                 <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                  Review pricing now. No monthly charge starts today. Purchases and receipts appear in Purchases after launch.
+                  Review pricing now. No monthly charge today. Purchases appear in Purchases after launch.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">

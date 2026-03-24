@@ -157,13 +157,10 @@ test.describe("Search merchandising sync", () => {
     const response = await page.goto("/search?q=void", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "No exact matches for this search." })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Try a wider search." })).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
 
-    await expect(page.getByText("Rocket Choir is a strong next pick for this search.")).toBeVisible({
-      timeout: SEARCH_UI_TIMEOUT_MS,
-    });
     await expect(page.getByRole("button", { name: /Open Rocket Choir/i }).first()).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });

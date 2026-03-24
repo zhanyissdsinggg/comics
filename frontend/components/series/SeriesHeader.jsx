@@ -112,7 +112,7 @@ export default function SeriesHeader({
         : "Fresh pick",
     accessSummary?.heroBadgeLabel ||
       (hasFreeEpisodes
-        ? "Starts free"
+        ? "Start here"
         : isCompleted
           ? "Finished run"
           : episodeCount > 0
@@ -167,7 +167,7 @@ export default function SeriesHeader({
         (onContinue
           ? "Continue where you stopped"
           : hasFreeEpisodes
-            ? "Free start"
+            ? "Start at Episode 1"
             : "Unlock as you go"),
       hint: "",
     },

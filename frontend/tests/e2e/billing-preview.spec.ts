@@ -52,12 +52,13 @@ test.describe("Billing prelaunch states", () => {
     const response = await page.goto("/store", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Point-pack checkout is not live yet", { exact: true }).first()).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Checkout opens later." }).first()).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Not on sale yet" }).first()).toBeDisabled({
+    await expect(page.getByText("Review launch pricing now. No charge today. Purchases appear in Purchases after launch.")).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
+    await expect(page.getByRole("button", { name: "Sign in to get it" })).toHaveCount(0);
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/store", runtimeIssues);
@@ -70,12 +71,13 @@ test.describe("Billing prelaunch states", () => {
     const response = await page.goto("/subscribe", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Membership starts are not live yet", { exact: true }).first()).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Membership opens later." }).first()).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Not live yet" }).first()).toBeDisabled({
+    await expect(page.getByText("Review pricing now. No monthly charge today. Purchases appear in Purchases after launch.")).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
+    await expect(page.getByRole("button", { name: "Pick this plan" })).toHaveCount(0);
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/subscribe", runtimeIssues);

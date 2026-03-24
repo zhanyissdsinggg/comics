@@ -53,7 +53,7 @@ function getPrimaryAction({ continueHref, startHref, freeEpisodeCount }) {
 
   if (startHref && freeEpisodeCount > 0) {
     return {
-      label: "Start free preview",
+      label: "Try the opener",
       href: startHref,
       hint: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} let you try the series before unlocking more.`,
     };

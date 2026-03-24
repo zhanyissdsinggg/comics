@@ -61,13 +61,13 @@ function toEpisodeStateList(episodeStateMap) {
 
 function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
   if (counts.free > 0 && counts.preview > 0) {
-    return "Start free, then unlock later.";
+    return "Start here, then unlock later.";
   }
 
   if (counts.free > 0) {
     return counts.points > 0 || counts.membership > 0 || counts.locked > 0
-      ? "Start free, then unlock later."
-      : "Start free.";
+      ? "Start here, then unlock later."
+      : "Start here.";
   }
 
   if (counts.preview > 0) {
@@ -109,7 +109,7 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
   }
 
   if (firstState.primaryState === "free") {
-    return "Starts free";
+    return "Start at Episode 1";
   }
 
   if (firstState.primaryState === "preview") {
@@ -135,7 +135,7 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
 
 function getEpisodeAvailabilityBadge(counts, hasCountdown) {
   if (counts.free > 0) {
-    return "Starts free";
+    return "Start here";
   }
 
   if (counts.preview > 0) {
@@ -440,7 +440,7 @@ export function getEpisodeAvailabilitySummary({
     hasCountdown,
     startsFree: counts.free > 0 || counts.preview > 0,
     heroBadgeLabel:
-      counts.free > 0 ? "Starts free" : counts.preview > 0 ? "Preview" : "",
+      counts.free > 0 ? "Start here" : counts.preview > 0 ? "Preview" : "",
     badgeLabel: getEpisodeAvailabilityBadge(counts, hasCountdown),
     entryLabel: getEpisodeEntryLabel(firstState, counts, hasCountdown),
     entryHint: explainer,

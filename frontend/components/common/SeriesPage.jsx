@@ -928,39 +928,17 @@ export default function SeriesPage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Browse filters
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Filter titles.
-              </h2>
-            </div>
-            <p className="text-xs text-slate-500">
-              {loading
-                ? "Refreshing..."
-                : activeFilterCount > 0
-                  ? `${activeFilterCount} active`
-                  : `${filteredAndSortedSeries.length.toLocaleString()} titles`}
-            </p>
-          </div>
-
-          <FilterBar
-            genres={genres}
-            selectedGenre={selectedGenre}
-            onGenreChange={(value) => updateParams({ genre: value })}
-            sortBy={sortBy}
-            onSortChange={(value) => updateParams({ sort: value })}
-            status={status}
-            onStatusChange={(value) => updateParams({ status: value })}
-            totalCount={filteredAndSortedSeries.length}
-            loading={loading}
-            onReset={handleResetFilters}
-            appearance="light"
-          />
-        </SurfacePanel>
+        <FilterBar
+          genres={genres}
+          selectedGenre={selectedGenre}
+          onGenreChange={(value) => updateParams({ genre: value })}
+          sortBy={sortBy}
+          onSortChange={(value) => updateParams({ sort: value })}
+          status={status}
+          onStatusChange={(value) => updateParams({ status: value })}
+          onReset={handleResetFilters}
+          appearance="light"
+        />
 
         {loading ? (
           <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">

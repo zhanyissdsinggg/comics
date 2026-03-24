@@ -483,9 +483,7 @@ export default function StorePage({
               ? "Use packs for one-time unlocks. Use membership if you read often."
               : "Launch pricing and point totals are visible now."
           }
-          secondary={
-            purchaseActionsEnabled ? regionConfig.label : "No charge today"
-          }
+          secondary={purchaseActionsEnabled ? regionConfig.label : ""}
           stats={storeHeroStats}
           appearance="light"
           actions={
@@ -543,7 +541,7 @@ export default function StorePage({
                 Checkout opens later.
               </h2>
               <p className="max-w-3xl text-sm leading-6 text-amber-700/85">
-                Review launch pricing now. No charge starts today. Purchases and receipts appear in Purchases after launch.
+                Review launch pricing now. No charge today. Purchases appear in Purchases after launch.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

@@ -42,9 +42,9 @@ const TABS = [
   },
   {
     id: "ttf",
-    label: "Free Episodes",
-    title: "Start free before you unlock.",
-    description: "The fastest way to find titles with a real first sample.",
+    label: "Start Here",
+    title: "Try the opening chapters first.",
+    description: "The quickest way to sample a hook before you unlock.",
   },
 ];
 
@@ -77,11 +77,11 @@ const CHART_GUIDES = {
     searchLabel: "See finished series",
   },
   ttf: {
-    audience: "Best when you want to try the hook before you spend.",
-    signal: "This free-start view highlights the titles with the strongest free entry right now.",
-    nextMove: "Start free here, then decide later if the story is worth more of your time.",
+    audience: "Best when you want a sample before you spend.",
+    signal: "This shelf highlights titles with the strongest opening sample right now.",
+    nextMove: "Try the opener here, then decide if you want to keep going.",
     searchHref: "/search?sort=popular",
-    searchLabel: "See more free starts",
+    searchLabel: "See more samples",
   },
 };
 
@@ -294,47 +294,31 @@ export default function RankingsPage({
           />
         ) : null}
 
-        <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-          <div className="space-y-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              Browse by shelf
-            </p>
+        <SurfacePanel className="space-y-3" appearance="light" accent="blue">
+          <div className="flex flex-wrap gap-2">
+            {TABS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => router.replace(`/rankings?type=${item.id}&window=${selectedWindow}`)}
+                className={filterButtonClass(tab === item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
 
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Shelf
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {TABS.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => router.replace(`/rankings?type=${item.id}&window=${selectedWindow}`)}
-                    className={filterButtonClass(tab === item.id)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Window
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {WINDOWS.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => router.replace(`/rankings?type=${tab}&window=${item.id}`)}
-                    className={filterButtonClass(selectedWindow === item.id)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {WINDOWS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => router.replace(`/rankings?type=${tab}&window=${item.id}`)}
+                className={filterButtonClass(selectedWindow === item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
         </SurfacePanel>
 
@@ -373,7 +357,7 @@ export default function RankingsPage({
                     Compare it against another board mood.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Switch between Popular, New, Completed, and Free Episodes when this one feels too quiet.
+                    Switch between Popular, New, Completed, and Start Here when this one feels too quiet.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -427,8 +411,8 @@ export default function RankingsPage({
                       href: "/rankings?type=completed&window=all",
                     },
                     {
-                      title: "Free Episodes",
-                      body: "Best when you want to try a hook before you spend points.",
+                      title: "Start Here",
+                      body: "Best when you want to sample the hook before you spend points.",
                       href: "/rankings?type=ttf&window=all",
                     },
                   ].map((item) => (
