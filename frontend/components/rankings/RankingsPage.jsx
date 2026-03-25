@@ -467,7 +467,7 @@ export default function RankingsPage({
               {boardEntries.length > 0 ? (
                 <SurfacePanel className="space-y-5" appearance="light" accent="blue">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    More from this board
+                    More ranks
                   </p>
 
                   <div className="space-y-3">

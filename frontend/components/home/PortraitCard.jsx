@@ -26,6 +26,9 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
   const resolvedHref = href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
   const coverMeta = getCoverCardMeta(item);
   const detailCopy = item.statusLabel || item.metaLabel || coverMeta.detailText || "";
+  const normalizedMetaLine = String(metaLine || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const normalizedDetailCopy = String(detailCopy || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const detailText = normalizedDetailCopy && normalizedDetailCopy !== normalizedMetaLine ? detailCopy : "";
 
   const handleClick = (event) => {
     if (typeof onClick !== "function") {
@@ -92,14 +95,14 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
             </p>
           </div>
 
-          {detailCopy ? (
+          {detailText ? (
             <p
               className={cn(
                 "line-clamp-1 text-sm leading-6 transition-colors",
                 isLight ? "text-slate-600 group-hover:text-slate-700" : "text-neutral-400 group-hover:text-neutral-300",
               )}
             >
-              {detailCopy}
+              {detailText}
             </p>
           ) : null}
 

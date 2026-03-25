@@ -170,6 +170,10 @@ function trimLabel(value, maxLength = 36) {
   return `${text.slice(0, maxLength - 3).trimEnd()}...`;
 }
 
+function labelsMatch(left, right) {
+  return trimLabel(left, 40).toLowerCase() === trimLabel(right, 40).toLowerCase();
+}
+
 export function normalizeGenreList(input) {
   if (Array.isArray(input)) {
     return input
@@ -241,8 +245,14 @@ export function getCoverArtDirection({
   const genreLabels = normalizeGenreList(genres);
   const primaryGenre = genreLabels[0] || palette.label;
   const secondaryGenre = genreLabels[1] || trimLabel(eyebrow, 34) || `${typeLabel} on Gush`;
-  const badgeLabel = normalizeCoverBadge(badge);
-  const kicker = badgeLabel || primaryGenre || palette.label || "Gush pick";
+  const normalizedBadgeLabel = normalizeCoverBadge(badge);
+  const badgeLabel =
+    normalizedBadgeLabel &&
+    !labelsMatch(normalizedBadgeLabel, typeLabel) &&
+    !labelsMatch(normalizedBadgeLabel, primaryGenre)
+      ? normalizedBadgeLabel
+      : "";
+  const kicker = primaryGenre || badgeLabel || palette.label || "Gush pick";
 
   return {
     ...palette,
