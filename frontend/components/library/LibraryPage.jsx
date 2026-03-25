@@ -470,31 +470,31 @@ export default function LibraryPage({ initialSignedIn = false }) {
             {
               label: "Mode",
               value: isAdultMode ? "18+" : "Standard",
-              hint: viewerSignedIn ? "Account sync on" : "Sign in to sync",
+              hint: viewerSignedIn ? "Account sync on" : "",
             },
           ]
         : [
             {
               label: "Read Free",
               value: "Ready",
-              hint: "Start with a free chapter",
+              hint: "",
             },
             {
               label: "Top Series",
               value: "Browse",
-              hint: "Find something worth saving",
+              hint: "",
             },
             {
               label: "Sync",
               value: viewerSignedIn ? "On" : "Sign in",
               hint: viewerSignedIn
                 ? "Progress and saved titles stay on this account"
-                : "Sign in to keep it together",
+                : "",
             },
             {
               label: "Mode",
               value: isAdultMode ? "18+" : "Standard",
-              hint: isAdultMode ? "18+ titles are visible right now" : "Main catalog is active",
+              hint: "",
             },
           ],
     [
@@ -518,8 +518,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
         {
           id: "start-free",
           eyebrow: "Read Free",
-          title: "Open a first series.",
-          description: "One chapter is enough to begin.",
+          title: "Free chapters.",
+          description: "",
           cta: "Read Free",
           onClick: () => router.push("/rankings?type=ttf&window=all"),
           accentClass: primaryAccentClass,
@@ -527,8 +527,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
         {
           id: "sync",
           eyebrow: "Sign In",
-          title: "Sign in to keep one shelf.",
-          description: "Keep progress, saves, and purchases together.",
+          title: "Your account.",
+          description: "Progress, saves, and purchases.",
           cta: "Sign In",
           onClick: () => openAuthPrompt(),
           accentClass: commonAccentClass,
@@ -541,8 +541,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
         {
           id: "free-starts",
           eyebrow: "Read Free",
-          title: "Open one series.",
-          description: "Your first chapter shows up here.",
+          title: "Free chapters.",
+          description: "",
           cta: "Read Free",
           onClick: () => router.push("/rankings?type=ttf&window=all"),
           accentClass: primaryAccentClass,
@@ -550,8 +550,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
         {
           id: "saved",
           eyebrow: "Saved Series",
-          title: "Saved titles appear here.",
-          description: "Follow a title or save a favorite.",
+          title: "Saved titles.",
+          description: "",
           cta: "View Top Series",
           onClick: () => router.push("/rankings?type=popular&window=week"),
           accentClass: commonAccentClass,
@@ -559,8 +559,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
         {
           id: "recent",
           eyebrow: "Recent activity",
-          title: "Recent reads appear here.",
-          description: "Open a chapter and it lands here.",
+          title: "Recent reads.",
+          description: "",
           cta: "Search",
           onClick: () => router.push("/search"),
           accentClass: commonAccentClass,
@@ -592,7 +592,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             eyebrow: "Progress",
             title: continueRailItems.length > 0 ? "Your in-progress reads are ready." : "Progress builds here.",
             description: continueRailItems.length > 0
-              ? "Active reads stay close."
+              ? ""
               : "Library keeps your place here.",
             cta: continueRailItems.length > 0 ? "Continue Reading" : "Read Free",
             onClick: () =>
@@ -604,10 +604,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
       {
         id: "saved",
         eyebrow: "Saved titles",
-        title: visibleLibraryItems.length > 0 ? "Open your saved series fast." : "Saved titles land here.",
+        title: visibleLibraryItems.length > 0 ? "Saved series." : "Saved titles.",
         description: visibleLibraryItems.length > 0
-          ? "Saved titles stay close."
-          : "Follow or save a series to keep it close.",
+          ? ""
+          : "",
         cta: visibleLibraryItems.length > 0 ? "Saved Series" : "View Top Series",
         onClick: () =>
           visibleLibraryItems.length > 0
@@ -618,10 +618,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
       {
         id: "recent",
         eyebrow: "Recent Activity",
-        title: historyRail.length > 0 ? "See what you opened recently." : "Recent reads land here too.",
+        title: historyRail.length > 0 ? "Recent activity." : "Recent reads.",
         description: historyRail.length > 0
-          ? "Your last opens stay close."
-          : "Open a chapter and it lands here.",
+          ? ""
+          : "",
         cta: historyRail.length > 0 ? "Recent Activity" : "Search",
         onClick: () => (historyRail.length > 0 ? scrollToSection("recent-activity") : router.push("/search")),
         accentClass: commonAccentClass,
@@ -630,7 +630,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         id: "search",
         eyebrow: "Search",
         title: "Find another title.",
-        description: "Search by title.",
+        description: "",
         cta: "Search",
         onClick: () => router.push("/search"),
         accentClass: commonAccentClass,
@@ -665,12 +665,12 @@ export default function LibraryPage({ initialSignedIn = false }) {
               ? resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
                 ? "Pick up where you left off."
                 : "Your reading shelf."
-              : "Your shelf starts here."
+              : "Your reading shelf."
           }
           description={
             viewerSignedIn
-              ? "Resume, saves, and recent reads stay together."
-              : "Read now. Sign in to keep one shelf."
+              ? "Resume, saves, and recent reads."
+              : ""
           }
           secondary=""
           stats={libraryStats}
@@ -761,7 +761,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   Quick actions
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {viewerSignedIn ? "Keep your reading close." : "Start reading."}
+                  Your shelf.
                 </h2>
               </div>
               <StorefrontPathwaysGrid
@@ -778,11 +778,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   Library
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Start one series.
+                  Nothing saved yet.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Read free, save a title, or open Top Series.
-                </p>
               </div>
                 <div className="flex flex-wrap gap-2">
                   <button

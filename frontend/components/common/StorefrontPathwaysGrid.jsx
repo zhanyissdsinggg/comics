@@ -43,7 +43,11 @@ export default function StorefrontPathwaysGrid({
             <h3 className={cn("mt-4 font-display text-xl font-semibold leading-tight", isLight ? "text-slate-950" : "text-white")}>
               {card.title}
             </h3>
-            <p className={cn("mt-3 text-sm leading-7", isLight ? "text-slate-600" : "text-neutral-200/90")}>{card.description}</p>
+            {card.description ? (
+              <p className={cn("mt-3 text-sm leading-7", isLight ? "text-slate-600" : "text-neutral-200/90")}>
+                {card.description}
+              </p>
+            ) : null}
             <Button
               type="button"
               variant="ghost"

@@ -151,30 +151,22 @@ function buildCreatorDirectoryHeroStats({
     {
       label: "Featured",
       value: leadCreator?.name || leadSeries?.title || "Top Series",
-      hint: leadCreator
-        ? `${leadCreator.name}'s titles stay together.`
-        : "Linked titles stay together.",
+      hint: "",
     },
     {
       label: "Free starts",
-      value: stats.freeStarts > 0 ? `${stats.freeStarts} free starts` : "Use title pages",
-      hint: stats.freeStarts > 0
-        ? "Free openings stay visible."
-        : "Free openings stay on title pages.",
+      value: stats.freeStarts > 0 ? `${stats.freeStarts} free starts` : "Title pages",
+      hint: "",
     },
     {
       label: "Studios",
       value: leadStudio?.name || "Studio picks",
-      hint: leadStudio
-        ? "Shared credits stay together."
-        : "Grouped credits stay close.",
+      hint: "",
     },
     {
       label: "Genre",
       value: genreOptions[0] || "Mixed catalog",
-      hint: genreOptions[0]
-        ? `${genreOptions[0]} stands out here.`
-        : "Comics and novels stay mixed.",
+      hint: "",
     },
   ];
 }
@@ -420,21 +412,21 @@ export default function CreatorsHubPage({
       {
         eyebrow: "Find a creator",
         title: "Search by creator, studio, or title.",
-        description: "Search by name or title.",
+        description: "",
         label: "Search",
         href: "/search",
       },
       {
         eyebrow: "Editor picks",
-        title: "Creator-led picks.",
-        description: "Popular titles and the names behind them.",
+        title: "Featured creators.",
+        description: "",
         label: "View Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
         eyebrow: "Browse more",
         title: "Browse by format.",
-        description: "Open comics, novels, and genre shelves.",
+        description: "",
         label: "Explore Comics",
         href: "/comics",
       },
@@ -755,9 +747,6 @@ export default function CreatorsHubPage({
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   Lead titles.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Title and credits stay close together.
-                </p>
               </div>
 
               {fallbackEntryTitles.length > 0 ? (
@@ -1102,8 +1091,8 @@ export default function CreatorsHubPage({
                       {summarizeLeadCopy(
                         series?.description,
                         creator
-                          ? `A lead title from ${creator.name}.`
-                          : "A lead title here.",
+                          ? `From ${creator.name}.`
+                          : "Featured.",
                       )}
                     </p>
 
