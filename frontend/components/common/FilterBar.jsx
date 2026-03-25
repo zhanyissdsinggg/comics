@@ -36,7 +36,7 @@ export default function FilterBar({
     { id: "completed", label: "Completed" },
   ];
 
-  const displayedGenres = showAllGenres ? genres : genres.slice(0, 8);
+  const displayedGenres = showAllGenres ? genres : genres.slice(0, isQuiet ? 5 : 8);
   const activeFilterCount = [
     selectedGenre !== "all" ? selectedGenre : "",
     sortBy !== "popular" ? sortBy : "",
@@ -58,7 +58,7 @@ export default function FilterBar({
   const filterShellClass =
     isLight
       ? isQuiet
-        ? "rounded-[20px] border border-black/6 bg-white/66 px-3.5 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.03)]"
+        ? "rounded-[18px] border border-black/5 bg-white/50 px-3 py-2.5 shadow-none backdrop-blur-[2px]"
         : "rounded-[22px] border border-black/6 bg-white/78 px-4 py-3.5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
       : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
   const labelClass = isLight ? "text-slate-500" : "text-neutral-400";
@@ -70,6 +70,7 @@ export default function FilterBar({
     isQuiet ? "text-[10px] tracking-[0.18em]" : "text-[11px] tracking-[0.24em]",
     labelClass,
   );
+  const visibleSectionLabelClass = isQuiet ? "sr-only" : sectionLabelClass;
   const chipClassName = isQuiet ? "px-3 py-1.5 text-[11px]" : "";
   const showHeaderRow = !isQuiet || activeFilterCount > 0;
 
@@ -122,9 +123,9 @@ export default function FilterBar({
       ) : null}
 
       <div className={cn(showHeaderRow ? "mt-3" : "", isQuiet ? "space-y-2.5" : "space-y-3")}>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className={sectionLabelClass}>Sort</span>
+        <div className="flex flex-col gap-2.5 xl:flex-row xl:items-start xl:justify-between">
+          <div className={cn("flex flex-wrap items-center", isQuiet ? "gap-2" : "gap-2.5")}>
+            <span className={visibleSectionLabelClass}>Sort</span>
             {sortOptions.map((option) => (
               <Chip
                 key={option.id}
@@ -137,8 +138,8 @@ export default function FilterBar({
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className={sectionLabelClass}>Status</span>
+          <div className={cn("flex flex-wrap items-center", isQuiet ? "gap-2" : "gap-2.5")}>
+            <span className={visibleSectionLabelClass}>Status</span>
             {statusOptions.map((option) => (
               <Chip
                 key={option.id}
@@ -160,7 +161,7 @@ export default function FilterBar({
             )}
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <p className={sectionLabelClass}>Genres</p>
+              <p className={visibleSectionLabelClass}>Genres</p>
               {genres.length > 8 ? (
                 <button
                   type="button"
@@ -170,7 +171,7 @@ export default function FilterBar({
                     subtleButtonClass,
                   )}
                 >
-                  {showAllGenres ? "Show less" : `Show all ${genres.length}`}
+                  {isQuiet ? (showAllGenres ? "Less" : "More") : showAllGenres ? "Show less" : `Show all ${genres.length}`}
                 </button>
               ) : null}
             </div>

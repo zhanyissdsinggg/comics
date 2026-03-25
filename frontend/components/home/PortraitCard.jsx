@@ -18,7 +18,15 @@ function isModifiedEvent(event) {
   );
 }
 
-function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }) {
+function PortraitCard({
+  item,
+  tone,
+  onClick,
+  appearance = "default",
+  href = "",
+  showActionLabel = true,
+  coverFallbackVariant = "default",
+}) {
   const metaLine = item.subtitle || item.eyebrow || "";
   const progressPercent = Number(item.progressPercent || 0);
   const progressWidth = Math.max(0, Math.min(progressPercent <= 1 ? progressPercent * 100 : progressPercent, 100));
@@ -74,6 +82,7 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
             badge={item.badge}
             genres={item.genres}
             seriesType={item.seriesType || item.type}
+            fallbackVariant={coverFallbackVariant}
             className="h-full w-full transition-transform duration-700 group-hover:scale-[1.02]"
           />
           <div className={cn("absolute inset-0", isLight ? "bg-gradient-to-t from-black/50 via-black/8 to-transparent" : "bg-gradient-to-t from-black/85 via-black/18 to-transparent")} />
@@ -112,16 +121,25 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
             </p>
           ) : null}
 
-          <div className="flex items-center justify-between pt-1">
+          <div
+            className={cn(
+              "flex items-center pt-1",
+              typeof item.progressPercent === "number" && item.progressPercent > 0
+                ? "justify-between"
+                : showActionLabel
+                  ? "justify-between"
+                  : "justify-end",
+            )}
+          >
             {typeof item.progressPercent === "number" && item.progressPercent > 0 ? (
               <p className={cn("text-[11px] font-medium", isLight ? "text-slate-400" : "text-neutral-500")}>
                 {Math.round(progressWidth)}% read
               </p>
-            ) : (
+            ) : showActionLabel ? (
               <span className={cn("text-[11px] font-medium", isLight ? "text-slate-400" : "text-neutral-500")}>
                 Open details
               </span>
-            )}
+            ) : null}
             <ArrowRight className={cn("size-4 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1", isLight ? "text-slate-400" : "text-white")} />
           </div>
           <div className="sr-only">Open title details</div>

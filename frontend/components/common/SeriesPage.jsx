@@ -608,6 +608,8 @@ export default function SeriesPage({
                   item={item}
                   tone={item.coverTone}
                   appearance="light"
+                  showActionLabel={!isComicPage}
+                  coverFallbackVariant={isComicPage ? "minimal-card" : "default"}
                   onClick={() => handleSeriesClick(item.id)}
                 />
               ))}

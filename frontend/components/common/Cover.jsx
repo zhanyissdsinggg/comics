@@ -40,7 +40,9 @@ function CoverFallback({
   seriesType = "",
   className = "",
   style = {},
+  fallbackVariant = "default",
 }) {
+  const isMinimalCard = fallbackVariant === "minimal-card";
   const title = label
     .replace(/\bEp\s*\d+\b/gi, "")
     .replace(/\bP\s*\d+\b/gi, "")
@@ -71,6 +73,7 @@ function CoverFallback({
       artDirection.primaryGenre,
       artDirection.badgeLabel,
     ].some((value) => labelsMatch(value, artDirection.secondaryGenre));
+  const minimalChipLabel = artDirection.badgeLabel || artDirection.primaryGenre || "";
 
   return (
     <div
@@ -85,25 +88,35 @@ function CoverFallback({
         }}
       />
       <div className="absolute inset-3 rounded-[24px] border" style={{ borderColor: artDirection.border }} />
-      <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
-        <div className="flex max-w-[70%] flex-wrap gap-2">
-          {shouldShowTypeLabel ? (
-            <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/82">
-              {artDirection.typeLabel}
-            </span>
-          ) : null}
-          {artDirection.primaryGenre ? (
-            <span className="rounded-full border border-white/12 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/75">
-              {artDirection.primaryGenre}
+      {isMinimalCard ? (
+        <div className="absolute left-4 top-4">
+          {minimalChipLabel ? (
+            <span className="rounded-full border border-white/14 bg-black/18 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/78">
+              {minimalChipLabel}
             </span>
           ) : null}
         </div>
-        {artDirection.badgeLabel ? (
-          <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/82">
-            {artDirection.badgeLabel}
-          </span>
-        ) : null}
-      </div>
+      ) : (
+        <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
+          <div className="flex max-w-[70%] flex-wrap gap-2">
+            {shouldShowTypeLabel ? (
+              <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/82">
+                {artDirection.typeLabel}
+              </span>
+            ) : null}
+            {artDirection.primaryGenre ? (
+              <span className="rounded-full border border-white/12 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/75">
+                {artDirection.primaryGenre}
+              </span>
+            ) : null}
+          </div>
+          {artDirection.badgeLabel ? (
+            <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/82">
+              {artDirection.badgeLabel}
+            </span>
+          ) : null}
+        </div>
+      )}
       <div className="absolute inset-x-0 top-[25%] flex justify-center">
         <div
           className="relative h-28 w-40 rounded-[32px] border bg-black/10 shadow-[0_18px_50px_rgba(0,0,0,0.14)] backdrop-blur-[2px]"
@@ -114,39 +127,43 @@ function CoverFallback({
           style={{ borderColor: artDirection.border }}
         />
       </div>
-      <div className="absolute inset-x-4 bottom-4">
-        <div
-          className="rounded-[24px] border px-4 py-4 backdrop-blur-[3px]"
-          style={{
-            borderColor: artDirection.border,
-            background: `linear-gradient(180deg, rgba(8, 12, 18, 0.12) 0%, ${artDirection.panel} 100%)`,
-          }}
-        >
-          {shouldShowKicker ? (
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/76">
-              <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: artDirection.accent }}
-              />
-              <span>{artDirection.kicker}</span>
-            </div>
-          ) : null}
-          {title ? (
-            <p className={`${shouldShowKicker ? "mt-2" : ""} line-clamp-3 text-lg font-semibold leading-tight text-white drop-shadow-[0_10px_28px_rgba(0,0,0,0.42)]`.trim()}>
-              {title}
-            </p>
-          ) : (
-            <p className={`${shouldShowKicker ? "mt-2" : ""} text-sm font-semibold uppercase tracking-[0.18em] text-white/82`.trim()}>
-              {chipLabel}
-            </p>
-          )}
-          {shouldShowSecondaryGenre ? (
-            <p className="mt-3 text-[11px] font-medium leading-5 text-white/74">
-              {artDirection.secondaryGenre}
-            </p>
-          ) : null}
+      {isMinimalCard ? (
+        <div className="absolute inset-x-4 bottom-4 h-16 rounded-[24px] border backdrop-blur-[3px]" style={{ borderColor: artDirection.border, background: `linear-gradient(180deg, rgba(8, 12, 18, 0.08) 0%, ${artDirection.panel} 100%)` }} />
+      ) : (
+        <div className="absolute inset-x-4 bottom-4">
+          <div
+            className="rounded-[24px] border px-4 py-4 backdrop-blur-[3px]"
+            style={{
+              borderColor: artDirection.border,
+              background: `linear-gradient(180deg, rgba(8, 12, 18, 0.12) 0%, ${artDirection.panel} 100%)`,
+            }}
+          >
+            {shouldShowKicker ? (
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/76">
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: artDirection.accent }}
+                />
+                <span>{artDirection.kicker}</span>
+              </div>
+            ) : null}
+            {title ? (
+              <p className={`${shouldShowKicker ? "mt-2" : ""} line-clamp-3 text-lg font-semibold leading-tight text-white drop-shadow-[0_10px_28px_rgba(0,0,0,0.42)]`.trim()}>
+                {title}
+              </p>
+            ) : (
+              <p className={`${shouldShowKicker ? "mt-2" : ""} text-sm font-semibold uppercase tracking-[0.18em] text-white/82`.trim()}>
+                {chipLabel}
+              </p>
+            )}
+            {shouldShowSecondaryGenre ? (
+              <p className="mt-3 text-[11px] font-medium leading-5 text-white/74">
+                {artDirection.secondaryGenre}
+              </p>
+            ) : null}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -161,6 +178,7 @@ export default function Cover({
   label = "",
   eyebrow = "",
   badge = "",
+  fallbackVariant = "default",
   sizes = "(max-width: 768px) 160px, 240px",
 }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -186,6 +204,7 @@ export default function Cover({
         tone={tone}
         genres={genres}
         seriesType={seriesType}
+        fallbackVariant={fallbackVariant}
         className={className}
         style={style}
       />
@@ -213,6 +232,7 @@ export default function Cover({
             tone={tone}
             genres={genres}
             seriesType={seriesType}
+            fallbackVariant={fallbackVariant}
             className="absolute inset-0"
           />
         ) : (
@@ -248,6 +268,7 @@ export default function Cover({
       tone={tone}
       genres={genres}
       seriesType={seriesType}
+      fallbackVariant={fallbackVariant}
       className={`cover ${className}`.trim()}
       style={style}
     />
