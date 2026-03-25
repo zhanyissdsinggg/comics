@@ -420,13 +420,13 @@ export default function CreatorsHubPage({
       {
         eyebrow: "Find a creator",
         title: "Search by creator, studio, or title.",
-        description: "Search when you already know the name or title.",
+        description: "Search by name or title.",
         label: "Search",
         href: "/search",
       },
       {
         eyebrow: "Editor picks",
-        title: "Start with strong creator-led titles.",
+        title: "Creator-led picks.",
         description: "Popular titles and the names behind them.",
         label: "View Top Series",
         href: "/rankings?type=popular&window=week",
@@ -1103,7 +1103,7 @@ export default function CreatorsHubPage({
                         series?.description,
                         creator
                           ? `A lead title from ${creator.name}.`
-                          : "A lead title on this shelf.",
+                          : "A lead title here.",
                       )}
                     </p>
 

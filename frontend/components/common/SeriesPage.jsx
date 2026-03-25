@@ -23,7 +23,7 @@ const PAGE_CONFIG = {
     eyebrow: "Comics",
     heroTitle: "Comics worth opening.",
     title: "Comics",
-    description: "Standout comics, free starts, and finished runs.",
+    description: "",
     secondary: "",
     emptyIcon: "search",
     emptyTitle: "No comics match this filter set",
@@ -172,6 +172,7 @@ export default function SeriesPage({
   const selectedGenre = getSearchParam(initialSearchParams, "genre", "all");
   const sortBy = getSearchParam(initialSearchParams, "sort", "popular");
   const status = getSearchParam(initialSearchParams, "status", "all");
+  const isComicPage = type === "comic";
   const isNovelPage = type === "novel";
   const hasActiveFilters = selectedGenre !== "all" || sortBy !== "popular" || status !== "all";
 
@@ -421,7 +422,8 @@ export default function SeriesPage({
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
   const showEditorialHero = !isNovelPage;
-  const showEntrySpotlight = Boolean(entrySpotlight) && (!isNovelPage || !hasActiveFilters);
+  const showEntrySpotlight = Boolean(entrySpotlight) && !isComicPage && (!isNovelPage || !hasActiveFilters);
+  const showCatalogCount = !isComicPage;
 
   return (
     <main className="gush-page-shell overflow-hidden">
@@ -554,6 +556,7 @@ export default function SeriesPage({
           onStatusChange={(value) => updateParams({ status: value })}
           onReset={handleResetFilters}
           appearance="light"
+          density={isComicPage ? "quiet" : "default"}
         />
 
         {loading ? (
@@ -592,11 +595,12 @@ export default function SeriesPage({
             </div>
           </SurfacePanel>
         ) : (
-          <div className="space-y-6">
-            <p className="text-sm text-slate-500">
-              {formatTitleCount(filteredAndSortedSeries.length)}
-            </p>
-
+          <div className={showCatalogCount ? "space-y-6" : "space-y-0"}>
+            {showCatalogCount ? (
+              <p className="text-sm text-slate-500">
+                {formatTitleCount(filteredAndSortedSeries.length)}
+              </p>
+            ) : null}
             <div className={catalogGridClassName}>
               {filteredAndSortedSeries.map((item) => (
                 <PortraitCard

@@ -62,6 +62,7 @@ function CoverFallback({
       artDirection.badgeLabel,
       artDirection.secondaryGenre,
     ].some((value) => labelsMatch(value, artDirection.kicker));
+  const shouldShowTypeLabel = Boolean(artDirection.typeLabel) && !artDirection.primaryGenre;
   const shouldShowSecondaryGenre =
     Boolean(artDirection.secondaryGenre) &&
     ![
@@ -86,9 +87,11 @@ function CoverFallback({
       <div className="absolute inset-3 rounded-[24px] border" style={{ borderColor: artDirection.border }} />
       <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
         <div className="flex max-w-[70%] flex-wrap gap-2">
-          <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/82">
-            {artDirection.typeLabel}
-          </span>
+          {shouldShowTypeLabel ? (
+            <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/82">
+              {artDirection.typeLabel}
+            </span>
+          ) : null}
           {artDirection.primaryGenre ? (
             <span className="rounded-full border border-white/12 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/75">
               {artDirection.primaryGenre}

@@ -541,7 +541,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         {
           id: "free-starts",
           eyebrow: "Read Free",
-          title: "Open one series to start your shelf.",
+          title: "Open one series.",
           description: "Your first chapter shows up here.",
           cta: "Read Free",
           onClick: () => router.push("/rankings?type=ttf&window=all"),
@@ -592,7 +592,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             eyebrow: "Progress",
             title: continueRailItems.length > 0 ? "Your in-progress reads are ready." : "Progress builds here.",
             description: continueRailItems.length > 0
-              ? "Open your active reads first."
+              ? "Active reads stay close."
               : "Library keeps your place here.",
             cta: continueRailItems.length > 0 ? "Continue Reading" : "Read Free",
             onClick: () =>
@@ -630,7 +630,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         id: "search",
         eyebrow: "Search",
         title: "Find another title.",
-        description: "Search when you already know the title.",
+        description: "Search by title.",
         cta: "Search",
         onClick: () => router.push("/search"),
         accentClass: commonAccentClass,
@@ -670,7 +670,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           description={
             viewerSignedIn
               ? "Resume, saves, and recent reads stay together."
-              : "Read now. Sign in when you want one shelf."
+              : "Read now. Sign in to keep one shelf."
           }
           secondary=""
           stats={libraryStats}
