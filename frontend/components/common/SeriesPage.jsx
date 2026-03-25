@@ -100,6 +100,11 @@ function toTimestamp(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function formatTitleCount(value) {
+  const count = Number(value) || 0;
+  return `${count.toLocaleString()} ${count === 1 ? "title" : "titles"}`;
+}
+
 function getSeriesBadge(series) {
   if (String(series?.status || "").toLowerCase() === "completed") {
     return "Completed";
@@ -589,7 +594,7 @@ export default function SeriesPage({
         ) : (
           <div className="space-y-6">
             <p className="text-sm text-slate-500">
-              {filteredAndSortedSeries.length.toLocaleString()} title{filteredAndSortedSeries.length === 1 ? "" : "s"}
+              {formatTitleCount(filteredAndSortedSeries.length)}
             </p>
 
             <div className={catalogGridClassName}>

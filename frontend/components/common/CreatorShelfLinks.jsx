@@ -59,6 +59,11 @@ function collectCreators(items, maxCreators) {
     .slice(0, Math.max(1, Number(maxCreators) || 6));
 }
 
+function formatTitleCount(value) {
+  const count = Number(value) || 0;
+  return `${count} ${count === 1 ? "title" : "titles"}`;
+}
+
 export default function CreatorShelfLinks({
   items,
   entryPoint = "CREATOR_CHIP",
@@ -138,7 +143,7 @@ export default function CreatorShelfLinks({
               <span className="flex items-center gap-2">
                 <span className={`text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}>{creator.name}</span>
                 <span className={`text-[11px] uppercase tracking-[0.18em] transition ${isLight ? "text-slate-400 group-hover:text-slate-500" : "text-neutral-500 group-hover:text-neutral-400"}`}>
-                  {creator.titles} title{creator.titles === 1 ? "" : "s"}
+                  {formatTitleCount(creator.titles)}
                 </span>
                 <span
                   aria-hidden="true"

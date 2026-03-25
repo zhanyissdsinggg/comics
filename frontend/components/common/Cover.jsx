@@ -27,6 +27,10 @@ function readPlaceholdLabel(url) {
   }
 }
 
+function labelsMatch(left, right) {
+  return String(left || "").replace(/\s+/g, " ").trim().toLowerCase() === String(right || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
 function CoverFallback({
   label = "",
   eyebrow = "",
@@ -50,6 +54,14 @@ function CoverFallback({
     badge,
     eyebrow,
   });
+  const shouldShowKicker =
+    Boolean(artDirection.kicker) &&
+    ![
+      artDirection.typeLabel,
+      artDirection.primaryGenre,
+      artDirection.badgeLabel,
+      artDirection.secondaryGenre,
+    ].some((value) => labelsMatch(value, artDirection.kicker));
 
   return (
     <div
@@ -99,19 +111,21 @@ function CoverFallback({
             background: `linear-gradient(180deg, rgba(8, 12, 18, 0.12) 0%, ${artDirection.panel} 100%)`,
           }}
         >
-          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/76">
-            <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: artDirection.accent }}
-            />
-            <span>{artDirection.kicker}</span>
-          </div>
+          {shouldShowKicker ? (
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/76">
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ backgroundColor: artDirection.accent }}
+              />
+              <span>{artDirection.kicker}</span>
+            </div>
+          ) : null}
           {title ? (
-            <p className="mt-2 line-clamp-3 text-lg font-semibold leading-tight text-white drop-shadow-[0_10px_28px_rgba(0,0,0,0.42)]">
+            <p className={`${shouldShowKicker ? "mt-2" : ""} line-clamp-3 text-lg font-semibold leading-tight text-white drop-shadow-[0_10px_28px_rgba(0,0,0,0.42)]`.trim()}>
               {title}
             </p>
           ) : (
-            <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-white/82">
+            <p className={`${shouldShowKicker ? "mt-2" : ""} text-sm font-semibold uppercase tracking-[0.18em] text-white/82`.trim()}>
               {chipLabel}
             </p>
           )}
