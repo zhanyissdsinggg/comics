@@ -422,9 +422,7 @@ export default function RankingsPage({
                       <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                         {leadEntry.title}
                       </h2>
-
-                      <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
-                      <p className="mt-3 text-sm text-slate-500">{formatSeriesMeta(leadEntry)}</p>
+                      <p className="mt-4 text-sm text-slate-500">{formatSeriesMeta(leadEntry)}</p>
                     </div>
                   </div>
                 </Link>
@@ -468,16 +466,9 @@ export default function RankingsPage({
 
               {boardEntries.length > 0 ? (
                 <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-                  <div>
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                        More from this board
-                      </p>
-                      <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                        Keep reading through the chart.
-                      </h2>
-                    </div>
-                  </div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    More from this board
+                  </p>
 
                   <div className="space-y-3">
                     {boardEntries.map((series, index) => (
@@ -526,9 +517,7 @@ export default function RankingsPage({
                 entryPoint="RANKINGS_CREATOR_CHIP"
                 campaignId={`${tab}_${selectedWindow}_spotlight_creator`}
                 sourcePath={rankingsPath}
-                label="Top Series creators"
-                title="Creators behind these picks"
-                description="Open the same voice again if one title lands."
+                label="Creators behind these picks"
                 maxCreators={6}
                 compact
                 appearance="light"

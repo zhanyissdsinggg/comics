@@ -167,6 +167,8 @@ export default function SeriesPage({
   const selectedGenre = getSearchParam(initialSearchParams, "genre", "all");
   const sortBy = getSearchParam(initialSearchParams, "sort", "popular");
   const status = getSearchParam(initialSearchParams, "status", "all");
+  const isNovelPage = type === "novel";
+  const hasActiveFilters = selectedGenre !== "all" || sortBy !== "popular" || status !== "all";
 
   useEffect(() => {
     async function loadSeries() {
@@ -413,6 +415,8 @@ export default function SeriesPage({
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+  const showEditorialHero = !isNovelPage;
+  const showEntrySpotlight = Boolean(entrySpotlight) && (!isNovelPage || !hasActiveFilters);
 
   return (
     <main className="gush-page-shell overflow-hidden">
@@ -420,13 +424,15 @@ export default function SeriesPage({
       <SiteHeader variant="light" />
 
       <div className="gush-page-main gush-section-stack">
-        <EditorialHero
-          eyebrow={config.eyebrow}
-          title={config.heroTitle}
-          description={config.description}
-          secondary={config.secondary}
-          appearance="light"
-        />
+        {showEditorialHero ? (
+          <EditorialHero
+            eyebrow={config.eyebrow}
+            title={config.heroTitle}
+            description={config.description}
+            secondary={config.secondary}
+            appearance="light"
+          />
+        ) : null}
 
         {loading ? (
           <div className="grid gap-4 xl:grid-cols-2">
@@ -496,7 +502,7 @@ export default function SeriesPage({
           </section>
         ) : null}
 
-        {!loading && entrySpotlight ? (
+        {!loading && showEntrySpotlight ? (
           <section>
             <SurfacePanel className="space-y-5" appearance="light" accent="blue">
               <div className="grid gap-4 sm:grid-cols-[200px_minmax(0,1fr)] sm:items-start">
@@ -504,7 +510,7 @@ export default function SeriesPage({
                   tone={entrySpotlight.coverTone}
                   coverUrl={entrySpotlight.coverUrl}
                   label={entrySpotlight.title}
-                  eyebrow={type === "comic" ? "Editors' pick" : "Featured read"}
+                  eyebrow={type === "comic" ? "Editors' pick" : "Novels"}
                   badge={getSeriesBadge(entrySpotlight)}
                   genres={entrySpotlight.genres}
                   seriesType={entrySpotlight.type}
@@ -512,7 +518,7 @@ export default function SeriesPage({
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    {type === "comic" ? "Start here" : "Settle in here"}
+                    {type === "comic" ? "Start here" : "Featured read"}
                   </p>
                   <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
                     {entrySpotlight.title}
