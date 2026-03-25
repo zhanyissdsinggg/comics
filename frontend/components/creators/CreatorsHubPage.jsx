@@ -152,29 +152,29 @@ function buildCreatorDirectoryHeroStats({
       label: "Featured",
       value: leadCreator?.name || leadSeries?.title || "Top Series",
       hint: leadCreator
-        ? `${leadCreator.name}'s shelf keeps linked titles together.`
-        : "Top Series and creator shelves stay closely linked.",
+        ? `${leadCreator.name}'s titles stay together.`
+        : "Linked titles stay together.",
     },
     {
       label: "Free starts",
       value: stats.freeStarts > 0 ? `${stats.freeStarts} free starts` : "Use title pages",
       hint: stats.freeStarts > 0
-        ? "Free openings still surface here."
-        : "Title pages still show free openings when they are available.",
+        ? "Free openings stay visible."
+        : "Free openings stay on title pages.",
     },
     {
       label: "Studios",
       value: leadStudio?.name || "Studio picks",
       hint: leadStudio
-        ? "Shared credits stay grouped here."
-        : "Grouped credits stay close across the catalog.",
+        ? "Shared credits stay together."
+        : "Grouped credits stay close.",
     },
     {
       label: "Genre",
       value: genreOptions[0] || "Mixed catalog",
       hint: genreOptions[0]
-        ? `${genreOptions[0]} stays strong across creator shelves.`
-        : "Comics and novels stay mixed here.",
+        ? `${genreOptions[0]} stands out here.`
+        : "Comics and novels stay mixed.",
     },
   ];
 }
@@ -427,7 +427,7 @@ export default function CreatorsHubPage({
       {
         eyebrow: "Editor picks",
         title: "Start with strong creator-led titles.",
-        description: "Top Series is a good way into creator discovery.",
+        description: "Popular titles and the names behind them.",
         label: "View Top Series",
         href: "/rankings?type=popular&window=week",
       },
@@ -750,13 +750,13 @@ export default function CreatorsHubPage({
             <SurfacePanel appearance="light" accent="blue" className="space-y-5">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Start from a title
+                  Lead titles
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Start with a title.
+                  Lead titles.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Open a strong title, then follow the credited shelf.
+                  Title and credits stay close together.
                 </p>
               </div>
 
@@ -1006,8 +1006,8 @@ export default function CreatorsHubPage({
                           {summarizeLeadCopy(
                             creator.leadSummary,
                             creator.spotlightSeries?.title
-                              ? `Start with ${creator.spotlightSeries.title}, then stay with the rest of this shelf.`
-                              : "Open the shelf to browse this creator or studio in one place.",
+                              ? `Featuring ${creator.spotlightSeries.title}.`
+                              : "Titles from this creator or studio.",
                           )}
                         </p>
                         <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
@@ -1102,8 +1102,8 @@ export default function CreatorsHubPage({
                       {summarizeLeadCopy(
                         series?.description,
                         creator
-                          ? `${series.title} leads into ${creator.name}'s shelf.`
-                          : `${series.title} is a strong way into this lane.`,
+                          ? `A lead title from ${creator.name}.`
+                          : "A lead title on this shelf.",
                       )}
                     </p>
 
@@ -1335,7 +1335,7 @@ export default function CreatorsHubPage({
                         {summarizeLeadCopy(
                           creator.leadSummary,
                           creator.spotlightSeries?.title
-                            ? `${creator.spotlightSeries.title} leads this shelf.`
+                            ? `Featuring ${creator.spotlightSeries.title}.`
                             : "Linked titles from this creator or studio.",
                         )}
                       </p>
@@ -1440,13 +1440,13 @@ export default function CreatorsHubPage({
                         </div>
 
                         <p className="mt-3 text-sm leading-6 text-slate-600">
-                        {summarizeLeadCopy(
-                          creator.leadSummary,
-                          creator.spotlightSeries?.title
-                            ? `${creator.spotlightSeries.title} leads this shelf.`
-                            : "Linked titles in one place.",
-                        )}
-                      </p>
+                          {summarizeLeadCopy(
+                            creator.leadSummary,
+                            creator.spotlightSeries?.title
+                              ? `Featuring ${creator.spotlightSeries.title}.`
+                              : "Linked titles in one place.",
+                          )}
+                        </p>
 
                         {creatorGenres.length > 0 ? (
                           <div className="mt-3 flex flex-wrap gap-2">

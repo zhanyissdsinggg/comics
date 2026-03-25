@@ -249,7 +249,8 @@ export function getCoverArtDirection({
   const badgeLabel =
     normalizedBadgeLabel &&
     !labelsMatch(normalizedBadgeLabel, typeLabel) &&
-    !labelsMatch(normalizedBadgeLabel, primaryGenre)
+    !labelsMatch(normalizedBadgeLabel, primaryGenre) &&
+    !labelsMatch(normalizedBadgeLabel, secondaryGenre)
       ? normalizedBadgeLabel
       : "";
   const kicker = primaryGenre || badgeLabel || palette.label || "Gush pick";

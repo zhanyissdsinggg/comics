@@ -24,25 +24,25 @@ const TABS = [
     id: "popular",
     label: "Popular",
     title: "What readers are opening now.",
-    description: "Live momentum across the catalog.",
+    description: "",
   },
   {
     id: "new",
     label: "New",
     title: "Fresh releases.",
-    description: "New launches and rising series.",
+    description: "",
   },
   {
     id: "completed",
     label: "Completed",
     title: "Completed stories.",
-    description: "Finished runs ready to read through.",
+    description: "",
   },
   {
     id: "ttf",
     label: "Read Free",
     title: "Read free first.",
-    description: "Openings you can try before you unlock more.",
+    description: "",
   },
 ];
 

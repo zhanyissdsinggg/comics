@@ -28,7 +28,13 @@ function PortraitCard({ item, tone, onClick, appearance = "default", href = "" }
   const detailCopy = item.statusLabel || item.metaLabel || coverMeta.detailText || "";
   const normalizedMetaLine = String(metaLine || "").replace(/\s+/g, " ").trim().toLowerCase();
   const normalizedDetailCopy = String(detailCopy || "").replace(/\s+/g, " ").trim().toLowerCase();
-  const detailText = normalizedDetailCopy && normalizedDetailCopy !== normalizedMetaLine ? detailCopy : "";
+  const normalizedBadgeLabel = String(coverMeta.badgeLabel || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const detailText =
+    normalizedDetailCopy &&
+    normalizedDetailCopy !== normalizedMetaLine &&
+    normalizedDetailCopy !== normalizedBadgeLabel
+      ? detailCopy
+      : "";
 
   const handleClick = (event) => {
     if (typeof onClick !== "function") {

@@ -62,6 +62,14 @@ function CoverFallback({
       artDirection.badgeLabel,
       artDirection.secondaryGenre,
     ].some((value) => labelsMatch(value, artDirection.kicker));
+  const shouldShowSecondaryGenre =
+    Boolean(artDirection.secondaryGenre) &&
+    ![
+      title,
+      artDirection.typeLabel,
+      artDirection.primaryGenre,
+      artDirection.badgeLabel,
+    ].some((value) => labelsMatch(value, artDirection.secondaryGenre));
 
   return (
     <div
@@ -129,9 +137,11 @@ function CoverFallback({
               {chipLabel}
             </p>
           )}
-          <p className="mt-3 text-[11px] font-medium leading-5 text-white/74">
-            {artDirection.secondaryGenre}
-          </p>
+          {shouldShowSecondaryGenre ? (
+            <p className="mt-3 text-[11px] font-medium leading-5 text-white/74">
+              {artDirection.secondaryGenre}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
