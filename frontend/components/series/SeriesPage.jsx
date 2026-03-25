@@ -840,7 +840,7 @@ export default function SeriesPage({
               This title is not available in the public catalog.
             </h1>
             <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-[15px]">
-              Try Top Series, browse the wider catalog, or search for another title so the session keeps moving.
+              Try Top Series, explore the catalog, or search for another title.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
@@ -848,21 +848,21 @@ export default function SeriesPage({
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                Browse Top Series
+                View Top Series
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/comics")}
                 className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
-                Browse comics
+                Explore Comics
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
                 className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
-                Search titles
+                Search
               </button>
             </div>
           </div>
@@ -901,14 +901,14 @@ export default function SeriesPage({
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
-                Browse Top Series
+                View Top Series
               </button>
               <button
                 type="button"
                 onClick={() => router.push(isUnavailable ? "/search" : "/store")}
                 className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
-                {isUnavailable ? "Search titles" : "See point packs"}
+                {isUnavailable ? "Search" : "View point packs"}
               </button>
             </div>
           </div>

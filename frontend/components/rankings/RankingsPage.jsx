@@ -23,26 +23,26 @@ const TABS = [
   {
     id: "popular",
     label: "Popular",
-    title: "See what readers are opening right now.",
-    description: "A live view of the titles drawing the most attention.",
+    title: "What readers are opening now.",
+    description: "Live momentum across the catalog.",
   },
   {
     id: "new",
     label: "New",
-    title: "Catch fresh releases early.",
-    description: "New launches and rising titles still gathering momentum.",
+    title: "Fresh releases.",
+    description: "New launches and rising series.",
   },
   {
     id: "completed",
     label: "Completed",
-    title: "Find finished stories you can read straight through.",
-    description: "Finished runs ready for a full reading session.",
+    title: "Completed stories.",
+    description: "Finished runs ready to read through.",
   },
   {
     id: "ttf",
-    label: "Start Free",
-    title: "Try the opening chapters first.",
-    description: "Sample the opening before you unlock more.",
+    label: "Read Free",
+    title: "Read free first.",
+    description: "Openings you can try before you unlock more.",
   },
 ];
 
@@ -54,28 +54,28 @@ const WINDOWS = [
 
 const CHART_GUIDES = {
   popular: {
-    audience: "For the titles carrying the strongest momentum.",
-    signal: "These titles are drawing the most attention right now.",
+    audience: "Popular now.",
+    signal: "The titles drawing the most attention right now.",
     searchHref: "/search?sort=popular",
-    searchLabel: "Browse related titles",
+    searchLabel: "View related series",
   },
   new: {
-    audience: "For readers who want something earlier in its run.",
-    signal: "A clean way to catch rising releases before they feel obvious.",
+    audience: "New releases.",
+    signal: "Fresh series still gathering momentum.",
     searchHref: "/search?sort=latest",
-    searchLabel: "See latest releases",
+    searchLabel: "View latest",
   },
   completed: {
-    audience: "For readers who want payoff without waiting on updates.",
-    signal: "Finished stories ready to read straight through.",
+    audience: "Completed reads.",
+    signal: "Finished stories ready to read through.",
     searchHref: "/search?status=Completed&sort=popular",
-    searchLabel: "See finished series",
+    searchLabel: "View completed",
   },
   ttf: {
-    audience: "For readers who want a lighter first step.",
-    signal: "A shelf built around strong openings and free starts.",
+    audience: "Read free.",
+    signal: "A shelf built around strong openings.",
     searchHref: "/search?sort=popular",
-    searchLabel: "See more to try",
+    searchLabel: "View more",
   },
 };
 
@@ -286,7 +286,7 @@ export default function RankingsPage({
                     Top Series
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    This board is quiet right now.
+                    Nothing is ranking here yet.
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
                 </div>
@@ -305,7 +305,7 @@ export default function RankingsPage({
                     onClick={() => router.push("/search")}
                     className={secondaryButtonClass}
                   >
-                    Search titles
+                    Search
                   </button>
                 </div>
               </SurfacePanel>
@@ -316,7 +316,7 @@ export default function RankingsPage({
                     Other views
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Try another chart.
+                    Open another view.
                   </h2>
                 </div>
                 <div className="grid gap-3">
@@ -354,7 +354,7 @@ export default function RankingsPage({
                     Top Series creators
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Follow the people behind these books.
+                    Browse creator shelves.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -363,14 +363,14 @@ export default function RankingsPage({
                     onClick={() => router.push("/creators")}
                     className={primaryButtonClass}
                   >
-                    Browse creators
+                    Explore Creators
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/comics")}
                     className={secondaryButtonClass}
                   >
-                    Browse comics
+                    Explore Comics
                   </button>
                 </div>
               </SurfacePanel>
@@ -381,7 +381,7 @@ export default function RankingsPage({
                     Search
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Search the full catalog.
+                    Search the catalog.
                   </h2>
                 </div>
                 <button
@@ -389,7 +389,7 @@ export default function RankingsPage({
                   onClick={() => router.push("/search")}
                   className={secondaryButtonClass}
                 >
-                  Search everything
+                  Search
                 </button>
               </SurfacePanel>
             </div>
@@ -502,7 +502,7 @@ export default function RankingsPage({
                           ) : null}
                         </div>
                         <span className="hidden rounded-full border border-black/8 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-500 sm:inline-flex">
-                          Open
+                          View
                         </span>
                       </Link>
                     ))}
@@ -517,7 +517,7 @@ export default function RankingsPage({
                 entryPoint="RANKINGS_CREATOR_CHIP"
                 campaignId={`${tab}_${selectedWindow}_spotlight_creator`}
                 sourcePath={rankingsPath}
-                label="Creators behind these picks"
+                label="Featured creators"
                 maxCreators={6}
                 compact
                 appearance="light"

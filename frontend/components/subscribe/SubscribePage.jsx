@@ -308,10 +308,10 @@ export default function SubscribePage({
           appearance="light"
           accent="blue"
           eyebrow="Membership"
-          title={subscriptionActionsEnabled ? "Pick the plan that fits your reading rhythm." : "Compare membership plans."}
+          title={subscriptionActionsEnabled ? "Choose a membership plan." : "Membership plans."}
           description={
             subscriptionActionsEnabled
-              ? "Membership is monthly. Choose it if you read often."
+              ? "Monthly plans for readers who come back often."
               : "Review plans and perks now. Membership opens later."
           }
           secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
@@ -323,7 +323,7 @@ export default function SubscribePage({
                 onClick={subscriptionActionsEnabled ? () => scrollToSection("membership-plans") : handleLaunchAccess}
                 className={primaryButtonClass}
               >
-                {subscriptionActionsEnabled ? "Compare plans" : launchAccessLabel}
+                {subscriptionActionsEnabled ? "View Plans" : launchAccessLabel}
               </button>
               <button
                 type="button"
@@ -348,7 +348,7 @@ export default function SubscribePage({
                   What to know
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Before membership opens.
+                  Before membership.
                 </h2>
             </div>
           </div>
@@ -369,7 +369,7 @@ export default function SubscribePage({
               },
               {
                 title: "Help",
-                body: "Billing support is here if you need it.",
+                body: "Billing help stays available.",
               },
             ].map((item) => (
               <div
@@ -425,7 +425,7 @@ export default function SubscribePage({
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
                   className={secondaryButtonClass}
                 >
-                  Browse sample titles
+                  Read Free
                 </button>
               </div>
             </div>
@@ -605,7 +605,7 @@ export default function SubscribePage({
 
         <details className="overflow-hidden rounded-[26px] border border-black/8 bg-white sm:hidden">
           <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-slate-950">
-            Compare membership details
+            Plan details
           </summary>
           <div className="space-y-3 border-t border-black/8 px-4 py-4">
             {planComparisonRows.map((plan) => (

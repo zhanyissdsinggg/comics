@@ -19,32 +19,32 @@ const DEFAULT_DISCOVERY_LANES = [
   {
     id: "popular-week",
     label: "Trending",
-    hint: "See what readers are opening now",
+    hint: "Popular now",
     href: "/rankings?type=popular&window=week",
   },
   {
     id: "completed",
     label: "Finished series",
-    hint: "Start something you can finish",
+    hint: "Completed reads",
     href: "/search?status=Completed&sort=popular",
   },
   {
     id: "free-unlocks",
-    label: "Start free",
-    hint: "Try a few chapters first",
+    label: "Read Free",
+    hint: "Free openings",
     href: "/rankings?type=ttf&window=all",
   },
   {
     id: "romance",
     label: "Romance",
-    hint: "Start with a crowd favorite",
+    hint: "A popular lane",
     query: "Romance",
   },
 ];
 
 const SearchBar = memo(function SearchBar({
   onSearch,
-  placeholder = "Search series",
+  placeholder = "Search titles, genres, or creators",
   variant = "default",
   showShortcut = true,
   initialValue = "",

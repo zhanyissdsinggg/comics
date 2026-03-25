@@ -31,17 +31,17 @@ const PAGE_CONFIG = {
     pathname: "/comics",
     emptyBrowseCards: [
       {
-        eyebrow: "Start here",
+        eyebrow: "Read Free",
         title: "Free first chapters",
         body: "Test the hook before you spend points.",
-        ctaLabel: "Start reading free",
+        ctaLabel: "Read Free",
         href: "/rankings?type=ttf&window=all",
       },
       {
         eyebrow: "Trending now",
         title: "Popular comics",
         body: "Start with the comics already pulling readers in.",
-        ctaLabel: "Browse Top Series",
+        ctaLabel: "View Top Series",
         href: "/rankings?type=popular&window=week",
       },
     ],
@@ -62,14 +62,14 @@ const PAGE_CONFIG = {
         eyebrow: "Trending now",
         title: "Popular novels",
         body: "Start with the novels already pulling readers in.",
-        ctaLabel: "Browse Top Series",
+        ctaLabel: "View Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
         eyebrow: "New updates",
         title: "Fresh drops",
         body: "Latest releases keep the shelf feeling current.",
-        ctaLabel: "See latest novels",
+        ctaLabel: "View latest",
         href: "/novels?sort=latest",
       },
     ],
@@ -308,10 +308,10 @@ export default function SeriesPage({
     return [
       {
         id: "start-free",
-        eyebrow: "Start here",
+        eyebrow: "Read Free",
         title: "Free first chapters",
         description: "Sample the hook before spending points.",
-        ctaLabel: "Start reading free",
+        ctaLabel: "Read Free",
         href: "/rankings?type=ttf&window=all",
         items: freeStart,
       },
@@ -320,7 +320,7 @@ export default function SeriesPage({
         eyebrow: "Trending now",
         title: `Popular ${config.title.toLowerCase()}`,
         description: "These titles already have reader momentum.",
-        ctaLabel: "Browse Top Series",
+        ctaLabel: "View Top Series",
         href: "/rankings?type=popular&window=week",
         items: trending,
       },
@@ -328,8 +328,8 @@ export default function SeriesPage({
         id: "latest",
         eyebrow: "New updates",
         title: "Fresh drops",
-        description: "Open the most recently updated titles first.",
-        ctaLabel: "See latest",
+        description: "The most recently updated titles.",
+        ctaLabel: "View latest",
         href: `${config.pathname}?sort=latest`,
         items: latest,
       },
@@ -338,7 +338,7 @@ export default function SeriesPage({
         eyebrow: "Binge ready",
         title: "Completed picks",
         description: "Finished runs are easier when you want payoff now.",
-        ctaLabel: "See finished reads",
+        ctaLabel: "View completed",
         href: `${config.pathname}?status=completed`,
         items: completed,
       },
@@ -348,17 +348,17 @@ export default function SeriesPage({
   const emptyStateCopy = useMemo(() => {
     if (!loading && series.length === 0) {
       return {
-        title: type === "comic" ? "Try another comic lane." : "Try another novel lane.",
+        title: "Nothing here yet.",
         description:
           type === "comic"
-            ? "Open Top Series, start free, or search by genre for another way in."
-            : "Open Top Series, browse latest updates, or search by genre for another way in.",
+            ? "Open Top Series, read free, or search by genre."
+            : "Open Top Series, view the latest, or search by genre.",
       };
     }
 
     return {
       title: config.emptyTitle,
-      description: `${config.emptyDescription} Top Series and free-start charts stay close if you want another way in.`,
+      description: config.emptyDescription,
     };
   }, [config.emptyDescription, config.emptyTitle, loading, series.length, type]);
 
@@ -523,7 +523,7 @@ export default function SeriesPage({
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    {type === "comic" ? "Start here" : "Featured read"}
+                    Featured
                   </p>
                   <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
                     {entrySpotlight.title}
@@ -535,7 +535,7 @@ export default function SeriesPage({
                       onClick={() => handleSeriesClick(entrySpotlight.id)}
                       className={primaryButtonClass}
                     >
-                      Open this title
+                      View Series
                     </button>
                   </div>
                 </div>
@@ -580,14 +580,14 @@ export default function SeriesPage({
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className={secondaryButtonClass}
               >
-                Browse top series
+                View Top Series
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/rankings?type=ttf&window=all")}
                 className={primaryButtonClass}
               >
-                Start free
+                Read Free
               </button>
             </div>
           </SurfacePanel>

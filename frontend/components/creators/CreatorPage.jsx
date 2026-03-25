@@ -132,16 +132,16 @@ function getCreatorHeroCopy(creatorName, isStudioShelf, topGenres) {
     return {
       title: "More from this studio.",
       description: genreLabel
-        ? `If one release clicked, this is the fastest way to find the rest of the studio's ${genreLabel} shelf.`
-        : "If one release clicked, this is the fastest way to find the rest of the studio's shelf.",
+        ? `${genreLabel} titles from the same studio, in one place.`
+        : "Linked titles from the same studio, in one place.",
     };
   }
 
   return {
     title: `More from ${creatorName}.`,
     description: genreLabel
-      ? `If one series hooked you, start here for more of ${creatorName}'s ${genreLabel} work.`
-      : `If one series hooked you, start here for more of ${creatorName}'s work.`,
+      ? `${creatorName}'s ${genreLabel} work, gathered on one shelf.`
+      : `${creatorName}'s public titles, gathered on one shelf.`,
   };
 }
 
@@ -450,10 +450,9 @@ export default function CreatorPage({
         ? {
             id: "lead-title",
             eyebrow: "Spotlight",
-            title: `Open ${spotlightSeries.title} first.`,
-            description:
-              "Start with the clearest entry point on this shelf, then fan back out into the rest of the creator page.",
-            cta: "Open title",
+            title: `View ${spotlightSeries.title}.`,
+            description: "The lead title on this shelf.",
+            cta: "View Series",
             onClick: () => handleOpenTitle(spotlightSeries),
             accentClass:
               "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
@@ -462,10 +461,9 @@ export default function CreatorPage({
       {
         id: "search-creator",
         eyebrow: "Search",
-        title: `Search ${creatorName} across the catalog.`,
-        description:
-          "Search the credit name, a lead title, or a related genre when you want a wider pass through the catalog.",
-        cta: "Search creator",
+        title: `Search ${creatorName}.`,
+        description: "Open the wider catalog around this name.",
+        cta: "Search",
         onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=popular`),
         accentClass:
           "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
@@ -473,10 +471,9 @@ export default function CreatorPage({
       {
         id: "genre",
         eyebrow: "Browse lane",
-        title: topGenres[0] ? `Browse more ${topGenres[0]} reads.` : "Browse similar reads.",
-        description:
-          "Use the strongest genre signal on this page to widen discovery without losing the same vibe.",
-        cta: topGenres[0] ? `Browse ${topGenres[0]}` : "Browse similar",
+        title: topGenres[0] ? `Explore ${topGenres[0]}.` : "Explore similar reads.",
+        description: "Keep the same tone and widen the shelf.",
+        cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
         onClick: handleBrowseGenre,
         accentClass:
           "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
@@ -484,10 +481,10 @@ export default function CreatorPage({
       {
         id: "return",
         eyebrow: "Return path",
-        title: originSeries ? `Go back to ${originSeries.title}.` : "Go back to your last browse path.",
+        title: originSeries ? `Back to ${originSeries.title}.` : "Back to your last path.",
         description: originSeries
-          ? "Jump back after checking the creator shelf so discovery keeps moving instead of turning into a dead end."
-          : "Use your last path or Top Series if you only wanted one quick detour through creator credits.",
+          ? "Return to the title that led you here."
+          : "Return to your last browse path.",
         cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
         onClick: handleReturn,
         accentClass:
@@ -501,10 +498,9 @@ export default function CreatorPage({
       {
         id: "search-series",
         eyebrow: "Search",
-        title: `Search ${creatorName} or a related title.`,
-        description:
-          "Search the credit name, a lead title, or a genre to open a broader path through the visible catalog.",
-        cta: "Search series",
+        title: `Search ${creatorName}.`,
+        description: "Open the wider catalog around this name.",
+        cta: "Search",
         onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=popular`),
         accentClass:
           "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
@@ -512,10 +508,9 @@ export default function CreatorPage({
       {
         id: "top-series",
         eyebrow: "Top Series",
-        title: "Open a stronger browse lane next.",
-        description:
-          "Top Series is the fastest broad browse lane when you want another strong entry point right away.",
-        cta: "Browse Top Series",
+        title: "Top Series",
+        description: "A broader shelf across the catalog.",
+        cta: "View Top Series",
         onClick: () => router.push("/rankings?type=popular&window=week"),
         accentClass:
           "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
@@ -523,10 +518,9 @@ export default function CreatorPage({
       {
         id: "catalog",
         eyebrow: "Browse",
-        title: "Open the wider catalog next.",
-        description:
-          "Jump into comics or novels to keep the same discovery session moving through a wider shelf.",
-        cta: "Browse comics",
+        title: "Explore the catalog.",
+        description: "Open comics or novels next.",
+        cta: "Explore Comics",
         onClick: () => router.push("/comics"),
         accentClass:
           "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
@@ -534,9 +528,8 @@ export default function CreatorPage({
       {
         id: "return",
         eyebrow: "Return path",
-        title: originSeries ? `Go back to ${originSeries.title}.` : "Go back to your last browse path.",
-        description:
-          "If you came here from a title, jump back there. If not, head back to search and keep the session moving.",
+        title: originSeries ? `Back to ${originSeries.title}.` : "Back to your last path.",
+        description: originSeries ? "Return to the title that led you here." : "Return to your last browse path.",
         cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
         onClick: handleReturn,
         accentClass:
@@ -584,19 +577,19 @@ export default function CreatorPage({
             appearance="light"
             accent="blue"
             eyebrow={isStudioShelf ? "Studio" : "Creator"}
-            title={`Browse more ways into ${creatorName}.`}
-            description="Use search, Top Series, or the wider catalog to keep moving through related titles from this name, studio, or shelf."
-            secondary="Open another lane below when you want the next strong click quickly."
+            title={`${creatorName} is not in the public catalog yet.`}
+            description="Search the catalog or open Top Series for related titles."
+            secondary=""
             stats={[
               {
                 label: isStudioShelf ? "Studio" : "Creator",
                 value: creatorName,
-                hint: "Use the name as a browse signal across search, Top Series, and related titles.",
+                hint: "Use the name to search the wider catalog.",
               },
               {
                 label: "Catalog",
                 value: isAdultMode ? "18+" : "Standard",
-                hint: isAdultMode ? "This browse path can include 18+ titles." : "Adult-only titles stay hidden on this pass.",
+                hint: isAdultMode ? "18+ titles may appear in search." : "Adult-only titles stay hidden on this pass.",
               },
             ]}
             actions={
@@ -606,14 +599,14 @@ export default function CreatorPage({
                   onClick={() => router.push("/search")}
                   className={primaryButtonClass}
                 >
-                  Search series
+                  Search
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className={secondaryButtonClass}
                 >
-                  Browse Top Series
+                  View Top Series
                 </button>
                 <button
                   type="button"
@@ -630,11 +623,11 @@ export default function CreatorPage({
             <EmptyState
               appearance="light"
               icon="book"
-              eyebrow="Keep browsing"
-              title="Open another browse lane."
-              description="Jump back to search or Top Series so discovery keeps moving from a stronger shelf."
+              eyebrow="Keep reading"
+              title="Try another shelf."
+              description="Search or open Top Series."
               action={{
-                label: "Search series",
+                label: "Search",
                 onClick: () => router.push("/search"),
               }}
             />
@@ -643,13 +636,13 @@ export default function CreatorPage({
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
-                  Keep browsing
+                  More to explore
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Use this creator page as a browse waypoint.
+                  Keep browsing.
                 </h2>
                 <p className="text-sm leading-7 text-slate-600">
-                  Jump into search, Top Series, or the wider catalog to keep the same session moving through related reads.
+                  Search, Top Series, and the wider catalog stay close.
                 </p>
             </div>
             <StorefrontPathwaysGrid
@@ -677,8 +670,8 @@ export default function CreatorPage({
           description={heroCopy.description}
           secondary={
             originSeries
-              ? `You came here from ${originSeries.title}. Start with the lead pick below, then branch out from there.`
-              : "Start with the lead pick below, then branch out across the rest of the shelf."
+              ? `From ${originSeries.title}.`
+              : ""
           }
           stats={creatorStats}
           actions={
@@ -688,14 +681,14 @@ export default function CreatorPage({
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className={primaryButtonClass}
               >
-                Browse Top Series
+                View Top Series
               </button>
               <button
                 type="button"
                 onClick={handleBrowseGenre}
                 className={secondaryButtonClass}
               >
-                {topGenres[0] ? `Browse ${topGenres[0]}` : "Browse similar reads"}
+                {topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads"}
               </button>
               <button
                 type="button"
@@ -740,7 +733,7 @@ export default function CreatorPage({
                 </h2>
                 <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
                   {spotlightSeries.description ||
-                    `Start with ${spotlightSeries.title} if you want the clearest first read from this creator.`}
+                    `${spotlightSeries.title} is a strong place to start on this shelf.`}
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -780,14 +773,14 @@ export default function CreatorPage({
                     onClick={() => handleOpenTitle(spotlightSeries)}
                     className={primaryButtonClass}
                   >
-                    Read now
+                    View Series
                   </button>
                   <button
                     type="button"
                     onClick={handleBrowseGenre}
                     className={secondaryButtonClass}
                   >
-                    {topGenres[0] ? `Browse ${topGenres[0]}` : "Browse similar reads"}
+                    {topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads"}
                   </button>
                   <button
                     type="button"
@@ -814,13 +807,13 @@ export default function CreatorPage({
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
-              What do you want to do next?
+              More to explore
             </p>
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Use this creator page like a real browse path.
+              Keep this shelf moving.
             </h2>
             <p className="text-sm leading-7 text-slate-600">
-              Open the lead title, widen into a genre, search the creator name, or jump back to where you came from.
+              View the lead title, widen into a genre, search the name, or go back.
             </p>
           </div>
           <StorefrontPathwaysGrid
@@ -837,7 +830,7 @@ export default function CreatorPage({
                 More from {creatorName}
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Every visible title in one place.
+                Every public title in one place.
               </h2>
             </div>
             <p className="text-sm text-slate-500">

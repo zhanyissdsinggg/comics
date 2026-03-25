@@ -375,10 +375,10 @@ export default function AccountPage({ initialSignedIn = false }) {
         {
           id: "membership",
           eyebrow: "Membership",
-          title: "Compare monthly plans before you start.",
+          title: "View monthly plans before you start.",
           description:
-            "Membership is the recurring option for regular readers. Compare the tiers first, then sign in when you are ready to start one.",
-          cta: "Compare plans",
+            "Membership is the recurring option for regular readers. View the tiers first, then sign in when you are ready to start one.",
+          cta: "View Plans",
           onClick: () =>
             router.push(
               buildPathWithAttribution("/subscribe", {
@@ -396,7 +396,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           title: "See one-time packs and current pricing.",
           description:
             "Store is for point packs, not membership. Use it when you want flexible one-off unlocking instead of a monthly plan.",
-          cta: "See point packs",
+          cta: "View point packs",
           onClick: () => router.push("/store"),
           accentClass:
             "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
@@ -408,7 +408,7 @@ export default function AccountPage({ initialSignedIn = false }) {
       {
         id: "membership",
         eyebrow: "Membership",
-        title: subscription?.active ? "Manage renewal and plan details." : "Compare membership before your next purchase.",
+        title: subscription?.active ? "Manage renewal and plan details." : "View membership before your next purchase.",
         description: subscription?.active
           ? subscription?.renewAt
             ? `Your plan renews on ${new Date(subscription.renewAt).toLocaleDateString("en-US", {
@@ -418,7 +418,7 @@ export default function AccountPage({ initialSignedIn = false }) {
               })}. Cancellation and billing rules stay in one place.`
             : "Open membership to review renewal timing, monthly perks, and cancellation."
           : "If you keep topping up, membership may fit better before your next pack purchase.",
-        cta: subscription?.active ? "Manage membership" : "Compare plans",
+        cta: subscription?.active ? "Manage membership" : "View Plans",
         onClick: () =>
           router.push(
             buildPathWithAttribution("/subscribe", {

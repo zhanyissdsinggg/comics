@@ -193,10 +193,10 @@ export default function SearchCreatorMatchesPanel({
   const leadCreatorMatch = matchedCreators[0] || null;
   const creatorPanelTitle =
     resultsLength === 0
-      ? "This search points to a creator."
+      ? "A creator page fits here."
       : resultsLength > 0 && resultsLength < 4
-        ? "The creator page may fit better."
-        : "The creator behind this search is close.";
+        ? "A creator page may fit better."
+        : "A creator shelf is close.";
 
   return (
     <SurfacePanel className="space-y-4" appearance="light" accent="blue">
@@ -213,7 +213,7 @@ export default function SearchCreatorMatchesPanel({
             onClick={() => handleCreatorClick(leadCreatorMatch)}
             className="rounded-full border border-black/8 bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
           >
-            View {leadCreatorMatch.name}
+            View Creator
           </button>
         ) : null}
       </div>
@@ -244,10 +244,10 @@ export default function SearchCreatorMatchesPanel({
                   <span className="font-medium text-slate-950">
                     {highlight(creator.spotlightSeries.title, query)}
                   </span>
-                  {" "}is the clearest title on this shelf.
+                  {" "}is a strong place to start.
                 </p>
               ) : (
-                <p className="text-sm leading-6 text-slate-600">Open the creator page to keep related work together.</p>
+                <p className="text-sm leading-6 text-slate-600">Open the creator shelf to keep related work together.</p>
               )}
 
               <div className="flex flex-wrap gap-3 text-xs text-slate-500">
@@ -262,7 +262,7 @@ export default function SearchCreatorMatchesPanel({
                   onClick={() => handleCreatorClick(creator)}
                   className="rounded-full border border-black/8 bg-white/84 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
                 >
-                  View creator page
+                  View Creator
                 </button>
               </div>
             </div>

@@ -497,17 +497,17 @@ function HomeContent({ initialSearchParams = {} }) {
       {
         id: "trending-now",
         eyebrow: "Top Series",
-        title: "Open what readers already trust first.",
-        description: "Browse the strongest popular picks first.",
-        label: "Browse top series",
+        title: "Open what readers already trust.",
+        description: "The strongest popular picks first.",
+        label: "View Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
         id: "start-free",
         eyebrow: "Free to Start",
-        title: "Try free chapters before you unlock anything.",
-        description: "Try free chapters before you commit.",
-        label: "Start reading free",
+        title: "Try free chapters first.",
+        description: "Free openings before you unlock more.",
+        label: "Read Free",
         href: "/rankings?type=ttf&window=all",
       },
     ],
@@ -579,7 +579,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     {heroEyebrow}
                   </p>
                   <h1 className="mt-3 max-w-3xl font-display text-[2rem] font-semibold leading-[1.08] tracking-tight text-slate-950 sm:text-[2.9rem] sm:leading-[1.02] xl:text-[3.4rem] xl:leading-[1]">
-                    Stories worth opening on the first tap.
+                    Stories worth opening.
                   </h1>
 
                   <div className="mt-5 flex flex-wrap gap-3">
@@ -593,7 +593,7 @@ function HomeContent({ initialSearchParams = {} }) {
                       }
                       className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
                     >
-                      {resumeSeries ? "Continue reading" : "Start reading free"}
+                      {resumeSeries ? "Continue Reading" : "Read Free"}
                     </Button>
                     <Button
                       type="button"
@@ -602,7 +602,7 @@ function HomeContent({ initialSearchParams = {} }) {
                       onClick={() => router.push("/rankings?type=popular&window=week")}
                       className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
                     >
-                      Browse top series
+                      View Top Series
                     </Button>
                   </div>
                 </div>
@@ -699,7 +699,7 @@ function HomeContent({ initialSearchParams = {} }) {
               icon={Flame}
               eyebrow="Trending now"
               title="Top Series"
-              ctaLabel="Browse top series"
+              ctaLabel="View Top Series"
               onCtaClick={() => router.push("/rankings?type=popular&window=week")}
               items={topSeriesItems}
               onItemClick={(item) =>
@@ -710,8 +710,8 @@ function HomeContent({ initialSearchParams = {} }) {
             <HomeShelfSection
               icon={BookOpenText}
               eyebrow="Free to start"
-              title="Start free"
-              ctaLabel="Start reading free"
+              title="Read Free"
+              ctaLabel="Read Free"
               onCtaClick={() => router.push("/rankings?type=ttf&window=all")}
               items={freeStartItems}
               onItemClick={(item) =>
@@ -749,7 +749,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     onClick={() => router.push("/subscribe")}
                     className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
                   >
-                    Compare membership
+                    View Plans
                   </Button>
                 </div>
               </div>

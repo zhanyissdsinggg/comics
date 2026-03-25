@@ -50,7 +50,7 @@ export default function NotificationList({
     if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
       return "See offer";
     }
-    return "Open title";
+    return "View Series";
   };
 
   if (!notifications) {

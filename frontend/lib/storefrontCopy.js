@@ -4,9 +4,9 @@ export const STOREFRONT_TERMS = {
   freeStart: "Free to start",
   bingeReady: "Binge-ready",
   returnWeekly: "Return weekly",
-  compareMembership: "Compare membership",
-  viewPointPacks: "See point packs",
-  billingSupport: "Get billing help",
+  compareMembership: "View Plans",
+  viewPointPacks: "View point packs",
+  billingSupport: "Billing help",
   readerBenefits: "Why join",
 };
 

@@ -149,32 +149,32 @@ function buildCreatorDirectoryHeroStats({
 
   return [
     {
-      label: "Start here",
+      label: "Featured",
       value: leadCreator?.name || leadSeries?.title || "Top Series",
       hint: leadCreator
-        ? `Open ${leadCreator.name} for linked titles from the same voice.`
-        : "Start from Top Series, then follow the next creator or studio link from a strong title page.",
+        ? `${leadCreator.name}'s shelf keeps linked titles together.`
+        : "Top Series and creator shelves stay closely linked.",
     },
     {
       label: "Free starts",
       value: stats.freeStarts > 0 ? `${stats.freeStarts} free starts` : "Use title pages",
       hint: stats.freeStarts > 0
-        ? "Creator shelves still surface titles with free first episodes."
-        : "Title pages still surface free openings when they are available.",
+        ? "Free openings still surface here."
+        : "Title pages still show free openings when they are available.",
     },
     {
-      label: "Studio lane",
+      label: "Studios",
       value: leadStudio?.name || "Studio picks",
       hint: leadStudio
-        ? "Studios with more than one standout title stay grouped here."
-        : "Creator pages, title pages, and search keep grouped credits close.",
+        ? "Shared credits stay grouped here."
+        : "Grouped credits stay close across the catalog.",
     },
     {
-      label: "Top genre",
+      label: "Genre",
       value: genreOptions[0] || "Mixed catalog",
       hint: genreOptions[0]
-        ? `${genreOptions[0]} remains one of the strongest creator-led lanes in the directory.`
-        : "Browse mixed voices across comics and novels for a broader first pass.",
+        ? `${genreOptions[0]} stays strong across creator shelves.`
+        : "Comics and novels stay mixed here.",
     },
   ];
 }
@@ -183,7 +183,7 @@ function buildCreatorShelfMeta(creator) {
   const meta = [];
 
   if (Number(creator?.freeStartCount || 0) > 0) {
-    meta.push(`${creator.freeStartCount} start free`);
+    meta.push(`${creator.freeStartCount} free start${Number(creator.freeStartCount) === 1 ? "" : "s"}`);
   }
   if (Number(creator?.ongoingCount || 0) > 0) {
     meta.push(`${creator.ongoingCount} active`);
@@ -421,21 +421,21 @@ export default function CreatorsHubPage({
         eyebrow: "Find a creator",
         title: "Search by creator, studio, or title.",
         description: "Search when you already know the name or title.",
-        label: "Search series",
+        label: "Search",
         href: "/search",
       },
       {
         eyebrow: "Editor picks",
-        title: "Open strong creator-led titles first.",
-        description: "Top Series is a strong way into creator discovery.",
-        label: "Browse Top Series",
+        title: "Start with strong creator-led titles.",
+        description: "Top Series is a good way into creator discovery.",
+        label: "View Top Series",
         href: "/rankings?type=popular&window=week",
       },
       {
         eyebrow: "Browse more",
-        title: "Browse by format or story lane.",
-        description: "Browse comics, novels, and genre-led shelves.",
-        label: "Browse comics",
+        title: "Browse by format.",
+        description: "Open comics, novels, and genre shelves.",
+        label: "Explore Comics",
         href: "/comics",
       },
     ],
@@ -693,8 +693,8 @@ export default function CreatorsHubPage({
             appearance="light"
             accent="blue"
             eyebrow="Creators"
-            title="Find the creators worth following."
-            description="Move from a title you like to the writer, artist, or studio behind it."
+            title="Creator shelves."
+            description="Writers, artists, and studios in one place."
             stats={heroStats}
             actions={
               <>
@@ -703,14 +703,14 @@ export default function CreatorsHubPage({
                   onClick={() => router.push("/search")}
                   className={primaryButtonClass}
                 >
-                  Search series
+                  Search
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className={secondaryButtonClass}
                 >
-                  Browse Top Series
+                  View Top Series
                 </button>
               </>
             }
@@ -753,10 +753,10 @@ export default function CreatorsHubPage({
                   Start from a title
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Start from standout titles.
+                  Start with a title.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Open a standout title, then follow the strongest credits from there.
+                  Open a strong title, then follow the credited shelf.
                 </p>
               </div>
 
@@ -823,14 +823,14 @@ export default function CreatorsHubPage({
                   onClick={() => router.push("/novels")}
                   className={secondaryButtonClass}
                 >
-                  Browse novels
+                  Explore Novels
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/rankings")}
                   className={secondaryButtonClass}
                 >
-                  Open Top Series
+                  View Top Series
                 </button>
               </div>
             </SurfacePanel>
@@ -850,8 +850,8 @@ export default function CreatorsHubPage({
           appearance="light"
           accent="blue"
           eyebrow="Creators"
-          title="Find the creators worth following."
-          description="Jump from a favorite series to the writer, artist, or studio behind it."
+          title="Creator shelves."
+          description="Writers, artists, and studios in one place."
           stats={heroStats}
           actions={
             <>
@@ -860,14 +860,14 @@ export default function CreatorsHubPage({
                 onClick={() => router.push("/rankings?type=popular&window=week")}
                 className={primaryButtonClass}
               >
-                Browse Top Series
+                View Top Series
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
                 className={secondaryButtonClass}
               >
-                Search series
+                Search
               </button>
             </>
           }
@@ -887,39 +887,39 @@ export default function CreatorsHubPage({
                 Browse paths
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Choose a creator path.
+                Ways in.
               </h2>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {[
                 {
                   eyebrow: "Studios",
-                  title: featuredStudios.length > 0 ? `Open ${featuredStudios.length} studio shelves.` : "Browse studio shelves first.",
-                  description: "Studios keep shared teams and linked titles together.",
-                  cta: "See studios",
+                  title: featuredStudios.length > 0 ? `${featuredStudios.length} studio shelves.` : "Studio shelves.",
+                  description: "Shared teams and linked titles in one place.",
+                  cta: "View Studios",
                   onClick: () => jumpToCreatorBrowse("studio"),
                 },
                 {
                   eyebrow: "Creators",
-                  title: spotlightCreators[0]?.name ? `Start with ${spotlightCreators[0].name}.` : "Browse creator-led shelves.",
-                  description: "Follow creator shelves when one strong title makes you want the same voice again.",
-                  cta: "See creators",
+                  title: spotlightCreators[0]?.name ? spotlightCreators[0].name : "Creator shelves.",
+                  description: "A closer read of one voice.",
+                  cta: "View Creators",
                   onClick: () => jumpToCreatorBrowse("creator"),
                 },
                 {
                   eyebrow: "Search",
                   title: "Search a creator, studio, or title.",
-                  description: "Search when you already know the name or lead title.",
-                  cta: "Open search",
+                  description: "Open a name you already know.",
+                  cta: "Search",
                   onClick: () => router.push("/search"),
                 },
                 {
                   eyebrow: "Story lanes",
-                  title: genreOptions[0] ? `Browse ${genreOptions[0]} voices.` : "Browse story-led discovery.",
+                  title: genreOptions[0] ? `Explore ${genreOptions[0]}.` : "Story lanes.",
                   description: genreOptions[0]
-                    ? `Start with ${genreOptions[0]} when you want creator shelves in that lane.`
-                    : "Start with a strong story lane, then branch into creators from the titles that land.",
-                  cta: genreOptions[0] ? `Open ${genreOptions[0]}` : "Browse Top Series",
+                    ? `Creator shelves in ${genreOptions[0]}.`
+                    : "A broader way into the catalog.",
+                  cta: genreOptions[0] ? `Explore ${genreOptions[0]}` : "View Top Series",
                   onClick: () =>
                     genreOptions[0] ? jumpToGenreBrowse(genreOptions[0]) : router.push("/rankings?type=popular&window=week"),
                 },
@@ -950,7 +950,7 @@ export default function CreatorsHubPage({
                   Featured shelves
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Open a strong creator shelf first.
+                  Featured shelves.
                 </h2>
               </div>
               <p className="text-xs text-slate-500">
@@ -1102,8 +1102,8 @@ export default function CreatorsHubPage({
                       {summarizeLeadCopy(
                         series?.description,
                         creator
-                          ? `Start with ${series.title}, then open ${creator.name}'s shelf for more from the same voice.`
-                          : `Start with ${series.title} for a clean way into this story lane.`,
+                          ? `${series.title} leads into ${creator.name}'s shelf.`
+                          : `${series.title} is a strong way into this lane.`,
                       )}
                     </p>
 
@@ -1137,7 +1137,7 @@ export default function CreatorsHubPage({
                         }}
                         className={primaryButtonClass}
                       >
-                        Open title
+                        View Series
                       </Link>
                       {creator ? (
                         <Link
@@ -1145,7 +1145,7 @@ export default function CreatorsHubPage({
                           onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_GUIDED_SHELF")}
                           className={secondaryButtonClass}
                         >
-                          Open creator
+                          View Creator
                         </Link>
                       ) : (
                         <button
@@ -1161,7 +1161,7 @@ export default function CreatorsHubPage({
                           }
                           className={secondaryButtonClass}
                         >
-                          Browse this lane
+                          {series?.type === "novel" ? "Explore Novels" : "Explore Comics"}
                         </button>
                       )}
                     </div>
@@ -1192,7 +1192,7 @@ export default function CreatorsHubPage({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Find a creator
+                  Creators
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   Search creators, studios, or titles.
@@ -1288,10 +1288,10 @@ export default function CreatorsHubPage({
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Start here
+                  Featured
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Featured creator shelves.
+                  Featured shelves.
                 </h2>
               </div>
             </div>
@@ -1335,8 +1335,8 @@ export default function CreatorsHubPage({
                         {summarizeLeadCopy(
                           creator.leadSummary,
                           creator.spotlightSeries?.title
-                            ? `Start with ${creator.spotlightSeries.title}, then stay with the rest of this shelf.`
-                            : "Open this shelf to browse the strongest linked titles from this creator or studio.",
+                            ? `${creator.spotlightSeries.title} leads this shelf.`
+                            : "Linked titles from this creator or studio.",
                         )}
                       </p>
 
@@ -1371,9 +1371,9 @@ export default function CreatorsHubPage({
             <EmptyState
               appearance="light"
               icon="search"
-              eyebrow="Try another lane"
-              title="Try a wider creator lane."
-              description="Clear a filter or widen the search to see more creators."
+              eyebrow="No match"
+              title="Try a wider search."
+              description="Clear a filter or widen the search."
               action={{
                 label: "Show all creators",
                 onClick: () => {
@@ -1392,7 +1392,7 @@ export default function CreatorsHubPage({
                   Full list
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Browse the creator directory.
+                  Creator directory.
                 </h2>
               </div>
               <p className="text-sm text-slate-500">
@@ -1440,13 +1440,13 @@ export default function CreatorsHubPage({
                         </div>
 
                         <p className="mt-3 text-sm leading-6 text-slate-600">
-                          {summarizeLeadCopy(
-                            creator.leadSummary,
-                            creator.spotlightSeries?.title
-                              ? `Start with ${creator.spotlightSeries.title}.`
-                              : "Open the shelf to browse this creator or studio in one place.",
-                          )}
-                        </p>
+                        {summarizeLeadCopy(
+                          creator.leadSummary,
+                          creator.spotlightSeries?.title
+                            ? `${creator.spotlightSeries.title} leads this shelf.`
+                            : "Linked titles in one place.",
+                        )}
+                      </p>
 
                         {creatorGenres.length > 0 ? (
                           <div className="mt-3 flex flex-wrap gap-2">

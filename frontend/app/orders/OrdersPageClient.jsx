@@ -253,8 +253,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       {
         id: "membership",
         eyebrow: "Membership",
-        title: "Compare monthly plans before your first checkout.",
-        description: "Compare membership if you expect to read often.",
+        title: "View monthly plans before your first checkout.",
+        description: "Membership may fit better if you read often.",
         cta: STOREFRONT_TERMS.compareMembership,
         onClick: () =>
           router.push(
@@ -271,7 +271,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "how-it-works",
         eyebrow: "How it works",
         title: "See when free starts, points, and membership kick in.",
-        description: "Use the quickest explainer before anything shows up here.",
+        description: "A short explainer before anything shows up here.",
         cta: "How points work",
         onClick: () => router.push("/how-it-works"),
         accentClass:

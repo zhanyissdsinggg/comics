@@ -24,7 +24,7 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
           }`}
         >
           <Search className="size-4" />
-          <span className="min-w-0 truncate text-sm font-medium">Search titles</span>
+          <span className="min-w-0 truncate text-sm font-medium">Search</span>
           <span className="sr-only">Search titles, genres, or creators</span>
         </Link>
       </div>

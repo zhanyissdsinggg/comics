@@ -24,7 +24,7 @@ const QUICK_LINKS = [
     title: "Get help",
     description: "Message us about a charge, a broken page, or an access problem.",
     href: "/support",
-    label: "Open support",
+    label: "Send Request",
   },
   {
     title: "How it works",
@@ -66,7 +66,7 @@ export default function FAQPage() {
             accent="blue"
             eyebrow="Help"
             title="Answers that get you back to reading."
-            description="Start here for charges, unlocks, account access, memberships, and 18+ settings."
+            description="Charges, unlocks, account access, memberships, and 18+ settings."
             secondary="If the FAQ does not solve it, you can contact us in one step."
             actions={
               <>
@@ -115,7 +115,7 @@ export default function FAQPage() {
                   Common questions
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Start here before you message us.
+                  Answers before you message us.
                 </h2>
               </div>
               <div className="space-y-3">

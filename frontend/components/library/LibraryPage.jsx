@@ -475,7 +475,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           ]
         : [
             {
-              label: "Start free",
+              label: "Read Free",
               value: "Ready",
               hint: "Free starts can open the shelf",
             },
@@ -517,19 +517,19 @@ export default function LibraryPage({ initialSignedIn = false }) {
       return [
         {
           id: "start-free",
-          eyebrow: "Start free",
-          title: "Start a free series first.",
-          description: "A clean way to give Library its first read.",
-          cta: "Start free",
+          eyebrow: "Read Free",
+          title: "Open a first series.",
+          description: "One chapter is enough to start your shelf.",
+          cta: "Read Free",
           onClick: () => router.push("/rankings?type=ttf&window=all"),
           accentClass: primaryAccentClass,
         },
         {
           id: "sync",
-          eyebrow: "Sign in to sync",
-          title: "Keep saved series and progress on one account.",
-          description: "Keep your shelf, history, and purchases together.",
-          cta: "Sign in to sync",
+          eyebrow: "Sign In",
+          title: "Sign in when you want your shelf synced.",
+          description: "Keep progress, saves, and purchases together.",
+          cta: "Sign In",
           onClick: () => openAuthPrompt(),
           accentClass: commonAccentClass,
         },
@@ -540,28 +540,28 @@ export default function LibraryPage({ initialSignedIn = false }) {
       return [
         {
           id: "free-starts",
-          eyebrow: "Start free",
-          title: "Start one series and give Library something to track.",
-          description: "One free chapter is enough to start building progress here.",
-          cta: "Start free",
+          eyebrow: "Read Free",
+          title: "Open one series to start your shelf.",
+          description: "Library begins with your first chapter.",
+          cta: "Read Free",
           onClick: () => router.push("/rankings?type=ttf&window=all"),
           accentClass: primaryAccentClass,
         },
         {
           id: "saved",
           eyebrow: "Saved Series",
-          title: "Your saved shelf will show up here as soon as you use it.",
+          title: "Saved titles appear here.",
           description: "Follow a title or save a favorite.",
-          cta: "Browse top series",
+          cta: "View Top Series",
           onClick: () => router.push("/rankings?type=popular&window=week"),
           accentClass: commonAccentClass,
         },
         {
           id: "recent",
           eyebrow: "Recent activity",
-          title: "Recent reads appear here once you open a chapter.",
-          description: "Come back after a reading session.",
-          cta: "Open search",
+          title: "Recent reads appear here.",
+          description: "Open a chapter and come back.",
+          cta: "Search",
           onClick: () => router.push("/search"),
           accentClass: commonAccentClass,
         },
@@ -572,10 +572,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
       resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
         ? {
             id: "resume",
-            eyebrow: "Resume Reading",
+            eyebrow: "Continue",
             title: "Jump back into your last chapter.",
             description: "Keep your next chapter one tap away.",
-            cta: "Resume Reading",
+            cta: "Continue Reading",
             onClick: () =>
               router.push(
                 buildLibraryReadHref(
@@ -594,7 +594,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             description: continueRailItems.length > 0
               ? "Open your active reads first."
               : "Once you start reading, Library keeps your place here.",
-            cta: continueRailItems.length > 0 ? "View progress" : "Start free",
+            cta: continueRailItems.length > 0 ? "Continue Reading" : "Read Free",
             onClick: () =>
               continueRailItems.length > 0
                 ? scrollToSection("continue-reading")
@@ -606,9 +606,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
         eyebrow: "Saved titles",
         title: visibleLibraryItems.length > 0 ? "Open your saved series fast." : "Save a title and it shows up here.",
         description: visibleLibraryItems.length > 0
-          ? "Saved Series should be close behind Resume."
+          ? "Saved titles stay close behind Resume."
           : "Follow or save a series, then come back here.",
-        cta: visibleLibraryItems.length > 0 ? "View saved series" : "Browse top series",
+        cta: visibleLibraryItems.length > 0 ? "Saved Series" : "View Top Series",
         onClick: () =>
           visibleLibraryItems.length > 0
             ? scrollToSection("saved-series")
@@ -622,16 +622,16 @@ export default function LibraryPage({ initialSignedIn = false }) {
         description: historyRail.length > 0
           ? "Jump back without hunting around the catalog."
           : "Open a few chapters and Library keeps the trail visible.",
-        cta: historyRail.length > 0 ? "View recent activity" : "Open search",
+        cta: historyRail.length > 0 ? "Recent Activity" : "Search",
         onClick: () => (historyRail.length > 0 ? scrollToSection("recent-activity") : router.push("/search")),
         accentClass: commonAccentClass,
       },
       {
         id: "search",
         eyebrow: "Search",
-        title: "Find another title without leaving utility mode.",
-        description: "Open search when you already know the title.",
-        cta: "Open search",
+        title: "Find another title.",
+        description: "Search when you already know the title.",
+        cta: "Search",
         onClick: () => router.push("/search"),
         accentClass: commonAccentClass,
       },
@@ -663,14 +663,14 @@ export default function LibraryPage({ initialSignedIn = false }) {
           title={
             viewerSignedIn
               ? resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
-                ? "Resume reading, then manage your shelf."
-                : "Saved series, recent activity, and progress."
-              : "Start reading, then sign in to sync."
+                ? "Pick up where you left off."
+                : "Your reading shelf."
+              : "Your shelf starts here."
           }
           description={
             viewerSignedIn
-              ? "Resume Reading, Saved Series, Recent Activity, and Progress stay close at the top."
-              : "Start with a free chapter, then sign in when you want everything on one account."
+              ? "Resume, saves, and recent reads stay together."
+              : "Read one chapter, then sign in when you want it all in one place."
           }
           secondary=""
           stats={libraryStats}
@@ -692,7 +692,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   }
                   className={primaryButtonClass}
                 >
-                  Resume now
+                  Continue Reading
                 </button>
               ) : (
                 <button
@@ -704,7 +704,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   }
                   className={primaryButtonClass}
                 >
-                  Start free
+                  Read Free
                 </button>
               )}
               <button
@@ -728,7 +728,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     : showCollectionManager
                       ? "Close collections"
                       : "Manage collections"
-                  : "Sign in to sync"}
+                  : "Sign In"}
               </button>
             </>
           }
@@ -761,7 +761,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   Quick actions
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {viewerSignedIn ? "Keep your reading close." : "Start reading or sign in to sync."}
+                  {viewerSignedIn ? "Keep your reading close." : "Start reading."}
                 </h2>
               </div>
               <StorefrontPathwaysGrid
@@ -775,29 +775,29 @@ export default function LibraryPage({ initialSignedIn = false }) {
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Get started
+                  Library
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Start a series and this page begins to fill in.
+                  Start one series.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Start free, save a favorite, or open Top Series.
+                  Read free, save a title, or open Top Series.
                 </p>
               </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => router.push("/rankings?type=ttf&window=all")}
-                    className={primaryButtonClass}
-                  >
-                    Start reading free
-                  </button>
+                  onClick={() => router.push("/rankings?type=ttf&window=all")}
+                  className={primaryButtonClass}
+                >
+                  Read Free
+                </button>
                   <button
                     type="button"
-                    onClick={() => router.push("/rankings?type=popular&window=week")}
-                    className={secondaryButtonClass}
-                  >
-                    Browse Top Series
+                  onClick={() => router.push("/rankings?type=popular&window=week")}
+                  className={secondaryButtonClass}
+                >
+                    View Top Series
                   </button>
                   {!viewerSignedIn ? (
                     <button
@@ -805,7 +805,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       onClick={openAuthPrompt}
                       className={secondaryButtonClass}
                     >
-                      Sign in to sync
+                      Sign In
                     </button>
                   ) : null}
                   <button
@@ -813,7 +813,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     onClick={() => router.push("/search")}
                     className={secondaryButtonClass}
                   >
-                    Open search
+                    Search
                   </button>
                 </div>
               </SurfacePanel>
@@ -826,7 +826,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     title="Resume Reading"
                     items={continueRailItems}
                     reason="Pick up where you left off."
-                    ctaLabel="Resume reading"
+                    ctaLabel="Continue Reading"
                     href="/library"
                     appearance="light"
                     onItemClick={(item) => {
@@ -938,10 +938,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
               {recommendedItems.length > 0 ? (
                 <Rail
-                  title="Recommended for You"
+                  title="Recommended"
                   items={recommendedItems}
                   reason={recommendedRailReason}
-                  ctaLabel="View chart"
+                  ctaLabel="View Top Series"
                   href="/rankings?type=popular&window=week"
                   appearance="light"
                   onItemClick={(item) =>

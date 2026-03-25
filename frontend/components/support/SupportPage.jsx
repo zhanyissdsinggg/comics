@@ -270,8 +270,8 @@ export default function SupportPage() {
       <main className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow="Support"
-          title="Send a request without leaving the site."
-          description="Choose the issue, add the best reply email, and tell us what happened."
+          title="Get help."
+          description="Choose the issue, add a reply email, and tell us what happened."
           appearance="light"
         />
 
@@ -288,7 +288,7 @@ export default function SupportPage() {
               Quick start
             </p>
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Pick the closest issue and keep moving.
+              Pick a topic.
             </h2>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -328,10 +328,10 @@ export default function SupportPage() {
                     Request received
                   </p>
                   <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
-                    We have your support request.
+                    We have your request.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span> within 1 to 2 business days. If this is a billing or subscription issue, keep the order ID and the affected page handy so follow-up stays fast.
+                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span> within 1 to 2 business days. For billing or membership questions, keep the order ID and affected page handy.
                   </p>
                 </div>
 
@@ -364,7 +364,7 @@ export default function SupportPage() {
                     onClick={resetForAnotherRequest}
                     className={primaryButtonClass}
                   >
-                    Send another request
+                    Send Request
                   </button>
                   <button
                     type="button"
@@ -389,7 +389,7 @@ export default function SupportPage() {
                     Send a request
                   </p>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    What do you need help with?
+                    What can we help with?
                   </h2>
                 </div>
 
@@ -492,7 +492,7 @@ export default function SupportPage() {
 
                 <div className="flex flex-wrap items-center gap-3">
                   <button type="submit" disabled={submitting} className={primaryButtonClass}>
-                    {submitting ? "Sending..." : "Send request"}
+                    {submitting ? "Sending..." : "Send Request"}
                   </button>
                   {!signedInReader ? (
                     <button

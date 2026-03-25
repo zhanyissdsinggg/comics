@@ -4,7 +4,7 @@ import { loadRankingsSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Top Series",
-  description: "Browse Top Series, new releases, completed picks, and free-start favorites across comics and novels on Gush.",
+  description: "Top Series, fresh releases, completed reads, and free starts on Gush.",
   path: "/rankings",
 });
 

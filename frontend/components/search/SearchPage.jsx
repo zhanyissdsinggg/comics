@@ -622,19 +622,19 @@ export default function SearchPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasSparseResults = Boolean(query) && !loading && results.length > 0 && results.length < 4;
   const showResultSections = Boolean(query);
-  const heroTitle = query ? `Results for "${query}"` : "Search the catalog.";
+  const heroTitle = query ? `Results for "${query}"` : "Search";
   const heroDescription = query
     ? loading
-      ? "Refreshing matches..."
+      ? "Updating results."
       : `${total.toLocaleString()} match${total === 1 ? "" : "es"}.`
-    : "Titles, genres, and creators.";
+    : "Find titles, genres, and creators.";
   const heroSecondary = "";
   const loadingResultLabel = "Updating";
   const recoPanelTitle = !query
-    ? "Popular right now"
+    ? "Popular now"
     : results.length === 0
-      ? "No exact match yet. Try one of these instead."
-      : "Only a few matches? Widen the net.";
+      ? "No exact match. Try one of these."
+      : "A few more ways in.";
   const lightCardAccentClass = "border-black/6 bg-white/84 hover:border-black/10 hover:bg-white";
   const lightFeatureAccentClass =
     "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]";
@@ -655,11 +655,11 @@ export default function SearchPage() {
         ? {
             id: "free-unlock-slot",
             eyebrow: "Free start",
-            title: `Start free with ${freeStartPick.title}.`,
+            title: `Read free with ${freeStartPick.title}.`,
             description:
               freeStartCount > 0
-                ? `${freeStartPick.title} already has ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}, so it is easy to try before you spend.`
-                : `${freeStartPick.title} is an easy sample pick if you want something simple to try first.`,
+                ? `${freeStartPick.title} opens with ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}.`
+                : `${freeStartPick.title} is easy to try first.`,
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_PATH_FREE_START", "search_path_free_start"),
             accentClass: lightFeatureAccentClass,
@@ -667,9 +667,9 @@ export default function SearchPage() {
         : {
             id: "free-unlock",
             eyebrow: "Free start",
-            title: "Start with a free chapter before you commit.",
-            description: "A simple way to sample a series before you unlock more.",
-            ctaLabel: "Open free-start picks",
+            title: "Read free first.",
+            description: "Try an opening chapter before you unlock more.",
+            ctaLabel: "Read Free",
             onClick: () => router.push("/rankings?type=ttf&window=all"),
             accentClass: lightFeatureAccentClass,
           },
@@ -790,17 +790,17 @@ export default function SearchPage() {
             id: hasDirectMatch ? "lead-match" : query ? "lead-editorial-rescue" : "lead-editorial-push",
             eyebrow: hasDirectMatch ? "Best match" : query ? "Try this next" : "Featured",
             title: hasDirectMatch
-              ? `${leadSearchResult.title} is the clearest match here.`
+              ? `${leadSearchResult.title} is the closest match.`
               : query
-                ? `${leadSearchResult.title} is a strong next pick for this search.`
+                ? `${leadSearchResult.title} is worth a look.`
                 : `${leadSearchResult.title} is a strong place to begin.`,
             description: hasDirectMatch
               ? hasSparseResults
-                ? "There are only a few matches, so start here and branch out from there."
-                : "This is the clearest match in the current results."
+                ? "A short list, with a clear lead."
+                : "The clearest result in this search."
               : query
-                ? "Your search came up empty, so this is the closest strong pick nearby."
-                : "If you are still browsing, begin with one strong pick.",
+                ? "No exact match yet, but this stays close."
+                : "A strong pick from the catalog.",
             signalLabel: hasDirectMatch ? "Results" : "Featured",
             signalValue: hasDirectMatch
               ? (loading ? loadingResultLabel : total.toLocaleString())
@@ -846,14 +846,14 @@ export default function SearchPage() {
         ? {
             id: "free-start-desk-slot",
             eyebrow: "Free start",
-            title: `${freeStartPick.title} lets you start free.`,
+            title: `Read free with ${freeStartPick.title}.`,
             description:
               freeStartCount > 0
-                ? `${freeStartPick.title} gives you ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"} before you decide whether to unlock more.`
-                : `${freeStartPick.title} is a good sample pick if you want something easy to try first.`,
+                ? `${freeStartPick.title} opens with ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}.`
+                : `${freeStartPick.title} is a good place to start.`,
             signalLabel: "Free eps",
             signalValue: freeStartCount > 0 ? String(freeStartCount) : "Live",
-            signalHint: "Ready before checkout",
+            signalHint: "Open before you unlock more",
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_EVENT_FREE_START", "search_event_free_start"),
             accentClass: lightFeatureAccentClass,
@@ -861,12 +861,12 @@ export default function SearchPage() {
         : {
             id: "free-start-desk",
             eyebrow: "Free start",
-            title: "Start with a free chapter first.",
-            description: "Free unlocks and previews keep discovery light.",
+            title: "Read free first.",
+            description: "Openings and previews keep discovery light.",
             signalLabel: "Chart",
             signalValue: "TTF",
-            signalHint: "Timed free unlocks available now",
-            ctaLabel: "Open free-start picks",
+            signalHint: "Free starts across the catalog",
+            ctaLabel: "Read Free",
             onClick: () => router.push("/rankings?type=ttf&window=all"),
             accentClass: lightFeatureAccentClass,
           },
@@ -1003,16 +1003,16 @@ export default function SearchPage() {
 
         {shouldShowEventHub ? (
           <StorefrontEventHub
-            eyebrow={query ? "Search picks" : "Start here"}
+            eyebrow={query ? "Search picks" : "Featured"}
             title={
               query
-                ? "Open the clearest match first."
-                : "Start with something readers already want."
+                ? "Open the closest match first."
+                : "A few strong places to begin."
             }
             description={
               query
-                ? "If the list feels thin, these picks open into a wider shelf."
-                : "A few strong picks to open the catalog."
+                ? "If the list feels thin, these picks widen the shelf."
+                : "A few strong picks from across the catalog."
             }
             events={searchEventCards}
             appearance="light"
@@ -1032,7 +1032,7 @@ export default function SearchPage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  More to try
+                  More to read
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   {recoPanelTitle}
@@ -1168,10 +1168,10 @@ export default function SearchPage() {
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                No direct matches
+                No exact match
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Try a wider search.
+                Try a broader search.
               </h2>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
@@ -1208,7 +1208,7 @@ export default function SearchPage() {
                   onClick={() => router.push("/rankings?type=popular&window=week")}
                   className={secondaryButtonClass}
                 >
-                  Open Top Series
+                  View Top Series
                 </button>
               )}
               {completedPick ? (
@@ -1253,7 +1253,7 @@ export default function SearchPage() {
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
                   className={accentButtonClass}
                 >
-                  Free unlock picks
+                  Read Free
                 </button>
               )}
             </div>

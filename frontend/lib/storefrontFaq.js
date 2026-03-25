@@ -112,8 +112,8 @@ export function getSeriesFaqItems({ series, episodes }) {
       question: `Who created ${seriesTitle}?`,
       answer:
         creatorLabel === "the credited studio"
-          ? `${seriesTitle} is grouped under its credited studio on this site, so the creator page is the fastest way to compare related titles.`
-          : `${seriesTitle} is credited to ${creatorLabel}. Opening the creator page is the fastest way to compare other titles from the same creator.`,
+          ? `${seriesTitle} is grouped under its credited studio on this site. The creator page keeps related titles together.`
+          : `${seriesTitle} is credited to ${creatorLabel}. The creator page keeps other titles from the same creator together.`,
     },
     {
       id: "series-episodes",

@@ -454,11 +454,11 @@ export default function StorePage({
       <main className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow="Point packs"
-          title={purchaseActionsEnabled ? "Buy points for one-time unlocks." : "Compare point packs."}
+          title={purchaseActionsEnabled ? "Point packs for one-time unlocks." : "Point packs."}
           description={
             purchaseActionsEnabled
-              ? "Use packs for one-time unlocks. Use membership if you read often."
-              : "Review pricing now. Checkout opens later."
+              ? "One-time unlocks for readers who buy as needed."
+              : "Review packs now. Checkout opens later."
           }
           secondary={purchaseActionsEnabled ? regionConfig.label : ""}
           stats={storeHeroStats}
@@ -517,7 +517,7 @@ export default function StorePage({
                 What to know
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Before checkout opens.
+                Before checkout.
               </h2>
             </div>
           </div>
@@ -533,7 +533,7 @@ export default function StorePage({
               },
               {
                 label: "Help",
-                detail: "Billing support is here if you need it.",
+                detail: "Billing help stays available.",
               },
             ].map((item) => (
               <div
@@ -604,14 +604,14 @@ export default function StorePage({
                     onClick={() => router.push("/rankings?type=ttf&window=all")}
                     className={secondaryButtonClass}
                   >
-                    Browse sample titles
+                    Read Free
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/subscribe")}
                     className={secondaryButtonClass}
                   >
-                    Compare membership
+                    View Plans
                   </button>
                 </div>
               </SurfacePanel>
@@ -620,13 +620,13 @@ export default function StorePage({
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Compare the models
+                  Compare options
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                   Point packs or membership.
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
-                  Choose one-off unlocks or a monthly plan.
+                  One-time unlocks or a monthly plan.
                 </p>
               </div>
               <div className="grid gap-3">
@@ -641,7 +641,7 @@ export default function StorePage({
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {subscriptionStats
                       ? `Starts around ${membershipStartingPrice || "the current plan price"} a month and can save up to ${subscriptionStats.maxDiscount}%.`
-                      : "Compare membership if repeated top-ups start feeling heavier than one monthly plan."}
+                      : "Membership is worth a look if you top up often."}
                   </p>
                 </div>
               </div>

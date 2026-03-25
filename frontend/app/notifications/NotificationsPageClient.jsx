@@ -306,8 +306,8 @@ export default function NotificationsPage() {
         {!loading && !error ? (
           <StorefrontEventHub
             eyebrow="From your inbox"
-            title="The fastest way back in."
-            description="Use the inbox to jump to the next chapter, catch an offer, or move on to something better."
+            title="A quick way back in."
+            description="Use the inbox to jump to the next chapter, catch an offer, or move on."
             events={notificationEventCards}
             appearance="light"
           />

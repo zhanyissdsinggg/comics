@@ -13,7 +13,7 @@ import { siteConfig } from "../../lib/siteConfig";
 export const metadata = createPageMetadata({
   title: "How Gush Works",
   description:
-    "Learn what is free, how points work, how memberships renew, where purchases appear, and where to get billing help on Gush.",
+    "Learn what is free, how points work, how membership works, and where to get billing help on Gush.",
   path: "/how-it-works",
 });
 
@@ -22,7 +22,7 @@ const HOW_IT_WORKS_STEPS = [
     eyebrow: "1. Browse",
     title: "Start with free chapters when they are available.",
     body:
-      "Browse comics and novels, open a series page, and look for free chapters or preview access before you spend anything.",
+      "Browse comics and novels, then look for free chapters or preview access before you spend anything.",
   },
   {
     eyebrow: "2. Unlock",
@@ -81,7 +81,7 @@ export default function HowItWorksPage() {
       path: "/how-it-works",
       name: `How Gush Works | ${siteConfig.siteName}`,
       description:
-        "Learn what is free, how points work, how memberships renew, and where to get billing help on Gush.",
+        "Learn what is free, how points work, how membership works, and where to get billing help on Gush.",
       items: FAQ_ITEMS,
     }),
   ].filter(Boolean);
@@ -97,9 +97,9 @@ export default function HowItWorksPage() {
             appearance="light"
             accent="blue"
             eyebrow="How it works"
-            title="How Gush works before you spend anything."
-            description="Browse comics and novels, start free where you can, unlock more episodes with points, and compare membership if you read often."
-            secondary="This page covers free chapters, point packs, memberships, receipts, cancellation, and where to get billing help."
+            title="How Gush works."
+            description="Read free where it is available, unlock more with points, or choose membership."
+            secondary="Free chapters, point packs, membership, receipts, and billing help."
             stats={[
               {
                 label: "Free access",
@@ -128,13 +128,13 @@ export default function HowItWorksPage() {
                   href="/store"
                   className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
-                  See point packs
+                  View point packs
                 </Link>
                 <Link
                   href="/subscribe"
                   className="rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                 >
-                  Compare membership
+                  View Plans
                 </Link>
               </>
             }
