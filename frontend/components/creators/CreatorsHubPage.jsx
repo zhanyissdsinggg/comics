@@ -411,7 +411,7 @@ export default function CreatorsHubPage({
     () => [
       {
         eyebrow: "Find a creator",
-        title: "Search by creator, studio, or title.",
+        title: "Search creators.",
         description: "",
         label: "Search",
         href: "/search",
@@ -726,7 +726,9 @@ export default function CreatorsHubPage({
                     <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                       {card.title}
                     </h2>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{card.description}</p>
+                    {card.description ? (
+                      <p className="mt-3 text-sm leading-7 text-slate-600">{card.description}</p>
+                    ) : null}
                   </div>
                   <button
                     type="button"
@@ -884,30 +886,28 @@ export default function CreatorsHubPage({
                 {
                   eyebrow: "Studios",
                   title: featuredStudios.length > 0 ? `${featuredStudios.length} studio shelves.` : "Studio shelves.",
-                  description: "Shared teams and linked titles in one place.",
+                  description: "",
                   cta: "View Studios",
                   onClick: () => jumpToCreatorBrowse("studio"),
                 },
                 {
                   eyebrow: "Creators",
                   title: spotlightCreators[0]?.name ? spotlightCreators[0].name : "Creator shelves.",
-                  description: "A closer read of one voice.",
+                  description: "",
                   cta: "View Creators",
                   onClick: () => jumpToCreatorBrowse("creator"),
                 },
                 {
                   eyebrow: "Search",
-                  title: "Search a creator, studio, or title.",
-                  description: "Open a name you already know.",
+                  title: "Search creators.",
+                  description: "",
                   cta: "Search",
                   onClick: () => router.push("/search"),
                 },
                 {
                   eyebrow: "Story lanes",
                   title: genreOptions[0] ? `Explore ${genreOptions[0]}.` : "Story lanes.",
-                  description: genreOptions[0]
-                    ? `Creator shelves in ${genreOptions[0]}.`
-                    : "A broader way into the catalog.",
+                  description: "",
                   cta: genreOptions[0] ? `Explore ${genreOptions[0]}` : "View Top Series",
                   onClick: () =>
                     genreOptions[0] ? jumpToGenreBrowse(genreOptions[0]) : router.push("/rankings?type=popular&window=week"),
@@ -923,7 +923,9 @@ export default function CreatorsHubPage({
                     {item.eyebrow}
                   </p>
                   <h3 className="mt-2 text-lg font-semibold text-slate-950">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
+                  {item.description ? (
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
+                  ) : null}
                   <span className="mt-4 inline-flex text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
                     {item.cta}
                   </span>

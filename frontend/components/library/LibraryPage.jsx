@@ -487,9 +487,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             {
               label: "Sync",
               value: viewerSignedIn ? "On" : "Sign in",
-              hint: viewerSignedIn
-                ? "Progress and saved titles stay on this account"
-                : "",
+              hint: "",
             },
             {
               label: "Mode",
@@ -881,7 +879,6 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   <Rail
                     title="Recent Activity"
                     items={historyRail}
-                    reason="Recent sessions stay close."
                     ctaLabel="Review History"
                     href="/library"
                     appearance="light"
