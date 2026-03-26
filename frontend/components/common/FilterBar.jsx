@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Chip from "./Chip";
@@ -22,6 +22,7 @@ export default function FilterBar({
   density = "default",
 }) {
   const [showAllGenres, setShowAllGenres] = useState(false);
+  const [showGenrePicker, setShowGenrePicker] = useState(selectedGenre !== "all");
   const isLight = appearance === "light";
   const isQuiet = density === "quiet";
 
@@ -52,8 +53,17 @@ export default function FilterBar({
   };
 
   const handleGenreChange = (genre) => {
+    if (isQuiet) {
+      setShowGenrePicker(genre !== "all");
+    }
     if (onGenreChange) onGenreChange(genre);
   };
+
+  useEffect(() => {
+    if (selectedGenre !== "all") {
+      setShowGenrePicker(true);
+    }
+  }, [selectedGenre]);
 
   const filterShellClass =
     isLight
@@ -160,41 +170,99 @@ export default function FilterBar({
               isLight ? "border-black/6" : "border-white/10",
             )}
           >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <p className={visibleSectionLabelClass}>Genres</p>
-              {genres.length > 8 ? (
-                <button
-                  type="button"
-                  onClick={() => setShowAllGenres(!showAllGenres)}
-                  className={cn(
-                    `rounded-full border ${isQuiet ? "px-3 py-1.5 text-[11px]" : "px-3 py-2 text-xs uppercase tracking-[0.16em]"} font-semibold transition-colors`,
-                    subtleButtonClass,
-                  )}
-                >
-                  {isQuiet ? (showAllGenres ? "Less" : "More") : showAllGenres ? "Show less" : `Show all ${genres.length}`}
-                </button>
-              ) : null}
-            </div>
+            {isQuiet ? (
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowGenrePicker((current) => !current)}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors",
+                      subtleButtonClass,
+                      (showGenrePicker || selectedGenre !== "all") &&
+                        (isLight
+                          ? "border-[rgba(49,87,214,0.16)] bg-[rgba(49,87,214,0.06)] text-slate-900"
+                          : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"),
+                    )}
+                  >
+                    Genres
+                  </button>
 
-            <div className="flex flex-wrap gap-2">
-              <Chip
-                label="All"
-                active={selectedGenre === "all"}
-                onClick={() => handleGenreChange("all")}
-                appearance={appearance}
-                className={chipClassName}
-              />
-              {displayedGenres.map((genre) => (
-                <Chip
-                  key={genre}
-                  label={genre}
-                  active={selectedGenre === genre}
-                  onClick={() => handleGenreChange(genre)}
-                  appearance={appearance}
-                  className={chipClassName}
-                />
-              ))}
-            </div>
+                  {showGenrePicker && genres.length > 8 ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllGenres(!showAllGenres)}
+                      className={cn(
+                        "rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors",
+                        subtleButtonClass,
+                      )}
+                    >
+                      {showAllGenres ? "Less" : "More"}
+                    </button>
+                  ) : null}
+                </div>
+
+                {showGenrePicker ? (
+                  <div className="flex flex-wrap gap-2">
+                    <Chip
+                      label="All"
+                      active={selectedGenre === "all"}
+                      onClick={() => handleGenreChange("all")}
+                      appearance={appearance}
+                      className={chipClassName}
+                    />
+                    {displayedGenres.map((genre) => (
+                      <Chip
+                        key={genre}
+                        label={genre}
+                        active={selectedGenre === genre}
+                        onClick={() => handleGenreChange(genre)}
+                        appearance={appearance}
+                        className={chipClassName}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <p className={visibleSectionLabelClass}>Genres</p>
+                  {genres.length > 8 ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllGenres(!showAllGenres)}
+                      className={cn(
+                        `rounded-full border ${isQuiet ? "px-3 py-1.5 text-[11px]" : "px-3 py-2 text-xs uppercase tracking-[0.16em]"} font-semibold transition-colors`,
+                        subtleButtonClass,
+                      )}
+                    >
+                      {isQuiet ? (showAllGenres ? "Less" : "More") : showAllGenres ? "Show less" : `Show all ${genres.length}`}
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Chip
+                    label="All"
+                    active={selectedGenre === "all"}
+                    onClick={() => handleGenreChange("all")}
+                    appearance={appearance}
+                    className={chipClassName}
+                  />
+                  {displayedGenres.map((genre) => (
+                    <Chip
+                      key={genre}
+                      label={genre}
+                      active={selectedGenre === genre}
+                      onClick={() => handleGenreChange(genre)}
+                      appearance={appearance}
+                      className={chipClassName}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         ) : null}
       </div>

@@ -73,7 +73,7 @@ function CoverFallback({
       artDirection.primaryGenre,
       artDirection.badgeLabel,
     ].some((value) => labelsMatch(value, artDirection.secondaryGenre));
-  const minimalChipLabel = artDirection.badgeLabel || artDirection.primaryGenre || "";
+  const minimalChipLabel = artDirection.badgeLabel || "";
 
   return (
     <div
