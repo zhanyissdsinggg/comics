@@ -66,6 +66,14 @@ export class ReadingService {
   }
 
   async addHistory(userId: string, payload: any) {
+    await this.prisma.readingHistory.deleteMany({
+      where: {
+        userId,
+        seriesId: payload.seriesId,
+        episodeId: payload.episodeId,
+      },
+    });
+
     await this.prisma.readingHistory.create({
       data: {
         userId,

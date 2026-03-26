@@ -137,6 +137,24 @@ function formatBookmarkCountLabel(value) {
   return `${count} bookmark${count === 1 ? "" : "s"}`;
 }
 
+function getReadingState({ progressPercent, hasProgress = false, hasRecent = false, isSaved = false }) {
+  const normalized = normalizeReadingPercent(progressPercent);
+
+  if ((hasProgress || hasRecent) && normalized >= 0.98) {
+    return { label: "Read", badge: "Read" };
+  }
+
+  if (hasProgress || hasRecent) {
+    return { label: "Reading", badge: "Reading" };
+  }
+
+  if (isSaved) {
+    return { label: "Unread", badge: "Unread" };
+  }
+
+  return { label: "Unread", badge: "" };
+}
+
 export default function LibraryPage({ initialSignedIn = false }) {
   const router = useRouter();
   const { hydrated, isSignedIn } = useAuthStore();
@@ -202,6 +220,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
             return null;
           }
           const progressPercent = normalizeReadingPercent(progress?.percent);
+          const readingState = getReadingState({
+            progressPercent,
+            hasProgress: true,
+          });
           return {
             id: `continue-${seriesId}-${progress.lastEpisodeId}`,
             seriesId,
@@ -214,6 +236,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             seriesType: series?.type || "",
             progressPercent,
             statusLabel: formatRelativeLibraryTime(progress.updatedAt),
+            badge: readingState.badge,
             isAdult: Boolean(series.adult),
             updatedAt: toTimestamp(progress.updatedAt),
           };
@@ -261,6 +284,12 @@ export default function LibraryPage({ initialSignedIn = false }) {
             return null;
           }
           const currentProgress = bySeriesId[entry.seriesId];
+          const progressPercent = normalizeReadingPercent(currentProgress?.percent);
+          const readingState = getReadingState({
+            progressPercent,
+            hasProgress: Boolean(currentProgress?.lastEpisodeId),
+            hasRecent: true,
+          });
           return {
             id: `history-${entry.id || `${entry.seriesId}-${entry.episodeId}`}`,
             seriesId: entry.seriesId,
@@ -271,14 +300,19 @@ export default function LibraryPage({ initialSignedIn = false }) {
             coverUrl: series.coverUrl,
             genres: Array.isArray(series?.genres) ? series.genres : [],
             seriesType: series?.type || "",
-            progressPercent: normalizeReadingPercent(currentProgress?.percent),
+            progressPercent,
             statusLabel: formatRelativeLibraryTime(entry.createdAt),
+            badge: readingState.badge,
             isAdult: Boolean(series.adult),
             updatedAt: toTimestamp(entry.createdAt),
           };
         })
         .filter(Boolean),
     [bySeriesId, historyItems, seriesById],
+  );
+  const historySeriesIds = useMemo(
+    () => new Set(historyItems.map((entry) => entry?.seriesId).filter(Boolean)),
+    [historyItems],
   );
 
   useEffect(() => {
@@ -437,16 +471,16 @@ export default function LibraryPage({ initialSignedIn = false }) {
         const latestBookmark = bookmarks[0];
         const bookmarkCount = bookmarks.length;
         const progressPercent = normalizeReadingPercent(progress?.percent);
+        const readingState = getReadingState({
+          progressPercent,
+          hasProgress: Boolean(progress?.lastEpisodeId),
+          hasRecent: historySeriesIds.has(seriesId),
+          isSaved: isFollowed || bookmarkCount > 0,
+        });
 
-        let subtitle = series.status || "Series";
+        let subtitle = readingState.label;
         if (progress?.lastEpisodeId) {
-          subtitle = formatEpisodeSubtitle("Resume", progress.lastEpisodeId);
-        } else if (latestBookmark?.label) {
-          subtitle = latestBookmark.label;
-        } else if (bookmarkCount > 0) {
-          subtitle = formatBookmarkCountLabel(bookmarkCount);
-        } else if (isFollowed) {
-          subtitle = "Saved";
+          subtitle = readingState.label;
         }
 
         const latestShelfTouch = Math.max(
@@ -454,8 +488,23 @@ export default function LibraryPage({ initialSignedIn = false }) {
           toTimestamp(latestBookmark?.createdAt),
         );
         const detailItems = [];
+        if (progress?.lastEpisodeId) {
+          detailItems.push(
+            formatEpisodeSubtitle(
+              progressPercent >= 0.98 ? "Read" : "Resume",
+              progress.lastEpisodeId,
+            ),
+          );
+        } else if (historySeriesIds.has(seriesId)) {
+          detailItems.push("Opened recently");
+        } else if (latestBookmark?.label) {
+          detailItems.push(latestBookmark.label);
+        }
         if (!progress?.lastEpisodeId && bookmarkCount > 0) {
           detailItems.push(formatBookmarkCountLabel(bookmarkCount));
+        }
+        if (!progress?.lastEpisodeId && !historySeriesIds.has(seriesId) && !latestBookmark?.label && series.status) {
+          detailItems.push(series.status);
         }
         if (isFollowed) {
           detailItems.push("Saved in Library");
@@ -475,7 +524,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           seriesType: series?.type || "",
           progressPercent,
           statusLabel: detailItems.filter(Boolean).join(" • "),
-          badge: isFollowed ? "Saved" : "",
+          badge: readingState.badge,
           isAdult: Boolean(series.adult),
           updatedAt: latestShelfTouch,
         };
@@ -487,7 +536,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         }
         return left.title.localeCompare(right.title);
       });
-  }, [bookmarksBySeries, bySeriesId, followedSeriesIds, followedSet, progressEntries, seriesById]);
+  }, [bookmarksBySeries, bySeriesId, followedSeriesIds, followedSet, historySeriesIds, progressEntries, seriesById]);
 
   const bookmarkCountTotal = useMemo(
     () =>

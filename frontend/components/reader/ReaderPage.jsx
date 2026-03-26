@@ -175,6 +175,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
   } = useReaderSettingsStore();
   const { bookmarksBySeries, addBookmark, removeBookmark } = useBookmarkStore();
   const reportedRef = useRef(false);
+  const historyLoggedRef = useRef(false);
   const routeAttribution = useMemo(
     () => readPaymentAttributionFromSearchParams(searchParams),
     [searchParams],
@@ -748,6 +749,28 @@ export default function ReaderPage({ seriesId, episodeId }) {
   }, [episodeData?.id, episodeId, seriesId]);
 
   useEffect(() => {
+    if (!isSignedIn || !episodeData?.id || !seriesData?.series?.title || historyLoggedRef.current) {
+      return;
+    }
+
+    historyLoggedRef.current = true;
+    addHistory({
+      seriesId,
+      episodeId,
+      title: seriesData.series.title,
+      percent: Math.max(Number(getProgress(seriesId)?.percent || 0), Number(scrollRef.current || 0)),
+    });
+  }, [
+    addHistory,
+    episodeData?.id,
+    episodeId,
+    getProgress,
+    isSignedIn,
+    seriesData?.series?.title,
+    seriesId,
+  ]);
+
+  useEffect(() => {
     if (error !== "ADULT_GATED") {
       return;
     }
@@ -849,15 +872,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
     if (showEndOverlay && !reportedRef.current) {
       report("READ_EPISODE");
       readEpisode(seriesId, episodeId);
-      addHistory({
-        seriesId,
-        episodeId,
-        title: seriesData?.series?.title || "",
-        percent: 1,
-      });
       reportedRef.current = true;
     }
-  }, [report, readEpisode, addHistory, seriesId, episodeId, showEndOverlay, seriesData?.series?.title]);
+  }, [report, readEpisode, seriesId, episodeId, showEndOverlay]);
 
   useEffect(() => {
     if (showPaywall) {
@@ -891,6 +908,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   useEffect(() => {
     reportedRef.current = false;
+    historyLoggedRef.current = false;
   }, [episodeId]);
 
   useEffect(() => {
