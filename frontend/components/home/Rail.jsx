@@ -93,6 +93,8 @@ export default function Rail({
   creatorCampaignId = "",
   creatorSourcePath = "/",
   creatorLabel = "More from these creators",
+  showActionLabel = true,
+  coverFallbackVariant = "default",
 }) {
   const router = useRouter();
   const safeItems = ensureArray(items);
@@ -201,6 +203,8 @@ export default function Rail({
                     item={item}
                     tone={tone}
                     appearance={appearance}
+                    showActionLabel={showActionLabel}
+                    coverFallbackVariant={coverFallbackVariant}
                     onClick={() => onItemClick?.(item, railName || title)}
                   />
                 </div>

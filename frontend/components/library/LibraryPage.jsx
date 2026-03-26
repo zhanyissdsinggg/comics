@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowUpRight } from "lucide-react";
 import SiteHeader from "../layout/SiteHeader";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
@@ -29,6 +30,7 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
+import { normalizeReadingPercent } from "../../lib/readingPercent";
 
 function PanelLoadingSkeleton({ rows = 3 }) {
   return (
@@ -89,6 +91,50 @@ function toTimestamp(value) {
 
   const parsed = Date.parse(value || "");
   return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function formatReadingPercentLabel(value) {
+  const normalized = normalizeReadingPercent(value);
+  if (normalized <= 0) {
+    return "";
+  }
+
+  return `${Math.round(normalized * 100)}% read`;
+}
+
+function formatRelativeLibraryTime(value) {
+  const timestamp = toTimestamp(value);
+  if (!timestamp) {
+    return "";
+  }
+
+  const deltaMs = Date.now() - timestamp;
+  const dayMs = 24 * 60 * 60 * 1000;
+  const dayDelta = Math.floor(deltaMs / dayMs);
+
+  if (dayDelta <= 0) {
+    return "Opened today";
+  }
+  if (dayDelta === 1) {
+    return "Opened yesterday";
+  }
+  if (dayDelta < 7) {
+    return `Opened ${dayDelta} days ago`;
+  }
+
+  return `Opened ${new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(new Date(timestamp))}`;
+}
+
+function formatBookmarkCountLabel(value) {
+  const count = Number(value) || 0;
+  if (count <= 0) {
+    return "";
+  }
+
+  return `${count} bookmark${count === 1 ? "" : "s"}`;
 }
 
 export default function LibraryPage({ initialSignedIn = false }) {
@@ -155,6 +201,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           if (!series || !progress?.lastEpisodeId) {
             return null;
           }
+          const progressPercent = normalizeReadingPercent(progress?.percent);
           return {
             id: `continue-${seriesId}-${progress.lastEpisodeId}`,
             seriesId,
@@ -163,6 +210,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
             subtitle: formatEpisodeSubtitle("Continue", progress.lastEpisodeId),
             coverTone: series.coverTone,
             coverUrl: series.coverUrl,
+            genres: Array.isArray(series?.genres) ? series.genres : [],
+            seriesType: series?.type || "",
+            progressPercent,
+            statusLabel: formatRelativeLibraryTime(progress.updatedAt),
             isAdult: Boolean(series.adult),
             updatedAt: toTimestamp(progress.updatedAt),
           };
@@ -209,6 +260,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           if (!series || !entry?.episodeId) {
             return null;
           }
+          const currentProgress = bySeriesId[entry.seriesId];
           return {
             id: `history-${entry.id || `${entry.seriesId}-${entry.episodeId}`}`,
             seriesId: entry.seriesId,
@@ -217,12 +269,16 @@ export default function LibraryPage({ initialSignedIn = false }) {
             subtitle: formatEpisodeSubtitle("Last read", entry.episodeId),
             coverTone: series.coverTone,
             coverUrl: series.coverUrl,
+            genres: Array.isArray(series?.genres) ? series.genres : [],
+            seriesType: series?.type || "",
+            progressPercent: normalizeReadingPercent(currentProgress?.percent),
+            statusLabel: formatRelativeLibraryTime(entry.createdAt),
             isAdult: Boolean(series.adult),
             updatedAt: toTimestamp(entry.createdAt),
           };
         })
         .filter(Boolean),
-    [historyItems, seriesById],
+    [bySeriesId, historyItems, seriesById],
   );
 
   useEffect(() => {
@@ -380,14 +436,32 @@ export default function LibraryPage({ initialSignedIn = false }) {
         const isFollowed = followedSet.has(seriesId);
         const latestBookmark = bookmarks[0];
         const bookmarkCount = bookmarks.length;
+        const progressPercent = normalizeReadingPercent(progress?.percent);
 
         let subtitle = series.status || "Series";
         if (progress?.lastEpisodeId) {
           subtitle = formatEpisodeSubtitle("Resume", progress.lastEpisodeId);
+        } else if (latestBookmark?.label) {
+          subtitle = latestBookmark.label;
         } else if (bookmarkCount > 0) {
-          subtitle = `${bookmarkCount} bookmark${bookmarkCount > 1 ? "s" : ""}`;
+          subtitle = formatBookmarkCountLabel(bookmarkCount);
         } else if (isFollowed) {
-          subtitle = "Following";
+          subtitle = "Saved";
+        }
+
+        const latestShelfTouch = Math.max(
+          toTimestamp(progress?.updatedAt),
+          toTimestamp(latestBookmark?.createdAt),
+        );
+        const detailItems = [];
+        if (!progress?.lastEpisodeId && bookmarkCount > 0) {
+          detailItems.push(formatBookmarkCountLabel(bookmarkCount));
+        }
+        if (isFollowed) {
+          detailItems.push("Saved in Library");
+        }
+        if (latestShelfTouch) {
+          detailItems.push(formatRelativeLibraryTime(latestShelfTouch));
         }
 
         return {
@@ -397,12 +471,13 @@ export default function LibraryPage({ initialSignedIn = false }) {
           subtitle,
           coverTone: series.coverTone,
           coverUrl: series.coverUrl,
-          badge: isFollowed ? series.badge || "Saved" : series.badge,
+          genres: Array.isArray(series?.genres) ? series.genres : [],
+          seriesType: series?.type || "",
+          progressPercent,
+          statusLabel: detailItems.filter(Boolean).join(" • "),
+          badge: isFollowed ? "Saved" : "",
           isAdult: Boolean(series.adult),
-          updatedAt: Math.max(
-            toTimestamp(progress?.updatedAt),
-            toTimestamp(latestBookmark?.createdAt),
-          ),
+          updatedAt: latestShelfTouch,
         };
       })
       .filter(Boolean)
@@ -413,6 +488,15 @@ export default function LibraryPage({ initialSignedIn = false }) {
         return left.title.localeCompare(right.title);
       });
   }, [bookmarksBySeries, bySeriesId, followedSeriesIds, followedSet, progressEntries, seriesById]);
+
+  const bookmarkCountTotal = useMemo(
+    () =>
+      Object.values(bookmarksBySeries || {}).reduce(
+        (total, entries) => total + (Array.isArray(entries) ? entries.length : 0),
+        0,
+      ),
+    [bookmarksBySeries],
+  );
 
   const recommendedItems = useMemo(
     () =>
@@ -437,214 +521,207 @@ export default function LibraryPage({ initialSignedIn = false }) {
     [homepageSlots, seriesList, visibleLibraryItems],
   );
   const recommendedRailReason = useMemo(() => {
+    if (!viewerSignedIn) {
+      return "";
+    }
     if (recommendedItems.some((item) => item.sourceSlot === "library-return")) {
-      return "Editors are highlighting these as strong next reads for library users.";
+      return "Picked for your shelf.";
     }
     if (recommendedItems.some((item) => Boolean(item.sourceSlot))) {
-      return "These picks come from the site's featured spots before the default recommendations take over.";
+      return "Fresh from the front page.";
     }
-    return "Popular series you have not saved yet.";
-  }, [recommendedItems]);
+    return "";
+  }, [recommendedItems, viewerSignedIn]);
   const showLibraryStale = showStale || showHomepageSlotsStale;
   const hasLibrarySignals =
     continueRailItems.length > 0 || historyRail.length > 0 || visibleLibraryItems.length > 0;
+  const resumeSpotlight = continueRailItems[0] || historyRail[0] || null;
+  const resumeSpotlightReadHref =
+    resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
+      ? buildLibraryReadHref(
+          resumeSpotlight.seriesId,
+          resumeSpotlight.episodeId,
+          "LIBRARY_RESUME_SPOTLIGHT",
+          "resume_spotlight",
+        )
+      : "";
+  const resumeSpotlightSeriesHref = resumeSpotlight?.seriesId
+    ? buildLibrarySeriesHref(
+        resumeSpotlight.seriesId,
+        "LIBRARY_RESUME_SPOTLIGHT",
+        "resume_spotlight",
+      )
+    : "";
+  const resumeSpotlightProgressLabel = formatReadingPercentLabel(
+    resumeSpotlight?.progressPercent,
+  );
+  const resumeSpotlightMeta = [
+    resumeSpotlight?.subtitle,
+    resumeSpotlightProgressLabel,
+    resumeSpotlight?.statusLabel,
+  ]
+    .filter(Boolean)
+    .join(" • ");
+  const resumeSpotlightProgressWidth = Math.max(
+    0,
+    Math.min(
+      Number(resumeSpotlight?.progressPercent || 0) <= 1
+        ? Number(resumeSpotlight?.progressPercent || 0) * 100
+        : Number(resumeSpotlight?.progressPercent || 0),
+      100,
+    ),
+  );
   const libraryStats = useMemo(
     () =>
-      hasLibrarySignals
+      viewerSignedIn
         ? [
             {
-              label: "Resume",
+              label: "In Progress",
               value: continueRailItems.length.toLocaleString(),
-              hint: "Pick up where you left off",
+              hint:
+                continueRailItems.length > 0
+                  ? formatReadingPercentLabel(continueRailItems[0]?.progressPercent) ||
+                    continueRailItems[0]?.statusLabel ||
+                    "Ready to resume"
+                  : "Your next chapter stays here",
             },
             {
               label: "Recent",
               value: historyRail.length.toLocaleString(),
-              hint: "Recent reads",
+              hint: historyRail[0]?.statusLabel || "Latest opens stay close",
             },
             {
               label: "Saved Series",
               value: visibleLibraryItems.length.toLocaleString(),
-              hint: "Saved in this mode",
+              hint:
+                bookmarkCountTotal > 0
+                  ? `${formatBookmarkCountLabel(bookmarkCountTotal)} saved`
+                  : "Saved titles stay here",
             },
             {
-              label: "Mode",
-              value: isAdultMode ? "18+" : "Standard",
-              hint: viewerSignedIn ? "Account sync on" : "",
+              label: "Bookmarks",
+              value: bookmarkCountTotal.toLocaleString(),
+              hint: bookmarkCountTotal > 0 ? "Saved moments" : "No bookmarks yet",
             },
           ]
         : [
             {
-              label: "Read Free",
-              value: "Ready",
-              hint: "",
+              label: "On This Device",
+              value: continueRailItems.length > 0 ? continueRailItems.length.toLocaleString() : "Ready",
+              hint:
+                continueRailItems.length > 0
+                  ? "Continue on this device"
+                  : "Start a title and it shows up here",
             },
             {
-              label: "Top Series",
-              value: "Browse",
-              hint: "",
-            },
-            {
-              label: "Sync",
-              value: viewerSignedIn ? "On" : "Sign in",
-              hint: "",
-            },
-            {
-              label: "Mode",
-              value: isAdultMode ? "18+" : "Standard",
-              hint: "",
+              label: "Sign In",
+              value: "Sync",
+              hint: "Keep progress and saves together",
             },
           ],
     [
+      bookmarkCountTotal,
+      continueRailItems,
       continueRailItems.length,
-      hasLibrarySignals,
+      historyRail,
       historyRail.length,
-      isAdultMode,
       viewerSignedIn,
+      visibleLibraryItems,
       visibleLibraryItems.length,
     ],
   );
-  const resumeSpotlight = continueRailItems[0] || historyRail[0] || null;
-  const libraryActionCards = useMemo(() => {
+  const readingSnapshotCards = useMemo(() => {
+    if (!viewerSignedIn) {
+      return [];
+    }
+
+    return [
+      {
+        id: "in-progress",
+        label: "In Progress",
+        value: continueRailItems.length.toLocaleString(),
+        description:
+          continueRailItems.length > 0
+            ? [
+                formatReadingPercentLabel(continueRailItems[0]?.progressPercent),
+                continueRailItems[0]?.statusLabel,
+              ]
+                .filter(Boolean)
+                .join(" • ") || "Ready to resume"
+            : "Your next chapter stays here",
+        onClick: () =>
+          continueRailItems.length > 0
+            ? scrollToSection("continue-reading")
+            : router.push("/rankings?type=ttf&window=all"),
+      },
+      {
+        id: "recent",
+        label: "Recent",
+        value: historyRail.length.toLocaleString(),
+        description:
+          historyRail.length > 0
+            ? historyRail[0]?.statusLabel || historyRail[0]?.subtitle || "Opened recently"
+            : "Latest opens stay close",
+        onClick: () =>
+          historyRail.length > 0 ? scrollToSection("recent-activity") : router.push("/search"),
+      },
+      {
+        id: "saved-series",
+        label: "Saved Series",
+        value: visibleLibraryItems.length.toLocaleString(),
+        description:
+          visibleLibraryItems.length > 0
+            ? bookmarkCountTotal > 0
+              ? `${formatBookmarkCountLabel(bookmarkCountTotal)} across your shelf`
+              : visibleLibraryItems[0]?.statusLabel || "Saved to your shelf"
+            : "Titles you want to keep",
+        onClick: () =>
+          visibleLibraryItems.length > 0
+            ? scrollToSection("saved-series")
+            : router.push("/rankings?type=popular&window=week"),
+      },
+    ];
+  }, [
+    bookmarkCountTotal,
+    continueRailItems,
+    continueRailItems.length,
+    historyRail,
+    historyRail.length,
+    router,
+    scrollToSection,
+    viewerSignedIn,
+    visibleLibraryItems,
+    visibleLibraryItems.length,
+  ]);
+  const signedOutActionCards = useMemo(() => {
     const commonAccentClass =
       "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]";
     const primaryAccentClass =
       "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]";
 
-    if (!viewerSignedIn) {
-      return [
-        {
-          id: "start-free",
-          eyebrow: "Read Free",
-          title: "Free chapters.",
-          description: "",
-          cta: "Read Free",
-          onClick: () => router.push("/rankings?type=ttf&window=all"),
-          accentClass: primaryAccentClass,
-        },
-        {
-          id: "sync",
-          eyebrow: "Sign In",
-          title: "Your account.",
-          description: "Progress, saves, and purchases.",
-          cta: "Sign In",
-          onClick: () => openAuthPrompt(),
-          accentClass: commonAccentClass,
-        },
-      ];
-    }
-
-    if (!hasLibrarySignals) {
-      return [
-        {
-          id: "free-starts",
-          eyebrow: "Read Free",
-          title: "Free chapters.",
-          description: "",
-          cta: "Read Free",
-          onClick: () => router.push("/rankings?type=ttf&window=all"),
-          accentClass: primaryAccentClass,
-        },
-        {
-          id: "saved",
-          eyebrow: "Saved Series",
-          title: "Saved titles.",
-          description: "",
-          cta: "View Top Series",
-          onClick: () => router.push("/rankings?type=popular&window=week"),
-          accentClass: commonAccentClass,
-        },
-        {
-          id: "recent",
-          eyebrow: "Recent activity",
-          title: "Recent reads.",
-          description: "",
-          cta: "Search",
-          onClick: () => router.push("/search"),
-          accentClass: commonAccentClass,
-        },
-      ];
-    }
-
     return [
-      resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
-        ? {
-            id: "resume",
-            eyebrow: "Continue",
-            title: "Jump back into your last chapter.",
-            description: "Keep your next chapter one tap away.",
-            cta: "Continue Reading",
-            onClick: () =>
-              router.push(
-                buildLibraryReadHref(
-                  resumeSpotlight.seriesId,
-                  resumeSpotlight.episodeId,
-                  "LIBRARY_ACTIONS",
-                  "library_actions_resume",
-                ),
-              ),
-            accentClass: primaryAccentClass,
-          }
-        : {
-            id: "progress",
-            eyebrow: "Progress",
-            title: continueRailItems.length > 0 ? "Your in-progress reads are ready." : "Progress builds here.",
-            description: continueRailItems.length > 0
-              ? ""
-              : "Library keeps your place here.",
-            cta: continueRailItems.length > 0 ? "Continue Reading" : "Read Free",
-            onClick: () =>
-              continueRailItems.length > 0
-                ? scrollToSection("continue-reading")
-                : router.push("/rankings?type=ttf&window=all"),
-            accentClass: primaryAccentClass,
-          },
       {
-        id: "saved",
-        eyebrow: "Saved titles",
-        title: visibleLibraryItems.length > 0 ? "Saved series." : "Saved titles.",
-        description: visibleLibraryItems.length > 0
-          ? ""
-          : "",
-        cta: visibleLibraryItems.length > 0 ? "Saved Series" : "View Top Series",
-        onClick: () =>
-          visibleLibraryItems.length > 0
-            ? scrollToSection("saved-series")
-            : router.push("/rankings?type=popular&window=week"),
-        accentClass: commonAccentClass,
-      },
-      {
-        id: "recent",
-        eyebrow: "Recent Activity",
-        title: historyRail.length > 0 ? "Recent activity." : "Recent reads.",
-        description: historyRail.length > 0
-          ? ""
-          : "",
-        cta: historyRail.length > 0 ? "Recent Activity" : "Search",
-        onClick: () => (historyRail.length > 0 ? scrollToSection("recent-activity") : router.push("/search")),
-        accentClass: commonAccentClass,
-      },
-      {
-        id: "search",
-        eyebrow: "Search",
-        title: "Find another title.",
+        id: "start-free",
+        eyebrow: "Read Free",
+        title: "Open a title.",
         description: "",
-        cta: "Search",
-        onClick: () => router.push("/search"),
+        cta: "Read Free",
+        onClick: () => router.push("/rankings?type=ttf&window=all"),
+        accentClass: primaryAccentClass,
+      },
+      {
+        id: "sync",
+        eyebrow: "Sign In",
+        title: "Keep your shelf.",
+        description: "Progress, recent reads, and saves.",
+        cta: "Sign In",
+        onClick: () => openAuthPrompt(),
         accentClass: commonAccentClass,
       },
-    ].filter(Boolean);
+    ];
   }, [
-    buildLibraryReadHref,
-    continueRailItems.length,
-    hasLibrarySignals,
-    historyRail.length,
     openAuthPrompt,
-    resumeSpotlight,
     router,
-    scrollToSection,
-    visibleLibraryItems.length,
-    viewerSignedIn,
   ]);
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
@@ -659,47 +736,40 @@ export default function LibraryPage({ initialSignedIn = false }) {
         <EditorialHero
           eyebrow="Library"
           title={
-            viewerSignedIn
-              ? resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
-                ? "Pick up where you left off."
-                : "Your reading shelf."
+            viewerSignedIn && resumeSpotlightReadHref
+              ? "Pick up where you left off."
               : "Your reading shelf."
           }
           description={
             viewerSignedIn
-              ? "Resume, saves, and recent reads."
-              : ""
+              ? "Continue where you left off, keep recent reads close, and save what matters."
+              : "Sign in to keep your shelf, progress, and recent reads in one place."
           }
           secondary=""
           stats={libraryStats}
           appearance="light"
           actions={
             <>
-              {viewerSignedIn && resumeSpotlight?.seriesId && resumeSpotlight?.episodeId ? (
+              {resumeSpotlightReadHref ? (
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push(
-                      buildLibraryReadHref(
-                        resumeSpotlight.seriesId,
-                        resumeSpotlight.episodeId,
-                        "LIBRARY_RESUME_SPOTLIGHT",
-                        "resume_spotlight",
-                      ),
-                    )
-                  }
+                  onClick={() => router.push(resumeSpotlightReadHref)}
                   className={primaryButtonClass}
                 >
                   Continue Reading
                 </button>
+              ) : viewerSignedIn && visibleLibraryItems.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => scrollToSection("saved-series")}
+                  className={primaryButtonClass}
+                >
+                  Saved Series
+                </button>
               ) : (
                 <button
                   type="button"
-                  onClick={() =>
-                    viewerSignedIn
-                      ? router.push("/rankings?type=ttf&window=all")
-                      : router.push("/rankings?type=ttf&window=all")
-                  }
+                  onClick={() => router.push("/rankings?type=ttf&window=all")}
                   className={primaryButtonClass}
                 >
                   Read Free
@@ -724,8 +794,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   ? visibleLibraryItems.length > 0
                     ? "Saved Series"
                     : showCollectionManager
-                      ? "Close collections"
-                      : "Manage collections"
+                      ? "Hide Collections"
+                      : "Collections"
                   : "Sign In"}
               </button>
             </>
@@ -753,77 +823,169 @@ export default function LibraryPage({ initialSignedIn = false }) {
           </div>
         ) : (
           <>
-            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-              <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Quick actions
-                </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Your shelf.
-                </h2>
-              </div>
-              <StorefrontPathwaysGrid
-                cards={libraryActionCards}
-                columnsClassName={viewerSignedIn ? "md:grid-cols-2 xl:grid-cols-4" : "md:grid-cols-2"}
-                appearance="light"
-              />
-            </SurfacePanel>
+            {viewerSignedIn ? (
+              hasLibrarySignals ? (
+                <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
+                    <div className="rounded-[28px] border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.06)] p-5 sm:p-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
+                        {resumeSpotlightReadHref ? "Continue Reading" : "Your Shelf"}
+                      </p>
+                      <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
+                        {resumeSpotlight?.title || "Your shelf is ready."}
+                      </h2>
+                      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
+                        {resumeSpotlightMeta || "Recent reads, saves, and bookmarks stay close."}
+                      </p>
 
-            {!hasLibrarySignals ? (
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Library
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Nothing saved yet.
-                </h2>
-              </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className={primaryButtonClass}
-                >
-                  Read Free
-                </button>
-                  <button
-                    type="button"
-                  onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className={secondaryButtonClass}
-                >
-                    View Top Series
-                  </button>
-                  {!viewerSignedIn ? (
+                      {resumeSpotlightProgressWidth > 0 ? (
+                        <div className="mt-5 space-y-2.5">
+                          <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
+                            <span>{resumeSpotlight?.subtitle || "Progress"}</span>
+                            <span>{resumeSpotlightProgressLabel}</span>
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-white/85">
+                            <div
+                              className="h-full rounded-full bg-[var(--gush-accent,#2f6bff)]"
+                              style={{ width: `${Math.round(resumeSpotlightProgressWidth)}%` }}
+                            />
+                          </div>
+                        </div>
+                      ) : null}
+
+                      <div className="mt-6 flex flex-wrap gap-2">
+                        {!resumeSpotlightReadHref && visibleLibraryItems.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => scrollToSection("saved-series")}
+                            className={primaryButtonClass}
+                          >
+                            Saved Series
+                          </button>
+                        ) : !resumeSpotlightReadHref ? (
+                          <button
+                            type="button"
+                            onClick={() => router.push("/rankings?type=ttf&window=all")}
+                            className={primaryButtonClass}
+                          >
+                            Read Free
+                          </button>
+                        ) : null}
+
+                        {resumeSpotlightSeriesHref ? (
+                          <button
+                            type="button"
+                            onClick={() => router.push(resumeSpotlightSeriesHref)}
+                            className={secondaryButtonClass}
+                          >
+                            View Series
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => router.push("/search")}
+                            className={secondaryButtonClass}
+                          >
+                            Search
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                      {readingSnapshotCards.map((card) => (
+                        <button
+                          key={card.id}
+                          type="button"
+                          onClick={card.onClick}
+                          className="group rounded-[24px] border border-black/8 bg-white/82 p-4 text-left transition-colors hover:border-black/12 hover:bg-white"
+                        >
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                            {card.label}
+                          </p>
+                          <div className="mt-3 flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                                {card.value}
+                              </p>
+                              <p className="mt-2 text-sm leading-6 text-slate-500">
+                                {card.description}
+                              </p>
+                            </div>
+                            <ArrowUpRight className="mt-1 size-4 flex-shrink-0 text-slate-400 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </SurfacePanel>
+              ) : (
+                <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      Library
+                    </p>
+                    <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                      Nothing saved yet.
+                    </h2>
+                    <p className="max-w-2xl text-sm leading-6 text-slate-600">
+                      Start a title and your shelf will keep your place.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
-                      onClick={openAuthPrompt}
+                      onClick={() => router.push("/rankings?type=ttf&window=all")}
+                      className={primaryButtonClass}
+                    >
+                      Read Free
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/search")}
                       className={secondaryButtonClass}
                     >
-                      Sign In
+                      Search
                     </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => router.push("/search")}
-                    className={secondaryButtonClass}
-                  >
-                    Search
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowCollectionManager((value) => !value)}
+                      className={secondaryButtonClass}
+                    >
+                      {showCollectionManager ? "Hide Collections" : "Collections"}
+                    </button>
+                  </div>
+                </SurfacePanel>
+              )
+            ) : (
+              <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Library
+                  </p>
+                  <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Keep your shelf together.
+                  </h2>
                 </div>
+                <StorefrontPathwaysGrid
+                  cards={signedOutActionCards}
+                  columnsClassName="md:grid-cols-2"
+                  appearance="light"
+                />
               </SurfacePanel>
-            ) : null}
+            )}
 
             <div className="grid gap-6">
               {continueRailItems.length > 0 ? (
                 <div id="continue-reading">
                   <Rail
-                    title="Resume Reading"
+                    eyebrow={viewerSignedIn ? "Continue" : "On This Device"}
+                    title={viewerSignedIn ? "Continue Reading" : "Continue on this device"}
+                    railName="continue"
                     items={continueRailItems}
-                    reason="Pick up where you left off."
-                    ctaLabel="Continue Reading"
-                    href="/library"
                     appearance="light"
+                    showActionLabel={false}
+                    coverFallbackVariant="minimal-card"
                     onItemClick={(item) => {
                       if (item.seriesId && item.episodeId) {
                         router.push(
@@ -850,15 +1012,52 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 </div>
               ) : null}
 
-              {visibleLibraryItems.length > 0 ? (
+              {viewerSignedIn && historyRail.length > 0 ? (
+                <div id="recent-activity">
+                  <Rail
+                    eyebrow="Recent"
+                    title="Recent Activity"
+                    railName="history"
+                    items={historyRail}
+                    appearance="light"
+                    showActionLabel={false}
+                    coverFallbackVariant="minimal-card"
+                    onItemClick={(item) => {
+                      if (item.seriesId && item.episodeId) {
+                        router.push(
+                          buildLibraryReadHref(
+                            item.seriesId,
+                            item.episodeId,
+                            "LIBRARY_HISTORY_RAIL",
+                            "history_rail",
+                          ),
+                        );
+                        return;
+                      }
+                      if (item.seriesId) {
+                        router.push(
+                          buildLibrarySeriesHref(
+                            item.seriesId,
+                            "LIBRARY_HISTORY_RAIL",
+                            "history_rail",
+                          ),
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
+
+              {viewerSignedIn && visibleLibraryItems.length > 0 ? (
                 <div id="saved-series">
                   <Rail
+                    eyebrow="Saved"
                     title="Saved Series"
+                    railName="following"
                     items={visibleLibraryItems}
-                    reason="Saved and followed titles together."
-                    ctaLabel="Manage Shelf"
-                    href="/library"
                     appearance="light"
+                    showActionLabel={false}
+                    coverFallbackVariant="minimal-card"
                     onItemClick={(item) => {
                       if (item.seriesId) {
                         router.push(
@@ -866,40 +1065,6 @@ export default function LibraryPage({ initialSignedIn = false }) {
                             item.seriesId,
                             "LIBRARY_SHELF_RAIL",
                             "library_shelf",
-                          ),
-                        );
-                      }
-                    }}
-                  />
-                </div>
-              ) : null}
-
-              {historyRail.length > 0 ? (
-                <div id="recent-activity">
-                  <Rail
-                    title="Recent Activity"
-                    items={historyRail}
-                    ctaLabel="Review History"
-                    href="/library"
-                    appearance="light"
-                    onItemClick={(item) => {
-                      if (item.seriesId && item.episodeId) {
-                        router.push(
-                          buildLibraryReadHref(
-                            item.seriesId,
-                            item.episodeId,
-                            "LIBRARY_HISTORY_RAIL",
-                            "history_rail",
-                          ),
-                        );
-                        return;
-                      }
-                      if (item.seriesId) {
-                        router.push(
-                          buildLibrarySeriesHref(
-                            item.seriesId,
-                            "LIBRARY_HISTORY_RAIL",
-                            "history_rail",
                           ),
                         );
                       }
@@ -932,12 +1097,14 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
               {recommendedItems.length > 0 ? (
                 <Rail
-                  title="Recommended"
+                  eyebrow={viewerSignedIn ? "Next" : "Recommended"}
+                  title={viewerSignedIn ? "Next Reads" : "Recommended"}
+                  railName="recommended"
                   items={recommendedItems}
                   reason={recommendedRailReason}
-                  ctaLabel="View Top Series"
-                  href="/rankings?type=popular&window=week"
                   appearance="light"
+                  showActionLabel={false}
+                  coverFallbackVariant="minimal-card"
                   onItemClick={(item) =>
                     router.push(
                       buildLibrarySeriesHref(
