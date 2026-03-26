@@ -17,6 +17,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import Cover from "../common/Cover";
+import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import SiteHeader from "../layout/SiteHeader";
 import SiteFooter from "../layout/SiteFooter";
 import PortraitCard from "./PortraitCard";
@@ -59,24 +60,6 @@ function formatPercent(value) {
   return !Number.isFinite(numeric) || numeric <= 0
     ? "0%"
     : `${Math.round((numeric <= 1 ? numeric : numeric / 100) * 100)}%`;
-}
-
-function formatCompactNumber(value) {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric) || numeric <= 0) {
-    return "0";
-  }
-  if (numeric >= 1000000) {
-    return `${(numeric / 1000000)
-      .toFixed(numeric >= 10000000 ? 0 : 1)
-      .replace(/\.0$/, "")}M`;
-  }
-  if (numeric >= 1000) {
-    return `${(numeric / 1000)
-      .toFixed(numeric >= 10000 ? 0 : 1)
-      .replace(/\.0$/, "")}K`;
-  }
-  return numeric.toLocaleString();
 }
 
 function formatRating(value) {
@@ -348,25 +331,39 @@ function HomeContent({ initialSearchParams = {} }) {
     const signals = [];
 
     if (resumeSpotlight?.episodeId) {
-      signals.push(
-        `${formatEpisodeLabel(resumeSpotlight.episodeId)}${
+      signals.push({
+        id: `episode-${resumeSpotlight.episodeId}`,
+        content: `${formatEpisodeLabel(resumeSpotlight.episodeId)}${
           resumeSpotlight.progressPercent > 0
             ? ` / ${formatPercent(resumeSpotlight.progressPercent)} complete`
             : ""
         }`,
-      );
+      });
     }
 
     if (Array.isArray(heroSeries.genres) && heroSeries.genres.length > 0) {
-      signals.push(heroSeries.genres.slice(0, 2).join(" / "));
+      signals.push({
+        id: `genres-${heroSeries.genres.slice(0, 2).join("-")}`,
+        content: heroSeries.genres.slice(0, 2).join(" / "),
+      });
     }
 
-    const ratingLabel = formatRating(heroSeries.rating);
-    if (ratingLabel && Number(heroSeries.ratingCount || 0) > 0) {
-      signals.push(`${ratingLabel} / ${formatCompactNumber(heroSeries.ratingCount)} ratings`);
+    if (formatRating(heroSeries.rating)) {
+      signals.push({
+        id: `rating-${heroSeries.id || "hero"}`,
+        content: (
+          <InlineRatingDisplay
+            score={heroSeries.rating}
+            ratingCount={heroSeries.ratingCount}
+          />
+        ),
+      });
     }
 
-    signals.push(getReadingState(heroSeries));
+    signals.push({
+      id: `state-${String(heroSeries.status || "default").toLowerCase()}`,
+      content: getReadingState(heroSeries),
+    });
 
     return signals.filter(Boolean).slice(0, 3);
   }, [heroSeries, resumeSpotlight]);
@@ -654,10 +651,10 @@ function HomeContent({ initialSearchParams = {} }) {
                           <div className="mt-4 flex flex-wrap gap-2">
                             {heroSignals.slice(0, 2).map((signal) => (
                               <span
-                                key={signal}
+                                key={signal.id}
                                 className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1.5 text-xs font-medium text-slate-700"
                               >
-                                {signal}
+                                {signal.content}
                               </span>
                             ))}
                           </div>

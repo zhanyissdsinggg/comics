@@ -1,10 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
+import NetworkFallback from "../common/NetworkFallback";
 import SurfacePanel from "../common/SurfacePanel";
 import PackageCard from "./PackageCard";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -104,6 +105,7 @@ export default function StorePage({
   const { isSignedIn } = useAuthStore();
   const [busyId, setBusyId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [retryPackageId, setRetryPackageId] = useState("");
   const [region, setRegion] = useState("us");
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
@@ -309,10 +311,13 @@ export default function StorePage({
           bonusLabel: bonusPct > 0 ? `${bonusPct}% extra` : "No bonus",
           bestFor: PACKAGE_FIT_GUIDE[pkg.id] || "Flexible one-time reading.",
         };
-      }),
+    }),
     [orderedPackages],
   );
   const handleBuy = async (packageId) => {
+    setErrorMessage("");
+    setRetryPackageId("");
+
     if (!isSignedIn) {
       setErrorMessage("Sign in to buy points and keep them on your account.");
       openAuthPrompt();
@@ -370,17 +375,27 @@ export default function StorePage({
       });
       router.replace(returnTo);
       setErrorMessage("");
+      setRetryPackageId("");
       return;
     }
 
     if (response.status === 401) {
       setErrorMessage("Sign in to buy points and keep them on your account.");
+      setRetryPackageId("");
       openAuthPrompt();
       return;
     }
 
+    setRetryPackageId(packageId);
     setErrorMessage(getFriendlyMessage(response.error, response.message || "Top up failed. Please try again."));
   };
+
+  const retryFailedPurchase = useCallback(() => {
+    if (!retryPackageId || busyId) {
+      return;
+    }
+    void handleBuy(retryPackageId);
+  }, [busyId, retryPackageId]);
 
   const handleClaim = async () => {
     const code = couponCode.trim();
@@ -505,9 +520,35 @@ export default function StorePage({
         />
 
         {errorMessage ? (
-          <SurfacePanel tone="danger" appearance="light" accent="rose">
-            <p className="text-sm text-red-600">{errorMessage}</p>
-          </SurfacePanel>
+          retryPackageId ? (
+            <NetworkFallback
+              compact
+              className="px-0 py-0"
+              cardClassName="max-w-none rounded-[28px] px-5 py-5 sm:px-6 sm:py-6"
+              title="Oops! Point-pack checkout hit a network snag."
+              description={`${errorMessage} Your data is safe, and you can try the same pack again or ask billing for help.`}
+              onRetry={retryFailedPurchase}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    buildSupportPath({
+                      topic: "billing",
+                      context: `Store top-up issue on ${retryPackageId}`,
+                    }),
+                  )
+                }
+                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                Billing help
+              </button>
+            </NetworkFallback>
+          ) : (
+            <SurfacePanel tone="danger" appearance="light" accent="rose">
+              <p className="text-sm text-red-600">{errorMessage}</p>
+            </SurfacePanel>
+          )
         ) : null}
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">

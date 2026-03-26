@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import Cover from "../common/Cover";
 import EmptyState from "../common/EmptyState";
+import NetworkFallback from "../common/NetworkFallback";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import SkeletonCard from "../common/SkeletonCard";
@@ -210,6 +211,7 @@ export default function CreatorPage({
   const [loading, setLoading] = useState(!hasInitialCatalog);
   const [error, setError] = useState("");
   const [commerceNotice, setCommerceNotice] = useState(null);
+  const [retryTick, setRetryTick] = useState(0);
   const requestRef = useRef(0);
 
   const creatorPath = useMemo(
@@ -220,6 +222,9 @@ export default function CreatorPage({
     () => readPaymentAttributionFromSearchParams(searchParams),
     [searchParams],
   );
+  const retryCreatorPage = useCallback(() => {
+    setRetryTick((current) => current + 1);
+  }, []);
 
   useEffect(() => {
     if (!routeAttribution) {
@@ -297,7 +302,7 @@ export default function CreatorPage({
         });
       }
     });
-  }, [forceDisableAdultMode, hasInitialCatalog, isAdultMode]);
+  }, [forceDisableAdultMode, hasInitialCatalog, isAdultMode, retryTick]);
 
   const creatorItems = useMemo(
     () => buildCreatorItems(catalog, creatorSlug),
@@ -549,19 +554,20 @@ export default function CreatorPage({
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
         <SiteHeader variant="light" />
         <div className="relative mx-auto max-w-[960px] px-4 py-12 sm:px-6">
-          <SurfacePanel appearance="light" tone="danger" accent="rose">
-            <EmptyState
-              appearance="light"
-              icon="alert"
-              eyebrow="Load issue"
-              title="This creator page is unavailable right now."
-              description="The page did not load cleanly. Try again, or head back to search while this recovers."
-              action={{
-                label: "Try again",
-                onClick: () => window.location.reload(),
-              }}
-            />
-          </SurfacePanel>
+          <NetworkFallback
+            compact
+            title="Oops! This creator page is taking a quick breather."
+            description="We're having trouble connecting. Your data is safe, and you can try again or head back to search while this recovers."
+            onRetry={retryCreatorPage}
+          >
+            <button
+              type="button"
+              onClick={() => router.push("/search")}
+              className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            >
+              Search
+            </button>
+          </NetworkFallback>
         </div>
       </main>
     );

@@ -20,6 +20,7 @@ import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
 import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAutoSaveProgress } from "../../hooks/useAutoSaveProgress";
+import NetworkFallback from "../common/NetworkFallback";
 import {
   buildPathWithAttribution,
   loadPersistedPaymentAttribution,
@@ -1407,40 +1408,34 @@ export default function ReaderPage({ seriesId, episodeId }) {
           onBack={() => router.push(buildSeriesHref())}
         />
         <div className="mx-auto max-w-3xl px-4 py-10">
-          <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-6 text-center">
-            <p className="text-sm text-red-200 font-semibold mb-2">Failed to Load</p>
-            <p className="text-xs text-red-300 mb-4">Unable to load episode content. Please check your connection or try again later.</p>
-            <div className="flex gap-2 justify-center">
-              <button
-                type="button"
-                onClick={() => fetchEpisode({ bustSeries: true })}
-                className="rounded-full border border-red-400 bg-red-500/20 px-4 py-2 text-xs text-red-200 hover:bg-red-500/30"
-              >
-                Retry
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push(buildSeriesHref())}
-                className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
-              >
-                Back to Series
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    buildSupportPath({
-                      topic: "reader",
-                      context: `Reader load issue on ${seriesId}/${episodeId}`,
-                    }),
-                  )
-                }
-                className="rounded-full border border-neutral-700 px-4 py-2 text-xs text-neutral-200"
-              >
-                Get help
-              </button>
-            </div>
-          </div>
+          <NetworkFallback
+            compact
+            title="Oops! This episode is taking a quick breather."
+            description="We're having trouble connecting. Your data is safe, and we're ready to retry this episode."
+            onRetry={() => fetchEpisode({ bustSeries: true })}
+          >
+            <button
+              type="button"
+              onClick={() => router.push(buildSeriesHref())}
+              className="rounded-full border border-neutral-700 bg-transparent px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-neutral-500 hover:bg-white/[0.04]"
+            >
+              Back to Series
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  buildSupportPath({
+                    topic: "reader",
+                    context: `Reader load issue on ${seriesId}/${episodeId}`,
+                  }),
+                )
+              }
+              className="rounded-full border border-neutral-700 bg-transparent px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-neutral-500 hover:bg-white/[0.04]"
+            >
+              Get help
+            </button>
+          </NetworkFallback>
         </div>
       </main>
     );

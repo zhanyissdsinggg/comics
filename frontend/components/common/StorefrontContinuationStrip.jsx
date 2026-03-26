@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
+import InlineRatingDisplay from "./InlineRatingDisplay";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,13 +23,28 @@ function getDiscoveryLaneTitle(campaignId) {
 
 function getSimilarDescription(series) {
   const rating = Number(series?.rating);
-  const ratingLabel = Number.isFinite(rating) ? `${rating.toFixed(1)} rating` : "Fresh pick";
   const genreLabel =
     Array.isArray(series?.genres) && series.genres.length > 0
       ? series.genres.slice(0, 2).join(" / ")
       : "Editorially adjacent";
 
-  return `${genreLabel} / ${ratingLabel}`;
+  if (!Number.isFinite(rating) || rating <= 0) {
+    return `${genreLabel} / Fresh pick`;
+  }
+
+  return (
+    <>
+      <span>{genreLabel}</span>
+      <span aria-hidden="true" className="text-slate-300">
+        /
+      </span>
+      <InlineRatingDisplay
+        score={series?.rating}
+        ratingCount={series?.ratingCount}
+        className="text-slate-500"
+      />
+    </>
+  );
 }
 
 export default function StorefrontContinuationStrip({
@@ -164,9 +180,9 @@ export default function StorefrontContinuationStrip({
               </p>
             ) : null}
             {card.meta ? (
-              <p className={cn("mt-3 text-[11px] uppercase tracking-[0.18em]", isLight ? "text-slate-500" : "text-neutral-500")}>
+              <div className={cn("mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs", isLight ? "text-slate-500" : "text-neutral-500")}>
                 {card.meta}
-              </p>
+              </div>
             ) : null}
             <Button
               type="button"

@@ -48,6 +48,7 @@ import { PageLoading, ButtonLoading, Spinner } from "@/components/common/Loading
 **使用示例**:
 ```jsx
 import { EmptyLibrary, EmptySearch, ErrorState } from "@/components/common/EmptyState";
+import NetworkFallback from "@/components/common/NetworkFallback";
 
 // 空图书馆
 <EmptyLibrary onBrowse={() => router.push("/browse")} />
@@ -57,6 +58,7 @@ import { EmptyLibrary, EmptySearch, ErrorState } from "@/components/common/Empty
 
 // 错误状态
 <ErrorState onRetry={() => refetch()} />
+<NetworkFallback onRetry={() => refetch()} />
 ```
 
 #### 3. Toast - 通知组件

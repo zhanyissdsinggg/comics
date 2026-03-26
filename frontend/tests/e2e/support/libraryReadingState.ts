@@ -1,11 +1,11 @@
-import { devices, expect, test, type Browser, type BrowserContext, type Page, type Route } from "@playwright/test";
-import { createPosterPlaceholder, createReaderPagePlaceholder } from "./support/placeholders";
-import { collectRuntimeIssues, expectNoRuntimeIssues, type RuntimeIssueCollector } from "./support/runtime";
+import { devices, expect, type Browser, type BrowserContext, type Page, type Route } from "@playwright/test";
+import { createPosterPlaceholder, createReaderPagePlaceholder } from "./placeholders";
+import { collectRuntimeIssues, type RuntimeIssueCollector } from "./runtime";
 
-const MOBILE_DEVICE = devices["iPhone 13"];
-const LIBRARY_UI_TIMEOUT_MS = 15000;
+export const MOBILE_DEVICE = devices["iPhone 13"];
+export const LIBRARY_UI_TIMEOUT_MS = 15000;
 
-type SessionMode = "signed-in" | "signed-out";
+export type SessionMode = "signed-in" | "signed-out";
 
 type ProgressEntry = {
   lastEpisodeId: string;
@@ -22,7 +22,7 @@ type HistoryEntry = {
   createdAt: string;
 };
 
-type MockState = {
+export type MockState = {
   seriesCatalog: Array<Record<string, unknown>>;
   seriesDetails: Record<string, { series: Record<string, unknown>; episodes: Array<Record<string, unknown>> }>;
   episodes: Record<string, { episode: Record<string, unknown> }>;
@@ -36,7 +36,7 @@ type MockState = {
   wallet: Record<string, unknown>;
 };
 
-type OpenedPage = {
+export type OpenedLibraryPage = {
   context: BrowserContext;
   page: Page;
   runtimeIssues: RuntimeIssueCollector;
@@ -140,7 +140,7 @@ function normalizeHistory(entries: HistoryEntry[]): HistoryEntry[] {
   );
 }
 
-function createMockState(): MockState {
+export function createLibraryReadingStateMock(): MockState {
   const seriesReading = createSeries({
     id: "series-reading",
     title: "Orbit Testament",
@@ -323,9 +323,13 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
   }
 
   if (pathname === "/api/auth/me") {
-    await fulfillJson(route, 200, session === "signed-in"
-      ? { isSignedIn: true, user: { id: "user-001", email: "reader@example.com" } }
-      : { isSignedIn: false, user: null });
+    await fulfillJson(
+      route,
+      200,
+      session === "signed-in"
+        ? { isSignedIn: true, user: { id: "user-001", email: "reader@example.com" } }
+        : { isSignedIn: false, user: null },
+    );
     return;
   }
 
@@ -539,12 +543,12 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
   await fulfillJson(route, 200, {});
 }
 
-async function openPage(
+export async function openLibraryReadingStatePage(
   browser: Browser,
   state: MockState,
   session: SessionMode,
   path: string,
-): Promise<OpenedPage> {
+): Promise<OpenedLibraryPage> {
   const context = await browser.newContext({
     ...MOBILE_DEVICE,
   });
@@ -562,147 +566,10 @@ async function openPage(
   };
 }
 
-async function closePage(openedPage: OpenedPage): Promise<void> {
+export async function closeLibraryReadingStatePage(openedPage: OpenedLibraryPage): Promise<void> {
   await openedPage.context.close();
 }
 
-async function bodyText(page: Page): Promise<string> {
+export async function getPageBodyText(page: Page): Promise<string> {
   return (await page.locator("body").innerText()).replace(/\s+/g, " ").trim();
 }
-
-test.describe("Library reading-state acceptance", () => {
-  test("signed-in library should lead with continue reading, recent activity, saved series, and clear read states on mobile", async ({
-    browser,
-  }) => {
-    const state = createMockState();
-    const openedPage = await openPage(browser, state, "signed-in", "/library");
-    const { page, runtimeIssues } = openedPage;
-
-    await expect(page.getByRole("button", { name: "Continue Reading" })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-    await expect(page.getByRole("heading", { name: "Recent Activity" })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-    await expect(page.getByRole("heading", { name: "Saved Series" })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-
-    const continueButtonBox = await page
-      .getByRole("button", { name: "Continue Reading" })
-      .boundingBox();
-    expect(continueButtonBox).not.toBeNull();
-    expect((continueButtonBox?.y || 0) + (continueButtonBox?.height || 0)).toBeLessThanOrEqual(
-      MOBILE_DEVICE.viewport.height,
-    );
-
-    await expect(page.getByText("Your shelf is ready.")).toHaveCount(0);
-    await expect(page.locator("#recent-activity")).toContainText("Last read Ep 1");
-    await expect(page.locator("#saved-series")).toContainText("Unread");
-    await expect(page.locator("#saved-series")).toContainText("Reading");
-    await expect(page.locator("#saved-series")).toContainText("Read");
-
-    const text = await bodyText(page);
-    expect(text).toContain("Continue Reading");
-    expect(text).toContain("Recent Activity");
-    expect(text).toContain("Saved Series");
-    expect(text).toContain("Orbit Testament");
-    expect(text).toContain("Paper Moon");
-
-    await page.waitForTimeout(300);
-    await expectNoRuntimeIssues("/library", runtimeIssues);
-    await closePage(openedPage);
-  });
-
-  test("library should keep new progress and saved context across a signed-out gap and a fresh sign-in", async ({
-    browser,
-  }) => {
-    const state = createMockState();
-
-    const signedIn = await openPage(browser, state, "signed-in", "/library");
-    await expect(signedIn.page.getByRole("button", { name: "Continue Reading" })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-    const signedInText = await bodyText(signedIn.page);
-    expect(signedInText).toContain("Continue Reading");
-    expect(signedInText).toContain("Saved Series");
-
-    await signedIn.page.goto("/series/series-fresh", { waitUntil: "domcontentloaded" });
-    await expect(signedIn.page.getByRole("heading", { name: "Fresh Atlas" })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-
-    await signedIn.page
-      .getByRole("button", { name: /Read Free|Start Reading|Continue Reading/i })
-      .first()
-      .click();
-    await signedIn.page.waitForURL(/\/read\/series-fresh\/series-fresh-e1/, {
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-    await expect(signedIn.page.getByRole("button", { name: "Back" })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-
-    await expect
-      .poll(
-        () =>
-          state.history.some(
-            (entry) => entry.seriesId === "series-fresh" && entry.episodeId === "series-fresh-e1",
-          ),
-        { timeout: LIBRARY_UI_TIMEOUT_MS },
-      )
-      .toBeTruthy();
-
-    await signedIn.page.evaluate(() => {
-      window.scrollTo({ top: document.documentElement.scrollHeight * 0.55 });
-    });
-
-    await expect
-      .poll(() => Number(state.progress["series-fresh"]?.percent || 0), {
-        timeout: LIBRARY_UI_TIMEOUT_MS,
-      })
-      .toBeGreaterThan(0.1);
-
-    await signedIn.page.goto("/library", { waitUntil: "domcontentloaded" });
-    await expect(signedIn.page.getByRole("button", { name: "Continue Reading" })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-    await expect(signedIn.page.locator("#recent-activity")).toContainText("Fresh Atlas");
-    await expect(signedIn.page.locator("#saved-series")).toContainText("Fresh Atlas");
-    await expect(signedIn.page.locator("#saved-series")).toContainText("Resume Ep 1");
-    await expect(signedIn.page.locator("#saved-series")).toContainText("Paper Moon");
-
-    await signedIn.page.waitForTimeout(300);
-    await expectNoRuntimeIssues("/library", signedIn.runtimeIssues);
-    await closePage(signedIn);
-
-    const signedOut = await openPage(browser, state, "signed-out", "/library");
-    await expect(signedOut.page.getByRole("heading", { name: "Keep your shelf together." })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-    await expect(signedOut.page.getByText("Continue Reading")).toHaveCount(0);
-    await expect(signedOut.page.getByText("Recent Activity")).toHaveCount(0);
-    await expect(signedOut.page.getByText("Saved Series")).toHaveCount(0);
-    await expect(signedOut.page.getByText("Your shelf is ready.")).toHaveCount(0);
-    await signedOut.page.waitForTimeout(300);
-    await expectNoRuntimeIssues("/library", signedOut.runtimeIssues);
-    await closePage(signedOut);
-
-    const relogin = await openPage(browser, state, "signed-in", "/library");
-    await expect(relogin.page.getByRole("button", { name: "Continue Reading" })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
-    await expect(relogin.page.locator("#recent-activity")).toContainText("Fresh Atlas");
-    await expect(relogin.page.locator("#saved-series")).toContainText("Fresh Atlas");
-    await expect(relogin.page.locator("#saved-series")).toContainText("Paper Moon");
-
-    const reloginText = await bodyText(relogin.page);
-    expect(reloginText).toContain("Continue Reading");
-    expect(reloginText).toContain("Fresh Atlas");
-    expect(reloginText).not.toContain("Your shelf is ready.");
-
-    await relogin.page.waitForTimeout(300);
-    await expectNoRuntimeIssues("/library", relogin.runtimeIssues);
-    await closePage(relogin);
-  });
-});

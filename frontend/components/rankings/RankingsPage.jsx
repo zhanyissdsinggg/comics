@@ -9,6 +9,7 @@ import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import CreatorShelfLinks from "../common/CreatorShelfLinks";
 import Cover from "../common/Cover";
+import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
@@ -79,12 +80,31 @@ const CHART_GUIDES = {
   },
 };
 
-function formatSeriesMeta(series) {
+function renderSeriesMeta(series) {
   const typeLabel = String(series.type || "Series");
   const statusLabel = String(series.status || "Ongoing");
-  const rating = Number(series.rating);
-  const ratingLabel = Number.isFinite(rating) ? rating.toFixed(1) : "N/A";
-  return `${typeLabel} / ${statusLabel} / Rating ${ratingLabel}`;
+
+  return (
+    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+      <span>{typeLabel}</span>
+      <span aria-hidden="true" className="text-slate-300">
+        /
+      </span>
+      <span>{statusLabel}</span>
+      {Number(series?.rating || 0) > 0 ? (
+        <>
+          <span aria-hidden="true" className="text-slate-300">
+            /
+          </span>
+          <InlineRatingDisplay
+            score={series.rating}
+            ratingCount={series.ratingCount}
+            className="text-slate-500"
+          />
+        </>
+      ) : null}
+    </span>
+  );
 }
 
 function RankingsLoadingState() {
@@ -422,7 +442,7 @@ export default function RankingsPage({
                       <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                         {leadEntry.title}
                       </h2>
-                      <p className="mt-4 text-sm text-slate-500">{formatSeriesMeta(leadEntry)}</p>
+                      <p className="mt-4 text-sm text-slate-500">{renderSeriesMeta(leadEntry)}</p>
                     </div>
                   </div>
                 </Link>
@@ -458,7 +478,7 @@ export default function RankingsPage({
                         seriesType={series.type}
                         className="mt-4 aspect-[3/4] w-full rounded-[20px]"
                       />
-                      <p className="mt-4 text-sm text-slate-500">{formatSeriesMeta(series)}</p>
+                      <p className="mt-4 text-sm text-slate-500">{renderSeriesMeta(series)}</p>
                     </Link>
                   ))}
                 </div>
@@ -496,7 +516,7 @@ export default function RankingsPage({
                         />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-base font-semibold text-slate-950">{series.title}</p>
-                          <p className="mt-1 text-xs text-slate-500">{formatSeriesMeta(series)}</p>
+                          <p className="mt-1 text-xs text-slate-500">{renderSeriesMeta(series)}</p>
                           {Array.isArray(series.genres) && series.genres.length > 0 ? (
                             <p className="mt-1 truncate text-xs text-slate-400">{series.genres.slice(0, 2).join(" / ")}</p>
                           ) : null}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ShareButton from "../common/ShareButton";
+import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import LoginGateModal from "../layout/LoginGateModal";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -117,12 +118,7 @@ export default function CommentsSection({
   const requestRef = useRef(0);
   const inputRef = useRef(null);
 
-  const displayRating = useMemo(() => {
-    if (!rating || !ratingCount) {
-      return null;
-    }
-    return Number(rating).toFixed(1);
-  }, [rating, ratingCount]);
+  const hasVisibleRating = useMemo(() => Number(rating) > 0, [rating]);
 
   const loadComments = useCallback(async () => {
     const requestId = requestRef.current + 1;
@@ -330,8 +326,8 @@ export default function CommentsSection({
         <div>
           <h3 className="text-lg font-semibold text-slate-950">Ratings & Comments</h3>
           <p className="text-xs text-slate-500">
-            {displayRating
-              ? `${displayRating} / 5 - ${ratingCount} rating${ratingCount === 1 ? "" : "s"}`
+            {hasVisibleRating
+              ? <InlineRatingDisplay score={rating} ratingCount={ratingCount} className="text-slate-500" />
               : "No ratings yet — be the first!"}
           </p>
         </div>

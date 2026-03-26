@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import NetworkFallback from "./NetworkFallback";
 import {
   AlertCircle,
   ArrowRight,
@@ -192,15 +193,21 @@ export const EmptyHistory = memo(function EmptyHistory({ onBrowse }) {
   );
 });
 
-export const ErrorState = memo(function ErrorState({ onRetry }) {
+export const ErrorState = memo(function ErrorState({
+  onRetry,
+  title = "Oops! We're having trouble loading this.",
+  description = "We're having trouble connecting. Your data is safe, let's try that again.",
+  retryLabel = "Retry",
+  className = "",
+}) {
   return (
-    <EmptyState
-      icon="alert"
-      title="Something went wrong"
-      description="We couldn't load this content. Please try again."
-      action={onRetry}
-      actionText="Retry"
-      eyebrow="Error"
+    <NetworkFallback
+      compact
+      title={title}
+      description={description}
+      retryLabel={retryLabel}
+      onRetry={onRetry}
+      className={className}
     />
   );
 });

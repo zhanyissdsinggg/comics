@@ -9,6 +9,7 @@ import Cover from "../common/Cover";
 import { SkeletonCard } from "../common/Skeleton";
 import SearchBar from "../common/SearchBar";
 import SurfacePanel from "../common/SurfacePanel";
+import NetworkFallback from "../common/NetworkFallback";
 import SiteHeader from "../layout/SiteHeader";
 import SearchCreatorMatchesPanel from "./SearchCreatorMatchesPanel";
 import { apiGet, apiPost } from "../../lib/apiClient";
@@ -181,6 +182,7 @@ export default function SearchPage() {
   const [catalogResponse, setCatalogResponse] = useState(null);
   const [homepageSlots, setHomepageSlots] = useState([]);
   const [homepageSlotsResponse, setHomepageSlotsResponse] = useState(null);
+  const [retrySearchTick, setRetrySearchTick] = useState(0);
   const recoImpressionRef = useRef(new Set());
   const resultsRequestRef = useRef(0);
   const surfaceRequestRef = useRef(0);
@@ -219,6 +221,10 @@ export default function SearchPage() {
     params.set("pageSize", String(PAGE_SIZE));
     return params.toString();
   }, [adultFlag, genre, page, query, sort, status, type]);
+
+  const retrySearch = useCallback(() => {
+    setRetrySearchTick((current) => current + 1);
+  }, []);
 
   const shouldLoadRecoCatalog = true;
 
@@ -291,7 +297,7 @@ export default function SearchPage() {
         clearTimeout(retryTimer);
       }
     };
-  }, [forceDisableAdultMode, queryString, shouldRetry]);
+  }, [forceDisableAdultMode, queryString, retrySearchTick, shouldRetry]);
 
   useEffect(() => {
     const requestId = surfaceRequestRef.current + 1;
@@ -1144,26 +1150,20 @@ export default function SearchPage() {
             ))}
           </div>
         ) : error ? (
-          <SurfacePanel className="text-red-700" appearance="light" tone="danger" accent="rose">
-            <p className="text-lg font-semibold">{error}</p>
-            <p className="mt-2 text-sm text-red-600/80">Please check your connection and try again.</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => window.location.reload()}
-                className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
-              >
-                Retry
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/")}
-                className={secondaryButtonClass}
-              >
-                Back to home
-              </button>
-            </div>
-          </SurfacePanel>
+          <NetworkFallback
+            compact
+            title="Oops! Search hit a network snag."
+            description="We're having trouble connecting. Your data is safe, let's try that search again."
+            onRetry={retrySearch}
+          >
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className={secondaryButtonClass}
+            >
+              Back to home
+            </button>
+          </NetworkFallback>
             ) : results.length === 0 ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <div>

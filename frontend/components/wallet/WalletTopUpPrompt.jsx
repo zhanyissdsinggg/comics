@@ -1,9 +1,10 @@
 "use client";
 
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Gift, Sparkles, Wallet, X, Zap } from "lucide-react";
 import { formatUSCurrency, formatUSNumber } from "../../lib/localization";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
+import NetworkFallback from "../common/NetworkFallback";
 
 function getPackageId(pkg) {
   return String(pkg?.packageId || pkg?.id || "").trim();
@@ -50,6 +51,11 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
   const [billingAvailability, setBillingAvailability] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
+
+  const retryPackages = useCallback(() => {
+    setRetryTick((current) => current + 1);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -93,7 +99,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     return () => {
       mounted = false;
     };
-  }, [isOpen]);
+  }, [isOpen, retryTick]);
 
   const displayPackages = useMemo(() => {
     return [...packages]
@@ -282,20 +288,27 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
               })}
             </div>
           ) : (
-            <div className="mb-6 rounded-[24px] border border-black/8 bg-white px-4 py-4 text-sm text-slate-600 shadow-[0_14px_34px_rgba(15,23,42,0.05)]">
-              <p className="font-semibold text-slate-950">Point packs are unavailable right now.</p>
-              <p className="mt-2 text-slate-500">
-                {loadFailed
-                  ? "We couldn't load the latest packs, but you can still open the points store."
-                  : "Open the points store to see the full pack list."}
-              </p>
-              <button
-                type="button"
-                onClick={() => handleSelectPackage({ id: "auto" })}
-                className="mt-4 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+            <div className="mb-6">
+              <NetworkFallback
+                compact
+                className="px-0 py-0"
+                cardClassName="max-w-none rounded-[24px] px-4 py-5 sm:px-5 sm:py-6"
+                title="Oops! Point packs are taking a quick breather."
+                description={
+                  loadFailed
+                    ? "We're having trouble connecting. Your data is safe, and you can try again or open the points store."
+                    : "Open the points store to see the full pack list while this panel stays light."
+                }
+                onRetry={retryPackages}
               >
-                Open points store
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectPackage({ id: "auto" })}
+                  className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Open points store
+                </button>
+              </NetworkFallback>
             </div>
           )}
 

@@ -33,16 +33,21 @@ function PortraitCard({
   const isLight = appearance === "light";
   const resolvedHref = href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
   const coverMeta = getCoverCardMeta(item);
-  const detailCopy = item.statusLabel || item.metaLabel || coverMeta.detailText || "";
+  const rawDetailCopy = item.statusLabel || item.metaLabel || coverMeta.detailText || "";
   const normalizedMetaLine = String(metaLine || "").replace(/\s+/g, " ").trim().toLowerCase();
-  const normalizedDetailCopy = String(detailCopy || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const normalizedDetailCopy =
+    typeof rawDetailCopy === "string"
+      ? String(rawDetailCopy || "").replace(/\s+/g, " ").trim().toLowerCase()
+      : "";
   const normalizedBadgeLabel = String(coverMeta.badgeLabel || "").replace(/\s+/g, " ").trim().toLowerCase();
   const detailText =
-    normalizedDetailCopy &&
-    normalizedDetailCopy !== normalizedMetaLine &&
-    normalizedDetailCopy !== normalizedBadgeLabel
-      ? detailCopy
-      : "";
+    typeof rawDetailCopy === "string"
+      ? normalizedDetailCopy &&
+        normalizedDetailCopy !== normalizedMetaLine &&
+        normalizedDetailCopy !== normalizedBadgeLabel
+        ? rawDetailCopy
+        : ""
+      : rawDetailCopy;
 
   const handleClick = (event) => {
     if (typeof onClick !== "function") {

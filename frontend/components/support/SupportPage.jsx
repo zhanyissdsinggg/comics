@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
+import NetworkFallback from "../common/NetworkFallback";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import { apiPost } from "../../lib/apiClient";
@@ -49,10 +50,11 @@ export default function SupportPage() {
   const [message, setMessage] = useState("");
   const [activeTopic, setActiveTopic] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const [feedback, setFeedback] = useState({ type: "", text: "", mode: "inline" });
   const [successState, setSuccessState] = useState(null);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const orderIdInputRef = useRef(null);
+  const lastRequestRef = useRef(null);
   const signedInReader = hydrated && isSignedIn;
   const activePreset = useMemo(() => getSupportTopicPreset(activeTopic), [activeTopic]);
   const quickIssueCards = [
@@ -185,8 +187,9 @@ export default function SupportPage() {
   );
 
   const resetForAnotherRequest = () => {
-    setFeedback({ type: "", text: "" });
+    setFeedback({ type: "", text: "", mode: "inline" });
     setSuccessState(null);
+    lastRequestRef.current = null;
     setSubject("");
     setOrderId("");
     setMessage("");
@@ -198,48 +201,22 @@ export default function SupportPage() {
     setEmail(trimmedEmail);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!activePreset) {
-      setFeedback({ type: "error", text: "Choose an issue type so we can route this faster." });
-      return;
-    }
-
-    if (!trimmedEmail) {
-      setFeedback({ type: "error", text: "Add the best reply email so we know where to answer." });
-      return;
-    }
-
-    if (!isValidEmail(trimmedEmail)) {
-      setFeedback({ type: "error", text: "Enter a valid reply email address." });
-      return;
-    }
-
-    if (!trimmedSubject || !trimmedMessage) {
-      setFeedback({ type: "error", text: "Please add both a subject and a message." });
-      return;
-    }
-
+  const submitSupportRequest = async ({ payload, successMeta }) => {
     setSubmitting(true);
-    setFeedback({ type: "", text: "" });
+    setFeedback({ type: "", text: "", mode: "inline" });
     setSuccessState(null);
+    lastRequestRef.current = { payload, successMeta };
 
     try {
-      const response = await apiPost("/api/support", {
-        topic: activePreset.id,
-        replyEmail: trimmedEmail,
-        orderId: trimmedOrderId || undefined,
-        subject: trimmedSubject,
-        message: supportBody,
-      });
+      const response = await apiPost("/api/support", payload);
 
       if (response.ok) {
         setSuccessState({
-          replyEmail: trimmedEmail,
-          topicLabel: activePreset.title,
-          signedInReader,
+          replyEmail: successMeta.replyEmail,
+          topicLabel: successMeta.topicLabel,
+          signedInReader: successMeta.signedInReader,
         });
+        lastRequestRef.current = null;
         setSubject("");
         setOrderId("");
         setMessage("");
@@ -247,12 +224,66 @@ export default function SupportPage() {
         return;
       }
 
-      setFeedback({ type: "error", text: response.error || "Could not send your request." });
+      setFeedback({
+        type: "error",
+        text: response.error || "Could not send your request.",
+        mode: "network",
+      });
     } catch {
-      setFeedback({ type: "error", text: "Could not send your request. Please try again." });
+      setFeedback({
+        type: "error",
+        text: "Could not send your request. Please try again.",
+        mode: "network",
+      });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!activePreset) {
+      setFeedback({ type: "error", text: "Choose an issue type so we can route this faster.", mode: "inline" });
+      return;
+    }
+
+    if (!trimmedEmail) {
+      setFeedback({ type: "error", text: "Add the best reply email so we know where to answer.", mode: "inline" });
+      return;
+    }
+
+    if (!isValidEmail(trimmedEmail)) {
+      setFeedback({ type: "error", text: "Enter a valid reply email address.", mode: "inline" });
+      return;
+    }
+
+    if (!trimmedSubject || !trimmedMessage) {
+      setFeedback({ type: "error", text: "Please add both a subject and a message.", mode: "inline" });
+      return;
+    }
+
+    await submitSupportRequest({
+      payload: {
+        topic: activePreset.id,
+        replyEmail: trimmedEmail,
+        orderId: trimmedOrderId || undefined,
+        subject: trimmedSubject,
+        message: supportBody,
+      },
+      successMeta: {
+        replyEmail: trimmedEmail,
+        topicLabel: activePreset.title,
+        signedInReader,
+      },
+    });
+  };
+
+  const retrySupportRequest = () => {
+    if (submitting || !lastRequestRef.current) {
+      return;
+    }
+    void submitSupportRequest(lastRequestRef.current);
   };
 
   const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
@@ -303,7 +334,7 @@ export default function SupportPage() {
                     applyTopicPreset(preset, { preserveMessage: true, forceSubject: true });
                     setSubject(item.subject);
                     setMessage((current) => current || `Context: ${item.context}`);
-                    setFeedback({ type: "", text: "" });
+                    setFeedback({ type: "", text: "", mode: "inline" });
                     setSuccessState(null);
                   }}
                   className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
@@ -394,16 +425,28 @@ export default function SupportPage() {
                 </div>
 
                 {feedback.text ? (
-                  <div
-                    className={[
-                      "rounded-[24px] border px-4 py-3 text-sm",
-                      feedback.type === "success"
-                        ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-700"
-                        : "border-red-200 bg-red-50 text-red-600",
-                    ].join(" ")}
-                  >
-                    {feedback.text}
-                  </div>
+                  feedback.type === "error" && feedback.mode === "network" ? (
+                    <NetworkFallback
+                      compact
+                      showIllustration={false}
+                      className="px-0 py-0"
+                      cardClassName="max-w-none rounded-[24px] px-4 py-4 sm:px-5 sm:py-5"
+                      title="Oops! Your support request hit a network snag."
+                      description={`${feedback.text} Your message is still here, so you can try again.`}
+                      onRetry={retrySupportRequest}
+                    />
+                  ) : (
+                    <div
+                      className={[
+                        "rounded-[24px] border px-4 py-3 text-sm",
+                        feedback.type === "success"
+                          ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-700"
+                          : "border-red-200 bg-red-50 text-red-600",
+                      ].join(" ")}
+                    >
+                      {feedback.text}
+                    </div>
+                  )
                 ) : null}
 
                 <div className="grid gap-4 sm:grid-cols-2">

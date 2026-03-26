@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { apiGet } from "../../lib/apiClient";
+import NetworkFallback from "./NetworkFallback";
 
 export function useBackendReady() {
   const [ready, setReady] = useState(true);
   const [checked, setChecked] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let mounted = true;
+    setChecked(false);
+
     apiGet("/api/health", { cacheMs: 0, bust: true }).then((response) => {
       if (!mounted) {
         return;
@@ -18,60 +21,30 @@ export function useBackendReady() {
     return () => {
       mounted = false;
     };
+  }, [attempt]);
+
+  const retry = useCallback(() => {
+    setAttempt((previous) => previous + 1);
   }, []);
 
-  return { ready, checked };
+  return { ready, checked, retry };
 }
 
 export function ApiBootGuard({ children }) {
-  const router = useRouter();
-  const { ready, checked } = useBackendReady();
-  const [countdown, setCountdown] = useState(0);
-
-  useEffect(() => {
-    if (!checked || ready) {
-      return;
-    }
-    setCountdown(3);
-  }, [checked, ready]);
-
-  useEffect(() => {
-    if (countdown <= 0) {
-      return;
-    }
-    const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [countdown]);
+  const { ready, checked, retry } = useBackendReady();
 
   const shouldBlock = checked && !ready;
-  const content = useMemo(() => {
-    if (!shouldBlock) {
-      return null;
-    }
-
-    return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        <p className="font-semibold text-amber-900">Some live account features are temporarily unavailable.</p>
-        <p className="mt-1 text-amber-800/90">
-          Browsing can still work with saved data, but sign-in, checkout, or account updates may not respond right away.
-          {countdown > 0 ? ` Trying again in ${countdown}s.` : ""}
-        </p>
-      </div>
-    );
-  }, [shouldBlock, countdown]);
 
   return (
     <>
-      {shouldBlock && content ? (
-        <div className="flex items-center gap-2 px-4 py-2">
-          {content}
-          <button
-            type="button"
-            onClick={() => router.refresh()}
-            className="whitespace-nowrap rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold text-amber-800 transition hover:border-amber-400 hover:bg-amber-100"
-          >
-            Retry
-          </button>
+      {shouldBlock ? (
+        <div className="px-4 py-3 sm:px-6 sm:py-4">
+          <NetworkFallback
+            compact
+            onRetry={retry}
+            title="Oops! Our servers are taking a quick breather."
+            description="We're having trouble connecting. Your data is safe, and saved browsing can still work while live account features catch up."
+          />
         </div>
       ) : null}
       {children}

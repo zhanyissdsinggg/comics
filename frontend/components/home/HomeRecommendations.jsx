@@ -12,6 +12,7 @@ import { getRecommendations } from "../../lib/recommendation/engine";
 import { buildHomeRail } from "../../lib/storefrontRecommendations";
 import { useHomeData } from "./HomeDataProvider";
 import { usePersonalizedRecommendations } from "../../hooks/useAIRecommendations";
+import InlineRatingDisplay from "../common/InlineRatingDisplay";
 
 function parseLatestNumber(value) {
   if (!value) {
@@ -253,7 +254,17 @@ export function useHomeRecommendations() {
           id: "ai-recommended",
           items: aiRecommendations.map((series) =>
             createRailItem(series, {
-              subtitle: `Rating ${series.rating?.toFixed(1) || "N/A"} | ${series.genres?.join(", ") || ""}`,
+              subtitle: series.genres?.join(", ") || series.status || "Series",
+              statusLabel:
+                Number(series?.rating || 0) > 0 ? (
+                  <InlineRatingDisplay
+                    score={series.rating}
+                    ratingCount={series.ratingCount}
+                    className="text-slate-500"
+                  />
+                ) : (
+                  ""
+                ),
             }),
           ),
         }),

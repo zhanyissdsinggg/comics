@@ -7,6 +7,7 @@ import SeriesHeader from "./SeriesHeader";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
 import SeriesArrivalPanel from "./SeriesArrivalPanel";
 import SiteHeader from "../layout/SiteHeader";
+import NetworkFallback from "../common/NetworkFallback";
 import Skeleton from "../common/Skeleton";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -879,39 +880,31 @@ export default function SeriesPage({
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="light" />
         <div className="gush-page-main">
-          <div className="rounded-[28px] border border-red-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.98))] p-6 text-center shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
-            <p className="mb-2 text-sm font-semibold text-red-600">
-              {isUnavailable ? "Series details are unavailable right now" : "Series details could not load"}
-            </p>
-            <p className="mb-4 text-xs text-red-500">
-              {isUnavailable
-                ? "Retry in a moment, search for another title, or head back to Top Series."
-                : "We could not load the cover, episode list, or access details for this title. Retry, search, or head back to Top Series."}
-            </p>
-            <div className="flex gap-2 justify-center">
-              <button
-                type="button"
-                onClick={() => fetchSeries({ bust: true })}
-                className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100"
-              >
-                Retry
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
-                View Top Series
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push(isUnavailable ? "/search" : "/store")}
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
-                {isUnavailable ? "Search" : "View point packs"}
-              </button>
-            </div>
-          </div>
+          <NetworkFallback
+            compact
+            title={isUnavailable ? "Oops! This title is taking a quick breather." : "Oops! We couldn't load this title yet."}
+            description={
+              isUnavailable
+                ? "We're having trouble connecting. Your data is safe, and you can try again or browse another title while this catches up."
+                : "We're having trouble connecting. Your data is safe, and we're ready to retry the cover, episode list, and access details."
+            }
+            onRetry={() => fetchSeries({ bust: true })}
+          >
+            <button
+              type="button"
+              onClick={() => router.push("/rankings?type=popular&window=week")}
+              className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            >
+              View Top Series
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(isUnavailable ? "/search" : "/store")}
+              className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            >
+              {isUnavailable ? "Search" : "View point packs"}
+            </button>
+          </NetworkFallback>
         </div>
       </main>
     );

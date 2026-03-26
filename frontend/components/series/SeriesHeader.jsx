@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
+import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
 
@@ -116,7 +117,6 @@ export default function SeriesHeader({
     visibleBadges.length > 0
       ? visibleBadges.slice(0, 1).map((badge) => ({ label: badge, tone: "badge" }))
       : genres.slice(0, 2).map((genre) => ({ label: genre, tone: "genre" }));
-  const ratingValue = series.rating ? Number(series.rating).toFixed(1) : "New";
   const lastEpisodeLabel = formatEpisodeNumber(lastReadEpisode?.number || "");
   const primaryAction = onPrimaryAction || onContinue || onStart || null;
   const primaryActionLabel = primaryActionLabelOverride || (onContinue
@@ -142,12 +142,21 @@ export default function SeriesHeader({
   const heroFacts = [
     {
       label: "Rating",
-      value: ratingCount > 0 ? ratingValue : "New",
+      value:
+        Number(series.rating || 0) > 0 ? (
+          <InlineRatingDisplay
+            score={series.rating}
+            ratingCount={series.ratingCount}
+            className="text-base font-semibold text-slate-950"
+          />
+        ) : (
+          "New"
+        ),
       detail:
-        ratingCount > 0
-          ? `${formatCompactCount(ratingCount)} rating${ratingCount === 1 ? "" : "s"}`
-          : followers > 0
-            ? `${formatCompactCount(followers)} following`
+        followers > 0
+          ? `${formatCompactCount(followers)} following`
+          : ratingCount > 0
+            ? "Reader score"
             : "Fresh release",
     },
     {

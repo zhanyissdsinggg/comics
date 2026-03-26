@@ -15,6 +15,7 @@ import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl
 import { getReadingCadenceLabel, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
 import Cover from "../common/Cover";
+import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -338,7 +339,15 @@ export default function HeroCarousel({ items }) {
                         Rating
                       </p>
                       <p className="mt-2 text-lg font-semibold text-white">
-                        {Number(active?.rating || 0).toFixed(1)}
+                        {Number(active?.rating || 0) > 0 ? (
+                          <InlineRatingDisplay
+                            score={active?.rating}
+                            ratingCount={active?.ratingCount}
+                            className="text-base font-semibold text-neutral-200"
+                          />
+                        ) : (
+                          "Fresh"
+                        )}
                       </p>
                     </div>
                     <div className={META_PANEL_CLASS}>

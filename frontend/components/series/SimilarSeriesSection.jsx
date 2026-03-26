@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles, Star } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useSimilarRecommendations } from "../../hooks/useAIRecommendations";
 import Skeleton from "../common/Skeleton";
 import Cover from "../common/Cover";
+import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import SurfacePanel from "../common/SurfacePanel";
 import StorefrontContinuationStrip from "../common/StorefrontContinuationStrip";
 
@@ -91,10 +92,11 @@ export default function SimilarSeriesSection({ seriesId, series }) {
               </p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                 {item.rating ? (
-                  <span className="inline-flex items-center gap-1 text-amber-600">
-                    <Star size={12} className="fill-current" />
-                    <span>{Number(item.rating).toFixed(1)}</span>
-                  </span>
+                  <InlineRatingDisplay
+                    score={item.rating}
+                    ratingCount={item.ratingCount}
+                    className="text-slate-500"
+                  />
                 ) : (
                   <span>New pick</span>
                 )}
