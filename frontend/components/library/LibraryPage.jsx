@@ -661,7 +661,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         description:
           historyRail.length > 0
             ? historyRail[0]?.statusLabel || historyRail[0]?.subtitle || "Opened recently"
-            : "Latest opens stay close",
+            : "Recent opens stay close",
         onClick: () =>
           historyRail.length > 0 ? scrollToSection("recent-activity") : router.push("/search"),
       },
@@ -674,7 +674,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             ? bookmarkCountTotal > 0
               ? `${formatBookmarkCountLabel(bookmarkCountTotal)} across your shelf`
               : visibleLibraryItems[0]?.statusLabel || "Saved to your shelf"
-            : "Titles you want to keep",
+            : "Titles you keep stay here",
         onClick: () =>
           visibleLibraryItems.length > 0
             ? scrollToSection("saved-series")
@@ -727,6 +727,41 @@ export default function LibraryPage({ initialSignedIn = false }) {
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
+  const signedInHeroDescription = viewerSignedIn
+    ? hasLibrarySignals
+      ? resumeSpotlightReadHref
+        ? "Continue where you left off, keep recent reads close, and save what matters."
+        : "Recent opens, saved series, and your next read stay together here."
+      : "Your next chapter, recent opens, and saved series will stay here."
+    : "Sign in to keep your shelf, progress, and recent reads in one place.";
+  const readingSnapshotCardsPanel =
+    viewerSignedIn && readingSnapshotCards.length > 0 ? (
+      <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+        {readingSnapshotCards.map((card) => (
+          <button
+            key={card.id}
+            type="button"
+            onClick={card.onClick}
+            className="group rounded-[24px] border border-black/8 bg-white/82 p-4 text-left transition-colors hover:border-black/12 hover:bg-white"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              {card.label}
+            </p>
+            <div className="mt-3 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                  {card.value}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  {card.description}
+                </p>
+              </div>
+              <ArrowUpRight className="mt-1 size-4 flex-shrink-0 text-slate-400 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </div>
+          </button>
+        ))}
+      </div>
+    ) : null;
 
   return (
     <div className="gush-page-shell">
@@ -741,9 +776,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
               : "Your reading shelf."
           }
           description={
-            viewerSignedIn
-              ? "Continue where you left off, keep recent reads close, and save what matters."
-              : "Sign in to keep your shelf, progress, and recent reads in one place."
+            signedInHeroDescription
           }
           secondary=""
           stats={libraryStats}
@@ -892,68 +925,48 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       </div>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                      {readingSnapshotCards.map((card) => (
-                        <button
-                          key={card.id}
-                          type="button"
-                          onClick={card.onClick}
-                          className="group rounded-[24px] border border-black/8 bg-white/82 p-4 text-left transition-colors hover:border-black/12 hover:bg-white"
-                        >
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                            {card.label}
-                          </p>
-                          <div className="mt-3 flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
-                                {card.value}
-                              </p>
-                              <p className="mt-2 text-sm leading-6 text-slate-500">
-                                {card.description}
-                              </p>
-                            </div>
-                            <ArrowUpRight className="mt-1 size-4 flex-shrink-0 text-slate-400 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+                    {readingSnapshotCardsPanel}
                   </div>
                 </SurfacePanel>
               ) : (
-                <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                  <div className="space-y-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      Library
-                    </p>
-                    <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                      Nothing saved yet.
-                    </h2>
-                    <p className="max-w-2xl text-sm leading-6 text-slate-600">
-                      Start a title and your shelf will keep your place.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => router.push("/rankings?type=ttf&window=all")}
-                      className={primaryButtonClass}
-                    >
-                      Read Free
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => router.push("/search")}
-                      className={secondaryButtonClass}
-                    >
-                      Search
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowCollectionManager((value) => !value)}
-                      className={secondaryButtonClass}
-                    >
-                      {showCollectionManager ? "Hide Collections" : "Collections"}
-                    </button>
+                <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
+                    <div className="rounded-[28px] border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.06)] p-5 sm:p-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
+                        Your Shelf
+                      </p>
+                      <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
+                        Your shelf is ready.
+                      </h2>
+                      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
+                        The next chapter, recent opens, and saved series will stay here.
+                      </p>
+                      <div className="mt-6 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => router.push("/rankings?type=ttf&window=all")}
+                          className={primaryButtonClass}
+                        >
+                          Read Free
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/search")}
+                          className={secondaryButtonClass}
+                        >
+                          Search
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCollectionManager((value) => !value)}
+                          className={secondaryButtonClass}
+                        >
+                          {showCollectionManager ? "Hide Collections" : "Collections"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {readingSnapshotCardsPanel}
                   </div>
                 </SurfacePanel>
               )
