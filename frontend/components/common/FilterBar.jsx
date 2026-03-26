@@ -4,8 +4,8 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Chip from "./Chip";
 
@@ -22,7 +22,8 @@ export default function FilterBar({
   density = "default",
 }) {
   const [showAllGenres, setShowAllGenres] = useState(false);
-  const [showGenrePicker, setShowGenrePicker] = useState(selectedGenre !== "all");
+  const [showGenrePicker, setShowGenrePicker] = useState(false);
+  const genreMenuRef = useRef(null);
   const isLight = appearance === "light";
   const isQuiet = density === "quiet";
 
@@ -54,16 +55,44 @@ export default function FilterBar({
 
   const handleGenreChange = (genre) => {
     if (isQuiet) {
-      setShowGenrePicker(genre !== "all");
+      setShowGenrePicker(false);
     }
     if (onGenreChange) onGenreChange(genre);
   };
 
   useEffect(() => {
-    if (selectedGenre !== "all") {
-      setShowGenrePicker(true);
+    if (!showGenrePicker) {
+      setShowAllGenres(false);
     }
-  }, [selectedGenre]);
+  }, [showGenrePicker]);
+
+  useEffect(() => {
+    if (!isQuiet || !showGenrePicker) {
+      return undefined;
+    }
+
+    const handlePointerDown = (event) => {
+      if (!genreMenuRef.current?.contains(event.target)) {
+        setShowGenrePicker(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setShowGenrePicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isQuiet, showGenrePicker]);
 
   const filterShellClass =
     isLight
@@ -90,12 +119,16 @@ export default function FilterBar({
         <div className="flex flex-wrap items-center justify-between gap-3">
           {!isQuiet ? (
             <div className="flex flex-wrap items-center gap-2.5">
-              <p className={cn("text-[11px] font-semibold uppercase tracking-[0.24em]", labelClass)}>Refine</p>
+              <p className={cn("text-[11px] font-semibold uppercase tracking-[0.24em]", labelClass)}>
+                Refine
+              </p>
               {activeFilterCount > 0 ? (
                 <span
                   className={cn(
                     "rounded-full border px-2.5 py-1 text-[11px] font-semibold",
-                    isLight ? "border-black/8 bg-white text-slate-500" : "border-white/10 bg-white/[0.04] text-neutral-300",
+                    isLight
+                      ? "border-black/8 bg-white text-slate-500"
+                      : "border-white/10 bg-white/[0.04] text-neutral-300",
                   )}
                 >
                   {activeFilterCount} active
@@ -106,7 +139,9 @@ export default function FilterBar({
             <span
               className={cn(
                 "rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
-                isLight ? "border-black/8 bg-white text-slate-400" : "border-white/10 bg-white/[0.04] text-neutral-300",
+                isLight
+                  ? "border-black/8 bg-white text-slate-400"
+                  : "border-white/10 bg-white/[0.04] text-neutral-300",
               )}
             >
               {activeFilterCount} active
@@ -119,7 +154,9 @@ export default function FilterBar({
             <button
               type="button"
               onClick={onReset}
-              className={`inline-flex items-center gap-2 rounded-full border ${isQuiet ? "px-3 py-1.5 text-[11px]" : "px-4 py-2 text-xs uppercase tracking-[0.16em]"} font-semibold transition-colors ${
+              className={`inline-flex items-center gap-2 rounded-full border ${
+                isQuiet ? "px-3 py-1.5 text-[11px]" : "px-4 py-2 text-xs uppercase tracking-[0.16em]"
+              } font-semibold transition-colors ${
                 isLight
                   ? "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
                   : "border-white/10 bg-black/20 text-neutral-200 hover:border-white/20 hover:bg-white/[0.08]"
@@ -143,7 +180,11 @@ export default function FilterBar({
                 active={sortBy === option.id}
                 onClick={() => handleSortChange(option.id)}
                 appearance={appearance}
-                className={cn(chipClassName, "tracking-[0.16em]", sortBy === option.id && !isLight ? "text-white" : "")}
+                className={cn(
+                  chipClassName,
+                  "tracking-[0.16em]",
+                  sortBy === option.id && !isLight ? "text-white" : "",
+                )}
               />
             ))}
           </div>
@@ -166,18 +207,23 @@ export default function FilterBar({
         {genres.length > 0 ? (
           <div
             className={cn(
-              `${isQuiet ? "space-y-2.5 pt-2.5" : "space-y-3 pt-3"} border-t`,
+              `${isQuiet ? "pt-2.5" : "space-y-3 pt-3"} border-t`,
               isLight ? "border-black/6" : "border-white/10",
             )}
           >
             {isQuiet ? (
-              <>
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <div
+                ref={genreMenuRef}
+                className="relative flex flex-wrap items-center justify-between gap-3"
+              >
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setShowGenrePicker((current) => !current)}
+                    aria-expanded={showGenrePicker}
+                    aria-haspopup="dialog"
                     className={cn(
-                      "rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors",
+                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors",
                       subtleButtonClass,
                       (showGenrePicker || selectedGenre !== "all") &&
                         (isLight
@@ -185,45 +231,69 @@ export default function FilterBar({
                           : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"),
                     )}
                   >
-                    Genres
+                    <span>Genres</span>
+                    <ChevronDown
+                      size={14}
+                      className={cn("transition-transform", showGenrePicker ? "rotate-180" : "")}
+                    />
                   </button>
 
-                  {showGenrePicker && genres.length > 8 ? (
-                    <button
-                      type="button"
-                      onClick={() => setShowAllGenres(!showAllGenres)}
-                      className={cn(
-                        "rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors",
-                        subtleButtonClass,
-                      )}
-                    >
-                      {showAllGenres ? "Less" : "More"}
-                    </button>
+                  {selectedGenre !== "all" ? (
+                    <Chip
+                      label={selectedGenre}
+                      active
+                      appearance={appearance}
+                      className={chipClassName}
+                    />
                   ) : null}
                 </div>
 
                 {showGenrePicker ? (
-                  <div className="flex flex-wrap gap-2">
-                    <Chip
-                      label="All"
-                      active={selectedGenre === "all"}
-                      onClick={() => handleGenreChange("all")}
-                      appearance={appearance}
-                      className={chipClassName}
-                    />
-                    {displayedGenres.map((genre) => (
+                  <div
+                    className={cn(
+                      "absolute left-0 top-full z-20 mt-2 w-full max-w-[min(20rem,calc(100vw-3rem))] rounded-[18px] border px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
+                      isLight
+                        ? "border-black/6 bg-white/95 backdrop-blur-[10px]"
+                        : "border-white/10 bg-black/90",
+                    )}
+                  >
+                    <div className="flex flex-wrap gap-2">
                       <Chip
-                        key={genre}
-                        label={genre}
-                        active={selectedGenre === genre}
-                        onClick={() => handleGenreChange(genre)}
+                        label="All"
+                        active={selectedGenre === "all"}
+                        onClick={() => handleGenreChange("all")}
                         appearance={appearance}
                         className={chipClassName}
                       />
-                    ))}
+                      {displayedGenres.map((genre) => (
+                        <Chip
+                          key={genre}
+                          label={genre}
+                          active={selectedGenre === genre}
+                          onClick={() => handleGenreChange(genre)}
+                          appearance={appearance}
+                          className={chipClassName}
+                        />
+                      ))}
+                    </div>
+
+                    {genres.length > 8 ? (
+                      <div className="mt-3 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setShowAllGenres(!showAllGenres)}
+                          className={cn(
+                            "rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors",
+                            subtleButtonClass,
+                          )}
+                        >
+                          {showAllGenres ? "Less" : "More"}
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
-              </>
+              </div>
             ) : (
               <>
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -233,11 +303,11 @@ export default function FilterBar({
                       type="button"
                       onClick={() => setShowAllGenres(!showAllGenres)}
                       className={cn(
-                        `rounded-full border ${isQuiet ? "px-3 py-1.5 text-[11px]" : "px-3 py-2 text-xs uppercase tracking-[0.16em]"} font-semibold transition-colors`,
+                        "rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors",
                         subtleButtonClass,
                       )}
                     >
-                      {isQuiet ? (showAllGenres ? "Less" : "More") : showAllGenres ? "Show less" : `Show all ${genres.length}`}
+                      {showAllGenres ? "Show less" : `Show all ${genres.length}`}
                     </button>
                   ) : null}
                 </div>
