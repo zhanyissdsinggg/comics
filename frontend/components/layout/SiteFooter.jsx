@@ -63,6 +63,83 @@ const socialLinks = [
   { label: "Twitter", href: siteConfig.twitterUrl },
 ].filter((item) => item.href);
 
+function FooterAgeBadge({ isHome }) {
+  return (
+    <span
+      aria-label="18 plus only"
+      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.22em] opacity-60 ${
+        isHome ? "border-slate-400/40 text-slate-600" : "border-white/15 text-neutral-200"
+      }`}
+    >
+      18+
+    </span>
+  );
+}
+
+function VisaIcon() {
+  return (
+    <svg viewBox="0 0 64 24" aria-hidden="true" className="h-4 w-auto">
+      <text
+        x="8"
+        y="16"
+        fill="currentColor"
+        fontFamily="Arial, sans-serif"
+        fontSize="11"
+        fontStyle="italic"
+        fontWeight="700"
+        letterSpacing=".16em"
+      >
+        VISA
+      </text>
+    </svg>
+  );
+}
+
+function MastercardIcon() {
+  return (
+    <svg viewBox="0 0 64 24" aria-hidden="true" className="h-4 w-auto">
+      <circle cx="23" cy="12" r="6.5" fill="#ef4444" />
+      <circle cx="31" cy="12" r="6.5" fill="#f59e0b" fillOpacity="0.92" />
+      <text
+        x="40"
+        y="15"
+        fill="currentColor"
+        fontFamily="Arial, sans-serif"
+        fontSize="5.5"
+        fontWeight="700"
+        textAnchor="middle"
+      >
+        MC
+      </text>
+    </svg>
+  );
+}
+
+function PaymentIconRow({ isHome }) {
+  const iconTone = isHome
+    ? "border-slate-300/70 bg-white/60 text-slate-500"
+    : "border-white/10 bg-white/[0.03] text-neutral-200";
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 opacity-60">
+      <span
+        className={`inline-flex h-8 min-w-[64px] items-center justify-center rounded-md border px-3 ${iconTone}`}
+        aria-label="Visa accepted"
+        title="Visa"
+      >
+        <VisaIcon />
+      </span>
+      <span
+        className={`inline-flex h-8 min-w-[64px] items-center justify-center rounded-md border px-3 ${iconTone}`}
+        aria-label="Mastercard accepted"
+        title="Mastercard"
+      >
+        <MastercardIcon />
+      </span>
+    </div>
+  );
+}
+
 function normalizeFooterPath(href) {
   return String(href || "").split("?")[0];
 }
@@ -129,26 +206,32 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
               isHome ? "border-black/8 text-slate-400" : "border-white/10 text-neutral-500"
             }`}
           >
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="flex flex-col gap-3">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
                 className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-300 transition-colors hover:text-white"}
               >
                 {siteConfig.supportEmail}
               </a>
-              {footerMetaLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                {footerMetaLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <FooterAgeBadge isHome={isHome} />
+              </div>
             </div>
-            <p>
-              (c) {currentYear} {siteConfig.companyName}
-            </p>
+            <div className="flex flex-col gap-3 lg:items-end">
+              <PaymentIconRow isHome={isHome} />
+              <p>
+                (c) {currentYear} {siteConfig.companyName}
+              </p>
+            </div>
           </div>
         </div>
       </footer>
@@ -228,33 +311,41 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
             isHome ? "border-black/8 text-slate-400" : "border-white/10 text-neutral-500"
           }`}
         >
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            {footerMetaLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
-              >
-                {link.label}
-              </Link>
-            ))}
-            {socialLinks.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
-              >
-                {item.label}
-              </a>
-            ))}
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              {footerMetaLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <FooterAgeBadge isHome={isHome} />
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              {socialLinks.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span>
-              (c) {currentYear} {siteConfig.companyName}
-            </span>
-            {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
+          <div className="flex flex-col gap-3 lg:items-end">
+            <PaymentIconRow isHome={isHome} />
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span>
+                (c) {currentYear} {siteConfig.companyName}
+              </span>
+              {siteConfig.companyAddress ? <span>{siteConfig.companyAddress}</span> : null}
+            </div>
           </div>
         </div>
       </div>
