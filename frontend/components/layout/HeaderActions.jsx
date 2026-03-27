@@ -56,7 +56,7 @@ export default function HeaderActions({
               ? "border-black/8 bg-white text-slate-800 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
               : "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]"
           }`}
-          aria-label="Wallet"
+          aria-label={`View your wallet${walletTotal > 0 ? ` with ${walletTotal.toLocaleString()} points` : ""}`}
         >
           <Wallet className="size-4" strokeWidth={2} />
           <span className="text-sm font-semibold">Wallet</span>
@@ -71,7 +71,11 @@ export default function HeaderActions({
           variant="outline"
           onClick={() => router.push("/notifications")}
           className={cn(iconButtonClass, "hidden sm:inline-flex")}
-          aria-label="Notifications"
+          aria-label={
+            unreadCount > 0
+              ? `View your notifications, ${unreadCount > 99 ? "99 plus" : unreadCount} unread`
+              : "View your notifications"
+          }
         >
           <Bell className="size-4" />
           {unreadCount > 0 ? (
@@ -112,7 +116,7 @@ export default function HeaderActions({
         variant="outline"
         onClick={onMenuClick}
         className={cn(iconButtonClass, "sm:hidden")}
-        aria-label={hydrated && isSignedIn ? "Open menu and account" : "Open menu"}
+        aria-label={hydrated && isSignedIn ? "Open menu and account options" : "Open main menu"}
         title="Open menu"
       >
         <Menu className="size-4" />

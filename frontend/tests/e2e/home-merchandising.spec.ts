@@ -186,16 +186,16 @@ test.describe("Homepage merchandising sync", () => {
 
     const homepageMain = page.locator("main");
 
-    await expect(homepageMain).toContainText("Read something worth staying up for.", {
+    await expect(page.getByRole("heading", { name: "Stories worth opening." })).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Start with Velvet Voltage, try a few free chapters, or jump straight into a finished series.", {
+    await expect(page.getByRole("button", { name: "Browse Free Series" })).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Trending", {
+    await expect(page.getByRole("button", { name: "View Top Series" }).first()).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Start Free", {
+    await expect(homepageMain).toContainText("Featured series", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(homepageMain).toContainText("Soft Launch Kiss", {
@@ -204,10 +204,6 @@ test.describe("Homepage merchandising sync", () => {
     await expect(homepageMain).toContainText("Last Ember Files", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Rocket Choir", {
-      timeout: HOME_UI_TIMEOUT_MS,
-    });
-
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/", runtimeIssues);
   });

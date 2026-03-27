@@ -1,6 +1,7 @@
 import AccountPageClient from "./AccountPageClient";
 import { createPageMetadata } from "../../lib/seo";
 import { cookies } from "next/headers";
+import { BookmarkProvider } from "../../store/useBookmarkStore";
 
 export const metadata = createPageMetadata({
   title: "Account",
@@ -16,5 +17,9 @@ export default async function Page() {
   const cookieStore = await cookies();
   const initialSignedIn = cookieStore.get("mn_is_signed_in")?.value === "1";
 
-  return <AccountPageClient initialSignedIn={initialSignedIn} />;
+  return (
+    <BookmarkProvider>
+      <AccountPageClient initialSignedIn={initialSignedIn} />
+    </BookmarkProvider>
+  );
 }

@@ -38,11 +38,15 @@ import {
 } from "../../lib/commerceSuccess";
 import { buildDiscoveryContext } from "../../lib/discoveryContext";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+import ReaderChapterNavBar from "./ReaderChapterNavBar";
 
 const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
   ssr: false,
 });
 const ActionModal = dynamic(() => import("../series/ActionModal"), {
+  ssr: false,
+});
+const UnlockChapterModal = dynamic(() => import("../series/UnlockChapterModal"), {
   ssr: false,
 });
 const ReaderDrawer = dynamic(() => import("./ReaderDrawer"), {
@@ -110,11 +114,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const [pendingResume, setPendingResume] = useState(null);
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [scrollPercent, setScrollPercent] = useState(0);
+  const [showChapterNavigation, setShowChapterNavigation] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
   const [gateStatus, setGateStatus] = useState("OK");
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
+  const [unlockModalBusy, setUnlockModalBusy] = useState("");
   const [commerceState, setCommerceState] = useState({
     loading: false,
     offerDecision: null,
@@ -128,6 +134,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const scrollRafRef = useRef(null);
   const lastUiProgressRef = useRef(-1);
   const progressTimerRef = useRef(null);
+  const lastScrollYRef = useRef(0);
+  const chapterNavigationVisibleRef = useRef(false);
   const resumeRef = useRef(false);
   const gateReportedRef = useRef(false);
   const requestRef = useRef(0);
@@ -296,6 +304,24 @@ export default function ReaderPage({ seriesId, episodeId }) {
       }),
     );
   }, [readerPath]);
+
+  const handleGoPrevChapter = useCallback(() => {
+    if (!prevEpisode) {
+      return;
+    }
+    router.push(buildEpisodeHref(prevEpisode.id));
+  }, [buildEpisodeHref, prevEpisode, router]);
+
+  const handleGoNextChapter = useCallback(() => {
+    if (!nextEpisode) {
+      return;
+    }
+    if (nextUnlocked) {
+      router.push(buildEpisodeHref(nextEpisode.id));
+      return;
+    }
+    setShowEndOverlay(true);
+  }, [buildEpisodeHref, nextEpisode, nextUnlocked, router]);
 
   const handleReturnToDiscovery = useCallback(() => {
     if (!discoveryContext?.sourcePath) {
@@ -917,20 +943,44 @@ export default function ReaderPage({ seriesId, episodeId }) {
   }, [episodeId]);
 
   useEffect(() => {
+    chapterNavigationVisibleRef.current = false;
+    lastScrollYRef.current = 0;
+    setShowChapterNavigation(false);
+  }, [episodeId]);
+
+  useEffect(() => {
+    const setChapterNavigationVisibility = (nextVisible) => {
+      if (chapterNavigationVisibleRef.current === nextVisible) {
+        return;
+      }
+      chapterNavigationVisibleRef.current = nextVisible;
+      setShowChapterNavigation(nextVisible);
+    };
+
+    lastScrollYRef.current = typeof window !== "undefined" ? Math.max(window.scrollY, 0) : 0;
     const onScroll = () => {
       if (scrollRafRef.current) {
         return;
       }
       scrollRafRef.current = window.requestAnimationFrame(() => {
         scrollRafRef.current = null;
+        const currentY = Math.max(window.scrollY, 0);
         const total = document.documentElement.scrollHeight - window.innerHeight;
-        const percent = total > 0 ? window.scrollY / total : 0;
+        const percent = total > 0 ? currentY / total : 0;
         const next = Math.min(1, Math.max(0, percent));
         scrollRef.current = next;
         if (Math.abs(next - lastUiProgressRef.current) >= 0.005) {
           lastUiProgressRef.current = next;
           setScrollPercent(next);
         }
+
+        const delta = currentY - lastScrollYRef.current;
+        if (currentY <= 96) {
+          setChapterNavigationVisibility(false);
+        } else if (Math.abs(delta) >= 12) {
+          setChapterNavigationVisibility(delta < 0);
+        }
+        lastScrollYRef.current = currentY;
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -947,6 +997,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       if (progressTimerRef.current) {
         clearInterval(progressTimerRef.current);
       }
+      setChapterNavigationVisibility(false);
       setProgress(seriesId, episodeId, scrollRef.current);
     };
   }, [episodeId, seriesId, setProgress]);
@@ -1109,6 +1160,29 @@ export default function ReaderPage({ seriesId, episodeId }) {
     return response;
   };
 
+  const openUnlockModal = (targetEpisodeId, options = {}) => {
+    const targetEpisode = episodes.find((item) => item.id === targetEpisodeId);
+    const resolvedPrice = Number(
+      options.pricePts ??
+        (targetEpisodeId === episodeId
+          ? currentPricing.finalPrice
+          : targetEpisodeId === nextEpisode?.id
+            ? nextPricing.finalPrice
+            : targetEpisode?.pricePts || 0),
+    );
+
+    setModalState({
+      type: "UNLOCK",
+      view: options.view || "confirm",
+      targetEpisodeId,
+      chapterNumber: targetEpisode?.number || (targetEpisodeId === episodeId ? currentIndex + 1 : ""),
+      pricePts: resolvedPrice,
+      shortfallPts:
+        options.shortfallPts ??
+        Math.max(0, resolvedPrice - Number((paidPts || 0) + (bonusPts || 0))),
+    });
+  };
+
   const handleShortfall = (response, targetEpisodeId) => {
     setModalState({
       type: "SHORTFALL",
@@ -1120,46 +1194,55 @@ export default function ReaderPage({ seriesId, episodeId }) {
     });
   };
 
-  const handleUnlockCurrent = async () => {
-    trackEvent("paywall_unlock_click", { seriesId, episodeId });
-    if (!isSignedIn) {
-      openReaderAuthPrompt();
-      setModalState({
-        type: "INFO",
-        title: "Sign in to unlock",
-        description: "Sign in so unlocks, points, and reading progress stay on one account.",
-      });
+  const handleConfirmUnlock = async () => {
+    if (modalState?.type !== "UNLOCK") {
       return;
     }
-    const response = await handleUnlock(episodeId);
+
+    const targetEpisodeId = modalState.targetEpisodeId || episodeId;
+    if (!targetEpisodeId) {
+      return;
+    }
+
+    if (!isSignedIn) {
+      openReaderAuthPrompt();
+      setModalState(null);
+      return;
+    }
+
+    setUnlockModalBusy("unlock");
+    const response = await handleUnlock(targetEpisodeId);
     if (response.ok) {
-      setModalState({
-        type: "SUCCESS",
-        title: "Episode unlocked",
-        description: "You're all set. Start reading.",
-      });
+      setUnlockModalBusy("");
+      setModalState(null);
+      if (nextEpisode && targetEpisodeId === nextEpisode.id) {
+        router.push(buildEpisodeHref(nextEpisode.id));
+      }
       return;
     }
     if (response.status === 401) {
       openReaderAuthPrompt();
-      setModalState({
-        type: "ERROR",
-        title: "Sign in required",
-        description: "Sign in to unlock this episode and keep your place.",
-      });
+      setUnlockModalBusy("");
+      setModalState(null);
       return;
     }
     if (response.status === 402) {
-      handleShortfall(response, episodeId);
+      setUnlockModalBusy("");
+      openUnlockModal(targetEpisodeId, {
+        pricePts: modalState.pricePts,
+        view: "packs",
+        shortfallPts: response.shortfallPts || Math.max(0, Number(modalState.pricePts || 0) - walletBalance),
+      });
       return;
     }
     trackEvent("unlock_fail", {
       seriesId,
-      episodeId,
+      episodeId: targetEpisodeId,
       status: response.status,
       errorCode: response.error,
       requestId: response.requestId,
     });
+    setUnlockModalBusy("");
     setModalState({
       type: "ERROR",
       title: "Unlock failed",
@@ -1167,48 +1250,19 @@ export default function ReaderPage({ seriesId, episodeId }) {
     });
   };
 
+  const handleUnlockCurrent = async () => {
+    trackEvent("paywall_unlock_click", { seriesId, episodeId });
+    openUnlockModal(episodeId, {
+      pricePts: currentPricing.finalPrice,
+    });
+  };
+
   const handleUnlockNext = async () => {
     if (!nextEpisode) {
       return;
     }
-    if (!isSignedIn) {
-      openReaderAuthPrompt();
-      setModalState({
-        type: "INFO",
-        title: "Sign in to unlock",
-        description: "Sign in so unlocks, points, and reading progress stay on one account.",
-      });
-      return;
-    }
-    const response = await handleUnlock(nextEpisode.id);
-    if (response.ok) {
-      router.push(buildEpisodeHref(nextEpisode.id));
-      return;
-    }
-    if (response.status === 401) {
-      openReaderAuthPrompt();
-      setModalState({
-        type: "ERROR",
-        title: "Sign in required",
-        description: "Sign in to unlock this episode and keep your place.",
-      });
-      return;
-    }
-    if (response.status === 402) {
-      handleShortfall(response, nextEpisode.id);
-      return;
-    }
-    trackEvent("unlock_fail", {
-      seriesId,
-      episodeId: nextEpisode.id,
-      status: response.status,
-      errorCode: response.error,
-      requestId: response.requestId,
-    });
-    setModalState({
-      type: "ERROR",
-      title: "Unlock failed",
-      description: response.error || "Please try again in a moment.",
+    openUnlockModal(nextEpisode.id, {
+      pricePts: nextPricing.finalPrice,
     });
   };
 
@@ -1460,21 +1514,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
         progress={scrollPercent}
         hasPrev={Boolean(prevEpisode)}
         hasNext={Boolean(nextEpisode)}
-        onPrev={() =>
-          prevEpisode
-            ? router.push(buildEpisodeHref(prevEpisode.id))
-            : null
-        }
-        onNext={() => {
-          if (!nextEpisode) {
-            return;
-          }
-          if (nextUnlocked) {
-            router.push(buildEpisodeHref(nextEpisode.id));
-            return;
-          }
-          setShowEndOverlay(true);
-        }}
+        onPrev={handleGoPrevChapter}
+        onNext={handleGoNextChapter}
         nextLocked={nextEpisode ? !nextUnlocked : false}
       />
       <div className="mx-auto hidden max-w-5xl px-4 pt-3 text-[11px] text-neutral-500 md:block">
@@ -1529,6 +1570,24 @@ export default function ReaderPage({ seriesId, episodeId }) {
           onEndRef={endRef}
         />
       </div>
+
+      <ReaderChapterNavBar
+        visible={
+          showChapterNavigation &&
+          Boolean(prevEpisode || nextEpisode) &&
+          !showPaywall &&
+          !showEndOverlay &&
+          !drawerOpen &&
+          !settingsPanelOpen &&
+          !modalState &&
+          !activeModal
+        }
+        hasPrev={Boolean(prevEpisode)}
+        hasNext={Boolean(nextEpisode)}
+        nextLocked={Boolean(nextEpisode) && !nextUnlocked}
+        onPrev={handleGoPrevChapter}
+        onNext={handleGoNextChapter}
+      />
 
       {showPaywall ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[rgba(15,23,42,0.36)] px-4 backdrop-blur-sm">
@@ -1806,7 +1865,123 @@ export default function ReaderPage({ seriesId, episodeId }) {
         />
       ) : null}
 
-      {modalState ? (
+      {modalState?.type === "UNLOCK" ? (
+        <UnlockChapterModal
+          open
+          chapterNumber={modalState?.chapterNumber}
+          pricePts={modalState?.pricePts}
+          walletBalance={walletBalance}
+          shortfallPts={modalState?.shortfallPts}
+          isSignedIn={isSignedIn}
+          view={modalState?.view}
+          busyAction={unlockModalBusy}
+          preferredPackageId={offerDecision?.recommendedTopupOffer?.id}
+          onViewChange={(nextView) =>
+            setModalState((current) =>
+              current?.type === "UNLOCK"
+                ? {
+                    ...current,
+                    view: nextView,
+                  }
+                : current,
+            )
+          }
+          onConfirmUnlock={handleConfirmUnlock}
+          onBuyPack={async (packageId) => {
+            const targetEpisodeId = modalState?.targetEpisodeId || episodeId;
+            const entryPoint = targetEpisodeId === nextEpisode?.id ? "READER_END" : "READER_PAYWALL";
+
+            setUnlockModalBusy(`topup:${packageId}`);
+            trackEvent("offer_click", {
+              offerId: `points_pack_${packageId}`,
+              entry: entryPoint,
+            });
+            const topupResponse = await topup(packageId, {
+              attribution: buildReaderCommerceAttribution(entryPoint, targetEpisodeId, {
+                offerId: `points_pack_${packageId}`,
+              }),
+            });
+            if (topupResponse.ok) {
+              const retry = await handleUnlock(targetEpisodeId);
+              if (retry.ok) {
+                trackEvent("offer_purchase_success", {
+                  offerId: `points_pack_${packageId}`,
+                  entry: entryPoint,
+                  orderId: topupResponse.data?.order?.orderId,
+                });
+                trackEvent("topup_success", {
+                  packageId,
+                  orderId: topupResponse.data?.order?.orderId,
+                });
+                setUnlockModalBusy("");
+                setModalState(null);
+                if (nextEpisode && targetEpisodeId === nextEpisode.id) {
+                  router.push(buildEpisodeHref(nextEpisode.id));
+                }
+                return;
+              }
+
+              if (retry.status === 402) {
+                setUnlockModalBusy("");
+                openUnlockModal(targetEpisodeId, {
+                  pricePts: modalState?.pricePts,
+                  view: "packs",
+                  shortfallPts:
+                    retry.shortfallPts || Math.max(0, Number(modalState?.pricePts || 0) - walletBalance),
+                });
+                return;
+              }
+
+              trackEvent("unlock_fail", {
+                seriesId,
+                episodeId: targetEpisodeId,
+                retry: true,
+                status: retry.status,
+                errorCode: retry.error,
+                requestId: retry.requestId,
+              });
+            } else {
+              trackEvent("topup_fail", {
+                packageId,
+                status: topupResponse.status,
+                errorCode: topupResponse.error,
+                requestId: topupResponse.requestId,
+              });
+            }
+
+            setUnlockModalBusy("");
+            setModalState({
+              type: "ERROR",
+              title: "Couldn't add points",
+              description: "We couldn't finish that purchase just now.",
+            });
+          }}
+          onOpenStore={() => {
+            const targetEpisodeId = modalState?.targetEpisodeId || episodeId;
+            const entryPoint = targetEpisodeId === nextEpisode?.id ? "READER_END" : "READER_PAYWALL";
+
+            trackEvent("offer_click", {
+              offerId: "store_entry",
+              entry: entryPoint,
+            });
+            router.push(
+              buildPathWithAttribution(
+                "/store",
+                buildReaderCommerceAttribution(entryPoint, targetEpisodeId),
+                { returnTo: readerPath, focus: "auto" },
+              ),
+            );
+            setModalState(null);
+          }}
+          onClose={() => {
+            if (!unlockModalBusy) {
+              setModalState(null);
+            }
+          }}
+        />
+      ) : null}
+
+      {modalState && modalState?.type !== "UNLOCK" ? (
         <ActionModal
           open
           type={modalState?.type}

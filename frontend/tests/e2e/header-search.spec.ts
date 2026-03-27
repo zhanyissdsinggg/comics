@@ -9,7 +9,9 @@ test.describe("Header search", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const searchInput = page.getByPlaceholder("Search titles, genres, or creators");
+    const searchInput = page.getByRole("searchbox", {
+      name: "Search series, creators, or genres",
+    });
     await searchInput.focus();
 
     await expect(page.getByText(/^Start with$/)).toBeVisible();

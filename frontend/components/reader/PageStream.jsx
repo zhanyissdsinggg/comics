@@ -1,7 +1,7 @@
 "use client";
 
 import NextImage from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
 import { trackEvent } from "../../lib/trackEvent";
 
@@ -148,9 +148,9 @@ export default function PageStream({
   const [loadingPages, setLoadingPages] = useState({});
   const [reloadKeys, setReloadKeys] = useState({});
   const [qualityOverrides, setQualityOverrides] = useState({});
+  const [readyPages, setReadyPages] = useState({});
   const retryAttemptsRef = useRef({});
   const retryTimersRef = useRef({});
-  const prefetchIndexRef = useRef(0);
   const containerRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const loadStartRef = useRef({});
@@ -176,28 +176,93 @@ export default function PageStream({
 
   const isHorizontal = layoutMode === "horizontal";
   const isVerticalComicFlow = !isHorizontal && visiblePages.length > 0;
+  const initialReadyCount = useMemo(
+    () => Math.max(1, Math.min(visiblePages.length, prefetchCount || 1)),
+    [prefetchCount, visiblePages.length],
+  );
 
-  useEffect(() => {
-    if (visiblePages.length > 0) {
-      preloadImages(visiblePages, 0, Math.max(1, prefetchCount));
-    }
-  }, [visiblePages, prefetchCount]);
-
-  useEffect(() => {
-    const next = {};
-    const loadingNext = {};
-    visiblePages.forEach((_page, index) => {
-      if (loadStartRef.current[index]) {
-        next[index] = loadStartRef.current[index];
-        loadingNext[index] = true;
+  const markPageReady = useCallback(
+    (index) => {
+      if (!Number.isFinite(index) || index < 0 || index >= visiblePages.length) {
         return;
       }
-      next[index] = Date.now();
-      loadingNext[index] = true;
+
+      if (!loadStartRef.current[index]) {
+        loadStartRef.current[index] = Date.now();
+        setLoadingPages((prev) => (prev[index] ? prev : { ...prev, [index]: true }));
+      }
+
+      setReadyPages((prev) => (prev[index] ? prev : { ...prev, [index]: true }));
+    },
+    [visiblePages.length],
+  );
+
+  useEffect(() => {
+    Object.values(retryTimersRef.current).forEach((timer) => {
+      if (timer) {
+        clearTimeout(timer);
+      }
     });
-    loadStartRef.current = next;
-    setLoadingPages(loadingNext);
-  }, [visiblePages, reloadKeys]);
+    retryTimersRef.current = {};
+    retryAttemptsRef.current = {};
+    loadStartRef.current = {};
+    setErrorPages({});
+    setReloadKeys({});
+    setQualityOverrides({});
+    setActiveIndex(0);
+
+    if (visiblePages.length === 0) {
+      setReadyPages({});
+      setLoadingPages({});
+      return;
+    }
+
+    const nextReady = {};
+    const next = {};
+    for (let index = 0; index < initialReadyCount; index += 1) {
+      nextReady[index] = true;
+      next[index] = true;
+      loadStartRef.current[index] = Date.now();
+    }
+    setReadyPages(nextReady);
+    setLoadingPages(next);
+    if (initialReadyCount > 0) {
+      preloadImages(visiblePages, 0, initialReadyCount);
+    }
+  }, [initialReadyCount, visiblePages]);
+
+  useEffect(() => {
+    if (visiblePages.length === 0) {
+      return;
+    }
+
+    const node = containerRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") {
+      visiblePages.forEach((_page, index) => markPageReady(index));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+          const index = Number(entry.target.getAttribute("data-index") || 0);
+          markPageReady(index);
+        });
+      },
+      {
+        rootMargin: isHorizontal ? "0px 40%" : "1400px 0px",
+        threshold: 0.01,
+      },
+    );
+
+    const items = node.querySelectorAll("[data-index]");
+    items.forEach((item) => observer.observe(item));
+
+    return () => observer.disconnect();
+  }, [isHorizontal, markPageReady, visiblePages]);
 
   useEffect(() => {
     if (visiblePages.length === 0) {
@@ -229,31 +294,7 @@ export default function PageStream({
     if (visiblePages.length === 0) {
       return;
     }
-    prefetchIndexRef.current = activeIndex;
-    const timers = retryTimersRef.current;
-    let cancelled = false;
-    const prefetchChunk = () => {
-      if (cancelled) {
-        return;
-      }
-      const start = prefetchIndexRef.current;
-      if (start >= visiblePages.length) {
-        return;
-      }
-      const count = Math.max(1, prefetchCount);
-      preloadImages(visiblePages, start, count);
-      prefetchIndexRef.current = start + count;
-      if (prefetchIndexRef.current < visiblePages.length) {
-        timers.prefetch = setTimeout(prefetchChunk, 600);
-      }
-    };
-    timers.prefetch = setTimeout(prefetchChunk, 0);
-    return () => {
-      cancelled = true;
-      if (timers.prefetch) {
-        clearTimeout(timers.prefetch);
-      }
-    };
+    preloadImages(visiblePages, Math.max(0, activeIndex + 1), Math.max(1, prefetchCount));
   }, [visiblePages, activeIndex, prefetchCount]);
 
   useEffect(() => {
@@ -272,6 +313,8 @@ export default function PageStream({
       clearTimeout(retryTimersRef.current[index]);
     }
     retryTimersRef.current[index] = setTimeout(() => {
+      loadStartRef.current[index] = Date.now();
+      setLoadingPages((prev) => ({ ...prev, [index]: true }));
       setErrorPages((prev) => ({ ...prev, [index]: false }));
       setReloadKeys((prev) => ({ ...prev, [index]: Date.now() }));
       onRetryPage?.(index);
@@ -312,13 +355,14 @@ export default function PageStream({
   return (
     <div
       ref={containerRef}
-      className={`mx-auto w-full max-w-3xl px-3 pb-24 pt-5 sm:px-4 sm:pt-6 ${
+      className={`mx-auto w-full max-w-3xl ${
         isHorizontal
-          ? "flex gap-4 overflow-x-auto scroll-snap-x no-scrollbar"
+          ? "flex gap-4 overflow-x-auto scroll-snap-x no-scrollbar px-3 pb-24 pt-5 sm:px-4 sm:pt-6"
           : isVerticalComicFlow
-            ? "flex flex-col gap-0"
-            : "flex flex-col gap-4"
+            ? "flex flex-col gap-0 px-0 pb-28 pt-0 leading-none"
+            : "flex flex-col gap-4 px-3 pb-24 pt-5 sm:px-4 sm:pt-6"
       }`}
+      style={isVerticalComicFlow ? { lineHeight: 0 } : undefined}
     >
       {visiblePages.length === 0 && visibleParagraphs.length === 0 ? (
         <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-6 text-sm text-neutral-300">
@@ -328,25 +372,33 @@ export default function PageStream({
           </p>
         </div>
       ) : visiblePages.length > 0
-        ? visiblePages.map((page, index) => (
-            <div
-              key={page.url}
-              className={`${
-                isHorizontal
-                  ? "flex-none w-full scroll-snap-item rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2"
-                  : "rounded-none border-0 bg-transparent p-0"
-              }`}
-              style={isHorizontal ? { contentVisibility: "auto", containIntrinsicSize: "1200px 800px" } : undefined}
-              data-index={index}
-            >
-              {readPlaceholdPageMeta(page.url) ? (
+        ? visiblePages.map((page, index) => {
+            const placeholderMeta = readPlaceholdPageMeta(page.url);
+            const shouldRenderImage = Boolean(readyPages[index]) || Boolean(placeholderMeta);
+
+            return (
+              <div
+                key={page.url}
+                className={`${
+                  isHorizontal
+                    ? "flex-none w-full scroll-snap-item rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2"
+                    : "block m-0 rounded-none border-0 bg-transparent p-0 leading-none"
+                }`}
+                style={
+                  isHorizontal
+                    ? { contentVisibility: "auto", containIntrinsicSize: "1200px 800px" }
+                    : { lineHeight: 0, margin: 0, padding: 0 }
+                }
+                data-index={index}
+              >
+                {placeholderMeta ? (
                 <ReaderEditorialFallback
                   page={page}
-                  meta={readPlaceholdPageMeta(page.url)}
+                  meta={placeholderMeta}
                   index={index}
                   isHorizontal={isHorizontal}
                 />
-              ) : errorPages[index] ? (
+                ) : errorPages[index] ? (
                 <div className="flex flex-col items-center gap-3 py-10 text-sm text-neutral-300">
                   <p className="text-base font-semibold text-neutral-100">
                     Page {index + 1} failed to load
@@ -362,40 +414,64 @@ export default function PageStream({
                     Retry
                   </button>
                 </div>
-              ) : (
-                <>
-                  {loadingPages[index] !== false ? (
+                ) : !shouldRenderImage ? (
+                  <div
+                    className={`animate-pulse ${
+                      isHorizontal
+                        ? "rounded-xl bg-neutral-800/60"
+                        : "m-0 block rounded-none bg-neutral-800/60 p-0 leading-none"
+                    }`}
+                    style={{
+                      height: 0,
+                      margin: 0,
+                      padding: 0,
+                      paddingTop: `${((page.h || 1200) / (page.w || 800)) * 100}%`,
+                    }}
+                  />
+                ) : (
+                  <div
+                    className={isHorizontal ? "relative overflow-hidden rounded-xl" : "relative m-0 block overflow-hidden p-0 leading-none"}
+                    style={isHorizontal ? undefined : { lineHeight: 0, margin: 0, padding: 0 }}
+                  >
+                    {loadingPages[index] !== false ? (
                     <div
-                      className="animate-pulse rounded-xl bg-neutral-800/60"
+                      className={`pointer-events-none absolute inset-0 z-[1] animate-pulse ${
+                        isHorizontal ? "rounded-xl bg-neutral-800/60" : "m-0 rounded-none bg-neutral-800/60"
+                      }`}
                       style={{
-                        height: 0,
-                        paddingTop: `${((page.h || 1200) / (page.w || 800)) * 100}%`,
+                        margin: 0,
+                        padding: 0,
+                        lineHeight: 0,
                       }}
                     />
-                  ) : null}
-                  <NextImage
-                    src={
-                      reloadKeys[index]
-                        ? `${normalizePlaceholdImageUrl(page.url)}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
-                        : normalizePlaceholdImageUrl(page.url)
-                    }
-                    alt=""
-                    width={page.w || 800}
-                    height={page.h || 1200}
-                    className={`w-full ${
-                      isHorizontal ? "rounded-xl" : "block rounded-none"
-                    } ${isNightMode ? "brightness-90 contrast-105" : ""}`}
-                    onError={() => handleError(index)}
-                    onLoad={() => handleLoad(index)}
-                    priority={index < 2}
-                    loading={index < 2 ? "eager" : "lazy"}
-                    quality={qualityOverrides[index] || imageQuality}
-                    sizes={imageSizes || "(max-width: 768px) 100vw, 768px"}
-                  />
-                </>
-              )}
-            </div>
-          ))
+                    ) : null}
+                    <NextImage
+                      src={
+                        reloadKeys[index]
+                          ? `${normalizePlaceholdImageUrl(page.url)}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
+                          : normalizePlaceholdImageUrl(page.url)
+                      }
+                      alt=""
+                      width={page.w || 800}
+                      height={page.h || 1200}
+                      className={`m-0 w-full p-0 align-top transition-opacity duration-200 ${
+                        isHorizontal ? "block rounded-xl" : "block rounded-none"
+                      } ${loadingPages[index] !== false ? "opacity-0" : "opacity-100"} ${
+                        isNightMode ? "brightness-90 contrast-105" : ""
+                      }`}
+                      style={{ display: "block", margin: 0, padding: 0, lineHeight: 0 }}
+                      onError={() => handleError(index)}
+                      onLoad={() => handleLoad(index)}
+                      priority={index < Math.min(initialReadyCount, 2)}
+                      loading={index < Math.min(initialReadyCount, 2) ? "eager" : "lazy"}
+                      quality={qualityOverrides[index] || imageQuality}
+                      sizes={imageSizes || "(max-width: 768px) 100vw, 768px"}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })
         : visibleParagraphs.map((paragraph, index) => (
             <div
               key={`paragraph-${index}`}

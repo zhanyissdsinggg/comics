@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import ReadingStats from "../../components/account/ReadingStats";
+import MyLibraryPanel from "../../components/account/MyLibraryPanel";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import CommerceSuccessBanner from "../../components/common/CommerceSuccessBanner";
@@ -618,6 +619,8 @@ export default function AccountPage({ initialSignedIn = false }) {
           </div>
           <StorefrontPathwaysGrid cards={accountActionCards} columnsClassName="md:grid-cols-2 xl:grid-cols-4" appearance="light" />
         </SurfacePanel>
+
+        <MyLibraryPanel viewerSignedIn={viewerSignedIn} onOpenAuth={openAuthPrompt} />
 
         {hydrated && isSignedIn ? <ReadingStats /> : null}
 

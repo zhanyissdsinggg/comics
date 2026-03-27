@@ -4,14 +4,15 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ActionModal from "./ActionModal";
+import UnlockChapterModal from "./UnlockChapterModal";
 import { useWalletStore } from "../../store/useWalletStore";
 import { trackEvent } from "../../lib/trackEvent";
 import { decideOffers } from "../../lib/offers/decide";
 import { getBucket, getOrCreateUserId, trackExposure } from "../../lib/experiments/ab";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
-import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getEpisodeAccessState } from "../../lib/episodeAccessState";
 
 function createIdempotencyKey() {
@@ -41,15 +42,6 @@ function formatDate(value) {
     month: "short",
     day: "2-digit",
   }).format(new Date(parsed));
-}
-
-function formatPointsLabel(value) {
-  return `${Number(value || 0)} points`;
-}
-
-function formatPackLabel(value) {
-  const count = Number(value || 0);
-  return `${count || 1}-episode pack`;
 }
 
 function getSignalClass(tone) {
@@ -86,15 +78,17 @@ function EpisodeRow({
   const router = useRouter();
   const { topup } = useWalletStore();
   const { paidPts, bonusPts, subscription, subscriptionUsage } = useWalletStore();
+  const { isSignedIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
   const { unlockEpisode: recordUnlock } = useBehaviorStore();
   const [modalState, setModalState] = useState(null);
-  const [isWorking, setIsWorking] = useState(false);
+  const [busyAction, setBusyAction] = useState("");
   const impressionRef = useRef(false);
   const now = typeof nowMs === "number" ? nowMs : Date.now();
 
   const isSubscriber = Boolean(subscription?.active);
   const walletBalance = (paidPts || 0) + (bonusPts || 0);
+  const isWorking = Boolean(busyAction);
   const isNewPayer =
     typeof window !== "undefined"
       ? window.localStorage.getItem("mn_has_purchased") !== "1"
@@ -152,11 +146,6 @@ function EpisodeRow({
   );
 
   const recommendedTopup = offerDecision.recommendedTopupOffer;
-  const recommendedUnlockOffer = offerDecision.recommendedUnlockOffer;
-  const offerBadge = recommendedUnlockOffer?.tag;
-  const savingsText = recommendedUnlockOffer?.savingsPct
-    ? `You save ${recommendedUnlockOffer.savingsPct}%`
-    : null;
   const accessState = useMemo(
     () =>
       getEpisodeAccessState({
@@ -200,53 +189,24 @@ function EpisodeRow({
             (shortfallValue > 0 ? `Need ${shortfallValue} more points` : "")
           : accessState.kind === "membership"
             ? accessState.supportLabel || ""
-            : "";
-  const compareItems =
-    modalState?.type === "SHORTFALL" && recommendedUnlockOffer?.episodes > 1
-      ? [
-          { label: "Single episode", value: formatPointsLabel(pricePts) },
-          {
-            label: formatPackLabel(recommendedUnlockOffer.episodes),
-            value: formatPointsLabel(recommendedUnlockOffer.pricePts),
-          },
-          {
-            label: "Membership",
-            value: isSubscriber ? "Already active" : "Free unlocks + lower prices",
-          },
-        ]
-      : [];
-  const unlockTips =
-    modalState?.type === "SHORTFALL"
-      ? [
-          "Unlocked episodes stay in your library.",
-          "Packs usually cost less per chapter.",
-          "Membership adds more free reads and shorter waits.",
-        ]
-      : [];
-  const subscribeUpsellTips =
-    modalState?.type === "SHORTFALL"
-      ? [
-          "Member pricing can lower unlock costs on eligible titles.",
-          "Membership can speed up free unlock timers.",
-        ]
-      : [];
+        : "";
 
   useEffect(() => {
-    if (modalState?.type !== "SHORTFALL") {
+    if (modalState?.type !== "UNLOCK" || modalState?.view !== "packs") {
       impressionRef.current = false;
       return;
     }
     if (impressionRef.current) {
       return;
     }
-    if (recommendedUnlockOffer?.id) {
-      trackEvent("offer_impression", { offerId: recommendedUnlockOffer.id, entry: "UNLOCK_MODAL" });
+    if (recommendedTopup?.id) {
+      trackEvent("offer_impression", { offerId: recommendedTopup.id, entry: "UNLOCK_MODAL" });
       impressionRef.current = true;
     }
-  }, [modalState?.type, recommendedUnlockOffer?.id]);
+  }, [modalState?.type, modalState?.view, recommendedTopup?.id]);
 
   const handleClaimAccess = async () => {
-    setIsWorking(true);
+    setBusyAction("claim");
     trackEvent("ttf_claim", { seriesId, episodeId: episode?.id });
     let response;
     try {
@@ -261,7 +221,7 @@ function EpisodeRow({
         title: "Episode unlocked",
         description: "You're all set. Start reading.",
       });
-      setIsWorking(false);
+      setBusyAction("");
       return;
     }
 
@@ -283,11 +243,28 @@ function EpisodeRow({
           ? "That free read is not ready yet."
           : response.error || "We couldn't open that free read right now.",
     });
-    setIsWorking(false);
+    setBusyAction("");
+  };
+
+  const openUnlockModal = (view = "confirm", nextShortfall = shortfallValue) => {
+    setModalState({
+      type: "UNLOCK",
+      view,
+      chapterNumber: episode?.number,
+      pricePts: effectivePrice,
+      shortfallPts: Math.max(0, Number(nextShortfall || 0)),
+      targetEpisodeId: episode?.id,
+    });
   };
 
   const handleUnlockAccess = async () => {
-    setIsWorking(true);
+    if (!isSignedIn) {
+      openAuthModal();
+      setModalState(null);
+      return;
+    }
+
+    setBusyAction("unlock");
     trackEvent("click_unlock", { seriesId, episodeId: episode?.id });
     const idempotencyKey = createIdempotencyKey();
     let response;
@@ -305,7 +282,7 @@ function EpisodeRow({
         title: "Episode unlocked",
         description: "You're all set. Start reading.",
       });
-      setIsWorking(false);
+      setBusyAction("");
       return;
     }
 
@@ -325,13 +302,7 @@ function EpisodeRow({
         description: "Sign in to unlock this episode and keep your place.",
       });
     } else if (response.status === 402) {
-      setModalState({
-        type: "SHORTFALL",
-        title: "Need more points",
-        description: "Add points or check membership to keep reading.",
-        shortfallPts: response.shortfallPts || 0,
-        offerId: recommendedTopup?.id,
-      });
+      openUnlockModal("packs", response.shortfallPts || Math.max(0, effectivePrice - walletBalance));
     } else {
       setModalState({
         type: "ERROR",
@@ -339,7 +310,7 @@ function EpisodeRow({
         description: response.error || "Please try again in a moment.",
       });
     }
-    setIsWorking(false);
+    setBusyAction("");
   };
 
   const handlePrimaryAction = async () => {
@@ -358,7 +329,7 @@ function EpisodeRow({
     }
 
     if (accessState.actionKind === "unlock") {
-      await handleUnlockAccess();
+      openUnlockModal();
       return;
     }
 
@@ -486,143 +457,148 @@ function EpisodeRow({
         </div>
       </div>
 
+      <UnlockChapterModal
+        open={modalState?.type === "UNLOCK"}
+        chapterNumber={modalState?.chapterNumber}
+        pricePts={modalState?.pricePts}
+        walletBalance={walletBalance}
+        shortfallPts={modalState?.shortfallPts}
+        isSignedIn={isSignedIn}
+        view={modalState?.view}
+        busyAction={busyAction}
+        preferredPackageId={recommendedTopup?.id}
+        onViewChange={(nextView) =>
+          setModalState((current) =>
+            current?.type === "UNLOCK"
+              ? {
+                  ...current,
+                  view: nextView,
+                }
+              : current,
+          )
+        }
+        onConfirmUnlock={handleUnlockAccess}
+        onBuyPack={async (packageId) => {
+          setBusyAction(`topup:${packageId}`);
+          trackEvent("offer_click", {
+            offerId: `points_pack_${packageId}`,
+            entry: "UNLOCK_MODAL",
+          });
+          const topupResponse = await topup(packageId, {
+            attribution: {
+              entryPoint: "UNLOCK_MODAL",
+              offerId: `points_pack_${packageId}`,
+              sourcePath: `/series/${seriesId}`,
+              sourceSeriesId: seriesId,
+              sourceEpisodeId: episode?.id,
+              returnTo: `/series/${seriesId}`,
+            },
+          });
+          if (topupResponse.ok) {
+            let retry;
+            try {
+              const retryKey = createIdempotencyKey();
+              retry = await onUnlock(seriesId, episode?.id, retryKey);
+            } catch {
+              retry = { ok: false, status: 500, error: "UNLOCK_FAILED" };
+            }
+
+            if (retry.ok) {
+              trackEvent("unlock_success", {
+                seriesId,
+                episodeId: episode?.id,
+                retry: true,
+              });
+              recordUnlock(seriesId, episode?.id);
+              trackEvent("offer_purchase_success", {
+                offerId: `points_pack_${packageId}`,
+                entry: "UNLOCK_MODAL",
+                orderId: topupResponse.data?.order?.orderId,
+              });
+              trackEvent("topup_success", {
+                packageId,
+                orderId: topupResponse.data?.order?.orderId,
+              });
+              setModalState({
+                type: "SUCCESS",
+                title: "Episode unlocked",
+                description: "You're all set. Start reading.",
+              });
+              setBusyAction("");
+              return;
+            }
+
+            if (retry.status === 402) {
+              openUnlockModal(
+                "packs",
+                retry.shortfallPts || Math.max(0, effectivePrice - ((paidPts || 0) + (bonusPts || 0))),
+              );
+              setBusyAction("");
+              return;
+            }
+
+            trackEvent("unlock_fail", {
+              seriesId,
+              episodeId: episode?.id,
+              retry: true,
+              status: retry.status,
+              errorCode: retry.error,
+              requestId: retry.requestId,
+            });
+          } else {
+            trackEvent("topup_fail", {
+              packageId,
+              status: topupResponse.status,
+              errorCode: topupResponse.error,
+              requestId: topupResponse.requestId,
+            });
+          }
+
+          setModalState({
+            type: "ERROR",
+            title: "Couldn't add points",
+            description: "We couldn't finish that purchase just now.",
+          });
+          setBusyAction("");
+        }}
+        onOpenStore={() => {
+          router.push(
+            buildPathWithAttribution(
+              "/store",
+              {
+                entryPoint: "UNLOCK_MODAL",
+                sourcePath: `/series/${seriesId}`,
+                sourceSeriesId: seriesId,
+                sourceEpisodeId: episode?.id,
+                returnTo: `/series/${seriesId}`,
+              },
+              { focus: "auto" },
+            ),
+          );
+          trackEvent("offer_click", {
+            offerId: "store_entry",
+            entry: "UNLOCK_MODAL",
+          });
+          setModalState(null);
+        }}
+        onClose={() => {
+          if (!busyAction) {
+            setModalState(null);
+          }
+        }}
+      />
+
       <ActionModal
-        open={Boolean(modalState)}
+        open={Boolean(modalState) && modalState?.type !== "UNLOCK"}
         type={modalState?.type}
         title={modalState?.title}
         description={modalState?.description}
         shortfallPts={modalState?.shortfallPts}
-        offer={modalState?.type === "SHORTFALL" ? recommendedTopup : recommendedUnlockOffer}
-        offerBadge={modalState?.type === "SHORTFALL" ? recommendedTopup?.tag : offerBadge}
-        offerSavingsText={modalState?.type === "SHORTFALL" ? null : savingsText}
-        compareItems={compareItems}
-        compareTitle="Single, pack, or membership"
-        tips={[...unlockTips, ...subscribeUpsellTips]}
-        tipsTitle="What each option gets you"
-        actions={
-          modalState?.type === "SHORTFALL"
-            ? [
-                {
-                  label: STOREFRONT_TERMS.viewPointPacks,
-                  onClick: () => {
-                    router.push(
-                      buildPathWithAttribution(
-                        "/store",
-                        {
-                          entryPoint: "UNLOCK_MODAL",
-                          sourcePath: `/series/${seriesId}`,
-                          sourceSeriesId: seriesId,
-                          sourceEpisodeId: episode?.id,
-                          returnTo: `/series/${seriesId}`,
-                        },
-                        { focus: "auto" },
-                      ),
-                    );
-                    trackEvent("offer_click", {
-                      offerId: "store_entry",
-                      entry: "UNLOCK_MODAL",
-                    });
-                    setModalState(null);
-                  },
-                  variant: "secondary",
-                },
-                {
-                  label: STOREFRONT_TERMS.compareMembership,
-                  onClick: () => {
-                    trackEvent("click_subscribe_from_shortfall", {
-                      seriesId,
-                      episodeId: episode?.id,
-                    });
-                    router.push(
-                      buildPathWithAttribution("/subscribe", {
-                        entryPoint: "UNLOCK_MODAL",
-                        sourcePath: `/series/${seriesId}`,
-                        sourceSeriesId: seriesId,
-                        sourceEpisodeId: episode?.id,
-                        returnTo: `/series/${seriesId}`,
-                      }),
-                    );
-                    setModalState(null);
-                  },
-                  variant: "secondary",
-                },
-                {
-                  label: recommendedTopup?.name
-                    ? `Get ${recommendedTopup.name}`
-                    : "Get recommended pack",
-                  onClick: async () => {
-                    const packageId =
-                      recommendedTopup?.id?.replace("points_pack_", "") || "starter";
-                    trackEvent("offer_click", {
-                      offerId: recommendedTopup?.id || "points_pack_starter",
-                      entry: "UNLOCK_MODAL",
-                    });
-                    const topupResponse = await topup(packageId, {
-                      attribution: {
-                        entryPoint: "UNLOCK_MODAL",
-                        offerId: recommendedTopup?.id || `points_pack_${packageId}`,
-                        sourcePath: `/series/${seriesId}`,
-                        sourceSeriesId: seriesId,
-                        sourceEpisodeId: episode?.id,
-                        returnTo: `/series/${seriesId}`,
-                      },
-                    });
-                    if (topupResponse.ok) {
-                      let retry;
-                      try {
-                        const retryKey = createIdempotencyKey();
-                        retry = await onUnlock(seriesId, episode?.id, retryKey);
-                      } catch {
-                        retry = { ok: false };
-                      }
-                      if (retry.ok) {
-                        trackEvent("unlock_success", {
-                          seriesId,
-                          episodeId: episode?.id,
-                          retry: true,
-                        });
-                        recordUnlock(seriesId, episode?.id);
-                        trackEvent("offer_purchase_success", {
-                          offerId: recommendedTopup?.id || "points_pack_starter",
-                          entry: "UNLOCK_MODAL",
-                          orderId: topupResponse.data?.order?.orderId,
-                        });
-                        trackEvent("topup_success", {
-                          packageId,
-                          orderId: topupResponse.data?.order?.orderId,
-                        });
-                        setModalState({
-                          type: "SUCCESS",
-                          title: "Episode unlocked",
-                          description: "You're all set. Start reading.",
-                        });
-                        return;
-                      }
-                    }
-                    trackEvent("topup_fail", {
-                      packageId,
-                      status: topupResponse.status,
-                      errorCode: topupResponse.error,
-                      requestId: topupResponse.requestId,
-                    });
-                    trackEvent("unlock_fail", {
-                      seriesId,
-                      episodeId: episode?.id,
-                      retry: true,
-                      errorCode: retry?.error,
-                      requestId: retry?.requestId,
-                    });
-                    setModalState({
-                      type: "ERROR",
-                      title: "Couldn't add points",
-                      description: "We couldn't finish that purchase just now.",
-                    });
-                  },
-                  variant: "primary",
-                },
-              ]
-            : null
-        }
+        offer={modalState?.type === "SHORTFALL" ? recommendedTopup : null}
+        offerBadge={modalState?.type === "SHORTFALL" ? recommendedTopup?.tag : null}
+        offerSavingsText={null}
+        compareItems={[]}
+        tips={[]}
         onClose={() => setModalState(null)}
       />
     </li>

@@ -24,10 +24,11 @@ export class EntitlementsController {
       res.status(401);
       return buildError(ERROR_CODES.UNAUTHENTICATED);
     }
+
     if (!seriesId) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST);
+      return { entitlements: await this.entitlementsService.listEntitlements(userId) };
     }
+
     const entitlement = await this.entitlementsService.getEntitlement(userId, seriesId);
     return { entitlement };
   }

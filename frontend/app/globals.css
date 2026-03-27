@@ -37,6 +37,7 @@
   --gush-page-max: 1280px;
   --gush-page-max-wide: 1320px;
   --gush-section-gap: clamp(1.5rem, 3vw, 2.4rem);
+  --gush-mobile-bottom-nav-height: 5.4rem;
 }
 
 html.dark {
@@ -83,6 +84,10 @@ main {
 @media (max-width: 767px) {
   body {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  body.has-mobile-bottom-nav {
+    padding-bottom: calc(var(--gush-mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
   }
 
   body.reader-page {

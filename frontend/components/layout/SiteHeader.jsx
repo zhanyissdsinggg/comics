@@ -11,6 +11,7 @@ import HeaderLogo from "./HeaderLogo";
 import HeaderNav from "./HeaderNav";
 import HeaderActions from "./HeaderActions";
 import HeaderSearch from "./HeaderSearch";
+import MobileBottomNav from "./MobileBottomNav";
 
 export default function SiteHeader({ onSearch, variant = "default" }) {
   const router = useRouter();
@@ -193,6 +194,8 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
           onPendingAdultToggleChange={setPendingAdultToggle}
         />
       ) : null}
+
+      <MobileBottomNav />
     </>
   );
 }

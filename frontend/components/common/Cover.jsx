@@ -31,6 +31,25 @@ function labelsMatch(left, right) {
   return String(left || "").replace(/\s+/g, " ").trim().toLowerCase() === String(right || "").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+function buildCoverAltText(label, seriesType = "") {
+  const normalizedLabel = String(label || "").replace(/\s+/g, " ").trim();
+  const normalizedType = String(seriesType || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+  if (normalizedLabel) {
+    if (normalizedType === "comic" || normalizedType === "novel") {
+      return `${normalizedType.charAt(0).toUpperCase()}${normalizedType.slice(1)} cover image for ${normalizedLabel}`;
+    }
+
+    return `Cover image for ${normalizedLabel}`;
+  }
+
+  if (normalizedType === "comic" || normalizedType === "novel") {
+    return `${normalizedType.charAt(0).toUpperCase()}${normalizedType.slice(1)} cover image`;
+  }
+
+  return "Series cover image";
+}
+
 function CoverFallback({
   label = "",
   eyebrow = "",
@@ -41,6 +60,7 @@ function CoverFallback({
   className = "",
   style = {},
   fallbackVariant = "default",
+  ariaLabel = "Series cover image",
 }) {
   const isMinimalCard = fallbackVariant === "minimal-card";
   const title = label
@@ -79,7 +99,8 @@ function CoverFallback({
     <div
       className={`relative overflow-hidden ${className}`.trim()}
       style={{ background: artDirection.background, ...style }}
-      aria-hidden="true"
+      role="img"
+      aria-label={ariaLabel}
     >
       <div
         className="absolute inset-0"
@@ -194,6 +215,7 @@ export default function Cover({
     badge,
     eyebrow,
   });
+  const altText = buildCoverAltText(fallbackLabel, seriesType);
 
   if (placeholdLabel || usesMockFallback) {
     return (
@@ -207,6 +229,7 @@ export default function Cover({
         fallbackVariant={fallbackVariant}
         className={className}
         style={style}
+        ariaLabel={altText}
       />
     );
   }
@@ -216,7 +239,6 @@ export default function Cover({
       <div
         className={`relative overflow-hidden ${className}`.trim()}
         style={style}
-        aria-hidden="true"
       >
         {isLoading && (
           <div
@@ -234,12 +256,13 @@ export default function Cover({
             seriesType={seriesType}
             fallbackVariant={fallbackVariant}
             className="absolute inset-0"
+            ariaLabel={altText}
           />
         ) : (
           <>
             <Image
               src={resolvedUrl}
-              alt=""
+              alt={altText}
               fill
               sizes={sizes}
               className={`object-cover transition-opacity duration-500 ${
@@ -271,6 +294,7 @@ export default function Cover({
       fallbackVariant={fallbackVariant}
       className={`cover ${className}`.trim()}
       style={style}
+      ariaLabel={altText}
     />
   );
 }

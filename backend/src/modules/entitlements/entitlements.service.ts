@@ -72,6 +72,33 @@ export class EntitlementsService {
     return { seriesId, unlockedEpisodeIds: rows.map((row) => row.episodeId) };
   }
 
+  async listEntitlements(userId: string) {
+    const rows = await this.prisma.entitlement.findMany({
+      where: { userId },
+      select: { seriesId: true, episodeId: true },
+      orderBy: [{ seriesId: "asc" }, { episodeId: "asc" }],
+    });
+
+    const grouped = new Map<string, string[]>();
+
+    rows.forEach((row) => {
+      if (!row?.seriesId || !row?.episodeId) {
+        return;
+      }
+
+      const current = grouped.get(row.seriesId) || [];
+      if (!current.includes(row.episodeId)) {
+        current.push(row.episodeId);
+        grouped.set(row.seriesId, current);
+      }
+    });
+
+    return Array.from(grouped.entries()).map(([seriesId, unlockedEpisodeIds]) => ({
+      seriesId,
+      unlockedEpisodeIds,
+    }));
+  }
+
   async unlockWithWallet(userId: string, seriesId: string, episodeId: string) {
     if (!(await this.findPublishedSeries(seriesId))) {
       return { ok: false, status: 404, error: "NOT_FOUND" };

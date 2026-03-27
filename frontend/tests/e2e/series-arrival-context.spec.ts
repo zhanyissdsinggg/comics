@@ -1,5 +1,8 @@
 import { expect, test, type Route } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
+import { createPosterPlaceholder } from "./support/placeholders";
+import { expectNoBasicA11yAuditIssues } from "./support/a11yAudit";
+import { tabToAndExpectVisibleFocus } from "./support/keyboard";
 
 const SERIES_UI_TIMEOUT_MS = 15000;
 
@@ -12,6 +15,7 @@ const SERIES_PAYLOAD = {
     adult: false,
     status: "Ongoing",
     description: "Manual breakout pick tied to live search momentum.",
+    coverUrl: createPosterPlaceholder("Rocket Choir"),
     rating: 4.1,
     ratingCount: 120,
     followers: 1500,
@@ -118,6 +122,9 @@ test.describe("Series arrival context", () => {
     await expect(
       page.getByRole("heading", { name: "Rocket Choir is trending in search right now." }),
     ).toBeVisible({ timeout: SERIES_UI_TIMEOUT_MS });
+    await expect(page.getByRole("img", { name: "Comic cover image for Rocket Choir" })).toBeVisible({
+      timeout: SERIES_UI_TIMEOUT_MS,
+    });
     const arrivalPanel = page.locator("div").filter({
       has: page.getByRole("heading", {
         name: "Rocket Choir is trending in search right now.",
@@ -129,8 +136,12 @@ test.describe("Series arrival context", () => {
     await expect(arrivalPanel.getByRole("button", { name: "Back to search" })).toBeVisible({
       timeout: SERIES_UI_TIMEOUT_MS,
     });
+    await tabToAndExpectVisibleFocus(page, arrivalPanel.getByRole("button", { name: "Back to search" }), {
+      label: "Series arrival Back to search button",
+    });
 
     await page.waitForTimeout(300);
+    await expectNoBasicA11yAuditIssues(page, "/series/series-slot-breakout");
     await expectNoRuntimeIssues("/series/series-slot-breakout", runtimeIssues);
   });
 });

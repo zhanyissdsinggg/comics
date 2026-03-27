@@ -187,7 +187,7 @@ const SearchBar = memo(function SearchBar({
     <div ref={containerRef} className="relative w-full">
       <div
         className={cn(
-          "relative flex items-center gap-2 rounded-full border px-4 py-2.5 transition-all duration-200 touch-manipulation",
+          "relative flex items-center gap-2 rounded-full border px-4 py-2.5 transition-all duration-200 touch-manipulation focus-within:ring-[3px] focus-within:ring-[rgba(49,87,214,0.16)]",
           isLight
             ? isFocused
               ? "border-black/12 bg-white shadow-[0_0_0_4px_rgba(47,88,198,0.08)]"
@@ -243,7 +243,7 @@ const SearchBar = memo(function SearchBar({
           )}
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
-          aria-label="Search titles, genres, or creators"
+          aria-label="Search series, creators, or genres"
         />
         {value ? (
           <Button

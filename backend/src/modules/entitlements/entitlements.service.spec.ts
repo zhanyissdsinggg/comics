@@ -52,4 +52,23 @@ describe("EntitlementsService", () => {
     expect(prisma.episode.findMany).not.toHaveBeenCalled();
     expect(prisma.entitlement.findMany).not.toHaveBeenCalled();
   });
+
+  it("groups unlocked episodes by series when listing entitlements", async () => {
+    prisma.entitlement.findMany.mockResolvedValue([
+      { seriesId: "series-1", episodeId: "series-1e1" },
+      { seriesId: "series-1", episodeId: "series-1e2" },
+      { seriesId: "series-2", episodeId: "series-2e1" },
+      { seriesId: "series-1", episodeId: "series-1e2" },
+    ]);
+
+    await expect(service.listEntitlements("user-1")).resolves.toEqual([
+      { seriesId: "series-1", unlockedEpisodeIds: ["series-1e1", "series-1e2"] },
+      { seriesId: "series-2", unlockedEpisodeIds: ["series-2e1"] },
+    ]);
+    expect(prisma.entitlement.findMany).toHaveBeenCalledWith({
+      where: { userId: "user-1" },
+      select: { seriesId: true, episodeId: true },
+      orderBy: [{ seriesId: "asc" }, { episodeId: "asc" }],
+    });
+  });
 });
