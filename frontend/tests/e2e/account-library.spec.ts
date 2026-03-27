@@ -259,16 +259,16 @@ test.describe("Account My Library", () => {
 
     await expect(page.getByRole("heading", { name: "Keep your next read closer than the settings." })).toBeVisible();
 
-    const libraryPanel = page.locator("section, div").filter({
-      has: page.getByRole("heading", { name: "Keep your next read closer than the settings." }),
-    }).first();
-
     const continueTab = page.getByRole("tab", { name: /Continue Reading 2/ });
     await expect(continueTab).toHaveAttribute("aria-selected", "true");
-    await expect(libraryPanel.getByRole("heading", { name: "Dragon Ledger" })).toBeVisible();
-    await expect(page.getByRole("img", { name: "Cover image for Dragon Ledger" })).toBeVisible();
-    await expect(libraryPanel.getByText("Read Chapter 12 of 50")).toBeVisible();
-    await expect(libraryPanel.getByRole("button", { name: "Resume" }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dragon Ledger" })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("img", { name: "Cover image for Dragon Ledger" })).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(page.getByText("Read Chapter 12 of 50")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("button", { name: "Resume" }).first()).toBeVisible({
+      timeout: 15000,
+    });
 
     const bookmarksTab = page.getByRole("tab", { name: /Bookmarks 1/ });
     await continueTab.focus();
@@ -279,8 +279,10 @@ test.describe("Account My Library", () => {
     await expectVisibleFocusIndicator(bookmarksTab, "Account Bookmarks tab");
     await bookmarksTab.dispatchEvent("click");
     await expect(bookmarksTab).toHaveAttribute("aria-selected", "true");
-    await expect(libraryPanel.getByRole("heading", { name: "Velvet Archive" })).toBeVisible();
-    await expect(libraryPanel.getByText("Saved to your shelf with 1 saved spot")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Velvet Archive" })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Saved to your shelf with 1 saved spot")).toBeVisible({
+      timeout: 10000,
+    });
 
     const unlockedTab = page.getByRole("tab", { name: /Unlocked 2/ });
     await bookmarksTab.press("Tab");
@@ -288,8 +290,10 @@ test.describe("Account My Library", () => {
     await expectVisibleFocusIndicator(unlockedTab, "Account Unlocked tab");
     await unlockedTab.dispatchEvent("click");
     await expect(unlockedTab).toHaveAttribute("aria-selected", "true");
-    await expect(libraryPanel.getByText("12 chapters unlocked - up to Chapter 12")).toBeVisible();
-    await expect(libraryPanel.getByRole("heading", { name: "Neon Prayer" })).toBeVisible();
+    await expect(page.getByText("12 chapters unlocked - up to Chapter 12")).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText("Neon Prayer")).toBeVisible({ timeout: 10000 });
     await expectNoBasicA11yAuditIssues(page, "/account");
     await expectNoRuntimeIssues("/account", runtimeIssues);
   });

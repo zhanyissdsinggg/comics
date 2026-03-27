@@ -2,7 +2,7 @@ import { expect, test, type Route } from "@playwright/test";
 import { createPosterPlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 import { expectNoBasicA11yAuditIssues } from "./support/a11yAudit";
-import { tabToAndExpectVisibleFocus } from "./support/keyboard";
+import { expectVisibleFocusIndicator, tabToAndExpectVisibleFocus } from "./support/keyboard";
 
 const SEARCH_UI_TIMEOUT_MS = 15000;
 const SEARCH_SERIES = {
@@ -177,6 +177,26 @@ test.describe("Global accessibility guardrails", () => {
       label: "Desktop header search input",
       focusRingTarget: searchInput.locator("xpath=.."),
     });
+    const walletButton = page.getByRole("button", { name: /View your wallet/i });
+    const notificationsButton = page.getByRole("button", { name: /View your notifications/i });
+    const adultToggle = page.getByRole("button", { name: "Adult content" });
+    const accountButton = page.getByRole("button", { name: "Account" });
+
+    await walletButton.focus();
+    await expect(walletButton).toBeFocused();
+    await expectVisibleFocusIndicator(walletButton, "Desktop wallet button");
+
+    await notificationsButton.focus();
+    await expect(notificationsButton).toBeFocused();
+    await expectVisibleFocusIndicator(notificationsButton, "Desktop notifications button");
+
+    await adultToggle.focus();
+    await expect(adultToggle).toBeFocused();
+    await expectVisibleFocusIndicator(adultToggle, "Desktop adult content toggle");
+
+    await accountButton.focus();
+    await expect(accountButton).toBeFocused();
+    await expectVisibleFocusIndicator(accountButton, "Desktop account button");
 
     await page.waitForTimeout(300);
     await expectNoBasicA11yAuditIssues(page, "/search?q=dragon");

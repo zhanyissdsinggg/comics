@@ -1,6 +1,7 @@
 import { expect, test, type Route } from "@playwright/test";
 import { createBannerPlaceholder, createPosterPlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
+import { expectVisibleFocusIndicator } from "./support/keyboard";
 
 const HOME_UI_TIMEOUT_MS = 15000;
 const HOME_SERIES_BODY = {
@@ -205,6 +206,75 @@ test.describe("Homepage merchandising sync", () => {
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/", runtimeIssues);
+  });
+
+  test("home hero should keep the primary content CTAs reachable by keyboard in order", async ({ page }) => {
+    await page.route("**/api/health", async (route) => {
+      await fulfillJson(route, { ok: true });
+    });
+    await page.route("**/api/branding**", async (route) => {
+      await fulfillJson(route, { branding: {} });
+    });
+    await page.route("**/api/series**", async (route) => {
+      await fulfillJson(route, HOME_SERIES_BODY);
+    });
+    await page.route("**/api/search/hot**", async (route) => {
+      await fulfillJson(route, {
+        keywords: [{ keyword: "rocket choir", count: 920, growthLabel: "Trending now" }],
+      });
+    });
+    await page.route("**/api/recommendations/homepage**", async (route) => {
+      await fulfillJson(route, {
+        slots: [
+          {
+            id: "slot-home-hero",
+            slot: "home-hero",
+            seriesIds: ["series-slot-hero", "series-slot-breakout"],
+          },
+          {
+            id: "slot-home-free-start",
+            slot: "home-free-start",
+            seriesIds: ["series-slot-free"],
+          },
+          {
+            id: "slot-home-binge-ready",
+            slot: "home-binge-ready",
+            seriesIds: ["series-slot-binge"],
+          },
+          {
+            id: "slot-home-breakout",
+            slot: "home-breakout",
+            seriesIds: ["series-slot-breakout"],
+          },
+        ],
+      });
+    });
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const browseFreeButton = page.getByRole("button", { name: "Browse Free Series" });
+    const viewTopSeriesButton = page.getByRole("button", { name: "View Top Series" }).first();
+    const readNowButton = page.getByRole("button", { name: "Read Now" });
+
+    await expect(browseFreeButton).toBeVisible({ timeout: HOME_UI_TIMEOUT_MS });
+    await expect(viewTopSeriesButton).toBeVisible({ timeout: HOME_UI_TIMEOUT_MS });
+    await expect(readNowButton).toBeVisible({ timeout: HOME_UI_TIMEOUT_MS });
+
+    await browseFreeButton.focus();
+    await expect(browseFreeButton).toBeFocused();
+    await expectVisibleFocusIndicator(browseFreeButton, "Homepage Browse Free Series button");
+
+    await browseFreeButton.press("Tab");
+    await expect(viewTopSeriesButton).toBeFocused();
+    await expectVisibleFocusIndicator(viewTopSeriesButton, "Homepage View Top Series button");
+
+    await viewTopSeriesButton.press("Tab");
+    await expect(readNowButton).toBeFocused();
+    await expectVisibleFocusIndicator(readNowButton, "Homepage Read Now button");
+
     await expectNoRuntimeIssues("/", runtimeIssues);
   });
 });

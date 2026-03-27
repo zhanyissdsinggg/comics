@@ -195,8 +195,12 @@ test.describe("Unlock chapter modal", () => {
     await expect(page.getByRole("img", { name: "Comic cover image for Midnight Static" })).toBeVisible();
 
     const episodeRow = page.locator("#episode-series-locked-e2");
+    const unlockButton = episodeRow.getByRole("button", { name: "Unlock with Points" });
     await expect(episodeRow).toBeVisible();
-    await episodeRow.getByRole("button", { name: "Unlock with Points" }).dispatchEvent("click");
+    await unlockButton.focus();
+    await expect(unlockButton).toBeFocused();
+    await expectVisibleFocusIndicator(unlockButton, "Locked episode unlock button");
+    await unlockButton.dispatchEvent("click");
 
     const dialog = page.getByRole("dialog", { name: /Unlock Chapter 2/i });
     const closeButton = dialog.getByRole("button", { name: "Close unlock modal" });
