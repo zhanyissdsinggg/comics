@@ -18,8 +18,8 @@ test.describe("Header search", () => {
     });
     await searchInput.focus();
 
-    await expect(page.getByText(/^Start with$/)).toBeVisible();
-    await expect(page.getByRole("button", { name: /Trending/i })).toBeVisible();
+    await expect(page.getByText(/^Browse by$/)).toBeVisible();
+    await expect(page.getByRole("button", { name: /Featured Series/i })).toBeVisible();
 
     await page.evaluate(() => {
       document.dispatchEvent(
@@ -32,7 +32,7 @@ test.describe("Header search", () => {
       );
     });
 
-    await expect(page.getByText(/^Start with$/)).toHaveCount(0);
+    await expect(page.getByText(/^Browse by$/)).toHaveCount(0);
     await expectNoRuntimeIssues("/", runtimeIssues);
   });
 
@@ -49,18 +49,18 @@ test.describe("Header search", () => {
     const searchInput = page.getByRole("searchbox", {
       name: "Search series, creators, or genres",
     });
-    const trendingLane = page.getByRole("button", { name: /Trending/i }).first();
-    const finishedLane = page.getByRole("button", { name: /Finished series/i }).first();
+    const featuredLane = page.getByRole("button", { name: /Featured Series/i }).first();
+    const completedLane = page.getByRole("button", { name: /Completed Series/i }).first();
 
     await searchInput.focus();
     await expect(searchInput).toBeFocused();
     await searchInput.press("Tab");
-    await expect(trendingLane).toBeFocused();
-    await expectVisibleFocusIndicator(trendingLane, "Search discovery Trending lane");
+    await expect(featuredLane).toBeFocused();
+    await expectVisibleFocusIndicator(featuredLane, "Search discovery Featured Series lane");
 
-    await trendingLane.press("Tab");
-    await expect(finishedLane).toBeFocused();
-    await expectVisibleFocusIndicator(finishedLane, "Search discovery Finished series lane");
+    await featuredLane.press("Tab");
+    await expect(completedLane).toBeFocused();
+    await expectVisibleFocusIndicator(completedLane, "Search discovery Completed Series lane");
 
     await expectNoRuntimeIssues("/", runtimeIssues);
   });

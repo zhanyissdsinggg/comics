@@ -11,13 +11,12 @@ import {
   ArrowRight,
   BookOpen,
   BookOpenText,
-  Flame,
   Gift,
+  CircleHelp,
   Sparkles,
-  WalletCards,
+  Users,
 } from "lucide-react";
 import Cover from "../common/Cover";
-import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import SiteHeader from "../layout/SiteHeader";
 import SiteFooter from "../layout/SiteFooter";
 import PortraitCard from "./PortraitCard";
@@ -36,7 +35,6 @@ import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import {
   buildHomeHeroItems,
   getHomeEditorialSnapshot,
-  getSeriesScore,
 } from "../../lib/homeMerchandising";
 import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getSearchParam } from "../../lib/pageSearchParams";
@@ -63,14 +61,6 @@ function formatPercent(value) {
     : `${Math.round((numeric <= 1 ? numeric : numeric / 100) * 100)}%`;
 }
 
-function formatRating(value) {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric) || numeric <= 0) {
-    return null;
-  }
-  return numeric.toFixed(1).replace(/\.0$/, "");
-}
-
 function clampText(value, limit = 180) {
   const text = String(value || "").trim();
   if (!text) {
@@ -82,36 +72,9 @@ function clampText(value, limit = 180) {
   return `${text.slice(0, limit).trimEnd()}...`;
 }
 
-function getDiscoveryBadge(series) {
-  const badgeTokens = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
-    .filter(Boolean)
-    .map((badge) => String(badge).trim().toUpperCase());
-
-  if (String(series?.status || "").toLowerCase() === "completed") {
-    return "Completed";
-  }
-  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
-    return "Free";
-  }
-  if (badgeTokens.includes("NEW")) {
-    return "New";
-  }
-  if (badgeTokens.includes("HOT")) {
-    return "Trending";
-  }
-  return "";
-}
-
 function getReadingState(series) {
-  const freeEpisodeCount = Number(series?.freeEpisodeCount || 0);
   const completed = String(series?.status || "").toLowerCase() === "completed";
-  if (completed) {
-    return "Completed series";
-  }
-  if (freeEpisodeCount > 0) {
-    return `${freeEpisodeCount} free chapter${freeEpisodeCount === 1 ? "" : "s"}`;
-  }
-  return "Updated weekly";
+  return completed ? "Completed" : "";
 }
 
 function dedupeSeries(seriesList) {
@@ -159,10 +122,12 @@ function HomeShelfSection({
   icon: Icon,
   eyebrow,
   title,
+  description = "",
   ctaLabel,
   onCtaClick,
   items,
   onItemClick,
+  actionLabel = "View Series",
 }) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
@@ -172,13 +137,18 @@ function HomeShelfSection({
     <section className="mb-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
-          <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-            {Icon ? <Icon className="size-3.5" /> : null}
-            {eyebrow}
-          </p>
+          {eyebrow ? (
+            <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+              {Icon ? <Icon className="size-3.5" /> : null}
+              {eyebrow}
+            </p>
+          ) : null}
           <h2 className="mt-3 font-display text-[1.65rem] font-semibold tracking-tight text-slate-950 sm:text-[1.95rem]">
             {title}
           </h2>
+          {description ? (
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{description}</p>
+          ) : null}
         </div>
 
         {ctaLabel && typeof onCtaClick === "function" ? (
@@ -201,6 +171,7 @@ function HomeShelfSection({
               item={item}
               tone={item.coverTone}
               appearance="light"
+              actionLabel={actionLabel}
               onClick={() => onItemClick?.(item)}
             />
           </div>
@@ -347,52 +318,27 @@ function HomeContent({ initialSearchParams = {} }) {
       });
     }
 
-    if (formatRating(heroSeries.rating)) {
+    const stateLabel = getReadingState(heroSeries);
+    if (stateLabel) {
       signals.push({
-        id: `rating-${heroSeries.id || "hero"}`,
-        content: (
-          <InlineRatingDisplay
-            score={heroSeries.rating}
-            ratingCount={heroSeries.ratingCount}
-          />
-        ),
+        id: `state-${String(heroSeries.status || "default").toLowerCase()}`,
+        content: stateLabel,
       });
     }
-
-    signals.push({
-      id: `state-${String(heroSeries.status || "default").toLowerCase()}`,
-      content: getReadingState(heroSeries),
-    });
 
     return signals.filter(Boolean).slice(0, 3);
   }, [heroSeries, resumeSpotlight]);
 
-  const leaderboardItems = useMemo(() => {
-    const seen = new Set();
-
-    return [
-      editorialSnapshot.breakoutPick,
-      editorialSnapshot.freeStartPick,
-      editorialSnapshot.completedPick,
-      ...editorialSnapshot.safeCatalog,
-    ]
-      .filter(Boolean)
-      .filter((series) => {
-        const seriesId = String(series?.id || "").trim();
-        if (!seriesId || seen.has(seriesId)) {
-          return false;
-        }
-        seen.add(seriesId);
-        return true;
-      })
-      .map((series) => {
-        const hasFree = Boolean(series?.hasFreeEpisodes || Number(series?.freeEpisodeCount) > 0);
-        const completed = String(series?.status || "").toLowerCase() === "completed";
-        const badgeTokens = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
-          .filter(Boolean)
-          .map((badge) => String(badge).trim().toUpperCase());
-
-        return {
+  const featuredSeriesItems = useMemo(
+    () =>
+      dedupeSeries([
+        editorialSnapshot.breakoutPick,
+        editorialSnapshot.completedPick,
+        ...editorialSnapshot.safeCatalog,
+      ])
+        .filter((series) => String(series?.id || "").trim() !== String(heroSeries?.id || "").trim())
+        .slice(0, 4)
+        .map((series) => ({
           id: series.id,
           title: series.title,
           coverUrl: series.coverUrl,
@@ -403,58 +349,24 @@ function HomeContent({ initialSearchParams = {} }) {
           status: series?.status || "",
           author: series?.author || "",
           adult: Boolean(series?.adult),
-          freeEpisodeCount: Number(series?.freeEpisodeCount || 0),
-          hasFreeEpisodes: hasFree,
           subtitle: "",
-          eyebrow: series.author || "Featured series",
-          statusLabel: completed
-            ? "Completed series"
-            : hasFree
-              ? `${Number(series?.freeEpisodeCount || 0)} free chapter${
-                  Number(series?.freeEpisodeCount || 0) === 1 ? "" : "s"
-                }`
-              : "Updated weekly",
-          badge: badgeTokens.includes("HOT")
-            ? "Trending"
-            : getDiscoveryBadge(series) || "",
-          score:
-            getSeriesScore(series) +
-            (hasFree ? 90 : 0) +
-            (completed ? 70 : 0) +
-            (badgeTokens.includes("HOT") ? 140 : 0) +
-            (badgeTokens.includes("NEW") ? 90 : 0),
-        };
-      })
-      .sort((left, right) => right.score - left.score)
-      .slice(0, 6);
-  }, [editorialSnapshot]);
-
-  const topSeriesItems = useMemo(
-    () =>
-      leaderboardItems.slice(0, 4).map((item, index) => ({
-        ...item,
-        badge: item.badge || (index === 0 ? "Trending" : ""),
-      })),
-    [leaderboardItems],
+          eyebrow: series.author || "",
+          statusLabel: "",
+          metaLabel: "",
+          badge: "",
+        })),
+    [editorialSnapshot, heroSeries?.id],
   );
 
-  const freeStartItems = useMemo(
+  const startHereItems = useMemo(
     () =>
       dedupeSeries([
         editorialSnapshot.freeStartPick,
-        ...editorialSnapshot.safeCatalog
-          .filter(
-            (series) => Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes,
-          )
-          .sort((left, right) => {
-            const freeDelta =
-              Number(right?.freeEpisodeCount || 0) - Number(left?.freeEpisodeCount || 0);
-            if (freeDelta !== 0) {
-              return freeDelta;
-            }
-            return getSeriesScore(right) - getSeriesScore(left);
-          }),
+        ...editorialSnapshot.safeCatalog.filter(
+          (series) => Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes,
+        ),
       ])
+        .filter((series) => String(series?.id || "").trim() !== String(heroSeries?.id || "").trim())
         .slice(0, 4)
         .map((series) => ({
           id: series.id,
@@ -465,21 +377,15 @@ function HomeContent({ initialSearchParams = {} }) {
           status: series?.status || "",
           author: series?.author || "",
           adult: Boolean(series?.adult),
-          freeEpisodeCount: Number(series?.freeEpisodeCount || 0),
-          hasFreeEpisodes: Boolean(series?.hasFreeEpisodes || Number(series?.freeEpisodeCount || 0) > 0),
           subtitle: "",
-          eyebrow: series.author || "Free start",
+          eyebrow: series.author || "",
           coverUrl: series.coverUrl,
           coverTone: series.coverTone,
-          badge: "Free",
-          metaLabel:
-            Number(series?.freeEpisodeCount || 0) > 0
-              ? `${Number(series?.freeEpisodeCount || 0)} free chapter${
-                  Number(series?.freeEpisodeCount || 0) === 1 ? "" : "s"
-                }`
-              : "Free start available",
+          badge: "",
+          statusLabel: "",
+          metaLabel: "",
         })),
-    [editorialSnapshot],
+    [editorialSnapshot, heroSeries?.id],
   );
 
   const showCatalogFallback = !loading && !featuredSeries;
@@ -487,20 +393,20 @@ function HomeContent({ initialSearchParams = {} }) {
   const homepageFallbackCards = useMemo(
     () => [
       {
-        id: "trending-now",
-        eyebrow: "Top Series",
-        title: "Open what readers already trust.",
-        description: "The strongest popular picks first.",
-        label: "View Top Series",
-        href: "/rankings?type=popular&window=week",
+        id: "featured-series",
+        eyebrow: "Featured Series",
+        title: "Featured Series",
+        description: "Hand-picked stories to start with.",
+        label: "Browse Series",
+        href: "/search",
       },
       {
-        id: "start-free",
-        eyebrow: "Free to Start",
-        title: "Try free chapters first.",
-        description: "Free openings before you unlock more.",
-        label: "Read Free",
-        href: "/rankings?type=ttf&window=all",
+        id: "browse-comics",
+        eyebrow: "Browse by Format",
+        title: "Browse by Format",
+        description: "Whether you are here for comics or prose, you can jump straight into the stories you like.",
+        label: "Browse Comics",
+        href: "/comics",
       },
     ],
     [],
@@ -558,9 +464,17 @@ function HomeContent({ initialSearchParams = {} }) {
     openHomeSeries(heroSeries.id, "HOME_HERO_CARD", `home_hero_card_${heroSeries.id}`);
   };
 
-  const heroEyebrow = resumeSeries ? "Continue reading" : "Start reading";
-  const showHeroFreemiumHook =
-    !resumeSeries && Number(heroSeries?.freeEpisodeCount || 0) >= 3;
+  const openPrimaryHeroCta = () => {
+    if (resumeSeries) {
+      goResume();
+      return;
+    }
+
+    openHeroCardCta();
+  };
+
+  const heroCardLabel = resumeSeries ? "Continue Reading" : "Featured Series";
+  const heroCardCtaLabel = resumeSeries ? "Start Reading" : "View Series";
   return (
     <div className="gush-page-shell overflow-hidden">
       <div className="gush-page-ambient h-[clamp(21rem,42vw,34rem)]" />
@@ -583,33 +497,41 @@ function HomeContent({ initialSearchParams = {} }) {
               <CardContent className="relative grid gap-5 p-4 sm:p-6 xl:grid-cols-[1.02fr_0.98fr] xl:items-center xl:p-8">
                 <div className="max-w-2xl">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    {heroEyebrow}
+                    Original comics and serialized fiction
                   </p>
                   <h1 className="mt-3 max-w-3xl font-display text-[2rem] font-semibold leading-[1.08] tracking-tight text-slate-950 sm:text-[2.9rem] sm:leading-[1.02] xl:text-[3.4rem] xl:leading-[1]">
-                    Stories worth opening.
+                    Read original comics and novels in one place.
                   </h1>
+                  <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+                    Find a story, start with chapter one, and keep up with the series you want to follow.
+                  </p>
 
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Button
                       type="button"
                       size="lg"
-                      onClick={
-                        resumeSeries
-                          ? goResume
-                          : () => router.push("/rankings?type=ttf&window=all")
-                      }
+                      onClick={openPrimaryHeroCta}
                       className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
                     >
-                      {resumeSeries ? "Continue Reading" : "Browse Free Series"}
+                      Start Reading
                     </Button>
                     <Button
                       type="button"
                       size="lg"
                       variant="outline"
-                      onClick={() => router.push("/rankings?type=popular&window=week")}
+                      onClick={() => router.push("/comics")}
                       className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
                     >
-                      View Top Series
+                      Browse Comics
+                    </Button>
+                    <Button
+                      type="button"
+                      size="lg"
+                      variant="outline"
+                      onClick={() => router.push("/novels")}
+                      className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                    >
+                      Browse Novels
                     </Button>
                   </div>
                 </div>
@@ -624,19 +546,15 @@ function HomeContent({ initialSearchParams = {} }) {
                           label={heroSeries.title}
                           genres={heroSeries.genres}
                           seriesType={heroSeries.type}
-                          eyebrow={resumeSeries ? "Continue reading" : heroSeries.author || "Featured series"}
-                          badge={
-                            resumeSeries
-                              ? heroSeries.badge
-                              : getDiscoveryBadge(heroSeries) || heroSeries.badge
-                          }
+                          eyebrow={resumeSeries ? "Continue Reading" : "Featured"}
+                          badge=""
                           className="aspect-[3/4] w-full"
                         />
                       </div>
 
                       <div className="min-w-0">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                          {resumeSeries ? "Up next" : "Featured series"}
+                          {heroCardLabel}
                         </p>
                         <h2 className="mt-3 font-display text-[1.6rem] font-semibold tracking-tight text-slate-950 sm:text-[1.85rem]">
                           {heroSeries.title}
@@ -679,22 +597,13 @@ function HomeContent({ initialSearchParams = {} }) {
                           </div>
                         ) : null}
 
-                        {showHeroFreemiumHook ? (
-                          <div className="mt-4 flex flex-wrap items-center gap-2">
-                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-700 shadow-[0_10px_20px_rgba(16,185,129,0.12)]">
-                              <Gift className="size-3.5" strokeWidth={2} />
-                              First 3 chapters FREE
-                            </span>
-                          </div>
-                        ) : null}
-
                         <Button
                           type="button"
                           variant="outline"
                           onClick={openHeroCardCta}
                           className="mt-4 h-10 rounded-full border-[rgba(49,87,214,0.16)] bg-[rgba(49,87,214,0.08)] px-4 text-sm font-semibold text-[var(--gush-accent,#3157d6)] hover:border-[rgba(49,87,214,0.22)] hover:bg-[rgba(49,87,214,0.14)] hover:text-[var(--gush-accent-strong,#2444af)]"
                         >
-                          {resumeSeries ? "Continue Reading" : "Read Now"}
+                          {heroCardCtaLabel}
                         </Button>
                       </div>
                     </div>
@@ -730,26 +639,25 @@ function HomeContent({ initialSearchParams = {} }) {
         ) : (
           <>
             <HomeShelfSection
-              icon={Flame}
-              eyebrow="Trending now"
-              title="Top Series"
-              ctaLabel="View Top Series"
-              onCtaClick={() => router.push("/rankings?type=popular&window=week")}
-              items={topSeriesItems}
+              title="Featured Series"
+              description="Hand-picked stories to start with."
+              ctaLabel="Browse Series"
+              onCtaClick={() => router.push("/search")}
+              items={featuredSeriesItems}
+              actionLabel="View Series"
               onItemClick={(item) =>
-                openHomeSeries(item.id, "HOME_TOP_SERIES", `home_top_series_${item.id}`)
+                openHomeSeries(item.id, "HOME_FEATURED_SERIES", `home_featured_series_${item.id}`)
               }
             />
 
             <HomeShelfSection
               icon={BookOpenText}
-              eyebrow="Free to start"
-              title="Read Free"
-              ctaLabel="Read Free"
-              onCtaClick={() => router.push("/rankings?type=ttf&window=all")}
-              items={freeStartItems}
+              title="Start Here"
+              description="New here? Begin with these reader-friendly picks."
+              items={startHereItems}
+              actionLabel="Read Chapter 1"
               onItemClick={(item) =>
-                openHomeSeries(item.id, "HOME_FREE_START", `home_free_start_${item.id}`)
+                openHomeSeries(item.id, "HOME_START_HERE", `home_start_here_${item.id}`)
               }
             />
 
@@ -761,29 +669,32 @@ function HomeContent({ initialSearchParams = {} }) {
             <CardContent className="grid gap-5 p-5 sm:p-6 xl:grid-cols-[1.02fr_0.98fr] xl:items-center">
               <div className="max-w-2xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                  Pricing
+                  Browse by Format
                 </p>
                 <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
-                  One-time packs or a monthly plan.
+                  Browse by Format
                 </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Whether you are here for comics or prose, you can jump straight into the stories you like.
+                </p>
 
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Button
                     type="button"
                     size="lg"
-                    onClick={() => router.push("/store")}
+                    onClick={() => router.push("/comics")}
                     className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
                   >
-                    View point packs
+                    Browse Comics
                   </Button>
                   <Button
                     type="button"
                     size="lg"
                     variant="outline"
-                    onClick={() => router.push("/subscribe")}
+                    onClick={() => router.push("/novels")}
                     className="h-11 rounded-full border-black/8 bg-white px-5 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
                   >
-                    View Plans
+                    Browse Novels
                   </Button>
                 </div>
               </div>
@@ -791,28 +702,48 @@ function HomeContent({ initialSearchParams = {} }) {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
                   <div className="flex size-10 items-center justify-center rounded-2xl bg-[rgba(49,87,214,0.08)] text-[var(--gush-accent,#3157d6)]">
-                    <WalletCards className="size-5" />
+                    <Users className="size-5" />
                   </div>
                   <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    Point packs
+                    Creators
                   </p>
                   <h3 className="mt-2 text-lg font-semibold text-slate-950">
-                    Use points as needed.
+                    Meet the Creators
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">One-time.</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Explore the writers, artists, and studios behind the work.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push("/creators")}
+                    className="mt-4 h-10 rounded-full border-black/8 bg-white px-4 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  >
+                    View Creators
+                  </Button>
                 </div>
 
                 <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
                   <div className="flex size-10 items-center justify-center rounded-2xl bg-[rgba(49,87,214,0.08)] text-[var(--gush-accent,#3157d6)]">
-                    <BookOpenText className="size-5" />
+                    <CircleHelp className="size-5" />
                   </div>
                   <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    Membership
+                    Help
                   </p>
                   <h3 className="mt-2 text-lg font-semibold text-slate-950">
-                    Read weekly for less.
+                    Need Help?
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">Monthly.</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Visit Help for reading, account, and content-setting support.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push("/support")}
+                    className="mt-4 h-10 rounded-full border-black/8 bg-white px-4 text-sm font-semibold text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  >
+                    Get Help
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -842,7 +773,12 @@ function HomeContent({ initialSearchParams = {} }) {
         />
       </main>
 
-      <SiteFooter tone="light" variant="compact" pathname="/" />
+      <SiteFooter
+        tone="light"
+        variant="compact"
+        pathname="/"
+        taglineOverride="Browse original comics and serialized fiction without the clutter."
+      />
     </div>
   );
 }

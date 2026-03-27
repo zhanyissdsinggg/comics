@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useHomeStore } from "../../store/useHomeStore";
 
-const NAV_ITEMS = [
+const DEFAULT_NAV_ITEMS = [
   { id: "home", label: "Home", href: "/" },
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
@@ -12,10 +12,18 @@ const NAV_ITEMS = [
   { id: "rankings", label: "Top Series", href: "/rankings" },
 ];
 
+const HOME_NAV_ITEMS = [
+  { id: "comics", label: "Comics", href: "/comics" },
+  { id: "novels", label: "Novels", href: "/novels" },
+  { id: "creators", label: "Creators", href: "/creators" },
+  { id: "help", label: "Help", href: "/support" },
+];
+
 export default function HeaderNav({ variant = "default" }) {
   const pathname = usePathname();
   const { setHomeTab } = useHomeStore();
   const isLight = variant === "home" || variant === "light";
+  const navItems = variant === "home" ? HOME_NAV_ITEMS : DEFAULT_NAV_ITEMS;
 
   return (
     <nav className="hidden flex-1 justify-center md:flex">
@@ -26,7 +34,7 @@ export default function HeaderNav({ variant = "default" }) {
             : "border border-white/8 bg-white/[0.04]"
         }`}
       >
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const isActive =
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
 

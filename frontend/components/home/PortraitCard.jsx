@@ -25,6 +25,7 @@ function PortraitCard({
   appearance = "default",
   href = "",
   showActionLabel = true,
+  actionLabel = "Open details",
   coverFallbackVariant = "default",
 }) {
   const metaLine = item.subtitle || item.eyebrow || "";
@@ -159,7 +160,7 @@ function PortraitCard({
               </p>
             ) : showActionLabel ? (
               <span className={cn("text-[11px] font-medium", isLight ? "text-slate-400" : "text-neutral-500")}>
-                Open details
+                {actionLabel}
               </span>
             ) : null}
             <ArrowRight className={cn("size-4 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1", isLight ? "text-slate-400" : "text-white")} />

@@ -151,7 +151,7 @@ export default function HeaderActions({
             isLight ? "bg-slate-950 text-white hover:bg-slate-800" : "bg-white text-neutral-950 hover:bg-neutral-200"
           }`}
         >
-          Sign in
+          Sign In
         </Button>
       )}
     </div>

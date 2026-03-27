@@ -48,6 +48,19 @@ const compactMetaFooterLinks = [
   { label: "Terms", href: "/terms-of-service" },
 ];
 
+const homePrimaryFooterLinks = [
+  { label: "Comics", href: "/comics" },
+  { label: "Novels", href: "/novels" },
+  { label: "Creators", href: "/creators" },
+  { label: "Help", href: "/support" },
+];
+
+const homeCompactMetaFooterLinks = [
+  { label: "Help", href: "/support" },
+  { label: "Privacy", href: "/privacy-policy" },
+  { label: "Terms", href: "/terms-of-service" },
+];
+
 const fullMetaFooterLinks = [
   { label: "Privacy", href: "/privacy-policy" },
   { label: "Terms", href: "/terms-of-service" },
@@ -157,13 +170,20 @@ function filterSections(sections, pathname) {
     .filter((section) => section.links.length > 0);
 }
 
-export default function SiteFooter({ tone = "default", variant = "full", pathname = "" }) {
+export default function SiteFooter({ tone = "default", variant = "full", pathname = "", taglineOverride = "" }) {
   const currentYear = new Date().getFullYear();
   const isHome = tone === "home" || tone === "light";
   const isCompact = variant === "compact";
-  const footerPrimaryLinks = filterLinks(primaryFooterLinks, pathname);
-  const footerMetaLinks = filterLinks(isCompact ? compactMetaFooterLinks : fullMetaFooterLinks, pathname);
+  const footerPrimaryLinks = filterLinks(
+    isHome && isCompact ? homePrimaryFooterLinks : primaryFooterLinks,
+    pathname,
+  );
+  const footerMetaLinks = filterLinks(
+    isHome && isCompact ? homeCompactMetaFooterLinks : isCompact ? compactMetaFooterLinks : fullMetaFooterLinks,
+    pathname,
+  );
   const footerSections = filterSections(fullFooterSections, pathname);
+  const footerTagline = taglineOverride || siteConfig.tagline;
 
   if (isCompact) {
     return (
@@ -184,7 +204,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                 {siteConfig.siteName}
               </Link>
               <p className={`text-sm leading-6 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
-                {siteConfig.tagline}
+                {footerTagline}
               </p>
             </div>
 
@@ -260,7 +280,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                 {siteConfig.siteName}
               </Link>
               <p className={`text-sm leading-6 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
-                {siteConfig.tagline}
+                {footerTagline}
               </p>
             </div>
 

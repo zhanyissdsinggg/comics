@@ -192,6 +192,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
           onAuthError={setAuthError}
           pendingAdultToggle={pendingAdultToggle}
           onPendingAdultToggleChange={setPendingAdultToggle}
+          variant={variant}
         />
       ) : null}
 

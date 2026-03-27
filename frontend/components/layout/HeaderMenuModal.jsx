@@ -25,6 +25,13 @@ const MENU_LINKS = [
   { label: "Top Series", href: "/rankings" },
 ];
 
+const HOME_MENU_LINKS = [
+  { label: "Comics", href: "/comics" },
+  { label: "Novels", href: "/novels" },
+  { label: "Creators", href: "/creators" },
+  { label: "Help", href: "/support" },
+];
+
 function isActivePath(pathname, href) {
   if (href === "/") {
     return pathname === "/";
@@ -37,12 +44,15 @@ export default function HeaderMenuModal({
   open,
   onClose,
   onOpenLogin,
+  variant = "default",
 }) {
   const pathname = usePathname();
   const { hydrated, isSignedIn } = useAuthStore();
   const { unreadCount } = useNotificationsStore();
   const { paidPts, bonusPts } = useWalletStore();
   const walletTotal = Number(paidPts || 0) + Number(bonusPts || 0);
+  const isHome = variant === "home";
+  const menuLinks = variant === "home" ? HOME_MENU_LINKS : MENU_LINKS;
 
   if (!open) {
     return null;
@@ -64,7 +74,7 @@ export default function HeaderMenuModal({
                 Menu
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Browse without the header taking over.
+                {isHome ? "Browse stories." : "Browse without the header taking over."}
               </h2>
             </div>
             <button
@@ -86,7 +96,7 @@ export default function HeaderMenuModal({
                       Account
                     </p>
                     <p className="mt-2 text-lg font-semibold text-slate-950">
-                      Signed in and ready to pick up fast.
+                      {isHome ? "Signed in and ready to keep reading." : "Signed in and ready to pick up fast."}
                     </p>
                   </div>
                   <span className="rounded-full border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#3157d6)]">
@@ -131,7 +141,9 @@ export default function HeaderMenuModal({
                   Account
                 </p>
                 <p className="mt-2 text-lg font-semibold text-slate-950">
-                  Sign in once, keep library, billing, and reading progress in one place.
+                  {isHome
+                    ? "Sign in to keep your library and reading progress together."
+                    : "Sign in to keep your library and reading progress in one place."}
                 </p>
                 <div className="mt-4 flex gap-2">
                   <button
@@ -142,14 +154,14 @@ export default function HeaderMenuModal({
                     }}
                     className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
-                    Sign in
+                    Sign In
                   </button>
                   <Link
-                    href="/account"
+                    href="/support"
                     onClick={onClose}
                     className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
                   >
-                    Account help
+                    Get Help
                   </Link>
                 </div>
               </>
@@ -161,7 +173,7 @@ export default function HeaderMenuModal({
               Browse
             </p>
             <div className="mt-3 grid gap-2">
-              {MENU_LINKS.map((item) => {
+              {menuLinks.map((item) => {
                 const isActive = isActivePath(pathname, item.href);
                 const Icon = item.icon;
                 return (

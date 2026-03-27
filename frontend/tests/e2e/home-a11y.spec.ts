@@ -165,7 +165,7 @@ test.describe("Home accessibility", () => {
 
       if (pathname === "/api/search/hot") {
         await fulfillJson(route, {
-          keywords: [{ keyword: "rocket choir", count: 920, growthLabel: "Trending now" }],
+          keywords: [{ keyword: "rocket choir", count: 920, growthLabel: "Featured pick" }],
         });
         return;
       }
@@ -212,7 +212,7 @@ test.describe("Home accessibility", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Stories worth opening." })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Read original comics and novels in one place." })).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(page.getByRole("img", { name: "Comic cover image for Velvet Voltage" }).first()).toBeVisible({

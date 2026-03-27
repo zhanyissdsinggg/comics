@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Loader2, Search, Trash2, TrendingUp, X } from "lucide-react";
+import { ArrowUpRight, Loader2, Search, Trash2, X } from "lucide-react";
 import { useSearchShortcutLabel } from "../../hooks/useSearchShortcutLabel";
 import {
   clearSearchHistory,
@@ -42,6 +42,33 @@ const DEFAULT_DISCOVERY_LANES = [
   },
 ];
 
+const HOME_DISCOVERY_LANES = [
+  {
+    id: "featured-series",
+    label: "Featured Series",
+    hint: "Editor's picks",
+    href: "/search",
+  },
+  {
+    id: "completed-series",
+    label: "Completed Series",
+    hint: "Finished stories",
+    href: "/search?status=Completed&sort=popular",
+  },
+  {
+    id: "browse-comics",
+    label: "Browse Comics",
+    hint: "Original comics",
+    href: "/comics",
+  },
+  {
+    id: "creators",
+    label: "Creators",
+    hint: "Writers and artists",
+    href: "/creators",
+  },
+];
+
 const SearchBar = memo(function SearchBar({
   onSearch,
   placeholder = "Search titles, genres, or creators",
@@ -60,6 +87,8 @@ const SearchBar = memo(function SearchBar({
   const containerRef = useRef(null);
   const shortcutLabel = useSearchShortcutLabel();
   const isLight = variant === "light";
+  const discoveryLanes = isLight ? HOME_DISCOVERY_LANES : DEFAULT_DISCOVERY_LANES;
+  const discoveryHeading = isLight ? "Browse by" : "Start with";
 
   useEffect(() => {
     setSearchHistory(readSearchHistory({ limit: MAX_HISTORY_ITEMS }));
@@ -289,7 +318,7 @@ const SearchBar = memo(function SearchBar({
               <div>
                 <div className="mb-2 flex items-center justify-between px-3 py-1">
                   <div className="flex items-center gap-2">
-                    <TrendingUp size={14} className={cn(isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-300")} />
+                    <Search size={14} className={cn(isLight ? "text-[var(--gush-accent,#3157d6)]" : "text-emerald-300")} />
                     <span className={cn("text-xs font-semibold", isLight ? "text-slate-500" : "text-emerald-200/80")}>
                       Recent
                     </span>
@@ -351,14 +380,14 @@ const SearchBar = memo(function SearchBar({
             ) : null}
 
             <div className={cn(searchHistory.length > 0 ? (isLight ? "mt-2 border-t border-black/6 pt-2" : "mt-2 border-t border-white/8 pt-2") : "")}>
-              <div className="mb-2 flex items-center gap-2 px-3 py-1">
-                <Search size={14} className={cn(isLight ? "text-slate-400" : "text-neutral-400")} />
-                <span className={cn("text-xs font-semibold", isLight ? "text-slate-500" : "text-neutral-300")}>
-                  Start with
-                </span>
-              </div>
-              <div className="space-y-1">
-                {DEFAULT_DISCOVERY_LANES.map((lane) => (
+                <div className="mb-2 flex items-center gap-2 px-3 py-1">
+                  <Search size={14} className={cn(isLight ? "text-slate-400" : "text-neutral-400")} />
+                  <span className={cn("text-xs font-semibold", isLight ? "text-slate-500" : "text-neutral-300")}>
+                    {discoveryHeading}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {discoveryLanes.map((lane) => (
                   <Button
                     key={lane.id}
                     type="button"

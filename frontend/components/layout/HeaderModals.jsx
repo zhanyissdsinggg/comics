@@ -19,6 +19,7 @@ export default function HeaderModals({
   onAuthError,
   pendingAdultToggle,
   onPendingAdultToggleChange,
+  variant = "default",
 }) {
   const router = useRouter();
   const { signIn } = useAuthStore();
@@ -105,6 +106,7 @@ export default function HeaderModals({
         open={activeModal === "menu"}
         onClose={() => onModalClose("menu")}
         onOpenLogin={() => onModalClose("login", true)}
+        variant={variant}
       />
 
       <LoginGateModal
