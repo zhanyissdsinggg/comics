@@ -175,23 +175,24 @@ function labelsMatch(left, right) {
 }
 
 export function normalizeGenreList(input) {
-  if (Array.isArray(input)) {
-    return input
-      .map((value) => trimLabel(value, 22))
-      .filter(Boolean)
-      .slice(0, 4);
-  }
+  const splitGenreValue = (value) => {
+    const text = trimLabel(value, 80);
+    if (!text) {
+      return [];
+    }
 
-  const text = trimLabel(input, 80);
-  if (!text) {
-    return [];
-  }
+    const delimiter = text.includes(" / ")
+      ? " / "
+      : text.includes(",")
+        ? ","
+        : null;
 
-  return text
-    .split(/[/|,]/)
-    .map((value) => trimLabel(value, 22))
-    .filter(Boolean)
-    .slice(0, 4);
+    const parts = delimiter ? text.split(delimiter) : text.split(/[/|,]/);
+    return parts.map((part) => trimLabel(part, 22)).filter(Boolean);
+  };
+
+  const values = Array.isArray(input) ? input.flatMap(splitGenreValue) : splitGenreValue(input);
+  return Array.from(new Set(values)).slice(0, 4);
 }
 
 export function getSeriesTypeLabel(value, fallback = "") {

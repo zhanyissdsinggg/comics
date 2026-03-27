@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Cover from "../common/Cover";
 import { cn } from "@/lib/utils";
-import { getCoverCardMeta } from "../../lib/coverPresentation";
+import { getCoverCardMeta, normalizeGenreList } from "../../lib/coverPresentation";
 
 function isModifiedEvent(event) {
   return Boolean(
@@ -33,7 +33,11 @@ function PortraitCard({
   const isLight = appearance === "light";
   const resolvedHref = href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
   const coverMeta = getCoverCardMeta(item);
-  const genrePills = Array.isArray(coverMeta.genres) ? coverMeta.genres : [];
+  const hasItemGenres = Array.isArray(item?.genres)
+    ? item.genres.length > 0
+    : typeof item?.genres === "string" && item.genres.trim();
+  const rawGenreData = hasItemGenres ? item.genres : coverMeta.genres;
+  const genrePills = normalizeGenreList(rawGenreData);
   const showGenrePills = genrePills.length > 0;
   const rawDetailCopy = item.statusLabel || item.metaLabel || coverMeta.detailText || "";
   const normalizedMetaLine = String(metaLine || "").replace(/\s+/g, " ").trim().toLowerCase();
@@ -112,10 +116,7 @@ function PortraitCard({
                 {genrePills.map((genre) => (
                   <span
                     key={`${item?.id || item?.title || "series"}-${genre}`}
-                    className={cn(
-                      "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap",
-                      isLight ? "bg-slate-100 text-slate-600" : "bg-white/10 text-neutral-300",
-                    )}
+                    className="inline-flex items-center whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
                   >
                     {genre}
                   </span>

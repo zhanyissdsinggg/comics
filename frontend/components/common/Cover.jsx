@@ -97,9 +97,9 @@ function CoverFallback({
           ) : null}
         </div>
       ) : (
-        <div className="absolute left-3 right-3 top-3 flex flex-wrap items-start gap-2">
+        <div className="absolute left-3 right-4 top-3 flex flex-wrap items-start gap-2">
           {artDirection.badgeLabel ? (
-            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/82">
+            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap rounded-full border border-white/15 bg-black/20 pl-2.5 pr-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/82">
               {artDirection.badgeLabel}
             </span>
           ) : null}
