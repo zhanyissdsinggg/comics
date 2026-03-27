@@ -7,9 +7,8 @@ const primaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
   { label: "Creators", href: "/creators" },
-  { label: "Top Series", href: "/rankings" },
-  { label: "Point packs", href: "/store" },
-  { label: "Membership", href: "/subscribe" },
+  { label: "Featured Series", href: "/rankings" },
+  { label: "Help", href: "/support" },
 ];
 
 const fullFooterSections = [
@@ -19,7 +18,8 @@ const fullFooterSections = [
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
       { label: "Creators", href: "/creators" },
-      { label: "Top Series", href: "/rankings" },
+      { label: "Featured Series", href: "/rankings" },
+      { label: "Help", href: "/support" },
     ],
   },
   {

@@ -25,7 +25,7 @@ function PortraitCard({
   appearance = "default",
   href = "",
   showActionLabel = true,
-  actionLabel = "Open details",
+  actionLabel = "View Series",
   coverFallbackVariant = "default",
 }) {
   const metaLine = item.subtitle || item.eyebrow || "";
@@ -165,7 +165,7 @@ function PortraitCard({
             ) : null}
             <ArrowRight className={cn("size-4 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1", isLight ? "text-slate-400" : "text-white")} />
           </div>
-          <div className="sr-only">Open title details</div>
+          <div className="sr-only">View series details</div>
         </div>
       </div>
     </Link>

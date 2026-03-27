@@ -503,7 +503,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     Read original comics and novels in one place.
                   </h1>
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                    Find a story, start with chapter one, and keep up with the series you want to follow.
+                    Find a story, start with chapter one, and follow the series you want to keep reading.
                   </p>
 
                   <div className="mt-5 flex flex-wrap gap-3">

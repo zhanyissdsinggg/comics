@@ -13,7 +13,7 @@ export default function FilterBar({
   genres = [],
   selectedGenre = "all",
   onGenreChange,
-  sortBy = "popular",
+  sortBy = "latest",
   onSortChange,
   status = "all",
   onStatusChange,
@@ -28,8 +28,8 @@ export default function FilterBar({
   const isQuiet = density === "quiet";
 
   const sortOptions = [
-    { id: "popular", label: "Popular", icon: "Hot" },
     { id: "latest", label: "Latest", icon: "New" },
+    { id: "title", label: "Title", icon: "A-Z" },
   ];
 
   const statusOptions = [
@@ -41,7 +41,7 @@ export default function FilterBar({
   const displayedGenres = showAllGenres ? genres : genres.slice(0, isQuiet ? 5 : 8);
   const activeFilterCount = [
     selectedGenre !== "all" ? selectedGenre : "",
-    sortBy !== "popular" ? sortBy : "",
+    sortBy !== "latest" ? sortBy : "",
     status !== "all" ? status : "",
   ].filter(Boolean).length;
 

@@ -12,12 +12,11 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function getPopularityScore(series) {
-  return Math.max(
-    toNumber(series?.followers),
-    toNumber(series?.views),
-    toNumber(series?.ratingCount),
-    Math.round(toNumber(series?.rating) * 100),
+function getCatalogPriority(series) {
+  return (
+    Date.parse(series?.updatedAt || 0) +
+    ((Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) ? 1200 : 0) +
+    (String(series?.status || "").toLowerCase() === "completed" ? 700 : 0)
   );
 }
 
@@ -67,7 +66,7 @@ function buildCreatorBucket(name, slug) {
 
 function sortCreatorSeries(items) {
   return [...items].sort((left, right) => {
-    const popularityDelta = getPopularityScore(right) - getPopularityScore(left);
+    const popularityDelta = getCatalogPriority(right) - getCatalogPriority(left);
     if (popularityDelta !== 0) {
       return popularityDelta;
     }
@@ -95,7 +94,7 @@ export function buildCreatorDirectory(seriesList) {
     const current = creatorMap.get(slug) || buildCreatorBucket(author, slug);
     current.series.push(series);
     current.titleCount += 1;
-    current.readerProof += getPopularityScore(series);
+    current.readerProof += toNumber(series?.views);
 
     if (String(series?.status || "").toLowerCase() === "completed") {
       current.completedCount += 1;
@@ -142,16 +141,12 @@ export function buildCreatorDirectory(seriesList) {
         series: sortedSeries,
         leadSummary:
           sortedSeries[0]?.description ||
-          `Start with ${sortedSeries[0]?.title || "the lead title"}${
-            topGenres[0] ? ` if you want a strong ${topGenres[0].toLowerCase()} entry.` : "."
+          `${sortedSeries[0]?.title || "The lead title"}${
+            topGenres[0] ? ` brings together ${topGenres[0].toLowerCase()} elements.` : "."
           }`,
       };
     })
     .sort((left, right) => {
-      if (right.readerProof !== left.readerProof) {
-        return right.readerProof - left.readerProof;
-      }
-
       if (right.titleCount !== left.titleCount) {
         return right.titleCount - left.titleCount;
       }

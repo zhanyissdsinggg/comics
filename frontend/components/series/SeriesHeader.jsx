@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
-import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
 
@@ -28,18 +27,6 @@ function formatSeriesKind(value) {
     return "Series";
   }
   return `${capitalize(value)} series`;
-}
-
-function formatCompactCount(value) {
-  const count = Number(value || 0);
-  if (!Number.isFinite(count) || count <= 0) {
-    return "0";
-  }
-
-  return new Intl.NumberFormat("en-US", {
-    notation: "compact",
-    maximumFractionDigits: count >= 1000 ? 1 : 0,
-  }).format(count);
 }
 
 function formatUpdateLabel(value) {
@@ -95,8 +82,6 @@ export default function SeriesHeader({
   mobilePrimaryActionRef,
   highlightPrimaryAction = false,
   creatorHref = "",
-  onOpenStore,
-  onOpenMembership,
 }) {
   const genres = series.genres || [];
   const badges = series.badges || [];
@@ -120,59 +105,39 @@ export default function SeriesHeader({
   const lastEpisodeLabel = formatEpisodeNumber(lastReadEpisode?.number || "");
   const primaryAction = onPrimaryAction || onContinue || onStart || null;
   const primaryActionLabel = primaryActionLabelOverride || (onContinue
-    ? lastEpisodeLabel
-      ? "Continue Reading"
-      : "Continue Reading"
-    : hasFreeEpisodes
-      ? "Read Free"
-      : "Start Reading");
-  const followers = Number(series.followers || 0);
-  const ratingCount = Number(series.ratingCount || 0);
-  const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.id || latestEpisode?.number || "");
+    ? "Continue Reading"
+    : "Start Reading");
+  const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.number || "");
   const accessValue =
     accessSummary?.entryLabel ||
     (onContinue
       ? "Continue where you stopped"
       : hasFreeEpisodes
-        ? "Episode 1 open"
+        ? "Start with chapter one"
         : "Unlock as you go");
   const accessHint =
     accessSummary?.entryHint ||
     (onContinue && lastEpisodeLabel ? `Resume at Episode ${lastEpisodeLabel}.` : "");
   const heroFacts = [
     {
-      label: "Rating",
-      value:
-        Number(series.rating || 0) > 0 ? (
-          <InlineRatingDisplay
-            score={series.rating}
-            ratingCount={series.ratingCount}
-            className="text-base font-semibold text-slate-950"
-          />
-        ) : (
-          "New"
-        ),
-      detail:
-        followers > 0
-          ? `${formatCompactCount(followers)} following`
-          : ratingCount > 0
-            ? "Reader score"
-            : "Fresh release",
+      label: "Format",
+      value: formatSeriesKind(series.type),
+      detail: Array.isArray(genres) && genres.length > 0 ? genres.slice(0, 2).join(" / ") : "Series",
     },
     {
-      label: "Run",
+      label: "Status",
       value: isCompleted ? "Completed" : capitalize(series.status || "updating"),
-      detail: episodeCount > 0 ? `${episodeCount} episode${episodeCount === 1 ? "" : "s"}` : "Episodes coming soon",
+      detail: latestEpisodeNumber ? `Latest: Episode ${latestEpisodeNumber}` : formatUpdateLabel(series.updatedAt),
     },
     {
-      label: "Latest",
-      value: latestEpisodeNumber ? `Ep ${latestEpisodeNumber}` : isCompleted ? "Completed" : "Live",
-      detail: latestEpisode?.title || formatUpdateLabel(latestEpisode?.publishedAt || series.updatedAt),
+      label: "Episodes",
+      value: episodeCount > 0 ? `${episodeCount}` : "Coming soon",
+      detail: episodeCount > 0 ? `Episode${episodeCount === 1 ? "" : "s"} available now.` : "Episodes will appear here once the series opens.",
     },
     {
       label: "Creator",
       value: series.author || "Studio",
-      detail: creatorHref ? "View creator page" : formatSeriesKind(series.type),
+      detail: creatorHref ? "View creator page" : "Series page",
       href: creatorHref,
     },
   ];
@@ -203,6 +168,8 @@ export default function SeriesHeader({
       </button>
     </div>
   ) : null;
+  const visibleHighlights = headerHighlights.filter((item) => Boolean(item?.label)).slice(0, 2);
+
   return (
     <header className="py-4 sm:py-6">
       <SurfacePanel className="relative overflow-hidden p-0" appearance="light" accent="blue">
@@ -240,9 +207,9 @@ export default function SeriesHeader({
               {series.title || "Series"}
             </h1>
 
-            {headerHighlights.length > 0 ? (
+            {visibleHighlights.length > 0 ? (
               <div className="mt-5 flex flex-wrap gap-2">
-                {headerHighlights.map((item) => (
+                {visibleHighlights.map((item) => (
                   <span
                     key={`${item.tone}-${item.label}`}
                     className={`rounded-full border px-3 py-1 text-xs ${
@@ -331,24 +298,6 @@ export default function SeriesHeader({
                 description={series.description || ""}
                 className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
               />
-              {onOpenStore ? (
-                <button
-                  type="button"
-                  onClick={onOpenStore}
-                  className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
-                >
-                  Point packs
-                </button>
-              ) : null}
-              {onOpenMembership ? (
-                <button
-                  type="button"
-                  onClick={onOpenMembership}
-                  className="min-h-[44px] rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
-                >
-                  Membership
-                </button>
-              ) : null}
             </div>
           </div>
         </div>

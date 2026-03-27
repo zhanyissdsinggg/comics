@@ -6,7 +6,7 @@ import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 export const metadata = createPageMetadata({
   title: "Comics",
   description:
-    "Browse trending comics, free starts, fresh updates, and completed picks across the Gush catalog.",
+    "Browse original comics, recent releases, and finished series on Gush.",
   path: "/comics",
 });
 

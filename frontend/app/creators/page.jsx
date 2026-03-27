@@ -15,9 +15,9 @@ export async function generateMetadata() {
   const leadCover = payload?.creators?.[0]?.spotlightSeries?.coverUrl || null;
 
   return createPageMetadata({
-    title: "Creators & Studios",
+    title: "Creators",
     description:
-      "Browse the creators and studios behind the catalog, discover multi-title teams, and find more from the same people faster.",
+      "Meet the writers, artists, and studios behind the stories on Gush.",
     path: "/creators",
     image: leadCover,
   });

@@ -233,10 +233,10 @@ export default function SeriesTrustPanel({
         </button>
         <button
           type="button"
-          onClick={() => router.push("/rankings?type=popular&window=week")}
+          onClick={() => router.push("/rankings?view=featured")}
           className={secondaryButtonClass}
         >
-          Top Series
+          Featured Series
         </button>
         {onFollowToggle ? (
           <button

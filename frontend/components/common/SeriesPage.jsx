@@ -21,56 +21,56 @@ import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 const PAGE_CONFIG = {
   comic: {
     eyebrow: "Comics",
-    heroTitle: "Comics worth opening.",
+    heroTitle: "Original comics.",
     title: "Comics",
-    description: "",
+    description: "Browse recent releases, finished runs, and stories worth keeping up with.",
     secondary: "",
     emptyIcon: "search",
     emptyTitle: "No comics match this filter set",
-    emptyDescription: "Reset the current filters or open Top Series to widen the selection.",
+    emptyDescription: "Clear the current filters or browse featured series.",
     pathname: "/comics",
     emptyBrowseCards: [
       {
-        eyebrow: "Read Free",
-        title: "Free first chapters",
-        body: "Test the hook before you spend points.",
-        ctaLabel: "Read Free",
-        href: "/rankings?type=ttf&window=all",
+        eyebrow: "Featured Series",
+        title: "Featured Series",
+        body: "Editorial picks from across the catalog.",
+        ctaLabel: "Browse Series",
+        href: "/rankings?view=featured",
       },
       {
-        eyebrow: "Trending now",
-        title: "Popular comics",
-        body: "Start with the comics already pulling readers in.",
-        ctaLabel: "View Top Series",
-        href: "/rankings?type=popular&window=week",
+        eyebrow: "Completed Series",
+        title: "Completed Series",
+        body: "Finished stories ready to read through.",
+        ctaLabel: "Browse Series",
+        href: "/rankings?view=completed",
       },
     ],
     fallbackGenres: ["Romance", "Fantasy", "Action", "BL", "Drama", "Thriller"],
   },
   novel: {
     eyebrow: "Novels",
-    heroTitle: "Novels worth settling into.",
+    heroTitle: "Original novels.",
     title: "Novels",
-    description: "Serialized fiction, finished reads, and recent updates.",
+    description: "Browse serialized fiction, recent chapters, and finished stories.",
     secondary: "",
     emptyIcon: "book",
     emptyTitle: "No novels match this filter set",
-    emptyDescription: "Reset the current filters or open Top Series to find more to read.",
+    emptyDescription: "Clear the current filters or browse featured series.",
     pathname: "/novels",
     emptyBrowseCards: [
       {
-        eyebrow: "Trending now",
-        title: "Popular novels",
-        body: "Start with the novels already pulling readers in.",
-        ctaLabel: "View Top Series",
-        href: "/rankings?type=popular&window=week",
+        eyebrow: "Featured Series",
+        title: "Featured Series",
+        body: "Editorial picks from across the catalog.",
+        ctaLabel: "Browse Series",
+        href: "/rankings?view=featured",
       },
       {
-        eyebrow: "New updates",
-        title: "Fresh drops",
-        body: "Latest releases keep the shelf feeling current.",
-        ctaLabel: "View latest",
-        href: "/novels?sort=latest",
+        eyebrow: "Completed Series",
+        title: "Completed Series",
+        body: "Finished stories ready to read through.",
+        ctaLabel: "Browse Series",
+        href: "/rankings?view=completed",
       },
     ],
     fallbackGenres: ["Fantasy", "Romance", "Drama", "Mystery", "BL", "Historical"],
@@ -86,13 +86,13 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function getPopularityScore(series) {
-  return Math.max(
-    toNumber(series.followers),
-    toNumber(series.views),
-    toNumber(series.ratingCount),
-    Math.round(toNumber(series.rating) * 100),
-  );
+function getEditorialScore(series) {
+  const updatedAtScore = toTimestamp(series?.updatedAt);
+  const freeStartScore =
+    Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes ? 1500 : 0;
+  const completedScore = normalizeStatus(series?.status) === "completed" ? 900 : 0;
+
+  return updatedAtScore + freeStartScore + completedScore;
 }
 
 function toTimestamp(value) {
@@ -117,9 +117,6 @@ function getSeriesBadge(series) {
     .map((badge) => String(badge).trim().toUpperCase());
   if (badgeTokens.includes("NEW")) {
     return "New";
-  }
-  if (badgeTokens.includes("HOT")) {
-    return "Trending";
   }
   return "";
 }
@@ -170,11 +167,11 @@ export default function SeriesPage({
   const searchParams = useMemo(() => toURLSearchParams(initialSearchParams), [initialSearchParams]);
 
   const selectedGenre = getSearchParam(initialSearchParams, "genre", "all");
-  const sortBy = getSearchParam(initialSearchParams, "sort", "popular");
+  const sortBy = getSearchParam(initialSearchParams, "sort", "latest");
   const status = getSearchParam(initialSearchParams, "status", "all");
   const isComicPage = type === "comic";
   const isNovelPage = type === "novel";
-  const hasActiveFilters = selectedGenre !== "all" || sortBy !== "popular" || status !== "all";
+  const hasActiveFilters = selectedGenre !== "all" || sortBy !== "latest" || status !== "all";
 
   useEffect(() => {
     async function loadSeries() {
@@ -265,9 +262,10 @@ export default function SeriesPage({
       switch (sortBy) {
         case "latest":
           return new Date(right.updatedAt || 0) - new Date(left.updatedAt || 0);
-        case "popular":
+        case "title":
+          return String(left?.title || "").localeCompare(String(right?.title || ""));
         default:
-          return getPopularityScore(right) - getPopularityScore(left);
+          return getEditorialScore(right) - getEditorialScore(left);
       }
     });
   }, [selectedGenre, series, sortBy, status]);
@@ -280,13 +278,13 @@ export default function SeriesPage({
         if (freeDelta !== 0) {
           return freeDelta;
         }
-        return getPopularityScore(right) - getPopularityScore(left);
+        return getEditorialScore(right) - getEditorialScore(left);
       })
       .slice(0, 4)
       .map(mapSeriesCardItem);
 
-    const trending = [...series]
-      .sort((left, right) => getPopularityScore(right) - getPopularityScore(left))
+    const featured = [...series]
+      .sort((left, right) => getEditorialScore(right) - getEditorialScore(left))
       .slice(0, 4)
       .map(mapSeriesCardItem);
 
@@ -302,45 +300,45 @@ export default function SeriesPage({
 
     const completed = [...series]
       .filter((item) => normalizeStatus(item?.status) === "completed")
-      .sort((left, right) => getPopularityScore(right) - getPopularityScore(left))
+      .sort((left, right) => getEditorialScore(right) - getEditorialScore(left))
       .slice(0, 4)
       .map(mapSeriesCardItem);
 
     return [
       {
         id: "start-free",
-        eyebrow: "Read Free",
-        title: "Free first chapters",
-        description: "Sample the hook before spending points.",
-        ctaLabel: "Read Free",
-        href: "/rankings?type=ttf&window=all",
+        eyebrow: "Start Here",
+        title: "Start Here",
+        description: "Reader-friendly stories to begin with.",
+        ctaLabel: "Browse Series",
+        href: "/rankings?view=start-here",
         items: freeStart,
       },
       {
-        id: "trending",
-        eyebrow: "Trending now",
-        title: `Popular ${config.title.toLowerCase()}`,
-        description: "These titles already have reader momentum.",
-        ctaLabel: "View Top Series",
-        href: "/rankings?type=popular&window=week",
-        items: trending,
+        id: "featured",
+        eyebrow: "Featured Series",
+        title: "Featured Series",
+        description: "Editorial picks from the catalog.",
+        ctaLabel: "Browse Series",
+        href: "/rankings?view=featured",
+        items: featured,
       },
       {
         id: "latest",
-        eyebrow: "New updates",
-        title: "Fresh drops",
+        eyebrow: "Recent Updates",
+        title: "Recent Updates",
         description: "The most recently updated titles.",
-        ctaLabel: "View latest",
+        ctaLabel: "Browse Series",
         href: `${config.pathname}?sort=latest`,
         items: latest,
       },
       {
         id: "completed",
-        eyebrow: "Binge ready",
-        title: "Completed picks",
-        description: "Finished runs are easier when you want payoff now.",
-        ctaLabel: "View completed",
-        href: `${config.pathname}?status=completed`,
+        eyebrow: "Completed Series",
+        title: "Completed Series",
+        description: "Finished stories ready to read through.",
+        ctaLabel: "Browse Series",
+        href: "/rankings?view=completed",
         items: completed,
       },
     ].filter((shelf) => shelf.items.length > 0);
@@ -350,10 +348,7 @@ export default function SeriesPage({
     if (!loading && series.length === 0) {
       return {
         title: "Nothing here yet.",
-        description:
-          type === "comic"
-            ? "Open Top Series, read free, or search by genre."
-            : "Open Top Series, view the latest, or search by genre.",
+        description: "Browse featured series or search by genre.",
       };
     }
 
@@ -373,13 +368,13 @@ export default function SeriesPage({
     router.replace(config.pathname);
   }, [config.pathname, router]);
   const entrySpotlight = useMemo(() => {
-    const byPopular = [...series].sort((left, right) => getPopularityScore(right) - getPopularityScore(left));
+    const byFeatured = [...series].sort((left, right) => getEditorialScore(right) - getEditorialScore(left));
     const byLatest = [...series].sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt));
-    const freeStart = byPopular.find((item) => Number(item?.freeEpisodeCount || 0) > 0 || item?.hasFreeEpisodes) || null;
-    const completed = byPopular.find((item) => normalizeStatus(item?.status) === "completed") || null;
+    const freeStart = byFeatured.find((item) => Number(item?.freeEpisodeCount || 0) > 0 || item?.hasFreeEpisodes) || null;
+    const completed = byFeatured.find((item) => normalizeStatus(item?.status) === "completed") || null;
     return type === "comic"
-      ? freeStart || byPopular[0] || byLatest[0] || completed || null
-      : byPopular[0] || byLatest[0] || completed || freeStart || null;
+      ? freeStart || byFeatured[0] || byLatest[0] || completed || null
+      : byFeatured[0] || byLatest[0] || completed || freeStart || null;
   }, [series, type]);
   const catalogGridClassName =
     filteredAndSortedSeries.length <= 8
@@ -497,7 +492,7 @@ export default function SeriesPage({
                   <button
                     key={item.genre}
                     type="button"
-                    onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=popular`)}
+                    onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=latest`)}
                     className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
                   >
                     {item.genre}
@@ -580,17 +575,17 @@ export default function SeriesPage({
             <div className="flex flex-wrap justify-center gap-3">
               <button
                 type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
+                onClick={() => router.push("/rankings?view=featured")}
                 className={secondaryButtonClass}
               >
-                View Top Series
+                Browse Series
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/rankings?type=ttf&window=all")}
+                onClick={() => router.push(type === "comic" ? "/novels" : "/comics")}
                 className={primaryButtonClass}
               >
-                Read Free
+                {type === "comic" ? "Browse Novels" : "Browse Comics"}
               </button>
             </div>
           </SurfacePanel>

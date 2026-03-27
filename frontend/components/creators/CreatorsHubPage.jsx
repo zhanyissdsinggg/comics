@@ -68,11 +68,10 @@ function toNumber(value) {
 }
 
 function getSeriesSignalScore(series) {
-  return Math.max(
-    toNumber(series?.followers),
-    toNumber(series?.views),
-    toNumber(series?.ratingCount),
-    Math.round(toNumber(series?.rating) * 100),
+  return (
+    Date.parse(series?.updatedAt || 0) +
+    ((Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) ? 1200 : 0) +
+    (String(series?.status || "").toLowerCase() === "completed" ? 700 : 0)
   );
 }
 
@@ -150,22 +149,22 @@ function buildCreatorDirectoryHeroStats({
   return [
     {
       label: "Featured",
-      value: leadCreator?.name || leadSeries?.title || "Top Series",
+      value: leadCreator?.name || leadSeries?.title || "Creators",
       hint: "",
     },
     {
-      label: "Free starts",
-      value: stats.freeStarts > 0 ? `${stats.freeStarts} free starts` : "Title pages",
+      label: "Stories",
+      value: stats.titles > 0 ? `${stats.titles} titles` : "Stories",
       hint: "",
     },
     {
       label: "Studios",
-      value: leadStudio?.name || "Studio picks",
+      value: leadStudio?.name || (stats.studios > 0 ? `${stats.studios} studios` : "Studios"),
       hint: "",
     },
     {
       label: "Genre",
-      value: genreOptions[0] || "Mixed catalog",
+      value: genreOptions[0] || "Comics and novels",
       hint: "",
     },
   ];
@@ -174,11 +173,8 @@ function buildCreatorDirectoryHeroStats({
 function buildCreatorShelfMeta(creator) {
   const meta = [];
 
-  if (Number(creator?.freeStartCount || 0) > 0) {
-    meta.push(`${creator.freeStartCount} free start${Number(creator.freeStartCount) === 1 ? "" : "s"}`);
-  }
   if (Number(creator?.ongoingCount || 0) > 0) {
-    meta.push(`${creator.ongoingCount} active`);
+    meta.push(`${creator.ongoingCount} ongoing`);
   }
   if (Number(creator?.completedCount || 0) > 0) {
     meta.push(`${creator.completedCount} completed`);
@@ -187,7 +183,7 @@ function buildCreatorShelfMeta(creator) {
     meta.push(formatDateLabel(creator.latestUpdatedAt));
   }
 
-  return meta.length > 0 ? meta : ["Curated shelf"];
+  return meta.length > 0 ? meta : ["Featured creator"];
 }
 
 function CreatorDirectorySkeleton() {
@@ -422,11 +418,11 @@ export default function CreatorsHubPage({
         href: "/search",
       },
       {
-        eyebrow: "Editor picks",
-        title: "Featured creators.",
+        eyebrow: "Featured Series",
+        title: "Featured Series",
         description: "",
-        label: "View Top Series",
-        href: "/rankings?type=popular&window=week",
+        label: "Browse Series",
+        href: "/rankings?view=featured",
       },
       {
         eyebrow: "Browse more",
@@ -691,8 +687,8 @@ export default function CreatorsHubPage({
             appearance="light"
             accent="blue"
             eyebrow="Creators"
-            title="Creator shelves."
-            description="Writers, artists, and studios in one place."
+            title="Meet the Creators."
+            description="Writers, artists, and studios behind the stories."
             stats={heroStats}
             actions={
               <>
@@ -705,10 +701,10 @@ export default function CreatorsHubPage({
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push("/rankings?type=popular&window=week")}
+                  onClick={() => router.push("/rankings?view=featured")}
                   className={secondaryButtonClass}
                 >
-                  View Top Series
+                  Browse Series
                 </button>
               </>
             }
@@ -750,10 +746,10 @@ export default function CreatorsHubPage({
             <SurfacePanel appearance="light" accent="blue" className="space-y-5">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Lead titles
+                  Start Here
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Lead titles.
+                  Start with These Stories.
                 </h2>
               </div>
 
@@ -824,10 +820,10 @@ export default function CreatorsHubPage({
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push("/rankings")}
+                  onClick={() => router.push("/rankings?view=featured")}
                   className={secondaryButtonClass}
                 >
-                  View Top Series
+                  Browse Series
                 </button>
               </div>
             </SurfacePanel>
@@ -847,17 +843,17 @@ export default function CreatorsHubPage({
           appearance="light"
           accent="blue"
           eyebrow="Creators"
-          title="Creator shelves."
-          description="Writers, artists, and studios in one place."
+          title="Meet the Creators."
+          description="Writers, artists, and studios behind the stories."
           stats={heroStats}
           actions={
             <>
               <button
                 type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
+                onClick={() => router.push("/rankings?view=featured")}
                 className={primaryButtonClass}
               >
-                View Top Series
+                Browse Series
               </button>
               <button
                 type="button"
@@ -881,24 +877,24 @@ export default function CreatorsHubPage({
           <SurfacePanel appearance="light" accent="blue" className="space-y-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Browse paths
+                Start Here
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Ways in.
+                A few clear ways in.
               </h2>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {[
                 {
                   eyebrow: "Studios",
-                  title: featuredStudios.length > 0 ? `${featuredStudios.length} studio shelves.` : "Studio shelves.",
+                  title: featuredStudios.length > 0 ? `${featuredStudios.length} studios.` : "Studios.",
                   description: "",
                   cta: "View Studios",
                   onClick: () => jumpToCreatorBrowse("studio"),
                 },
                 {
                   eyebrow: "Creators",
-                  title: spotlightCreators[0]?.name ? spotlightCreators[0].name : "Creator shelves.",
+                  title: spotlightCreators[0]?.name ? spotlightCreators[0].name : "Featured Creators.",
                   description: "",
                   cta: "View Creators",
                   onClick: () => jumpToCreatorBrowse("creator"),
@@ -911,12 +907,12 @@ export default function CreatorsHubPage({
                   onClick: () => router.push("/search"),
                 },
                 {
-                  eyebrow: "Story lanes",
-                  title: genreOptions[0] ? `Explore ${genreOptions[0]}.` : "Story lanes.",
+                  eyebrow: "Genres",
+                  title: genreOptions[0] ? `Explore ${genreOptions[0]}.` : "Browse by genre.",
                   description: "",
-                  cta: genreOptions[0] ? `Explore ${genreOptions[0]}` : "View Top Series",
+                  cta: genreOptions[0] ? `Explore ${genreOptions[0]}` : "Browse Series",
                   onClick: () =>
-                    genreOptions[0] ? jumpToGenreBrowse(genreOptions[0]) : router.push("/rankings?type=popular&window=week"),
+                    genreOptions[0] ? jumpToGenreBrowse(genreOptions[0]) : router.push("/rankings?view=featured"),
                 },
               ].map((item) => (
                 <button
@@ -944,16 +940,16 @@ export default function CreatorsHubPage({
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Featured shelves
+                  Featured Creators
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Featured shelves.
+                  Featured Creators.
                 </h2>
               </div>
               <p className="text-xs text-slate-500">
-                {[featuredStudios.length > 0 ? `${featuredStudios.length} studio shelves` : "", featuredVoices.length > 0 ? `${featuredVoices.length} creator shelves` : ""]
+                {[featuredStudios.length > 0 ? `${featuredStudios.length} studios` : "", featuredVoices.length > 0 ? `${featuredVoices.length} creators` : ""]
                   .filter(Boolean)
-                  .join(" | ") || "Curated shelves ready to browse"}
+                  .join(" | ") || "Featured creators ready to browse"}
               </p>
             </div>
 
@@ -1197,7 +1193,7 @@ export default function CreatorsHubPage({
               </div>
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm text-slate-500">
-                {filteredCreators.length.toLocaleString()} creator shel{filteredCreators.length === 1 ? "f" : "ves"} shown
+                {filteredCreators.length.toLocaleString()} creator{filteredCreators.length === 1 ? "" : "s"} shown
               </p>
               {query || activeGenre !== "All" || creditFilter !== "all" ? (
                 <button
@@ -1246,7 +1242,7 @@ export default function CreatorsHubPage({
                   <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-slate-900">
                     Browse genres
                     <span className="ml-2 text-xs font-normal text-slate-500">
-                      {activeGenre === "All" ? `${genreOptions.length} lanes` : activeGenre}
+                      {activeGenre === "All" ? `${genreOptions.length} genres` : activeGenre}
                     </span>
                   </summary>
                   <div className="flex flex-wrap gap-2.5 border-t border-black/8 px-4 py-4">
@@ -1288,7 +1284,7 @@ export default function CreatorsHubPage({
                   Featured
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Featured shelves.
+                  Featured Creators.
                 </h2>
               </div>
             </div>
@@ -1333,7 +1329,7 @@ export default function CreatorsHubPage({
                           creator.leadSummary,
                           creator.spotlightSeries?.title
                             ? `Featuring ${creator.spotlightSeries.title}.`
-                            : "Linked titles from this creator or studio.",
+                            : "Notable series from this creator or studio.",
                         )}
                       </p>
 
@@ -1389,7 +1385,7 @@ export default function CreatorsHubPage({
                   Full list
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Creator directory.
+                  All Creators.
                 </h2>
               </div>
               <p className="text-sm text-slate-500">
@@ -1441,7 +1437,7 @@ export default function CreatorsHubPage({
                             creator.leadSummary,
                             creator.spotlightSeries?.title
                               ? `Featuring ${creator.spotlightSeries.title}.`
-                              : "Linked titles in one place.",
+                              : "Notable series in one place.",
                           )}
                         </p>
 

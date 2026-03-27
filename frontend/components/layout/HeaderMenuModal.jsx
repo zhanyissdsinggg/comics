@@ -22,7 +22,7 @@ const MENU_LINKS = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
   { label: "Creators", href: "/creators" },
-  { label: "Top Series", href: "/rankings" },
+  { label: "Help", href: "/support" },
 ];
 
 const HOME_MENU_LINKS = [

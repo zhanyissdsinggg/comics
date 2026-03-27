@@ -9,7 +9,7 @@ const DEFAULT_NAV_ITEMS = [
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
   { id: "creators", label: "Creators", href: "/creators" },
-  { id: "rankings", label: "Top Series", href: "/rankings" },
+  { id: "help", label: "Help", href: "/support" },
 ];
 
 const HOME_NAV_ITEMS = [

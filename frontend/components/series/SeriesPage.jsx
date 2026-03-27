@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SeriesHeader from "./SeriesHeader";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
-import SeriesArrivalPanel from "./SeriesArrivalPanel";
 import SiteHeader from "../layout/SiteHeader";
 import NetworkFallback from "../common/NetworkFallback";
 import Skeleton from "../common/Skeleton";
@@ -88,34 +87,6 @@ function getFirstEpisodeId(episodes) {
     return aNum - bNum;
   });
   return sorted[0]?.id || null;
-}
-
-function syncSeriesRatingCache(seriesId, nextRating, nextCount) {
-  if (typeof window === "undefined" || !seriesId) {
-    return;
-  }
-
-  try {
-    Object.keys(window.localStorage)
-      .filter((key) => key.startsWith(`mn_api_cache:/api/series/${seriesId}`))
-      .forEach((key) => {
-        const raw = window.localStorage.getItem(key);
-        if (!raw) {
-          return;
-        }
-
-        const parsed = JSON.parse(raw);
-        if (!parsed?.response?.data?.series) {
-          return;
-        }
-
-        parsed.response.data.series.rating = nextRating;
-        parsed.response.data.series.ratingCount = nextCount;
-        window.localStorage.setItem(key, JSON.stringify(parsed));
-      });
-  } catch {
-    // ignore cache sync issues
-  }
 }
 
 function hasSeriesPayload(payload) {
@@ -606,16 +577,6 @@ export default function SeriesPage({
       ),
     );
   }, [router, seriesId]);
-  const handleOpenMembership = useCallback(() => {
-    router.push(
-      buildPathWithAttribution("/subscribe", {
-        entryPoint: "SERIES_HEADER_MEMBERSHIP",
-        sourcePath: `/series/${seriesId}`,
-        sourceSeriesId: seriesId,
-        returnTo: `/series/${seriesId}`,
-      }),
-    );
-  }, [router, seriesId]);
   const creatorHref = useMemo(() => {
     const targetPath = buildCreatorHref(series?.author || "Studio");
     return buildPathWithAttribution(targetPath, {
@@ -755,23 +716,6 @@ export default function SeriesPage({
     followSeries(seriesId);
   };
 
-  const handleRatingUpdate = (nextRating, nextCount) => {
-    syncSeriesRatingCache(seriesId, nextRating, nextCount);
-    setData((prev) => {
-      if (!prev?.series) {
-        return prev;
-      }
-      return {
-        ...prev,
-        series: {
-          ...prev.series,
-          rating: nextRating,
-          ratingCount: nextCount,
-        },
-      };
-    });
-  };
-
   if (loading) {
     return (
       <main className="gush-page-shell overflow-hidden">
@@ -841,15 +785,15 @@ export default function SeriesPage({
               This title is not available in the public catalog.
             </h1>
             <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-[15px]">
-              Try Top Series, explore the catalog, or search for another title.
+              Browse featured series, explore the catalog, or search for another title.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
+                onClick={() => router.push("/rankings?view=featured")}
                 className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                View Top Series
+                Browse Series
               </button>
               <button
                 type="button"
@@ -892,17 +836,17 @@ export default function SeriesPage({
           >
             <button
               type="button"
-              onClick={() => router.push("/rankings?type=popular&window=week")}
+              onClick={() => router.push("/rankings?view=featured")}
               className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
             >
-              View Top Series
+              Browse Series
             </button>
             <button
               type="button"
-              onClick={() => router.push(isUnavailable ? "/search" : "/store")}
+              onClick={() => router.push(isUnavailable ? "/support" : "/search")}
               className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
             >
-              {isUnavailable ? "Search" : "View point packs"}
+              {isUnavailable ? "Get Help" : "Search"}
             </button>
           </NetworkFallback>
         </div>
@@ -973,8 +917,6 @@ export default function SeriesPage({
           mobilePrimaryActionRef={mobilePrimaryActionRef}
           highlightPrimaryAction={Boolean(commerceNotice)}
           creatorHref={creatorHref}
-          onOpenStore={handleOpenStore}
-          onOpenMembership={handleOpenMembership}
         />
 
         <EpisodeList
@@ -990,12 +932,6 @@ export default function SeriesPage({
           onSubscribe={handleSubscribe}
         />
 
-        <SeriesArrivalPanel
-          series={series}
-          attribution={routeAttribution}
-          creatorHref={creatorHref}
-        />
-
         <div ref={secondarySectionsRef} className="mt-8 h-px w-full" />
         {showSecondarySections ? (
           <>
@@ -1003,14 +939,10 @@ export default function SeriesPage({
             <div className="mt-8 border-t border-black/6 pt-6" />
             <CommentsSection
               seriesId={seriesId}
-              rating={series.rating}
-              ratingCount={series.ratingCount}
-              onRatingUpdate={handleRatingUpdate}
               seriesTitle={series.title}
               author={series.author}
               status={series.status}
               genres={series.genres}
-              followers={series.followers}
               isFollowing={isFollowing}
               onFollowToggle={handleFollowToggle}
               sharePath={`/series/${seriesId}`}

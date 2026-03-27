@@ -107,10 +107,10 @@ export default function SeriesArrivalPanel({
         ) : null}
         <button
           type="button"
-          onClick={() => router.push("/rankings?type=popular&window=week")}
+          onClick={() => router.push("/rankings?view=featured")}
           className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
         >
-          Open Top Series
+          Browse Series
         </button>
       </div>
     </SurfacePanel>

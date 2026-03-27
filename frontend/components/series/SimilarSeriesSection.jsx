@@ -1,15 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import { useSimilarRecommendations } from "../../hooks/useAIRecommendations";
 import Skeleton from "../common/Skeleton";
 import Cover from "../common/Cover";
-import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import SurfacePanel from "../common/SurfacePanel";
-import StorefrontContinuationStrip from "../common/StorefrontContinuationStrip";
 
-export default function SimilarSeriesSection({ seriesId, series }) {
+export default function SimilarSeriesSection({ seriesId }) {
   const { data: similarSeries, loading, error } = useSimilarRecommendations(seriesId, 6);
 
   if (loading) {
@@ -17,10 +14,10 @@ export default function SimilarSeriesSection({ seriesId, series }) {
       <SurfacePanel className="mt-8 space-y-4" appearance="light" accent="blue">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-            Similar series
+            More Series
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-            Readers who stopped here kept going.
+            More to read.
           </h2>
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
@@ -38,29 +35,14 @@ export default function SimilarSeriesSection({ seriesId, series }) {
 
   return (
     <SurfacePanel className="mt-8 space-y-4" appearance="light" accent="blue">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-            Similar series
-          </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-            Readers who stopped here kept going.
-          </h2>
-        </div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs text-slate-500">
-          <Sparkles size={14} className="text-[var(--gush-accent,#2f6bff)]" />
-          <span>Picked from reader patterns</span>
-        </div>
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+          More Series
+        </p>
+        <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+          More to read.
+        </h2>
       </div>
-
-      <StorefrontContinuationStrip
-        series={series}
-        similarItems={similarSeries}
-        sourcePath={`/series/${seriesId}`}
-        returnTo={`/series/${seriesId}`}
-        entryPoint="SERIES_SIMILAR"
-        appearance="light"
-      />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {similarSeries.map((item) => (
@@ -70,38 +52,31 @@ export default function SimilarSeriesSection({ seriesId, series }) {
             className="group overflow-hidden rounded-[26px] border border-black/6 bg-white text-left shadow-[0_16px_36px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
             aria-label={`Open ${item.title}`}
           >
-            <div className="relative">
-              <Cover
-                tone={item.coverTone}
-                coverUrl={item.coverUrl}
-                label={item.title}
-                eyebrow={item.author || item.subtitle || "Recommended next"}
-                badge={item.badge}
-                className="aspect-[3/4] w-full"
-              />
-              {item.badge ? (
-                <span className="absolute left-3 top-3 rounded-full border border-white/50 bg-white/88 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-700 shadow-[0_8px_18px_rgba(15,23,42,0.08)] backdrop-blur-sm">
-                  {item.badge}
-                </span>
-              ) : null}
-            </div>
+            <Cover
+              tone={item.coverTone}
+              coverUrl={item.coverUrl}
+              label={item.title}
+              eyebrow={item.author || item.subtitle || "Series"}
+              badge={item.badge}
+              className="aspect-[3/4] w-full"
+            />
             <div className="space-y-2 p-4">
               <h3 className="line-clamp-2 text-sm font-semibold text-slate-950">{item.title}</h3>
               <p className="line-clamp-1 text-xs text-slate-500">
-                {item.author || item.subtitle || "Recommended next"}
+                {item.author || item.subtitle || "Series"}
               </p>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                {item.rating ? (
-                  <InlineRatingDisplay
-                    score={item.rating}
-                    ratingCount={item.ratingCount}
-                    className="text-slate-500"
-                  />
-                ) : (
-                  <span>New pick</span>
-                )}
-                {item.subtitle ? <span>{item.subtitle}</span> : null}
-              </div>
+              {Array.isArray(item.genres) && item.genres.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {item.genres.slice(0, 2).map((genre) => (
+                    <span
+                      key={`${item.id}-${genre}`}
+                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-[11px] text-slate-500"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </Link>
         ))}

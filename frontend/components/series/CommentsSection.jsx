@@ -1,15 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import ShareButton from "../common/ShareButton";
-import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import LoginGateModal from "../layout/LoginGateModal";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
-
-const STAR_VALUES = [1, 2, 3, 4, 5];
 
 function formatDate(value) {
   if (!value) {
@@ -52,10 +47,6 @@ function getCommentLikedByUser(entry) {
   return false;
 }
 
-function formatCount(value) {
-  return Number(value || 0).toLocaleString("en-US");
-}
-
 function buildPromptSuggestions({ seriesTitle, author, status, genres }) {
   const safeTitle = seriesTitle || "this series";
   const leadGenre = Array.isArray(genres) && genres.length > 0 ? genres[0] : "character-driven stories";
@@ -91,34 +82,24 @@ function buildPromptSuggestions({ seriesTitle, author, status, genres }) {
 
 export default function CommentsSection({
   seriesId,
-  rating,
-  ratingCount,
-  onRatingUpdate,
   seriesTitle = "",
   author = "",
   status = "",
   genres = [],
-  followers = 0,
   isFollowing = false,
   onFollowToggle = null,
   sharePath = "",
 }) {
-  const router = useRouter();
   const { isSignedIn, signIn } = useAuthStore();
-  const { isAdultMode } = useAdultGateStore();
   const [comments, setComments] = useState([]);
   const [input, setInput] = useState("");
   const [replyDrafts, setReplyDrafts] = useState({});
   const [replyOpenId, setReplyOpenId] = useState("");
   const [activeModal, setActiveModal] = useState(false);
   const [working, setWorking] = useState(false);
-  const [userRating, setUserRating] = useState(0);
-  const [ratingPending, setRatingPending] = useState(false);
   const [sortKey, setSortKey] = useState("latest");
   const requestRef = useRef(0);
   const inputRef = useRef(null);
-
-  const hasVisibleRating = useMemo(() => Number(rating) > 0, [rating]);
 
   const loadComments = useCallback(async () => {
     const requestId = requestRef.current + 1;
@@ -173,7 +154,7 @@ export default function CommentsSection({
       setComments((prev) =>
         prev.map((comment) =>
           comment.id === commentId ? response.data.comment : comment
-        )
+        ),
       );
     }
   };
@@ -197,60 +178,24 @@ export default function CommentsSection({
       setComments((prev) =>
         prev.map((comment) =>
           comment.id === commentId ? response.data.comment : comment
-        )
+        ),
       );
       setReplyDrafts((prev) => ({ ...prev, [commentId]: "" }));
       setReplyOpenId("");
     }
   };
 
-  const handleRating = async (value) => {
-    if (!isSignedIn) {
-      setActiveModal(true);
-      return;
-    }
-    if (ratingPending) {
-      return;
-    }
-    setRatingPending(true);
-    const response = await apiPost("/api/ratings", { seriesId, rating: value });
-    if (response.ok) {
-      setUserRating(value);
-      onRatingUpdate?.(response.data.rating, response.data.count);
-      void apiGet(`/api/series/${seriesId}?adult=${isAdultMode ? "1" : "0"}`, {
-        bust: true,
-        dedupeMs: 0,
-        suppressAuthModal: true,
-      });
-    }
-    setRatingPending(false);
-  };
-
   const sortedComments = useMemo(() => {
     const list = Array.isArray(comments) ? [...comments] : [];
     if (sortKey === "top") {
       return list.sort(
-        (a, b) => getCommentLikeCount(b) - getCommentLikeCount(a)
+        (a, b) => getCommentLikeCount(b) - getCommentLikeCount(a),
       );
     }
     return list.sort(
-      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime(),
     );
   }, [comments, sortKey]);
-
-  const replyCount = useMemo(
-    () =>
-      comments.reduce(
-        (total, comment) => total + (Array.isArray(comment?.replies) ? comment.replies.length : 0),
-        0,
-      ),
-    [comments],
-  );
-
-  const topLikeCount = useMemo(
-    () => comments.reduce((max, comment) => Math.max(max, getCommentLikeCount(comment)), 0),
-    [comments],
-  );
 
   const promptSuggestions = useMemo(
     () => buildPromptSuggestions({ seriesTitle, author, status, genres }),
@@ -270,32 +215,6 @@ export default function CommentsSection({
     return "";
   }, [sharePath]);
 
-  const commentStats = useMemo(
-    () => [
-      {
-        label: "Readers talking",
-        value: formatCount(comments.length),
-        hint: comments.length > 0 ? "Visible comments in the current thread." : "No public comments yet.",
-      },
-      {
-        label: "Replies",
-        value: formatCount(replyCount),
-        hint: replyCount > 0 ? "Back-and-forth discussion already started." : "No reply chains yet.",
-      },
-      {
-        label: "Top likes",
-        value: formatCount(topLikeCount),
-        hint: topLikeCount > 0 ? "Most likes on a single comment so far." : "No liked comments yet.",
-      },
-      {
-        label: "Library saves",
-        value: formatCount(followers),
-        hint: Number(followers || 0) > 0 ? "Readers already keeping up with this title." : "Be the first to save it.",
-      },
-    ],
-    [comments.length, followers, replyCount, topLikeCount],
-  );
-
   const focusComposer = useCallback(
     (seedText = "") => {
       if (!isSignedIn) {
@@ -313,6 +232,7 @@ export default function CommentsSection({
     },
     [isSignedIn],
   );
+
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
   const primaryButtonClass =
@@ -324,96 +244,38 @@ export default function CommentsSection({
     <section data-comments-section className="mt-8 rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-slate-950">Ratings & Comments</h3>
-          <p className="text-xs text-slate-500">
-            {hasVisibleRating
-              ? <InlineRatingDisplay score={rating} ratingCount={ratingCount} className="text-slate-500" />
-              : "No ratings yet — be the first!"}
+          <h3 className="text-lg font-semibold text-slate-950">Comments</h3>
+          <p className="text-sm text-slate-500">
+            Share a reaction, a recommendation, or your take on the latest chapter.
           </p>
         </div>
-        <div className="flex items-center gap-1">
-          {STAR_VALUES.map((value) => (
+        <div className="flex flex-wrap gap-2">
+          {onFollowToggle ? (
             <button
-              key={value}
               type="button"
-              onClick={() => handleRating(value)}
-              disabled={ratingPending}
-              className={`text-lg ${
-                value <= (userRating || rating) ? "text-amber-500" : "text-slate-300"
+              onClick={onFollowToggle}
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                isFollowing
+                  ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-950 hover:border-[rgba(47,107,255,0.22)] hover:bg-[rgba(47,107,255,0.09)]"
+                  : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
               }`}
-              aria-label={`Rate ${value} star`}
             >
-              ★
+              {isFollowing ? "Saved" : "Save"}
             </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {commentStats.map((item) => (
-          <div
-            key={item.label}
-            className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+          ) : null}
+          <button
+            type="button"
+            onClick={() => focusComposer()}
+            className={secondaryButtonClass}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-              {item.label}
-            </p>
-            <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
-              {item.value}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-slate-500">{item.hint}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-5 rounded-[24px] border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              Community moves
-            </p>
-            <h4 className="mt-2 text-lg font-semibold text-slate-950">
-              Give readers a reason to react, save, and share before they leave the page.
-            </h4>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Strong series pages turn comments into a return reason instead of hiding discussion under a plain text box.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {onFollowToggle ? (
-              <button
-                type="button"
-                onClick={onFollowToggle}
-                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  isFollowing
-                    ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-950 hover:border-[rgba(47,107,255,0.22)] hover:bg-[rgba(47,107,255,0.09)]"
-                    : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
-                }`}
-              >
-                {isFollowing ? "Saved" : "Save"}
-              </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => focusComposer()}
-              className={secondaryButtonClass}
-            >
-              Write a comment
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push(isFollowing ? "/notifications" : "/library")}
-              className={secondaryButtonClass}
-            >
-              {isFollowing ? "Open notifications" : "Open library"}
-            </button>
-            <ShareButton
-              url={shareUrl}
-              title={seriesTitle || "Check out this series"}
-              description={`Join the discussion around ${seriesTitle || "this series"}.`}
-              className={secondaryButtonClass}
-            />
-          </div>
+            Write a comment
+          </button>
+          <ShareButton
+            url={shareUrl}
+            title={seriesTitle || "Check out this series"}
+            description={`Join the conversation around ${seriesTitle || "this series"}.`}
+            className={secondaryButtonClass}
+          />
         </div>
       </div>
 
@@ -460,13 +322,13 @@ export default function CommentsSection({
         <div className="mt-3 flex flex-wrap gap-2">
           {promptSuggestions.map((prompt) => (
             <button
-            key={prompt.id}
-            type="button"
-            onClick={() => focusComposer(prompt.text)}
-            className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-          >
-            {prompt.label}
-          </button>
+              key={prompt.id}
+              type="button"
+              onClick={() => focusComposer(prompt.text)}
+              className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            >
+              {prompt.label}
+            </button>
           ))}
         </div>
       </div>
@@ -492,7 +354,7 @@ export default function CommentsSection({
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
           <div className="rounded-2xl border border-black/6 bg-white/84 p-4 text-sm text-slate-500">
-            Be the first to comment. Strong series pages feel more alive once readers leave a reaction, recommendation, or latest-episode take.
+            No comments yet. Start the conversation.
           </div>
         ) : (
           sortedComments.map((comment) => (
@@ -572,7 +434,7 @@ export default function CommentsSection({
         onClose={() => setActiveModal(false)}
         allowRegister
         title="Sign in"
-        description="Sign in to post comments or rate."
+        description="Sign in to post a comment."
         onSubmit={async ({ email, password, mode }) => {
           const response = await signIn(email, password, mode);
           if (response?.status === 202) {

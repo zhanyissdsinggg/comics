@@ -9,7 +9,6 @@ import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import CreatorShelfLinks from "../common/CreatorShelfLinks";
 import Cover from "../common/Cover";
-import InlineRatingDisplay from "../common/InlineRatingDisplay";
 import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
@@ -20,96 +19,115 @@ import {
 } from "../../lib/commerceSuccess";
 import { getSearchParam } from "../../lib/pageSearchParams";
 
-const TABS = [
+const VIEWS = [
   {
-    id: "popular",
-    label: "Popular",
-    title: "What readers are opening now.",
-    description: "",
+    id: "featured",
+    label: "Featured",
+    description: "A curated mix from across the catalog.",
   },
   {
-    id: "new",
-    label: "New",
-    title: "Fresh releases.",
-    description: "",
+    id: "start-here",
+    label: "Start Here",
+    description: "Reader-friendly stories with a strong first step.",
   },
   {
     id: "completed",
     label: "Completed",
-    title: "Completed stories.",
-    description: "",
+    description: "Finished stories ready to read through.",
   },
   {
-    id: "ttf",
-    label: "Read Free",
-    title: "Read free first.",
-    description: "",
+    id: "comics",
+    label: "Comics",
+    description: "Editorial picks in comics.",
+  },
+  {
+    id: "novels",
+    label: "Novels",
+    description: "Editorial picks in novels.",
   },
 ];
 
-const WINDOWS = [
-  { id: "all", label: "All time" },
-  { id: "week", label: "Weekly" },
-  { id: "month", label: "Monthly" },
-];
+function toTimestamp(value) {
+  const parsed = typeof value === "number" ? value : Date.parse(value || "");
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 
-const CHART_GUIDES = {
-  popular: {
-    audience: "Popular now.",
-    signal: "The titles drawing the most attention right now.",
-    searchHref: "/search?sort=popular",
-    searchLabel: "View related series",
-  },
-  new: {
-    audience: "New releases.",
-    signal: "Fresh series still gathering momentum.",
-    searchHref: "/search?sort=latest",
-    searchLabel: "View latest",
-  },
-  completed: {
-    audience: "Completed reads.",
-    signal: "Finished stories ready to read through.",
-    searchHref: "/search?status=Completed&sort=popular",
-    searchLabel: "View completed",
-  },
-  ttf: {
-    audience: "Read free.",
-    signal: "A shelf built around strong openings.",
-    searchHref: "/search?sort=popular",
-    searchLabel: "View more",
-  },
-};
+function normalizeStatus(value) {
+  return String(value || "").trim().toLowerCase();
+}
 
-function renderSeriesMeta(series) {
-  const typeLabel = String(series.type || "Series");
-  const statusLabel = String(series.status || "Ongoing");
+function hasReaderFriendlyStart(series) {
+  return Number(series?.freeEpisodeCount || 0) > 0 || Boolean(series?.hasFreeEpisodes);
+}
 
+function getFeaturedScore(series) {
   return (
-    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
-      <span>{typeLabel}</span>
-      <span aria-hidden="true" className="text-slate-300">
-        /
-      </span>
-      <span>{statusLabel}</span>
-      {Number(series?.rating || 0) > 0 ? (
-        <>
-          <span aria-hidden="true" className="text-slate-300">
-            /
-          </span>
-          <InlineRatingDisplay
-            score={series.rating}
-            ratingCount={series.ratingCount}
-            className="text-slate-500"
-          />
-        </>
-      ) : null}
-    </span>
+    toTimestamp(series?.updatedAt) +
+    (hasReaderFriendlyStart(series) ? 1200 : 0) +
+    (normalizeStatus(series?.status) === "completed" ? 700 : 0)
   );
+}
+
+function normalizeView(initialSearchParams = {}) {
+  const requestedView = getSearchParam(initialSearchParams, "view", "featured");
+  if (VIEWS.some((item) => item.id === requestedView)) {
+    return requestedView;
+  }
+
+  const legacyType = getSearchParam(initialSearchParams, "type", "");
+  if (legacyType === "ttf") {
+    return "start-here";
+  }
+  if (legacyType === "completed") {
+    return "completed";
+  }
+  if (legacyType === "popular" || legacyType === "new") {
+    return "featured";
+  }
+
+  return "featured";
+}
+
+function getSeriesMeta(series) {
+  return [
+    String(series?.type || "").trim(),
+    String(series?.status || "").trim(),
+    String(series?.author || "").trim(),
+  ].filter(Boolean);
+}
+
+function sortFeaturedSeries(seriesList = []) {
+  return [...seriesList].sort((left, right) => {
+    const scoreDelta = getFeaturedScore(right) - getFeaturedScore(left);
+    if (scoreDelta !== 0) {
+      return scoreDelta;
+    }
+
+    return String(left?.title || "").localeCompare(String(right?.title || ""));
+  });
+}
+
+function filterSeriesForView(seriesList = [], view = "featured") {
+  const sorted = sortFeaturedSeries(seriesList);
+
+  switch (view) {
+    case "start-here":
+      return sorted.filter((series) => hasReaderFriendlyStart(series));
+    case "completed":
+      return sorted.filter((series) => normalizeStatus(series?.status) === "completed");
+    case "comics":
+      return sorted.filter((series) => String(series?.type || "").toLowerCase() === "comic");
+    case "novels":
+      return sorted.filter((series) => String(series?.type || "").toLowerCase() === "novel");
+    case "featured":
+    default:
+      return sorted;
+  }
 }
 
 function RankingsLoadingState() {
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.32fr)_360px]">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.28fr)_360px]">
       <div className="space-y-6">
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="space-y-3">
@@ -161,73 +179,77 @@ function isModifiedEvent(event) {
 
 export default function RankingsPage({
   initialSearchParams = {},
-  initialRankings = [],
-  hasInitialRankings = false,
+  initialSeries = [],
+  hasInitialSeries = false,
 }) {
   const router = useRouter();
-  const tab = getSearchParam(initialSearchParams, "type", "popular");
-  const selectedWindow = getSearchParam(initialSearchParams, "window", "all");
-  const [list, setList] = useState(Array.isArray(initialRankings) ? initialRankings : []);
-  const [loading, setLoading] = useState(!hasInitialRankings);
+  const [seriesList, setSeriesList] = useState(Array.isArray(initialSeries) ? initialSeries : []);
+  const [loading, setLoading] = useState(!hasInitialSeries);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const { isAdultMode } = useAdultGateStore();
+  const activeViewId = normalizeView(initialSearchParams);
+  const activeView = VIEWS.find((item) => item.id === activeViewId) || VIEWS[0];
+  const featuredPath = `/rankings?view=${activeView.id}`;
 
-  const activeTab = TABS.find((item) => item.id === tab) || TABS[0];
-  const chartGuide = CHART_GUIDES[tab] || CHART_GUIDES.popular;
-  const rankingsPath = `/rankings?type=${tab}&window=${selectedWindow}`;
+  useEffect(() => {
+    if (!hasInitialSeries) {
+      setLoading(true);
+    }
+    const adultFlag = isAdultMode ? "1" : "0";
+    apiGet(`/api/series?adult=${adultFlag}`).then((response) => {
+      if (response.ok) {
+        setSeriesList(Array.isArray(response.data?.series) ? response.data.series : []);
+      } else {
+        setSeriesList([]);
+      }
+      setLoading(false);
+    });
+  }, [hasInitialSeries, isAdultMode]);
+
+  useEffect(() => {
+    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/rankings")));
+  }, []);
+
+  const curatedSeries = useMemo(
+    () => filterSeriesForView(seriesList, activeView.id),
+    [activeView.id, seriesList],
+  );
+  const leadEntry = curatedSeries[0] || null;
+  const supportingEntries = curatedSeries.slice(1, 3);
+  const boardEntries = curatedSeries.slice(3, 12);
 
   const handleSeriesClick = useCallback(
-    (seriesId, entryPoint = "RANKINGS_BOARD", campaignId = `${tab}_${selectedWindow}`) => {
+    (seriesId, entryPoint = "FEATURED_SERIES") => {
       const targetPath = `/series/${seriesId}`;
-      trackEvent("ranking_click", {
+      trackEvent("featured_series_click", {
         seriesId,
         entryPoint,
-        chartType: tab,
-        window: selectedWindow,
-        campaignId,
+        featuredView: activeView.id,
       });
       router.push(
         buildPathWithAttribution(targetPath, {
           entryPoint,
-          campaignId,
-          sourcePath: rankingsPath,
+          campaignId: `featured_${activeView.id}`,
+          sourcePath: featuredPath,
           sourceSeriesId: seriesId,
           returnTo: targetPath,
         }),
       );
     },
-    [rankingsPath, router, selectedWindow, tab],
+    [activeView.id, featuredPath, router],
   );
+
   const handleSeriesLinkClick = useCallback(
-    (event, seriesId, entryPoint = "RANKINGS_BOARD", campaignId = `${tab}_${selectedWindow}`) => {
+    (event, seriesId, entryPoint = "FEATURED_SERIES") => {
       if (isModifiedEvent(event)) {
         return;
       }
 
       event.preventDefault();
-      handleSeriesClick(seriesId, entryPoint, campaignId);
+      handleSeriesClick(seriesId, entryPoint);
     },
-    [handleSeriesClick, selectedWindow, tab],
+    [handleSeriesClick],
   );
-
-  useEffect(() => {
-    if (!hasInitialRankings) {
-      setLoading(true);
-    }
-    const adultFlag = isAdultMode ? "1" : "0";
-    apiGet(`/api/rankings?type=${tab}&window=${selectedWindow}&adult=${adultFlag}`).then((response) => {
-      if (response.ok) {
-        setList(response.data?.rankings || []);
-      } else {
-        setList([]);
-      }
-      setLoading(false);
-    });
-  }, [hasInitialRankings, isAdultMode, selectedWindow, tab]);
-
-  useEffect(() => {
-    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/rankings")));
-  }, []);
 
   const filterButtonClass = (isActive) =>
     [
@@ -236,15 +258,11 @@ export default function RankingsPage({
         ? "border-black/10 bg-slate-950 text-white"
         : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950",
     ].join(" ");
+
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
-
-  const spotlightEntries = list.slice(0, 8);
-  const leadEntry = spotlightEntries[0] || null;
-  const supportingEntries = list.slice(1, 3);
-  const boardEntries = list.slice(3, 12);
 
   return (
     <main className="gush-page-shell overflow-hidden">
@@ -252,9 +270,9 @@ export default function RankingsPage({
       <SiteHeader variant="light" />
       <div className="gush-page-main gush-section-stack">
         <EditorialHero
-          eyebrow="Top Series"
-          title={activeTab.title}
-          description={activeTab.description}
+          eyebrow="Featured Series"
+          title="Editor’s picks and reader-friendly starting points."
+          description={activeView.description}
           appearance="light"
         />
 
@@ -266,161 +284,82 @@ export default function RankingsPage({
         ) : null}
 
         <div className="rounded-[24px] border border-black/6 bg-white/82 p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap gap-2">
-              {TABS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => router.replace(`/rankings?type=${item.id}&window=${selectedWindow}`)}
-                  className={filterButtonClass(tab === item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {WINDOWS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => router.replace(`/rankings?type=${tab}&window=${item.id}`)}
-                  className={filterButtonClass(selectedWindow === item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {VIEWS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => router.replace(`/rankings?view=${item.id}`)}
+                className={filterButtonClass(activeView.id === item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
         </div>
 
         {loading ? (
           <RankingsLoadingState />
-        ) : list.length === 0 ? (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.32fr)_360px]">
-            <div className="space-y-4">
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Top Series
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Nothing is ranking here yet.
-                  </h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{chartGuide.signal}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push(tab === "completed" ? "/search?status=Completed&sort=popular" : chartGuide.searchHref)
-                    }
-                    className={primaryButtonClass}
-                  >
-                    {chartGuide.searchLabel}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/search")}
-                    className={secondaryButtonClass}
-                  >
-                    Search
-                  </button>
-                </div>
-              </SurfacePanel>
-
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Other views
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Open another view.
-                  </h2>
-                </div>
-                <div className="grid gap-3">
-                  {[
-                    {
-                      title: "Popular",
-                      href: "/rankings?type=popular&window=week",
-                    },
-                    {
-                      title: "Completed",
-                      href: "/rankings?type=completed&window=all",
-                    },
-                    {
-                      title: "Start Free",
-                      href: "/rankings?type=ttf&window=all",
-                    },
-                  ].map((item) => (
-                    <button
-                      key={item.title}
-                      type="button"
-                      onClick={() => router.push(item.href)}
-                      className="rounded-[20px] border border-black/6 bg-white/88 px-4 py-4 text-left text-sm font-semibold text-slate-900 transition hover:border-black/10 hover:bg-[#f8f9fc]"
-                    >
-                      {item.title}
-                    </button>
-                  ))}
-                </div>
-              </SurfacePanel>
-            </div>
-
-            <div className="space-y-4">
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Top Series creators
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Browse creator shelves.
-                  </h2>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => router.push("/creators")}
-                    className={primaryButtonClass}
-                  >
-                    Explore Creators
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/comics")}
-                    className={secondaryButtonClass}
-                  >
-                    Explore Comics
-                  </button>
-                </div>
-              </SurfacePanel>
-
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Search
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Search the catalog.
-                  </h2>
-                </div>
+        ) : curatedSeries.length === 0 ? (
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.28fr)_360px]">
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Featured Series
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Nothing is featured here yet.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Browse the catalog directly or switch to another editorial view.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={() => router.push("/search")}
+                  onClick={() => router.push("/comics")}
+                  className={primaryButtonClass}
+                >
+                  Browse Comics
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/novels")}
                   className={secondaryButtonClass}
                 >
-                  Search
+                  Browse Novels
                 </button>
-              </SurfacePanel>
-            </div>
+              </div>
+            </SurfacePanel>
+
+            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Creators
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  Meet the Creators
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Browse the writers, artists, and studios behind the stories.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/creators")}
+                className={secondaryButtonClass}
+              >
+                View Creators
+              </button>
+            </SurfacePanel>
           </div>
         ) : (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.32fr)_360px]">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.28fr)_360px]">
             <div className="space-y-6">
               {leadEntry ? (
                 <Link
                   href={`/series/${encodeURIComponent(leadEntry.id)}`}
-                  onClick={(event) => handleSeriesLinkClick(event, leadEntry.id, "RANKINGS_LEAD")}
+                  onClick={(event) => handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")}
                   className="w-full rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-5 text-left shadow-[0_22px_52px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-black/10"
                   aria-label={`Open ${leadEntry.title}`}
                 >
@@ -429,7 +368,7 @@ export default function RankingsPage({
                       tone={leadEntry.coverTone}
                       coverUrl={leadEntry.coverUrl}
                       label={leadEntry.title}
-                      eyebrow={activeTab.label}
+                      eyebrow={activeView.label}
                       badge={leadEntry.badge}
                       genres={leadEntry.genres}
                       seriesType={leadEntry.type}
@@ -437,12 +376,24 @@ export default function RankingsPage({
                     />
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                        Rank #1
+                        Featured
                       </p>
                       <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                         {leadEntry.title}
                       </h2>
-                      <p className="mt-4 text-sm text-slate-500">{renderSeriesMeta(leadEntry)}</p>
+                      <p className="mt-4 text-sm leading-7 text-slate-600">
+                        {leadEntry.description || "A strong place to begin."}
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
+                        {getSeriesMeta(leadEntry).map((item) => (
+                          <span
+                            key={`${leadEntry.id}-lead-meta-${item}`}
+                            className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1.5"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -450,35 +401,40 @@ export default function RankingsPage({
 
               {supportingEntries.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2">
-                  {supportingEntries.map((series, index) => (
+                  {supportingEntries.map((series) => (
                     <Link
                       key={series.id}
                       href={`/series/${encodeURIComponent(series.id)}`}
-                      onClick={(event) => handleSeriesLinkClick(event, series.id, "RANKINGS_SUPPORTING")}
+                      onClick={(event) => handleSeriesLinkClick(event, series.id, "FEATURED_SUPPORTING")}
                       className="rounded-[26px] border border-black/6 bg-white/88 p-4 text-left shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-black/10"
                       aria-label={`Open ${series.title}`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                            Rank #{index + 2}
-                          </p>
-                          <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                            {series.title}
-                          </h3>
-                        </div>
-                      </div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                        {activeView.label}
+                      </p>
+                      <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                        {series.title}
+                      </h3>
                       <Cover
                         tone={series.coverTone}
                         coverUrl={series.coverUrl}
                         label={series.title}
-                        eyebrow={`Rank #${index + 2}`}
+                        eyebrow={series.author || activeView.label}
                         badge={series.badge}
                         genres={series.genres}
                         seriesType={series.type}
                         className="mt-4 aspect-[3/4] w-full rounded-[20px]"
                       />
-                      <p className="mt-4 text-sm text-slate-500">{renderSeriesMeta(series)}</p>
+                      <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
+                        {getSeriesMeta(series).map((item) => (
+                          <span
+                            key={`${series.id}-support-meta-${item}`}
+                            className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1.5"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
                     </Link>
                   ))}
                 </div>
@@ -487,28 +443,23 @@ export default function RankingsPage({
               {boardEntries.length > 0 ? (
                 <SurfacePanel className="space-y-5" appearance="light" accent="blue">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    More ranks
+                    More Series
                   </p>
 
                   <div className="space-y-3">
-                    {boardEntries.map((series, index) => (
+                    {boardEntries.map((series) => (
                       <Link
                         key={series.id}
                         href={`/series/${encodeURIComponent(series.id)}`}
-                        onClick={(event) => handleSeriesLinkClick(event, series.id, "RANKINGS_BOARD_LIST")}
+                        onClick={(event) => handleSeriesLinkClick(event, series.id, "FEATURED_LIST")}
                         className="flex w-full items-center gap-4 rounded-[24px] border border-black/6 bg-white/86 p-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-black/10"
                         aria-label={`Open ${series.title}`}
                       >
-                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-[18px] border border-black/8 bg-[#f8f9fc]">
-                          <span className="font-display text-xl font-semibold tracking-tight text-slate-950">
-                            #{index + 4}
-                          </span>
-                        </div>
                         <Cover
                           tone={series.coverTone}
                           coverUrl={series.coverUrl}
                           label={series.title}
-                          eyebrow={`Rank #${index + 4}`}
+                          eyebrow={series.author || activeView.label}
                           badge={series.badge}
                           genres={series.genres}
                           seriesType={series.type}
@@ -516,13 +467,17 @@ export default function RankingsPage({
                         />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-base font-semibold text-slate-950">{series.title}</p>
-                          <p className="mt-1 text-xs text-slate-500">{renderSeriesMeta(series)}</p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            {getSeriesMeta(series).join(" / ")}
+                          </p>
                           {Array.isArray(series.genres) && series.genres.length > 0 ? (
-                            <p className="mt-1 truncate text-xs text-slate-400">{series.genres.slice(0, 2).join(" / ")}</p>
+                            <p className="mt-1 truncate text-xs text-slate-400">
+                              {series.genres.slice(0, 2).join(" / ")}
+                            </p>
                           ) : null}
                         </div>
                         <span className="hidden rounded-full border border-black/8 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-500 sm:inline-flex">
-                          View
+                          View Series
                         </span>
                       </Link>
                     ))}
@@ -533,16 +488,43 @@ export default function RankingsPage({
 
             <div className="space-y-4">
               <CreatorShelfLinks
-                items={spotlightEntries}
-                entryPoint="RANKINGS_CREATOR_CHIP"
-                campaignId={`${tab}_${selectedWindow}_spotlight_creator`}
-                sourcePath={rankingsPath}
-                label="Featured creators"
+                items={curatedSeries}
+                entryPoint="FEATURED_CREATOR_CHIP"
+                campaignId={`featured_${activeView.id}_creator`}
+                sourcePath={featuredPath}
+                label="Meet the Creators"
                 maxCreators={6}
                 compact
                 appearance="light"
                 className="shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
               />
+
+              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Browse
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Keep browsing
+                  </h2>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/comics")}
+                    className={primaryButtonClass}
+                  >
+                    Browse Comics
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/novels")}
+                    className={secondaryButtonClass}
+                  >
+                    Browse Novels
+                  </button>
+                </div>
+              </SurfacePanel>
             </div>
           </div>
         )}

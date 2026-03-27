@@ -10,7 +10,7 @@ import { loadHomepageSeoPayload } from "../lib/storefrontSeo";
 export const metadata = createPageMetadata({
   title: "Read Comics and Novels Online",
   description:
-    "Read comics and novels on Gush. Start free, unlock with points, or choose a membership plan.",
+    "Read original comics and novels in one place. Find a story, start with chapter one, and follow the series you want to keep reading.",
   path: "/",
 });
 
@@ -21,7 +21,7 @@ export default async function Page({ searchParams }) {
     buildOrganizationStructuredData(),
     buildWebsiteStructuredData({
       description:
-        "Read comics and novels on Gush. Start free, unlock with points, or choose a membership plan.",
+        "Read original comics and novels in one place. Find a story, start with chapter one, and follow the series you want to keep reading.",
     }),
   ];
 

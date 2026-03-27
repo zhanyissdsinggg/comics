@@ -11,7 +11,6 @@ import SurfacePanel from "../common/SurfacePanel";
 import SkeletonCard from "../common/SkeletonCard";
 import PortraitCard from "../home/PortraitCard";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
-import StorefrontCampaignPanel from "../common/StorefrontCampaignPanel";
 import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { apiGet } from "../../lib/apiClient";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -39,13 +38,6 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function formatCompactCount(value) {
-  return new Intl.NumberFormat("en-US", {
-    notation: value >= 1000 ? "compact" : "standard",
-    maximumFractionDigits: value >= 1000 ? 1 : 0,
-  }).format(Math.max(0, toNumber(value)));
-}
-
 function formatDateLabel(value) {
   if (!value) {
     return "Recently updated";
@@ -63,17 +55,12 @@ function formatDateLabel(value) {
   }).format(new Date(parsed));
 }
 
-function getPopularityScore(series) {
-  return Math.max(
-    toNumber(series?.followers),
-    toNumber(series?.views),
-    toNumber(series?.ratingCount),
-    Math.round(toNumber(series?.rating) * 100),
+function getCatalogPriority(series) {
+  return (
+    Date.parse(series?.updatedAt || 0) +
+    ((Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) ? 1200 : 0) +
+    (String(series?.status || "").toLowerCase() === "completed" ? 700 : 0)
   );
-}
-
-function getReaderProofTotal(items) {
-  return items.reduce((sum, item) => sum + getPopularityScore(item), 0);
 }
 
 function getTopGenres(items) {
@@ -98,7 +85,7 @@ function buildCreatorItems(seriesList, creatorSlug) {
   return seriesList
     .filter((item) => item?.id && creatorMatchesSlug(item?.author, creatorSlug))
     .sort((left, right) => {
-      const popularityDelta = getPopularityScore(right) - getPopularityScore(left);
+      const popularityDelta = getCatalogPriority(right) - getCatalogPriority(left);
       if (popularityDelta !== 0) {
         return popularityDelta;
       }
@@ -133,16 +120,16 @@ function getCreatorHeroCopy(creatorName, isStudioShelf, topGenres) {
     return {
       title: "More from this studio.",
       description: genreLabel
-        ? `${genreLabel} titles from the same studio, in one place.`
-        : "Linked titles from the same studio, in one place.",
+        ? `${genreLabel} stories from the same studio.`
+        : "Stories from the same studio.",
     };
   }
 
   return {
     title: `More from ${creatorName}.`,
     description: genreLabel
-      ? `${creatorName}'s ${genreLabel} work, gathered on one shelf.`
-      : `${creatorName}'s public titles, gathered on one shelf.`,
+      ? `${creatorName}'s ${genreLabel} work in one place.`
+      : `${creatorName}'s published stories in one place.`,
   };
 }
 
@@ -340,33 +327,45 @@ export default function CreatorPage({
     const completedCount = creatorItems.filter(
       (item) => String(item?.status || "").toLowerCase() === "completed",
     ).length;
-    const readerProof = getReaderProofTotal(creatorItems);
     const strongestGenre = topGenres[0] || "Mixed";
+    const formatLabel = Array.from(
+      new Set(
+        creatorItems
+          .map((item) => String(item?.type || "").trim())
+          .filter(Boolean),
+      ),
+    )
+      .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
+      .join(" / ") || "Series";
+    const latestUpdatedAt = creatorItems[0]?.updatedAt;
 
     return [
       {
-        label: "Shelf",
+        label: "Stories",
         value: formatTitleCountLabel(creatorItems.length),
-        hint: "Everything public on this creator shelf right now.",
+        hint: "Published titles on this page.",
       },
       {
-        label: "Reading mode",
+        label: "Format",
+        value: formatLabel,
+        hint: "Available on Gush.",
+      },
+      {
+        label: "Status",
         value: completedCount > 0 ? `${completedCount} complete` : "Mostly ongoing",
-        hint: completedCount > 0 ? "Finished reads are ready to binge." : "This page leans ongoing right now.",
+        hint: completedCount > 0 ? "Finished stories are included here too." : "Most titles on this page are still ongoing.",
       },
       {
-        label: "Audience",
-        value: readerProof > 0 ? `${formatCompactCount(readerProof)} readers` : "Fresh shelf",
-        hint: readerProof > 0
-          ? "Visible audience activity across this creator's titles."
-          : "Open the lead title for the clearest read on this shelf.",
+        label: "Latest",
+        value: latestUpdatedAt ? formatDateLabel(latestUpdatedAt) : "Catalog",
+        hint: latestUpdatedAt ? "Most recent update on this page." : "Updates will appear here once available.",
       },
       {
-        label: "Best known for",
+        label: "Genre",
         value: strongestGenre,
         hint: topGenres.length > 1
-          ? `${topGenres.slice(0, 2).join(" | ")} show up the most on this page.`
-          : "This is the clearest genre signal on the shelf.",
+          ? `${topGenres.slice(0, 2).join(" / ")} show up most often here.`
+          : "A notable genre on this page.",
       },
     ];
   }, [creatorItems, topGenres]);
@@ -377,10 +376,8 @@ export default function CreatorPage({
     }
 
     const isCompleted = String(spotlightSeries?.status || "").toLowerCase() === "completed";
-    const popularityScore = getPopularityScore(spotlightSeries);
 
     return [
-      popularityScore > 0 ? `${formatCompactCount(popularityScore)} readers` : null,
       isCompleted ? "Completed" : `Updated ${formatDateLabel(spotlightSeries?.updatedAt)}`,
       Array.isArray(spotlightSeries?.genres) && spotlightSeries.genres.length > 0
         ? spotlightSeries.genres.slice(0, 2).join(" / ")
@@ -469,15 +466,15 @@ export default function CreatorPage({
         title: `Search ${creatorName}.`,
         description: "Open the wider catalog around this name.",
         cta: "Search",
-        onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=popular`),
+        onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=latest`),
         accentClass:
           "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
       {
         id: "genre",
-        eyebrow: "Browse lane",
+        eyebrow: "Genres",
         title: topGenres[0] ? `Explore ${topGenres[0]}.` : "Explore similar reads.",
-        description: "Keep the same tone and widen the shelf.",
+        description: "Browse more stories with a similar tone.",
         cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
         onClick: handleBrowseGenre,
         accentClass:
@@ -485,11 +482,11 @@ export default function CreatorPage({
       },
       {
         id: "return",
-        eyebrow: "Return path",
-        title: originSeries ? `Back to ${originSeries.title}.` : "Back to your last path.",
+        eyebrow: "Back",
+        title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
         description: originSeries
           ? "Return to the title that led you here."
-          : "Return to your last browse path.",
+          : "Return to your last page.",
         cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
         onClick: handleReturn,
         accentClass:
@@ -506,17 +503,17 @@ export default function CreatorPage({
         title: `Search ${creatorName}.`,
         description: "Open the wider catalog around this name.",
         cta: "Search",
-        onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=popular`),
+        onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=latest`),
         accentClass:
           "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
       },
       {
-        id: "top-series",
-        eyebrow: "Top Series",
-        title: "Top Series",
-        description: "A broader shelf across the catalog.",
-        cta: "View Top Series",
-        onClick: () => router.push("/rankings?type=popular&window=week"),
+        id: "featured-series",
+        eyebrow: "Featured Series",
+        title: "Featured Series",
+        description: "A broader editorial mix across the catalog.",
+        cta: "Browse Series",
+        onClick: () => router.push("/rankings?view=featured"),
         accentClass:
           "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
@@ -532,9 +529,9 @@ export default function CreatorPage({
       },
       {
         id: "return",
-        eyebrow: "Return path",
-        title: originSeries ? `Back to ${originSeries.title}.` : "Back to your last path.",
-        description: originSeries ? "Return to the title that led you here." : "Return to your last browse path.",
+        eyebrow: "Back",
+        title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
+        description: originSeries ? "Return to the title that led you here." : "Return to your last page.",
         cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
         onClick: handleReturn,
         accentClass:
@@ -584,7 +581,7 @@ export default function CreatorPage({
             accent="blue"
             eyebrow={isStudioShelf ? "Studio" : "Creator"}
             title={`${creatorName} is not in the public catalog yet.`}
-            description="Search the catalog or open Top Series for related titles."
+            description="Search the catalog or browse featured series for related titles."
             secondary=""
             stats={[
               {
@@ -609,10 +606,10 @@ export default function CreatorPage({
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push("/rankings?type=popular&window=week")}
+                  onClick={() => router.push("/rankings?view=featured")}
                   className={secondaryButtonClass}
                 >
-                  View Top Series
+                  Browse Series
                 </button>
                 <button
                   type="button"
@@ -631,7 +628,7 @@ export default function CreatorPage({
               icon="book"
               eyebrow="Keep reading"
               title="Try another shelf."
-              description="Search or open Top Series."
+              description="Search or browse featured series."
               action={{
                 label: "Search",
                 onClick: () => router.push("/search"),
@@ -648,7 +645,7 @@ export default function CreatorPage({
                   Keep browsing.
                 </h2>
                 <p className="text-sm leading-7 text-slate-600">
-                  Search, Top Series, and the wider catalog stay close.
+                  Search, browse featured series, or head back to the catalog.
                 </p>
             </div>
             <StorefrontPathwaysGrid
@@ -684,10 +681,10 @@ export default function CreatorPage({
             <>
               <button
                 type="button"
-                onClick={() => router.push("/rankings?type=popular&window=week")}
+                onClick={() => router.push("/rankings?view=featured")}
                 className={primaryButtonClass}
               >
-                View Top Series
+                Browse Series
               </button>
               <button
                 type="button"
@@ -762,11 +759,7 @@ export default function CreatorPage({
                   {spotlightMeta.map((item, index) => (
                     <span
                       key={`${spotlightSeries.id}-meta-${index}`}
-                      className={`rounded-full border px-3 py-1.5 ${
-                        index === 0
-                          ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900"
-                          : "border-black/8 bg-[#f8f9fc]"
-                      }`}
+                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1.5"
                     >
                       {item}
                     </span>
@@ -801,25 +794,16 @@ export default function CreatorPage({
           </SurfacePanel>
         ) : null}
 
-        {spotlightSeries ? (
-          <StorefrontCampaignPanel
-            series={spotlightSeries}
-            sourcePath={creatorPath}
-            returnTo={creatorPath}
-            appearance="light"
-          />
-        ) : null}
-
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
               More to explore
             </p>
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Keep this shelf moving.
+              Keep browsing.
             </h2>
             <p className="text-sm leading-7 text-slate-600">
-              View the lead title, widen into a genre, search the name, or go back.
+              View the series, browse by genre, search the name, or go back.
             </p>
           </div>
           <StorefrontPathwaysGrid
@@ -836,7 +820,7 @@ export default function CreatorPage({
                 More from {creatorName}
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Every public title in one place.
+                Stories by {creatorName}.
               </h2>
             </div>
             <p className="text-sm text-slate-500">

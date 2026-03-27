@@ -19,8 +19,8 @@ export async function generateMetadata({ params }) {
     creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug);
 
   return createPageMetadata({
-    title: `Creator: ${creatorName}`,
-    description: `Browse titles from ${creatorName} on ${siteConfig.siteName}. Find the best place to start and discover more from the same creator.`,
+    title: creatorName,
+    description: `Browse stories from ${creatorName} on ${siteConfig.siteName}.`,
     path: buildCreatorPathFromSlug(creatorSlug),
     image: creatorPayload?.items?.[0]?.coverUrl || null,
   });

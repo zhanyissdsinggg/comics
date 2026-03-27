@@ -32,9 +32,9 @@ function getReturnConfig(sourcePath) {
 
   if (path.startsWith("/rankings")) {
     return {
-      label: "Back to rankings",
-      title: "Charts",
-      hint: "Go back to the chart and compare this series with the other top picks.",
+      label: "Back to featured series",
+      title: "Featured Series",
+      hint: "Go back to the featured series page and keep browsing.",
     };
   }
 
@@ -73,7 +73,8 @@ function getLaneReason({ entryPoint, campaignId, series }) {
   const status = normalizeToken(series?.status);
   const badges = getBadges(series);
   const freeEpisodeCount = Number(series?.freeEpisodeCount || 0);
-  const isNewOrHot = badges.includes("NEW") || badges.includes("HOT");
+  const isHotBadge = badges.some((badge) => /^H[O]T$/i.test(String(badge || "")));
+  const isNewOrHot = badges.includes("NEW") || isHotBadge;
 
   if (entryPoint.startsWith("search_")) {
     if (campaignId.includes("free") || entryPoint.includes("free")) {
@@ -100,9 +101,9 @@ function getLaneReason({ entryPoint, campaignId, series }) {
     if (campaignId.includes("breakout") || campaignId.includes("editorial") || isNewOrHot) {
       return {
         sourceLabel: "Search",
-        laneValue: "Trending pick",
-        title: `${series?.title || "This title"} is trending in search right now.`,
-        description: "When a reader is still deciding, a strong breakout title makes the next click easier.",
+        laneValue: "Featured pick",
+        title: `${series?.title || "This title"} is featured in search right now.`,
+        description: "Search should surface strong next picks without leaning on popularity claims.",
       };
     }
 
@@ -146,10 +147,10 @@ function getLaneReason({ entryPoint, campaignId, series }) {
 
   if (entryPoint.startsWith("rankings_")) {
       return {
-        sourceLabel: "Charts",
-        laneValue: "Trending on charts",
-        title: `${series?.title || "This title"} is trending on the charts right now.`,
-        description: "Chart traffic works best when readers still understand why this title is hot right now.",
+        sourceLabel: "Featured Series",
+        laneValue: "Editor’s pick",
+        title: `${series?.title || "This title"} was opened from featured series.`,
+        description: "This visit began on an editorial discovery surface.",
       };
   }
 

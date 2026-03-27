@@ -17,27 +17,27 @@ import { Button } from "@/components/ui/button";
 const MAX_HISTORY_ITEMS = 5;
 const DEFAULT_DISCOVERY_LANES = [
   {
-    id: "popular-week",
-    label: "Trending",
-    hint: "Popular now",
-    href: "/rankings?type=popular&window=week",
+    id: "featured-series",
+    label: "Featured Series",
+    hint: "Editor's picks",
+    href: "/rankings?view=featured",
   },
   {
     id: "completed",
     label: "Finished series",
     hint: "Completed reads",
-    href: "/search?status=Completed&sort=popular",
+    href: "/rankings?view=completed",
   },
   {
-    id: "free-unlocks",
-    label: "Read Free",
-    hint: "Free openings",
-    href: "/rankings?type=ttf&window=all",
+    id: "start-here",
+    label: "Start Here",
+    hint: "Reader-friendly starts",
+    href: "/rankings?view=start-here",
   },
   {
     id: "romance",
     label: "Romance",
-    hint: "A popular lane",
+    hint: "Browse by genre",
     query: "Romance",
   },
 ];
@@ -71,7 +71,7 @@ const HOME_DISCOVERY_LANES = [
 
 const SearchBar = memo(function SearchBar({
   onSearch,
-  placeholder = "Search titles, genres, or creators",
+  placeholder = "Search series, creators...",
   variant = "default",
   showShortcut = true,
   initialValue = "",
