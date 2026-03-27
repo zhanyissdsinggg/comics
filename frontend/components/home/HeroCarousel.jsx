@@ -12,6 +12,7 @@ import { trackEvent } from "../../lib/trackEvent";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
+import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getReadingCadenceLabel, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
 import Cover from "../common/Cover";
@@ -63,6 +64,7 @@ export default function HeroCarousel({ items }) {
   const gradient = TONE_GRADIENTS[active?.coverTone] || TONE_GRADIENTS.default;
   const campaign = getStorefrontCampaign(active);
   const activeSeriesHref = activeSeriesId ? `/series/${encodeURIComponent(activeSeriesId)}` : "#";
+  const activeGenres = useMemo(() => normalizeGenreList(active?.genres).slice(0, 3), [active?.genres]);
   const heroSignals = useMemo(
     () =>
       Array.from(
@@ -231,10 +233,19 @@ export default function HeroCarousel({ items }) {
               </p>
             ) : null}
 
-            <div className="mt-4 flex flex-wrap gap-3 text-sm text-neutral-200/85">
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-neutral-200/85">
               {active?.author ? <span>By {active.author}</span> : null}
-              {Array.isArray(active?.genres) && active.genres.length > 0 ? (
-                <span>{active.genres.slice(0, 3).join(" / ")}</span>
+              {activeGenres.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {activeGenres.map((genre) => (
+                    <span
+                      key={`hero-carousel-genre-${genre}`}
+                      className="inline-flex items-center whitespace-nowrap rounded-full border border-white/12 bg-white/8 px-3 py-1 text-xs font-medium text-neutral-100"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                </div>
               ) : null}
             </div>
 

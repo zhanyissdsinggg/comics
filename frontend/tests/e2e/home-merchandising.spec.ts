@@ -199,6 +199,14 @@ test.describe("Homepage merchandising sync", () => {
     await expect(homepageMain).toContainText("Featured series", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
+    await expect(homepageMain).not.toContainText("Romance / Drama");
+    await expect(homepageMain).not.toContainText("Fantasy / Action");
+    await expect(homepageMain.getByText("Romance", { exact: true }).first()).toBeVisible({
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(homepageMain.getByText("Drama", { exact: true }).first()).toBeVisible({
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
     await expect(homepageMain).toContainText("Soft Launch Kiss", {
       timeout: HOME_UI_TIMEOUT_MS,
     });

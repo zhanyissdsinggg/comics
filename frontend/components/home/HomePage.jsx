@@ -38,6 +38,7 @@ import {
   getHomeEditorialSnapshot,
   getSeriesScore,
 } from "../../lib/homeMerchandising";
+import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getSearchParam } from "../../lib/pageSearchParams";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -123,6 +124,10 @@ function dedupeSeries(seriesList) {
     seen.add(seriesId);
     return true;
   });
+}
+
+function getPrimaryGenres(genres, limit = 2) {
+  return normalizeGenreList(genres).slice(0, limit);
 }
 
 function FallbackDiscoveryCard({ eyebrow, title, description, label, onClick }) {
@@ -322,6 +327,7 @@ function HomeContent({ initialSearchParams = {} }) {
   const resumeSpotlight = continueItems[0] || recentHistoryItems[0] || null;
   const resumeSeries = resumeSpotlight ? seriesById.get(resumeSpotlight.seriesId) || null : null;
   const heroSeries = resumeSeries || featuredSeries || null;
+  const heroGenrePills = useMemo(() => getPrimaryGenres(heroSeries?.genres, 2), [heroSeries?.genres]);
 
   const heroSignals = useMemo(() => {
     if (!heroSeries) {
@@ -338,13 +344,6 @@ function HomeContent({ initialSearchParams = {} }) {
             ? ` / ${formatPercent(resumeSpotlight.progressPercent)} complete`
             : ""
         }`,
-      });
-    }
-
-    if (Array.isArray(heroSeries.genres) && heroSeries.genres.length > 0) {
-      signals.push({
-        id: `genres-${heroSeries.genres.slice(0, 2).join("-")}`,
-        content: heroSeries.genres.slice(0, 2).join(" / "),
       });
     }
 
@@ -406,10 +405,8 @@ function HomeContent({ initialSearchParams = {} }) {
           adult: Boolean(series?.adult),
           freeEpisodeCount: Number(series?.freeEpisodeCount || 0),
           hasFreeEpisodes: hasFree,
-          subtitle:
-            Array.isArray(series?.genres) && series.genres.length > 0
-              ? series.genres.slice(0, 2).join(" / ")
-              : series.author || "Featured series",
+          subtitle: "",
+          eyebrow: series.author || "Featured series",
           statusLabel: completed
             ? "Completed series"
             : hasFree
@@ -470,10 +467,8 @@ function HomeContent({ initialSearchParams = {} }) {
           adult: Boolean(series?.adult),
           freeEpisodeCount: Number(series?.freeEpisodeCount || 0),
           hasFreeEpisodes: Boolean(series?.hasFreeEpisodes || Number(series?.freeEpisodeCount || 0) > 0),
-          subtitle:
-            Array.isArray(series?.genres) && series.genres.length > 0
-              ? series.genres.slice(0, 2).join(" / ")
-              : series.author || "Free start",
+          subtitle: "",
+          eyebrow: series.author || "Free start",
           coverUrl: series.coverUrl,
           coverTone: series.coverTone,
           badge: "Free",
@@ -629,11 +624,7 @@ function HomeContent({ initialSearchParams = {} }) {
                           label={heroSeries.title}
                           genres={heroSeries.genres}
                           seriesType={heroSeries.type}
-                          eyebrow={
-                            Array.isArray(heroSeries.genres) && heroSeries.genres.length > 0
-                              ? heroSeries.genres.slice(0, 2).join(" / ")
-                              : ""
-                          }
+                          eyebrow={resumeSeries ? "Continue reading" : heroSeries.author || "Featured series"}
                           badge={
                             resumeSeries
                               ? heroSeries.badge
@@ -662,8 +653,21 @@ function HomeContent({ initialSearchParams = {} }) {
                             : clampText(heroSeries.description, 110) || getReadingState(heroSeries)}
                         </p>
 
-                        {heroSignals.length > 0 ? (
+                        {heroGenrePills.length > 0 ? (
                           <div className="mt-4 flex flex-wrap gap-2">
+                            {heroGenrePills.map((genre) => (
+                              <span
+                                key={`hero-genre-${genre}`}
+                                className="inline-flex items-center whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
+                              >
+                                {genre}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+
+                        {heroSignals.length > 0 ? (
+                          <div className={`flex flex-wrap gap-2 ${heroGenrePills.length > 0 ? "mt-2" : "mt-4"}`}>
                             {heroSignals.slice(0, 2).map((signal) => (
                               <span
                                 key={signal.id}
