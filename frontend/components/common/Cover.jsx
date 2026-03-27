@@ -91,14 +91,19 @@ function CoverFallback({
       {isMinimalCard ? (
         <div className="absolute left-4 top-4">
           {minimalChipLabel ? (
-            <span className="rounded-full border border-white/14 bg-black/18 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/78">
+            <span className="inline-flex whitespace-nowrap rounded-full border border-white/14 bg-black/18 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/78">
               {minimalChipLabel}
             </span>
           ) : null}
         </div>
       ) : (
-        <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
-          <div className="flex max-w-[70%] flex-wrap gap-2">
+        <div className="absolute left-3 right-3 top-3 flex flex-wrap items-start gap-2">
+          {artDirection.badgeLabel ? (
+            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/82">
+              {artDirection.badgeLabel}
+            </span>
+          ) : null}
+          <div className="order-2 flex w-full flex-wrap gap-2">
             {shouldShowTypeLabel ? (
               <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/82">
                 {artDirection.typeLabel}
@@ -110,11 +115,6 @@ function CoverFallback({
               </span>
             ) : null}
           </div>
-          {artDirection.badgeLabel ? (
-            <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/82">
-              {artDirection.badgeLabel}
-            </span>
-          ) : null}
         </div>
       )}
       <div className="absolute inset-x-0 top-[25%] flex justify-center">

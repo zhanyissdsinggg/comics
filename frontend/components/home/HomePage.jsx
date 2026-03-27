@@ -550,7 +550,22 @@ function HomeContent({ initialSearchParams = {} }) {
     );
   };
 
+  const openHeroCardCta = () => {
+    if (!heroSeries?.id) {
+      return;
+    }
+
+    if (resumeSeries) {
+      goResume();
+      return;
+    }
+
+    openHomeSeries(heroSeries.id, "HOME_HERO_CARD", `home_hero_card_${heroSeries.id}`);
+  };
+
   const heroEyebrow = resumeSeries ? "Continue reading" : "Start reading";
+  const showHeroFreemiumHook =
+    !resumeSeries && Number(heroSeries?.freeEpisodeCount || 0) >= 3;
   return (
     <div className="gush-page-shell overflow-hidden">
       <div className="gush-page-ambient h-[clamp(21rem,42vw,34rem)]" />
@@ -590,7 +605,7 @@ function HomeContent({ initialSearchParams = {} }) {
                       }
                       className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
                     >
-                      {resumeSeries ? "Continue Reading" : "Read Free"}
+                      {resumeSeries ? "Continue Reading" : "Browse Free Series"}
                     </Button>
                     <Button
                       type="button"
@@ -659,6 +674,24 @@ function HomeContent({ initialSearchParams = {} }) {
                             ))}
                           </div>
                         ) : null}
+
+                        {showHeroFreemiumHook ? (
+                          <div className="mt-4 flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-700 shadow-[0_10px_20px_rgba(16,185,129,0.12)]">
+                              <Gift className="size-3.5" strokeWidth={2} />
+                              First 3 chapters FREE
+                            </span>
+                          </div>
+                        ) : null}
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={openHeroCardCta}
+                          className="mt-4 h-10 rounded-full border-[rgba(49,87,214,0.16)] bg-[rgba(49,87,214,0.08)] px-4 text-sm font-semibold text-[var(--gush-accent,#3157d6)] hover:border-[rgba(49,87,214,0.22)] hover:bg-[rgba(49,87,214,0.14)] hover:text-[var(--gush-accent-strong,#2444af)]"
+                        >
+                          {resumeSeries ? "Continue Reading" : "Read Now"}
+                        </Button>
                       </div>
                     </div>
                   </div>

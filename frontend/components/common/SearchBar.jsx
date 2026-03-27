@@ -238,7 +238,7 @@ const SearchBar = memo(function SearchBar({
             }
           }}
           className={cn(
-            "flex-1 bg-transparent text-base focus:outline-none md:text-sm",
+            "min-w-0 flex-1 bg-transparent text-base focus:outline-none md:text-sm",
             isLight ? "text-slate-900 placeholder:text-slate-400" : "text-neutral-100 placeholder:text-neutral-500",
           )}
           aria-expanded={showSuggestions}

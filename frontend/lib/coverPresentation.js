@@ -270,13 +270,15 @@ export function getCoverCardMeta(item = {}) {
   const subtitleLooksEditorial =
     /[/|,]/.test(subtitleValue) &&
     !/(episode|chapter|continue|last read|updated|rating|saved|series)/i.test(subtitleValue);
-  const genres = normalizeGenreList(
+  const genreSource =
     Array.isArray(item?.genres) && item.genres.length > 0
       ? item.genres
-      : subtitleLooksEditorial
-        ? subtitleValue
-        : [],
-  );
+      : typeof item?.genres === "string" && item.genres.trim()
+        ? item.genres
+        : subtitleLooksEditorial
+          ? subtitleValue
+          : [];
+  const genres = normalizeGenreList(genreSource);
   const typeLabel = getSeriesTypeLabel(item?.seriesType || item?.type, "");
   const badgeLabel = item?.adult || item?.isAdult ? "18+" : normalizeCoverBadge(item?.badge);
   const chips = [];

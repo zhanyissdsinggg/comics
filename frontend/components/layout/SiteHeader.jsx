@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { HomeProvider } from "../../store/useHomeStore";
@@ -12,6 +13,7 @@ import HeaderActions from "./HeaderActions";
 import HeaderSearch from "./HeaderSearch";
 
 export default function SiteHeader({ onSearch, variant = "default" }) {
+  const router = useRouter();
   const { isAdultMode, legalAge, requestAdultToggle } = useAdultGateStore();
   const { isSignedIn, hydrated } = useAuthStore();
   const [activeModal, setActiveModal] = useState(null);
@@ -113,6 +115,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
 
     if (!isAdultMode) {
       trackEvent("adult_gate_enabled", { source: "header" });
+      router.push("/adult");
     }
 
     setActiveModal(null);
@@ -164,7 +167,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
             <HomeProvider>
               <HeaderNav variant={variant} />
             </HomeProvider>
-            <div className="min-w-0 flex-1 md:max-w-sm lg:max-w-md xl:max-w-[30rem]">
+            <div className="min-w-0 flex-1 md:max-w-md lg:max-w-[32rem] xl:max-w-[34rem]">
               <HeaderSearch onSearch={onSearch} variant={variant} />
             </div>
             <HeaderActions

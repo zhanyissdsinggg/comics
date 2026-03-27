@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Coins, Menu, User } from "lucide-react";
+import { Bell, Menu, User, Wallet } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -58,7 +58,7 @@ export default function HeaderActions({
           }`}
           aria-label="Wallet"
         >
-          <Coins className="size-4" />
+          <Wallet className="size-4" strokeWidth={2} />
           <span className="text-sm font-semibold">Wallet</span>
           <span className={`text-xs tabular-nums ${isLight ? "text-slate-500" : "text-neutral-400"}`}>{walletTotal.toLocaleString()}</span>
         </Button>

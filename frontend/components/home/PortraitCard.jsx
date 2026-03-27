@@ -33,6 +33,8 @@ function PortraitCard({
   const isLight = appearance === "light";
   const resolvedHref = href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
   const coverMeta = getCoverCardMeta(item);
+  const genrePills = Array.isArray(coverMeta.genres) ? coverMeta.genres : [];
+  const showGenrePills = genrePills.length > 0;
   const rawDetailCopy = item.statusLabel || item.metaLabel || coverMeta.detailText || "";
   const normalizedMetaLine = String(metaLine || "").replace(/\s+/g, " ").trim().toLowerCase();
   const normalizedDetailCopy =
@@ -105,7 +107,21 @@ function PortraitCard({
 
         <div className="space-y-2.5 px-4 py-4">
           <div className="space-y-1.5">
-            {metaLine ? (
+            {showGenrePills ? (
+              <div className="flex flex-wrap gap-2">
+                {genrePills.map((genre) => (
+                  <span
+                    key={`${item?.id || item?.title || "series"}-${genre}`}
+                    className={cn(
+                      "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap",
+                      isLight ? "bg-slate-100 text-slate-600" : "bg-white/10 text-neutral-300",
+                    )}
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+            ) : metaLine ? (
               <p className={cn("line-clamp-1 text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors", isLight ? "text-slate-400 group-hover:text-slate-500" : "text-neutral-500 group-hover:text-neutral-400")}>
                 {metaLine}
               </p>

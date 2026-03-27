@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -19,6 +20,7 @@ export default function HeaderModals({
   pendingAdultToggle,
   onPendingAdultToggleChange,
 }) {
+  const router = useRouter();
   const { signIn } = useAuthStore();
   const {
     requestAdultToggle,
@@ -63,11 +65,13 @@ export default function HeaderModals({
     return response;
   };
 
-  const handleAgeConfirm = () => {
-    trackEvent("adult_gate_confirm", { source: "header", ruleKey: ageRuleKey });
-    confirmAge(ageRuleKey);
+  const handleAgeConfirm = (ruleKey) => {
+    const resolvedRuleKey = ruleKey || ageRuleKey;
+    trackEvent("adult_gate_confirm", { source: "header", ruleKey: resolvedRuleKey });
+    confirmAge(resolvedRuleKey);
     onModalClose("age");
     trackEvent("adult_gate_enabled", { source: "header" });
+    router.push("/adult");
   };
 
   const handleTopUp = (pkg) => {
