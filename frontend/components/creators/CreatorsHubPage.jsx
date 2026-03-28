@@ -141,6 +141,75 @@ function buildCreatorShelfMeta(creator) {
   return meta.length > 0 ? meta : ["Featured creator"];
 }
 
+function formatSeriesTypeLabel(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) {
+    return "Series";
+  }
+  if (normalized === "comic") {
+    return "Comic";
+  }
+  if (normalized === "novel") {
+    return "Novel";
+  }
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function formatTitleCountLabel(count) {
+  const total = Number(count || 0);
+  return `${total} title${total === 1 ? "" : "s"}`;
+}
+
+function buildCreatorWorksSummary(creator) {
+  const leadSeries = getCreatorLeadSeries(creator);
+  const genres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
+  const formatLabel = formatSeriesTypeLabel(leadSeries?.type).toLowerCase();
+
+  if (genres.length > 0 && leadSeries?.title) {
+    return `${genres.join(" / ")} ${formatLabel}${Number(creator?.titleCount || 0) > 1 ? "s" : ""} led by ${leadSeries.title}.`;
+  }
+
+  if (leadSeries?.title) {
+    return `Best known here for ${leadSeries.title}.`;
+  }
+
+  if (genres.length > 0) {
+    return `${genres.join(" / ")} stories in the catalog.`;
+  }
+
+  return "Published work in the catalog.";
+}
+
+function buildCreatorStartLabel(creator) {
+  const leadSeries = getCreatorLeadSeries(creator);
+  if (leadSeries?.title) {
+    return `Start with ${leadSeries.title}.`;
+  }
+  return "Start with the lead title.";
+}
+
+function buildFallbackTeamHeadline(series) {
+  if (!series?.title) {
+    return "Featured story team";
+  }
+  return `The team behind ${series.title}`;
+}
+
+function buildFallbackTeamSummary(series) {
+  const fallback = Array.isArray(series?.genres) && series.genres.length > 0
+    ? `${series.genres.slice(0, 2).join(" / ")} ${formatSeriesTypeLabel(series?.type).toLowerCase()} with a clear place to start.`
+    : `${formatSeriesTypeLabel(series?.type)} with a clear place to start.`;
+
+  return summarizeLeadCopy(series?.description, fallback);
+}
+
+function buildSeriesStartLabel(series) {
+  if (series?.title) {
+    return `Start with ${series.title}.`;
+  }
+  return "Start with the lead story.";
+}
+
 function CreatorDirectorySkeleton() {
   return (
     <main className="gush-page-shell">
@@ -362,34 +431,9 @@ export default function CreatorsHubPage({
       .slice(0, 6)
       .map(([genre, count]) => ({ genre, count }));
   }, [catalog]);
-  const fallbackCreatorHighlights = useMemo(
-    () => [
-      {
-        eyebrow: "Story-first catalog",
-        title:
-          fallbackEntryTitles.length > 0
-            ? `${fallbackEntryTitles.length} strong places to start.`
-            : "Strong story entry points.",
-        description:
-          "This page stays close to the titles that give the clearest feel for the catalog right now.",
-      },
-      {
-        eyebrow: "Credited teams",
-        title: "Public credits stay tied to the work.",
-        description:
-          "When a series carries a public-facing credit, it shows up here under the same name readers see on the title page.",
-      },
-      {
-        eyebrow: "Genre lanes",
-        title:
-          fallbackGenrePicks.length > 0
-            ? `${fallbackGenrePicks.length} genre paths to explore.`
-            : "Genre paths stay close.",
-        description:
-          "Genre picks make it easier to move from one story to the next while creator pages stay selective and clean.",
-      },
-    ],
-    [fallbackEntryTitles.length, fallbackGenrePicks.length],
+  const fallbackFeaturedTeams = useMemo(
+    () => fallbackEntryTitles.slice(0, 3),
+    [fallbackEntryTitles],
   );
   const creatorLookup = useMemo(
     () => new Map(creators.map((creator) => [creator.slug, creator])),
@@ -666,28 +710,77 @@ export default function CreatorsHubPage({
                 Featured Creators
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                This page starts with strong story entry points, credited teams when they are public, and genre paths that help new readers find a way in.
+                Start with a few standout stories and the teams behind them.
               </p>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-3">
-              {fallbackCreatorHighlights.map((item) => (
-                <div
-                  key={item.eyebrow}
-                  className="rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    {item.eyebrow}
-                  </p>
-                  <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-950">
-                    {item.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
-                    {item.description}
-                  </p>
-                </div>
-              ))}
-            </div>
+            {fallbackFeaturedTeams.length > 0 ? (
+              <div className="grid gap-4 xl:grid-cols-3">
+                {fallbackFeaturedTeams.map((series) => (
+                  <article
+                    key={`featured-team-${series.id}`}
+                    className="rounded-[28px] border border-black/6 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
+                  >
+                    <div className="grid gap-4 sm:grid-cols-[116px_minmax(0,1fr)]">
+                      <Link
+                        href={buildFallbackTitleHref(series)}
+                        onClick={(event) => handleFallbackTitleLinkClick(event, series)}
+                        className="group block overflow-hidden rounded-[20px]"
+                        aria-label={`Open ${series.title}`}
+                      >
+                        <Cover
+                          tone={series.coverTone}
+                          coverUrl={series.coverUrl}
+                          label={series.title}
+                          eyebrow="Featured team"
+                          badge={series.badge}
+                          fallbackVariant="minimal-card"
+                          className="h-40 rounded-[20px] transition-transform duration-500 group-hover:scale-[1.03]"
+                        />
+                      </Link>
+
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                          Story team
+                        </p>
+                        <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
+                          {buildFallbackTeamHeadline(series)}
+                        </h3>
+                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                          {buildFallbackTeamSummary(series)}
+                        </p>
+
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                            {buildSeriesStartLabel(series)}
+                          </span>
+                          {(Array.isArray(series?.genres) ? series.genres : []).slice(0, 2).map((genre) => (
+                            <span
+                              key={`${series.id}-featured-team-${genre}`}
+                              className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
+                            >
+                              {genre}
+                            </span>
+                          ))}
+                        </div>
+
+                        <Link
+                          href={buildFallbackTitleHref(series)}
+                          onClick={(event) => handleFallbackTitleLinkClick(event, series)}
+                          className="mt-4 inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                        >
+                          {Number(series?.freeEpisodeCount || 0) > 0 ? "Read Chapter 1" : "View Series"}
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm leading-7 text-slate-600">
+                Use the story picks below to get a feel for the teams shaping the catalog right now.
+              </p>
+            )}
           </SurfacePanel>
 
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
@@ -701,7 +794,7 @@ export default function CreatorsHubPage({
             </div>
 
             {fallbackEntryTitles.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {fallbackEntryTitles.map((series) => (
                   <Link
                     key={`creator-fallback-${series.id}`}
@@ -772,8 +865,32 @@ export default function CreatorsHubPage({
               All Creators
             </h2>
             <p className="text-sm leading-7 text-slate-600">
-              When a series carries a clear public credit, it appears here under the same name readers see on the title page.
+              Public-facing creator names stay tied to the title page, so this shelf stays selective instead of padded with filler.
             </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-[22px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  How credits land
+                </p>
+                <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-950">
+                  Public names appear here only when they are attached to a live title.
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  That keeps the page close to the same reader-facing credits shown on the series page.
+                </p>
+              </div>
+              <div className="rounded-[22px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Where to start now
+                </p>
+                <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-950">
+                  Use the featured works above to meet the catalog through its strongest entry points.
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  The lead stories and genre lanes on this page are the cleanest way to find the teams worth remembering first.
+                </p>
+              </div>
+            </div>
           </SurfacePanel>
         </div>
       </main>
@@ -820,48 +937,82 @@ export default function CreatorsHubPage({
         ) : null}
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-          <div>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Featured Creators
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-slate-600">
-              Meet a few of the credited creators and studios behind the catalog.
-            </p>
-          </div>
+            <div>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                Featured Creators
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                See who they are, what they make, and where to start.
+              </p>
+            </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
-            {featuredCreatorCards.map((creator) => (
-              <Link
-                key={`featured-${creator.slug}`}
-                href={buildCreatorHref(creator, "CREATORS_HUB_FEATURED")}
-                onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_FEATURED")}
-                className="block w-full rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-white"
-                aria-label={`Open ${creator.name}`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                      {formatCreditTypeLabel(creator.creditType)}
-                    </p>
-                    <h3 className="mt-2 text-lg font-semibold text-slate-950">{creator.name}</h3>
+            {featuredCreatorCards.map((creator) => {
+              const leadSeries = getCreatorLeadSeries(creator);
+              const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
+
+              return (
+                <Link
+                  key={`featured-${creator.slug}`}
+                  href={buildCreatorHref(creator, "CREATORS_HUB_FEATURED")}
+                  onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_FEATURED")}
+                  className="block w-full rounded-[28px] border border-black/6 bg-white/90 p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:border-black/12 hover:bg-white hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                  aria-label={`Open ${creator.name}`}
+                >
+                  <div className="grid gap-4 sm:grid-cols-[128px_minmax(0,1fr)]">
+                    <div className="overflow-hidden rounded-[20px] border border-black/8 bg-white/90 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+                      <Cover
+                        tone={leadSeries?.coverTone}
+                        coverUrl={leadSeries?.coverUrl}
+                        label={leadSeries?.title || creator.name}
+                        eyebrow={creator.name}
+                        badge={getCreatorStoryBadge(leadSeries)}
+                        fallbackVariant="minimal-card"
+                        className="h-44 rounded-[20px]"
+                      />
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                            {formatCreditTypeLabel(creator.creditType)}
+                          </p>
+                          <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
+                            {creator.name}
+                          </h3>
+                        </div>
+                        <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
+                          {formatTitleCountLabel(creator.titleCount)}
+                        </span>
+                      </div>
+
+                      <p className="mt-3 text-sm leading-6 text-slate-600">
+                        {buildCreatorWorksSummary(creator)}
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                          {buildCreatorStartLabel(creator)}
+                        </span>
+                        {creatorGenres.map((genre) => (
+                          <span
+                            key={`${creator.slug}-featured-${genre}`}
+                            className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
+                          >
+                            {genre}
+                          </span>
+                        ))}
+                      </div>
+
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent,#2f6bff)]">
+                        View Creator
+                      </p>
+                    </div>
                   </div>
-                  <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
-                    {creator.titleCount} titles
-                  </span>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  {summarizeLeadCopy(
-                    creator.leadSummary,
-                    creator.spotlightSeries?.title
-                      ? `Includes ${creator.spotlightSeries.title}.`
-                      : "Series from this creator or studio.",
-                  )}
-                </p>
-                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent,#2f6bff)]">
-                  View Creator
-                </p>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </SurfacePanel>
 
@@ -1086,6 +1237,7 @@ export default function CreatorsHubPage({
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filteredCreators.map((creator) => {
+                const leadSeries = getCreatorLeadSeries(creator);
                 const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
 
                 return (
@@ -1098,11 +1250,11 @@ export default function CreatorsHubPage({
                   >
                     <div className="grid gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
                       <Cover
-                        tone={creator.spotlightSeries?.coverTone}
-                        coverUrl={creator.spotlightSeries?.coverUrl}
-                        label={creator.spotlightSeries?.title || creator.name}
+                        tone={leadSeries?.coverTone}
+                        coverUrl={leadSeries?.coverUrl}
+                        label={leadSeries?.title || creator.name}
                         eyebrow={creator.name}
-                        badge={getCreatorStoryBadge(creator.spotlightSeries)}
+                        badge={getCreatorStoryBadge(leadSeries)}
                         fallbackVariant="minimal-card"
                         className="h-44 rounded-[20px]"
                       />
@@ -1117,31 +1269,27 @@ export default function CreatorsHubPage({
                             </h3>
                           </div>
                           <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-xs text-slate-600">
-                            {creator.titleCount} titles
+                            {formatTitleCountLabel(creator.titleCount)}
                           </span>
                         </div>
 
                         <p className="mt-3 text-sm leading-6 text-slate-600">
-                          {summarizeLeadCopy(
-                            creator.leadSummary,
-                            creator.spotlightSeries?.title
-                              ? `Includes ${creator.spotlightSeries.title}.`
-                              : "Series from this creator or studio.",
-                          )}
+                          {buildCreatorWorksSummary(creator)}
                         </p>
 
-                        {creatorGenres.length > 0 ? (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {creatorGenres.map((genre) => (
-                              <span
-                                key={`${creator.slug}-grid-${genre}`}
-                                className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-xs text-slate-600"
-                              >
-                                {genre}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                            {buildCreatorStartLabel(creator)}
+                          </span>
+                          {creatorGenres.map((genre) => (
+                            <span
+                              key={`${creator.slug}-grid-${genre}`}
+                              className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-xs text-slate-600"
+                            >
+                              {genre}
+                            </span>
+                          ))}
+                        </div>
 
                         <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
                           {buildCreatorShelfMeta(creator).map((item) => (

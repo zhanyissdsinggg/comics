@@ -29,6 +29,24 @@ function formatSeriesKind(value) {
   return capitalize(value);
 }
 
+function getCreatorPresentation(series) {
+  const creatorName = String(series?.author || "").replace(/\s+/g, " ").trim();
+
+  if (creatorName) {
+    return {
+      eyebrow: creatorName,
+      value: creatorName,
+      detail: "View Creator",
+    };
+  }
+
+  return {
+    eyebrow: "Story credits",
+    value: "Credits coming soon",
+    detail: "Public creator names have not been listed on this title yet.",
+  };
+}
+
 function formatUpdateLabel(value) {
   if (!value) {
     return "Update timing unavailable";
@@ -78,8 +96,7 @@ export default function SeriesHeader({
   const primaryActionLabel = primaryActionLabelOverride || "Start Reading";
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.number || "");
   const latestEpisodeValue = latestEpisodeNumber ? `Episode ${latestEpisodeNumber}` : "Coming soon";
-  const creatorName = String(series.author || "").trim();
-  const creatorValue = creatorName || "Credits coming soon";
+  const creatorPresentation = getCreatorPresentation(series);
   const heroFacts = [
     {
       label: "Format",
@@ -98,8 +115,8 @@ export default function SeriesHeader({
     },
     {
       label: "Creator",
-      value: creatorValue,
-      detail: creatorHref ? "View Creator" : "Story credits are being updated.",
+      value: creatorPresentation.value,
+      detail: creatorHref ? "View Creator" : creatorPresentation.detail,
       href: creatorHref,
     },
     {
@@ -150,7 +167,7 @@ export default function SeriesHeader({
                   tone={series.coverTone}
                   coverUrl={series.coverUrl}
                   label={series.title}
-                  eyebrow={series.author || formatSeriesKind(series.type)}
+                  eyebrow={creatorPresentation.eyebrow}
                   badge=""
                   genres={series.genres}
                   seriesType={series.type}
