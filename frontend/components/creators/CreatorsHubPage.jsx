@@ -362,6 +362,35 @@ export default function CreatorsHubPage({
       .slice(0, 6)
       .map(([genre, count]) => ({ genre, count }));
   }, [catalog]);
+  const fallbackCreatorHighlights = useMemo(
+    () => [
+      {
+        eyebrow: "Story-first catalog",
+        title:
+          fallbackEntryTitles.length > 0
+            ? `${fallbackEntryTitles.length} strong places to start.`
+            : "Strong story entry points.",
+        description:
+          "This page stays close to the titles that give the clearest feel for the catalog right now.",
+      },
+      {
+        eyebrow: "Credited teams",
+        title: "Public credits stay tied to the work.",
+        description:
+          "When a series carries a public-facing credit, it shows up here under the same name readers see on the title page.",
+      },
+      {
+        eyebrow: "Genre lanes",
+        title:
+          fallbackGenrePicks.length > 0
+            ? `${fallbackGenrePicks.length} genre paths to explore.`
+            : "Genre paths stay close.",
+        description:
+          "Genre picks make it easier to move from one story to the next while creator pages stay selective and clean.",
+      },
+    ],
+    [fallbackEntryTitles.length, fallbackGenrePicks.length],
+  );
   const creatorLookup = useMemo(
     () => new Map(creators.map((creator) => [creator.slug, creator])),
     [creators],
@@ -637,8 +666,27 @@ export default function CreatorsHubPage({
                 Featured Creators
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Some titles still lead with the story first, so this page keeps the clearest credited teams, strong entry points, and genre paths close at hand.
+                This page starts with strong story entry points, credited teams when they are public, and genre paths that help new readers find a way in.
               </p>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              {fallbackCreatorHighlights.map((item) => (
+                <div
+                  key={item.eyebrow}
+                  className="rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    {item.eyebrow}
+                  </p>
+                  <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-950">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    {item.description}
+                  </p>
+                </div>
+              ))}
             </div>
           </SurfacePanel>
 
@@ -648,7 +696,7 @@ export default function CreatorsHubPage({
                 Start with These Stories
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                A few good places to get a feel for the catalog.
+                A few strong places to begin right now.
               </p>
             </div>
 
@@ -724,7 +772,7 @@ export default function CreatorsHubPage({
               All Creators
             </h2>
             <p className="text-sm leading-7 text-slate-600">
-              This shelf only lists clear public-facing credits, so the story picks above stay the best way in when a title leads with the work itself.
+              When a series carries a clear public credit, it appears here under the same name readers see on the title page.
             </p>
           </SurfacePanel>
         </div>

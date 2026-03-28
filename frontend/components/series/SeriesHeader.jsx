@@ -99,7 +99,7 @@ export default function SeriesHeader({
     {
       label: "Creator",
       value: creatorValue,
-      detail: creatorHref ? "View Creator" : "Public creator credits are still being added.",
+      detail: creatorHref ? "View Creator" : "Story credits are being updated.",
       href: creatorHref,
     },
     {

@@ -289,12 +289,9 @@ export function getEpisodeAccessState({
       countdownMs,
       shortLabel: `${previewPages} page${previewPages === 1 ? "" : "s"}`,
       helperText: "",
-      rowHelperText:
-        effectivePrice > 0
-          ? `Preview ${previewPages} page${previewPages === 1 ? "" : "s"}, then unlock later.`
-          : `Preview ${previewPages} page${previewPages === 1 ? "" : "s"}.`,
-      supportLabel: effectivePrice > 0 ? `Full unlock: ${effectivePrice} points` : "",
-      supportTone: effectivePrice > 0 ? "points" : "muted",
+      rowHelperText: `Preview ${previewPages} page${previewPages === 1 ? "" : "s"}.`,
+      supportLabel: "",
+      supportTone: "muted",
     });
   }
 
