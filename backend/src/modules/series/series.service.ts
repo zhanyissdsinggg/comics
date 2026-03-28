@@ -27,7 +27,43 @@ export class SeriesService {
     private readonly cacheService: CacheService,
   ) {}
 
-  private toSeriesView(series: any) {
+  private extractEpisodeNumber(value: unknown) {
+    const match = String(value || "").trim().match(/(\d+)$/);
+    const episodeNumber = Number(match?.[1] || 0);
+    if (!Number.isFinite(episodeNumber) || episodeNumber <= 0) {
+      return 0;
+    }
+    return Math.floor(episodeNumber);
+  }
+
+  private formatLatestEpisodeLabel(value: unknown) {
+    const episodeNumber = this.extractEpisodeNumber(value);
+    return episodeNumber > 0 ? `Ep ${episodeNumber}` : "";
+  }
+
+  private getEpisodeStats(episodes: SeriesEpisodeRow[] = []) {
+    if (!Array.isArray(episodes) || episodes.length === 0) {
+      return {
+        episodeCount: 0,
+        latestEpisodeId: "",
+        latest: "",
+      };
+    }
+
+    const sorted = [...episodes].sort((left, right) => Number(right?.number || 0) - Number(left?.number || 0));
+    const latestEpisode = sorted[0] || null;
+
+    return {
+      episodeCount: episodes.length,
+      latestEpisodeId: String(latestEpisode?.id || "").trim(),
+      latest: this.formatLatestEpisodeLabel(latestEpisode?.number || latestEpisode?.id),
+    };
+  }
+
+  private toSeriesView(series: any, episodes: SeriesEpisodeRow[] = []) {
+    const derivedStats = this.getEpisodeStats(episodes);
+    const latestEpisodeId = derivedStats.latestEpisodeId || String(series.latestEpisodeId || "");
+
     return {
       id: series.id,
       title: series.title,
@@ -41,8 +77,9 @@ export class SeriesService {
         : series.badge
           ? [series.badge]
           : [],
-      latest: series.latestEpisodeId ? `Ep ${series.latestEpisodeId}` : "",
-      latestEpisodeId: series.latestEpisodeId || "",
+      latest: derivedStats.latest || this.formatLatestEpisodeLabel(latestEpisodeId),
+      latestEpisodeId,
+      episodeCount: derivedStats.episodeCount,
       genres: Array.isArray(series.genres) ? series.genres : [],
       status: series.status || "Ongoing",
       rating: series.rating || 0,
@@ -394,8 +431,8 @@ export class SeriesService {
       ? data.episodes.map((ep) => this.applyTtfAcceleration(ep, data, subscription))
       : data.episodes;
 
-    const [series] = await enrichSeriesWithStorefrontFields(this.prisma, [this.toSeriesView(data)]);
+    const [series] = await enrichSeriesWithStorefrontFields(this.prisma, [this.toSeriesView(data, accelerated)]);
 
-    return { series: series || this.toSeriesView(data), episodes: accelerated };
+    return { series: series || this.toSeriesView(data, accelerated), episodes: accelerated };
   }
 }

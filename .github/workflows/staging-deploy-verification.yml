@@ -78,7 +78,10 @@ jobs:
         env:
           BACKEND_URL: ${{ steps.targets.outputs.backend_url }}
           FRONTEND_URL: ${{ steps.targets.outputs.frontend_url }}
-          EXPECT_BACKEND_COMMIT: ${{ inputs.expected_backend_commit }}
+          EXPECT_BACKEND_COMMIT: ${{ inputs.expected_backend_commit != '' && inputs.expected_backend_commit || github.sha }}
+          EXPECT_FRONTEND_COMMIT: ${{ github.sha }}
+          EXPECT_FRONTEND_REPO: ${{ github.repository }}
+          EXPECT_FRONTEND_BRANCH: ${{ github.ref_name }}
           OPS_ROUNDS: ${{ inputs.rounds }}
           OPS_ADMIN_KEY: ${{ secrets.STAGING_ADMIN_KEY }}
           OPS_ADMIN_REQUIRED: "0"

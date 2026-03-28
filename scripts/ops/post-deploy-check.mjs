@@ -7,6 +7,25 @@ const DEFAULT_MAX_ENDPOINT_P95_MS = 1_500;
 const DEFAULT_MAX_FRONTEND_P95_MS = 1_800;
 const DEFAULT_MAX_OBS_ERROR_RATE_PCT = 2;
 const DEFAULT_MAX_OBS_P95_MS = 1_200;
+const CREATOR_FALLBACK_LABEL = "Creator details coming soon";
+const CREATOR_FALLBACK_DETAIL = "Public creator names have not been listed on this title yet.";
+const LEGACY_TERMS = [
+  "Top Series",
+  "Read Free",
+  "Fresh pick",
+  "Point packs",
+  "Membership",
+  "Unlock as you go",
+  "4.6 stars",
+  "4.7 stars",
+  "4.4(742)",
+  "HOT",
+  "Trending",
+  "Creator shelf",
+  "Creator shelves",
+  "Story team",
+  "The team behind",
+];
 
 function readNumber(name, fallback) {
   const raw = process.env[name];
@@ -52,8 +71,111 @@ function commitMatches(actual, expected) {
   return left.startsWith(right) || right.startsWith(left);
 }
 
+function normalizeSmartPunctuation(value) {
+  return String(value || "")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"');
+}
+
+function normalizeText(value) {
+  return normalizeSmartPunctuation(
+    String(value || "")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/&#x27;/gi, "'")
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
+}
+
+function includesText(haystack, needle) {
+  return normalizeText(haystack).toLowerCase().includes(normalizeText(needle).toLowerCase());
+}
+
+function readHeader(headers, key) {
+  return String(headers?.[String(key || "").toLowerCase()] || "").trim();
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function hasPublicCreatorCredit(series) {
+  return Boolean(String(series?.author || "").trim());
+}
+
+function getSeriesById(seriesList, seriesId) {
+  return (Array.isArray(seriesList) ? seriesList : []).find(
+    (series) => String(series?.id || "") === seriesId,
+  ) || null;
+}
+
+function buildFrontendAuditSpecs(seriesCatalog) {
+  const hasRealCreators = (Array.isArray(seriesCatalog) ? seriesCatalog : []).some((series) =>
+    hasPublicCreatorCredit(series),
+  );
+  const specs = [
+    {
+      route: "/",
+      required: [
+        "Read original comics and novels in one place.",
+        "Featured Series",
+        "Browse Comics",
+        "Browse Novels",
+        "Meet the Creators",
+        "Need Help?",
+      ],
+      forbidden: LEGACY_TERMS,
+    },
+    {
+      route: "/rankings",
+      required: [
+        "Featured Series",
+        "Editor's picks and reader-friendly starting points.",
+        "Browse Comics",
+        "Browse Novels",
+      ],
+      forbidden: [...LEGACY_TERMS, "Rank #", "All time", "Weekly", "Monthly"],
+    },
+    hasRealCreators
+      ? {
+          route: "/creators",
+          required: ["Meet the Creators", "Featured Creators", "All Creators"],
+          forbidden: ["Story team", "The team behind"],
+        }
+      : {
+          route: "/creators",
+          required: ["Behind the Stories", "Start with These Stories", "How creator credits appear"],
+          forbidden: ["Story team", "The team behind", "Featured Creators"],
+        },
+  ];
+
+  for (const seriesId of ["series-008", "series-012", "series-005"]) {
+    const series = getSeriesById(seriesCatalog, seriesId);
+    if (!series) {
+      continue;
+    }
+
+    specs.push({
+      route: `/series/${seriesId}`,
+      required: [
+        String(series.title || "").trim(),
+        hasPublicCreatorCredit(series) ? String(series.author).trim() : CREATOR_FALLBACK_LABEL,
+      ].filter(Boolean),
+      requiredAny: [["Read Chapter 1", "Start Reading", "Continue Reading"]],
+      forbidden: hasPublicCreatorCredit(series)
+        ? [...LEGACY_TERMS, CREATOR_FALLBACK_LABEL, CREATOR_FALLBACK_DETAIL]
+        : LEGACY_TERMS,
+    });
+  }
+
+  return specs;
 }
 
 async function timedFetch(url, options = {}) {
@@ -67,15 +189,16 @@ async function timedFetch(url, options = {}) {
       ...options,
       signal: controller.signal,
       headers: {
-        Accept: "application/json",
+        Accept: "application/json, text/html;q=0.9, */*;q=0.8",
         ...(options.headers || {}),
       },
     });
     const durationMs = Date.now() - startedAt;
-
+    const text = await response.text();
     let body = null;
+
     try {
-      body = await response.json();
+      body = text ? JSON.parse(text) : null;
     } catch {
       body = null;
     }
@@ -84,6 +207,8 @@ async function timedFetch(url, options = {}) {
       ok: response.ok,
       status: response.status,
       durationMs,
+      headers: Object.fromEntries(response.headers.entries()),
+      text,
       body,
     };
   } catch (error) {
@@ -91,6 +216,8 @@ async function timedFetch(url, options = {}) {
       ok: false,
       status: 0,
       durationMs: Date.now() - startedAt,
+      headers: {},
+      text: "",
       body: null,
       error: error instanceof Error ? error.message : String(error),
     };
@@ -103,6 +230,9 @@ async function run() {
   const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
   const frontendBaseUrl = normalizeBaseUrl(process.env.FRONTEND_URL);
   const expectedBackendCommit = String(process.env.EXPECT_BACKEND_COMMIT || "").trim();
+  const expectedFrontendCommit = String(process.env.EXPECT_FRONTEND_COMMIT || "").trim();
+  const expectedFrontendRepo = String(process.env.EXPECT_FRONTEND_REPO || "").trim();
+  const expectedFrontendBranch = String(process.env.EXPECT_FRONTEND_BRANCH || "").trim();
   const observabilityKey = String(process.env.OBSERVABILITY_KEY || "").trim();
   const observabilityRequired = process.env.OBS_REQUIRED === "1";
 
@@ -120,7 +250,7 @@ async function run() {
   );
   const maxObsP95Ms = readNumber("OPS_MAX_OBS_P95_MS", DEFAULT_MAX_OBS_P95_MS);
 
-  const frontendRoutes = String(process.env.FRONTEND_ROUTES || "/,/search,/store,/admin/login")
+  const frontendRoutes = String(process.env.FRONTEND_ROUTES || "/,/creators,/rankings,/series/series-008")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean)
@@ -131,11 +261,14 @@ async function run() {
     "/api/health/ready",
     "/api/health/detail",
     "/api/meta/version",
+    "/api/series?adult=0",
   ];
 
   const latencyByRoute = new Map();
   const failures = [];
   let latestVersion = null;
+  let publicCatalog = [];
+  let frontendIdentity = null;
 
   console.log(`[ops] post-deploy verification started (rounds=${rounds})`);
   console.log(`[ops] backend=${backendBaseUrl}`);
@@ -144,6 +277,15 @@ async function run() {
   }
   if (expectedBackendCommit) {
     console.log(`[ops] expected backend commit=${expectedBackendCommit}`);
+  }
+  if (expectedFrontendCommit) {
+    console.log(`[ops] expected frontend commit=${expectedFrontendCommit}`);
+  }
+  if (expectedFrontendRepo) {
+    console.log(`[ops] expected frontend repo=${expectedFrontendRepo}`);
+  }
+  if (expectedFrontendBranch) {
+    console.log(`[ops] expected frontend branch=${expectedFrontendBranch}`);
   }
 
   for (let round = 1; round <= rounds; round += 1) {
@@ -172,6 +314,10 @@ async function run() {
       if (path === "/api/meta/version" && result.body && typeof result.body === "object") {
         latestVersion = result.body;
       }
+
+      if (path === "/api/series?adult=0" && Array.isArray(result.body?.series)) {
+        publicCatalog = result.body.series;
+      }
     }
 
     if (frontendBaseUrl) {
@@ -180,7 +326,7 @@ async function run() {
         const url = `${frontendBaseUrl}${route}`;
         const result = await timedFetch(url, {
           headers: {
-            Accept: "text/html",
+            Accept: "text/html,application/xhtml+xml",
           },
         });
 
@@ -197,6 +343,14 @@ async function run() {
           );
         } else {
           console.log(`[ops] ${routeKey} -> ${result.status} (${result.durationMs}ms)`);
+          if (!frontendIdentity) {
+            frontendIdentity = {
+              revision: readHeader(result.headers, "x-gush-frontend-revision"),
+              repo: readHeader(result.headers, "x-gush-frontend-repo"),
+              branch: readHeader(result.headers, "x-gush-frontend-branch"),
+              deployment: readHeader(result.headers, "x-gush-frontend-deployment"),
+            };
+          }
         }
       }
     }
@@ -228,6 +382,103 @@ async function run() {
       );
     } else {
       console.log(`[ops] backend commit matched: ${actualCommit}`);
+    }
+  }
+
+  if (frontendBaseUrl) {
+    const identityProbe = await timedFetch(`${frontendBaseUrl}/`, {
+      headers: {
+        Accept: "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (identityProbe.ok) {
+      frontendIdentity = {
+        revision: readHeader(identityProbe.headers, "x-gush-frontend-revision"),
+        repo: readHeader(identityProbe.headers, "x-gush-frontend-repo"),
+        branch: readHeader(identityProbe.headers, "x-gush-frontend-branch"),
+        deployment: readHeader(identityProbe.headers, "x-gush-frontend-deployment"),
+      };
+    }
+
+    if (!frontendIdentity) {
+      failures.push("frontend identity headers missing on checked frontend routes");
+    } else {
+      console.log(
+        `[ops] frontend identity: revision=${frontendIdentity.revision || "unknown"} repo=${
+          frontendIdentity.repo || "unknown"
+        } branch=${frontendIdentity.branch || "unknown"} deployment=${
+          frontendIdentity.deployment || "unknown"
+        }`,
+      );
+    }
+
+    if (expectedFrontendCommit && !commitMatches(frontendIdentity?.revision, expectedFrontendCommit)) {
+      failures.push(
+        `frontend commit mismatch: expected=${expectedFrontendCommit}, actual=${
+          frontendIdentity?.revision || "unknown"
+        }`,
+      );
+    }
+
+    if (expectedFrontendRepo) {
+      const actualRepo = String(frontendIdentity?.repo || "").trim().toLowerCase();
+      const normalizedExpectedRepo = expectedFrontendRepo.toLowerCase();
+      if (!actualRepo || actualRepo !== normalizedExpectedRepo) {
+        failures.push(
+          `frontend repo mismatch: expected=${expectedFrontendRepo}, actual=${frontendIdentity?.repo || "unknown"}`,
+        );
+      }
+    }
+
+    if (expectedFrontendBranch) {
+      const actualBranch = String(frontendIdentity?.branch || "").trim().toLowerCase();
+      const normalizedExpectedBranch = expectedFrontendBranch.toLowerCase();
+      if (!actualBranch || actualBranch !== normalizedExpectedBranch) {
+        failures.push(
+          `frontend branch mismatch: expected=${expectedFrontendBranch}, actual=${frontendIdentity?.branch || "unknown"}`,
+        );
+      }
+    }
+
+    const frontendAuditSpecs = buildFrontendAuditSpecs(publicCatalog);
+    for (const spec of frontendAuditSpecs) {
+      const result = await timedFetch(`${frontendBaseUrl}${spec.route}`, {
+        headers: {
+          Accept: "text/html,application/xhtml+xml",
+        },
+      });
+
+      if (!result.ok) {
+        failures.push(
+          `frontend content audit failed for ${spec.route}: status=${result.status}, error=${
+            result.error || "n/a"
+          }`,
+        );
+        continue;
+      }
+
+      const visibleText = normalizeText(result.text);
+
+      for (const needle of spec.required || []) {
+        if (!includesText(visibleText, needle)) {
+          failures.push(`frontend route ${spec.route} missing required content: ${needle}`);
+        }
+      }
+
+      for (const alternatives of spec.requiredAny || []) {
+        if (!alternatives.some((needle) => includesText(visibleText, needle))) {
+          failures.push(
+            `frontend route ${spec.route} missing any acceptable content variant: ${alternatives.join(" | ")}`,
+          );
+        }
+      }
+
+      for (const needle of spec.forbidden || []) {
+        if (includesText(visibleText, needle)) {
+          failures.push(`frontend route ${spec.route} still exposes forbidden content: ${needle}`);
+        }
+      }
     }
   }
 

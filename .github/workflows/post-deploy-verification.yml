@@ -44,7 +44,10 @@ jobs:
         env:
           BACKEND_URL: ${{ inputs.backend_url }}
           FRONTEND_URL: ${{ inputs.frontend_url }}
-          EXPECT_BACKEND_COMMIT: ${{ inputs.expected_backend_commit }}
+          EXPECT_BACKEND_COMMIT: ${{ inputs.expected_backend_commit != '' && inputs.expected_backend_commit || github.sha }}
+          EXPECT_FRONTEND_COMMIT: ${{ github.sha }}
+          EXPECT_FRONTEND_REPO: ${{ github.repository }}
+          EXPECT_FRONTEND_BRANCH: ${{ github.ref_name }}
           OPS_ROUNDS: ${{ inputs.rounds }}
           OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
           OBS_REQUIRED: "0"

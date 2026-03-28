@@ -4,7 +4,7 @@ import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Featured Series",
-  description: "Editor’s picks and reader-friendly starting points on Gush.",
+  description: "Editor's picks and reader-friendly starting points on Gush.",
   path: "/rankings",
 });
 

@@ -10,6 +10,8 @@ Use this right after each production deployment:
 BACKEND_URL=https://comics-production-07fa.up.railway.app \
 FRONTEND_URL=https://www.gushcomics.com \
 EXPECT_BACKEND_COMMIT=<commit-sha> \
+EXPECT_FRONTEND_COMMIT=<commit-sha> \
+EXPECT_FRONTEND_REPO=<owner/repo> \
 OPS_ADMIN_KEY=<production-admin-key> \
 npm run ops:deploy-gate
 ```
@@ -17,7 +19,8 @@ npm run ops:deploy-gate
 What it covers:
 
 - backend health and version endpoints
-- frontend critical routes (`/`, `/search`, `/store`, `/admin/login`)
+- frontend identity headers (`X-Gush-Frontend-Revision`, `X-Gush-Frontend-Repo`, `X-Gush-Frontend-Branch`)
+- frontend trust-safe route audits (`/`, `/creators`, `/rankings`, `/series/series-008`, `/series/series-012`, `/series/series-005`)
 - optional observability thresholds
 - admin login -> verify -> read-only admin API -> append-only audit delete probe -> logout -> token invalidation
 
@@ -32,12 +35,17 @@ If you only want health/version/frontend checks without admin session validation
 BACKEND_URL=https://comics-production-07fa.up.railway.app \
 FRONTEND_URL=https://www.gushcomics.com \
 EXPECT_BACKEND_COMMIT=<commit-sha> \
+EXPECT_FRONTEND_COMMIT=<commit-sha> \
+EXPECT_FRONTEND_REPO=<owner/repo> \
 npm run ops:post-deploy
 ```
 
 Optional environment variables:
 
 - `OBSERVABILITY_KEY`: required if `/api/meta/observability` is private in production.
+- `EXPECT_FRONTEND_COMMIT`: expected frontend git SHA exposed by the deployed Next.js app.
+- `EXPECT_FRONTEND_REPO`: expected frontend repository slug exposed by the deployed Next.js app.
+- `EXPECT_FRONTEND_BRANCH`: expected frontend git branch exposed by the deployed Next.js app.
 - `OPS_ROUNDS` (default `3`): verification rounds.
 - `OPS_INTERVAL_MS` (default `3000`): interval between rounds.
 - `OPS_MAX_ENDPOINT_P95_MS` (default `1500`): backend endpoint p95 latency threshold.
@@ -45,7 +53,12 @@ Optional environment variables:
 - `OPS_MAX_OBS_ERROR_RATE_PCT` (default `2`): observability error-rate threshold.
 - `OPS_MAX_OBS_P95_MS` (default `1200`): observability p95 latency threshold.
 - `OBS_REQUIRED=1`: fail if observability endpoint is unreachable/forbidden.
-- `FRONTEND_ROUTES`: override default frontend routes. Default is `/,/search,/store,/admin/login`.
+- `FRONTEND_ROUTES`: override default frontend routes. Default is `/,/creators,/rankings,/series/series-008`.
+
+The content audit also compares the rendered frontend against the backend creator-data mode:
+
+- if live public creator credits exist, `/creators` must behave like a real discovery page
+- if live public creator credits do not exist yet, `/creators` must stay in the honest fallback mode instead of rendering fake creator entries
 
 ## 3) Admin Session Smoke Only
 

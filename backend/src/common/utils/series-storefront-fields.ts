@@ -30,6 +30,22 @@ function normalizeCount(value: unknown) {
   return Math.floor(parsed);
 }
 
+function extractEpisodeNumber(value: unknown) {
+  const match = String(value || "").trim().match(/(\d+)$/);
+  return normalizeCount(match?.[1] || 0);
+}
+
+function formatLatestEpisodeLabel(value: unknown) {
+  const episodeNumber = extractEpisodeNumber(value);
+  return episodeNumber > 0 ? `Ep ${episodeNumber}` : "";
+}
+
+type EpisodeStats = {
+  episodeCount: number;
+  latestEpisodeId: string;
+  latest: string;
+};
+
 async function getAvailableSeriesColumns(prisma: PrismaService) {
   if (seriesColumnsCache && seriesColumnsCache.expiresAt > Date.now()) {
     return seriesColumnsCache.columns;
@@ -129,22 +145,112 @@ async function fetchViewsMap(prisma: PrismaService, ids: string[]) {
   return viewsMap;
 }
 
+async function fetchEpisodeStatsRows(prisma: PrismaService, ids: string[]) {
+  const buildWhere = (includeSoftDelete = true) => ({
+    seriesId: { in: ids },
+    ...(includeSoftDelete ? { isDeleted: false } : {}),
+  });
+
+  try {
+    return await prisma.episode.findMany({
+      where: buildWhere(true),
+      select: {
+        seriesId: true,
+        id: true,
+        number: true,
+      },
+      orderBy: [{ seriesId: "asc" }, { number: "desc" }],
+    });
+  } catch {
+    try {
+      return await prisma.episode.findMany({
+        where: buildWhere(false),
+        select: {
+          seriesId: true,
+          id: true,
+          number: true,
+        },
+        orderBy: [{ seriesId: "asc" }, { number: "desc" }],
+      });
+    } catch {
+      return [];
+    }
+  }
+}
+
+async function fetchEpisodeStatsMap(prisma: PrismaService, ids: string[]) {
+  const episodeStatsMap = new Map<string, EpisodeStats>();
+  if (!ids.length) {
+    return episodeStatsMap;
+  }
+
+  const rows = await fetchEpisodeStatsRows(prisma, ids);
+  rows.forEach((row) => {
+    const seriesId = String(row?.seriesId || "").trim();
+    if (!seriesId) {
+      return;
+    }
+
+    const latestEpisodeId = String(row?.id || "").trim();
+    const existing = episodeStatsMap.get(seriesId);
+    if (!existing) {
+      episodeStatsMap.set(seriesId, {
+        episodeCount: 1,
+        latestEpisodeId,
+        latest: formatLatestEpisodeLabel(row?.number || latestEpisodeId),
+      });
+      return;
+    }
+
+    existing.episodeCount += 1;
+  });
+
+  return episodeStatsMap;
+}
+
 export async function enrichSeriesWithStorefrontFields<
-  T extends { id?: string | null; author?: unknown; followers?: unknown; views?: unknown },
->(prisma: PrismaService, items: T[]): Promise<Array<T & { author: string; followers: number; views: number }>> {
+  T extends {
+    id?: string | null;
+    author?: unknown;
+    followers?: unknown;
+    views?: unknown;
+    latestEpisodeId?: unknown;
+    latest?: unknown;
+    episodeCount?: unknown;
+  },
+>(
+  prisma: PrismaService,
+  items: T[],
+): Promise<
+  Array<
+    T & {
+      author: string;
+      followers: number;
+      views: number;
+      latestEpisodeId: string;
+      latest: string;
+      episodeCount: number;
+    }
+  >
+> {
   if (!Array.isArray(items) || items.length === 0) {
     return [];
   }
 
   const ids = normalizeSeriesIdList(items.map((item) => item?.id));
-  const [authorMap, followersMap, viewsMap] = await Promise.all([
+  const [authorMap, followersMap, viewsMap, episodeStatsMap] = await Promise.all([
     fetchAuthorMap(prisma, ids),
     fetchFollowersMap(prisma, ids),
     fetchViewsMap(prisma, ids),
+    fetchEpisodeStatsMap(prisma, ids),
   ]);
 
   return items.map((item) => {
     const seriesId = String(item?.id || "");
+    const derivedEpisodeStats = episodeStatsMap.get(seriesId);
+    const fallbackLatestEpisodeId = String(item?.latestEpisodeId || "").trim();
+    const fallbackLatest = String(item?.latest || "").trim() || formatLatestEpisodeLabel(fallbackLatestEpisodeId);
+    const fallbackEpisodeCount = normalizeCount(item?.episodeCount || extractEpisodeNumber(fallbackLatestEpisodeId));
 
     return {
       ...item,
@@ -155,6 +261,9 @@ export async function enrichSeriesWithStorefrontFields<
       views: viewsMap.has(seriesId)
         ? viewsMap.get(seriesId) || 0
         : normalizeCount(item?.views),
+      latestEpisodeId: derivedEpisodeStats?.latestEpisodeId || fallbackLatestEpisodeId,
+      latest: derivedEpisodeStats?.latest || fallbackLatest,
+      episodeCount: derivedEpisodeStats?.episodeCount ?? fallbackEpisodeCount,
     };
   });
 }

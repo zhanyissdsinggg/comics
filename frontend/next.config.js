@@ -3,6 +3,52 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 });
 
+function normalizeHeaderValue(value, fallback = "unknown") {
+  const normalized = String(value || "")
+    .replace(/[\r\n]+/g, " ")
+    .trim();
+
+  return normalized || fallback;
+}
+
+function getFrontendIdentityHeaders() {
+  const repoOwner = normalizeHeaderValue(
+    process.env.VERCEL_GIT_REPO_OWNER || process.env.GITHUB_REPOSITORY_OWNER,
+    "",
+  );
+  const repoSlug = normalizeHeaderValue(
+    process.env.VERCEL_GIT_REPO_SLUG ||
+      (process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split("/")[1] : ""),
+    "",
+  );
+  const repo = repoOwner && repoSlug
+    ? `${repoOwner}/${repoSlug}`
+    : normalizeHeaderValue(process.env.GITHUB_REPOSITORY, "unknown");
+
+  return [
+    {
+      key: "X-Gush-Frontend-Revision",
+      value: normalizeHeaderValue(process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA),
+    },
+    {
+      key: "X-Gush-Frontend-Repo",
+      value: normalizeHeaderValue(repo),
+    },
+    {
+      key: "X-Gush-Frontend-Branch",
+      value: normalizeHeaderValue(process.env.VERCEL_GIT_COMMIT_REF || process.env.GITHUB_REF_NAME),
+    },
+    {
+      key: "X-Gush-Frontend-Deployment",
+      value: normalizeHeaderValue(
+        process.env.VERCEL_URL ||
+          process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+          process.env.NEXT_PUBLIC_SITE_URL,
+      ),
+    },
+  ];
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -22,6 +68,7 @@ const nextConfig = {
         key: "Permissions-Policy",
         value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
       },
+      ...getFrontendIdentityHeaders(),
     ];
 
     if (process.env.NODE_ENV === "production") {

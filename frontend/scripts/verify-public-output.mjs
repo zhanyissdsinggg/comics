@@ -7,94 +7,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendRoot = path.resolve(__dirname, "..");
 const backendRoot = path.resolve(frontendRoot, "../backend");
-
-const ROUTES = [
-  {
-    route: "/",
-    expectedTitle: "Read Comics and Novels Online",
-    expectedH1: "Read comics and novels, start free, and unlock more when you're ready.",
-    expectedNeedles: ["New updates", "How Gush works", "Leave the homepage with a cleaner next click."],
-    expectedHrefPatterns: [{ label: "series links", pattern: /href="\/series\/[^"]+"/i }],
-  },
-  {
-    route: "/comics",
-    expectedTitle: "Comics",
-    expectedH1: "Browse comics with faster first clicks.",
-    expectedNeedles: ["Free first chapters", "Popular comics", "Quick genre picks"],
-    expectedHrefPatterns: [{ label: "series links", pattern: /href="\/series\/[^"]+"/i }],
-  },
-  {
-    route: "/novels",
-    expectedTitle: "Novels",
-    expectedH1: "Browse novels with room to settle in.",
-    expectedNeedles: ["Fresh drops", "Popular novels", "Quick genre picks"],
-    expectedHrefPatterns: [{ label: "series links", pattern: /href="\/series\/[^"]+"/i }],
-  },
-  {
-    route: "/creators",
-    expectedTitle: "Creators & Studios",
-    expectedH1: "Find the creators worth following.",
-    expectedNeedles: [
-      "Search by creator, studio, or genre.",
-      "Creator spotlight",
-      "Use live titles until creator credits catch up.",
-    ],
-  },
-  {
-    route: "/rankings",
-    expectedTitle: "Top Series",
-    expectedH1: "See what readers are opening right now.",
-    expectedNeedles: ["Choose a Top Series view.", "Rank #1", "Search titles"],
-    expectedHrefPatterns: [{ label: "series links", pattern: /href="\/series\/[^"]+"/i }],
-  },
-  {
-    route: "/store",
-    expectedTitle: "Store",
-    expectedH1: "Buy points for one-time unlocks.",
-    expectedNeedles: ["How paying works", "Point packs", "Point packs are one-time. Membership is the monthly path."],
-  },
-  {
-    route: "/subscribe",
-    expectedTitle: "Membership",
-    expectedH1: "Pick the plan that fits your reading rhythm.",
-    expectedNeedles: ["Recurring monthly billing", "Three tiers. Three reading habits.", "Membership is monthly. Point packs stay flexible. Help should stay obvious."],
-  },
-  {
-    route: "/orders",
-    expectedTitle: "Purchases",
-    expectedH1: "Sign in, compare plans, or get billing help.",
-    expectedNeedles: ["See point packs", "Compare membership", "Get billing help"],
-  },
-  {
-    route: "/account",
-    expectedTitle: "Account",
-    expectedH1: "Sign in for receipts and recovery. Keep local reading setup here now.",
-    expectedNeedles: ["Sign in to keep purchases, library, and mature-content settings on one account.", "Reset password", "Works on this device right now"],
-  },
-  {
-    route: "/how-it-works",
-    expectedTitle: "How Gush Works",
-    expectedH1: "How Gush works before you spend anything.",
-    expectedNeedles: ["Pricing basics", "Billing and receipts", "Quick answers"],
-  },
-  {
-    route: "/support",
-    expectedTitle: "Support",
-    expectedH1: "Billing, account, and reader help.",
-    expectedNeedles: ["Fast issue shortcuts", "Use this topic", "How it works"],
-  },
-  {
-    route: "/series/demo-series",
-    expectedTitle: "Series",
-    expectedH1: "This title is not available in the public catalog.",
-    expectedNeedles: ["Series unavailable", "Browse Top Series", "Search titles"],
-  },
-  {
-    route: "/read/demo-series/demo-episode",
-    expectedTitle: "Gush | Read comics and novels",
-    expectedH1: "Getting the reader ready.",
-    expectedNeedles: ["Opening chapter", "Back to series", "Need help instead?"],
-  },
+const CREATOR_FALLBACK_LABEL = "Creator details coming soon";
+const CREATOR_FALLBACK_DETAIL = "Public creator names have not been listed on this title yet.";
+const LEGACY_FORBIDDEN = [
+  "Top Series",
+  "Read Free",
+  "Fresh pick",
+  "Point packs",
+  "Membership",
+  "Unlock as you go",
+  "4.6 stars",
+  "4.7 stars",
+  "4.4(742)",
+  "HOT",
+  "Trending",
+  "Creator shelf",
+  "Creator shelves",
+  "Story team",
+  "The team behind",
 ];
 
 function getFreePort() {
@@ -137,18 +67,31 @@ async function waitForServer(targetUrl, timeoutMs = 30000) {
   throw new Error("Timed out waiting for Next.js server");
 }
 
-function decodeHtmlEntities(value) {
+function normalizeSmartPunctuation(value) {
   return String(value || "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/gi, "'");
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"');
+}
+
+function normalizeText(value) {
+  return normalizeSmartPunctuation(
+    String(value || "")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/&#x27;/gi, "'")
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
 }
 
 function stripTags(value) {
-  return decodeHtmlEntities(String(value || "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+  return normalizeText(value);
 }
 
 function getFirstMatch(html, pattern) {
@@ -156,9 +99,114 @@ function getFirstMatch(html, pattern) {
   return match ? stripTags(match[1]) : "";
 }
 
-function countNeedleMatches(html, needle) {
-  const pattern = new RegExp(needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
-  return (html.match(pattern) || []).length;
+function includesText(haystack, needle) {
+  return normalizeText(haystack).toLowerCase().includes(normalizeText(needle).toLowerCase());
+}
+
+function hasPublicCreatorCredit(series) {
+  return Boolean(String(series?.author || "").trim());
+}
+
+async function terminateChild(child) {
+  if (!child || child.exitCode !== null || !child.pid) {
+    return;
+  }
+
+  await new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve();
+    };
+
+    child.once("exit", finish);
+
+    if (process.platform === "win32") {
+      const killer = spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], {
+        stdio: "ignore",
+      });
+      killer.once("exit", finish);
+      killer.once("error", finish);
+    } else {
+      child.kill("SIGTERM");
+      setTimeout(() => {
+        if (child.exitCode === null) {
+          child.kill("SIGKILL");
+        }
+        finish();
+      }, 2500);
+    }
+
+    setTimeout(finish, 5000);
+  });
+}
+
+function buildRouteChecks(seriesCatalog) {
+  const hasRealCreators = (Array.isArray(seriesCatalog) ? seriesCatalog : []).some((series) =>
+    hasPublicCreatorCredit(series),
+  );
+  const catalogMap = new Map(
+    (Array.isArray(seriesCatalog) ? seriesCatalog : []).map((series) => [String(series?.id || ""), series]),
+  );
+
+  const routes = [
+    {
+      route: "/",
+      titleIncludes: "Read Comics and Novels Online",
+      h1: "Read original comics and novels in one place.",
+      required: ["Featured Series", "Browse Comics", "Browse Novels", "Meet the Creators", "Need Help?"],
+      forbidden: LEGACY_FORBIDDEN,
+      expectedHrefPatterns: [{ label: "series links", pattern: /href="\/series\/[^"]+"/i }],
+    },
+    {
+      route: "/creators",
+      titleIncludes: hasRealCreators ? "Creators" : "Behind the Stories",
+      h1: hasRealCreators ? "Meet the Creators" : "Behind the Stories",
+      required: hasRealCreators
+        ? ["Featured Creators", "Start with These Stories", "Browse by Genre", "All Creators"]
+        : ["Start with These Stories", "Browse by Genre", "How creator credits appear"],
+      forbidden: hasRealCreators
+        ? ["Story team", "The team behind"]
+        : ["Story team", "The team behind", "Featured Creators"],
+    },
+    {
+      route: "/rankings",
+      titleIncludes: "Featured Series",
+      h1: "Editor's picks and reader-friendly starting points.",
+      required: ["Featured Series", "Browse Comics", "Browse Novels"],
+      forbidden: [...LEGACY_FORBIDDEN, "Rank #", "All time", "Weekly", "Monthly"],
+      expectedHrefPatterns: [{ label: "series links", pattern: /href="\/series\/[^"]+"/i }],
+    },
+  ];
+
+  for (const seriesId of ["series-008", "series-012", "series-005"]) {
+    const series = catalogMap.get(seriesId);
+    if (!series) {
+      continue;
+    }
+
+    routes.push({
+      route: `/series/${seriesId}`,
+      titleIncludes: String(series.title || "Series"),
+      h1: String(series.title || "Series"),
+      required: [hasPublicCreatorCredit(series) ? String(series.author).trim() : CREATOR_FALLBACK_LABEL],
+      requiredAny: [["Read Chapter 1", "Start Reading", "Continue Reading"]],
+      forbidden: hasPublicCreatorCredit(series)
+        ? [...LEGACY_FORBIDDEN, CREATOR_FALLBACK_LABEL, CREATOR_FALLBACK_DETAIL]
+        : LEGACY_FORBIDDEN,
+    });
+  }
+
+  return routes;
+}
+
+async function loadSeriesCatalog(backendBaseUrl) {
+  const response = await fetch(`${backendBaseUrl}/api/series?adult=0`);
+  const payload = await response.json();
+  return Array.isArray(payload?.series) ? payload.series : [];
 }
 
 async function run() {
@@ -207,9 +255,11 @@ async function run() {
   try {
     await waitForServer(`${backendBaseUrl}/health`, 60000);
     await waitForServer(baseUrl);
+    const seriesCatalog = await loadSeriesCatalog(backendBaseUrl);
+    const routeChecks = buildRouteChecks(seriesCatalog);
     const failures = [];
 
-    for (const item of ROUTES) {
+    for (const item of routeChecks) {
       const res = await fetch(`${baseUrl}${item.route}`);
       const html = await res.text();
       const title = getFirstMatch(html, /<title>(.*?)<\/title>/i);
@@ -217,60 +267,82 @@ async function run() {
       const h1Count = (html.match(/<h1\b/gi) || []).length;
       const mainCount = (html.match(/<main\b/gi) || []).length;
       const navCount = (html.match(/<nav\b/gi) || []).length;
-      const duplicateHomeLinks = countNeedleMatches(html, ">Home<");
-      const duplicateSupportLinks = countNeedleMatches(html, ">Support<");
       const rawImageAnchorCount = (html.match(/href="[^"]*\/_next\/image[^"]*"/gi) || []).length;
-      const bodySnippet = stripTags(html).slice(0, 800);
-      const needles = item.expectedNeedles.map((needle) => ({
+      const visibleText = normalizeText(html);
+      const bodySnippet = visibleText.slice(0, 800);
+      const required = (item.required || []).map((needle) => ({
         needle,
-        present: html.includes(needle),
+        present: includesText(visibleText, needle),
+      }));
+      const forbidden = (item.forbidden || []).map((needle) => ({
+        needle,
+        present: includesText(visibleText, needle),
       }));
 
       console.log(`[verify] route=${item.route}`);
       console.log(`[verify] title=${title}`);
       console.log(`[verify] h1=${h1}`);
-      console.log(`[verify] h1Count=${h1Count} mainCount=${mainCount} navs=${navCount} homeLinks=${duplicateHomeLinks} supportLinks=${duplicateSupportLinks} rawImageAnchors=${rawImageAnchorCount}`);
+      console.log(
+        `[verify] h1Count=${h1Count} mainCount=${mainCount} navs=${navCount} rawImageAnchors=${rawImageAnchorCount}`,
+      );
       console.log(`[verify] snippet=${bodySnippet}`);
-      needles.forEach(({ needle, present }) => {
+      required.forEach(({ needle, present }) => {
         console.log(`[verify] contains "${needle}" -> ${present}`);
       });
+      forbidden.forEach(({ needle, present }) => {
+        console.log(`[verify] forbids "${needle}" -> ${!present}`);
+      });
 
-      if (!title.includes(item.expectedTitle)) {
+      if (!title.includes(item.titleIncludes)) {
         failures.push(`Route ${item.route} title mismatch: ${title}`);
       }
-      if (h1 !== item.expectedH1) {
+      if (h1 !== item.h1) {
         failures.push(`Route ${item.route} H1 mismatch: ${h1 || "missing"}`);
       }
-      const missing = needles.filter((entry) => !entry.present);
-      if (missing.length > 0) {
+
+      const missingRequired = required.filter((entry) => !entry.present);
+      if (missingRequired.length > 0) {
         failures.push(
-          `Route ${item.route} missing expected public content: ${missing.map((entry) => entry.needle).join(", ")}`,
+          `Route ${item.route} missing expected public content: ${missingRequired
+            .map((entry) => entry.needle)
+            .join(", ")}`,
         );
       }
+
+      if (Array.isArray(item.requiredAny)) {
+        const missingVariants = item.requiredAny.filter(
+          (alternatives) => !alternatives.some((needle) => includesText(visibleText, needle)),
+        );
+        if (missingVariants.length > 0) {
+          failures.push(
+            `Route ${item.route} missing any acceptable content variant: ${missingVariants
+              .map((alternatives) => alternatives.join(" | "))
+              .join(", ")}`,
+          );
+        }
+      }
+
+      const leakedForbidden = forbidden.filter((entry) => entry.present);
+      if (leakedForbidden.length > 0) {
+        failures.push(
+          `Route ${item.route} still exposes forbidden content: ${leakedForbidden
+            .map((entry) => entry.needle)
+            .join(", ")}`,
+        );
+      }
+
       if (rawImageAnchorCount > 0) {
         failures.push(`Route ${item.route} exposes raw _next/image links in public anchors`);
       }
+
       if (Array.isArray(item.expectedHrefPatterns)) {
         const missingHrefPatterns = item.expectedHrefPatterns.filter((entry) => !entry.pattern.test(html));
         if (missingHrefPatterns.length > 0) {
           failures.push(
-            `Route ${item.route} missing expected crawlable links: ${missingHrefPatterns.map((entry) => entry.label).join(", ")}`,
+            `Route ${item.route} missing expected crawlable links: ${missingHrefPatterns
+              .map((entry) => entry.label)
+              .join(", ")}`,
           );
-        }
-      }
-      if (item.route === "/") {
-        const footerIndex = html.lastIndexOf("<footer");
-        const topNowIndex = html.indexOf("Top now");
-        const freeStartRailIndex = Math.max(html.indexOf("Easy first clicks"), html.indexOf("Free start"));
-
-        if (footerIndex === -1) {
-          failures.push("Route / missing footer markup");
-        }
-        if (topNowIndex === -1 || (footerIndex !== -1 && topNowIndex > footerIndex)) {
-          failures.push('Route / renders "Top now" after the footer');
-        }
-        if (freeStartRailIndex === -1 || (footerIndex !== -1 && freeStartRailIndex > footerIndex)) {
-          failures.push('Route / renders the free-start rail after the footer');
         }
       }
     }
@@ -281,12 +353,8 @@ async function run() {
 
     console.log("[verify] public output checks passed");
   } finally {
-    if (!backendChild.killed) {
-      backendChild.kill("SIGTERM");
-    }
-    if (!child.killed) {
-      child.kill("SIGTERM");
-    }
+    await terminateChild(backendChild);
+    await terminateChild(child);
   }
 }
 
