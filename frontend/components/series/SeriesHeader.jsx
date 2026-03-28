@@ -5,7 +5,6 @@ import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
-import { normalizeCoverBadge } from "../../lib/coverPresentation";
 
 function capitalize(value) {
   if (!value) {
@@ -27,7 +26,7 @@ function formatSeriesKind(value) {
   if (!value) {
     return "Series";
   }
-  return `${capitalize(value)} series`;
+  return capitalize(value);
 }
 
 function formatUpdateLabel(value) {
@@ -47,15 +46,6 @@ function formatUpdateLabel(value) {
   })}`;
 }
 
-function isDuplicateAccessLabel(value) {
-  const text = String(value || "").replace(/\s+/g, " ").trim().toUpperCase();
-  if (!text) {
-    return false;
-  }
-
-  return /^(READ FREE|ALL FREE|FREE|STARTS? FREE|START AT EPISODE 1|EPISODE 1 OPEN|ALL EPISODES OPEN)$/.test(text);
-}
-
 function assignRef(ref, value) {
   if (!ref) {
     return;
@@ -69,13 +59,9 @@ function assignRef(ref, value) {
 
 export default function SeriesHeader({
   series,
-  accessSummary = null,
-  lastReadEpisode = null,
   episodeCount = 0,
   latestEpisode = null,
   onPrimaryAction = null,
-  onContinue,
-  onStart,
   primaryActionLabelOverride = "",
   onFollowToggle,
   isFollowing,
@@ -86,32 +72,13 @@ export default function SeriesHeader({
 }) {
   const genres = series.genres || [];
   const isAdult = Boolean(series.adult);
-  const hasFreeEpisodes =
-    accessSummary?.startsFree ||
-    series.hasFreeEpisodes ||
-    series.freeEpisodeCount > 0;
   const isCompleted = String(series.status || "").toLowerCase() === "completed";
-  const normalizedSeriesBadge = normalizeCoverBadge(
-    hasFreeEpisodes && isDuplicateAccessLabel(series.badge) ? "" : series.badge,
-  );
-  const coverBadge = isCompleted ? "Completed" : normalizedSeriesBadge === "New" ? "New" : "";
   const headerHighlights = genres.slice(0, 2).map((genre) => ({ label: genre, tone: "genre" }));
-  const lastEpisodeLabel = formatEpisodeNumber(lastReadEpisode?.number || "");
-  const primaryAction = onPrimaryAction || onContinue || onStart || null;
-  const primaryActionLabel = primaryActionLabelOverride || (onContinue
-    ? "Continue Reading"
-    : "Start Reading");
+  const primaryAction = onPrimaryAction || null;
+  const primaryActionLabel = primaryActionLabelOverride || "Start Reading";
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.number || "");
-  const accessValue =
-    accessSummary?.entryLabel ||
-    (onContinue
-      ? "Continue where you stopped"
-      : hasFreeEpisodes
-        ? "Start with chapter one"
-        : "Unlock as you go");
-  const accessHint =
-    accessSummary?.entryHint ||
-    (onContinue && lastEpisodeLabel ? `Resume at Episode ${lastEpisodeLabel}.` : "");
+  const latestEpisodeValue = latestEpisodeNumber ? `Episode ${latestEpisodeNumber}` : "Not listed";
+  const creatorName = String(series.author || "").trim() || "Not listed";
   const heroFacts = [
     {
       label: "Format",
@@ -121,18 +88,25 @@ export default function SeriesHeader({
     {
       label: "Status",
       value: isCompleted ? "Completed" : capitalize(series.status || "updating"),
-      detail: latestEpisodeNumber ? `Latest: Episode ${latestEpisodeNumber}` : formatUpdateLabel(series.updatedAt),
+      detail: isCompleted ? "Completed run." : "Still updating.",
     },
     {
       label: "Episodes",
       value: episodeCount > 0 ? `${episodeCount}` : "Coming soon",
-      detail: episodeCount > 0 ? `Episode${episodeCount === 1 ? "" : "s"} available now.` : "Episodes will appear here once the series opens.",
+      detail: episodeCount > 0 ? `${episodeCount} listed.` : "No episodes listed yet.",
     },
     {
       label: "Creator",
-      value: series.author || "Studio",
-      detail: creatorHref ? "View creator page" : "Series page",
+      value: creatorName,
+      detail: creatorHref ? "View Creator" : "Creator not listed.",
       href: creatorHref,
+    },
+    {
+      label: "Latest",
+      value: latestEpisodeValue,
+      detail: latestEpisode?.releasedAt
+        ? formatUpdateLabel(latestEpisode.releasedAt)
+        : formatUpdateLabel(series.updatedAt),
     },
   ];
   const primaryActionClassName = [
@@ -176,7 +150,7 @@ export default function SeriesHeader({
                   coverUrl={series.coverUrl}
                   label={series.title}
                   eyebrow={series.author || formatSeriesKind(series.type)}
-                  badge={coverBadge}
+                  badge=""
                   genres={series.genres}
                   seriesType={series.type}
                   className="h-full w-full"
@@ -227,7 +201,7 @@ export default function SeriesHeader({
               </p>
             </div>
 
-            <div className="mt-6 grid gap-3 xl:grid-cols-4">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               {heroFacts.map((item) =>
                 item.href ? (
                   <Link
@@ -256,19 +230,7 @@ export default function SeriesHeader({
               )}
             </div>
 
-            <div className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)] lg:items-start">
-              <div className="rounded-[24px] border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.06)] px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  Reading access
-                </p>
-                <p className="mt-2 text-base font-semibold text-slate-950">{accessValue}</p>
-                {accessHint ? (
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{accessHint}</p>
-                ) : null}
-              </div>
-
-              {primaryActions ? <div className="max-w-sm lg:justify-self-end">{primaryActions}</div> : null}
-            </div>
+            {primaryActions ? <div className="mt-6 max-w-sm">{primaryActions}</div> : null}
 
             <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
               {onFollowToggle ? (

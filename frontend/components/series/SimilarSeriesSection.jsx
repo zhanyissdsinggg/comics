@@ -5,6 +5,15 @@ import { useSimilarRecommendations } from "../../hooks/useAIRecommendations";
 import Skeleton from "../common/Skeleton";
 import Cover from "../common/Cover";
 import SurfacePanel from "../common/SurfacePanel";
+import { normalizeCoverBadge } from "../../lib/coverPresentation";
+
+function getSeriesBadge(item) {
+  if (String(item?.status || "").toLowerCase() === "completed") {
+    return "Completed";
+  }
+
+  return normalizeCoverBadge(item?.badge);
+}
 
 export default function SimilarSeriesSection({ seriesId }) {
   const { data: similarSeries, loading, error } = useSimilarRecommendations(seriesId, 6);
@@ -57,7 +66,7 @@ export default function SimilarSeriesSection({ seriesId }) {
               coverUrl={item.coverUrl}
               label={item.title}
               eyebrow={item.author || item.subtitle || "Series"}
-              badge={item.badge}
+              badge={getSeriesBadge(item)}
               className="aspect-[3/4] w-full"
             />
             <div className="space-y-2 p-4">

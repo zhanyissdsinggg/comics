@@ -33,11 +33,7 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { buildCreatorHref, slugifyCreatorName } from "../../lib/creators";
-import {
-  buildEpisodeAccessStateMap,
-  getEpisodeAvailabilitySummary,
-  getSeriesPrimaryReadAction,
-} from "../../lib/episodeAccessState";
+import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
 
 function EpisodeListSkeleton() {
   return (
@@ -196,17 +192,9 @@ export default function SeriesPage({
     () => getFirstEpisodeId(episodes),
     [episodes]
   );
-  const [lastReadEpisodeId, setLastReadEpisodeId] = useState(null);
   const progress = useMemo(
     () => progressBySeriesId?.[seriesId] || getProgress(seriesId),
     [progressBySeriesId, getProgress, seriesId]
-  );
-  const lastReadEpisode = useMemo(
-    () =>
-      progress?.lastEpisodeId
-        ? episodes.find((episode) => episode?.id === progress.lastEpisodeId) || null
-        : null,
-    [episodes, progress?.lastEpisodeId],
   );
 
   useEffect(() => {
@@ -373,18 +361,6 @@ export default function SeriesPage({
   useEffect(() => {
     gateReportedRef.current = false;
   }, [seriesId]);
-
-  useEffect(() => {
-    if (!seriesId) {
-      return;
-    }
-    const progress = progressBySeriesId?.[seriesId] || getProgress(seriesId);
-    if (progress?.lastEpisodeId) {
-      setLastReadEpisodeId(progress.lastEpisodeId);
-      return;
-    }
-    setLastReadEpisodeId(null);
-  }, [seriesId, data?.series?.id, getProgress, progressBySeriesId]);
 
   useEffect(() => {
     if (data?.series?.id) {
@@ -557,12 +533,6 @@ export default function SeriesPage({
     );
   }, [router]);
 
-  const handleContinue = lastReadEpisodeId
-    ? () => handleRead(seriesId, lastReadEpisodeId)
-    : null;
-  const handleStart = firstEpisodeId
-    ? () => handleRead(seriesId, firstEpisodeId)
-    : null;
   const handleOpenStore = useCallback(() => {
     router.push(
       buildPathWithAttribution(
@@ -578,10 +548,15 @@ export default function SeriesPage({
     );
   }, [router, seriesId]);
   const creatorHref = useMemo(() => {
-    const targetPath = buildCreatorHref(series?.author || "Studio");
+    const creatorName = String(series?.author || "").trim();
+    if (!creatorName) {
+      return "";
+    }
+
+    const targetPath = buildCreatorHref(creatorName);
     return buildPathWithAttribution(targetPath, {
       entryPoint: "SERIES_CREATOR",
-      campaignId: slugifyCreatorName(series?.author || "Studio"),
+      campaignId: slugifyCreatorName(creatorName),
       sourcePath: `/series/${seriesId}`,
       sourceSeriesId: seriesId,
       returnTo: `/series/${seriesId}`,
@@ -617,28 +592,6 @@ export default function SeriesPage({
       walletStore?.subscriptionUsage,
     ],
   );
-  const seriesAccessSummary = useMemo(() => {
-    const episodeStateMap = buildEpisodeAccessStateMap({
-      episodes,
-      unlockedEpisodeIds: entitlement?.unlockedEpisodeIds || [],
-      subscription: walletStore?.subscription,
-      subscriptionUsage: walletStore?.subscriptionUsage,
-      coupons,
-      fallbackPrice: series?.pricing?.episodePrice ?? 0,
-    });
-
-    return getEpisodeAvailabilitySummary({
-      episodes,
-      episodeStateMap,
-    });
-  }, [
-    coupons,
-    entitlement?.unlockedEpisodeIds,
-    episodes,
-    series?.pricing?.episodePrice,
-    walletStore?.subscription,
-    walletStore?.subscriptionUsage,
-  ]);
   const handleSeriesPrimaryAction = useCallback(async () => {
     if (!primaryReadAction) {
       return;
@@ -902,15 +855,10 @@ export default function SeriesPage({
 
         <SeriesHeader
           series={series}
-          progress={progress}
-          lastReadEpisode={lastReadEpisode}
           episodeCount={episodes.length}
           latestEpisode={latestEpisode}
-          onPrimaryAction={handleSeriesPrimaryAction}
-          onContinue={handleContinue}
-          onStart={handleStart}
-          primaryActionLabelOverride={primaryReadAction?.type === "free" ? "" : primaryReadAction?.label || ""}
-          accessSummary={seriesAccessSummary}
+          onPrimaryAction={primaryReadAction ? handleSeriesPrimaryAction : null}
+          primaryActionLabelOverride={primaryReadAction?.label || ""}
           onFollowToggle={handleFollowToggle}
           isFollowing={isFollowing}
           desktopPrimaryActionRef={desktopPrimaryActionRef}

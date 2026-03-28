@@ -476,13 +476,7 @@ export function getSeriesPrimaryReadAction({
 
   const firstEpisode = list[0] || null;
   if (!firstEpisode) {
-    return {
-      type: "browse",
-      label: "Unlock Access",
-      episodeId: null,
-      actionKind: "subscribe",
-      note: "Episodes will appear here as the series expands.",
-    };
+    return null;
   }
 
   const state = getEpisodeAccessState({
@@ -497,8 +491,8 @@ export function getSeriesPrimaryReadAction({
 
   if (state.kind === "unlocked") {
     return {
-      type: "continue",
-      label: "Continue Reading",
+      type: "start",
+      label: "Read Chapter 1",
       episodeId: firstEpisode.id,
       actionKind: "read",
       note: "",
@@ -508,7 +502,7 @@ export function getSeriesPrimaryReadAction({
   if (state.primaryState === "free" || state.primaryState === "preview") {
     return {
       type: state.primaryState,
-      label: state.primaryState === "preview" ? "Preview Episode 1" : "Read Episode 1",
+      label: "Read Chapter 1",
       episodeId: firstEpisode.id,
       actionKind: state.actionKind,
       note: "",
@@ -525,21 +519,5 @@ export function getSeriesPrimaryReadAction({
     };
   }
 
-  if (state.primaryState === "points") {
-    return {
-      type: "points",
-      label: "Unlock with Points",
-      episodeId: firstEpisode.id,
-      actionKind: state.actionKind,
-      note: "",
-    };
-  }
-
-  return {
-    type: "locked",
-    label: state.actionLabel || "Unlock Access",
-    episodeId: firstEpisode.id,
-    actionKind: state.actionKind,
-    note: "",
-  };
+  return null;
 }

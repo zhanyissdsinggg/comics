@@ -64,11 +64,6 @@ function formatCreditTypeLabel(creditType) {
   return creditType === "studio" ? "Studio" : "Creator";
 }
 
-function toNumber(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function getSeriesSignalScore(series) {
   return (
     Date.parse(series?.updatedAt || 0) +
@@ -92,10 +87,6 @@ function getCreatorStoryBadge(series) {
 function buildFallbackSeriesSubtitle(series) {
   if (Array.isArray(series?.genres) && series.genres.length > 0) {
     return series.genres.slice(0, 2).join(" / ");
-  }
-  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
-    const freeCount = Number(series?.freeEpisodeCount || 0);
-    return `${freeCount} free chapter${freeCount === 1 ? "" : "s"}`;
   }
   if (series?.updatedAt) {
     return formatDateLabel(series.updatedAt);
@@ -640,46 +631,16 @@ export default function CreatorsHubPage({
             />
           ) : null}
 
-          <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
-            <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-              <div>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Featured Creators
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Creator pages will appear here.
-                </p>
-              </div>
-            </SurfacePanel>
-
-            <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-              <div>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Browse by Genre
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Browse the stories behind each genre.
-                </p>
-              </div>
-
-              {fallbackGenrePicks.length > 0 ? (
-                <div className="flex flex-wrap gap-2.5">
-                  {fallbackGenrePicks.map((item) => (
-                    <button
-                      key={`creator-fallback-genre-${item.genre}`}
-                      type="button"
-                      onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=popular`)}
-                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
-                    >
-                      {item.genre}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500">Genres will appear here as the catalog grows.</p>
-              )}
-            </SurfacePanel>
-          </section>
+          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+            <div>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                Featured Creators
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                Credits are still being added.
+              </p>
+            </div>
+          </SurfacePanel>
 
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div>
@@ -725,12 +686,42 @@ export default function CreatorsHubPage({
 
           </SurfacePanel>
 
+          <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
+            <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+              <div>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                  Browse by Genre
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Browse stories by genre.
+                </p>
+              </div>
+
+              {fallbackGenrePicks.length > 0 ? (
+                <div className="flex flex-wrap gap-2.5">
+                  {fallbackGenrePicks.map((item) => (
+                    <button
+                      key={`creator-fallback-genre-${item.genre}`}
+                      type="button"
+                      onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=popular`)}
+                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
+                    >
+                      {item.genre}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">Genres will appear here as the catalog grows.</p>
+              )}
+            </SurfacePanel>
+          </section>
+
           <SurfacePanel appearance="light" accent="blue" className="space-y-3">
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
               All Creators
             </h2>
             <p className="text-sm leading-7 text-slate-600">
-              More creator pages will appear as credits are added.
+              Creator pages will appear here as credits are added.
             </p>
           </SurfacePanel>
         </div>
@@ -777,91 +768,58 @@ export default function CreatorsHubPage({
           />
         ) : null}
 
-        <section className="grid gap-4 xl:grid-cols-[0.94fr_1.06fr]">
-          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-            <div>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Browse by Genre
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Browse creators by genre.
-              </p>
-            </div>
+        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+          <div>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+              Featured Creators
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              A few creators and studios to start with.
+            </p>
+          </div>
 
-            {genreOptions.length > 0 ? (
-              <div className="flex flex-wrap gap-2.5">
-                {genreOptions.map((genre) => (
-                  <button
-                    key={`browse-genre-${genre}`}
-                    type="button"
-                    onClick={() => jumpToGenreBrowse(genre)}
-                    className={filterButtonClass(activeGenre === genre)}
-                  >
-                    {genre}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">Genres will appear here as the catalog grows.</p>
-            )}
-
-          </SurfacePanel>
-
-          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-            <div>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Featured Creators
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                A few creators and studios worth opening first.
-              </p>
-            </div>
-
-            <div className="grid gap-4 xl:grid-cols-2">
-              {featuredCreatorCards.map((creator) => (
-                <Link
-                  key={`featured-${creator.slug}`}
-                  href={buildCreatorHref(creator, "CREATORS_HUB_FEATURED")}
-                  onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_FEATURED")}
-                  className="block w-full rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-white"
-                  aria-label={`Open ${creator.name}`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        {formatCreditTypeLabel(creator.creditType)}
-                      </p>
-                      <h3 className="mt-2 text-lg font-semibold text-slate-950">{creator.name}</h3>
-                    </div>
-                    <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
-                      {creator.titleCount} titles
-                    </span>
+          <div className="grid gap-4 xl:grid-cols-2">
+            {featuredCreatorCards.map((creator) => (
+              <Link
+                key={`featured-${creator.slug}`}
+                href={buildCreatorHref(creator, "CREATORS_HUB_FEATURED")}
+                onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_FEATURED")}
+                className="block w-full rounded-[24px] border border-black/6 bg-white/90 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-white"
+                aria-label={`Open ${creator.name}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      {formatCreditTypeLabel(creator.creditType)}
+                    </p>
+                    <h3 className="mt-2 text-lg font-semibold text-slate-950">{creator.name}</h3>
                   </div>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
-                    {summarizeLeadCopy(
-                      creator.leadSummary,
-                      creator.spotlightSeries?.title
-                        ? `Featuring ${creator.spotlightSeries.title}.`
-                        : "Stories from this creator or studio.",
-                    )}
-                  </p>
-                  <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent,#2f6bff)]">
-                    View Creator
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </SurfacePanel>
-        </section>
+                  <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
+                    {creator.titleCount} titles
+                  </span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {summarizeLeadCopy(
+                    creator.leadSummary,
+                    creator.spotlightSeries?.title
+                      ? `Includes ${creator.spotlightSeries.title}.`
+                      : "Series from this creator or studio.",
+                  )}
+                </p>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent,#2f6bff)]">
+                  View Creator
+                </p>
+              </Link>
+            ))}
+          </div>
+        </SurfacePanel>
 
         {guidedDiscoveryEntries.length > 0 ? (
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Start with These Stories
-                </h2>
-              </div>
+            <div>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                Start with These Stories
+              </h2>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -937,11 +895,6 @@ export default function CreatorsHubPage({
                     </p>
 
                     <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
-                      {freeStarts > 0 ? (
-                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-[var(--gush-accent,#2f6bff)]">
-                          {freeStarts} free chapter{freeStarts === 1 ? "" : "s"}
-                        </span>
-                      ) : null}
                       <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
                         {series?.type || "Series"}
                       </span>
@@ -968,31 +921,6 @@ export default function CreatorsHubPage({
                       >
                         {freeStarts > 0 ? "Read Chapter 1" : "View Series"}
                       </Link>
-                      {creator ? (
-                        <Link
-                          href={buildCreatorHref(creator, "CREATORS_HUB_GUIDED_SHELF")}
-                          onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_GUIDED_SHELF")}
-                          className={secondaryButtonClass}
-                        >
-                          View Creator
-                        </Link>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            router.push(
-                              series?.genres?.[0]
-                                ? `/search?q=${encodeURIComponent(series.genres[0])}&sort=popular`
-                                : series?.type === "novel"
-                                  ? "/novels"
-                                  : "/comics",
-                            )
-                          }
-                          className={secondaryButtonClass}
-                        >
-                          {series?.type === "novel" ? "Browse Novels" : "Browse Comics"}
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1002,6 +930,34 @@ export default function CreatorsHubPage({
           </SurfacePanel>
         ) : null}
 
+        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+          <div>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+              Browse by Genre
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              Creators working in each genre.
+            </p>
+          </div>
+
+          {genreOptions.length > 0 ? (
+            <div className="flex flex-wrap gap-2.5">
+              {genreOptions.map((genre) => (
+                <button
+                  key={`browse-genre-${genre}`}
+                  type="button"
+                  onClick={() => jumpToGenreBrowse(genre)}
+                  className={filterButtonClass(activeGenre === genre)}
+                >
+                  {genre}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500">Genres will appear here as the catalog grows.</p>
+          )}
+        </SurfacePanel>
+
         <SurfacePanel id="creator-list" appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -1009,24 +965,19 @@ export default function CreatorsHubPage({
                 All Creators
               </h2>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm text-slate-500">
-                {filteredCreators.length.toLocaleString()} creator{filteredCreators.length === 1 ? "" : "s"} shown
-              </p>
-              {query || activeGenre !== "All" || creditFilter !== "all" ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuery("");
-                    setActiveGenre("All");
-                    setCreditFilter("all");
-                  }}
-                  className={secondaryButtonClass}
-                >
-                  Clear filters
-                </button>
-              ) : null}
-            </div>
+            {query || activeGenre !== "All" || creditFilter !== "all" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setActiveGenre("All");
+                  setCreditFilter("all");
+                }}
+                className={secondaryButtonClass}
+              >
+                Clear filters
+              </button>
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-4">
@@ -1039,7 +990,7 @@ export default function CreatorsHubPage({
 
             <div className="flex flex-wrap gap-2.5">
               {[
-                { id: "all", label: "All credits" },
+                { id: "all", label: "All" },
                 { id: "creator", label: "Creators" },
                 { id: "studio", label: "Studios" },
               ].map((item) => (
@@ -1076,12 +1027,6 @@ export default function CreatorsHubPage({
           </SurfacePanel>
         ) : (
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-            {creditFilter !== "all" ? (
-              <p className="text-sm text-slate-500">
-                {creditFilter === "studio" ? "Studios only" : "Creators only"}
-              </p>
-            ) : null}
-
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filteredCreators.map((creator) => {
                 const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
@@ -1123,8 +1068,8 @@ export default function CreatorsHubPage({
                           {summarizeLeadCopy(
                             creator.leadSummary,
                             creator.spotlightSeries?.title
-                              ? `Featuring ${creator.spotlightSeries.title}.`
-                              : "Notable series in one place.",
+                              ? `Includes ${creator.spotlightSeries.title}.`
+                              : "Series from this creator or studio.",
                           )}
                         </p>
 
