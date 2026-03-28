@@ -188,28 +188,6 @@ function buildCreatorStartLabel(creator) {
   return "Start with the lead title.";
 }
 
-function buildFallbackTeamHeadline(series) {
-  if (!series?.title) {
-    return "Featured story team";
-  }
-  return `The team behind ${series.title}`;
-}
-
-function buildFallbackTeamSummary(series) {
-  const fallback = Array.isArray(series?.genres) && series.genres.length > 0
-    ? `${series.genres.slice(0, 2).join(" / ")} ${formatSeriesTypeLabel(series?.type).toLowerCase()} with a clear place to start.`
-    : `${formatSeriesTypeLabel(series?.type)} with a clear place to start.`;
-
-  return summarizeLeadCopy(series?.description, fallback);
-}
-
-function buildSeriesStartLabel(series) {
-  if (series?.title) {
-    return `Start with ${series.title}.`;
-  }
-  return "Start with the lead story.";
-}
-
 function CreatorDirectorySkeleton() {
   return (
     <main className="gush-page-shell">
@@ -431,10 +409,6 @@ export default function CreatorsHubPage({
       .slice(0, 6)
       .map(([genre, count]) => ({ genre, count }));
   }, [catalog]);
-  const fallbackFeaturedTeams = useMemo(
-    () => fallbackEntryTitles.slice(0, 3),
-    [fallbackEntryTitles],
-  );
   const creatorLookup = useMemo(
     () => new Map(creators.map((creator) => [creator.slug, creator])),
     [creators],
@@ -674,9 +648,9 @@ export default function CreatorsHubPage({
           <EditorialHero
             appearance="light"
             accent="blue"
-            eyebrow="Creators"
-            title="Meet the Creators"
-            description="Explore the writers, artists, and studios behind the stories."
+            eyebrow="Creator credits"
+            title="Behind the Stories"
+            description="We’re adding public creator credits title by title. Until then, start with the stories already available."
             actions={
               <>
                 <button
@@ -707,89 +681,10 @@ export default function CreatorsHubPage({
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Featured Creators
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Start with a few standout stories and the teams behind them.
-              </p>
-            </div>
-
-            {fallbackFeaturedTeams.length > 0 ? (
-              <div className="grid gap-4 xl:grid-cols-3">
-                {fallbackFeaturedTeams.map((series) => (
-                  <article
-                    key={`featured-team-${series.id}`}
-                    className="rounded-[28px] border border-black/6 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
-                  >
-                    <div className="grid gap-4 sm:grid-cols-[116px_minmax(0,1fr)]">
-                      <Link
-                        href={buildFallbackTitleHref(series)}
-                        onClick={(event) => handleFallbackTitleLinkClick(event, series)}
-                        className="group block overflow-hidden rounded-[20px]"
-                        aria-label={`Open ${series.title}`}
-                      >
-                        <Cover
-                          tone={series.coverTone}
-                          coverUrl={series.coverUrl}
-                          label={series.title}
-                          eyebrow="Featured team"
-                          badge={series.badge}
-                          fallbackVariant="minimal-card"
-                          className="h-40 rounded-[20px] transition-transform duration-500 group-hover:scale-[1.03]"
-                        />
-                      </Link>
-
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                          Story team
-                        </p>
-                        <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
-                          {buildFallbackTeamHeadline(series)}
-                        </h3>
-                        <p className="mt-3 text-sm leading-6 text-slate-600">
-                          {buildFallbackTeamSummary(series)}
-                        </p>
-
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
-                            {buildSeriesStartLabel(series)}
-                          </span>
-                          {(Array.isArray(series?.genres) ? series.genres : []).slice(0, 2).map((genre) => (
-                            <span
-                              key={`${series.id}-featured-team-${genre}`}
-                              className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
-                            >
-                              {genre}
-                            </span>
-                          ))}
-                        </div>
-
-                        <Link
-                          href={buildFallbackTitleHref(series)}
-                          onClick={(event) => handleFallbackTitleLinkClick(event, series)}
-                          className="mt-4 inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-                        >
-                          {Number(series?.freeEpisodeCount || 0) > 0 ? "Read Chapter 1" : "View Series"}
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm leading-7 text-slate-600">
-                Use the story picks below to get a feel for the teams shaping the catalog right now.
-              </p>
-            )}
-          </SurfacePanel>
-
-          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-            <div>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Start with These Stories
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                A few strong places to begin right now.
+                A few strong entry points while public creator credits are still being added.
               </p>
             </div>
 
@@ -837,7 +732,7 @@ export default function CreatorsHubPage({
                   Browse by Genre
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Follow the genres that shape the catalog.
+                  Browse the catalog by the genres already attached to live titles.
                 </p>
               </div>
 
@@ -860,34 +755,36 @@ export default function CreatorsHubPage({
             </SurfacePanel>
           </section>
 
-          <SurfacePanel appearance="light" accent="blue" className="space-y-3">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              All Creators
-            </h2>
-            <p className="text-sm leading-7 text-slate-600">
-              Public-facing creator names stay tied to the title page, so this shelf stays selective instead of padded with filler.
-            </p>
+          <SurfacePanel appearance="light" accent="blue" className="space-y-4">
+            <div>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                How creator credits appear
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                Public-facing creator names show up on title pages first. This directory stays quiet until live titles actually carry those credits.
+              </p>
+            </div>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-[22px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  How credits land
+                  Current state
                 </p>
                 <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-950">
-                  Public names appear here only when they are attached to a live title.
+                  No live public creator names are attached to the current catalog yet.
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
-                  That keeps the page close to the same reader-facing credits shown on the series page.
+                  Until that changes, the cleanest way to browse is by story, format, and genre instead of a fake creator directory.
                 </p>
               </div>
               <div className="rounded-[22px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  Where to start now
+                  Where credits will show up
                 </p>
                 <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-950">
-                  Use the featured works above to meet the catalog through its strongest entry points.
+                  Series pages use one consistent creator fallback until a real public credit exists.
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
-                  The lead stories and genre lanes on this page are the cleanest way to find the teams worth remembering first.
+                  When a title gains a public-facing creator or team credit upstream, it can graduate into the creator directory without changing the reading flow.
                 </p>
               </div>
             </div>

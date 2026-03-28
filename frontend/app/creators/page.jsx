@@ -13,11 +13,13 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const payload = await loadCreatorsDirectorySeoPayload();
   const leadCover = payload?.creators?.[0]?.spotlightSeries?.coverUrl || null;
+  const hasRealCreators = Array.isArray(payload?.creators) && payload.creators.length > 0;
 
   return createPageMetadata({
-    title: "Creators",
-    description:
-      "Meet the writers, artists, and studios behind the stories on Gush.",
+    title: hasRealCreators ? "Creators" : "Behind the Stories",
+    description: hasRealCreators
+      ? "Meet the writers, artists, and studios behind the stories on Gush."
+      : "Start with the stories first while public creator credits are added title by title.",
     path: "/creators",
     image: leadCover,
   });
@@ -31,11 +33,14 @@ export default async function CreatorsPageRoute() {
   const creatorCatalog = (payload?.creators || []).flatMap((creator) =>
     Array.isArray(creator?.series) ? creator.series : [],
   );
+  const hasRealCreators = creatorCatalog.length > 0;
   const initialCatalog =
     creatorCatalog.length > 0 ? creatorCatalog : catalogPayload?.series || [];
-  const structuredData = buildCreatorsDirectoryStructuredData({
-    creators: payload?.creators || [],
-  });
+  const structuredData = hasRealCreators
+    ? buildCreatorsDirectoryStructuredData({
+        creators: payload?.creators || [],
+      })
+    : [];
 
   return (
     <>

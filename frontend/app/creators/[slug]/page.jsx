@@ -1,5 +1,6 @@
 import CreatorPage from "../../../components/creators/CreatorPage";
 import StructuredDataScript from "../../../components/common/StructuredDataScript";
+import { redirect } from "next/navigation";
 import { createPageMetadata } from "../../../lib/seo";
 import {
   buildCreatorPathFromSlug,
@@ -15,14 +16,17 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const creatorSlug = resolvedParams?.slug;
   const creatorPayload = await loadCreatorSeoPayload(creatorSlug);
+  const hasCreatorItems = Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
   const creatorName =
-    creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug);
+    hasCreatorItems ? creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug) : "Behind the Stories";
 
   return createPageMetadata({
     title: creatorName,
-    description: `Browse stories from ${creatorName} on ${siteConfig.siteName}.`,
-    path: buildCreatorPathFromSlug(creatorSlug),
-    image: creatorPayload?.items?.[0]?.coverUrl || null,
+    description: hasCreatorItems
+      ? `Browse stories from ${creatorName} on ${siteConfig.siteName}.`
+      : "Start with the stories first while public creator credits are added title by title.",
+    path: hasCreatorItems ? buildCreatorPathFromSlug(creatorSlug) : "/creators",
+    image: hasCreatorItems ? creatorPayload?.items?.[0]?.coverUrl || null : null,
   });
 }
 
@@ -30,6 +34,12 @@ export default async function CreatorRoutePage({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const creatorSlug = resolvedParams.slug;
   const creatorPayload = await loadCreatorSeoPayload(creatorSlug);
+  const hasCreatorItems = Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
+
+  if (!hasCreatorItems) {
+    redirect("/creators");
+  }
+
   const structuredData = buildCreatorStructuredData({
     creatorName: creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug),
     creatorPath: buildCreatorPathFromSlug(creatorSlug),
