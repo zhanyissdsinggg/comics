@@ -28,10 +28,10 @@ export const EPISODE_PRIMARY_STATE_META = {
     filterLabel: "Unlock with points",
   },
   membership: {
-    stateLabel: "Included with membership",
+    stateLabel: "Available",
     stateTone: "membership",
-    summaryLabel: "included with membership",
-    filterLabel: "Included with membership",
+    summaryLabel: "available",
+    filterLabel: "Available",
   },
   locked: {
     stateLabel: "Locked",
@@ -79,11 +79,11 @@ function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
   }
 
   if (counts.points > 0 && counts.membership > 0) {
-    return "Use points or membership.";
+    return "Some episodes unlock right away, and others use points.";
   }
 
   if (counts.membership > 0) {
-    return counts.points > 0 ? "Membership covers eligible episodes." : "";
+    return counts.points > 0 ? "Some episodes are already open." : "";
   }
 
   if (hasCountdown) {
@@ -117,7 +117,7 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
   }
 
   if (firstState.primaryState === "membership") {
-    return "Membership included";
+    return "Available now";
   }
 
   if (firstState.primaryState === "points") {
@@ -143,7 +143,7 @@ function getEpisodeAvailabilityBadge(counts, hasCountdown) {
   }
 
   if (counts.membership > 0) {
-    return "Membership included";
+    return "Available";
   }
 
   if (counts.points > 0) {
@@ -240,7 +240,7 @@ export function getEpisodeAccessState({
   if (pricing.appliedDailyFree) {
     return buildEpisodeAccessState("membership", {
       kind: "membership",
-      actionLabel: "Included with Membership",
+      actionLabel: "Start Reading",
       actionKind: "unlock",
       claimRequired: false,
       pricing,
@@ -321,7 +321,7 @@ export function getEpisodeAccessState({
           : subscription?.active && discountLabel
             ? discountLabel
             : subscription?.active
-              ? "Membership discount active"
+              ? "Discount active"
               : "",
       supportTone:
         hasTtf && !isTtfReady && countdownMs
@@ -335,7 +335,7 @@ export function getEpisodeAccessState({
   if (hasTtf && !isTtfReady) {
     return buildEpisodeAccessState("locked", {
       kind: "locked",
-      actionLabel: "Join Membership",
+      actionLabel: "Unlock Access",
       actionKind: "subscribe",
       claimRequired: false,
       pricing,
@@ -353,7 +353,7 @@ export function getEpisodeAccessState({
 
   return buildEpisodeAccessState("locked", {
     kind: "locked",
-    actionLabel: "Join Membership",
+    actionLabel: "Unlock Access",
     actionKind: "subscribe",
     claimRequired: false,
     pricing,
@@ -363,7 +363,7 @@ export function getEpisodeAccessState({
     countdownMs,
     shortLabel: "Locked",
     helperText: "",
-    rowHelperText: "Membership or points required.",
+    rowHelperText: "Unlock required.",
     supportLabel: "",
     supportTone: "muted",
   });
@@ -478,7 +478,7 @@ export function getSeriesPrimaryReadAction({
   if (!firstEpisode) {
     return {
       type: "browse",
-      label: "Join Membership",
+      label: "Unlock Access",
       episodeId: null,
       actionKind: "subscribe",
       note: "Episodes will appear here as the series expands.",
@@ -518,7 +518,7 @@ export function getSeriesPrimaryReadAction({
   if (state.primaryState === "membership") {
     return {
       type: "membership",
-      label: "Included with Membership",
+      label: "Start Reading",
       episodeId: firstEpisode.id,
       actionKind: state.actionKind,
       note: "",
@@ -537,7 +537,7 @@ export function getSeriesPrimaryReadAction({
 
   return {
     type: "locked",
-    label: state.actionLabel || "Join Membership",
+    label: state.actionLabel || "Unlock Access",
     episodeId: firstEpisode.id,
     actionKind: state.actionKind,
     note: "",

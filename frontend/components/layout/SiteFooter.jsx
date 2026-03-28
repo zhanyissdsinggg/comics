@@ -23,10 +23,10 @@ const fullFooterSections = [
     ],
   },
   {
-    title: "Plans & Account",
+    title: "Store & Account",
     links: [
-      { label: "Point packs", href: "/store" },
-      { label: "Membership", href: "/subscribe" },
+      { label: "Store", href: "/store" },
+      { label: "Plans", href: "/subscribe" },
       { label: "Purchases", href: "/orders" },
       { label: "Account", href: "/account" },
     ],

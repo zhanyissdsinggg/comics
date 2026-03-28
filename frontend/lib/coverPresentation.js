@@ -228,7 +228,7 @@ export function normalizeCoverBadge(value) {
   if (upper.includes("NEW")) {
     return "New";
   }
-  if (/(H[O]T|TREND|POPULAR)/.test(upper)) {
+  if (/(H[O]T|TREND|POPULAR|FRESH)/.test(upper)) {
     return "";
   }
   return trimLabel(raw, 18);

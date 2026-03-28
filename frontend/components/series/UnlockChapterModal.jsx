@@ -51,16 +51,18 @@ function resolvePackageName(pkg) {
   }
 
   const packageId = normalizePackageId(pkg?.packageId || pkg?.id);
-  return packageId ? titleCase(packageId) : "Points Pack";
+  return packageId ? titleCase(packageId) : "Points";
 }
 
 function resolvePackageTag(pkg, packageId) {
   const tags = Array.isArray(pkg?.tags) ? pkg.tags.filter(Boolean) : [];
   if (tags.length > 0) {
-    return String(tags[0]);
+    const primaryTag = String(tags[0]);
+    return /popular/i.test(primaryTag) ? "" : primaryTag;
   }
 
-  return OFFERS[`points_pack_${packageId}`]?.tag || "";
+  const fallbackTag = OFFERS[`points_pack_${packageId}`]?.tag || "";
+  return /popular/i.test(String(fallbackTag)) ? "" : fallbackTag;
 }
 
 function resolvePackagePriceLabel(pkg, packageId) {
@@ -269,7 +271,7 @@ export default function UnlockChapterModal({
               </div>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/55">
-                  {view === "packs" ? "Point packs" : "Secure unlock"}
+                  {view === "packs" ? "More points" : "Secure unlock"}
                 </p>
                 <p className="mt-1 text-sm text-white/60">
                   {view === "packs"
@@ -337,7 +339,7 @@ export default function UnlockChapterModal({
                   <div>
                     <p className="font-semibold text-white">Secure unlock</p>
                     <p className="mt-1 text-xs leading-6 text-white/60">
-                      Point packs are shown in USD and checkout stays tied to your current account.
+                      Point options are shown in USD and stay tied to your current account.
                     </p>
                   </div>
                 </div>
@@ -474,11 +476,11 @@ export default function UnlockChapterModal({
                     disabled={Boolean(busyAction)}
                     className="rounded-full border border-white/12 bg-white/6 px-4 py-2.5 text-sm font-semibold text-white/78 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    View all packs
+                    View all options
                   </button>
                 ) : null}
                 <span className="inline-flex items-center justify-center rounded-full bg-[var(--gush-accent,#8b5cf6)] px-5 py-2.5 text-sm font-semibold text-white/85 opacity-90">
-                  {isLoadingPackages ? "Refreshing prices..." : "Popular packs"}
+                  {isLoadingPackages ? "Refreshing prices..." : "Point options"}
                 </span>
               </div>
             </div>

@@ -5,6 +5,7 @@ import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
+import { normalizeCoverBadge } from "../../lib/coverPresentation";
 
 function capitalize(value) {
   if (!value) {
@@ -84,24 +85,17 @@ export default function SeriesHeader({
   creatorHref = "",
 }) {
   const genres = series.genres || [];
-  const badges = series.badges || [];
   const isAdult = Boolean(series.adult);
   const hasFreeEpisodes =
     accessSummary?.startsFree ||
     series.hasFreeEpisodes ||
     series.freeEpisodeCount > 0;
   const isCompleted = String(series.status || "").toLowerCase() === "completed";
-  const coverBadge =
-    hasFreeEpisodes && isDuplicateAccessLabel(series.badge)
-      ? isCompleted
-        ? "Completed"
-        : ""
-      : series.badge || (isCompleted ? "Completed" : "");
-  const visibleBadges = badges.filter((badge) => !(hasFreeEpisodes && isDuplicateAccessLabel(badge)));
-  const headerHighlights =
-    visibleBadges.length > 0
-      ? visibleBadges.slice(0, 1).map((badge) => ({ label: badge, tone: "badge" }))
-      : genres.slice(0, 2).map((genre) => ({ label: genre, tone: "genre" }));
+  const normalizedSeriesBadge = normalizeCoverBadge(
+    hasFreeEpisodes && isDuplicateAccessLabel(series.badge) ? "" : series.badge,
+  );
+  const coverBadge = isCompleted ? "Completed" : normalizedSeriesBadge === "New" ? "New" : "";
+  const headerHighlights = genres.slice(0, 2).map((genre) => ({ label: genre, tone: "genre" }));
   const lastEpisodeLabel = formatEpisodeNumber(lastReadEpisode?.number || "");
   const primaryAction = onPrimaryAction || onContinue || onStart || null;
   const primaryActionLabel = primaryActionLabelOverride || (onContinue

@@ -157,7 +157,7 @@ export default function SeriesFitPanel({
       socialProof:
         readerProof > 0
           ? `${formatCompactCount(readerProof)} visible reader signals and an update trail from ${formatDateLabel(series?.updatedAt)}.`
-          : `Fresh pick with updates as recent as ${formatDateLabel(series?.updatedAt)}.`,
+          : `Updated as recently as ${formatDateLabel(series?.updatedAt)}.`,
       genrePath: leadGenre ? `/search?genre=${encodeURIComponent(leadGenre)}&sort=popular` : "/search?sort=popular",
     };
   }, [continueHref, episodes, series, startHref]);

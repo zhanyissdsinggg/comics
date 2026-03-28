@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const MENU_LINKS = [
   { label: "Library", href: "/library", icon: Library },
   { label: "Store", href: "/store", icon: ShoppingBag },
-  { label: "Membership", href: "/subscribe", icon: Crown },
+  { label: "Plans", href: "/subscribe", icon: Crown },
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
   { label: "Creators", href: "/creators" },
