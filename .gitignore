@@ -64,6 +64,7 @@ frontend/.audit-frontend.json
 frontend/.outdated-frontend.json
 frontend/.lighthouse-*.json
 frontend/artifacts/
+test-results/
 frontend/test-results/
 frontend/playwright-report/
 ops-watchdog-report.json
