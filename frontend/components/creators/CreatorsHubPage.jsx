@@ -61,7 +61,7 @@ function buildGenreOptions(creators) {
 }
 
 function formatCreditTypeLabel(creditType) {
-  return creditType === "studio" ? "Studio" : "Creator";
+  return creditType === "team" ? "Team" : "Creator";
 }
 
 function getSeriesSignalScore(series) {
@@ -343,7 +343,7 @@ export default function CreatorsHubPage({
     return creators.filter((creator) => {
       const matchesCredit =
         creditFilter === "all" ||
-        (creditFilter === "studio" ? creator?.creditType === "studio" : creator?.creditType !== "studio");
+        (creditFilter === "team" ? creator?.creditType === "team" : creator?.creditType !== "team");
       const matchesGenre =
         activeGenre === "All" ||
         (Array.isArray(creator?.topGenres) ? creator.topGenres : []).includes(activeGenre);
@@ -369,12 +369,12 @@ export default function CreatorsHubPage({
     });
   }, [activeGenre, creators, creditFilter, query]);
   const spotlightCreators = useMemo(() => filteredCreators.slice(0, 3), [filteredCreators]);
-  const featuredStudios = useMemo(
-    () => creators.filter((creator) => creator?.creditType === "studio").slice(0, 3),
+  const featuredTeams = useMemo(
+    () => creators.filter((creator) => creator?.creditType === "team").slice(0, 3),
     [creators],
   );
   const featuredVoices = useMemo(
-    () => creators.filter((creator) => creator?.creditType !== "studio" && creator?.titleCount > 1).slice(0, 3),
+    () => creators.filter((creator) => creator?.creditType !== "team" && creator?.titleCount > 1).slice(0, 3),
     [creators],
   );
   const fallbackEntryTitles = useMemo(
@@ -440,7 +440,7 @@ export default function CreatorsHubPage({
     [creators],
   );
   const featuredCreatorCards = useMemo(() => {
-    const entries = [...featuredVoices, ...featuredStudios, ...spotlightCreators];
+    const entries = [...featuredVoices, ...featuredTeams, ...spotlightCreators];
     const bySlug = new Map();
 
     entries.forEach((creator) => {
@@ -450,7 +450,7 @@ export default function CreatorsHubPage({
     });
 
     return Array.from(bySlug.values()).slice(0, 6);
-  }, [featuredStudios, featuredVoices, spotlightCreators]);
+  }, [featuredTeams, featuredVoices, spotlightCreators]);
 
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
@@ -1200,7 +1200,7 @@ export default function CreatorsHubPage({
               {[
                 { id: "all", label: "All" },
                 { id: "creator", label: "Creators" },
-                { id: "studio", label: "Studios" },
+                { id: "team", label: "Teams" },
               ].map((item) => (
                 <button
                   key={item.id}

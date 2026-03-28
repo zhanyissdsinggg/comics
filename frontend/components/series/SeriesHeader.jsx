@@ -5,6 +5,7 @@ import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
+import { resolveCreatorIdentity } from "../../lib/creatorIdentity";
 
 function capitalize(value) {
   if (!value) {
@@ -30,21 +31,7 @@ function formatSeriesKind(value) {
 }
 
 function getCreatorPresentation(series) {
-  const creatorName = String(series?.author || "").replace(/\s+/g, " ").trim();
-
-  if (creatorName) {
-    return {
-      eyebrow: creatorName,
-      value: creatorName,
-      detail: "View Creator",
-    };
-  }
-
-  return {
-    eyebrow: "Story credits",
-    value: "Credits coming soon",
-    detail: "Public creator names have not been listed on this title yet.",
-  };
+  return resolveCreatorIdentity(series?.author);
 }
 
 function formatUpdateLabel(value) {

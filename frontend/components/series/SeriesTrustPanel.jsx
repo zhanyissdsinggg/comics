@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
+import { resolveCreatorIdentity } from "../../lib/creatorIdentity";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -87,7 +88,7 @@ export default function SeriesTrustPanel({
 
   const leadGenre = Array.isArray(series?.genres) && series.genres.length > 0 ? series.genres[0] : "";
   const secondaryGenre = Array.isArray(series?.genres) && series.genres.length > 1 ? series.genres[1] : "";
-  const creatorLabel = series?.author || "Studio";
+  const creatorIdentity = resolveCreatorIdentity(series?.author);
   const followers = toNumber(series?.followers);
   const views = toNumber(series?.views);
   const ratingCount = toNumber(series?.ratingCount);
@@ -96,10 +97,10 @@ export default function SeriesTrustPanel({
   const trustCards = [
     {
       label: "Creator",
-      value: creatorLabel,
+      value: creatorIdentity.displayName,
       hint: creatorHref
         ? "View the creator page and browse related series."
-        : "The credited creator or studio attached to this title.",
+        : creatorIdentity.detail,
       onClick: creatorHref ? () => router.push(creatorHref) : null,
     },
     {

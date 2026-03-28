@@ -1,4 +1,8 @@
 import { siteConfig } from "./siteConfig";
+import {
+  CREATOR_FALLBACK_DETAIL,
+  resolveCreatorIdentity,
+} from "./creatorIdentity";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -90,7 +94,7 @@ export function getSeriesFaqItems({ series, episodes }) {
 
   const seriesTitle = normalizeText(series.title);
   const statusLabel = normalizeText(series.status) || "Ongoing";
-  const creatorLabel = normalizeText(series.author) || "the credited studio";
+  const creatorIdentity = resolveCreatorIdentity(series.author);
   const episodeCount = getEpisodeCount(series, episodes);
   const freeEpisodeCount = toNumber(series?.freeEpisodeCount);
   const maxPreviewPages = getMaxPreviewPages(episodes);
@@ -111,9 +115,9 @@ export function getSeriesFaqItems({ series, episodes }) {
       id: "series-creator",
       question: `Who created ${seriesTitle}?`,
       answer:
-        creatorLabel === "the credited studio"
-          ? `${seriesTitle} is grouped under its credited studio on this site. The creator page keeps related titles together.`
-          : `${seriesTitle} is credited to ${creatorLabel}. The creator page keeps other titles from the same creator together.`,
+        creatorIdentity.hasPublicCredit
+          ? `${seriesTitle} is credited to ${creatorIdentity.displayName}. The series page and creator page use the same public-facing credit.`
+          : `${CREATOR_FALLBACK_DETAIL} The title page will surface public creator names here once they are attached upstream.`,
     },
     {
       id: "series-episodes",

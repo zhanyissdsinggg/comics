@@ -7,11 +7,15 @@ export function normalizeCreatorName(name) {
 }
 
 export function getCreatorDisplayName(name) {
-  return normalizeCreatorName(name) || "Studio";
+  return normalizeCreatorName(name);
 }
 
 export function slugifyCreatorName(name) {
-  const normalized = getCreatorDisplayName(name);
+  const normalized = normalizeCreatorName(name);
+  if (!normalized) {
+    return "";
+  }
+
   const asciiSafe = normalized
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -23,34 +27,39 @@ export function slugifyCreatorName(name) {
     .replace(/^-+|-+$/g, "")
     .replace(/-{2,}/g, "-");
 
-  return slug || "studio";
+  return slug;
 }
 
 export function buildCreatorPathFromSlug(slug) {
   const normalizedSlug = slugifyCreatorName(String(slug || ""));
-  return `/creators/${encodeURIComponent(normalizedSlug)}`;
+  return normalizedSlug ? `/creators/${encodeURIComponent(normalizedSlug)}` : "/creators";
 }
 
 export function buildCreatorHref(name) {
-  return buildCreatorPathFromSlug(slugifyCreatorName(name));
+  const slug = slugifyCreatorName(name);
+  return slug ? buildCreatorPathFromSlug(slug) : "/creators";
 }
 
 export function creatorMatchesSlug(name, slug) {
-  if (!slug) {
+  const normalizedName = slugifyCreatorName(name);
+  const normalizedSlug = slugifyCreatorName(slug);
+
+  if (!normalizedName || !normalizedSlug) {
     return false;
   }
 
-  return slugifyCreatorName(name) === slugifyCreatorName(slug);
+  return normalizedName === normalizedSlug;
 }
 
 export function humanizeCreatorSlug(slug) {
-  const normalized = String(slug || "")
+  const normalizedSlug = slugifyCreatorName(String(slug || ""));
+  if (!normalizedSlug) {
+    return "";
+  }
+
+  const normalized = normalizedSlug
     .replace(/-/g, " ")
     .trim();
-
-  if (!normalized) {
-    return "Studio";
-  }
 
   return normalized.replace(/\b([a-z])/g, (match) => match.toUpperCase());
 }

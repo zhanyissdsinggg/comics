@@ -163,6 +163,7 @@ export class SeriesService {
     return {
       id: String(series.id || ""),
       title: String(series.title || ""),
+      author: String(series.author || ""),
       type: String(series.type || "comic"),
       adult: Boolean(series.adult),
       isPublished: series.isPublished !== false,
@@ -211,6 +212,7 @@ export class SeriesService {
       const candidates = [
         "id",
         "title",
+        "author",
         "type",
         "adult",
         "isPublished",

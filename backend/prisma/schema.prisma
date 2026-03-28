@@ -53,6 +53,7 @@ model User {
 model Series {
   id               String   @id @default(cuid())
   title            String
+  author           String   @default("")
   type             String   @default("comic")
   description      String?
   coverUrl         String?

@@ -28,10 +28,10 @@ import {
 import {
   buildCreatorPathFromSlug,
   creatorMatchesSlug,
-  getCreatorDisplayName,
   humanizeCreatorSlug,
   slugifyCreatorName,
 } from "../../lib/creators";
+import { resolveCreatorIdentity } from "../../lib/creatorIdentity";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -113,15 +113,15 @@ function formatTitleCountLabel(count) {
   return `${count} title${count === 1 ? "" : "s"}`;
 }
 
-function getCreatorHeroCopy(creatorName, isStudioShelf, topGenres) {
+function getCreatorHeroCopy(creatorName, creditType, topGenres) {
   const genreLabel = topGenres.slice(0, 2).join(" and ");
 
-  if (isStudioShelf) {
+  if (creditType === "team") {
     return {
-      title: "More from this studio.",
+      title: "More from this team.",
       description: genreLabel
-        ? `${genreLabel} stories from the same studio.`
-        : "Stories from the same studio.",
+        ? `${genreLabel} stories from the same credited team.`
+        : "Stories from the same credited team.",
     };
   }
 
@@ -295,14 +295,17 @@ export default function CreatorPage({
     () => buildCreatorItems(catalog, creatorSlug),
     [catalog, creatorSlug],
   );
-  const creatorName = useMemo(() => {
+  const routeCreatorName = useMemo(() => humanizeCreatorSlug(creatorSlug), [creatorSlug]);
+  const creatorIdentity = useMemo(() => {
     if (creatorItems.length > 0) {
-      return getCreatorDisplayName(creatorItems[0]?.author);
+      return resolveCreatorIdentity(creatorItems[0]?.author);
     }
 
-    return humanizeCreatorSlug(creatorSlug);
-  }, [creatorItems, creatorSlug]);
-  const isStudioShelf = creatorName === "Studio";
+    return resolveCreatorIdentity(routeCreatorName);
+  }, [creatorItems, routeCreatorName]);
+  const creatorName = creatorIdentity.hasPublicCredit
+    ? creatorIdentity.displayName
+    : routeCreatorName || creatorIdentity.displayName;
   const creatorSlugKey = useMemo(
     () => slugifyCreatorName(creatorName),
     [creatorName],
@@ -319,8 +322,8 @@ export default function CreatorPage({
   );
 
   const heroCopy = useMemo(
-    () => getCreatorHeroCopy(creatorName, isStudioShelf, topGenres),
-    [creatorName, isStudioShelf, topGenres],
+    () => getCreatorHeroCopy(creatorName, creatorIdentity.creditType, topGenres),
+    [creatorIdentity.creditType, creatorName, topGenres],
   );
 
   const creatorStats = useMemo(() => {
@@ -579,13 +582,13 @@ export default function CreatorPage({
           <EditorialHero
             appearance="light"
             accent="blue"
-            eyebrow={isStudioShelf ? "Studio" : "Creator"}
+            eyebrow={creatorIdentity.creditType === "team" ? "Team" : "Creator"}
             title={`${creatorName} is not in the public catalog yet.`}
             description="Search the catalog or browse featured series for related titles."
             secondary=""
             stats={[
               {
-                label: isStudioShelf ? "Studio" : "Creator",
+                label: creatorIdentity.creditType === "team" ? "Team" : "Creator",
                 value: creatorName,
                 hint: "Use the name to search the wider catalog.",
               },
@@ -668,7 +671,7 @@ export default function CreatorPage({
         <EditorialHero
           appearance="light"
           accent="blue"
-          eyebrow={isStudioShelf ? "Studio" : "Creator"}
+          eyebrow={creatorIdentity.creditType === "team" ? "Team" : "Creator"}
           title={heroCopy.title}
           description={heroCopy.description}
           secondary={

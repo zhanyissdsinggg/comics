@@ -4,8 +4,7 @@ import {
   normalizeCreatorName,
   slugifyCreatorName,
 } from "./creators";
-
-const STUDIO_TOKENS = ["studio", "team", "works", "lab", "collective", "house", "project"];
+import { inferCreatorCreditType } from "./creatorIdentity";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -38,12 +37,8 @@ function normalizeIsoDate(value) {
 }
 
 function getCreatorCreditType(name) {
-  const normalized = normalizeCreatorName(name).toLowerCase();
-  if (!normalized) {
-    return "creator";
-  }
-
-  return STUDIO_TOKENS.some((token) => normalized.includes(token)) ? "studio" : "creator";
+  const creditType = inferCreatorCreditType(name);
+  return creditType === "fallback" ? "creator" : creditType;
 }
 
 function buildCreatorBucket(name, slug) {
@@ -168,8 +163,8 @@ export function getCreatorDirectoryStats(creators) {
       summary.completedTitles += Number(creator?.completedCount || 0);
       summary.freeStarts += Number(creator?.freeStartCount || 0);
       summary.readerProof += Number(creator?.readerProof || 0);
-      if (creator?.creditType === "studio") {
-        summary.studios += 1;
+      if (creator?.creditType === "team") {
+        summary.teams += 1;
       }
       return summary;
     },
@@ -178,13 +173,13 @@ export function getCreatorDirectoryStats(creators) {
       completedTitles: 0,
       freeStarts: 0,
       readerProof: 0,
-      studios: 0,
+      teams: 0,
     },
   );
 
   return {
     creators: safeCreators.length,
-    studios: totals.studios,
+    teams: totals.teams,
     titles: totals.titles,
     completedTitles: totals.completedTitles,
     freeStarts: totals.freeStarts,
