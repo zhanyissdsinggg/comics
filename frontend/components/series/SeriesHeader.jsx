@@ -77,8 +77,9 @@ export default function SeriesHeader({
   const primaryAction = onPrimaryAction || null;
   const primaryActionLabel = primaryActionLabelOverride || "Start Reading";
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.number || "");
-  const latestEpisodeValue = latestEpisodeNumber ? `Episode ${latestEpisodeNumber}` : "Not listed";
-  const creatorName = String(series.author || "").trim() || "Not listed";
+  const latestEpisodeValue = latestEpisodeNumber ? `Episode ${latestEpisodeNumber}` : "Coming soon";
+  const creatorName = String(series.author || "").trim();
+  const creatorValue = creatorName || "Credits coming soon";
   const heroFacts = [
     {
       label: "Format",
@@ -97,8 +98,8 @@ export default function SeriesHeader({
     },
     {
       label: "Creator",
-      value: creatorName,
-      detail: creatorHref ? "View Creator" : "Creator not listed.",
+      value: creatorValue,
+      detail: creatorHref ? "View Creator" : "Public creator credits are still being added.",
       href: creatorHref,
     },
     {

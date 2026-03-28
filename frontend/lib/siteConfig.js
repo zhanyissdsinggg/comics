@@ -21,7 +21,7 @@ export const siteConfig = {
   siteUrl: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
   defaultDescription:
     clean(process.env.NEXT_PUBLIC_SITE_DESCRIPTION) ||
-    "Read comics and novels on Gush. Start free, unlock with points, or choose a membership plan.",
+    "Read original comics and novels on Gush. Start with chapter one and follow the stories you want to keep reading.",
   tagline:
     clean(process.env.NEXT_PUBLIC_SITE_TAGLINE) ||
     "Comics and novels, without the platform clutter.",

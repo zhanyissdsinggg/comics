@@ -637,7 +637,7 @@ export default function CreatorsHubPage({
                 Featured Creators
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Credits are still being added.
+                Some titles still lead with the story first, so this page keeps the clearest credited teams, strong entry points, and genre paths close at hand.
               </p>
             </div>
           </SurfacePanel>
@@ -647,6 +647,9 @@ export default function CreatorsHubPage({
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Start with These Stories
               </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                A few good places to get a feel for the catalog.
+              </p>
             </div>
 
             {fallbackEntryTitles.length > 0 ? (
@@ -693,7 +696,7 @@ export default function CreatorsHubPage({
                   Browse by Genre
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Browse stories by genre.
+                  Follow the genres that shape the catalog.
                 </p>
               </div>
 
@@ -711,7 +714,7 @@ export default function CreatorsHubPage({
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">Genres will appear here as the catalog grows.</p>
+                <p className="text-sm text-slate-500">Use the catalog pages above to keep browsing by story and format.</p>
               )}
             </SurfacePanel>
           </section>
@@ -721,7 +724,7 @@ export default function CreatorsHubPage({
               All Creators
             </h2>
             <p className="text-sm leading-7 text-slate-600">
-              Creator pages will appear here as credits are added.
+              This shelf only lists clear public-facing credits, so the story picks above stay the best way in when a title leads with the work itself.
             </p>
           </SurfacePanel>
         </div>
@@ -774,7 +777,7 @@ export default function CreatorsHubPage({
               Featured Creators
             </h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">
-              A few creators and studios to start with.
+              Meet a few of the credited creators and studios behind the catalog.
             </p>
           </div>
 
@@ -820,6 +823,9 @@ export default function CreatorsHubPage({
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Start with These Stories
               </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                A few strong places to begin.
+              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -936,7 +942,7 @@ export default function CreatorsHubPage({
               Browse by Genre
             </h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">
-              Creators working in each genre.
+              See which creators and studios are shaping each genre lane.
             </p>
           </div>
 
@@ -954,7 +960,7 @@ export default function CreatorsHubPage({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500">Genres will appear here as the catalog grows.</p>
+            <p className="text-sm text-slate-500">Browse the catalog pages to keep moving between genres and formats.</p>
           )}
         </SurfacePanel>
 
@@ -964,6 +970,9 @@ export default function CreatorsHubPage({
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 All Creators
               </h2>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                Browse the credited names currently attached to public titles.
+              </p>
             </div>
             {query || activeGenre !== "All" || creditFilter !== "all" ? (
               <button
