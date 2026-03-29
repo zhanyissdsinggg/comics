@@ -96,10 +96,13 @@ describe("RankingsService", () => {
     ]);
 
     await expect(service.list("new", true)).resolves.toEqual([
-      {
+      expect.objectContaining({
         id: "cached-series",
         title: "Cached",
-      },
+        creator: expect.objectContaining({
+          label: "Creator details coming soon",
+        }),
+      }),
     ]);
     expect(prisma.series.findMany).not.toHaveBeenCalled();
   });

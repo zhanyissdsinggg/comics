@@ -9,6 +9,7 @@ import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { recommendRails } from "../../lib/reco/recommender";
 import { getRecommendations } from "../../lib/recommendation/engine";
+import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { buildHomeRail } from "../../lib/storefrontRecommendations";
 import { useHomeData } from "./HomeDataProvider";
 import { usePersonalizedRecommendations } from "../../hooks/useAIRecommendations";
@@ -32,7 +33,7 @@ function createRailItem(series, overrides = {}) {
     id: series.id,
     seriesId: series.id,
     title: series.title,
-    author: series.author || "",
+    author: resolveSeriesCreatorName(series),
     subtitle: series.status || "Series",
     type: series.type || "",
     seriesType: series.type || "",

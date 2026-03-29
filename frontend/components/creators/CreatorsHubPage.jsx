@@ -17,8 +17,10 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
-import { normalizeCoverBadge } from "../../lib/coverPresentation";
-import { slugifyCreatorName } from "../../lib/creators";
+import {
+  resolveSeriesCreatorIdentity,
+  resolveSeriesCreatorName,
+} from "../../lib/creatorIdentity";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -61,14 +63,35 @@ function buildGenreOptions(creators) {
 }
 
 function formatCreditTypeLabel(creditType) {
-  return creditType === "team" ? "Team" : "Creator";
+  if (creditType === "studio") {
+    return "Studio";
+  }
+
+  if (creditType === "team") {
+    return "Team";
+  }
+
+  return "Creator";
+}
+
+function isCollectiveCreditType(creditType) {
+  return creditType === "team" || creditType === "studio";
 }
 
 function getSeriesSignalScore(series) {
+  const updatedAtMs = Date.parse(series?.updatedAt || 0);
+  const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
+  const hasDescription = Boolean(String(series?.description || "").trim());
+  const completedBonus =
+    String(series?.status || "").toLowerCase() === "completed"
+      ? 12 * 60 * 60 * 1000
+      : 0;
+
   return (
-    Date.parse(series?.updatedAt || 0) +
-    ((Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) ? 1200 : 0) +
-    (String(series?.status || "").toLowerCase() === "completed" ? 700 : 0)
+    (Number.isNaN(updatedAtMs) ? 0 : updatedAtMs) +
+    Math.min(episodeCount, 200) * 60 * 60 * 1000 +
+    (hasDescription ? 3 * 60 * 60 * 1000 : 0) +
+    completedBonus
   );
 }
 
@@ -76,12 +99,22 @@ function getCreatorStoryBadge(series) {
   if (String(series?.status || "").toLowerCase() === "completed") {
     return "Completed";
   }
-  const badges = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
-    .filter(Boolean)
-    .map((badge) => normalizeCoverBadge(badge))
-    .filter(Boolean);
 
-  return badges.find((badge) => badge === "New") || "";
+  const updatedAtMs = Date.parse(series?.updatedAt || 0);
+  if (!Number.isNaN(updatedAtMs) && updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000) {
+    return "Updated";
+  }
+
+  const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
+  if (episodeCount > 0 && episodeCount <= 12) {
+    return "Start here";
+  }
+
+  return "";
+}
+
+function canStartFromChapterOne(series) {
+  return Math.max(0, Number(series?.episodeCount || 0)) > 0;
 }
 
 function buildFallbackSeriesSubtitle(series) {
@@ -321,7 +354,9 @@ export default function CreatorsHubPage({
     return creators.filter((creator) => {
       const matchesCredit =
         creditFilter === "all" ||
-        (creditFilter === "team" ? creator?.creditType === "team" : creator?.creditType !== "team");
+        (creditFilter === "team"
+          ? isCollectiveCreditType(creator?.creditType)
+          : !isCollectiveCreditType(creator?.creditType));
       const matchesGenre =
         activeGenre === "All" ||
         (Array.isArray(creator?.topGenres) ? creator.topGenres : []).includes(activeGenre);
@@ -348,11 +383,11 @@ export default function CreatorsHubPage({
   }, [activeGenre, creators, creditFilter, query]);
   const spotlightCreators = useMemo(() => filteredCreators.slice(0, 3), [filteredCreators]);
   const featuredTeams = useMemo(
-    () => creators.filter((creator) => creator?.creditType === "team").slice(0, 3),
+    () => creators.filter((creator) => isCollectiveCreditType(creator?.creditType)).slice(0, 3),
     [creators],
   );
   const featuredVoices = useMemo(
-    () => creators.filter((creator) => creator?.creditType !== "team" && creator?.titleCount > 1).slice(0, 3),
+    () => creators.filter((creator) => !isCollectiveCreditType(creator?.creditType) && creator?.titleCount > 1).slice(0, 3),
     [creators],
   );
   const fallbackEntryTitles = useMemo(
@@ -360,12 +395,6 @@ export default function CreatorsHubPage({
       [...catalog]
         .filter((series) => series?.id)
         .sort((left, right) => {
-          const rightFree = Number(right?.freeEpisodeCount || 0) > 0 || right?.hasFreeEpisodes ? 1 : 0;
-          const leftFree = Number(left?.freeEpisodeCount || 0) > 0 || left?.hasFreeEpisodes ? 1 : 0;
-          if (rightFree !== leftFree) {
-            return rightFree - leftFree;
-          }
-
           const scoreDelta = getSeriesSignalScore(right) - getSeriesSignalScore(left);
           if (scoreDelta !== 0) {
             return scoreDelta;
@@ -374,21 +403,27 @@ export default function CreatorsHubPage({
           return Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0);
         })
         .slice(0, 4)
-        .map((series) => ({
-          id: series.id,
-          title: series.title,
-          subtitle: buildFallbackSeriesSubtitle(series),
-          genres: Array.isArray(series?.genres) ? series.genres : [],
-          type: series?.type || "",
-          seriesType: series?.type || "",
-          status: series?.status || "",
-          freeEpisodeCount: Number(series?.freeEpisodeCount || 0),
-          author: series?.author || "",
-          adult: Boolean(series?.adult),
-          coverUrl: series.coverUrl,
-          coverTone: series.coverTone,
-          badge: getCreatorStoryBadge(series),
-        })),
+        .map((series) => {
+          const creatorIdentity = resolveSeriesCreatorIdentity(series);
+
+          return {
+            id: series.id,
+            title: series.title,
+            subtitle: buildFallbackSeriesSubtitle(series),
+            genres: Array.isArray(series?.genres) ? series.genres : [],
+            type: series?.type || "",
+            seriesType: series?.type || "",
+            status: series?.status || "",
+            description: series?.description || "",
+            episodeCount: Number(series?.episodeCount || 0),
+            updatedAt: series?.updatedAt || "",
+            author: resolveSeriesCreatorName(series),
+            creatorIdentity,
+            adult: Boolean(series?.adult),
+            coverUrl: series.coverUrl,
+            coverTone: series.coverTone,
+          };
+        }),
     [catalog],
   );
   const fallbackGenrePicks = useMemo(() => {
@@ -563,7 +598,7 @@ export default function CreatorsHubPage({
           return {
             creator,
             series,
-            freeStarts: Number(series?.freeEpisodeCount || 0),
+            canStartFromChapterOne: canStartFromChapterOne(series),
           };
         })
         .filter(Boolean),
@@ -573,7 +608,7 @@ export default function CreatorsHubPage({
     const entries = [];
     const seenSeriesIds = new Set();
 
-    creatorEntryTitles.forEach(({ creator, series, freeStarts }) => {
+    creatorEntryTitles.forEach(({ creator, series, canStartFromChapterOne: hasOpeningChapter }) => {
       if (!series?.id || seenSeriesIds.has(series.id)) {
         return;
       }
@@ -584,7 +619,7 @@ export default function CreatorsHubPage({
         mode: "creator",
         creator,
         series,
-        freeStarts,
+        canStartFromChapterOne: hasOpeningChapter,
       });
     });
 
@@ -593,8 +628,8 @@ export default function CreatorsHubPage({
         return;
       }
 
-      const linkedCreator = series.author
-        ? creatorLookup.get(slugifyCreatorName(series.author))
+      const linkedCreator = series?.creatorIdentity?.slug
+        ? creatorLookup.get(series.creatorIdentity.slug)
         : null;
 
       seenSeriesIds.add(series.id);
@@ -603,7 +638,7 @@ export default function CreatorsHubPage({
         mode: linkedCreator ? "creator" : "story",
         creator: linkedCreator,
         series,
-        freeStarts: Number(series?.freeEpisodeCount || 0),
+        canStartFromChapterOne: canStartFromChapterOne(series),
       });
     });
 
@@ -650,7 +685,7 @@ export default function CreatorsHubPage({
             accent="blue"
             eyebrow="Creator credits"
             title="Behind the Stories"
-            description="We’re adding public creator credits title by title. Until then, start with the stories already available."
+            description="Browse the stories and credited teams already visible in the public catalog."
             actions={
               <>
                 <button
@@ -684,7 +719,7 @@ export default function CreatorsHubPage({
                 Start with These Stories
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                A few strong entry points while public creator credits are still being added.
+                A few strong entry points drawn from the live catalog.
               </p>
             </div>
 
@@ -704,7 +739,7 @@ export default function CreatorsHubPage({
                         coverUrl={series.coverUrl}
                         label={series.title}
                         eyebrow={series.subtitle}
-                        badge={series.badge}
+                        badge={getCreatorStoryBadge(series)}
                         fallbackVariant="minimal-card"
                         className="h-full w-full transition-transform duration-700 group-hover:scale-[1.04]"
                       />
@@ -742,7 +777,7 @@ export default function CreatorsHubPage({
                     <button
                       key={`creator-fallback-genre-${item.genre}`}
                       type="button"
-                      onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=popular`)}
+                      onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=latest`)}
                       className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
                     >
                       {item.genre}
@@ -778,10 +813,10 @@ export default function CreatorsHubPage({
               </div>
               <div className="rounded-[22px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  Where credits will show up
+                  How creator credit works
                 </p>
                 <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-950">
-                  Series pages use one consistent creator fallback until a real public credit exists.
+                  Series pages use one consistent creator fallback when no public credit is available.
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
                   When a title gains a public-facing creator or team credit upstream, it can graduate into the creator directory without changing the reading flow.
@@ -925,7 +960,7 @@ export default function CreatorsHubPage({
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {guidedDiscoveryEntries.map(({ id, creator, series, freeStarts }) => (
+              {guidedDiscoveryEntries.map(({ id, creator, series, canStartFromChapterOne: hasOpeningChapter }) => (
                 <div
                   key={id}
                   className="rounded-[28px] border border-black/6 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
@@ -1021,7 +1056,7 @@ export default function CreatorsHubPage({
                         }}
                         className={primaryButtonClass}
                       >
-                        {freeStarts > 0 ? "Read Chapter 1" : "View Series"}
+                        {hasOpeningChapter ? "Read Chapter 1" : "View Series"}
                       </Link>
                     </div>
                   </div>
@@ -1097,7 +1132,7 @@ export default function CreatorsHubPage({
               {[
                 { id: "all", label: "All" },
                 { id: "creator", label: "Creators" },
-                { id: "team", label: "Teams" },
+                { id: "team", label: "Studios & Teams" },
               ].map((item) => (
                 <button
                   key={item.id}

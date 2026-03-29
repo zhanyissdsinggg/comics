@@ -30,8 +30,8 @@ export class SeriesController {
     return { series: await this.seriesService.list(adult) };
   }
 
-  @Get(":id")
-  async detail(
+  @Get(":id/commerce")
+  async detailCommerce(
     @Param("id") id: string,
     @Query("adult") adultParam: string,
     @Req() req: Request,
@@ -53,7 +53,47 @@ export class SeriesController {
         subscription = await getSubscriptionPayload(this.prisma, userId).catch(() => null);
       }
 
-      const result = await this.seriesService.detail(id, subscription);
+      const result = await this.seriesService.detailCommerce(id, subscription);
+      if (!result) {
+        res.status(404);
+        return buildError(ERROR_CODES.NOT_FOUND);
+      }
+
+      if (result.adult) {
+        const gate = checkAdultGate(req.cookies || {});
+        if (!gate.ok) {
+          res.status(403);
+          return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+        }
+      }
+
+      return result;
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack || error.message : String(error);
+      this.logger.error(`Failed to load series commerce detail for ${id}.`, stack);
+      res.status(503);
+      return buildError(ERROR_CODES.INTERNAL, { message: "Failed to load series commerce detail." });
+    }
+  }
+
+  @Get(":id")
+  async detail(
+    @Param("id") id: string,
+    @Query("adult") adultParam: string,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const adult = parseBool(adultParam);
+    if (adult === true) {
+      const gate = checkAdultGate(req.cookies || {});
+      if (!gate.ok) {
+        res.status(403);
+        return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+      }
+    }
+
+    try {
+      const result = await this.seriesService.detail(id);
       if (!result) {
         res.status(404);
         return buildError(ERROR_CODES.NOT_FOUND);

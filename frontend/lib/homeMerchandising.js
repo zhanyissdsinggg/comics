@@ -1,13 +1,80 @@
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 function toNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function normalizeStatus(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function getEpisodeCount(series) {
+  return Math.max(0, toNumber(series?.episodeCount));
+}
+
+function getUpdatedAtMs(series) {
+  const parsed = Date.parse(series?.updatedAt || series?.createdAt || "");
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function isCompletedSeries(series) {
+  return normalizeStatus(series?.status) === "completed";
+}
+
+function isRecentlyUpdated(series, days = 21) {
+  const updatedAtMs = getUpdatedAtMs(series);
+  if (!updatedAtMs) {
+    return false;
+  }
+
+  return updatedAtMs >= Date.now() - days * DAY_MS;
+}
+
+function getBacklogAccessibilityBonus(series) {
+  const episodeCount = getEpisodeCount(series);
+  if (episodeCount <= 0) {
+    return 0;
+  }
+  if (episodeCount <= 12) {
+    return 18 * DAY_MS;
+  }
+  if (episodeCount <= 24) {
+    return 12 * DAY_MS;
+  }
+  if (episodeCount <= 48) {
+    return 6 * DAY_MS;
+  }
+  return 0;
+}
+
+function getCatalogSignalLabel(series) {
+  if (isCompletedSeries(series)) {
+    return "Completed";
+  }
+  if (isRecentlyUpdated(series, 14)) {
+    return "Updated";
+  }
+  if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
+    return "Start here";
+  }
+  return "";
+}
+
 function getBadgeTokens(series) {
-  return [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
-    .filter(Boolean)
-    .map((badge) => String(badge).trim().toUpperCase())
-    .filter(Boolean);
+  const tokens = [];
+
+  if (isCompletedSeries(series)) {
+    tokens.push("COMPLETED");
+  }
+  if (isRecentlyUpdated(series, 14)) {
+    tokens.push("UPDATED");
+  }
+  if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
+    tokens.push("START");
+  }
+
+  return tokens;
 }
 
 function getVisibleCatalog(seriesList) {
@@ -66,47 +133,72 @@ function resolveHomepageSlotSeries(seriesPool, homepageSlots, slotId, limit = In
   return slotIds.map((seriesId) => seriesById.get(seriesId)).filter(Boolean).slice(0, limit);
 }
 
+function getEditorialSeriesScore(series) {
+  return (
+    getUpdatedAtMs(series) +
+    getBacklogAccessibilityBonus(series) +
+    (isCompletedSeries(series) ? 14 * DAY_MS : 0) +
+    (series?.coverUrl ? 3 * DAY_MS : 0) +
+    (String(series?.description || "").trim() ? 2 * DAY_MS : 0)
+  );
+}
+
+function getStartHereScore(series) {
+  return (
+    getEditorialSeriesScore(series) +
+    getBacklogAccessibilityBonus(series) +
+    (getEpisodeCount(series) > 0 ? 3 * DAY_MS : 0)
+  );
+}
+
+function getBreakoutScore(series) {
+  return (
+    getEditorialSeriesScore(series) +
+    (isRecentlyUpdated(series, 14) ? 10 * DAY_MS : 0) +
+    (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24 ? 4 * DAY_MS : 0)
+  );
+}
+
 function mapHeroSeries(series, index, bannerUrl = null) {
   return {
     id: `hero-${series.id || index + 1}`,
     seriesId: series.id,
     latestEpisodeId: series.latestEpisodeId || null,
     title: series.title,
-    description: series.description || `${Array.isArray(series.genres) ? series.genres.join(" | ") : ""}`,
+    description:
+      series.description ||
+      `${Array.isArray(series.genres) ? series.genres.join(" | ") : ""}`,
     coverTone: series.coverTone || "default",
     coverUrl: series.coverUrl,
     bannerUrl: bannerUrl || series.bannerUrl || null,
-    badge: series.badge,
+    badge: getCatalogSignalLabel(series),
     status: series.status,
-    freeEpisodeCount: toNumber(series.freeEpisodeCount),
-    hasFreeEpisodes: Boolean(series.hasFreeEpisodes || toNumber(series.freeEpisodeCount) > 0),
+    episodeCount: getEpisodeCount(series),
+    freeEpisodeCount: 0,
+    hasFreeEpisodes: false,
   };
 }
 
 export function getSeriesScore(series) {
-  return toNumber(series?.rating) * Math.max(1, toNumber(series?.ratingCount) || 1);
+  return Math.round(getEditorialSeriesScore(series) / DAY_MS);
 }
 
 export function getReaderProof(series) {
-  return Math.max(
-    toNumber(series?.followers),
-    toNumber(series?.views),
-    toNumber(series?.ratingCount),
-    Math.round(toNumber(series?.rating) * 100),
+  return (
+    getEpisodeCount(series) +
+    (Array.isArray(series?.genres) ? series.genres.length : 0) +
+    (Array.isArray(series?.creatorCredits) ? series.creatorCredits.length : 0) +
+    (series?.coverUrl ? 2 : 0) +
+    (String(series?.description || "").trim() ? 2 : 0) +
+    (isCompletedSeries(series) ? 4 : 0)
   );
 }
 
 function getLibraryReturnScore(series) {
-  const badges = getBadgeTokens(series);
   return (
-    getSeriesScore(series) +
-    getReaderProof(series) +
-    toNumber(series?.episodeCount) * 3 +
-    toNumber(series?.freeEpisodeCount) * 18 +
-    (String(series?.status || "").toLowerCase() === "completed" ? 140 : 0) +
-    (badges.includes("HOT") ? 120 : 0) +
-    (badges.includes("NEW") ? 60 : 0) +
-    (series?.coverUrl ? 30 : 0)
+    getEditorialSeriesScore(series) +
+    getEpisodeCount(series) * DAY_MS +
+    (isRecentlyUpdated(series, 30) ? 5 * DAY_MS : 0)
   );
 }
 
@@ -120,7 +212,7 @@ const LIBRARY_RETURN_SLOT_PRIORITIES = [
   },
   {
     slotId: "home-breakout",
-    sourceLabel: "Trending breakout pick",
+    sourceLabel: "Recent standout",
     entryPoint: "LIBRARY_BREAKOUT_FILL",
     campaignId: "library_breakout_fill",
     limit: 2,
@@ -218,12 +310,9 @@ export function buildHomeHeroItems(seriesList, options = {}) {
   );
   const featured = dedupeSeries([
     ...slotDrivenHeroSeries,
-    ...visibleCatalog
-      .filter((series) => {
-        const badges = getBadgeTokens(series);
-        return badges.includes("HOT") || toNumber(series?.rating) >= 4.5;
-      })
-      .sort((left, right) => toNumber(right?.rating) - toNumber(left?.rating)),
+    ...[...visibleCatalog].sort(
+      (left, right) => getEditorialSeriesScore(right) - getEditorialSeriesScore(left),
+    ),
   ])
     .slice(0, 6)
     .map((series, index) => mapHeroSeries(series, index, index === 0 ? bannerUrl : null));
@@ -250,7 +339,7 @@ export function getHomeEditorialSnapshot(seriesList, options = {}) {
       adultCount += 1;
     }
 
-    if (getBadgeTokens(series).includes("NEW")) {
+    if (isRecentlyUpdated(series, 30)) {
       newCount += 1;
     }
 
@@ -259,30 +348,20 @@ export function getHomeEditorialSnapshot(seriesList, options = {}) {
     }
   });
 
-  const completedSeries = safeCatalog.filter(
-    (series) => String(series?.status || "").toLowerCase() === "completed",
+  const completedSeries = safeCatalog.filter((series) => isCompletedSeries(series));
+  const startHereSeries = [...safeCatalog]
+    .filter((series) => getEpisodeCount(series) > 0)
+    .sort((left, right) => getStartHereScore(right) - getStartHereScore(left));
+  const breakoutSeries = [...safeCatalog].sort(
+    (left, right) => getBreakoutScore(right) - getBreakoutScore(left),
   );
-  const freeStartSeries = safeCatalog.filter(
-    (series) => toNumber(series?.freeEpisodeCount) > 0 || series?.hasFreeEpisodes,
-  );
-  const breakoutSeries = safeCatalog.filter((series) => {
-    const badges = getBadgeTokens(series);
-    return badges.includes("NEW") || badges.includes("HOT");
-  });
 
-  const completedPick = [...completedSeries].sort(
-    (left, right) => getSeriesScore(right) - getSeriesScore(left),
-  )[0] || null;
-  const freeStartPick = [...freeStartSeries].sort((left, right) => {
-    const freeDelta = toNumber(right?.freeEpisodeCount) - toNumber(left?.freeEpisodeCount);
-    if (freeDelta !== 0) {
-      return freeDelta;
-    }
-    return getSeriesScore(right) - getSeriesScore(left);
-  })[0] || null;
-  const breakoutPick = [...breakoutSeries].sort(
-    (left, right) => getSeriesScore(right) - getSeriesScore(left),
-  )[0] || null;
+  const completedPick =
+    [...completedSeries].sort(
+      (left, right) => getEditorialSeriesScore(right) - getEditorialSeriesScore(left),
+    )[0] || null;
+  const freeStartPick = startHereSeries[0] || null;
+  const breakoutPick = breakoutSeries[0] || null;
   const slotDrivenFreeStartPick =
     resolveHomepageSlotSeries(safeCatalog, options.homepageSlots, "home-free-start", 1)[0] || null;
   const slotDrivenCompletedPick =
@@ -293,12 +372,13 @@ export function getHomeEditorialSnapshot(seriesList, options = {}) {
   return {
     visibleCatalog,
     safeCatalog,
+    startHereSeries,
     seriesCount: visibleCatalog.length,
     genreCount: genres.size,
     newCount,
     adultCount,
     completedSeriesCount: completedSeries.length,
-    freeStartSeriesCount: freeStartSeries.length,
+    freeStartSeriesCount: startHereSeries.length,
     breakoutSeriesCount: breakoutSeries.length,
     completedPick: slotDrivenCompletedPick || completedPick,
     freeStartPick: slotDrivenFreeStartPick || freeStartPick,
@@ -310,7 +390,7 @@ export function getHomeEditorialStats(seriesList, options = {}) {
   if (options.loading) {
     return [
       { label: "Series live", value: "--", hint: "Across comics and novels" },
-      { label: "Fresh drops", value: "--", hint: "Recently tagged new" },
+      { label: "Fresh drops", value: "--", hint: "Recently updated titles" },
       { label: "Genres", value: "--", hint: "Browse without losing your place" },
       { label: "18+ catalog", value: "--", hint: "Protected behind sign-in" },
     ];
@@ -318,10 +398,26 @@ export function getHomeEditorialStats(seriesList, options = {}) {
 
   const snapshot = getHomeEditorialSnapshot(seriesList);
   return [
-    { label: "Series live", value: snapshot.seriesCount.toLocaleString(), hint: "Across comics and novels" },
-    { label: "Fresh drops", value: snapshot.newCount.toLocaleString(), hint: "Recently tagged new" },
-    { label: "Genres", value: snapshot.genreCount.toLocaleString(), hint: "Browse without losing your place" },
-    { label: "18+ catalog", value: snapshot.adultCount.toLocaleString(), hint: "Protected behind sign-in" },
+    {
+      label: "Series live",
+      value: snapshot.seriesCount.toLocaleString(),
+      hint: "Across comics and novels",
+    },
+    {
+      label: "Fresh drops",
+      value: snapshot.newCount.toLocaleString(),
+      hint: "Recently updated titles",
+    },
+    {
+      label: "Genres",
+      value: snapshot.genreCount.toLocaleString(),
+      hint: "Browse without losing your place",
+    },
+    {
+      label: "18+ catalog",
+      value: snapshot.adultCount.toLocaleString(),
+      hint: "Protected behind sign-in",
+    },
   ];
 }
 
@@ -332,43 +428,26 @@ export function getHomeHeroCandidates(seriesList, options = {}) {
   return visibleCatalog
     .filter((series) => series?.id && series?.title)
     .map((series) => {
-      const badges = getBadgeTokens(series);
-      const readinessSignals = [];
+      const reasons = [];
+      const episodeCount = getEpisodeCount(series);
 
-      if (badges.includes("HOT")) {
-        readinessSignals.push("HOT 标记");
+      if (isCompletedSeries(series)) {
+        reasons.push("Completed run");
       }
-      if (badges.includes("NEW")) {
-        readinessSignals.push("NEW 标记");
+      if (isRecentlyUpdated(series, 14)) {
+        reasons.push("Recently updated");
       }
-      if (toNumber(series?.freeEpisodeCount) > 0 || series?.hasFreeEpisodes) {
-        readinessSignals.push("可做免费开篇");
+      if (episodeCount > 0 && episodeCount <= 24) {
+        reasons.push("Easy place to start");
       }
-      if (toNumber(series?.rating) >= 4.5) {
-        readinessSignals.push("高评分");
+      if (Array.isArray(series?.creatorCredits) && series.creatorCredits.length > 0) {
+        reasons.push("Credited creator");
       }
-      if (String(series?.status || "").toLowerCase() === "completed") {
-        readinessSignals.push("适合 binge");
-      }
-      if (getReaderProof(series) >= 1000) {
-        readinessSignals.push("读者信号强");
-      }
-
-      const score =
-        getSeriesScore(series) +
-        getReaderProof(series) / 100 +
-        toNumber(series?.episodeCount) * 2 +
-        (badges.includes("HOT") ? 180 : 0) +
-        (badges.includes("NEW") ? 120 : 0) +
-        (toNumber(series?.freeEpisodeCount) > 0 || series?.hasFreeEpisodes ? 100 : 0) +
-        (String(series?.status || "").toLowerCase() === "completed" ? 60 : 0) +
-        (series?.coverUrl ? 40 : 0) +
-        (String(series?.description || "").trim() ? 30 : 0);
 
       return {
         series,
-        score,
-        reasons: readinessSignals.slice(0, 4),
+        score: getEditorialSeriesScore(series),
+        reasons: reasons.slice(0, 4),
       };
     })
     .sort((left, right) => right.score - left.score)

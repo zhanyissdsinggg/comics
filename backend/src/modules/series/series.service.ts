@@ -5,8 +5,8 @@ import {
   mapEpisodeListItem,
   mapStorefrontSeriesSummary,
   type SeriesAnalyticsSnapshot,
-  type StorefrontEpisodeAccess,
   type StorefrontSeriesSummary,
+  sanitizeStorefrontSeriesSummary,
 } from "../../common/mappers/storefront-series.mapper";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
@@ -52,9 +52,16 @@ type CachedSeriesEpisodeRow = Omit<
 };
 
 type CachedSeriesDetail = {
-  series: StorefrontSeriesSummary;
+  series: StorefrontSeriesSummary | Record<string, unknown>;
   episodes: CachedSeriesEpisodeRow[];
   ttfIntervalHours: number;
+};
+
+type SeriesCommerceEpisodeAccess = {
+  id: string;
+  pricePts: number;
+  ttfEligible: boolean;
+  ttfReadyAt: Date | null;
 };
 
 const SERIES_LIST_TTL_SECONDS = 300;
@@ -146,8 +153,8 @@ export class SeriesService {
     const cacheKey = `series:list:${adult === null ? "all" : adult ? "adult" : "standard"}`;
     const cached =
       await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
-    if (cached) {
-      return cached;
+    if (Array.isArray(cached) && cached.length > 0) {
+      return cached.map((item) => sanitizeStorefrontSeriesSummary(item));
     }
 
     const where =
@@ -190,8 +197,6 @@ export class SeriesService {
           episodeCount: 0,
           latestEpisodeId: "",
           latestEpisodeNumber: null,
-          followers: 0,
-          views: 0,
         },
         creditsMap.get(row.id) || [],
       ),
@@ -201,10 +206,7 @@ export class SeriesService {
     return series;
   }
 
-  async detail(
-    seriesId: string,
-    subscription?: { perks?: { ttfMultiplier?: number } } | null,
-  ) {
+  private async loadCachedDetail(seriesId: string) {
     const cacheKey = `series:detail:${seriesId}`;
     let cached = await this.cacheService.get<CachedSeriesDetail>(cacheKey);
 
@@ -260,8 +262,6 @@ export class SeriesService {
         episodeCount: episodes.length,
         latestEpisodeId: String(row.latestEpisodeId || ""),
         latestEpisodeNumber: null,
-        followers: 0,
-        views: 0,
       };
 
       const summary = this.buildSeriesSummary(row, analytics, credits);
@@ -271,6 +271,33 @@ export class SeriesService {
         ttfIntervalHours: Math.max(1, Number(row.ttfIntervalHours || 24)),
       };
       await this.cacheService.set(cacheKey, cached, SERIES_DETAIL_TTL_SECONDS);
+    }
+
+    return cached;
+  }
+
+  async detail(seriesId: string) {
+    const cached = await this.loadCachedDetail(seriesId);
+    if (!cached) {
+      return null;
+    }
+
+    const normalizedEpisodes = cached.episodes.map((episode) =>
+      this.normalizeCachedEpisode(episode),
+    );
+    return {
+      series: sanitizeStorefrontSeriesSummary(cached.series),
+      episodes: normalizedEpisodes.map((episode) => mapEpisodeListItem(episode)),
+    };
+  }
+
+  async detailCommerce(
+    seriesId: string,
+    subscription?: { perks?: { ttfMultiplier?: number } } | null,
+  ) {
+    const cached = await this.loadCachedDetail(seriesId);
+    if (!cached) {
+      return null;
     }
 
     const normalizedEpisodes = cached.episodes.map((episode) =>
@@ -287,15 +314,17 @@ export class SeriesService {
       : normalizedEpisodes;
 
     return {
-      series: cached.series,
-      episodes: episodes.map((episode) => ({
-        ...mapEpisodeListItem(episode),
-        access: {
-          pricePts: episode.pricePts,
-          ttfEligible: episode.ttfEligible,
-          ttfReadyAt: episode.ttfReadyAt,
-        } satisfies StorefrontEpisodeAccess,
-      })),
+      seriesId,
+      adult: sanitizeStorefrontSeriesSummary(cached.series).adult,
+      episodes: episodes.map(
+        (episode) =>
+          ({
+            id: episode.id,
+            pricePts: episode.pricePts,
+            ttfEligible: episode.ttfEligible,
+            ttfReadyAt: episode.ttfReadyAt,
+          }) satisfies SeriesCommerceEpisodeAccess,
+      ),
     };
   }
 }

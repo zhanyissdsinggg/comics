@@ -1,7 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { CacheService } from "../../common/cache/cache.service";
 import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
-import { mapStorefrontSeriesSummary } from "../../common/mappers/storefront-series.mapper";
+import {
+  mapStorefrontSeriesSummary,
+  sanitizeStorefrontSeriesSummary,
+} from "../../common/mappers/storefront-series.mapper";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
 
@@ -20,7 +23,7 @@ export class RankingsService {
     const cacheKey = `rankings:${normalizedType}:${adult ? "adult" : "standard"}`;
     const cached = await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
     if (cached) {
-      return cached;
+      return cached.map((item) => sanitizeStorefrontSeriesSummary(item));
     }
 
     const rows = await this.prisma.series.findMany({

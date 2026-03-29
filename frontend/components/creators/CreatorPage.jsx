@@ -27,11 +27,14 @@ import {
 } from "../../lib/commerceSuccess";
 import {
   buildCreatorPathFromSlug,
-  creatorMatchesSlug,
   humanizeCreatorSlug,
   slugifyCreatorName,
 } from "../../lib/creators";
-import { resolveCreatorIdentity } from "../../lib/creatorIdentity";
+import {
+  resolveCreatorIdentity,
+  resolveSeriesCreatorIdentity,
+  seriesMatchesCreatorSlug,
+} from "../../lib/creatorIdentity";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -56,11 +59,38 @@ function formatDateLabel(value) {
 }
 
 function getCatalogPriority(series) {
+  const updatedAtMs = Date.parse(series?.updatedAt || 0);
+  const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
+  const hasDescription = Boolean(String(series?.description || "").trim());
+  const completedBonus =
+    String(series?.status || "").toLowerCase() === "completed"
+      ? 12 * 60 * 60 * 1000
+      : 0;
+
   return (
-    Date.parse(series?.updatedAt || 0) +
-    ((Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) ? 1200 : 0) +
-    (String(series?.status || "").toLowerCase() === "completed" ? 700 : 0)
+    (Number.isNaN(updatedAtMs) ? 0 : updatedAtMs) +
+    Math.min(episodeCount, 200) * 60 * 60 * 1000 +
+    (hasDescription ? 3 * 60 * 60 * 1000 : 0) +
+    completedBonus
   );
+}
+
+function getCreatorShelfBadge(series) {
+  if (String(series?.status || "").toLowerCase() === "completed") {
+    return "Completed";
+  }
+
+  const updatedAtMs = Date.parse(series?.updatedAt || 0);
+  if (!Number.isNaN(updatedAtMs) && updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000) {
+    return "Updated";
+  }
+
+  const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
+  if (episodeCount > 0 && episodeCount <= 12) {
+    return "Start here";
+  }
+
+  return "";
 }
 
 function getTopGenres(items) {
@@ -83,7 +113,7 @@ function getTopGenres(items) {
 
 function buildCreatorItems(seriesList, creatorSlug) {
   return seriesList
-    .filter((item) => item?.id && creatorMatchesSlug(item?.author, creatorSlug))
+    .filter((item) => item?.id && seriesMatchesCreatorSlug(item, creatorSlug))
     .sort((left, right) => {
       const popularityDelta = getCatalogPriority(right) - getCatalogPriority(left);
       if (popularityDelta !== 0) {
@@ -113,8 +143,29 @@ function formatTitleCountLabel(count) {
   return `${count} title${count === 1 ? "" : "s"}`;
 }
 
+function formatCreatorCreditTypeLabel(creditType) {
+  if (creditType === "studio") {
+    return "Studio";
+  }
+
+  if (creditType === "team") {
+    return "Team";
+  }
+
+  return "Creator";
+}
+
 function getCreatorHeroCopy(creatorName, creditType, topGenres) {
   const genreLabel = topGenres.slice(0, 2).join(" and ");
+
+  if (creditType === "studio") {
+    return {
+      title: "More from this studio.",
+      description: genreLabel
+        ? `${genreLabel} stories from the same credited studio.`
+        : "Stories from the same credited studio.",
+    };
+  }
 
   if (creditType === "team") {
     return {
@@ -298,7 +349,7 @@ export default function CreatorPage({
   const routeCreatorName = useMemo(() => humanizeCreatorSlug(creatorSlug), [creatorSlug]);
   const creatorIdentity = useMemo(() => {
     if (creatorItems.length > 0) {
-      return resolveCreatorIdentity(creatorItems[0]?.author);
+      return resolveSeriesCreatorIdentity(creatorItems[0]);
     }
 
     return resolveCreatorIdentity(routeCreatorName);
@@ -307,8 +358,8 @@ export default function CreatorPage({
     ? creatorIdentity.displayName
     : routeCreatorName || creatorIdentity.displayName;
   const creatorSlugKey = useMemo(
-    () => slugifyCreatorName(creatorName),
-    [creatorName],
+    () => creatorIdentity.slug || creatorSlug || slugifyCreatorName(creatorName),
+    [creatorIdentity.slug, creatorName, creatorSlug],
   );
   const topGenres = useMemo(() => getTopGenres(creatorItems), [creatorItems]);
   const originSeriesId = routeAttribution?.sourceSeriesId || "";
@@ -416,11 +467,11 @@ export default function CreatorPage({
   const handleBrowseGenre = useCallback(() => {
     const primaryGenre = topGenres[0];
     if (!primaryGenre) {
-      router.push("/search?sort=popular");
+      router.push("/search?sort=latest");
       return;
     }
 
-    router.push(`/search?genre=${encodeURIComponent(primaryGenre)}&sort=popular`);
+    router.push(`/search?genre=${encodeURIComponent(primaryGenre)}&sort=latest`);
   }, [router, topGenres]);
 
   const handleReturn = useCallback(() => {
@@ -582,13 +633,13 @@ export default function CreatorPage({
           <EditorialHero
             appearance="light"
             accent="blue"
-            eyebrow={creatorIdentity.creditType === "team" ? "Team" : "Creator"}
+            eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
             title={`${creatorName} is not in the public catalog yet.`}
             description="Search the catalog or browse featured series for related titles."
             secondary=""
             stats={[
               {
-                label: creatorIdentity.creditType === "team" ? "Team" : "Creator",
+                label: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
                 value: creatorName,
                 hint: "Use the name to search the wider catalog.",
               },
@@ -671,7 +722,7 @@ export default function CreatorPage({
         <EditorialHero
           appearance="light"
           accent="blue"
-          eyebrow={creatorIdentity.creditType === "team" ? "Team" : "Creator"}
+          eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
           title={heroCopy.title}
           description={heroCopy.description}
           secondary={
@@ -724,7 +775,7 @@ export default function CreatorPage({
                     coverUrl={spotlightSeries.coverUrl}
                     label={spotlightSeries.title}
                     eyebrow={creatorName}
-                    badge={spotlightSeries.badge}
+                    badge={getCreatorShelfBadge(spotlightSeries)}
                     className="h-full w-full"
                   />
                 </div>

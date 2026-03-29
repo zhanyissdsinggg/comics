@@ -29,7 +29,7 @@ import {
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
 import { focusInteractiveTarget } from "../../lib/focusTarget";
-import { parallelRequests2 } from "../../lib/parallelRequests";
+import { mergeSeriesCommerceEpisodes } from "../../lib/seriesCommerce";
 import { buildSupportPath } from "../../lib/supportRouting";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import {
@@ -539,6 +539,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       const adultFlag = isAdultMode ? "1" : "0";
       const episodePath = `/api/episode?seriesId=${seriesId}&episodeId=${episodeId}`;
       const seriesPath = `/api/series/${seriesId}?adult=${adultFlag}`;
+      const commercePath = `/api/series/${seriesId}/commerce?adult=${adultFlag}`;
       const isCurrentRequest = () => requestRef.current === requestId;
       const applyFailure = (response, fallbackError) => {
         if (!isCurrentRequest()) {
@@ -575,19 +576,27 @@ export default function ReaderPage({ seriesId, episodeId }) {
         return true;
       };
 
-      const [episodeResponse, seriesResponse] = await parallelRequests2(
-        () => apiGet(episodePath, bustSeries ? { dedupeMs: 0 } : undefined),
-        () =>
-          apiGet(
-            seriesPath,
-            bustSeries
-              ? {
-                  bust: true,
-                  dedupeMs: 0,
-                }
-              : undefined
-          )
-      );
+      const [episodeResponse, seriesResponse, commerceResponse] = await Promise.all([
+        apiGet(episodePath, bustSeries ? { dedupeMs: 0 } : undefined),
+        apiGet(
+          seriesPath,
+          bustSeries
+            ? {
+                bust: true,
+                dedupeMs: 0,
+              }
+            : undefined,
+        ),
+        apiGet(
+          commercePath,
+          bustSeries
+            ? {
+                bust: true,
+                dedupeMs: 0,
+              }
+            : undefined,
+        ),
+      ]);
 
       if (!isCurrentRequest()) {
         return;
@@ -618,18 +627,41 @@ export default function ReaderPage({ seriesId, episodeId }) {
         return;
       }
 
-      setEpisodeData(episodeResponse.data?.episode);
-      setSeriesData(seriesResponse.data);
+      const mergedSeriesData = mergeSeriesCommerceEpisodes(
+        seriesResponse.data,
+        commerceResponse?.ok ? commerceResponse.data : null,
+      );
+      const currentEpisodeCommerce = Array.isArray(mergedSeriesData?.episodes)
+        ? mergedSeriesData.episodes.find((item) => item?.id === episodeId)
+        : null;
+
+      setEpisodeData({
+        ...(episodeResponse.data?.episode || {}),
+        ...(currentEpisodeCommerce
+          ? {
+              pricePts: currentEpisodeCommerce.pricePts,
+              ttfEligible: currentEpisodeCommerce.ttfEligible,
+              ttfReadyAt: currentEpisodeCommerce.ttfReadyAt,
+            }
+          : {}),
+      });
+      setSeriesData(mergedSeriesData);
       setGateStatus("OK");
       if (showLoading) {
         setLoading(false);
       }
 
       if (!bustSeries && seriesResponse.stale) {
-        apiGet(seriesPath, {
-          bust: true,
-          dedupeMs: 0,
-        }).then((freshResponse) => {
+        Promise.all([
+          apiGet(seriesPath, {
+            bust: true,
+            dedupeMs: 0,
+          }),
+          apiGet(commercePath, {
+            bust: true,
+            dedupeMs: 0,
+          }),
+        ]).then(([freshResponse, freshCommerceResponse]) => {
           if (!isCurrentRequest()) {
             return;
           }
@@ -651,7 +683,25 @@ export default function ReaderPage({ seriesId, episodeId }) {
             );
             return;
           }
-          setSeriesData(freshResponse.data);
+          const mergedFreshSeriesData = mergeSeriesCommerceEpisodes(
+            freshResponse.data,
+            freshCommerceResponse?.ok ? freshCommerceResponse.data : null,
+          );
+          const freshEpisodeCommerce = Array.isArray(mergedFreshSeriesData?.episodes)
+            ? mergedFreshSeriesData.episodes.find((item) => item?.id === episodeId)
+            : null;
+
+          setSeriesData(mergedFreshSeriesData);
+          setEpisodeData((current) => ({
+            ...(current || {}),
+            ...(freshEpisodeCommerce
+              ? {
+                  pricePts: freshEpisodeCommerce.pricePts,
+                  ttfEligible: freshEpisodeCommerce.ttfEligible,
+                  ttfReadyAt: freshEpisodeCommerce.ttfReadyAt,
+                }
+              : {}),
+          }));
           setGateStatus("OK");
         });
       }

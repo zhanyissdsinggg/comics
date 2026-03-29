@@ -1,14 +1,15 @@
-import type {
-  PublicCreatorCredit,
-  PublicCreatorIdentity,
+import {
+  CREATOR_FALLBACK_LABEL,
+  type PublicCreatorCredit,
+  type PublicCreatorIdentity,
 } from "../creators/creator-identity";
 
 export type SeriesAnalyticsSnapshot = {
   episodeCount: number;
   latestEpisodeId: string;
   latestEpisodeNumber?: number | null;
-  followers: number;
-  views: number;
+  followers?: number;
+  views?: number;
 };
 
 export type StorefrontEpisodeListItem = {
@@ -18,12 +19,6 @@ export type StorefrontEpisodeListItem = {
   title: string;
   releasedAt: Date | null;
   previewFreePages: number;
-};
-
-export type StorefrontEpisodeAccess = {
-  pricePts: number;
-  ttfEligible: boolean;
-  ttfReadyAt: Date | null;
 };
 
 export type StorefrontSeriesSummary = {
@@ -41,11 +36,8 @@ export type StorefrontSeriesSummary = {
   description: string;
   createdAt: Date | null;
   updatedAt: Date | null;
-  author: string;
   creator: PublicCreatorIdentity;
   creatorCredits: PublicCreatorCredit[];
-  followers: number;
-  views: number;
 };
 
 function extractEpisodeNumber(value: unknown): number {
@@ -122,13 +114,102 @@ export function mapStorefrontSeriesSummary(
     description: String(series.description || ""),
     createdAt: series.createdAt || null,
     updatedAt: series.updatedAt || null,
-    // Keep `author` only as a storefront compatibility alias.
-    // Public creator identity must continue to come from normalized credits.
-    author: identity.label,
     creator: identity,
     creatorCredits: credits,
-    // Followers/views remain real analytics snapshots, not legacy rating-style fallbacks.
-    followers: Math.max(0, Number(analytics.followers || 0)),
-    views: Math.max(0, Number(analytics.views || 0)),
+  };
+}
+
+function sanitizeCreatorIdentity(value: unknown): PublicCreatorIdentity {
+  if (!value || typeof value !== "object") {
+    return {
+      label: CREATOR_FALLBACK_LABEL,
+      type: "fallback",
+      isFallback: true,
+    };
+  }
+
+  const candidate = value as Partial<PublicCreatorIdentity>;
+  const label = String(candidate.label || "").trim() || CREATOR_FALLBACK_LABEL;
+  const type =
+    candidate.type === "person" ||
+    candidate.type === "team" ||
+    candidate.type === "studio" ||
+    candidate.type === "fallback"
+      ? candidate.type
+      : "fallback";
+
+  return {
+    label,
+    type,
+    slug: String(candidate.slug || "").trim() || undefined,
+    creatorId: String(candidate.creatorId || "").trim() || undefined,
+    isFallback: candidate.isFallback !== false ? type === "fallback" : false,
+  };
+}
+
+function sanitizeCreatorCredits(value: unknown): PublicCreatorCredit[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object") {
+        return null;
+      }
+
+      const candidate = item as Partial<PublicCreatorCredit>;
+      const name = String(candidate.name || "").trim();
+      if (!name) {
+        return null;
+      }
+
+      const type =
+        candidate.type === "person" ||
+        candidate.type === "team" ||
+        candidate.type === "studio"
+          ? candidate.type
+          : "person";
+
+      return {
+        creatorId: String(candidate.creatorId || "").trim(),
+        slug: String(candidate.slug || "").trim(),
+        name,
+        type,
+        role: String(candidate.role || "creator").trim() || "creator",
+        isPrimary: Boolean(candidate.isPrimary),
+        sortOrder: Number(candidate.sortOrder || 0),
+      } satisfies PublicCreatorCredit;
+    })
+    .filter((item): item is PublicCreatorCredit => Boolean(item));
+}
+
+export function sanitizeStorefrontSeriesSummary(
+  value: unknown,
+): StorefrontSeriesSummary {
+  const candidate =
+    value && typeof value === "object"
+      ? (value as Partial<StorefrontSeriesSummary>)
+      : {};
+
+  return {
+    id: String(candidate.id || "").trim(),
+    title: String(candidate.title || "").trim(),
+    type: String(candidate.type || "comic"),
+    adult: Boolean(candidate.adult),
+    coverTone: String(candidate.coverTone || ""),
+    coverUrl: String(candidate.coverUrl || ""),
+    latest: String(candidate.latest || "").trim(),
+    latestEpisodeId: String(candidate.latestEpisodeId || "").trim(),
+    episodeCount: Math.max(0, Number(candidate.episodeCount || 0)),
+    genres: Array.isArray(candidate.genres)
+      ? candidate.genres.map((item) => String(item || "").trim()).filter(Boolean)
+      : [],
+    status: String(candidate.status || "Ongoing"),
+    description: String(candidate.description || ""),
+    createdAt: candidate.createdAt ? new Date(candidate.createdAt) : null,
+    updatedAt: candidate.updatedAt ? new Date(candidate.updatedAt) : null,
+    creator: sanitizeCreatorIdentity(candidate.creator),
+    creatorCredits: sanitizeCreatorCredits(candidate.creatorCredits),
   };
 }

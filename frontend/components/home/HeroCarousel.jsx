@@ -13,6 +13,7 @@ import { useFollowStore } from "../../store/useFollowStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
 import { normalizeGenreList } from "../../lib/coverPresentation";
+import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { getReadingCadenceLabel, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getStorefrontCampaign } from "../../lib/storefrontCampaigns";
 import Cover from "../common/Cover";
@@ -64,6 +65,7 @@ export default function HeroCarousel({ items }) {
   const gradient = TONE_GRADIENTS[active?.coverTone] || TONE_GRADIENTS.default;
   const campaign = getStorefrontCampaign(active);
   const activeSeriesHref = activeSeriesId ? `/series/${encodeURIComponent(activeSeriesId)}` : "#";
+  const activeCreatorName = useMemo(() => resolveSeriesCreatorName(active), [active]);
   const activeGenres = useMemo(() => normalizeGenreList(active?.genres).slice(0, 3), [active?.genres]);
   const heroSignals = useMemo(
     () =>
@@ -234,7 +236,7 @@ export default function HeroCarousel({ items }) {
             ) : null}
 
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-neutral-200/85">
-              {active?.author ? <span>By {active.author}</span> : null}
+              {activeCreatorName ? <span>By {activeCreatorName}</span> : null}
               {activeGenres.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {activeGenres.map((genre) => (

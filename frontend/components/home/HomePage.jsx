@@ -36,6 +36,7 @@ import {
   buildHomeHeroItems,
   getHomeEditorialSnapshot,
 } from "../../lib/homeMerchandising";
+import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getSearchParam } from "../../lib/pageSearchParams";
 import { Button } from "@/components/ui/button";
@@ -338,23 +339,26 @@ function HomeContent({ initialSearchParams = {} }) {
       ])
         .filter((series) => String(series?.id || "").trim() !== String(heroSeries?.id || "").trim())
         .slice(0, 4)
-        .map((series) => ({
-          id: series.id,
-          title: series.title,
-          coverUrl: series.coverUrl,
-          coverTone: series.coverTone,
-          genres: Array.isArray(series?.genres) ? series.genres : [],
-          type: series?.type || "",
-          seriesType: series?.type || "",
-          status: series?.status || "",
-          author: series?.author || "",
-          adult: Boolean(series?.adult),
-          subtitle: "",
-          eyebrow: series.author || "",
-          statusLabel: "",
-          metaLabel: "",
-          badge: "",
-        })),
+        .map((series) => {
+          const creatorName = resolveSeriesCreatorName(series);
+          return {
+            id: series.id,
+            title: series.title,
+            coverUrl: series.coverUrl,
+            coverTone: series.coverTone,
+            genres: Array.isArray(series?.genres) ? series.genres : [],
+            type: series?.type || "",
+            seriesType: series?.type || "",
+            status: series?.status || "",
+            author: creatorName,
+            adult: Boolean(series?.adult),
+            subtitle: "",
+            eyebrow: creatorName,
+            statusLabel: "",
+            metaLabel: "",
+            badge: "",
+          };
+        }),
     [editorialSnapshot, heroSeries?.id],
   );
 
@@ -362,29 +366,32 @@ function HomeContent({ initialSearchParams = {} }) {
     () =>
       dedupeSeries([
         editorialSnapshot.freeStartPick,
-        ...editorialSnapshot.safeCatalog.filter(
-          (series) => Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes,
-        ),
+        ...(Array.isArray(editorialSnapshot.startHereSeries)
+          ? editorialSnapshot.startHereSeries
+          : []),
       ])
         .filter((series) => String(series?.id || "").trim() !== String(heroSeries?.id || "").trim())
         .slice(0, 4)
-        .map((series) => ({
-          id: series.id,
-          title: series.title,
-          genres: Array.isArray(series?.genres) ? series.genres : [],
-          type: series?.type || "",
-          seriesType: series?.type || "",
-          status: series?.status || "",
-          author: series?.author || "",
-          adult: Boolean(series?.adult),
-          subtitle: "",
-          eyebrow: series.author || "",
-          coverUrl: series.coverUrl,
-          coverTone: series.coverTone,
-          badge: "",
-          statusLabel: "",
-          metaLabel: "",
-        })),
+        .map((series) => {
+          const creatorName = resolveSeriesCreatorName(series);
+          return {
+            id: series.id,
+            title: series.title,
+            genres: Array.isArray(series?.genres) ? series.genres : [],
+            type: series?.type || "",
+            seriesType: series?.type || "",
+            status: series?.status || "",
+            author: creatorName,
+            adult: Boolean(series?.adult),
+            subtitle: "",
+            eyebrow: creatorName,
+            coverUrl: series.coverUrl,
+            coverTone: series.coverTone,
+            badge: "",
+            statusLabel: "",
+            metaLabel: "",
+          };
+        }),
     [editorialSnapshot, heroSeries?.id],
   );
 

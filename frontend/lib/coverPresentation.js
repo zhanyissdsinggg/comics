@@ -1,3 +1,5 @@
+import { resolveSeriesCreatorName } from "./creatorIdentity";
+
 const TONE_KEYS = {
   warm: "romance",
   cool: "sciFi",
@@ -303,7 +305,7 @@ export function getCoverCardMeta(item = {}) {
   const rawDetail =
     trimLabel(item?.statusLabel || item?.metaLabel, 48) ||
     trimLabel(item?.subtitle, 48) ||
-    trimLabel(item?.author, 48);
+    trimLabel(resolveSeriesCreatorName(item) || item?.author, 48);
 
   const normalizedGenreText = genres.join(" / ").toLowerCase();
   const detailText =

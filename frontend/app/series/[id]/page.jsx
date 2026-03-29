@@ -4,6 +4,7 @@ import { CouponProvider } from "../../../store/useCouponStore";
 import { EntitlementProvider } from "../../../store/useEntitlementStore";
 import { RewardsProvider } from "../../../store/useRewardsStore";
 import { createPageMetadata } from "../../../lib/seo";
+import { resolveSeriesCreatorName } from "../../../lib/creatorIdentity";
 import { siteConfig } from "../../../lib/siteConfig";
 import { buildSeriesStructuredData } from "../../../lib/structuredData";
 import { loadSeriesRoutePayload, loadSeriesSeoPayload } from "../../../lib/storefrontSeo";
@@ -24,16 +25,16 @@ export async function generateMetadata({ params }) {
     });
   }
 
-  const freeEpisodeCount = Number(series.freeEpisodeCount || 0);
   const statusLabel = String(series.status || "").trim() || "Ongoing";
-  const authorLabel = String(series.author || "").trim();
+  const authorLabel = resolveSeriesCreatorName(series);
   const genreLabel = Array.isArray(series.genres) && series.genres.length > 0 ? series.genres.slice(0, 2).join(" / ") : "";
+  const episodeCount = Number(series.episodeCount || 0);
   const baseDescription = String(series.description || "").trim();
   const generatedDescription = [
     `Read ${series.title} on ${siteConfig.siteName}.`,
     authorLabel ? `By ${authorLabel}.` : "",
     genreLabel ? `${genreLabel}.` : "",
-    freeEpisodeCount > 0 ? `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} available.` : "",
+    episodeCount > 0 ? `${episodeCount} episode${episodeCount === 1 ? "" : "s"} listed.` : "",
     `Status: ${statusLabel}.`,
   ]
     .filter(Boolean)

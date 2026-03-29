@@ -1,5 +1,5 @@
 import { absoluteUrl } from "../lib/siteConfig";
-import { normalizeCreatorName, slugifyCreatorName } from "../lib/creators";
+import { resolveSeriesCreatorIdentity } from "../lib/creatorIdentity";
 
 const STATIC_SITEMAP_PATHS = [
   "/",
@@ -82,12 +82,12 @@ async function loadCreatorPaths() {
     const creatorPaths = new Set();
 
     seriesList.forEach((series) => {
-      const author = normalizeCreatorName(series?.author);
-      if (!author) {
+      const creatorIdentity = resolveSeriesCreatorIdentity(series);
+      if (!creatorIdentity.hasPublicCredit || !creatorIdentity.href) {
         return;
       }
 
-      creatorPaths.add(`/creators/${encodeURIComponent(slugifyCreatorName(author))}`);
+      creatorPaths.add(creatorIdentity.href);
     });
 
     return Array.from(creatorPaths);

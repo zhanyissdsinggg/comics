@@ -3,12 +3,8 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
-import {
-  buildCreatorHref,
-  getCreatorDisplayName,
-  normalizeCreatorName,
-  slugifyCreatorName,
-} from "../../lib/creators";
+import { getCreatorDisplayName } from "../../lib/creators";
+import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { trackEvent } from "../../lib/trackEvent";
 
 function getSeriesId(item) {
@@ -27,15 +23,15 @@ function collectCreators(items, maxCreators) {
   const creatorMap = new Map();
 
   (Array.isArray(items) ? items : []).forEach((item) => {
-    const normalizedName = normalizeCreatorName(item?.author);
-    if (!normalizedName) {
+    const creatorIdentity = resolveSeriesCreatorIdentity(item);
+    if (!creatorIdentity.hasPublicCredit || !creatorIdentity.slug) {
       return;
     }
 
-    const slug = slugifyCreatorName(normalizedName);
-    const current = creatorMap.get(slug) || {
-      slug,
-      name: getCreatorDisplayName(normalizedName),
+    const current = creatorMap.get(creatorIdentity.slug) || {
+      slug: creatorIdentity.slug,
+      href: creatorIdentity.href,
+      name: getCreatorDisplayName(creatorIdentity.displayName),
       titles: 0,
       sourceSeriesId: getSeriesId(item),
     };
@@ -45,7 +41,7 @@ function collectCreators(items, maxCreators) {
       current.sourceSeriesId = getSeriesId(item);
     }
 
-    creatorMap.set(slug, current);
+    creatorMap.set(creatorIdentity.slug, current);
   });
 
   return Array.from(creatorMap.values())
@@ -94,7 +90,7 @@ export default function CreatorShelfLinks({
       : "rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 sm:px-5";
 
   const handleClick = (creator) => {
-    const targetPath = buildCreatorHref(creator.name);
+    const targetPath = creator.href || "/creators";
 
     trackEvent("creator_chip_click", {
       entryPoint,

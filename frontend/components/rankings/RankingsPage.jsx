@@ -13,6 +13,7 @@ import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
@@ -56,16 +57,43 @@ function normalizeStatus(value) {
   return String(value || "").trim().toLowerCase();
 }
 
+function getEpisodeCount(series) {
+  return Math.max(0, Number(series?.episodeCount || 0));
+}
+
+function isRecentlyUpdated(series, days = 21) {
+  const updatedAt = toTimestamp(series?.updatedAt);
+  if (!updatedAt) {
+    return false;
+  }
+
+  return updatedAt >= Date.now() - days * 24 * 60 * 60 * 1000;
+}
+
 function hasReaderFriendlyStart(series) {
-  return Number(series?.freeEpisodeCount || 0) > 0 || Boolean(series?.hasFreeEpisodes);
+  const episodeCount = getEpisodeCount(series);
+  return episodeCount > 0 && episodeCount <= 24;
 }
 
 function getFeaturedScore(series) {
   return (
     toTimestamp(series?.updatedAt) +
-    (hasReaderFriendlyStart(series) ? 1200 : 0) +
-    (normalizeStatus(series?.status) === "completed" ? 700 : 0)
+    (hasReaderFriendlyStart(series) ? 12 * 24 * 60 * 60 * 1000 : 0) +
+    (normalizeStatus(series?.status) === "completed" ? 10 * 24 * 60 * 60 * 1000 : 0)
   );
+}
+
+function getSeriesBadge(series) {
+  if (normalizeStatus(series?.status) === "completed") {
+    return "Completed";
+  }
+  if (isRecentlyUpdated(series, 14)) {
+    return "Updated";
+  }
+  if (hasReaderFriendlyStart(series)) {
+    return "Start here";
+  }
+  return "";
 }
 
 function normalizeView(initialSearchParams = {}) {
@@ -89,10 +117,11 @@ function normalizeView(initialSearchParams = {}) {
 }
 
 function getSeriesMeta(series) {
+  const creatorName = resolveSeriesCreatorName(series);
   return [
     String(series?.type || "").trim(),
     String(series?.status || "").trim(),
-    String(series?.author || "").trim(),
+    creatorName,
   ].filter(Boolean);
 }
 
@@ -369,7 +398,7 @@ export default function RankingsPage({
                       coverUrl={leadEntry.coverUrl}
                       label={leadEntry.title}
                       eyebrow={activeView.label}
-                      badge={leadEntry.badge}
+                      badge={getSeriesBadge(leadEntry)}
                       genres={leadEntry.genres}
                       seriesType={leadEntry.type}
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] lg:mx-0"
@@ -419,8 +448,8 @@ export default function RankingsPage({
                         tone={series.coverTone}
                         coverUrl={series.coverUrl}
                         label={series.title}
-                        eyebrow={series.author || activeView.label}
-                        badge={series.badge}
+                        eyebrow={resolveSeriesCreatorName(series) || activeView.label}
+                        badge={getSeriesBadge(series)}
                         genres={series.genres}
                         seriesType={series.type}
                         className="mt-4 aspect-[3/4] w-full rounded-[20px]"
@@ -459,8 +488,8 @@ export default function RankingsPage({
                           tone={series.coverTone}
                           coverUrl={series.coverUrl}
                           label={series.title}
-                          eyebrow={series.author || activeView.label}
-                          badge={series.badge}
+                          eyebrow={resolveSeriesCreatorName(series) || activeView.label}
+                          badge={getSeriesBadge(series)}
                           genres={series.genres}
                           seriesType={series.type}
                           className="aspect-[3/4] w-[4.5rem] flex-shrink-0 rounded-[16px]"

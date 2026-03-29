@@ -50,13 +50,12 @@ export default function EpisodeList({
       subscriptionUsage: wallet?.subscriptionUsage,
       coupons,
       nowMs,
-      fallbackPrice: series?.pricing?.episodePrice ?? 0,
+      fallbackPrice: 0,
     });
   }, [
     coupons,
     episodes,
     nowMs,
-    series?.pricing?.episodePrice,
     unlockedEpisodeIds,
     wallet?.subscription,
     wallet?.subscriptionUsage,
@@ -202,7 +201,7 @@ export default function EpisodeList({
               eligible: ttfEligible,
               readyAt: episodeAccess?.ttfReadyAt || null,
             };
-            const pricePts = episodeAccess?.pricePts ?? series?.access?.episodePrice ?? series?.pricing?.episodePrice ?? 0;
+            const pricePts = episodeAccess?.pricePts ?? 0;
             const nowMsForRow = !unlocked && ttfEligible ? nowMs : null;
 
             return (

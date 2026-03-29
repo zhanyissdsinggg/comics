@@ -57,8 +57,13 @@ export function humanizeCreatorSlug(slug) {
     return "";
   }
 
-  const normalized = normalizedSlug
-    .replace(/-/g, " ")
+  const slugSegments = normalizedSlug.split("-").filter(Boolean);
+  const readableSegments =
+    slugSegments.length > 1 && /^[a-f0-9]{6,12}$/i.test(slugSegments[slugSegments.length - 1])
+      ? slugSegments.slice(0, -1)
+      : slugSegments;
+  const normalized = readableSegments
+    .join(" ")
     .trim();
 
   return normalized.replace(/\b([a-z])/g, (match) => match.toUpperCase());

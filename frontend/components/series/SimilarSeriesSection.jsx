@@ -5,14 +5,24 @@ import { useSimilarRecommendations } from "../../hooks/useAIRecommendations";
 import Skeleton from "../common/Skeleton";
 import Cover from "../common/Cover";
 import SurfacePanel from "../common/SurfacePanel";
-import { normalizeCoverBadge } from "../../lib/coverPresentation";
+import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 
 function getSeriesBadge(item) {
   if (String(item?.status || "").toLowerCase() === "completed") {
     return "Completed";
   }
 
-  return normalizeCoverBadge(item?.badge);
+  const updatedAtMs = Date.parse(item?.updatedAt || 0);
+  if (!Number.isNaN(updatedAtMs) && updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000) {
+    return "Updated";
+  }
+
+  const episodeCount = Math.max(0, Number(item?.episodeCount || 0));
+  if (episodeCount > 0 && episodeCount <= 12) {
+    return "Start here";
+  }
+
+  return "";
 }
 
 export default function SimilarSeriesSection({ seriesId }) {
@@ -54,41 +64,45 @@ export default function SimilarSeriesSection({ seriesId }) {
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-        {similarSeries.map((item) => (
-          <Link
-            key={item.id}
-            href={`/series/${encodeURIComponent(item.id)}`}
-            className="group overflow-hidden rounded-[26px] border border-black/6 bg-white text-left shadow-[0_16px_36px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
-            aria-label={`Open ${item.title}`}
-          >
-            <Cover
-              tone={item.coverTone}
-              coverUrl={item.coverUrl}
-              label={item.title}
-              eyebrow={item.author || item.subtitle || "Series"}
-              badge={getSeriesBadge(item)}
-              className="aspect-[3/4] w-full"
-            />
-            <div className="space-y-2 p-4">
-              <h3 className="line-clamp-2 text-sm font-semibold text-slate-950">{item.title}</h3>
-              <p className="line-clamp-1 text-xs text-slate-500">
-                {item.author || item.subtitle || "Series"}
-              </p>
-              {Array.isArray(item.genres) && item.genres.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {item.genres.slice(0, 2).map((genre) => (
-                    <span
-                      key={`${item.id}-${genre}`}
-                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-[11px] text-slate-500"
-                    >
-                      {genre}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          </Link>
-        ))}
+        {similarSeries.map((item) => {
+          const creatorName = resolveSeriesCreatorName(item);
+
+          return (
+            <Link
+              key={item.id}
+              href={`/series/${encodeURIComponent(item.id)}`}
+              className="group overflow-hidden rounded-[26px] border border-black/6 bg-white text-left shadow-[0_16px_36px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
+              aria-label={`Open ${item.title}`}
+            >
+              <Cover
+                tone={item.coverTone}
+                coverUrl={item.coverUrl}
+                label={item.title}
+                eyebrow={creatorName || item.subtitle || "Series"}
+                badge={getSeriesBadge(item)}
+                className="aspect-[3/4] w-full"
+              />
+              <div className="space-y-2 p-4">
+                <h3 className="line-clamp-2 text-sm font-semibold text-slate-950">{item.title}</h3>
+                <p className="line-clamp-1 text-xs text-slate-500">
+                  {creatorName || item.subtitle || "Series"}
+                </p>
+                {Array.isArray(item.genres) && item.genres.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {item.genres.slice(0, 2).map((genre) => (
+                      <span
+                        key={`${item.id}-${genre}`}
+                        className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-[11px] text-slate-500"
+                      >
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </SurfacePanel>
   );

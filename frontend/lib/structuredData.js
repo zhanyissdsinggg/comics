@@ -1,5 +1,6 @@
 import { absoluteUrl, siteConfig } from "./siteConfig";
-import { buildCreatorHref, normalizeCreatorName } from "./creators";
+import { normalizeCreatorName } from "./creators";
+import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
 import { getSeriesFaqItems } from "./storefrontFaq";
 
 function normalizeText(value) {
@@ -52,22 +53,6 @@ function inferCreatorEntityType(name) {
   }
 
   return "Person";
-}
-
-function buildAggregateRating(entity) {
-  const ratingValue = toNumber(entity?.rating);
-  const ratingCount = Math.max(0, Math.floor(toNumber(entity?.ratingCount)));
-
-  if (ratingValue <= 0 || ratingCount <= 0) {
-    return undefined;
-  }
-
-  return {
-    "@type": "AggregateRating",
-    ratingValue,
-    ratingCount,
-    reviewCount: ratingCount,
-  };
 }
 
 function buildPublisherEntity() {
@@ -160,8 +145,11 @@ function buildSeriesEntity(series, creatorEntityId) {
   }
 
   const seriesPath = `/series/${encodeURIComponent(series.id)}`;
-  const creatorName = normalizeCreatorName(series?.author);
-  const creatorPath = creatorName ? buildCreatorHref(creatorName) : null;
+  const creatorIdentity = resolveSeriesCreatorIdentity(series);
+  const creatorName = creatorIdentity.hasPublicCredit
+    ? normalizeCreatorName(creatorIdentity.displayName)
+    : "";
+  const creatorPath = creatorIdentity.hasPublicCredit ? creatorIdentity.href : null;
   const hasFreeAccess =
     toNumber(series?.freeEpisodeCount) > 0 ||
     Boolean(series?.hasFreeEpisodes) ||
@@ -185,7 +173,6 @@ function buildSeriesEntity(series, creatorEntityId) {
     inLanguage: "en-US",
     dateCreated: toIsoDate(series?.createdAt),
     dateModified: toIsoDate(series?.updatedAt),
-    aggregateRating: buildAggregateRating(series),
     numberOfItems: Number.isFinite(Number(series?.episodeCount))
       ? Math.max(0, Math.floor(Number(series.episodeCount)))
       : undefined,

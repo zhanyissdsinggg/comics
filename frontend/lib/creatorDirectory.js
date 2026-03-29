@@ -1,10 +1,8 @@
 import {
   buildCreatorPathFromSlug,
   getCreatorDisplayName,
-  normalizeCreatorName,
-  slugifyCreatorName,
 } from "./creators";
-import { inferCreatorCreditType } from "./creatorIdentity";
+import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -12,15 +10,26 @@ function toNumber(value) {
 }
 
 function getCatalogPriority(series) {
+  const updatedAtMs = Date.parse(series?.updatedAt || 0);
+  const episodeCount = Math.max(0, toNumber(series?.episodeCount));
+  const hasDescription = Boolean(String(series?.description || "").trim());
+  const completedBonus =
+    String(series?.status || "").toLowerCase() === "completed"
+      ? 12 * 60 * 60 * 1000
+      : 0;
+
   return (
-    Date.parse(series?.updatedAt || 0) +
-    ((Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) ? 1200 : 0) +
-    (String(series?.status || "").toLowerCase() === "completed" ? 700 : 0)
+    (Number.isNaN(updatedAtMs) ? 0 : updatedAtMs) +
+    Math.min(episodeCount, 200) * 60 * 60 * 1000 +
+    (hasDescription ? 3 * 60 * 60 * 1000 : 0) +
+    completedBonus
   );
 }
 
 function normalizeSeriesList(items) {
-  return (Array.isArray(items) ? items : []).filter((item) => item?.id && normalizeCreatorName(item?.author));
+  return (Array.isArray(items) ? items : []).filter(
+    (item) => item?.id && resolveSeriesCreatorIdentity(item).hasPublicCredit,
+  );
 }
 
 function normalizeIsoDate(value) {
@@ -36,21 +45,15 @@ function normalizeIsoDate(value) {
   return new Date(parsed).toISOString();
 }
 
-function getCreatorCreditType(name) {
-  const creditType = inferCreatorCreditType(name);
-  return creditType === "fallback" ? "creator" : creditType;
-}
-
-function buildCreatorBucket(name, slug) {
+function buildCreatorBucket(identity) {
   return {
-    slug,
-    name: getCreatorDisplayName(name),
-    path: buildCreatorPathFromSlug(slug),
-    creditType: getCreatorCreditType(name),
+    slug: identity.slug,
+    name: getCreatorDisplayName(identity.displayName),
+    path: identity.href || buildCreatorPathFromSlug(identity.slug),
+    creditType: identity.creditType,
     titleCount: 0,
     completedCount: 0,
     ongoingCount: 0,
-    freeStartCount: 0,
     readerProof: 0,
     latestUpdatedAt: null,
     topGenres: [],
@@ -80,25 +83,25 @@ export function buildCreatorDirectory(seriesList) {
   const creatorMap = new Map();
 
   safeSeries.forEach((series) => {
-    const author = normalizeCreatorName(series?.author);
-    if (!author) {
+    const identity = resolveSeriesCreatorIdentity(series);
+    if (!identity.hasPublicCredit || !identity.slug) {
       return;
     }
 
-    const slug = slugifyCreatorName(author);
-    const current = creatorMap.get(slug) || buildCreatorBucket(author, slug);
+    const slug = identity.slug;
+    const current = creatorMap.get(slug) || buildCreatorBucket(identity);
     current.series.push(series);
     current.titleCount += 1;
-    current.readerProof += toNumber(series?.views);
+    current.readerProof += Math.max(
+      1,
+      toNumber(series?.episodeCount),
+      Array.isArray(series?.creatorCredits) ? series.creatorCredits.length : 0,
+    );
 
     if (String(series?.status || "").toLowerCase() === "completed") {
       current.completedCount += 1;
     } else {
       current.ongoingCount += 1;
-    }
-
-    if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
-      current.freeStartCount += 1;
     }
 
     const updatedAt = normalizeIsoDate(series?.updatedAt);
@@ -161,9 +164,11 @@ export function getCreatorDirectoryStats(creators) {
     (summary, creator) => {
       summary.titles += Number(creator?.titleCount || 0);
       summary.completedTitles += Number(creator?.completedCount || 0);
-      summary.freeStarts += Number(creator?.freeStartCount || 0);
       summary.readerProof += Number(creator?.readerProof || 0);
       if (creator?.creditType === "team") {
+        summary.teams += 1;
+      }
+      if (creator?.creditType === "studio") {
         summary.teams += 1;
       }
       return summary;
@@ -171,7 +176,6 @@ export function getCreatorDirectoryStats(creators) {
     {
       titles: 0,
       completedTitles: 0,
-      freeStarts: 0,
       readerProof: 0,
       teams: 0,
     },
@@ -182,7 +186,6 @@ export function getCreatorDirectoryStats(creators) {
     teams: totals.teams,
     titles: totals.titles,
     completedTitles: totals.completedTitles,
-    freeStarts: totals.freeStarts,
     readerProof: totals.readerProof,
   };
 }

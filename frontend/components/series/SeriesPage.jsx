@@ -32,8 +32,9 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
-import { buildCreatorHref, slugifyCreatorName } from "../../lib/creators";
+import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
+import { mergeSeriesCommerceAccess } from "../../lib/seriesCommerce";
 
 function EpisodeListSkeleton() {
   return (
@@ -187,6 +188,10 @@ export default function SeriesPage({
     () => (Array.isArray(data?.episodes) ? data.episodes : []),
     [data?.episodes]
   );
+  const creatorPresentation = useMemo(
+    () => resolveSeriesCreatorIdentity(series),
+    [series],
+  );
   const entitlement = bySeriesId[seriesId] || { seriesId, unlockedEpisodeIds: [] };
   const firstEpisodeId = useMemo(
     () => getFirstEpisodeId(episodes),
@@ -233,7 +238,8 @@ export default function SeriesPage({
       setError(null);
 
       const adultFlag = isAdultMode ? "1" : "0";
-      const path = `/api/series/${seriesId}?adult=${adultFlag}`;
+      const detailPath = `/api/series/${seriesId}?adult=${adultFlag}`;
+      const commercePath = `/api/series/${seriesId}/commerce?adult=${adultFlag}`;
       const isCurrentRequest = () => requestRef.current === requestId;
       const applyFailure = (response) => {
         if (!isCurrentRequest()) {
@@ -279,7 +285,10 @@ export default function SeriesPage({
         return true;
       };
 
-      const response = await apiGet(path, bust ? { bust: true, dedupeMs: 0 } : undefined);
+      const [response, commerceResponse] = await Promise.all([
+        apiGet(detailPath, bust ? { bust: true, dedupeMs: 0 } : undefined),
+        apiGet(commercePath, bust ? { bust: true, dedupeMs: 0 } : undefined),
+      ]);
       if (!isCurrentRequest()) {
         return;
       }
@@ -301,17 +310,28 @@ export default function SeriesPage({
         return;
       }
 
-      setData(response.data);
+      setData(
+        mergeSeriesCommerceAccess(
+          response.data,
+          commerceResponse?.ok ? commerceResponse.data : null,
+        ),
+      );
       setGateStatus("OK");
       if (showLoading) {
         setLoading(false);
       }
 
       if (!bust && response.stale) {
-        apiGet(path, {
-          bust: true,
-          dedupeMs: 0,
-        }).then((freshResponse) => {
+        Promise.all([
+          apiGet(detailPath, {
+            bust: true,
+            dedupeMs: 0,
+          }),
+          apiGet(commercePath, {
+            bust: true,
+            dedupeMs: 0,
+          }),
+        ]).then(([freshResponse, freshCommerceResponse]) => {
           if (!isCurrentRequest()) {
             return;
           }
@@ -330,7 +350,12 @@ export default function SeriesPage({
             });
             return;
           }
-          setData(freshResponse.data);
+          setData(
+            mergeSeriesCommerceAccess(
+              freshResponse.data,
+              freshCommerceResponse?.ok ? freshCommerceResponse.data : null,
+            ),
+          );
           setGateStatus("OK");
         });
       }
@@ -548,20 +573,18 @@ export default function SeriesPage({
     );
   }, [router, seriesId]);
   const creatorHref = useMemo(() => {
-    const creatorName = String(series?.author || "").trim();
-    if (!creatorName) {
+    if (!creatorPresentation.hasPublicCredit || !creatorPresentation.href) {
       return "";
     }
 
-    const targetPath = buildCreatorHref(creatorName);
-    return buildPathWithAttribution(targetPath, {
+    return buildPathWithAttribution(creatorPresentation.href, {
       entryPoint: "SERIES_CREATOR",
-      campaignId: slugifyCreatorName(creatorName),
+      campaignId: creatorPresentation.slug || "",
       sourcePath: `/series/${seriesId}`,
       sourceSeriesId: seriesId,
       returnTo: `/series/${seriesId}`,
     });
-  }, [series?.author, seriesId]);
+  }, [creatorPresentation.hasPublicCredit, creatorPresentation.href, creatorPresentation.slug, seriesId]);
   const latestEpisode = useMemo(() => {
     if (!Array.isArray(episodes) || episodes.length === 0) {
       return null;
@@ -888,7 +911,7 @@ export default function SeriesPage({
             <CommentsSection
               seriesId={seriesId}
               seriesTitle={series.title}
-              author={series.author}
+              author={creatorPresentation.hasPublicCredit ? creatorPresentation.displayName : ""}
               status={series.status}
               genres={series.genres}
               isFollowing={isFollowing}

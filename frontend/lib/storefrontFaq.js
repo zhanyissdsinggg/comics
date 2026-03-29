@@ -1,7 +1,7 @@
 import { siteConfig } from "./siteConfig";
 import {
   CREATOR_FALLBACK_DETAIL,
-  resolveCreatorIdentity,
+  resolveSeriesCreatorIdentity,
 } from "./creatorIdentity";
 
 function toNumber(value) {
@@ -94,7 +94,7 @@ export function getSeriesFaqItems({ series, episodes }) {
 
   const seriesTitle = normalizeText(series.title);
   const statusLabel = normalizeText(series.status) || "Ongoing";
-  const creatorIdentity = resolveCreatorIdentity(series.author);
+  const creatorIdentity = resolveSeriesCreatorIdentity(series);
   const episodeCount = getEpisodeCount(series, episodes);
   const freeEpisodeCount = toNumber(series?.freeEpisodeCount);
   const maxPreviewPages = getMaxPreviewPages(episodes);

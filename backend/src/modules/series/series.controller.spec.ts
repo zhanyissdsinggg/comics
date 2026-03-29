@@ -4,12 +4,13 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 
 describe("SeriesController", () => {
   let controller: SeriesController;
-  let seriesService: { detail: jest.Mock; list: jest.Mock };
+  let seriesService: { detail: jest.Mock; detailCommerce: jest.Mock; list: jest.Mock };
   let prisma: Record<string, unknown>;
 
   beforeEach(() => {
     seriesService = {
       detail: jest.fn(),
+      detailCommerce: jest.fn(),
       list: jest.fn(),
     };
     prisma = {};
@@ -20,7 +21,7 @@ describe("SeriesController", () => {
     );
   });
 
-  it("skips subscription lookup for guest requests", async () => {
+  it("loads public detail without subscription context", async () => {
     const expected = { series: { adult: false }, episodes: [] };
     seriesService.detail.mockResolvedValue(expected);
 
@@ -28,7 +29,7 @@ describe("SeriesController", () => {
     const res = { status: jest.fn() } as any;
 
     await expect(controller.detail("series-001", "0", req, res)).resolves.toEqual(expected);
-    expect(seriesService.detail).toHaveBeenCalledWith("series-001", null);
+    expect(seriesService.detail).toHaveBeenCalledWith("series-001");
   });
 
   it("returns not found when the service returns null", async () => {

@@ -5,7 +5,7 @@ import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
-import { resolveCreatorIdentity } from "../../lib/creatorIdentity";
+import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 
 function capitalize(value) {
   if (!value) {
@@ -31,7 +31,7 @@ function formatSeriesKind(value) {
 }
 
 function getCreatorPresentation(series) {
-  return resolveCreatorIdentity(series?.author);
+  return resolveSeriesCreatorIdentity(series);
 }
 
 function formatUpdateLabel(value) {

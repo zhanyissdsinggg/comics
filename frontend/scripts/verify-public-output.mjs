@@ -104,7 +104,9 @@ function includesText(haystack, needle) {
 }
 
 function hasPublicCreatorCredit(series) {
-  return Boolean(String(series?.author || "").trim());
+  const label = String(series?.creator?.label || "").trim();
+  const isFallback = Boolean(series?.creator?.isFallback);
+  return Boolean(label && !isFallback && label !== CREATOR_FALLBACK_LABEL);
 }
 
 async function terminateChild(child) {
@@ -192,7 +194,7 @@ function buildRouteChecks(seriesCatalog) {
       route: `/series/${seriesId}`,
       titleIncludes: String(series.title || "Series"),
       h1: String(series.title || "Series"),
-      required: [hasPublicCreatorCredit(series) ? String(series.author).trim() : CREATOR_FALLBACK_LABEL],
+      required: [hasPublicCreatorCredit(series) ? String(series?.creator?.label || "").trim() : CREATOR_FALLBACK_LABEL],
       requiredAny: [["Read Chapter 1", "Start Reading", "Continue Reading"]],
       forbidden: hasPublicCreatorCredit(series)
         ? [...LEGACY_FORBIDDEN, CREATOR_FALLBACK_LABEL, CREATOR_FALLBACK_DETAIL]

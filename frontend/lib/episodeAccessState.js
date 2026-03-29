@@ -492,7 +492,7 @@ export function getSeriesPrimaryReadAction({
     subscriptionUsage,
     coupons,
     nowMs,
-    fallbackPrice: series?.access?.episodePrice ?? series?.pricing?.episodePrice ?? 0,
+    fallbackPrice: 0,
   });
 
   if (state.kind === "unlocked") {

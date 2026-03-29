@@ -16,6 +16,7 @@ import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
+import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 
 const PAGE_CONFIG = {
@@ -86,13 +87,31 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function isRecentlyUpdated(series, days = 21) {
+  const updatedAt = toTimestamp(series?.updatedAt);
+  if (!updatedAt) {
+    return false;
+  }
+
+  return updatedAt >= Date.now() - days * 24 * 60 * 60 * 1000;
+}
+
+function getEpisodeCount(series) {
+  return Math.max(0, toNumber(series?.episodeCount));
+}
+
 function getEditorialScore(series) {
   const updatedAtScore = toTimestamp(series?.updatedAt);
-  const freeStartScore =
-    Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes ? 1500 : 0;
-  const completedScore = normalizeStatus(series?.status) === "completed" ? 900 : 0;
+  const startHereScore =
+    getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24 ? 12 * 24 * 60 * 60 * 1000 : 0;
+  const completedScore =
+    normalizeStatus(series?.status) === "completed" ? 10 * 24 * 60 * 60 * 1000 : 0;
+  const coverScore = series?.coverUrl ? 3 * 24 * 60 * 60 * 1000 : 0;
+  const descriptionScore = String(series?.description || "").trim()
+    ? 2 * 24 * 60 * 60 * 1000
+    : 0;
 
-  return updatedAtScore + freeStartScore + completedScore;
+  return updatedAtScore + startHereScore + completedScore + coverScore + descriptionScore;
 }
 
 function toTimestamp(value) {
@@ -109,32 +128,31 @@ function getSeriesBadge(series) {
   if (String(series?.status || "").toLowerCase() === "completed") {
     return "Completed";
   }
-  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
-    return "Free";
+  if (isRecentlyUpdated(series, 14)) {
+    return "Updated";
   }
-  const badgeTokens = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
-    .filter(Boolean)
-    .map((badge) => String(badge).trim().toUpperCase());
-  if (badgeTokens.includes("NEW")) {
-    return "New";
+  if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
+    return "Start here";
   }
   return "";
 }
 
 function getSeriesSubtitle(series) {
+  const creatorName = resolveSeriesCreatorName(series);
   if (Array.isArray(series?.genres) && series.genres.length > 0) {
     return series.genres.slice(0, 2).join(" / ");
   }
   if (String(series?.status || "").toLowerCase() === "completed") {
     return "Completed series";
   }
-  if (Number(series?.freeEpisodeCount || 0) > 0) {
-    return `${Number(series.freeEpisodeCount).toLocaleString()} free chapter${Number(series.freeEpisodeCount) === 1 ? "" : "s"}`;
+  if (getEpisodeCount(series) > 0) {
+    return `${getEpisodeCount(series).toLocaleString()} episode${getEpisodeCount(series) === 1 ? "" : "s"}`;
   }
-  return series?.author || "Updated series";
+  return creatorName || "Updated series";
 }
 
 function mapSeriesCardItem(series) {
+  const creatorName = resolveSeriesCreatorName(series);
   return {
     id: series.id,
     title: series.title,
@@ -144,9 +162,7 @@ function mapSeriesCardItem(series) {
     seriesType: series?.type || "",
     status: series?.status || "",
     adult: Boolean(series?.adult),
-    freeEpisodeCount: Number(series?.freeEpisodeCount || 0),
-    hasFreeEpisodes: Boolean(series?.hasFreeEpisodes || Number(series?.freeEpisodeCount || 0) > 0),
-    author: series?.author || "",
+    author: creatorName,
     coverUrl: series.coverUrl,
     coverTone: series.coverTone,
     badge: getSeriesBadge(series),
@@ -271,12 +287,13 @@ export default function SeriesPage({
   }, [selectedGenre, series, sortBy, status]);
 
   const discoveryShelves = useMemo(() => {
-    const freeStart = [...series]
-      .filter((item) => Number(item?.freeEpisodeCount || 0) > 0 || item?.hasFreeEpisodes)
+    const startHere = [...series]
+      .filter((item) => getEpisodeCount(item) > 0)
       .sort((left, right) => {
-        const freeDelta = Number(right?.freeEpisodeCount || 0) - Number(left?.freeEpisodeCount || 0);
-        if (freeDelta !== 0) {
-          return freeDelta;
+        const leftEpisodes = getEpisodeCount(left);
+        const rightEpisodes = getEpisodeCount(right);
+        if (leftEpisodes !== rightEpisodes) {
+          return leftEpisodes - rightEpisodes;
         }
         return getEditorialScore(right) - getEditorialScore(left);
       })
@@ -312,7 +329,7 @@ export default function SeriesPage({
         description: "Reader-friendly stories to begin with.",
         ctaLabel: "Browse Series",
         href: "/rankings?view=start-here",
-        items: freeStart,
+        items: startHere,
       },
       {
         id: "featured",
@@ -370,11 +387,20 @@ export default function SeriesPage({
   const entrySpotlight = useMemo(() => {
     const byFeatured = [...series].sort((left, right) => getEditorialScore(right) - getEditorialScore(left));
     const byLatest = [...series].sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt));
-    const freeStart = byFeatured.find((item) => Number(item?.freeEpisodeCount || 0) > 0 || item?.hasFreeEpisodes) || null;
+    const startHere = [...series]
+      .filter((item) => getEpisodeCount(item) > 0)
+      .sort((left, right) => {
+        const leftEpisodes = getEpisodeCount(left);
+        const rightEpisodes = getEpisodeCount(right);
+        if (leftEpisodes !== rightEpisodes) {
+          return leftEpisodes - rightEpisodes;
+        }
+        return getEditorialScore(right) - getEditorialScore(left);
+      })[0] || null;
     const completed = byFeatured.find((item) => normalizeStatus(item?.status) === "completed") || null;
     return type === "comic"
-      ? freeStart || byFeatured[0] || byLatest[0] || completed || null
-      : byFeatured[0] || byLatest[0] || completed || freeStart || null;
+      ? startHere || byFeatured[0] || byLatest[0] || completed || null
+      : byFeatured[0] || byLatest[0] || completed || startHere || null;
   }, [series, type]);
   const catalogGridClassName =
     filteredAndSortedSeries.length <= 8

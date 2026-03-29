@@ -137,13 +137,22 @@ describe("SearchService", () => {
         page: 1,
         pageSize: 12,
       }),
-    ).resolves.toEqual({
-      results: [{ id: "cached-series" }],
-      total: 1,
-      page: 1,
-      pageSize: 12,
-      appliedSort: "latest",
-    });
+    ).resolves.toEqual(
+      expect.objectContaining({
+        results: [
+          expect.objectContaining({
+            id: "cached-series",
+            creator: expect.objectContaining({
+              label: "Creator details coming soon",
+            }),
+          }),
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 12,
+        appliedSort: "latest",
+      }),
+    );
     expect(prisma.$queryRaw).not.toHaveBeenCalled();
   });
 

@@ -1,10 +1,12 @@
 import { cache } from "react";
 import { buildCreatorDirectory } from "./creatorDirectory";
 import {
-  creatorMatchesSlug,
-  getCreatorDisplayName,
   humanizeCreatorSlug,
 } from "./creators";
+import {
+  resolveSeriesCreatorName,
+  seriesMatchesCreatorSlug,
+} from "./creatorIdentity";
 
 export const SEO_REVALIDATE_SECONDS = 300;
 
@@ -48,11 +50,10 @@ function toNumber(value) {
 }
 
 function getCreatorSeriesScore(series) {
-  return Math.max(
-    toNumber(series?.followers),
-    toNumber(series?.views),
-    toNumber(series?.ratingCount),
-    Math.round(toNumber(series?.rating) * 100),
+  return (
+    Math.max(0, toNumber(series?.episodeCount)) * 100 +
+    (String(series?.status || "").toLowerCase() === "completed" ? 60 : 0) +
+    (new Date(series?.updatedAt || 0).getTime() || 0)
   );
 }
 
@@ -237,13 +238,11 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
     const payload = await response.json();
     const seriesList = Array.isArray(payload?.series) ? payload.series : [];
     const creatorItems = sortCreatorSeries(
-      seriesList.filter((item) => creatorMatchesSlug(item?.author, creatorSlug)),
+      seriesList.filter((item) => seriesMatchesCreatorSlug(item, creatorSlug)),
     );
 
     return {
-      creatorName: creatorItems[0]?.author
-        ? getCreatorDisplayName(creatorItems[0].author)
-        : fallbackName,
+      creatorName: resolveSeriesCreatorName(creatorItems[0]) || fallbackName,
       items: creatorItems,
     };
   } catch {

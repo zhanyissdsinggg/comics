@@ -147,16 +147,33 @@ function summarizeSearchDescription(series) {
     return description.length > 96 ? `${description.slice(0, 93).trimEnd()}...` : description;
   }
 
-  if (Number(series?.freeEpisodeCount || 0) > 0 || series?.hasFreeEpisodes) {
-    const freeCount = Number(series?.freeEpisodeCount || 0);
-    return `${freeCount} free chapter${freeCount === 1 ? "" : "s"} before points kick in.`;
-  }
-
   if (String(series?.status || "").toLowerCase() === "completed") {
     return "Completed series ready for a full-session read.";
   }
 
-  return "Open the title page to see chapters and unlock options.";
+  if (Number(series?.episodeCount || 0) > 0) {
+    const episodeCount = Number(series.episodeCount || 0);
+    return `${episodeCount} episode${episodeCount === 1 ? "" : "s"} currently listed.`;
+  }
+
+  return "Open the title page to see the latest chapters and creator credits.";
+}
+
+function getSearchSeriesBadge(series) {
+  if (String(series?.status || "").toLowerCase() === "completed") {
+    return "Completed";
+  }
+
+  const updatedAt = Date.parse(series?.updatedAt || "");
+  if (!Number.isNaN(updatedAt) && updatedAt >= Date.now() - 14 * 24 * 60 * 60 * 1000) {
+    return "Updated";
+  }
+
+  if (Number(series?.episodeCount || 0) > 0 && Number(series?.episodeCount || 0) <= 12) {
+    return "Start here";
+  }
+
+  return "";
 }
 
 export default function SearchPage() {
@@ -654,29 +671,29 @@ export default function SearchPage() {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
     const leadHotValue = leadHotKeyword?.value || leadHotLabel;
-    const freeStartCount = Number(freeStartPick?.freeEpisodeCount || 0);
+    const startHereEpisodeCount = Number(freeStartPick?.episodeCount || 0);
 
     return [
       freeStartPick
         ? {
             id: "free-unlock-slot",
-            eyebrow: "Free start",
-            title: `Read free with ${freeStartPick.title}.`,
+            eyebrow: "Start here",
+            title: `Start with ${freeStartPick.title}.`,
             description:
-              freeStartCount > 0
-                ? `${freeStartPick.title} opens with ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}.`
-                : `${freeStartPick.title} is easy to try first.`,
+              startHereEpisodeCount > 0
+                ? `${freeStartPick.title} already has ${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} listed, so it is easy to size up quickly.`
+                : `${freeStartPick.title} is a clear place to begin.`,
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_PATH_FREE_START", "search_path_free_start"),
             accentClass: lightFeatureAccentClass,
           }
         : {
             id: "free-unlock",
-            eyebrow: "Free start",
-            title: "Read free first.",
-            description: "Try an opening chapter before you unlock more.",
-            ctaLabel: "Read Free",
-            onClick: () => router.push("/rankings?type=ttf&window=all"),
+            eyebrow: "Start here",
+            title: "Open a strong first pick.",
+            description: "When search feels thin, start with an editorially easy place to begin.",
+            ctaLabel: "Browse Start Here",
+            onClick: () => router.push("/rankings?view=start-here"),
             accentClass: lightFeatureAccentClass,
           },
       completedPick
@@ -788,7 +805,7 @@ export default function SearchPage() {
     const sortLabel = SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance";
     const hasDirectMatch = Boolean(query) && results.length > 0;
     const hasEditorialLead = Boolean(leadSearchResult) && (!query || results.length === 0);
-    const freeStartCount = Number(freeStartPick?.freeEpisodeCount || 0);
+    const startHereEpisodeCount = Number(freeStartPick?.episodeCount || 0);
 
     return [
       leadSearchResult && (hasDirectMatch || hasEditorialLead)
@@ -851,29 +868,29 @@ export default function SearchPage() {
       freeStartPick
         ? {
             id: "free-start-desk-slot",
-            eyebrow: "Free start",
-            title: `Read free with ${freeStartPick.title}.`,
+            eyebrow: "Start here",
+            title: `Start with ${freeStartPick.title}.`,
             description:
-              freeStartCount > 0
-                ? `${freeStartPick.title} opens with ${freeStartCount} free episode${freeStartCount === 1 ? "" : "s"}.`
+              startHereEpisodeCount > 0
+                ? `${freeStartPick.title} already has ${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} listed, so it is easy to judge from the first click.`
                 : `${freeStartPick.title} is a good place to start.`,
-            signalLabel: "Free eps",
-            signalValue: freeStartCount > 0 ? String(freeStartCount) : "Live",
-            signalHint: "Open before you unlock more",
+            signalLabel: "Episodes",
+            signalValue: startHereEpisodeCount > 0 ? String(startHereEpisodeCount) : "Live",
+            signalHint: "A lighter commitment than restarting your search from scratch",
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_EVENT_FREE_START", "search_event_free_start"),
             accentClass: lightFeatureAccentClass,
           }
         : {
             id: "free-start-desk",
-            eyebrow: "Free start",
-            title: "Read free first.",
-            description: "Openings and previews keep discovery light.",
-            signalLabel: "Chart",
-            signalValue: "TTF",
-            signalHint: "Free starts across the catalog",
-            ctaLabel: "Read Free",
-            onClick: () => router.push("/rankings?type=ttf&window=all"),
+            eyebrow: "Start here",
+            title: "Try an editorial first pick.",
+            description: "A shorter, cleaner place to begin can be more useful than another empty result list.",
+            signalLabel: "Shelf",
+            signalValue: "Start Here",
+            signalHint: "Editorial picks with a cleaner first step",
+            ctaLabel: "Browse Start Here",
+            onClick: () => router.push("/rankings?view=start-here"),
             accentClass: lightFeatureAccentClass,
           },
       completedPick
@@ -1205,10 +1222,10 @@ export default function SearchPage() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => router.push("/rankings?type=popular&window=week")}
+                  onClick={() => router.push("/rankings?view=featured")}
                   className={secondaryButtonClass}
                 >
-                  View Top Series
+                  Browse Series
                 </button>
               )}
               {completedPick ? (
@@ -1229,7 +1246,7 @@ export default function SearchPage() {
                         type: "",
                         genre: "",
                         status: "Completed",
-                        sort: "popular",
+                        sort: "latest",
                       },
                       { resetPage: true },
                     )
@@ -1250,10 +1267,10 @@ export default function SearchPage() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
+                  onClick={() => router.push("/rankings?view=start-here")}
                   className={accentButtonClass}
                 >
-                  Read Free
+                  Browse Start Here
                 </button>
               )}
             </div>
@@ -1290,7 +1307,7 @@ export default function SearchPage() {
                         coverUrl={series.coverUrl}
                         label={series.title}
                         eyebrow=""
-                        badge={series.badge}
+                        badge={getSearchSeriesBadge(series)}
                         genres={series.genres}
                         seriesType={series.type}
                         className="aspect-[3/4] w-full"
