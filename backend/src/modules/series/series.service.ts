@@ -1,10 +1,29 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
-import { PrismaService } from "../../common/prisma/prisma.service";
+import { Injectable } from "@nestjs/common";
 import { CacheService } from "../../common/cache/cache.service";
-import { Cacheable, CacheEvict } from "../../common/cache/cache.decorator";
-import { isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
-import { enrichSeriesWithStorefrontFields } from "../../common/utils/series-storefront-fields";
+import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
+import { mapEpisodeListItem, mapStorefrontSeriesSummary, type SeriesAnalyticsSnapshot } from "../../common/mappers/storefront-series.mapper";
+import { PrismaService } from "../../common/prisma/prisma.service";
+import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
+
+type SeriesListRow = {
+  id: string;
+  title: string;
+  type: string;
+  description: string | null;
+  coverUrl: string | null;
+  coverTone: string | null;
+  adult: boolean;
+  isPublished: boolean;
+  genres: string[];
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type SeriesDetailRow = SeriesListRow & {
+  latestEpisodeId: string | null;
+  ttfIntervalHours: number;
+};
 
 type SeriesEpisodeRow = {
   id: string;
@@ -18,421 +37,212 @@ type SeriesEpisodeRow = {
   previewFreePages: number;
 };
 
+type StorefrontSeriesSummary = ReturnType<typeof mapStorefrontSeriesSummary>;
+
+type CachedSeriesDetail = {
+  series: StorefrontSeriesSummary;
+  episodes: SeriesEpisodeRow[];
+  ttfIntervalHours: number;
+};
+
+const SERIES_LIST_TTL_SECONDS = 300;
+const SERIES_DETAIL_TTL_SECONDS = 180;
+
 @Injectable()
 export class SeriesService {
-  private readonly logger = new Logger(SeriesService.name);
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly cacheService: CacheService,
+    private readonly creatorCreditsService: CreatorCreditsService,
   ) {}
 
-  private extractEpisodeNumber(value: unknown) {
-    const match = String(value || "").trim().match(/(\d+)$/);
-    const episodeNumber = Number(match?.[1] || 0);
-    if (!Number.isFinite(episodeNumber) || episodeNumber <= 0) {
-      return 0;
-    }
-    return Math.floor(episodeNumber);
-  }
-
-  private formatLatestEpisodeLabel(value: unknown) {
-    const episodeNumber = this.extractEpisodeNumber(value);
-    return episodeNumber > 0 ? `Ep ${episodeNumber}` : "";
-  }
-
-  private getEpisodeStats(episodes: SeriesEpisodeRow[] = []) {
-    if (!Array.isArray(episodes) || episodes.length === 0) {
-      return {
-        episodeCount: 0,
-        latestEpisodeId: "",
-        latest: "",
-      };
-    }
-
-    const sorted = [...episodes].sort((left, right) => Number(right?.number || 0) - Number(left?.number || 0));
-    const latestEpisode = sorted[0] || null;
-
-    return {
-      episodeCount: episodes.length,
-      latestEpisodeId: String(latestEpisode?.id || "").trim(),
-      latest: this.formatLatestEpisodeLabel(latestEpisode?.number || latestEpisode?.id),
-    };
-  }
-
-  private toSeriesView(series: any, episodes: SeriesEpisodeRow[] = []) {
-    const derivedStats = this.getEpisodeStats(episodes);
-    const latestEpisodeId = derivedStats.latestEpisodeId || String(series.latestEpisodeId || "");
-
-    return {
-      id: series.id,
-      title: series.title,
-      type: series.type,
-      adult: series.adult,
-      coverTone: series.coverTone || "",
-      coverUrl: series.coverUrl || "",
-      badge: series.badge || "",
-      badges: Array.isArray(series.badges) && series.badges.length
-        ? series.badges
-        : series.badge
-          ? [series.badge]
-          : [],
-      latest: derivedStats.latest || this.formatLatestEpisodeLabel(latestEpisodeId),
-      latestEpisodeId,
-      episodeCount: derivedStats.episodeCount,
-      genres: Array.isArray(series.genres) ? series.genres : [],
-      status: series.status || "Ongoing",
-      rating: series.rating || 0,
-      ratingCount: series.ratingCount || 0,
-      description: series.description || "",
-      createdAt: series.createdAt || null,
-      updatedAt: series.updatedAt || null,
-      author: typeof series.author === "string" ? series.author : "",
-      followers: Number(series.followers || 0),
-      views: Number(series.views || 0),
-      pricing: {
-        currency: "POINTS",
-        episodePrice: series.episodePrice || 0,
-        discount: 0,
-      },
-      ttf: {
-        enabled: Boolean(series.ttfEnabled),
-        intervalHours: series.ttfIntervalHours || 24,
-      },
-    };
-  }
-
-  private applyTtfAcceleration(episode: any, series: any, subscription: any) {
-    if (!episode.ttfEligible || !episode.ttfReadyAt) {
+  private applyTtfAcceleration(
+    episode: SeriesEpisodeRow,
+    series: { ttfIntervalHours: number },
+    subscription?: { perks?: { ttfMultiplier?: number } } | null,
+  ): SeriesEpisodeRow {
+    if (!subscription || !episode.ttfEligible || !episode.ttfReadyAt || !episode.releasedAt) {
       return episode;
     }
-    const multiplier = subscription?.perks?.ttfMultiplier;
-    if (!multiplier || multiplier >= 1) {
+
+    const multiplier = Number(subscription.perks?.ttfMultiplier || 1);
+    if (!Number.isFinite(multiplier) || multiplier >= 1 || multiplier <= 0) {
       return episode;
     }
-    const releasedAtMs = new Date(episode.releasedAt).getTime();
-    if (Number.isNaN(releasedAtMs)) {
-      return episode;
-    }
-    const intervalHours = series?.ttfIntervalHours || 24;
-    const baseReadyAtMs = releasedAtMs + intervalHours * 60 * 60 * 1000;
+
+    const releasedAtMs = episode.releasedAt.getTime();
+    const intervalHours = Math.max(1, Number(series.ttfIntervalHours || 24));
     const acceleratedReadyAtMs = releasedAtMs + intervalHours * multiplier * 60 * 60 * 1000;
-    const originalReadyAtMs = new Date(episode.ttfReadyAt).getTime();
-    const targetReadyAtMs = Number.isNaN(originalReadyAtMs)
-      ? Math.min(baseReadyAtMs, acceleratedReadyAtMs)
-      : Math.min(originalReadyAtMs, acceleratedReadyAtMs);
+    const existingReadyAtMs = episode.ttfReadyAt.getTime();
+
     return {
       ...episode,
-      ttfReadyAt: new Date(targetReadyAtMs),
+      ttfReadyAt: new Date(Math.min(existingReadyAtMs, acceleratedReadyAtMs)),
     };
   }
 
-  private isSchemaDriftError(error: unknown): boolean {
-    if (!error || typeof error !== "object") {
-      return false;
-    }
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2021" || error.code === "P2022") {
-        return true;
-      }
-    }
-
-    const message = String((error as { message?: string }).message || "");
-    return (
-      message.includes("previewFreePages") ||
-      message.includes("does not exist") ||
-      message.includes("Unknown column")
+  private buildSeriesSummary(
+    row: SeriesListRow,
+    analytics: SeriesAnalyticsSnapshot,
+    credits: Awaited<ReturnType<CreatorCreditsService["getCreditsForSeries"]>>,
+    legacyAuthor?: string,
+  ) {
+    const identity = this.creatorCreditsService.buildIdentity(credits, legacyAuthor);
+    return mapStorefrontSeriesSummary(
+      row,
+      {
+        ...analytics,
+        latestEpisodeId: analytics.latestEpisodeId || String((row as Partial<SeriesDetailRow>).latestEpisodeId || ""),
+      },
+      identity,
+      credits,
     );
   }
 
-  private normalizeEpisode(episode: Partial<SeriesEpisodeRow> & Record<string, any>): SeriesEpisodeRow {
-    return {
-      id: String(episode.id || ""),
-      seriesId: String(episode.seriesId || ""),
-      number: Number(episode.number || 0),
-      title: String(episode.title || ""),
-      releasedAt: episode.releasedAt ? new Date(episode.releasedAt) : null,
-      pricePts: Number(episode.pricePts || 0),
-      ttfEligible: Boolean(episode.ttfEligible),
-      ttfReadyAt: episode.ttfReadyAt ? new Date(episode.ttfReadyAt) : null,
-      previewFreePages: Number(episode.previewFreePages || 0),
-    };
+  async list(adult: boolean | null) {
+    const cacheKey = `series:list:${adult === null ? "all" : adult ? "adult" : "standard"}`;
+    const cached = await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const where =
+      adult === null
+        ? { isPublished: true }
+        : {
+            isPublished: true,
+            adult,
+          };
+
+    const rows = await this.prisma.series.findMany({
+      where,
+      orderBy: { title: "asc" },
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        description: true,
+        coverUrl: true,
+        coverTone: true,
+        adult: true,
+        isPublished: true,
+        genres: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    const seriesIds = rows.map((row) => row.id);
+    const [analyticsMap, creditsMap, authorMap] = await Promise.all([
+      loadSeriesAnalytics(this.prisma, seriesIds),
+      this.creatorCreditsService.getCreditsMap(seriesIds),
+      this.creatorCreditsService.getLegacyAuthorMap(seriesIds),
+    ]);
+
+    const series = rows.map((row) =>
+      this.buildSeriesSummary(
+        row,
+        analyticsMap.get(row.id) || {
+          episodeCount: 0,
+          latestEpisodeId: "",
+          latestEpisodeNumber: null,
+          followers: 0,
+          views: 0,
+        },
+        creditsMap.get(row.id) || [],
+        authorMap.get(row.id),
+      ),
+    );
+
+    await this.cacheService.set(cacheKey, series, SERIES_LIST_TTL_SECONDS);
+    return series;
   }
 
-  private toStringArray(value: unknown): string[] {
-    if (Array.isArray(value)) {
-      return value.map((item) => String(item || "").trim()).filter(Boolean);
-    }
-    if (typeof value !== "string") {
-      return [];
-    }
-    const raw = value.trim();
-    if (!raw) {
-      return [];
-    }
-    if (raw.startsWith("[") && raw.endsWith("]")) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          return parsed.map((item) => String(item || "").trim()).filter(Boolean);
-        }
-      } catch {
-        return [];
-      }
-    }
-    if (raw.startsWith("{") && raw.endsWith("}")) {
-      return raw
-        .slice(1, -1)
-        .split(",")
-        .map((item) => item.replace(/^"+|"+$/g, "").trim())
-        .filter(Boolean);
-    }
-    return [raw];
-  }
+  async detail(seriesId: string, subscription?: { perks?: { ttfMultiplier?: number } } | null) {
+    const cacheKey = `series:detail:${seriesId}`;
+    let cached = await this.cacheService.get<CachedSeriesDetail>(cacheKey);
 
-  private asNumber(value: unknown, fallback = 0): number {
-    const num = Number(value);
-    return Number.isFinite(num) ? num : fallback;
-  }
+    if (!cached) {
+      const row = await this.prisma.series.findUnique({
+        where: { id: seriesId },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          description: true,
+          coverUrl: true,
+          coverTone: true,
+          adult: true,
+          isPublished: true,
+          latestEpisodeId: true,
+          genres: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+          ttfIntervalHours: true,
+        },
+      });
 
-  private normalizeSeriesRecord(series: Record<string, any>) {
-    return {
-      id: String(series.id || ""),
-      title: String(series.title || ""),
-      author: String(series.author || ""),
-      type: String(series.type || "comic"),
-      adult: Boolean(series.adult),
-      isPublished: series.isPublished !== false,
-      coverTone: String(series.coverTone || ""),
-      coverUrl: String(series.coverUrl || ""),
-      badge: String(series.badge || ""),
-      badges: this.toStringArray(series.badges),
-      latestEpisodeId: String(series.latestEpisodeId || ""),
-      genres: this.toStringArray(series.genres),
-      status: String(series.status || "Ongoing"),
-      rating: this.asNumber(series.rating, 0),
-      ratingCount: Math.max(0, Math.floor(this.asNumber(series.ratingCount, 0))),
-      description: String(series.description || ""),
-      createdAt: series.createdAt ? new Date(series.createdAt) : null,
-      updatedAt: series.updatedAt ? new Date(series.updatedAt) : null,
-      episodePrice: Math.max(0, Math.floor(this.asNumber(series.episodePrice, 0))),
-      ttfEnabled: Boolean(series.ttfEnabled),
-      ttfIntervalHours: Math.max(1, Math.floor(this.asNumber(series.ttfIntervalHours, 24))),
-    };
-  }
-
-  private async fetchSeriesRecordWithFallback(seriesId: string) {
-    try {
-      return await this.prisma.series.findUnique({ where: { id: seriesId } });
-    } catch (error) {
-      if (!this.isSchemaDriftError(error)) {
-        throw error;
-      }
-      this.logger.warn(
-        `Series full query failed for ${seriesId}, switching to compatibility mode.`,
-      );
-    }
-
-    try {
-      const columns = await this.prisma.$queryRawUnsafe<Array<{ column_name: string }>>(
-        `SELECT column_name
-         FROM information_schema.columns
-         WHERE table_schema = 'public' AND table_name = 'series'`,
-      );
-
-      const available = new Set(
-        columns
-          .map((item) => String(item?.column_name || "").trim())
-          .filter(Boolean),
-      );
-      const candidates = [
-        "id",
-        "title",
-        "author",
-        "type",
-        "adult",
-        "isPublished",
-        "coverTone",
-        "coverUrl",
-        "badge",
-        "badges",
-        "latestEpisodeId",
-        "genres",
-        "status",
-        "rating",
-        "ratingCount",
-        "description",
-        "createdAt",
-        "updatedAt",
-        "episodePrice",
-        "ttfEnabled",
-        "ttfIntervalHours",
-      ];
-      const selected = candidates.filter((name) => available.has(name));
-      if (!selected.includes("id")) {
-        selected.unshift("id");
-      }
-      const selectClause = selected
-        .map((column) => `"${column.replace(/"/g, "\"\"")}"`)
-        .join(", ");
-      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, any>>>(
-        `SELECT ${selectClause} FROM "series" WHERE "id" = $1 LIMIT 1`,
-        seriesId,
-      );
-      if (!rows.length) {
+      if (!row || row.isPublished === false) {
         return null;
       }
-      return this.normalizeSeriesRecord(rows[0]);
-    } catch (error) {
-      if (!this.isSchemaDriftError(error)) {
-        throw error;
-      }
-      this.logger.warn(
-        `Series compatibility query failed for ${seriesId}, falling back to not found.`,
-      );
-      return null;
-    }
-  }
 
-  private inferEpisodeCount(series: any): number {
-    const latestRaw = String(series?.latestEpisodeId || "");
-    const match = latestRaw.match(/(\d+)$/);
-    const count = Number(match?.[1] || 0);
-    if (!Number.isFinite(count) || count <= 0) {
-      return 0;
-    }
-    return Math.min(count, 300);
-  }
+      const [episodes, analyticsMap, credits, authorMap] = await Promise.all([
+        this.prisma.episode.findMany({
+          where: {
+            seriesId,
+            isDeleted: false,
+          },
+          orderBy: { number: "asc" },
+          select: {
+            id: true,
+            seriesId: true,
+            number: true,
+            title: true,
+            releasedAt: true,
+            pricePts: true,
+            ttfEligible: true,
+            ttfReadyAt: true,
+            previewFreePages: true,
+          },
+        }),
+        loadSeriesAnalytics(this.prisma, [seriesId]),
+        this.creatorCreditsService.getCreditsForSeries(seriesId),
+        this.creatorCreditsService.getLegacyAuthorMap([seriesId]),
+      ]);
 
-  private buildFallbackEpisodes(series: any): SeriesEpisodeRow[] {
-    const count = this.inferEpisodeCount(series);
-    if (count <= 0) {
-      return [];
-    }
-
-    return Array.from({ length: count }, (_, idx) => {
-      const number = idx + 1;
-      return {
-        id: `${series.id}e${number}`,
-        seriesId: series.id,
-        number,
-        title: `Episode ${number}`,
-        releasedAt: null,
-        pricePts: Number(series?.episodePrice || 0),
-        ttfEligible: false,
-        ttfReadyAt: null,
-        previewFreePages: 0,
+      const analytics = analyticsMap.get(seriesId) || {
+        episodeCount: episodes.length,
+        latestEpisodeId: String(row.latestEpisodeId || ""),
+        latestEpisodeNumber: null,
+        followers: 0,
+        views: 0,
       };
-    });
-  }
 
-  private async fetchEpisodesWithFallback(seriesId: string): Promise<SeriesEpisodeRow[] | null> {
-    try {
-      const rows = await this.prisma.episode.findMany({
-        where: { seriesId },
-        select: {
-          id: true,
-          seriesId: true,
-          number: true,
-          title: true,
-          releasedAt: true,
-          pricePts: true,
-          ttfEligible: true,
-          ttfReadyAt: true,
-          previewFreePages: true,
-        },
-        orderBy: { number: "asc" },
-      });
-      return rows.map((episode) => this.normalizeEpisode(episode));
-    } catch (error) {
-      if (!this.isSchemaDriftError(error)) {
-        throw error;
-      }
-      this.logger.warn(
-        `Episode full query failed for series ${seriesId}, switching to compatibility mode.`,
-      );
+      const summary = this.buildSeriesSummary(row, analytics, credits, authorMap.get(seriesId));
+      cached = {
+        series: summary,
+        episodes,
+        ttfIntervalHours: Math.max(1, Number(row.ttfIntervalHours || 24)),
+      };
+      await this.cacheService.set(cacheKey, cached, SERIES_DETAIL_TTL_SECONDS);
     }
 
-    try {
-      const rows = await this.prisma.episode.findMany({
-        where: { seriesId },
-        select: {
-          id: true,
-          seriesId: true,
-          number: true,
-          title: true,
-        },
-        orderBy: { number: "asc" },
-      });
-      return rows.map((episode) => this.normalizeEpisode(episode));
-    } catch (error) {
-      if (!this.isSchemaDriftError(error)) {
-        throw error;
-      }
-      this.logger.warn(
-        `Episode compatibility query failed for series ${seriesId}, using synthetic episodes.`,
-      );
-      return null;
-    }
-  }
+    const episodes = subscription
+      ? cached.episodes.map((episode) =>
+          this.applyTtfAcceleration(episode, { ttfIntervalHours: cached!.ttfIntervalHours }, subscription),
+        )
+      : cached.episodes;
 
-  private async fetchSeriesWithEpisodes(seriesId: string) {
-    const series = await this.fetchSeriesRecordWithFallback(seriesId);
-    if (!series || series.isPublished === false) {
-      return null;
-    }
-
-    const episodes = await this.fetchEpisodesWithFallback(seriesId);
     return {
-      ...series,
-      episodes: episodes && episodes.length > 0 ? episodes : this.buildFallbackEpisodes(series),
+      series: cached.series,
+      episodes: episodes.map((episode) => ({
+        ...mapEpisodeListItem(episode),
+        pricePts: episode.pricePts,
+        ttfEligible: episode.ttfEligible,
+        ttfReadyAt: episode.ttfReadyAt,
+      })),
     };
-  }
-
-  @Cacheable("series:list", 3600)
-  async list(adult: boolean | null) {
-    const where = adult === null ? { isPublished: true } : { adult, isPublished: true };
-
-    try {
-      const list = await this.prisma.series.findMany({
-        where,
-        orderBy: { title: "asc" },
-      });
-      return enrichSeriesWithStorefrontFields(
-        this.prisma,
-        list.map((item) => this.toSeriesView(item)),
-      );
-    } catch (error) {
-      if (!this.isSchemaDriftError(error) && !isSeriesVisibilitySchemaDrift(error)) {
-        throw error;
-      }
-      this.logger.warn("Series list query hit schema drift, switching to compatibility mode.");
-      const fallbackList = await querySeriesVisibilityCompat(this.prisma, {
-        adult,
-        onlyPublished: true,
-        orderBy: [{ field: "title", direction: "asc" }],
-      });
-      return enrichSeriesWithStorefrontFields(
-        this.prisma,
-        fallbackList.map((item) => this.toSeriesView(item)),
-      );
-    }
-  }
-
-  async detail(seriesId: string, subscription?: any) {
-    const data = await this.fetchSeriesWithEpisodes(seriesId);
-
-    if (!data || data.isPublished === false) {
-      return null;
-    }
-
-    const accelerated = subscription
-      ? data.episodes.map((ep) => this.applyTtfAcceleration(ep, data, subscription))
-      : data.episodes;
-
-    const [series] = await enrichSeriesWithStorefrontFields(this.prisma, [this.toSeriesView(data, accelerated)]);
-
-    return { series: series || this.toSeriesView(data, accelerated), episodes: accelerated };
   }
 }

@@ -14,26 +14,15 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { randomBytes, randomInt } from "crypto";
+import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { OAuth2Client } from "google-auth-library";
 import { EmailService } from "../email/email.service";
+import { getAppConfig } from "../../common/config/app-config";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { buildCookieOptions } from "../../common/utils/cookies";
 import { getRedisClient } from "../../common/redis/client";
 import { logger } from "../../common/logger/winston.init";
-
-type BcryptLike = {
-  compare: (plainText: string, hashedText: string) => Promise<boolean>;
-  hash: (plainText: string, saltRounds: number) => Promise<string>;
-};
-
-const bcrypt: BcryptLike = (() => {
-  try {
-    return require("bcrypt");
-  } catch {
-    return require("bcryptjs");
-  }
-})();
 
 const GOOGLE_OAUTH_CLIENT = new OAuth2Client();
 const SESSION_COOKIE_NAME = "mn_session";
@@ -294,7 +283,7 @@ export class AuthController {
   }
 
   private shouldExposeDebugTokens(): boolean {
-    return process.env.AUTH_DEBUG_TOKENS === "1" && process.env.NODE_ENV !== "production";
+    return getAppConfig().auth.debugTokensEnabled;
   }
 
   private buildEphemeralRequestResult(token: string): EphemeralRequestResult {
@@ -507,8 +496,7 @@ export class AuthController {
       throw new BadRequestException("Missing Google token");
     }
 
-    const googleClientId =
-      process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+    const googleClientId = getAppConfig().auth.googleClientId;
     if (!googleClientId) {
       throw new InternalServerErrorException("Google login is not configured");
     }

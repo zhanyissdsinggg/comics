@@ -1,25 +1,24 @@
-import * as Sentry from '@sentry/node';
-import { logger } from '../logger/winston.init';
+import * as Sentry from "@sentry/node";
+import { getAppConfig } from "../config/app-config";
+import { logger } from "../logger/winston.init";
 
 export function initSentry() {
-  const dsn = process.env.SENTRY_DSN;
+  const appConfig = getAppConfig();
+  const dsn = appConfig.observability.sentryDsn;
 
   if (!dsn) {
-    logger.warn('SENTRY_DSN未配置，Sentry错误追踪已禁用');
+    logger.warn("SENTRY_DSN is not configured; Sentry is disabled.");
     return;
   }
 
-  // 老王说：初始化Sentry，用于错误追踪和性能监控
   Sentry.init({
     dsn,
-    environment: process.env.NODE_ENV || 'development',
-    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    environment: appConfig.environment,
+    tracesSampleRate: appConfig.environment === "production" ? 0.1 : 1.0,
     beforeSend(event) {
-      // 老王说：过滤掉不必要的错误，避免Sentry爆炸
       if (event.exception) {
-        const error = event.exception.values?.[0]?.value || '';
-        // 忽略404和某些无关紧要的错误
-        if (error.includes('404') || error.includes('ECONNREFUSED')) {
+        const error = event.exception.values?.[0]?.value || "";
+        if (error.includes("404") || error.includes("ECONNREFUSED")) {
           return null;
         }
       }
@@ -27,5 +26,5 @@ export function initSentry() {
     },
   });
 
-  logger.info('Sentry初始化成功');
+  logger.info("Sentry initialized.");
 }

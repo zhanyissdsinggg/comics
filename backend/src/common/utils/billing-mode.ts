@@ -1,4 +1,5 @@
 import { buildError, ERROR_CODES } from "./errors";
+import { getBillingModeConfig } from "../config/app-config";
 
 export const BILLING_MODES = {
   DEMO: "demo",
@@ -15,15 +16,7 @@ export type PublicBillingAvailability = {
 };
 
 export function getBillingMode(): BillingMode {
-  const explicitMode = String(process.env.BILLING_MODE || "")
-    .trim()
-    .toLowerCase();
-
-  if (explicitMode === BILLING_MODES.DEMO || explicitMode === BILLING_MODES.PROVIDER) {
-    return explicitMode;
-  }
-
-  return process.env.NODE_ENV === "production" ? BILLING_MODES.PROVIDER : BILLING_MODES.DEMO;
+  return getBillingModeConfig();
 }
 
 export function isDemoBillingEnabled(): boolean {

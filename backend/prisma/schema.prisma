@@ -1,5 +1,5 @@
 // This is your Prisma schema file
-// 老王说：完整的数据库schema
+// 鑰佺帇璇达細瀹屾暣鐨勬暟鎹簱schema
 
 generator client {
   provider = "prisma-client-js"
@@ -10,6 +10,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum CreatorType {
+  PERSON
+  TEAM
+  STUDIO
+}
+
+enum CreditRole {
+  CREATOR
+  WRITER
+  ARTIST
+  AUTHOR
+  ADAPTER
+  STUDIO
+  TEAM
+}
+
 model User {
   id             String         @id @default(cuid())
   email          String         @unique
@@ -18,7 +34,7 @@ model User {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  // 老王新增：所有反向关系
+  // 鑰佺帇鏂板锛氭墍鏈夊弽鍚戝叧绯?
   wallet         Wallet?        @relation("UserWallet")
   sessions       Session[]      @relation("UserSessions")
   comments       Comment[]      @relation("UserComments")
@@ -73,12 +89,13 @@ model Series {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  // 老王新增：反向关系
+  // 鑰佺帇鏂板锛氬弽鍚戝叧绯?
   episodes         Episode[]         @relation("SeriesEpisodes")
   comments         Comment[]         @relation("SeriesComments")
   follows          Follow[]          @relation("SeriesFollows")
   bookmarks        Bookmark[]        @relation("SeriesBookmarks")
   entitlements     Entitlement[]     @relation("SeriesEntitlements")
+  credits          SeriesCredit[]    @relation("SeriesCredits")
   ratings          Rating[]          @relation("SeriesRatings")
   progress         Progress[]        @relation("SeriesProgress")
   readingHistory   ReadingHistory[]  @relation("SeriesReadingHistory")
@@ -87,6 +104,42 @@ model Series {
   recommendationAnalytics RecommendationAnalytics[] @relation("SeriesRecommendationAnalytics")
 
   @@map("series")
+}
+
+model Creator {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  name           String
+  normalizedName String         @unique
+  type           CreatorType    @default(PERSON)
+  bio            String?
+  isPublic       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  seriesCredits  SeriesCredit[] @relation("CreatorSeriesCredits")
+
+  @@index([isPublic, name])
+  @@map("creators")
+}
+
+model SeriesCredit {
+  id        String     @id @default(cuid())
+  seriesId  String
+  creatorId String
+  role      CreditRole @default(CREATOR)
+  source    String     @default("manual")
+  sortOrder Int        @default(0)
+  isPrimary Boolean    @default(false)
+  isPublic  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  series    Series     @relation("SeriesCredits", fields: [seriesId], references: [id], onDelete: Cascade)
+  creator   Creator    @relation("CreatorSeriesCredits", fields: [creatorId], references: [id], onDelete: Restrict)
+
+  @@unique([seriesId, creatorId, role])
+  @@index([creatorId, isPublic])
+  @@index([seriesId, isPublic, sortOrder])
+  @@map("series_credits")
 }
 
 model Episode {
@@ -102,23 +155,26 @@ model Episode {
   pages            Json      @default("[]")
   paragraphs       String[]  @default([])
   text             String?
-  isDeleted        Boolean   @default(false) // 老王说：软删除标记，防止数据被硬删除
+  isDeleted        Boolean   @default(false) // 鑰佺帇璇达細杞垹闄ゆ爣璁帮紝闃叉鏁版嵁琚‖鍒犻櫎
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  // 老王新增：与Series的关系，改为Restrict防止意外删除
+  // 鑰佺帇鏂板锛氫笌Series鐨勫叧绯伙紝鏀逛负Restrict闃叉鎰忓鍒犻櫎
   series           Series    @relation("SeriesEpisodes", fields: [seriesId], references: [id], onDelete: Restrict)
 
-  // 老王新增：反向关系
+  // 鑰佺帇鏂板锛氬弽鍚戝叧绯?
   bookmarks        Bookmark[]        @relation("EpisodeBookmarks")
   entitlements     Entitlement[]     @relation("EpisodeEntitlements")
   readingHistory   ReadingHistory[]  @relation("EpisodeReadingHistory")
   notifications    Notification[]    @relation("EpisodeNotifications")
   progress         Progress[]        @relation("EpisodeProgress")
 
+  @@unique([seriesId, number])
   @@index([seriesId])
-  @@index([isDeleted]) // 老王说：软删除查询索引
+  @@index([seriesId, isDeleted, number])
+  @@index([seriesId, isDeleted, releasedAt])
   @@map("episodes")
+  @@index([isDeleted])
 }
 
 model Session {
@@ -154,7 +210,7 @@ model DailyActive {
   date      DateTime
   createdAt DateTime @default(now())
 
-  // 老王新增：与User的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserDailyActives", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([dateKey, userId])
@@ -196,11 +252,10 @@ model Comment {
   content   String
   text      String?
   hidden    Boolean        @default(false)
-  isDeleted Boolean        @default(false) // 老王说：软删除标记，防止数据被硬删除
+  isDeleted Boolean        @default(false)
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
-  // 老王新增：与User和Series的关系，改为Restrict防止意外删除
   user      User           @relation("UserComments", fields: [userId], references: [id], onDelete: Restrict)
   series    Series         @relation("SeriesComments", fields: [seriesId], references: [id], onDelete: Restrict)
   likes     CommentLike[]  @relation("CommentLikes")
@@ -208,8 +263,8 @@ model Comment {
 
   @@index([userId])
   @@index([seriesId])
-  @@index([seriesId, createdAt]) // 老王说：用于排序查询，提高列表查询性能
-  @@index([isDeleted]) // 老王说：软删除查询索引
+  @@index([seriesId, createdAt])
+  @@index([isDeleted])
   @@map("comments")
 }
 
@@ -219,7 +274,7 @@ model CommentLike {
   commentId String
   createdAt DateTime @default(now())
 
-  // 老王新增：与User和Comment的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鍜孋omment鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserCommentLikes", fields: [userId], references: [id], onDelete: Cascade)
   comment   Comment  @relation("CommentLikes", fields: [commentId], references: [id], onDelete: Cascade)
 
@@ -238,7 +293,7 @@ model CommentReply {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 老王新增：与User和Comment的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鍜孋omment鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserCommentReplies", fields: [userId], references: [id], onDelete: Cascade)
   comment   Comment  @relation("CommentReplies", fields: [commentId], references: [id], onDelete: Cascade)
 
@@ -253,7 +308,7 @@ model Follow {
   seriesId  String
   createdAt DateTime @default(now())
 
-  // 老王新增：与User和Series的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鍜孲eries鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserFollows", fields: [userId], references: [id], onDelete: Cascade)
   series    Series   @relation("SeriesFollows", fields: [seriesId], references: [id], onDelete: Cascade)
 
@@ -273,7 +328,7 @@ model Bookmark {
   label     String?
   createdAt DateTime @default(now())
 
-  // 老王新增：与User、Series、Episode的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User銆丼eries銆丒pisode鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserBookmarks", fields: [userId], references: [id], onDelete: Cascade)
   series    Series   @relation("SeriesBookmarks", fields: [seriesId], references: [id], onDelete: Cascade)
   episode   Episode  @relation("EpisodeBookmarks", fields: [episodeId], references: [id], onDelete: Cascade)
@@ -291,7 +346,6 @@ model Entitlement {
   episodeId String
   createdAt DateTime @default(now())
 
-  // 老王新增：与User、Series、Episode的关系，级联删除
   user      User     @relation("UserEntitlements", fields: [userId], references: [id], onDelete: Cascade)
   series    Series   @relation("SeriesEntitlements", fields: [seriesId], references: [id], onDelete: Cascade)
   episode   Episode  @relation("EpisodeEntitlements", fields: [episodeId], references: [id], onDelete: Cascade)
@@ -299,7 +353,7 @@ model Entitlement {
   @@unique([userId, episodeId])
   @@index([userId])
   @@index([episodeId])
-  @@index([userId, seriesId]) // 老王说：用于快速查询用户对某个系列的所有权限
+  @@index([userId, seriesId])
   @@map("entitlements")
 }
 
@@ -326,7 +380,7 @@ model UserCoupon {
   claimedAt DateTime @default(now())
   createdAt DateTime @default(now())
 
-  // 老王新增：与User和Coupon的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鍜孋oupon鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserCoupons", fields: [userId], references: [id], onDelete: Cascade)
   coupon    Coupon   @relation("CouponUserCoupons", fields: [couponId], references: [id])
 
@@ -347,7 +401,7 @@ model Subscription {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  // 老王新增：与User的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([planId])
@@ -362,7 +416,7 @@ model SubscriptionUsage {
   used      Int      @default(0)
   createdAt DateTime @default(now())
 
-  // 老王新增：与User的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserSubscriptionUsages", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, dateKey])
@@ -379,7 +433,7 @@ model SubscriptionVoucherUsage {
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  // 老王新增：与User的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserSubscriptionVoucherUsages", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, dateKey])
@@ -401,7 +455,7 @@ model TopupPackage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 老王新增：反向关系
+  // 鑰佺帇鏂板锛氬弽鍚戝叧绯?
   orders    Order[]  @relation("PackageOrders")
 
   @@map("topup_packages")
@@ -446,7 +500,7 @@ model UserPreference {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 老王新增：与User的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserPreferences", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_preferences")
@@ -472,6 +526,7 @@ model SearchLog {
   createdAt DateTime @default(now())
 
   @@unique([dateKey, keyword])
+  @@index([dateKey, count])
   @@map("search_logs")
 }
 
@@ -483,7 +538,7 @@ model SeriesViewStat {
   date      DateTime
   createdAt DateTime @default(now())
 
-  // 老王新增：与Series的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌Series鐨勫叧绯伙紝绾ц仈鍒犻櫎
   series    Series   @relation("SeriesViewStats", fields: [seriesId], references: [id], onDelete: Cascade)
 
   @@unique([dateKey, seriesId])
@@ -503,7 +558,7 @@ model SupportTicket {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  // 老王新增：与User的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user       User?    @relation("UserSupportTickets", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -639,7 +694,7 @@ model MissionState {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 老王新增：与User的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserMissionStates", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("mission_states")
@@ -656,7 +711,7 @@ model RewardState {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  // 老王新增：与User的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user            User      @relation("UserRewardStates", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reward_states")
@@ -691,15 +746,14 @@ model Order {
   amount           Int
   currency         String
   status           String
-  priceSnapshot    Int       // 老王说：价格快照，防止套餐价格被修改后金额不匹配
-  idempotencyKey   String?   // 老王说：幂等性key，防止重复支付
+  priceSnapshot    Int
+  idempotencyKey   String?
   paidAt           DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  // 老王新增：与User和TopupPackage的关系，级联删除
-  user             User          @relation("UserOrders", fields: [userId], references: [id], onDelete: Cascade)
-  package          TopupPackage  @relation("PackageOrders", fields: [packageId], references: [id], onDelete: Restrict)
+  user             User            @relation("UserOrders", fields: [userId], references: [id], onDelete: Cascade)
+  package          TopupPackage    @relation("PackageOrders", fields: [packageId], references: [id], onDelete: Restrict)
   paymentIntents   PaymentIntent[] @relation("OrderPaymentIntents")
   paymentRetries   PaymentRetry[]  @relation("OrderPaymentRetries")
 
@@ -718,7 +772,7 @@ model PaymentIntent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 老王新增：与User和Order的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鍜孫rder鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserPaymentIntents", fields: [userId], references: [id], onDelete: Cascade)
   order     Order    @relation("OrderPaymentIntents", fields: [orderId], references: [id], onDelete: Cascade)
   retries   PaymentRetry[] @relation("PaymentIntentRetries")
@@ -735,13 +789,12 @@ model PaymentRetry {
   paymentId     String?
   status        String
   attempts      Int      @default(0)
-  version       Int      @default(0) // 老王说：乐观锁版本号，防止并发更新冲突
+  version       Int      @default(0)
   nextAttemptAt DateTime
   lastError     String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // 老王新增：与User、Order、PaymentIntent的关系，级联删除
   user          User     @relation("UserPaymentRetries", fields: [userId], references: [id], onDelete: Cascade)
   order         Order    @relation("OrderPaymentRetries", fields: [orderId], references: [id], onDelete: Cascade)
   paymentIntent PaymentIntent? @relation("PaymentIntentRetries", fields: [paymentId], references: [id], onDelete: SetNull)
@@ -759,7 +812,7 @@ model Rating {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 老王新增：与User和Series的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User鍜孲eries鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserRatings", fields: [userId], references: [id], onDelete: Cascade)
   series    Series   @relation("SeriesRatings", fields: [seriesId], references: [id], onDelete: Cascade)
 
@@ -804,15 +857,15 @@ model Progress {
   id            String   @id @default(cuid())
   userId        String
   seriesId      String
-  lastEpisodeId String
+  lastEpisodeId String?
   percent       Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // 老王新增：与User、Series、Episode的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User銆丼eries銆丒pisode鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user          User     @relation("UserProgress", fields: [userId], references: [id], onDelete: Cascade)
   series        Series   @relation("SeriesProgress", fields: [seriesId], references: [id], onDelete: Cascade)
-  lastEpisode   Episode  @relation("EpisodeProgress", fields: [lastEpisodeId], references: [id], onDelete: SetNull)
+  lastEpisode   Episode? @relation("EpisodeProgress", fields: [lastEpisodeId], references: [id], onDelete: SetNull)
 
   @@unique([userId, seriesId])
   @@index([userId])
@@ -832,7 +885,7 @@ model Notification {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 老王新增：与User、Series、Episode的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User銆丼eries銆丒pisode鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
   series    Series?  @relation("SeriesNotifications", fields: [seriesId], references: [id], onDelete: SetNull)
   episode   Episode? @relation("EpisodeNotifications", fields: [episodeId], references: [id], onDelete: SetNull)
@@ -851,14 +904,14 @@ model ReadingHistory {
   percent   Int      @default(0)
   createdAt DateTime @default(now())
 
-  // 老王新增：与User、Series、Episode的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌User銆丼eries銆丒pisode鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserReadingHistory", fields: [userId], references: [id], onDelete: Cascade)
   series    Series   @relation("SeriesReadingHistory", fields: [seriesId], references: [id], onDelete: Cascade)
   episode   Episode  @relation("EpisodeReadingHistory", fields: [episodeId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([episodeId])
-  @@index([userId, createdAt]) // 老王说：用于快速查询用户的阅读历史，按时间排序
+  @@index([userId, createdAt]) // 鑰佺帇璇达細鐢ㄤ簬蹇€熸煡璇㈢敤鎴风殑闃呰鍘嗗彶锛屾寜鏃堕棿鎺掑簭
   @@map("reading_history")
 }
 
@@ -894,7 +947,7 @@ model RecommendationAnalytics {
   date        DateTime
   createdAt   DateTime @default(now())
 
-  // 老王新增：与Series的关系，级联删除
+  // 鑰佺帇鏂板锛氫笌Series鐨勫叧绯伙紝绾ц仈鍒犻櫎
   series      Series   @relation("SeriesRecommendationAnalytics", fields: [seriesId], references: [id], onDelete: Cascade)
 
   @@index([slot])
@@ -911,3 +964,5 @@ model RankingConfig {
 
   @@map("ranking_configs")
 }
+
+

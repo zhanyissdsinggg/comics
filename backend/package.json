@@ -1,7 +1,7 @@
 {
   "name": "gush-backend",
   "version": "1.0.0",
-  "description": "Gush Comics Backend API",
+  "description": "Gush reading platform backend service",
   "author": "Gush Team",
   "private": true,
   "license": "UNLICENSED",
@@ -11,7 +11,11 @@
   "scripts": {
     "build": "nest build -b swc",
     "prisma:generate": "prisma generate",
-    "prisma:deploy": "prisma db push --skip-generate",
+    "prisma:push:local": "prisma db push",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:migrate:status": "prisma migrate status",
+    "prisma:deploy": "npm run prisma:migrate:deploy",
     "contract:generate": "ts-node --transpile-only scripts/generate-openapi.ts",
     "contract:check": "ts-node --transpile-only scripts/check-openapi-contract.ts",
     "contract:update": "npm run contract:generate -- contracts/openapi.snapshot.json",
@@ -44,10 +48,8 @@
     "@nestjs/throttler": "^5.0.0",
     "@prisma/client": "^5.0.0",
     "@sentry/node": "^10.41.0",
-    "@sentry/tracing": "^7.120.4",
     "adm-zip": "^0.5.16",
     "bcrypt": "^5.1.1",
-    "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
@@ -60,11 +62,11 @@
     "passport-local": "^1.0.0",
     "pg": "^8.16.3",
     "prisma": "^5.0.0",
-    "redis": "^4.6.7",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "winston": "^3.19.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

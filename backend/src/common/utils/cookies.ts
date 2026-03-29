@@ -1,4 +1,5 @@
 import type { Request } from "express";
+import { getAppConfig, getCookieSecureDefault } from "../config/app-config";
 
 type CookieOptions = {
   httpOnly?: boolean;
@@ -89,7 +90,7 @@ function resolveSameSite(
     return overrides.sameSite;
   }
 
-  const sameSiteEnv = String(process.env.COOKIE_SAMESITE || "").trim().toLowerCase();
+  const sameSiteEnv = String(getAppConfig().cookies.sameSite || "").trim().toLowerCase();
   if (["lax", "strict", "none"].includes(sameSiteEnv)) {
     return sameSiteEnv as "lax" | "strict" | "none";
   }
@@ -104,11 +105,10 @@ function resolveSameSite(
 }
 
 export function buildCookieOptions(overrides: CookieOptions = {}, request?: CookieRequestContext) {
-  const isProd = process.env.NODE_ENV === "production";
+  const appConfig = getAppConfig();
   const sameSite = resolveSameSite(overrides, request);
-  const secureEnv = process.env.COOKIE_SECURE;
-  const secure = overrides.secure ?? (secureEnv ? secureEnv === "1" : isProd || sameSite === "none");
-  const domain = overrides.domain ?? process.env.COOKIE_DOMAIN;
+  const secure = overrides.secure ?? getCookieSecureDefault(sameSite);
+  const domain = overrides.domain ?? appConfig.cookies.domain;
   const maxAge = overrides.maxAge ?? DEFAULT_MAX_AGE_SEC;
 
   return {

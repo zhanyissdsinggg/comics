@@ -1,6 +1,30 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { CacheService } from "../../common/cache/cache.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { isPrismaSchemaDriftError } from "../../common/utils/prisma-schema-drift";
+
+type EpisodePayload =
+  | {
+      episode: {
+        id: string;
+        seriesId: string;
+        number: number;
+        title: string;
+        type: "novel";
+        paragraphs: string[];
+        previewParagraphs: number;
+      };
+    }
+  | {
+      episode: {
+        id: string;
+        seriesId: string;
+        number: number;
+        title: string;
+        type: "comic";
+        pages: Array<Record<string, unknown>>;
+        previewFreePages: number;
+      };
+    };
 
 function normalizeEpisodePages(value: unknown): Array<Record<string, unknown>> {
   if (Array.isArray(value)) {
@@ -11,13 +35,8 @@ function normalizeEpisodePages(value: unknown): Array<Record<string, unknown>> {
     return [];
   }
 
-  const raw = value.trim();
-  if (!raw) {
-    return [];
-  }
-
   try {
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(value);
     return Array.isArray(parsed)
       ? parsed.filter((item) => item && typeof item === "object") as Array<Record<string, unknown>>
       : [];
@@ -41,201 +60,57 @@ function normalizeParagraphs(value: unknown): string[] {
 
 @Injectable()
 export class EpisodeService {
-  private readonly logger = new Logger(EpisodeService.name);
-
-  constructor(private readonly prisma: PrismaService) {}
-
-  private isSchemaDriftError(error: unknown): boolean {
-    return isPrismaSchemaDriftError(error);
-  }
-
-  private async findSeriesType(seriesId: string): Promise<{ id: string; type: string } | null> {
-    try {
-      const row = await this.prisma.series.findUnique({
-        where: { id: seriesId },
-        select: { id: true, type: true, isPublished: true },
-      });
-      if (!row || row.isPublished === false) {
-        return null;
-      }
-      return {
-        id: String(row.id || ""),
-        type: String(row.type || "comic"),
-      };
-    } catch (error) {
-      if (!this.isSchemaDriftError(error)) {
-        throw error;
-      }
-      this.logger.warn(`Series type query failed for ${seriesId}, switching to compatibility mode.`);
-    }
-
-    try {
-      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
-        `SELECT "id", "type", "isPublished" FROM "series" WHERE "id" = $1 LIMIT 1`,
-        seriesId,
-      );
-      if (!rows.length || rows[0].isPublished === false) {
-        return null;
-      }
-      return {
-        id: String(rows[0].id || ""),
-        type: String(rows[0].type || "comic"),
-      };
-    } catch (error) {
-      if (!this.isSchemaDriftError(error)) {
-        throw error;
-      }
-      this.logger.warn(`Series compatibility query failed for ${seriesId}, retrying without publish state.`);
-    }
-
-    try {
-      const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
-        `SELECT "id", "type" FROM "series" WHERE "id" = $1 LIMIT 1`,
-        seriesId,
-      );
-      if (!rows.length) {
-        return null;
-      }
-      return {
-        id: String(rows[0].id || ""),
-        type: String(rows[0].type || "comic"),
-      };
-    } catch (error) {
-      if (!this.isSchemaDriftError(error)) {
-        throw error;
-      }
-      this.logger.warn(`Series compatibility query failed for ${seriesId}.`);
-      return null;
-    }
-  }
-
-  private normalizeCompatEpisode(row: Record<string, unknown>) {
-    return {
-      id: String(row.id || ""),
-      seriesId: String(row.seriesId || ""),
-      number: Number(row.number || 0),
-      title: String(row.title || ""),
-      pages: normalizeEpisodePages(row.pages),
-      paragraphs: normalizeParagraphs(row.paragraphs),
-      text: row.text == null ? null : String(row.text),
-      previewFreePages: Number(row.previewFreePages || 0),
-    };
-  }
-
-  private async findStoredEpisodeCompat(episodeId: string): Promise<any> {
-    const columns = await this.prisma.$queryRawUnsafe<Array<{ column_name: string }>>(
-      `SELECT column_name
-       FROM information_schema.columns
-       WHERE table_schema = 'public' AND table_name = 'episode'`,
-    );
-
-    const available = new Set(
-      columns
-        .map((item) => String(item?.column_name || "").trim())
-        .filter(Boolean),
-    );
-
-    const requested = [
-      "id",
-      "seriesId",
-      "number",
-      "title",
-      "pages",
-      "paragraphs",
-      "text",
-      "previewFreePages",
-    ].filter((column) => available.has(column));
-
-    if (!requested.includes("id")) {
-      requested.unshift("id");
-    }
-
-    const selectClause = requested
-      .map((column) => `"${column.replace(/"/g, "\"\"")}"`)
-      .join(", ");
-
-    const rows = await this.prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
-      `SELECT ${selectClause} FROM "episode" WHERE "id" = $1 LIMIT 1`,
-      episodeId,
-    );
-
-    if (!rows.length) {
-      return null;
-    }
-
-    return this.normalizeCompatEpisode(rows[0]);
-  }
-
-  private async findStoredEpisode(episodeId: string): Promise<any> {
-    try {
-      return await this.prisma.episode.findUnique({
-        where: { id: episodeId },
-        select: {
-          id: true,
-          seriesId: true,
-          number: true,
-          title: true,
-          pages: true,
-          paragraphs: true,
-          text: true,
-          previewFreePages: true,
-        },
-      });
-    } catch (error) {
-      this.logger.warn(`Episode full query failed for ${episodeId}, switching to compatibility mode.`);
-      if (error instanceof Error) {
-        this.logger.debug(error.message);
-      }
-    }
-
-    try {
-      return await this.prisma.episode.findUnique({
-        where: { id: episodeId },
-        select: {
-          id: true,
-          seriesId: true,
-          number: true,
-          title: true,
-          text: true,
-        },
-      });
-    } catch (error) {
-      this.logger.warn(`Episode compatibility query failed for ${episodeId}, switching to raw fallback.`);
-      if (error instanceof Error) {
-        this.logger.debug(error.message);
-      }
-    }
-
-    try {
-      return await this.findStoredEpisodeCompat(episodeId);
-    } catch (error) {
-      if (!this.isSchemaDriftError(error)) {
-        throw error;
-      }
-      this.logger.warn(`Episode raw compatibility query failed for ${episodeId}.`);
-      return null;
-    }
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+  ) {}
 
   async getEpisode(seriesId: string, episodeId: string) {
-    const series = await this.findSeriesType(seriesId);
-    if (!series) {
-      return null;
+    const cacheKey = `episode:detail:${seriesId}:${episodeId}`;
+    const cached = await this.cacheService.get<EpisodePayload>(cacheKey);
+    if (cached) {
+      return cached;
     }
 
-    const stored = await this.findStoredEpisode(episodeId);
+    const stored = await this.prisma.episode.findFirst({
+      where: {
+        id: episodeId,
+        seriesId,
+        isDeleted: false,
+        series: {
+          isPublished: true,
+        },
+      },
+      select: {
+        id: true,
+        seriesId: true,
+        number: true,
+        title: true,
+        pages: true,
+        paragraphs: true,
+        text: true,
+        previewFreePages: true,
+        series: {
+          select: {
+            type: true,
+          },
+        },
+      },
+    });
+
     if (!stored) {
       return null;
     }
 
-    const number = Number(stored.number) || Number(episodeId.replace(`${seriesId}e`, "")) || 1;
-    const title = String(stored.title || `Episode ${number}`);
+    const number = Number(stored.number || 0);
+    const title = String(stored.title || `Episode ${number || 1}`);
+    const seriesType = String(stored.series?.type || "comic").toLowerCase();
 
-    if (series.type === "novel") {
-      return {
+    if (seriesType === "novel") {
+      const payload = {
         episode: {
-          id: String(stored.id || episodeId),
-          seriesId,
+          id: stored.id,
+          seriesId: stored.seriesId,
           number,
           title,
           type: "novel",
@@ -243,19 +118,22 @@ export class EpisodeService {
           previewParagraphs: 3,
         },
       };
+      await this.cacheService.set(cacheKey, payload, 180);
+      return payload;
     }
 
-    const previewFreePages = Number(stored.previewFreePages);
-    return {
+    const payload = {
       episode: {
-        id: String(stored.id || episodeId),
-        seriesId,
+        id: stored.id,
+        seriesId: stored.seriesId,
         number,
         title,
         type: "comic",
-        pages: Array.isArray(stored.pages) ? stored.pages : [],
-        previewFreePages: Number.isFinite(previewFreePages) ? previewFreePages : undefined,
+        pages: normalizeEpisodePages(stored.pages),
+        previewFreePages: Math.max(0, Number(stored.previewFreePages || 0)),
       },
     };
+    await this.cacheService.set(cacheKey, payload, 180);
+    return payload;
   }
 }

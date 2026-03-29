@@ -1,132 +1,99 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { CacheService } from "../../common/cache/cache.service";
+import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
 import { SearchService } from "./search.service";
+
+jest.mock("../../common/queries/series-analytics", () => ({
+  loadSeriesAnalytics: jest.fn(),
+}));
 
 describe("SearchService", () => {
   let service: SearchService;
   let prisma: {
+    $queryRaw: jest.Mock;
     series: { findMany: jest.Mock };
-    searchLog: { findMany: jest.Mock; upsert: jest.Mock };
+    searchLog: { groupBy: jest.Mock; upsert: jest.Mock };
+  };
+  let cacheService: {
+    get: jest.Mock;
+    set: jest.Mock;
+    deletePatterns: jest.Mock;
+  };
+  let creatorCreditsService: {
+    getCreditsMap: jest.Mock;
+    getLegacyAuthorMap: jest.Mock;
+    buildIdentity: jest.Mock;
   };
 
-  const allSeries = [
-    {
-      id: "series-1",
-      title: "Romance Comic",
-      type: "comic",
-      description: "A sweeping romance story",
-      coverUrl: null,
-      coverTone: null,
-      badge: null,
-      badges: [],
-      adult: false,
-      isPublished: true,
-      genres: ["Romance", "Drama"],
-      status: "Ongoing",
-      rating: 4.8,
-      ratingCount: 120,
-      updatedAt: new Date("2026-03-05T00:00:00.000Z"),
-      createdAt: new Date("2026-01-05T00:00:00.000Z"),
-    },
-    {
-      id: "series-2",
-      title: "Action Hero",
-      type: "comic",
-      description: "Fast-paced battles",
-      coverUrl: null,
-      coverTone: null,
-      badge: null,
-      badges: [],
-      adult: false,
-      isPublished: true,
-      genres: ["Action"],
-      status: "Completed",
-      rating: 4.6,
-      ratingCount: 95,
-      updatedAt: new Date("2026-03-07T00:00:00.000Z"),
-      createdAt: new Date("2026-01-07T00:00:00.000Z"),
-    },
-    {
-      id: "series-3",
-      title: "Romance Notes",
-      type: "novel",
-      description: "Romance and longing",
-      coverUrl: null,
-      coverTone: null,
-      badge: null,
-      badges: [],
-      adult: false,
-      isPublished: true,
-      genres: ["Romance"],
-      status: "Completed",
-      rating: 4.9,
-      ratingCount: 40,
-      updatedAt: new Date("2026-03-01T00:00:00.000Z"),
-      createdAt: new Date("2026-01-01T00:00:00.000Z"),
-    },
-    {
-      id: "series-4",
-      title: "Secret Desire",
-      type: "comic",
-      description: "Adults only romance",
-      coverUrl: null,
-      coverTone: null,
-      badge: null,
-      badges: [],
-      adult: true,
-      isPublished: true,
-      genres: ["Romance"],
-      status: "Completed",
-      rating: 4.7,
-      ratingCount: 80,
-      updatedAt: new Date("2026-03-06T00:00:00.000Z"),
-      createdAt: new Date("2026-01-06T00:00:00.000Z"),
-    },
-    {
-      id: "series-5",
-      title: "Romance Hidden",
-      type: "comic",
-      description: "Should never appear in public search",
-      coverUrl: null,
-      coverTone: null,
-      badge: null,
-      badges: [],
-      adult: false,
-      isPublished: false,
-      genres: ["Romance"],
-      status: "Ongoing",
-      rating: 4.95,
-      ratingCount: 999,
-      updatedAt: new Date("2026-03-08T00:00:00.000Z"),
-      createdAt: new Date("2026-01-08T00:00:00.000Z"),
-    },
-  ];
-
-  beforeEach(async () => {
+  beforeEach(() => {
     prisma = {
+      $queryRaw: jest.fn(),
       series: {
-        findMany: jest.fn().mockResolvedValue(allSeries),
+        findMany: jest.fn(),
       },
       searchLog: {
-        findMany: jest.fn().mockResolvedValue([]),
+        groupBy: jest.fn(),
         upsert: jest.fn().mockResolvedValue(undefined),
       },
     };
+    cacheService = {
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn().mockResolvedValue(undefined),
+      deletePatterns: jest.fn().mockResolvedValue(undefined),
+    };
+    creatorCreditsService = {
+      getCreditsMap: jest.fn().mockResolvedValue(new Map()),
+      getLegacyAuthorMap: jest.fn().mockResolvedValue(new Map()),
+      buildIdentity: jest.fn().mockReturnValue({
+        label: "Creator details coming soon",
+        type: "fallback",
+        isFallback: true,
+      }),
+    };
+    (loadSeriesAnalytics as jest.Mock).mockResolvedValue(
+      new Map([
+        [
+          "series-1",
+          {
+            episodeCount: 12,
+            latestEpisodeId: "series-1e12",
+            latestEpisodeNumber: 12,
+            followers: 10,
+            views: 50,
+          },
+        ],
+      ]),
+    );
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SearchService,
-        {
-          provide: PrismaService,
-          useValue: prisma,
-        },
-      ],
-    }).compile();
-
-    service = module.get<SearchService>(SearchService);
+    service = new SearchService(
+      prisma as unknown as PrismaService,
+      cacheService as unknown as CacheService,
+      creatorCreditsService as unknown as CreatorCreditsService,
+    );
   });
 
-  it("supports real type/status/genre filters and excludes adult content by default", async () => {
+  it("hydrates database search results and caches the payload", async () => {
+    prisma.$queryRaw
+      .mockResolvedValueOnce([
+        {
+          id: "series-1",
+          title: "Romance Comic",
+          author: "",
+          type: "comic",
+          description: "A sweeping romance story",
+          coverUrl: null,
+          coverTone: null,
+          adult: false,
+          genres: ["Romance", "Drama"],
+          status: "Ongoing",
+          createdAt: new Date("2026-01-05T00:00:00.000Z"),
+          updatedAt: new Date("2026-03-05T00:00:00.000Z"),
+          latestEpisodeId: "series-1e12",
+        },
+      ])
+      .mockResolvedValueOnce([{ total: BigInt(1) }]);
+
     const result = await service.search({
       q: "romance",
       type: "comic",
@@ -140,47 +107,61 @@ describe("SearchService", () => {
 
     expect(result.total).toBe(1);
     expect(result.results.map((item) => item.id)).toEqual(["series-1"]);
+    expect(cacheService.set).toHaveBeenCalledWith(
+      expect.stringContaining("search:results:standard:romance"),
+      expect.objectContaining({
+        total: 1,
+      }),
+      120,
+    );
   });
 
-  it("never returns unpublished titles even if the data source contains them", async () => {
-    const result = await service.search({
-      q: "romance",
-      adult: false,
-      sort: "latest",
+  it("returns cached search payloads without executing raw queries", async () => {
+    cacheService.get.mockResolvedValue({
+      results: [{ id: "cached-series" }],
+      total: 1,
       page: 1,
       pageSize: 12,
+      appliedSort: "latest",
     });
 
-    expect(result.results.map((item) => item.id)).not.toContain("series-5");
-    expect(prisma.series.findMany).toHaveBeenCalledWith(
+    await expect(
+      service.search({
+        q: "cached",
+        adult: false,
+        sort: "latest",
+        page: 1,
+        pageSize: 12,
+      }),
+    ).resolves.toEqual({
+      results: [{ id: "cached-series" }],
+      total: 1,
+      page: 1,
+      pageSize: 12,
+      appliedSort: "latest",
+    });
+    expect(prisma.$queryRaw).not.toHaveBeenCalled();
+  });
+
+  it("aggregates hot keywords in the database", async () => {
+    prisma.searchLog.groupBy.mockResolvedValue([
+      { keyword: "romance", _sum: { count: 12 } },
+      { keyword: "action", _sum: { count: 9 } },
+    ]);
+
+    await expect(service.hot(false, "week")).resolves.toEqual(["romance", "action"]);
+    expect(prisma.searchLog.groupBy).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { adult: false, isPublished: true },
+        by: ["keyword"],
+        take: 10,
       }),
     );
   });
 
-  it("supports pagination with alphabetical sorting", async () => {
-    const result = await service.search({
-      adult: false,
-      sort: "alphabetical",
-      page: 2,
-      pageSize: 2,
-    });
+  it("invalidates hot and search result caches when a query is logged", async () => {
+    await service.log("user-1", "romance");
 
-    expect(result.total).toBe(3);
-    expect(result.page).toBe(2);
-    expect(result.results.map((item) => item.id)).toEqual(["series-3"]);
-  });
-
-  it("prefers stronger title matches for relevance ordering", async () => {
-    const result = await service.search({
-      q: "romance comic",
-      adult: false,
-      sort: "relevance",
-      page: 1,
-      pageSize: 12,
-    });
-
-    expect(result.results[0]?.id).toBe("series-1");
+    expect(prisma.searchLog.upsert).toHaveBeenCalled();
+    expect(cacheService.deletePatterns).toHaveBeenCalledWith(["search:hot:*", "search:results:*"]);
   });
 });

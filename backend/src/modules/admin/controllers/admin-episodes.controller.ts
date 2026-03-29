@@ -13,6 +13,7 @@
 } from "@nestjs/common";
 import type { Episode, Prisma } from "@prisma/client";
 import type { Request } from "express";
+import { CacheService } from "../../../common/cache/cache.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { readBooleanLike, readDateLike, readIntLike } from "../utils/param-parsing";
@@ -201,7 +202,22 @@ function toEpisodeUpdateData(draft: EpisodeDraft): Prisma.EpisodeUncheckedUpdate
 export class AdminEpisodesController {
   private readonly logger = new Logger(AdminEpisodesController.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+  ) {}
+
+  private async invalidateReadCaches(seriesId: string) {
+    await this.cacheService.deletePatterns([
+      `series:detail:${seriesId}`,
+      `episode:detail:${seriesId}:*`,
+      "series:list:*",
+      "search:*",
+      "rankings:*",
+      "creators:*",
+      "recommendations:*",
+    ]);
+  }
 
   private async syncLatest(seriesId: string) {
     const latest = await this.prisma.episode.findFirst({
@@ -336,6 +352,7 @@ export class AdminEpisodesController {
       });
 
       this.logger.log(`Successfully created ${count} episodes for series: ${seriesId}`);
+      await this.invalidateReadCaches(seriesId);
       return { episodes };
     }
 
@@ -363,6 +380,7 @@ export class AdminEpisodesController {
       orderBy: { number: "asc" },
     });
 
+    await this.invalidateReadCaches(seriesId);
     return { episodes };
   }
 
@@ -407,6 +425,7 @@ export class AdminEpisodesController {
     });
 
     this.logger.log(`Successfully bulk updated episodes for series: ${seriesId}`);
+    await this.invalidateReadCaches(seriesId);
     return { episodes };
   }
 
@@ -422,14 +441,24 @@ export class AdminEpisodesController {
         orderBy: { number: "asc" },
       });
 
-      await Promise.all(
-        existingEpisodes.map((episode, index) =>
-          this.prisma.episode.update({
-            where: { id: episode.id },
-            data: { number: startNumber + index },
-          })
-        )
-      );
+      await this.prisma.$transaction(async (tx) => {
+        await Promise.all(
+          existingEpisodes.map((episode, index) =>
+            tx.episode.update({
+              where: { id: episode.id },
+              data: { number: -1 * (index + 1) },
+            }),
+          ),
+        );
+        await Promise.all(
+          existingEpisodes.map((episode, index) =>
+            tx.episode.update({
+              where: { id: episode.id },
+              data: { number: startNumber + index },
+            }),
+          ),
+        );
+      });
 
       await this.syncLatest(seriesId);
 
@@ -438,6 +467,7 @@ export class AdminEpisodesController {
         orderBy: { number: "asc" },
       });
 
+      await this.invalidateReadCaches(seriesId);
       return { episodes };
     }
 
@@ -475,14 +505,24 @@ export class AdminEpisodesController {
       throw new NotFoundException("部分章节不存在。");
     }
 
-    await Promise.all(
-      normalizedItems.map((item) =>
-        this.prisma.episode.update({
-          where: { id: item.id },
-          data: { number: item.number },
-        })
-      )
-    );
+    await this.prisma.$transaction(async (tx) => {
+      await Promise.all(
+        normalizedItems.map((item, index) =>
+          tx.episode.update({
+            where: { id: item.id },
+            data: { number: -1 * (index + 1) },
+          }),
+        ),
+      );
+      await Promise.all(
+        normalizedItems.map((item) =>
+          tx.episode.update({
+            where: { id: item.id },
+            data: { number: item.number },
+          }),
+        ),
+      );
+    });
 
     await this.syncLatest(seriesId);
 
@@ -491,6 +531,7 @@ export class AdminEpisodesController {
       orderBy: { number: "asc" },
     });
 
+    await this.invalidateReadCaches(seriesId);
     return { episodes };
   }
 
@@ -517,6 +558,7 @@ export class AdminEpisodesController {
     await this.syncLatest(seriesId);
 
     this.logger.log(`Successfully updated episode: ${episodeId}`);
+    await this.invalidateReadCaches(seriesId);
     return { episode: updated };
   }
 
@@ -536,6 +578,7 @@ export class AdminEpisodesController {
     });
 
     this.logger.log(`Successfully deleted episode: ${episodeId}`);
+    await this.invalidateReadCaches(seriesId);
     return { episodes };
   }
 }

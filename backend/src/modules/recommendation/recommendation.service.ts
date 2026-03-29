@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
+import { CacheService } from "../../common/cache/cache.service";
+import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
+import { mapStorefrontSeriesSummary } from "../../common/mappers/storefront-series.mapper";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { findSeriesVisibilityCompat, isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
+import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
 
 const STOREFRONT_SLOT_IDS = [
   "home-hero",
@@ -16,35 +19,69 @@ export interface HomepageRecommendationSlot {
   seriesIds: string[];
 }
 
+type RecommendationSeriesRow = {
+  id: string;
+  title: string;
+  type: string;
+  description: string | null;
+  coverTone: string | null;
+  coverUrl: string | null;
+  genres: string[];
+  status: string;
+  adult: boolean;
+  isPublished: boolean;
+  latestEpisodeId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type StorefrontSeriesSummary = ReturnType<typeof mapStorefrontSeriesSummary>;
+
 @Injectable()
 export class RecommendationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+    private readonly creatorCreditsService: CreatorCreditsService,
+  ) {}
+
+  private async hydrateSeries(rows: RecommendationSeriesRow[]) {
+    const seriesIds = rows.map((row) => row.id);
+    const [analyticsMap, creditsMap, authorMap] = await Promise.all([
+      loadSeriesAnalytics(this.prisma, seriesIds),
+      this.creatorCreditsService.getCreditsMap(seriesIds),
+      this.creatorCreditsService.getLegacyAuthorMap(seriesIds),
+    ]);
+
+    return rows.map((row) => {
+      const credits = creditsMap.get(row.id) || [];
+      const identity = this.creatorCreditsService.buildIdentity(credits, authorMap.get(row.id));
+      return mapStorefrontSeriesSummary(
+        row,
+        analyticsMap.get(row.id) || {
+          episodeCount: 0,
+          latestEpisodeId: String(row.latestEpisodeId || ""),
+          latestEpisodeNumber: null,
+          followers: 0,
+          views: 0,
+        },
+        identity,
+        credits,
+      );
+    });
+  }
 
   async getContentBasedRecommendations(seriesId: string, limit = 10, userId?: string) {
-    let currentSeries;
-    try {
-      currentSeries = await this.prisma.series.findUnique({
-        where: { id: seriesId },
-        select: {
-          id: true,
-          type: true,
-          genres: true,
-          adult: true,
-          isPublished: true,
-        },
-      });
-    } catch (error) {
-      if (!isSeriesVisibilitySchemaDrift(error)) {
-        throw error;
-      }
-      currentSeries = await findSeriesVisibilityCompat(this.prisma, seriesId, [
-        "id",
-        "type",
-        "genres",
-        "adult",
-        "isPublished",
-      ]);
-    }
+    const currentSeries = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+      select: {
+        id: true,
+        type: true,
+        genres: true,
+        adult: true,
+        isPublished: true,
+      },
+    });
 
     if (!currentSeries || currentSeries.isPublished === false) {
       return [];
@@ -60,94 +97,63 @@ export class RecommendationService {
       readSeriesIds = readSeries.map((item) => item.seriesId);
     }
 
-    let similarSeries;
-    try {
-      similarSeries = await this.prisma.series.findMany({
-        where: {
-          AND: [
-            { id: { not: seriesId } },
-            { type: currentSeries.type },
-            { adult: currentSeries.adult },
-            { isPublished: true },
-            { status: { not: "draft" } },
-            ...(readSeriesIds.length > 0 ? [{ id: { notIn: readSeriesIds } }] : []),
-          ],
+    const candidates = await this.prisma.series.findMany({
+      where: {
+        id: {
+          notIn: [seriesId, ...readSeriesIds],
         },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          coverTone: true,
-          type: true,
-          genres: true,
-          rating: true,
-          ratingCount: true,
-          status: true,
-          badges: true,
-          adult: true,
-          isPublished: true,
-          episodePrice: true,
-          ttfEnabled: true,
-          _count: {
-            select: {
-              follows: true,
-              episodes: true,
-            },
-          },
-        } as const,
-        take: limit * 3,
-      });
-    } catch (error) {
-      if (!isSeriesVisibilitySchemaDrift(error)) {
-        throw error;
-      }
-      similarSeries = await querySeriesVisibilityCompat(this.prisma, {
-        adult: currentSeries.adult,
-        excludeIds: [seriesId, ...readSeriesIds],
-        limit: limit * 3,
-        onlyPublished: true,
-        orderBy: [
-          { field: "rating", direction: "desc" },
-          { field: "ratingCount", direction: "desc" },
-        ],
-        select: [
-          "id",
-          "title",
-          "description",
-          "coverTone",
-          "type",
-          "genres",
-          "rating",
-          "ratingCount",
-          "status",
-          "badges",
-          "adult",
-          "isPublished",
-          "episodePrice",
-          "ttfEnabled",
-        ],
-        statusNot: "draft",
         type: currentSeries.type,
-      });
-    }
+        adult: currentSeries.adult,
+        isPublished: true,
+        status: { not: "draft" },
+        ...(currentSeries.genres.length > 0 ? { genres: { hasSome: currentSeries.genres } } : {}),
+      },
+      take: Math.max(limit * 4, limit),
+      orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        description: true,
+        coverTone: true,
+        coverUrl: true,
+        genres: true,
+        status: true,
+        adult: true,
+        isPublished: true,
+        latestEpisodeId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
 
-    return similarSeries
-      .filter((series) => series.isPublished !== false)
+    const analyticsMap = await loadSeriesAnalytics(
+      this.prisma,
+      candidates.map((row) => row.id),
+    );
+    const hydrated = await this.hydrateSeries(candidates);
+
+    return hydrated
       .map((series) => {
-        let score = 10;
-        const genreMatches = this.countMatches(currentSeries.genres || [], series.genres || []);
-        score += genreMatches * 5;
-
-        if (typeof series.rating === "number") {
-          score += series.rating * 2;
-        }
-
-        const followCount = "_count" in (series as any) ? ((series as any)._count?.follows || 0) : 0;
-        score += Math.log10(followCount + 1) * 2;
+        const analytics = analyticsMap.get(series.id) || {
+          episodeCount: 0,
+          latestEpisodeId: "",
+          latestEpisodeNumber: null,
+          followers: 0,
+          views: 0,
+        };
+        const genreMatches = (series.genres || []).filter((genre) => currentSeries.genres.includes(genre)).length;
+        const recencyScore = Math.max(0, Date.parse(String(series.updatedAt || 0)) / 1_000_000_000);
+        const score =
+          genreMatches * 10 +
+          Math.log10(analytics.followers + 1) * 4 +
+          Math.log10(analytics.views + 1) * 2 +
+          (String(series.status || "").toLowerCase() === "completed" ? 2 : 0) +
+          recencyScore;
 
         return {
           ...series,
-          similarityScore: score,
+          similarityScore: Number(score.toFixed(3)),
         };
       })
       .sort((left, right) => right.similarityScore - left.similarityScore)
@@ -184,77 +190,62 @@ export class RecommendationService {
       allRecommendations.push(...recommendations);
     }
 
-    const uniqueRecommendations = this.deduplicateSeries(allRecommendations);
-    return uniqueRecommendations.slice(0, limit);
+    const deduped = new Map<string, any>();
+    for (const item of allRecommendations) {
+      const current = deduped.get(item.id);
+      if (!current || item.similarityScore > current.similarityScore) {
+        deduped.set(item.id, item);
+      }
+    }
+
+    return Array.from(deduped.values())
+      .sort((left, right) => right.similarityScore - left.similarityScore)
+      .slice(0, limit);
   }
 
   async getPopularSeries(limit = 10) {
-    try {
-      const rows = await this.prisma.series.findMany({
-        where: {
-          status: { not: "draft" },
-          isPublished: true,
-        },
-        orderBy: [{ rating: "desc" }, { ratingCount: "desc" }],
-        take: limit,
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          coverTone: true,
-          type: true,
-          genres: true,
-          rating: true,
-          ratingCount: true,
-          status: true,
-          badges: true,
-          adult: true,
-          isPublished: true,
-          episodePrice: true,
-          ttfEnabled: true,
-          _count: {
-            select: {
-              follows: true,
-              episodes: true,
-            },
-          },
-        } as const,
-      });
-
-      return rows.filter((series) => series.isPublished !== false);
-    } catch (error) {
-      if (!isSeriesVisibilitySchemaDrift(error)) {
-        throw error;
-      }
-      return querySeriesVisibilityCompat(this.prisma, {
-        limit,
-        onlyPublished: true,
-        orderBy: [
-          { field: "rating", direction: "desc" },
-          { field: "ratingCount", direction: "desc" },
-        ],
-        select: [
-          "id",
-          "title",
-          "description",
-          "coverTone",
-          "type",
-          "genres",
-          "rating",
-          "ratingCount",
-          "status",
-          "badges",
-          "adult",
-          "isPublished",
-          "episodePrice",
-          "ttfEnabled",
-        ],
-        statusNot: "draft",
-      });
+    const cacheKey = `recommendations:popular:${limit}`;
+    const cached = await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
+    if (cached) {
+      return cached;
     }
+
+    const rows = await this.prisma.series.findMany({
+      where: {
+        status: { not: "draft" },
+        isPublished: true,
+      },
+      orderBy: [{ follows: { _count: "desc" } }, { updatedAt: "desc" }],
+      take: Math.max(1, limit),
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        description: true,
+        coverTone: true,
+        coverUrl: true,
+        genres: true,
+        status: true,
+        adult: true,
+        isPublished: true,
+        latestEpisodeId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    const series = await this.hydrateSeries(rows);
+    await this.cacheService.set(cacheKey, series, 180);
+    return series;
   }
 
   async getHomepageSlots(): Promise<HomepageRecommendationSlot[]> {
+    const cacheKey = "recommendations:homepage-slots";
+    const cached = await this.cacheService.get<HomepageRecommendationSlot[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const orderMap = new Map<string, number>(STOREFRONT_SLOT_IDS.map((slot, index) => [slot, index]));
     const slots = await this.prisma.recommendationSlot.findMany({
       where: {
@@ -272,7 +263,7 @@ export class RecommendationService {
       },
     });
 
-    return slots
+    const normalized = slots
       .map((slot) => ({
         id: slot.id,
         slot: slot.slot,
@@ -285,19 +276,8 @@ export class RecommendationService {
           (orderMap.get(left.slot) ?? Number.MAX_SAFE_INTEGER) -
           (orderMap.get(right.slot) ?? Number.MAX_SAFE_INTEGER),
       );
-  }
 
-  private countMatches(left: string[], right: string[]): number {
-    return left.filter((item) => right.includes(item)).length;
-  }
-
-  private deduplicateSeries(series: any[]): any[] {
-    const seen = new Map<string, any>();
-    for (const item of series) {
-      if (!seen.has(item.id) || item.similarityScore > seen.get(item.id).similarityScore) {
-        seen.set(item.id, item);
-      }
-    }
-    return Array.from(seen.values()).sort((left, right) => right.similarityScore - left.similarityScore);
+    await this.cacheService.set(cacheKey, normalized, 120);
+    return normalized;
   }
 }

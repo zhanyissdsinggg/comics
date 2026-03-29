@@ -29,8 +29,8 @@ describe("EpisodeController", () => {
       },
     };
     statsService = {
-      recordSeriesView: jest.fn(),
-      recordComicView: jest.fn(),
+      recordSeriesView: jest.fn().mockResolvedValue(undefined),
+      recordComicView: jest.fn().mockResolvedValue(undefined),
     };
 
     controller = new EpisodeController(
@@ -40,7 +40,7 @@ describe("EpisodeController", () => {
     );
   });
 
-  it("returns 400 when episodeId is missing", async () => {
+  it("returns 400 when either seriesId or episodeId is missing", async () => {
     const req = { cookies: {} } as any;
     const res = { status: jest.fn() } as any;
 
@@ -49,7 +49,7 @@ describe("EpisodeController", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(result).toEqual({
       error: ERROR_CODES.INVALID_REQUEST,
-      message: "episodeId is required",
+      message: "seriesId and episodeId are required",
     });
   });
 
@@ -71,7 +71,7 @@ describe("EpisodeController", () => {
     expect(episodeService.getEpisode).not.toHaveBeenCalled();
   });
 
-  it("ignores stats failure and still returns episode payload", async () => {
+  it("keeps preview slicing active even when stats recording fails", async () => {
     prisma.series.findUnique.mockResolvedValue({
       id: "series-001",
       adult: false,
@@ -82,6 +82,10 @@ describe("EpisodeController", () => {
     episodeService.getEpisode.mockResolvedValue({
       episode: {
         id: "series-001e1",
+        seriesId: "series-001",
+        number: 1,
+        title: "Episode 1",
+        type: "comic",
         pages: [{ p: 1 }, { p: 2 }, { p: 3 }, { p: 4 }],
         previewFreePages: 2,
       },
@@ -91,13 +95,12 @@ describe("EpisodeController", () => {
     const req = { cookies: {} } as any;
     const res = { status: jest.fn() } as any;
 
-    const result = await controller.getEpisode("series-001", "series-001e1", req, res);
-    const payload = result as any;
+    const result = (await controller.getEpisode("series-001", "series-001e1", req, res)) as any;
 
-    expect(payload.episode.pages).toHaveLength(2);
-    expect(payload.episode.isPreview).toBe(true);
-    expect(payload.episode.previewCount).toBe(2);
-    expect(statsService.recordComicView).not.toHaveBeenCalled();
+    expect(result.episode.pages).toHaveLength(2);
+    expect(result.episode.isPreview).toBe(true);
+    expect(result.episode.previewCount).toBe(2);
+    expect(statsService.recordComicView).toHaveBeenCalledWith(null);
   });
 
   it("preserves zero preview pages instead of forcing a default preview", async () => {
@@ -111,6 +114,10 @@ describe("EpisodeController", () => {
     episodeService.getEpisode.mockResolvedValue({
       episode: {
         id: "series-001e1",
+        seriesId: "series-001",
+        number: 1,
+        title: "Episode 1",
+        type: "comic",
         pages: [{ p: 1 }, { p: 2 }],
         previewFreePages: 0,
       },
@@ -119,12 +126,11 @@ describe("EpisodeController", () => {
     const req = { cookies: {} } as any;
     const res = { status: jest.fn() } as any;
 
-    const result = await controller.getEpisode("series-001", "series-001e1", req, res);
-    const payload = result as any;
+    const result = (await controller.getEpisode("series-001", "series-001e1", req, res)) as any;
 
-    expect(payload.episode.pages).toEqual([]);
-    expect(payload.episode.previewCount).toBe(0);
-    expect(payload.episode.isPreview).toBe(true);
+    expect(result.episode.pages).toEqual([]);
+    expect(result.episode.previewCount).toBe(0);
+    expect(result.episode.isPreview).toBe(true);
   });
 
   it("returns an internal error instead of fake content when the episode service crashes", async () => {

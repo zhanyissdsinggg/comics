@@ -13,18 +13,36 @@
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
+import { CacheService } from "../../../common/cache/cache.service";
 import { logger } from "../../../common/logger/winston.init";
+import { CreatorCreditsService } from "../../../common/creators/creator-credits.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
-import {
-  enrichSeriesWithStorefrontFields,
-  syncSeriesAuthorField,
-} from "../../../common/utils/series-storefront-fields";
+import { enrichSeriesWithStorefrontFields, syncSeriesAuthorField } from "../../../common/utils/series-storefront-fields";
 
 @Controller("admin/series")
 @UseGuards(AdminAuthGuard)
 export class AdminSeriesController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+    private readonly creatorCreditsService: CreatorCreditsService,
+  ) {}
+
+  private async invalidateReadCaches(seriesId?: string) {
+    const patterns = [
+      "series:list:*",
+      "search:*",
+      "rankings:*",
+      "creators:*",
+      "recommendations:*",
+    ];
+    if (seriesId) {
+      patterns.push(`series:detail:${seriesId}`);
+      patterns.push(`episode:detail:${seriesId}:*`);
+    }
+    await this.cacheService.deletePatterns(patterns);
+  }
 
   private mapSeriesSummary(series: any) {
     if (!series) {
@@ -88,7 +106,14 @@ export class AdminSeriesController {
   }
 
   private async applyStorefrontMetadata(seriesId: string, input: any) {
-    await syncSeriesAuthorField(this.prisma, seriesId, input?.author);
+    if (!input || !Object.prototype.hasOwnProperty.call(input, "author")) {
+      return;
+    }
+
+    await Promise.all([
+      syncSeriesAuthorField(this.prisma, seriesId, input?.author),
+      this.creatorCreditsService.syncLegacyAuthorCredit(seriesId, input?.author),
+    ]);
   }
 
   @Get()
@@ -195,6 +220,7 @@ export class AdminSeriesController {
           },
         },
       });
+      await this.invalidateReadCaches(created.id);
       return { series: await this.enrichSeriesSummary(nextSeries || created) };
     } catch (error: any) {
       if (error?.code === "P2002") {
@@ -248,6 +274,7 @@ export class AdminSeriesController {
         },
       },
     });
+    await this.invalidateReadCaches(seriesId);
     return { series: await this.enrichSeriesSummary(nextSeries || updated) };
   }
 
@@ -261,6 +288,7 @@ export class AdminSeriesController {
 
     await this.prisma.episode.deleteMany({ where: { seriesId } });
     await this.prisma.series.delete({ where: { id: seriesId } });
+    await this.invalidateReadCaches(seriesId);
     return { ok: true };
   }
 }

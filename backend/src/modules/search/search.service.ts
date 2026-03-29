@@ -1,25 +1,10 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
+import { CacheService } from "../../common/cache/cache.service";
+import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
+import { mapStorefrontSeriesSummary } from "../../common/mappers/storefront-series.mapper";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
-
-type SearchSeries = {
-  id: string;
-  title: string;
-  type: string;
-  description?: string | null;
-  coverUrl?: string | null;
-  coverTone?: string | null;
-  badge?: string | null;
-  badges?: string[];
-  adult: boolean;
-  isPublished?: boolean;
-  genres: string[];
-  status: string;
-  rating: number;
-  ratingCount: number;
-  updatedAt: Date;
-  createdAt: Date;
-};
+import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
 
 type SearchOptions = {
   q?: string;
@@ -32,9 +17,25 @@ type SearchOptions = {
   adult?: boolean;
 };
 
+type SearchSeriesRow = {
+  id: string;
+  title: string;
+  type: string;
+  description: string | null;
+  coverUrl: string | null;
+  coverTone: string | null;
+  adult: boolean;
+  genres: string[];
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  latestEpisodeId: string | null;
+};
+
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 48;
+const SEARCH_RESULTS_TTL_SECONDS = 120;
 
 function parsePositiveInt(value: number | string | undefined, fallback: number, max?: number): number {
   const parsed = Number(value);
@@ -59,80 +60,47 @@ function normalizeText(value: string | undefined): string {
 function normalizeStatus(value: string): string {
   const normalized = normalizeText(value);
   if (normalized === "completed") {
-    return "Completed";
+    return "completed";
   }
   if (normalized === "ongoing") {
-    return "Ongoing";
+    return "ongoing";
   }
   if (normalized === "hiatus") {
-    return "Hiatus";
+    return "hiatus";
   }
-  return value.trim();
+  return normalized;
 }
 
-function getSearchText(series: SearchSeries): string {
+function buildSearchResultsCacheKey(input: {
+  adult: boolean;
+  query: string;
+  requestedTypes: string[];
+  requestedStatuses: string[];
+  requestedGenres: string[];
+  sort: string;
+  page: number;
+  pageSize: number;
+}): string {
   return [
-    series.title,
-    series.description || "",
-    series.type,
-    series.status,
-    ...(series.genres || []),
-  ]
-    .join(" ")
-    .toLowerCase();
-}
-
-function computeRelevanceScore(series: SearchSeries, query: string): number {
-  if (!query) {
-    return 0;
-  }
-
-  const title = String(series.title || "").toLowerCase();
-  const description = String(series.description || "").toLowerCase();
-  const genres = (series.genres || []).map((genre) => String(genre).toLowerCase());
-  const tokens = query.split(/\s+/).filter(Boolean);
-
-  let score = 0;
-  if (title === query) {
-    score += 200;
-  } else if (title.startsWith(query)) {
-    score += 120;
-  } else if (title.includes(query)) {
-    score += 80;
-  }
-
-  if (genres.some((genre) => genre === query)) {
-    score += 60;
-  }
-  if (genres.some((genre) => genre.includes(query))) {
-    score += 30;
-  }
-  if (description.includes(query)) {
-    score += 20;
-  }
-
-  for (const token of tokens) {
-    if (title.includes(token)) {
-      score += 16;
-    }
-    if (genres.some((genre) => genre.includes(token))) {
-      score += 10;
-    }
-    if (description.includes(token)) {
-      score += 4;
-    }
-  }
-
-  return score;
-}
-
-function compareByDateDesc(left: SearchSeries, right: SearchSeries): number {
-  return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
+    "search:results",
+    input.adult ? "adult" : "standard",
+    input.query || "all",
+    input.requestedTypes.join("|") || "all-types",
+    input.requestedStatuses.join("|") || "all-statuses",
+    input.requestedGenres.join("|") || "all-genres",
+    input.sort || "relevance",
+    `p${input.page}`,
+    `ps${input.pageSize}`,
+  ].join(":");
 }
 
 @Injectable()
 export class SearchService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+    private readonly creatorCreditsService: CreatorCreditsService,
+  ) {}
 
   private getTodayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -148,81 +116,195 @@ export class SearchService {
     return result;
   }
 
-  private buildSuggestions(query: string, list: SearchSeries[], limit = 8) {
-    const q = String(query || "").trim().toLowerCase();
-    if (!q) {
-      return [];
-    }
-    const hits: string[] = [];
-    (list || []).forEach((series) => {
-      if (series.title && String(series.title).toLowerCase().includes(q)) {
-        hits.push(series.title);
-      }
-      (series.genres || []).forEach((genre: string) => {
-        if (String(genre).toLowerCase().includes(q)) {
-          hits.push(genre);
-        }
-      });
+  private async hydrateSeries(rows: SearchSeriesRow[]) {
+    const seriesIds = rows.map((row) => row.id);
+    const [analyticsMap, creditsMap, authorMap] = await Promise.all([
+      loadSeriesAnalytics(this.prisma, seriesIds),
+      this.creatorCreditsService.getCreditsMap(seriesIds),
+      this.creatorCreditsService.getLegacyAuthorMap(seriesIds),
+    ]);
+
+    return rows.map((row) => {
+      const credits = creditsMap.get(row.id) || [];
+      const identity = this.creatorCreditsService.buildIdentity(credits, authorMap.get(row.id));
+      return mapStorefrontSeriesSummary(
+        row,
+        analyticsMap.get(row.id) || {
+          episodeCount: 0,
+          latestEpisodeId: String(row.latestEpisodeId || ""),
+          latestEpisodeNumber: null,
+          followers: 0,
+          views: 0,
+        },
+        identity,
+        credits,
+      );
     });
-    const unique = Array.from(new Set(hits));
-    return unique.slice(0, limit);
   }
 
-  private async loadSearchableSeries(adult: boolean): Promise<SearchSeries[]> {
-    try {
-      return await this.prisma.series.findMany({
-        where: adult ? { isPublished: true } : { adult: false, isPublished: true },
-        select: {
-          id: true,
-          title: true,
-          type: true,
-          description: true,
-          coverUrl: true,
-          coverTone: true,
-          badge: true,
-          badges: true,
-          adult: true,
-          isPublished: true,
-          genres: true,
-          status: true,
-          rating: true,
-          ratingCount: true,
-          updatedAt: true,
-          createdAt: true,
-        },
-      });
-    } catch (error) {
-      if (!isSeriesVisibilitySchemaDrift(error)) {
-        throw error;
-      }
-      const fallbackRows = await querySeriesVisibilityCompat(this.prisma, {
-        adult: adult ? null : false,
-        onlyPublished: true,
-        select: [
-          "id",
-          "title",
-          "type",
-          "description",
-          "coverUrl",
-          "coverTone",
-          "badge",
-          "badges",
-          "adult",
-          "isPublished",
-          "genres",
-          "status",
-          "rating",
-          "ratingCount",
-          "updatedAt",
-          "createdAt",
-        ],
-      });
-      return fallbackRows.map((row) => ({
-        ...row,
-        createdAt: row.createdAt || new Date(0),
-        updatedAt: row.updatedAt || row.createdAt || new Date(0),
-      }));
+  private buildSortSql(sort: string, query?: string) {
+    const normalizedSort = normalizeText(sort) || "relevance";
+    const normalizedQuery = String(query || "").trim();
+
+    if (normalizedSort === "latest") {
+      return Prisma.sql`ORDER BY s."updatedAt" DESC, s."createdAt" DESC`;
     }
+    if (normalizedSort === "alphabetical") {
+      return Prisma.sql`ORDER BY s."title" ASC`;
+    }
+    if (normalizedSort === "completed") {
+      return Prisma.sql`
+        ORDER BY
+          CASE WHEN LOWER(s."status") = 'completed' THEN 1 ELSE 0 END DESC,
+          s."updatedAt" DESC,
+          s."title" ASC
+      `;
+    }
+    if (["popular", "views", "rating"].includes(normalizedSort)) {
+      return Prisma.sql`
+        ORDER BY
+          COALESCE(f.followers, 0) DESC,
+          COALESCE(v.views, 0) DESC,
+          s."updatedAt" DESC,
+          s."title" ASC
+      `;
+    }
+
+    if (!normalizedQuery) {
+      return Prisma.sql`ORDER BY s."updatedAt" DESC, s."title" ASC`;
+    }
+
+    return Prisma.sql`
+      ORDER BY
+        ts_rank_cd(
+          setweight(to_tsvector('simple', COALESCE(s."title", '')), 'A') ||
+          setweight(to_tsvector('simple', COALESCE(s."description", '')), 'B') ||
+          setweight(to_tsvector('simple', array_to_string(s."genres", ' ')), 'C'),
+          websearch_to_tsquery('simple', ${normalizedQuery})
+        ) DESC,
+        COALESCE(f.followers, 0) DESC,
+        s."updatedAt" DESC,
+        s."title" ASC
+    `;
+  }
+
+  private buildFilterSql(input: {
+    adult: boolean;
+    query: string;
+    requestedTypes: string[];
+    requestedStatuses: string[];
+    requestedGenres: string[];
+  }) {
+    const clauses: Prisma.Sql[] = [Prisma.sql`s."isPublished" = true`];
+
+    if (!input.adult) {
+      clauses.push(Prisma.sql`s."adult" = false`);
+    }
+    if (input.requestedTypes.length > 0) {
+      clauses.push(Prisma.sql`LOWER(s."type") IN (${Prisma.join(input.requestedTypes)})`);
+    }
+    if (input.requestedStatuses.length > 0) {
+      clauses.push(Prisma.sql`LOWER(s."status") IN (${Prisma.join(input.requestedStatuses)})`);
+    }
+    if (input.requestedGenres.length > 0) {
+      const genreMatchers = input.requestedGenres.map((genre) => `%${genre}%`);
+      clauses.push(
+        Prisma.sql`
+          EXISTS (
+            SELECT 1
+            FROM unnest(s."genres") AS genre
+            WHERE LOWER(genre) LIKE ANY (ARRAY[${Prisma.join(genreMatchers)}])
+          )
+        `,
+      );
+    }
+    if (input.query) {
+      const likePattern = `%${input.query}%`;
+      clauses.push(
+        Prisma.sql`
+          (
+            setweight(to_tsvector('simple', COALESCE(s."title", '')), 'A') ||
+            setweight(to_tsvector('simple', COALESCE(s."description", '')), 'B') ||
+            setweight(to_tsvector('simple', array_to_string(s."genres", ' ')), 'C')
+          ) @@ websearch_to_tsquery('simple', ${input.query})
+          OR LOWER(s."title") LIKE ${likePattern}
+          OR LOWER(COALESCE(s."description", '')) LIKE ${likePattern}
+          OR EXISTS (
+            SELECT 1
+            FROM unnest(s."genres") AS genre
+            WHERE LOWER(genre) LIKE ${likePattern}
+          )
+        `,
+      );
+    }
+
+    return clauses.length > 0
+      ? Prisma.sql`WHERE ${Prisma.join(clauses, " AND ")}`
+      : Prisma.empty;
+  }
+
+  private async runSearchQuery(
+    input: {
+      adult: boolean;
+      query: string;
+      requestedTypes: string[];
+      requestedStatuses: string[];
+      requestedGenres: string[];
+      sort: string;
+      page: number;
+      pageSize: number;
+    },
+  ) {
+    const whereSql = this.buildFilterSql(input);
+    const orderSql = this.buildSortSql(input.sort, input.query);
+    const offset = (input.page - 1) * input.pageSize;
+
+    const [rows, totals] = await Promise.all([
+      this.prisma.$queryRaw<SearchSeriesRow[]>(
+        Prisma.sql`
+          SELECT
+            s."id",
+            s."title",
+            s."type",
+            s."description",
+            s."coverUrl",
+            s."coverTone",
+            s."adult",
+            s."genres",
+            s."status",
+            s."createdAt",
+            s."updatedAt",
+            s."latestEpisodeId"
+          FROM "series" s
+          LEFT JOIN (
+            SELECT "seriesId", COUNT(*)::int AS followers
+            FROM "follows"
+            GROUP BY "seriesId"
+          ) f ON f."seriesId" = s."id"
+          LEFT JOIN (
+            SELECT "seriesId", COALESCE(SUM("views"), 0)::int AS views
+            FROM "series_view_stats"
+            GROUP BY "seriesId"
+          ) v ON v."seriesId" = s."id"
+          ${whereSql}
+          ${orderSql}
+          LIMIT ${input.pageSize}
+          OFFSET ${offset}
+        `,
+      ),
+      this.prisma.$queryRaw<Array<{ total: bigint | number }>>(
+        Prisma.sql`
+          SELECT COUNT(*)::bigint AS total
+          FROM "series" s
+          ${whereSql}
+        `,
+      ),
+    ]);
+
+    return {
+      rows,
+      total: Number(totals[0]?.total || 0),
+    };
   }
 
   async search(options: SearchOptions) {
@@ -234,121 +316,159 @@ export class SearchService {
     const sort = normalizeText(options.sort) || "relevance";
     const page = parsePositiveInt(options.page, DEFAULT_PAGE);
     const pageSize = parsePositiveInt(options.pageSize, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
-
-    const list = await this.loadSearchableSeries(adult);
-    const filtered = list.filter((series) => {
-      if (!adult && series.adult) {
-        return false;
-      }
-      if (series.isPublished === false) {
-        return false;
-      }
-      if (requestedTypes.length > 0 && !requestedTypes.includes(normalizeText(series.type))) {
-        return false;
-      }
-      if (requestedStatuses.length > 0 && !requestedStatuses.includes(normalizeStatus(series.status))) {
-        return false;
-      }
-      if (requestedGenres.length > 0) {
-        const normalizedGenres = (series.genres || []).map((genre) => normalizeText(genre));
-        const hasGenre = requestedGenres.some((genre) => normalizedGenres.some((item) => item.includes(genre)));
-        if (!hasGenre) {
-          return false;
-        }
-      }
-      if (!query) {
-        return true;
-      }
-      return getSearchText(series).includes(query);
+    const cacheKey = buildSearchResultsCacheKey({
+      adult,
+      query,
+      requestedTypes,
+      requestedStatuses,
+      requestedGenres,
+      sort,
+      page,
+      pageSize,
     });
 
-    const sorted = [...filtered].sort((left, right) => {
-      if (sort === "latest") {
-        return compareByDateDesc(left, right);
-      }
-      if (sort === "rating") {
-        return right.rating - left.rating || right.ratingCount - left.ratingCount || compareByDateDesc(left, right);
-      }
-      if (sort === "popular" || sort === "views") {
-        return right.ratingCount - left.ratingCount || right.rating - left.rating || compareByDateDesc(left, right);
-      }
-      if (sort === "alphabetical") {
-        return String(left.title || "").localeCompare(String(right.title || ""), "en", {
-          sensitivity: "base",
-        });
-      }
-      if (sort === "completed") {
-        const leftCompleted = normalizeStatus(left.status) === "Completed" ? 1 : 0;
-        const rightCompleted = normalizeStatus(right.status) === "Completed" ? 1 : 0;
-        return rightCompleted - leftCompleted || compareByDateDesc(left, right);
-      }
+    const cached = await this.cacheService.get<{
+      results: Awaited<ReturnType<SearchService["hydrateSeries"]>>;
+      total: number;
+      page: number;
+      pageSize: number;
+      appliedSort: string;
+    }>(cacheKey);
+    if (cached) {
+      return cached;
+    }
 
-      const leftScore = computeRelevanceScore(left, query);
-      const rightScore = computeRelevanceScore(right, query);
-      return rightScore - leftScore || right.ratingCount - left.ratingCount || compareByDateDesc(left, right);
+    const { rows, total } = await this.runSearchQuery({
+      adult,
+      query,
+      requestedTypes,
+      requestedStatuses,
+      requestedGenres,
+      sort,
+      page,
+      pageSize,
     });
 
-    const total = sorted.length;
-    const start = (page - 1) * pageSize;
-    const results = sorted.slice(start, start + pageSize);
-
-    return {
-      results,
+    const payload = {
+      results: await this.hydrateSeries(rows),
       total,
       page,
       pageSize,
+      appliedSort: sort,
     };
+    await this.cacheService.set(cacheKey, payload, SEARCH_RESULTS_TTL_SECONDS);
+    return payload;
   }
 
   async keywords(adult: boolean) {
-    const list = await this.loadSearchableSeries(adult);
-    const genres = new Map<string, number>();
-    list.filter((series) => series.isPublished !== false).forEach((series) => {
-      (series.genres || []).forEach((genre: string) => {
-        genres.set(genre, (genres.get(genre) || 0) + 1);
-      });
-    });
-    const topGenres = Array.from(genres.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([genre]) => genre);
-    const topTitles = [...list].filter((series) => series.isPublished !== false)
-      .sort((a, b) => b.ratingCount - a.ratingCount || compareByDateDesc(a, b))
-      .slice(0, 4)
-      .map((series) => series.title);
-    return Array.from(new Set([...topGenres, ...topTitles]));
+    const cacheKey = `search:keywords:${adult ? "adult" : "standard"}`;
+    const cached = await this.cacheService.get<string[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const [genres, titles] = await Promise.all([
+      this.prisma.$queryRaw<Array<{ genre: string; count: number }>>(
+        Prisma.sql`
+          SELECT genre, COUNT(*)::int AS count
+          FROM (
+            SELECT unnest("genres") AS genre
+            FROM "series"
+            WHERE "isPublished" = true
+              ${adult ? Prisma.empty : Prisma.sql`AND "adult" = false`}
+          ) expanded
+          WHERE genre IS NOT NULL AND TRIM(genre) <> ''
+          GROUP BY genre
+          ORDER BY count DESC, genre ASC
+          LIMIT 6
+        `,
+      ),
+      this.prisma.series.findMany({
+        where: adult ? { isPublished: true } : { isPublished: true, adult: false },
+        orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
+        take: 4,
+        select: { title: true },
+      }),
+    ]);
+
+    const keywords = Array.from(
+      new Set([
+        ...genres.map((item) => item.genre),
+        ...titles.map((item) => item.title),
+      ]),
+    ).slice(0, 10);
+
+    await this.cacheService.set(cacheKey, keywords, 300);
+    return keywords;
   }
 
   async suggest(query: string, adult: boolean) {
-    const list = await this.loadSearchableSeries(adult);
-    return this.buildSuggestions(query, list.filter((series) => series.isPublished !== false), 8);
+    const normalizedQuery = normalizeText(query);
+    if (!normalizedQuery) {
+      return [];
+    }
+
+    const cacheKey = `search:suggest:${adult ? "adult" : "standard"}:${normalizedQuery}`;
+    const cached = await this.cacheService.get<string[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const likePattern = `%${normalizedQuery}%`;
+    const [titles, genres] = await Promise.all([
+      this.prisma.$queryRaw<Array<{ value: string }>>(
+        Prisma.sql`
+          SELECT DISTINCT "title" AS value
+          FROM "series"
+          WHERE "isPublished" = true
+            ${adult ? Prisma.empty : Prisma.sql`AND "adult" = false`}
+            AND LOWER("title") LIKE ${likePattern}
+          ORDER BY value ASC
+          LIMIT 6
+        `,
+      ),
+      this.prisma.$queryRaw<Array<{ value: string }>>(
+        Prisma.sql`
+          SELECT DISTINCT genre AS value
+          FROM (
+            SELECT unnest("genres") AS genre
+            FROM "series"
+            WHERE "isPublished" = true
+              ${adult ? Prisma.empty : Prisma.sql`AND "adult" = false`}
+          ) expanded
+          WHERE LOWER(genre) LIKE ${likePattern}
+          ORDER BY value ASC
+          LIMIT 6
+        `,
+      ),
+    ]);
+
+    const suggestions = Array.from(new Set([...titles, ...genres].map((item) => item.value))).slice(0, 8);
+    await this.cacheService.set(cacheKey, suggestions, 120);
+    return suggestions;
   }
 
   async hot(adult: boolean, windowParam?: string) {
-    const windowKey = ["week", "month"].includes(windowParam || "")
-      ? windowParam
-      : "day";
+    const windowKey = ["week", "month"].includes(String(windowParam || "").trim()) ? windowParam : "day";
+    const cacheKey = `search:hot:${adult ? "adult" : "standard"}:${windowKey}`;
+    const cached = await this.cacheService.get<string[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const days = windowKey === "month" ? 30 : windowKey === "week" ? 7 : 1;
     const dateKeys = this.buildDateRange(days);
-    const rows = await this.prisma.searchLog.findMany({
+    const rows = await this.prisma.searchLog.groupBy({
+      by: ["keyword"],
       where: { dateKey: { in: dateKeys } },
-      orderBy: { count: "desc" },
-      take: 50,
+      _sum: { count: true },
+      orderBy: [{ _sum: { count: "desc" } }, { keyword: "asc" }],
+      take: 10,
     });
-    const counts = new Map<string, number>();
-    rows.forEach((row) => {
-      counts.set(row.keyword, (counts.get(row.keyword) || 0) + row.count);
-    });
-    const hot = Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .map(([keyword]) => keyword);
-    const list = await this.loadSearchableSeries(adult);
-    const fallback = [...list].filter((series) => series.isPublished !== false)
-      .sort((a, b) => b.ratingCount - a.ratingCount || compareByDateDesc(a, b))
-      .slice(0, 4)
-      .map((series) => series.title);
-    return Array.from(new Set([...hot, ...fallback])).slice(0, 10);
+    const hotKeywords = rows.map((row) => row.keyword);
+
+    await this.cacheService.set(cacheKey, hotKeywords, 120);
+    return hotKeywords;
   }
 
   async log(_userId: string, query: string) {
@@ -362,5 +482,6 @@ export class SearchService {
       update: { count: { increment: 1 } },
       create: { dateKey: today, keyword, count: 1 },
     });
+    await this.cacheService.deletePatterns(["search:hot:*", "search:results:*"]);
   }
 }

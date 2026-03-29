@@ -12,6 +12,7 @@ import {
 } from "express";
 import { join } from "path";
 import { AppModule } from "./app.module";
+import { getAppConfig } from "./common/config/app-config";
 import { ObservabilityService } from "./common/observability/observability.service";
 import { createObservabilityMiddleware } from "./common/observability/observability.middleware";
 import { ResponseEnvelopeInterceptor } from "./common/interceptors/response-envelope.interceptor";
@@ -28,10 +29,11 @@ import { SentryMiddleware } from "./common/sentry/sentry.middleware";
 const normalizeOrigin = (origin: string) => origin.trim().replace(/\/+$/, "");
 
 async function bootstrap(): Promise<void> {
+  const appConfig = getAppConfig();
   initSentry();
 
   const logLevels: LogLevel[] =
-    process.env.NODE_ENV === "production"
+    appConfig.environment === "production"
       ? ["error", "warn"]
       : ["log", "error", "warn", "debug", "verbose"];
 
@@ -53,7 +55,7 @@ async function bootstrap(): Promise<void> {
       "Permissions-Policy",
       "camera=(), microphone=(), geolocation=(), interest-cohort=()",
     );
-    if (process.env.NODE_ENV === "production") {
+    if (appConfig.environment === "production") {
       res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
     }
     next();
@@ -66,10 +68,9 @@ async function bootstrap(): Promise<void> {
     res.status(200).json({ ok: true, service: "gush-backend", time: new Date().toISOString() }),
   );
 
-  const originEnv = process.env.FRONTEND_ORIGIN || "";
-  const allowedOrigins = originEnv.split(",").map(normalizeOrigin).filter(Boolean);
+  const allowedOrigins = appConfig.server.frontendOrigins.map(normalizeOrigin).filter(Boolean);
   const allowedOriginSet = new Set(allowedOrigins);
-  const isProd = process.env.NODE_ENV === "production";
+  const isProd = appConfig.environment === "production";
   const uploadsDir = join(process.cwd(), "public", "uploads");
   expressApp.use(
     "/uploads",
@@ -137,14 +138,14 @@ async function bootstrap(): Promise<void> {
   app.useGlobalInterceptors(new TimeoutInterceptor());
 
   const config = new DocumentBuilder()
-    .setTitle("Gush Backend")
-    .setDescription("Mock backend API for Gush.")
-    .setVersion("0.1.0")
+    .setTitle("Gush Reading Platform Backend")
+    .setDescription("Production backend for the Gush comics-and-novels reading platform.")
+    .setVersion("1.0.0")
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api/docs", app, document);
 
-  const port = Number(process.env.PORT || 4000);
+  const port = appConfig.server.port;
   await app.listen(port);
   logger.info(`Application started on port: ${port}`);
 }

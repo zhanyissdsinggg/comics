@@ -1,9 +1,10 @@
 import { createHash, createCipheriv, createDecipheriv, randomBytes } from "crypto";
+import { getAppConfig } from "../config/app-config";
 
 const PREFIX = "enc_v1";
 
 function getKey() {
-  const secret = process.env.EMAIL_SECRET || "";
+  const secret = getAppConfig().email.secret;
   if (!secret) {
     return null;
   }

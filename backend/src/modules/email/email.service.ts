@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { getAppConfig, getPrimaryFrontendOrigin } from "../../common/config/app-config";
 import { logger } from "../../common/logger/winston.init";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import {
@@ -16,7 +17,7 @@ import {
 } from "./email-config";
 
 function getFrontendOrigin(): string {
-  return process.env.FRONTEND_ORIGIN?.split(",")[0]?.trim() || "http://localhost:3000";
+  return getPrimaryFrontendOrigin();
 }
 
 const CACHE_TTL_MS = 60_000;
@@ -222,15 +223,16 @@ export class EmailService {
     payload: EmailMessagePayload,
     error: string,
   ): Promise<void> {
-    const adminEmail = config.adminNotifyEmail || process.env.ADMIN_NOTIFY_EMAIL || "";
+    const appConfig = getAppConfig();
+    const adminEmail = config.adminNotifyEmail || appConfig.email.adminNotifyEmail || "";
     if (!adminEmail) {
       return;
     }
 
     const message = `Email send failed for ${payload.to}. Subject: ${payload.subject}. Error: ${error}`;
-    const provider = config.provider || process.env.EMAIL_PROVIDER || "console";
+    const provider = config.provider || appConfig.email.provider || "console";
     const alertPayload: EmailMessagePayload = {
-      from: config.from || process.env.EMAIL_FROM || "no-reply@gush.local",
+      from: config.from || appConfig.email.from || "no-reply@gush.local",
       to: adminEmail,
       subject: "[Alert] Email delivery failed",
       html: `<p>${message}</p>`,
@@ -247,8 +249,9 @@ export class EmailService {
     options: { priority?: EmailPriority } = {},
   ): Promise<{ ok: boolean }> {
     const config = await this.loadConfig();
-    const provider = config.provider || process.env.EMAIL_PROVIDER || "console";
-    const from = config.from || process.env.EMAIL_FROM || "no-reply@gush.local";
+    const appConfig = getAppConfig();
+    const provider = config.provider || appConfig.email.provider || "console";
+    const from = config.from || appConfig.email.from || "no-reply@gush.local";
     const payload: EmailMessagePayload = { from, to, subject, html, text };
     const priority = options.priority || "normal";
 
@@ -356,7 +359,7 @@ export class EmailService {
 
   async sendSmsOtp(phone: string, code: string): Promise<SendResult> {
     const config = await this.loadConfig();
-    const webhookUrl = config.smsWebhookUrl || process.env.SMS_WEBHOOK_URL || "";
+    const webhookUrl = config.smsWebhookUrl || getAppConfig().email.smsWebhookUrl || "";
     return this.sendViaSmsWebhook(phone, `Your login code is ${code}`, webhookUrl);
   }
 }

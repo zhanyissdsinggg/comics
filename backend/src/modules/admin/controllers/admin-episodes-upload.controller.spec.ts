@@ -3,6 +3,7 @@ import AdmZip = require("adm-zip");
 import { BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CacheService } from '../../../common/cache/cache.service';
 import { AdminEpisodesUploadController } from './admin-episodes-upload.controller';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 
@@ -38,6 +39,12 @@ describe('AdminEpisodesUploadController', () => {
               findFirst: jest.fn().mockResolvedValue({ id: 'series-1e1' }),
               upsert: jest.fn().mockResolvedValue({ id: 'series-1e1' }),
             },
+          },
+        },
+        {
+          provide: CacheService,
+          useValue: {
+            deletePatterns: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],

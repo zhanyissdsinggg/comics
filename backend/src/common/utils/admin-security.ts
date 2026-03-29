@@ -1,4 +1,5 @@
-﻿import { createHash, createHmac, timingSafeEqual } from "crypto";
+import { createHash, createHmac, timingSafeEqual } from "crypto";
+import { getAdminTotpConfig, getAppConfig } from "../config/app-config";
 
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const DEFAULT_TOTP_DIGITS = 6;
@@ -79,16 +80,7 @@ export function validateAdminKeyFormat(key: string): boolean {
 }
 
 export function getAdminKeysFromEnv(): string[] {
-  const keys = [
-    ...String(process.env.ADMIN_KEYS || "")
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean),
-  ];
-  if (process.env.ADMIN_KEY) {
-    keys.push(String(process.env.ADMIN_KEY).trim());
-  }
-  return [...new Set(keys.filter(Boolean))];
+  return [...new Set(getAppConfig().admin.keys.filter(Boolean))];
 }
 
 export function getAdminIdentityFromKey(adminKey: string): string | null {
@@ -107,7 +99,7 @@ export function getAdminIdentityFromKey(adminKey: string): string | null {
 }
 
 export function isAdminTotpEnabled(): boolean {
-  return Boolean(String(process.env.ADMIN_TOTP_SECRET || "").trim());
+  return Boolean(getAdminTotpConfig().secret);
 }
 
 export function verifyAdminTotpCode(code: string): boolean {
@@ -116,19 +108,19 @@ export function verifyAdminTotpCode(code: string): boolean {
     return false;
   }
 
-  const secretRaw = String(process.env.ADMIN_TOTP_SECRET || "").trim();
-  if (!secretRaw) {
+  const totpConfig = getAdminTotpConfig();
+  if (!totpConfig.secret) {
     return true;
   }
 
-  const decodedSecret = decodeBase32(secretRaw);
+  const decodedSecret = decodeBase32(totpConfig.secret);
   if (!decodedSecret.length) {
     return false;
   }
 
-  const digits = toPositiveInt(process.env.ADMIN_TOTP_DIGITS, DEFAULT_TOTP_DIGITS);
-  const periodSeconds = toPositiveInt(process.env.ADMIN_TOTP_PERIOD_SECONDS, DEFAULT_TOTP_PERIOD_SECONDS);
-  const windowSize = toPositiveInt(process.env.ADMIN_TOTP_WINDOW, DEFAULT_TOTP_WINDOW);
+  const digits = toPositiveInt(totpConfig.digits, DEFAULT_TOTP_DIGITS);
+  const periodSeconds = toPositiveInt(totpConfig.periodSeconds, DEFAULT_TOTP_PERIOD_SECONDS);
+  const windowSize = toPositiveInt(totpConfig.window, DEFAULT_TOTP_WINDOW);
   const currentCounter = Math.floor(Date.now() / 1000 / periodSeconds);
 
   for (let offset = -windowSize; offset <= windowSize; offset += 1) {

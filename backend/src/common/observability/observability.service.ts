@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { getAppConfig, getObservabilityRuntimeConfig } from "../config/app-config";
 import { logger } from "../logger/winston.init";
 
 type RequestSnapshot = {
@@ -72,18 +73,16 @@ function sanitizeText(value: unknown, maxLength: number): string {
 @Injectable()
 export class ObservabilityService {
   private readonly startedAt = Date.now();
-  private readonly sentryEnabled = Boolean(process.env.SENTRY_DSN);
-  private readonly alertWebhook = String(process.env.ALERT_WEBHOOK_URL || "").trim();
-  private readonly slowRequestMs = toNumber(
-    process.env.OBS_SLOW_REQUEST_MS,
-    DEFAULT_SLOW_REQUEST_MS,
-  );
+  private readonly runtimeConfig = getObservabilityRuntimeConfig();
+  private readonly sentryEnabled = Boolean(this.runtimeConfig.sentryDsn);
+  private readonly alertWebhook = this.runtimeConfig.alertWebhookUrl;
+  private readonly slowRequestMs = toNumber(this.runtimeConfig.slowRequestMs, DEFAULT_SLOW_REQUEST_MS);
   private readonly alertSlowRequestMs = toNumber(
-    process.env.OBS_ALERT_SLOW_REQUEST_MS,
+    this.runtimeConfig.alertSlowRequestMs,
     DEFAULT_ALERT_SLOW_REQUEST_MS,
   );
   private readonly alertCooldownMs = toNumber(
-    process.env.OBS_ALERT_COOLDOWN_MS,
+    this.runtimeConfig.alertCooldownMs,
     DEFAULT_ALERT_COOLDOWN_MS,
   );
 
@@ -282,7 +281,7 @@ export class ObservabilityService {
     const payload = {
       service: "gush-backend",
       type,
-      environment: process.env.NODE_ENV || "development",
+      environment: getAppConfig().environment,
       event,
       sentAt: new Date().toISOString(),
     };

@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { findSeriesVisibilityCompat, isSeriesVisibilitySchemaDrift } from "../../common/utils/series-visibility";
 import { chargeWallet } from "../../common/utils/wallet";
 import {
   buildWalletSnapshot,
@@ -16,29 +15,14 @@ export class EntitlementsService {
   constructor(private readonly prisma: PrismaService) {}
 
   private async findPublishedSeries(seriesId: string) {
-    try {
-      const series = await this.prisma.series.findUnique({
-        where: { id: seriesId },
-        select: { id: true, isPublished: true, ttfIntervalHours: true },
-      });
-      if (!series || series.isPublished === false) {
-        return null;
-      }
-      return series;
-    } catch (error) {
-      if (!isSeriesVisibilitySchemaDrift(error)) {
-        throw error;
-      }
-      const fallback = await findSeriesVisibilityCompat(this.prisma, seriesId, [
-        "id",
-        "isPublished",
-        "ttfIntervalHours",
-      ]);
-      if (!fallback || fallback.isPublished === false) {
-        return null;
-      }
-      return fallback;
+    const series = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+      select: { id: true, isPublished: true, ttfIntervalHours: true },
+    });
+    if (!series || series.isPublished === false) {
+      return null;
     }
+    return series;
   }
 
   private applyTtfAcceleration(episode: any, series: any, subscription: any) {

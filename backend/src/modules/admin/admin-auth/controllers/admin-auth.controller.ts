@@ -11,6 +11,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { randomUUID } from "crypto";
 import { IncomingHttpHeaders } from "http";
+import { getAdminCookieSecureOverride, getAppConfig } from "../../../../common/config/app-config";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { getRedisClient } from "../../../../common/redis/client";
 import { logger } from "../../../../common/logger/winston.init";
@@ -328,7 +329,8 @@ export class AdminAuthController {
     ip: string;
     reason: LoginFailureReason;
   }): Promise<void> {
-    const webhook = String(process.env.ALERT_WEBHOOK_URL || "").trim();
+    const appConfig = getAppConfig();
+    const webhook = String(appConfig.observability.alertWebhookUrl || "").trim();
     if (!webhook) {
       return;
     }
@@ -339,7 +341,7 @@ export class AdminAuthController {
       reason: input.reason,
       ip: input.ip,
       time: new Date().toISOString(),
-      environment: process.env.NODE_ENV || "development",
+      environment: appConfig.environment,
     };
 
     try {
@@ -554,10 +556,11 @@ export class AdminAuthController {
   }
 
   private shouldUseSecureCookie(): boolean {
-    if (process.env.ADMIN_COOKIE_SECURE) {
-      return process.env.ADMIN_COOKIE_SECURE === "true";
+    const override = getAdminCookieSecureOverride();
+    if (override) {
+      return override === "true";
     }
-    return process.env.NODE_ENV === "production";
+    return getAppConfig().environment === "production";
   }
 }
 

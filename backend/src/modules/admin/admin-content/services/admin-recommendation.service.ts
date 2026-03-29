@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma, RankingConfig, RecommendationAnalytics, RecommendationSlot, Series } from '@prisma/client';
+import { CacheService } from '../../../../common/cache/cache.service';
 import { PrismaService } from '../../../../common/prisma/prisma.service';
 import type {
   CreateRankingConfigInput,
@@ -201,7 +202,18 @@ function summarizePerformance(items: RecommendationAnalytics[]): RecommendationP
 
 @Injectable()
 export class AdminRecommendationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+  ) {}
+
+  private async invalidateRecommendationCaches(): Promise<void> {
+    await this.cacheService.deletePatterns([
+      "recommendations:*",
+      "rankings:*",
+      "search:keywords:*",
+    ]);
+  }
 
   async getRecommendationSlots(
     filters: RecommendationPaginationFilters = {},
@@ -232,6 +244,7 @@ export class AdminRecommendationService {
       },
     });
 
+    await this.invalidateRecommendationCaches();
     return mapSlot(slot);
   }
 
@@ -250,13 +263,16 @@ export class AdminRecommendationService {
       data: updateData,
     });
 
+    await this.invalidateRecommendationCaches();
     return mapSlot(slot);
   }
 
   async deleteRecommendationSlot(id: string): Promise<RecommendationSlot> {
-    return this.prisma.recommendationSlot.delete({
+    const slot = await this.prisma.recommendationSlot.delete({
       where: { id },
     });
+    await this.invalidateRecommendationCaches();
+    return slot;
   }
 
   async getRankingConfigs(filters: RecommendationPaginationFilters = {}): Promise<RankingConfigListResult> {
@@ -286,6 +302,7 @@ export class AdminRecommendationService {
       },
     });
 
+    await this.invalidateRecommendationCaches();
     return mapRankingConfig(config);
   }
 
@@ -318,13 +335,16 @@ export class AdminRecommendationService {
       data: updateData,
     });
 
+    await this.invalidateRecommendationCaches();
     return mapRankingConfig(config);
   }
 
   async deleteRankingConfig(id: string): Promise<RankingConfig> {
-    return this.prisma.rankingConfig.delete({
+    const config = await this.prisma.rankingConfig.delete({
       where: { id },
     });
+    await this.invalidateRecommendationCaches();
+    return config;
   }
 
   async getRecommendationAnalytics(
@@ -401,11 +421,14 @@ export class AdminRecommendationService {
     const seriesType = hasText(filters.seriesType) ? filters.seriesType : 'all';
     const adult = readBooleanLike(filters.adult, false);
 
-    let orderBy: Prisma.SeriesOrderByWithRelationInput = { ratingCount: 'desc' };
-    if (rankingType === 'rating') {
-      orderBy = { rating: 'desc' };
-    } else if (rankingType === 'trending') {
-      orderBy = { updatedAt: 'desc' };
+    let orderBy: Prisma.SeriesOrderByWithRelationInput[] = [
+      { follows: { _count: 'desc' } },
+      { updatedAt: 'desc' },
+    ];
+    if (rankingType === 'trending' || rankingType === 'new') {
+      orderBy = [{ updatedAt: 'desc' }, { createdAt: 'desc' }];
+    } else if (rankingType === 'views') {
+      orderBy = [{ viewStats: { _count: 'desc' } }, { updatedAt: 'desc' }];
     }
 
     const where: Prisma.SeriesWhereInput = {};

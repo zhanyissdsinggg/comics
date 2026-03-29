@@ -1,193 +1,166 @@
-import { Injectable } from '@nestjs/common';
-import { createClient, RedisClientType } from 'redis';
-import { logger } from '../logger/winston.init';
+import { Injectable } from "@nestjs/common";
+import { getRedisClient, getRedisStatus } from "../redis/client";
+import { logger } from "../logger/winston.init";
 
-/**
- * Redis缓存服务 - 统一管理所有缓存操作
- * 这个SB缓存服务处理热点数据的缓存，提升系统性能
- */
+type LocalCacheEntry = {
+  payload: string;
+  expiresAt: number | null;
+};
+
+function wildcardToRegExp(pattern: string): RegExp {
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp(`^${escaped}$`);
+}
+
 @Injectable()
 export class CacheService {
-  private client: RedisClientType;
-  private isConnected = false;
+  private readonly localFallback = new Map<string, LocalCacheEntry>();
 
-  constructor() {
-    // 老王说：如果没有配置Redis，就不创建客户端，避免无谓的连接尝试
-    if (!process.env.REDIS_HOST) {
-      logger.warn('未配置Redis，将使用内存缓存');
-      this.client = null as any;
+  private readLocal<T>(key: string): T | null {
+    const entry = this.localFallback.get(key);
+    if (!entry) {
+      return null;
+    }
+    if (entry.expiresAt !== null && entry.expiresAt <= Date.now()) {
+      this.localFallback.delete(key);
+      return null;
+    }
+    try {
+      return JSON.parse(entry.payload) as T;
+    } catch {
+      this.localFallback.delete(key);
+      return null;
+    }
+  }
+
+  private writeLocal(key: string, payload: string, ttlSeconds?: number): void {
+    this.localFallback.set(key, {
+      payload,
+      expiresAt: typeof ttlSeconds === "number" && ttlSeconds > 0 ? Date.now() + ttlSeconds * 1000 : null,
+    });
+  }
+
+  private async scanDelete(pattern: string): Promise<void> {
+    const client = getRedisClient();
+    if (!client) {
+      const matcher = wildcardToRegExp(pattern);
+      for (const key of [...this.localFallback.keys()]) {
+        if (matcher.test(key)) {
+          this.localFallback.delete(key);
+        }
+      }
       return;
     }
 
-    this.client = createClient({
-      socket: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        reconnectStrategy: false, // 老王说：禁用自动重连，避免大量日志
-      },
-      password: process.env.REDIS_PASSWORD,
+    const stream = client.scanStream({ match: pattern, count: 100 });
+    const keys: string[] = [];
+
+    await new Promise<void>((resolve, reject) => {
+      stream.on("data", (chunk: string[]) => {
+        if (Array.isArray(chunk) && chunk.length > 0) {
+          keys.push(...chunk);
+        }
+      });
+      stream.on("error", reject);
+      stream.on("end", () => resolve());
     });
 
-    this.client.on('error', (err) => {
-      // 老王说：只记录一次错误，避免日志爆炸
-      if (!this.isConnected) {
-        logger.error('Redis连接错误，将使用内存缓存', { error: err });
-      }
-      this.isConnected = false;
-    });
-
-    this.client.on('connect', () => {
-      logger.info('Redis连接成功');
-      this.isConnected = true;
-    });
-  }
-
-  /**
-   * 初始化Redis连接
-   */
-  async connect(): Promise<void> {
-    if (!this.isConnected) {
-      try {
-        await this.client.connect();
-      } catch (error) {
-        logger.error('Redis连接失败，将使用内存缓存', { error });
-      }
+    if (keys.length > 0) {
+      await client.del(...keys);
     }
   }
 
-  /**
-   * 断开Redis连接
-   */
-  async disconnect(): Promise<void> {
-    if (this.isConnected) {
-      await this.client.quit();
-      this.isConnected = false;
-    }
-  }
-
-  /**
-   * 获取缓存值
-   */
   async get<T>(key: string): Promise<T | null> {
-    if (!this.isConnected) {
-      return null;
+    const client = getRedisClient();
+    if (!client) {
+      return this.readLocal<T>(key);
     }
 
     try {
-      const value = await this.client.get(key);
+      const value = await client.get(key);
       if (!value) {
-        return null;
+        return this.readLocal<T>(key);
       }
-
       return JSON.parse(value) as T;
     } catch (error) {
-      logger.error(`获取缓存失败 [${key}]`, { error });
-      return null;
+      logger.warn("[cache] read failed, falling back to in-memory cache", {
+        key,
+        status: getRedisStatus(),
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return this.readLocal<T>(key);
     }
   }
 
-  /**
-   * 设置缓存值
-   * @param key 缓存键
-   * @param value 缓存值
-   * @param ttlSeconds 过期时间（秒）
-   */
   async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
-    if (!this.isConnected) {
+    const payload = JSON.stringify(value);
+    this.writeLocal(key, payload, ttlSeconds);
+
+    const client = getRedisClient();
+    if (!client) {
       return;
     }
 
     try {
-      const serialized = JSON.stringify(value);
-
-      if (ttlSeconds) {
-        await this.client.setEx(key, ttlSeconds, serialized);
+      if (typeof ttlSeconds === "number" && ttlSeconds > 0) {
+        await client.set(key, payload, "EX", ttlSeconds);
       } else {
-        await this.client.set(key, serialized);
+        await client.set(key, payload);
       }
     } catch (error) {
-      logger.error(`设置缓存失败 [${key}]`, { error });
+      logger.warn("[cache] write failed, kept local fallback only", {
+        key,
+        status: getRedisStatus(),
+        message: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
-  /**
-   * 删除缓存
-   */
   async delete(key: string): Promise<void> {
-    if (!this.isConnected) {
+    this.localFallback.delete(key);
+
+    const client = getRedisClient();
+    if (!client) {
       return;
     }
 
-    try {
-      await this.client.del(key);
-    } catch (error) {
-      logger.error(`删除缓存失败 [${key}]`, { error });
-    }
+    await client.del(key).catch((error: unknown) => {
+      logger.warn("[cache] delete failed", {
+        key,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    });
   }
 
-  /**
-   * 批量删除缓存（支持通配符）
-   */
   async deletePattern(pattern: string): Promise<void> {
-    if (!this.isConnected) {
-      return;
-    }
+    await this.scanDelete(pattern).catch((error: unknown) => {
+      logger.warn("[cache] pattern delete failed", {
+        pattern,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    });
+  }
 
-    try {
-      const keys = await this.client.keys(pattern);
-      if (keys.length > 0) {
-        await this.client.del(keys);
-      }
-    } catch (error) {
-      logger.error(`批量删除缓存失败 [${pattern}]`, { error });
+  async deletePatterns(patterns: string[]): Promise<void> {
+    for (const pattern of patterns) {
+      await this.deletePattern(pattern);
     }
   }
 
-  /**
-   * 清空所有缓存
-   */
-  async clear(): Promise<void> {
-    if (!this.isConnected) {
-      return;
-    }
-
-    try {
-      await this.client.flushDb();
-    } catch (error) {
-      logger.error('清空缓存失败', { error });
-    }
-  }
-
-  /**
-   * 检查缓存是否存在
-   */
   async exists(key: string): Promise<boolean> {
-    if (!this.isConnected) {
+    if (this.readLocal(key) !== null) {
+      return true;
+    }
+
+    const client = getRedisClient();
+    if (!client) {
       return false;
     }
 
     try {
-      const result = await this.client.exists(key);
-      return result === 1;
-    } catch (error) {
-      logger.error(`检查缓存失败 [${key}]`, { error });
+      return (await client.exists(key)) === 1;
+    } catch {
       return false;
-    }
-  }
-
-  /**
-   * 获取缓存的剩余TTL（秒）
-   */
-  async getTtl(key: string): Promise<number> {
-    if (!this.isConnected) {
-      return -1;
-    }
-
-    try {
-      return await this.client.ttl(key);
-    } catch (error) {
-      logger.error(`获取TTL失败 [${key}]`, { error });
-      return -1;
     }
   }
 }

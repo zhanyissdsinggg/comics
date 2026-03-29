@@ -15,6 +15,7 @@ import { memoryStorage } from "multer";
 import AdmZip = require("adm-zip");
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { extname, join } from "path";
+import { CacheService } from "../../../common/cache/cache.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { buildPublicAssetUrl } from "../../../common/utils/public-asset-url";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
@@ -68,8 +69,23 @@ function createEpisodeAssetPath(seriesId: string, chapterTitle: string, index: n
 export class AdminEpisodesUploadController {
   private readonly logger = new Logger(AdminEpisodesUploadController.name);
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheService: CacheService,
+  ) {
     ensureDirectory(episodeUploadsDir);
+  }
+
+  private async invalidateReadCaches(seriesId: string) {
+    await this.cacheService.deletePatterns([
+      `series:detail:${seriesId}`,
+      `episode:detail:${seriesId}:*`,
+      "series:list:*",
+      "search:*",
+      "rankings:*",
+      "creators:*",
+      "recommendations:*",
+    ]);
   }
 
   private async syncLatest(seriesId: string) {
@@ -237,6 +253,7 @@ export class AdminEpisodesUploadController {
     });
 
     this.logger.log(`Successfully uploaded ${created.length} episodes for series: ${seriesId}`);
+    await this.invalidateReadCaches(seriesId);
     return { episodes, created: created.length };
   }
 }

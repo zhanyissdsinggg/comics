@@ -1,5 +1,7 @@
 import { ConflictException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
+import { CacheService } from "../../../common/cache/cache.service";
+import { CreatorCreditsService } from "../../../common/creators/creator-credits.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { AdminSeriesController } from "./admin-series.controller";
@@ -33,6 +35,18 @@ describe("AdminSeriesController", () => {
             seriesViewStat: {
               groupBy: jest.fn().mockResolvedValue([]),
             },
+          },
+        },
+        {
+          provide: CacheService,
+          useValue: {
+            deletePatterns: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: CreatorCreditsService,
+          useValue: {
+            syncLegacyAuthorCredit: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],

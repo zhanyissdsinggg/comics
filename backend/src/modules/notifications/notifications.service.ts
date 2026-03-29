@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { Promotion } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { ExpiringMapCache } from "../../common/utils/runtime-cache";
-import { isSeriesVisibilitySchemaDrift, querySeriesVisibilityCompat } from "../../common/utils/series-visibility";
 import { getSubscriptionPayload } from "../../common/utils/subscription";
 
 type FollowedSeriesEpisodeRow = {
@@ -42,26 +41,15 @@ export class NotificationsService {
       return [];
     }
 
-    try {
-      return await this.prisma.series.findMany({
-        where: { id: { in: seriesIds }, isPublished: true },
-        select: {
-          id: true,
-          title: true,
-          ttfEnabled: true,
-          ttfIntervalHours: true,
-        },
-      });
-    } catch (error) {
-      if (!isSeriesVisibilitySchemaDrift(error)) {
-        throw error;
-      }
-      return querySeriesVisibilityCompat(this.prisma, {
-        ids: seriesIds,
-        onlyPublished: true,
-        select: ["id", "title", "ttfEnabled", "ttfIntervalHours", "isPublished"],
-      });
-    }
+    return this.prisma.series.findMany({
+      where: { id: { in: seriesIds }, isPublished: true },
+      select: {
+        id: true,
+        title: true,
+        ttfEnabled: true,
+        ttfIntervalHours: true,
+      },
+    });
   }
 
   private async listFollowedSeriesWithLatestEpisode(userId: string) {

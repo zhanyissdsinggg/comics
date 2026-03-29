@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
+import { getAppConfig } from "../../../common/config/app-config";
 import { AdminAuthController } from "./controllers/admin-auth.controller";
 import { AdminLogService } from "../../../common/services/admin-log.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -9,12 +10,12 @@ import { AdminAuditInterceptor } from "../interceptors/admin-audit.interceptor";
 const TEST_JWT_SECRET = "gush-jwt-test-secret";
 
 function resolveJwtSecret(): string {
-  const secret = String(process.env.JWT_SECRET || "").trim();
+  const secret = String(getAppConfig().auth.jwtSecret || "").trim();
   if (secret) {
     return secret;
   }
 
-  if (process.env.NODE_ENV === "test") {
+  if (getAppConfig().environment === "test") {
     return TEST_JWT_SECRET;
   }
 

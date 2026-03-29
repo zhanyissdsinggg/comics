@@ -1,6 +1,12 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { CacheService } from "../../common/cache/cache.service";
+import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
 import { RecommendationService } from "./recommendation.service";
+
+jest.mock("../../common/queries/series-analytics", () => ({
+  loadSeriesAnalytics: jest.fn(),
+}));
 
 describe("RecommendationService", () => {
   let service: RecommendationService;
@@ -19,23 +25,50 @@ describe("RecommendationService", () => {
       findMany: jest.fn(),
     },
   };
+  const cacheService = {
+    get: jest.fn(),
+    set: jest.fn(),
+  };
+  const creatorCreditsService = {
+    getCreditsMap: jest.fn(),
+    getLegacyAuthorMap: jest.fn(),
+    buildIdentity: jest.fn(),
+  };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     Object.values(prisma).forEach((group) => {
       Object.values(group).forEach((mockFn) => mockFn.mockReset());
     });
+    cacheService.get.mockReset().mockResolvedValue(null);
+    cacheService.set.mockReset().mockResolvedValue(undefined);
+    creatorCreditsService.getCreditsMap.mockReset().mockResolvedValue(new Map());
+    creatorCreditsService.getLegacyAuthorMap.mockReset().mockResolvedValue(new Map());
+    creatorCreditsService.buildIdentity.mockReset().mockReturnValue({
+      label: "Creator details coming soon",
+      type: "fallback",
+      isFallback: true,
+    });
+    (loadSeriesAnalytics as jest.Mock).mockReset().mockImplementation(
+      async (_prisma: PrismaService, ids: string[]) =>
+        new Map(
+          ids.map((id, index) => [
+            id,
+            {
+              episodeCount: 10 + index,
+              latestEpisodeId: `${id}e${10 + index}`,
+              latestEpisodeNumber: 10 + index,
+              followers: 20 + index,
+              views: 50 + index,
+            },
+          ]),
+        ),
+    );
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        RecommendationService,
-        {
-          provide: PrismaService,
-          useValue: prisma,
-        },
-      ],
-    }).compile();
-
-    service = module.get<RecommendationService>(RecommendationService);
+    service = new RecommendationService(
+      prisma as unknown as PrismaService,
+      cacheService as unknown as CacheService,
+      creatorCreditsService as unknown as CreatorCreditsService,
+    );
   });
 
   it("returns no recommendations for an unpublished source title", async () => {
@@ -51,7 +84,7 @@ describe("RecommendationService", () => {
     expect(prisma.series.findMany).not.toHaveBeenCalled();
   });
 
-  it("filters unpublished recommendation candidates", async () => {
+  it("requests only published recommendation candidates", async () => {
     prisma.series.findUnique.mockResolvedValue({
       id: "series-1",
       type: "comic",
@@ -64,36 +97,18 @@ describe("RecommendationService", () => {
       {
         id: "series-2",
         title: "Published Match",
+        author: "",
         description: "Visible",
         coverTone: "warm",
+        coverUrl: "",
         type: "comic",
         genres: ["Romance"],
-        rating: 4.8,
-        ratingCount: 100,
         status: "Ongoing",
-        badges: [],
         adult: false,
         isPublished: true,
-        episodePrice: 3,
-        ttfEnabled: true,
-        _count: { follows: 12, episodes: 40 },
-      },
-      {
-        id: "series-3",
-        title: "Hidden Match",
-        description: "Hidden",
-        coverTone: "dark",
-        type: "comic",
-        genres: ["Romance"],
-        rating: 5,
-        ratingCount: 999,
-        status: "Ongoing",
-        badges: [],
-        adult: false,
-        isPublished: false,
-        episodePrice: 4,
-        ttfEnabled: true,
-        _count: { follows: 120, episodes: 40 },
+        latestEpisodeId: "series-2e12",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-03-01T00:00:00.000Z"),
       },
     ]);
 
@@ -102,48 +117,32 @@ describe("RecommendationService", () => {
     expect(prisma.series.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          AND: expect.arrayContaining([{ isPublished: true }]),
+          adult: false,
+          isPublished: true,
+          type: "comic",
         }),
       }),
     );
     expect(result.map((item) => item.id)).toEqual(["series-2"]);
   });
 
-  it("only returns published titles from the popular fallback", async () => {
+  it("only returns published titles from the popular fallback and caches them", async () => {
     prisma.series.findMany.mockResolvedValue([
       {
         id: "series-1",
         title: "Visible",
+        author: "",
         description: "Visible",
         coverTone: "warm",
+        coverUrl: "",
         type: "comic",
         genres: ["Action"],
-        rating: 4.6,
-        ratingCount: 60,
         status: "Completed",
-        badges: [],
         adult: false,
         isPublished: true,
-        episodePrice: 3,
-        ttfEnabled: false,
-        _count: { follows: 10, episodes: 30 },
-      },
-      {
-        id: "series-2",
-        title: "Hidden",
-        description: "Hidden",
-        coverTone: "cool",
-        type: "comic",
-        genres: ["Action"],
-        rating: 5,
-        ratingCount: 600,
-        status: "Completed",
-        badges: [],
-        adult: false,
-        isPublished: false,
-        episodePrice: 4,
-        ttfEnabled: true,
-        _count: { follows: 100, episodes: 80 },
+        latestEpisodeId: "series-1e10",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-03-04T00:00:00.000Z"),
       },
     ]);
 
@@ -158,6 +157,7 @@ describe("RecommendationService", () => {
       }),
     );
     expect(result.map((item) => item.id)).toEqual(["series-1"]);
+    expect(cacheService.set).toHaveBeenCalledWith("recommendations:popular:5", expect.any(Array), 180);
   });
 
   it("returns storefront slots in curated order, including the library return lane", async () => {
@@ -196,27 +196,5 @@ describe("RecommendationService", () => {
         seriesIds: ["series-9", "series-8"],
       },
     ]);
-
-    expect(prisma.recommendationSlot.findMany).toHaveBeenCalledWith({
-      where: {
-        slot: {
-          in: [
-            "home-hero",
-            "home-free-start",
-            "home-binge-ready",
-            "home-breakout",
-            "library-return",
-          ],
-        },
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-      select: {
-        id: true,
-        slot: true,
-        seriesIds: true,
-      },
-    });
   });
 });

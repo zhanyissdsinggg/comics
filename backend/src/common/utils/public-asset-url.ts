@@ -1,4 +1,5 @@
 import type { Request } from "express";
+import { getPublicAssetBaseUrlConfig } from "../config/app-config";
 
 function normalizeBaseUrl(value: string): string {
   return value.trim().replace(/\/+$/, "");
@@ -22,7 +23,7 @@ function readHeaderValue(value: string | string[] | undefined): string {
 }
 
 export function getPublicAssetBaseUrl(request?: Pick<Request, "protocol" | "headers" | "get">): string {
-  const configuredBase = String(process.env.PUBLIC_ASSET_BASE_URL || process.env.BACKEND_PUBLIC_URL || "").trim();
+  const configuredBase = String(getPublicAssetBaseUrlConfig() || "").trim();
   if (configuredBase) {
     return normalizeBaseUrl(configuredBase);
   }

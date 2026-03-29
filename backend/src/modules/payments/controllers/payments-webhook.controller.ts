@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Req, Res } from "@nestjs/common";
 import { createHmac, timingSafeEqual } from "crypto";
 import { Request, Response } from "express";
+import { getWebhookSecretConfig } from "../../../common/config/app-config";
 import { getTopupPackage } from "../../../common/config/topup";
 import { logger } from "../../../common/logger/winston.init";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -56,7 +57,7 @@ export class PaymentsWebhookController {
   }
 
   private verifyWebhookSignature(req: Request, body: WebhookBody): boolean {
-    const secret = process.env.WEBHOOK_SECRET || "";
+    const secret = getWebhookSecretConfig();
     if (!secret) {
       logger.error("WEBHOOK_SECRET is missing; rejecting webhook request.");
       return false;

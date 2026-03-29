@@ -1,8 +1,9 @@
 import { Body, Controller, ForbiddenException, Get, HttpCode, Post, Req } from "@nestjs/common";
 import { timingSafeEqual } from "crypto";
 import { Request } from "express";
+import { getAppConfig } from "./common/config/app-config";
 import { ObservabilityService, FrontendErrorReportInput } from "./common/observability/observability.service";
-import { getRedisClient } from "./common/redis/client";
+import { getRedisClient, getRedisStatus, isRedisConfigured } from "./common/redis/client";
 
 type VersionSnapshot = {
   name: string;
@@ -34,15 +35,16 @@ export class MetaController {
   }
 
   private canReadObservability(req: Request): boolean {
-    if (process.env.OBSERVABILITY_PUBLIC === "1") {
+    const appConfig = getAppConfig();
+    if (appConfig.observability.publicEnabled) {
       return true;
     }
 
-    if (process.env.NODE_ENV !== "production") {
+    if (appConfig.environment !== "production") {
       return true;
     }
 
-    const configuredKey = String(process.env.OBSERVABILITY_KEY || "").trim();
+    const configuredKey = appConfig.observability.accessKey;
     if (!configuredKey) {
       return false;
     }
@@ -69,7 +71,7 @@ export class MetaController {
 
     return {
       name: "gush-backend",
-      version: "0.1.0",
+      version: "1.0.0",
       commit,
       deploymentId,
       time: new Date().toISOString(),
@@ -90,12 +92,13 @@ export class MetaController {
     }
 
     const redis = getRedisClient();
+    const appConfig = getAppConfig();
     return {
       ...this.observability.getSnapshot(),
       redis: {
-        configured: Boolean(process.env.REDIS_URL),
+        configured: isRedisConfigured(),
         connected: Boolean(redis && redis.status === "ready"),
-        status: redis?.status || "disconnected",
+        status: appConfig.redis.url ? getRedisStatus() : "disabled",
       },
     };
   }

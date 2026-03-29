@@ -3,6 +3,7 @@ import { BadRequestException, Body, Controller, ForbiddenException, Post, Req, U
 import type { Request } from "express";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
+import { isAdminContentGeneratorEnabledConfig } from "../../../../common/config/app-config";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { buildPublicAssetUrl } from "../../../../common/utils/public-asset-url";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
@@ -228,11 +229,7 @@ function resolveSettings(body: GeneratorRequestBody): GeneratorSettings {
 }
 
 function isContentGeneratorEnabled(): boolean {
-  const flag = String(process.env.ADMIN_CONTENT_GENERATOR_ENABLED || "").trim();
-  if (flag) {
-    return flag === "1";
-  }
-  return process.env.NODE_ENV !== "production";
+  return isAdminContentGeneratorEnabledConfig();
 }
 
 function createSeededRandom(seedInput: string): () => number {
@@ -252,10 +249,6 @@ function createSeededRandom(seedInput: string): () => number {
 
 function randomInt(random: () => number, min: number, max: number): number {
   return Math.floor(random() * (max - min + 1)) + min;
-}
-
-function randomRating(random: () => number): number {
-  return Number((4.1 + random() * 0.8).toFixed(1));
 }
 
 function buildSeriesId(type: GeneratorContentType, runId: string, index: number): string {
@@ -484,7 +477,6 @@ export class AdminContentGeneratorController {
       const episodePrice = input.type === "comic" ? randomInt(input.random, 4, 8) : randomInt(input.random, 3, 6);
       const latestEpisodeId = `${seriesId}e${episodeCount}`;
       const isAdult = Boolean(seed.adult);
-      const hot = !isAdult && index % 5 === 0;
 
       seriesRecords.push({
         id: seriesId,
@@ -493,14 +485,14 @@ export class AdminContentGeneratorController {
         description: seed.description,
         coverUrl: buildCoverUrl(seriesId, title, input.type, seed.coverTone, input.request),
         coverTone: seed.coverTone,
-        badge: isAdult ? "18+" : hot ? "Hot" : "",
-        badges: isAdult ? ["18+"] : hot ? ["Hot"] : [],
+        badge: "",
+        badges: [],
         adult: isAdult,
         latestEpisodeId,
         genres: seed.genres,
         status: "Ongoing",
-        rating: randomRating(input.random),
-        ratingCount: randomInt(input.random, 120, 6800),
+        rating: 0,
+        ratingCount: 0,
         episodePrice,
         ttfEnabled: true,
         ttfIntervalHours: 24,
