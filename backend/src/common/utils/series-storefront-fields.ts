@@ -1,14 +1,5 @@
 import { PrismaService } from "../prisma/prisma.service";
 
-const SERIES_COLUMN_CACHE_TTL_MS = 5 * 60 * 1000;
-
-let seriesColumnsCache:
-  | {
-      expiresAt: number;
-      columns: Set<string>;
-    }
-  | null = null;
-
 function normalizeSeriesIdList(items: Array<string | null | undefined>) {
   return [...new Set(items.map((item) => String(item || "").trim()).filter(Boolean))];
 }
@@ -46,31 +37,6 @@ type EpisodeStats = {
   latest: string;
 };
 
-async function getAvailableSeriesColumns(prisma: PrismaService) {
-  if (seriesColumnsCache && seriesColumnsCache.expiresAt > Date.now()) {
-    return seriesColumnsCache.columns;
-  }
-
-  const columns = await prisma.$queryRawUnsafe<Array<{ column_name: string }>>(
-    `SELECT column_name
-     FROM information_schema.columns
-     WHERE table_schema = 'public' AND table_name = 'series'`,
-  );
-
-  const nextColumns = new Set(
-    columns
-      .map((item) => String(item?.column_name || "").trim())
-      .filter(Boolean),
-  );
-
-  seriesColumnsCache = {
-    expiresAt: Date.now() + SERIES_COLUMN_CACHE_TTL_MS,
-    columns: nextColumns,
-  };
-
-  return nextColumns;
-}
-
 async function fetchAuthorMap(prisma: PrismaService, ids: string[]) {
   const authorMap = new Map<string, string>();
   if (!ids.length) {
@@ -78,16 +44,17 @@ async function fetchAuthorMap(prisma: PrismaService, ids: string[]) {
   }
 
   try {
-    const availableColumns = await getAvailableSeriesColumns(prisma);
-    if (!availableColumns.has("author")) {
-      return authorMap;
-    }
-
-    const placeholders = ids.map((_id, index) => `$${index + 1}`).join(", ");
-    const rows = await prisma.$queryRawUnsafe<Array<{ id: string; author?: string | null }>>(
-      `SELECT "id", "author" FROM "series" WHERE "id" IN (${placeholders})`,
-      ...ids,
-    );
+    const rows = await prisma.series.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      select: {
+        id: true,
+        author: true,
+      },
+    });
 
     rows.forEach((row) => {
       authorMap.set(String(row.id || ""), normalizeAuthor(row.author));
@@ -279,16 +246,12 @@ export async function syncSeriesAuthorField(
   }
 
   try {
-    const availableColumns = await getAvailableSeriesColumns(prisma);
-    if (!availableColumns.has("author")) {
-      return false;
-    }
-
-    await prisma.$executeRawUnsafe(
-      `UPDATE "series" SET "author" = $1 WHERE "id" = $2`,
-      normalizeAuthor(author),
-      normalizedSeriesId,
-    );
+    await prisma.series.update({
+      where: { id: normalizedSeriesId },
+      data: {
+        author: normalizeAuthor(author),
+      },
+    });
     return true;
   } catch {
     return false;

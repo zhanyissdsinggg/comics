@@ -1,7 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { logger } from "../logger/winston.init";
 import { PrismaService } from "../prisma/prisma.service";
-import { SchemaCapabilitiesService } from "../prisma/schema-capabilities.service";
 import {
   buildCreatorIdentityFromCredits,
   buildPublicCreatorCredits,
@@ -11,25 +9,6 @@ import {
   type PublicCreatorCredit,
   type PublicCreatorIdentity,
 } from "./creator-identity";
-
-type CreatorRecord = {
-  id: string;
-  slug: string;
-  name: string;
-  normalizedName: string;
-  type: "PERSON" | "TEAM" | "STUDIO";
-  isPublic: boolean;
-};
-
-type SeriesCreditRecord = {
-  seriesId: string;
-  source: string;
-  role: string;
-  sortOrder: number;
-  isPrimary: boolean;
-  isPublic: boolean;
-  creator: CreatorRecord;
-};
 
 function toCreatorType(name: string): "PERSON" | "TEAM" | "STUDIO" {
   const inferred = inferCreatorTypeFromName(name);
@@ -55,10 +34,7 @@ function toCreditRole(name: string): "AUTHOR" | "TEAM" | "STUDIO" {
 
 @Injectable()
 export class CreatorCreditsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly schemaCapabilitiesService: SchemaCapabilitiesService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private async reserveSlug(baseSlug: string, creatorId?: string): Promise<string> {
     const fallbackBase = baseSlug || "creator";
@@ -84,10 +60,6 @@ export class CreatorCreditsService {
     const normalizedSeriesIds = [...new Set(seriesIds.map((item) => String(item || "").trim()).filter(Boolean))];
     const result = new Map<string, PublicCreatorCredit[]>();
     if (normalizedSeriesIds.length === 0) {
-      return result;
-    }
-
-    if (!(await this.schemaCapabilitiesService.supportsCreatorCredits())) {
       return result;
     }
 
@@ -117,52 +89,14 @@ export class CreatorCreditsService {
     return map.get(seriesId) || [];
   }
 
-  async getLegacyAuthorMap(seriesIds: string[]): Promise<Map<string, string>> {
-    const normalizedSeriesIds = [...new Set(seriesIds.map((item) => String(item || "").trim()).filter(Boolean))];
-    const result = new Map<string, string>();
-    if (normalizedSeriesIds.length === 0) {
-      return result;
-    }
-
-    if (!(await this.schemaCapabilitiesService.supportsLegacySeriesAuthor())) {
-      return result;
-    }
-
-    try {
-      const placeholders = normalizedSeriesIds.map((_item, index) => `$${index + 1}`).join(", ");
-      const rows = await this.prisma.$queryRawUnsafe<Array<{ id: string; author?: string | null }>>(
-        `SELECT "id", "author" FROM "series" WHERE "id" IN (${placeholders})`,
-        ...normalizedSeriesIds,
-      );
-
-      rows.forEach((row) => {
-        const seriesId = String(row?.id || "").trim();
-        const author = normalizeCreatorName(row?.author);
-        if (seriesId && author) {
-          result.set(seriesId, author);
-        }
-      });
-    } catch (error) {
-      logger.warn("[creator-credits] failed to load legacy author map", {
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
-
-    return result;
+  buildIdentity(credits: PublicCreatorCredit[], fallbackLabel?: unknown): PublicCreatorIdentity {
+    return buildCreatorIdentityFromCredits(credits, fallbackLabel);
   }
 
-  buildIdentity(credits: PublicCreatorCredit[], legacyAuthor?: unknown): PublicCreatorIdentity {
-    return buildCreatorIdentityFromCredits(credits, legacyAuthor);
-  }
-
-  async syncLegacyAuthorCredit(seriesId: string, author: unknown): Promise<void> {
+  async syncPrimaryCreditFromAuthorField(seriesId: string, author: unknown): Promise<void> {
     const normalizedSeriesId = String(seriesId || "").trim();
     const normalizedAuthor = normalizeCreatorName(author);
     if (!normalizedSeriesId) {
-      return;
-    }
-
-    if (!(await this.schemaCapabilitiesService.supportsCreatorCredits())) {
       return;
     }
 
@@ -170,7 +104,28 @@ export class CreatorCreditsService {
       await this.prisma.seriesCredit.deleteMany({
         where: {
           seriesId: normalizedSeriesId,
-          source: "legacy_author",
+          source: "admin_author_input",
+        },
+      });
+      return;
+    }
+
+    const hasNonAdminCredits =
+      (await this.prisma.seriesCredit.count({
+        where: {
+          seriesId: normalizedSeriesId,
+          isPublic: true,
+          source: {
+            not: "admin_author_input",
+          },
+        },
+      })) > 0;
+
+    if (hasNonAdminCredits) {
+      await this.prisma.seriesCredit.deleteMany({
+        where: {
+          seriesId: normalizedSeriesId,
+          source: "admin_author_input",
         },
       });
       return;
@@ -211,7 +166,7 @@ export class CreatorCreditsService {
     await this.prisma.seriesCredit.deleteMany({
       where: {
         seriesId: normalizedSeriesId,
-        source: "legacy_author",
+        source: "admin_author_input",
       },
     });
 
@@ -220,7 +175,7 @@ export class CreatorCreditsService {
         seriesId: normalizedSeriesId,
         creatorId: creator.id,
         role,
-        source: "legacy_author",
+        source: "admin_author_input",
         sortOrder: 0,
         isPrimary: true,
         isPublic: true,
@@ -229,10 +184,6 @@ export class CreatorCreditsService {
   }
 
   async listPublicCreators(limit = 100) {
-    if (!(await this.schemaCapabilitiesService.supportsCreatorCredits())) {
-      return [];
-    }
-
     const creators = await this.prisma.creator.findMany({
       where: {
         isPublic: true,
@@ -307,10 +258,6 @@ export class CreatorCreditsService {
   async getPublicCreatorBySlug(slug: string) {
     const normalizedSlug = String(slug || "").trim();
     if (!normalizedSlug) {
-      return null;
-    }
-
-    if (!(await this.schemaCapabilitiesService.supportsCreatorCredits())) {
       return null;
     }
 

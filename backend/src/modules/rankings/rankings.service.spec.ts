@@ -21,7 +21,6 @@ describe("RankingsService", () => {
   };
   const creatorCreditsService = {
     getCreditsMap: jest.fn(),
-    getLegacyAuthorMap: jest.fn(),
     buildIdentity: jest.fn(),
   };
 
@@ -30,7 +29,6 @@ describe("RankingsService", () => {
     cacheService.get.mockReset().mockResolvedValue(null);
     cacheService.set.mockReset().mockResolvedValue(undefined);
     creatorCreditsService.getCreditsMap.mockReset().mockResolvedValue(new Map());
-    creatorCreditsService.getLegacyAuthorMap.mockReset().mockResolvedValue(new Map());
     creatorCreditsService.buildIdentity.mockReset().mockReturnValue({
       label: "Creator details coming soon",
       type: "fallback",

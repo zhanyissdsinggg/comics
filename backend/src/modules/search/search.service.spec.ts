@@ -22,7 +22,6 @@ describe("SearchService", () => {
   };
   let creatorCreditsService: {
     getCreditsMap: jest.Mock;
-    getLegacyAuthorMap: jest.Mock;
     buildIdentity: jest.Mock;
   };
 
@@ -44,7 +43,6 @@ describe("SearchService", () => {
     };
     creatorCreditsService = {
       getCreditsMap: jest.fn().mockResolvedValue(new Map()),
-      getLegacyAuthorMap: jest.fn().mockResolvedValue(new Map()),
       buildIdentity: jest.fn().mockReturnValue({
         label: "Creator details coming soon",
         type: "fallback",

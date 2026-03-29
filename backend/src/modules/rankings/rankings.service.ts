@@ -50,14 +50,11 @@ export class RankingsService {
       this.prisma,
       rows.map((row) => row.id),
     );
-    const [creditsMap, authorMap] = await Promise.all([
-      this.creatorCreditsService.getCreditsMap(rows.map((row) => row.id)),
-      this.creatorCreditsService.getLegacyAuthorMap(rows.map((row) => row.id)),
-    ]);
+    const creditsMap = await this.creatorCreditsService.getCreditsMap(rows.map((row) => row.id));
 
     const payload = rows.map((row) => {
       const credits = creditsMap.get(row.id) || [];
-      const identity = this.creatorCreditsService.buildIdentity(credits, authorMap.get(row.id));
+      const identity = this.creatorCreditsService.buildIdentity(credits);
       return mapStorefrontSeriesSummary(
         row,
         analyticsMap.get(row.id) || {

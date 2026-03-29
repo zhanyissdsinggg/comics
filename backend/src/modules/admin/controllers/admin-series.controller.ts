@@ -112,7 +112,7 @@ export class AdminSeriesController {
 
     await Promise.all([
       syncSeriesAuthorField(this.prisma, seriesId, input?.author),
-      this.creatorCreditsService.syncLegacyAuthorCredit(seriesId, input?.author),
+      this.creatorCreditsService.syncPrimaryCreditFromAuthorField(seriesId, input?.author),
     ]);
   }
 

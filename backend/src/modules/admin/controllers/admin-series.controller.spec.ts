@@ -46,7 +46,7 @@ describe("AdminSeriesController", () => {
         {
           provide: CreatorCreditsService,
           useValue: {
-            syncLegacyAuthorCredit: jest.fn().mockResolvedValue(undefined),
+            syncPrimaryCreditFromAuthorField: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],

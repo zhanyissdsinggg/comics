@@ -38,6 +38,11 @@ type SeriesEpisodeRow = {
 };
 
 type StorefrontSeriesSummary = ReturnType<typeof mapStorefrontSeriesSummary>;
+type EpisodeAccessSnapshot = {
+  pricePts: number;
+  ttfEligible: boolean;
+  ttfReadyAt: Date | null;
+};
 
 type CachedSeriesDetail = {
   series: StorefrontSeriesSummary;
@@ -85,9 +90,8 @@ export class SeriesService {
     row: SeriesListRow,
     analytics: SeriesAnalyticsSnapshot,
     credits: Awaited<ReturnType<CreatorCreditsService["getCreditsForSeries"]>>,
-    legacyAuthor?: string,
   ) {
-    const identity = this.creatorCreditsService.buildIdentity(credits, legacyAuthor);
+    const identity = this.creatorCreditsService.buildIdentity(credits);
     return mapStorefrontSeriesSummary(
       row,
       {
@@ -134,10 +138,9 @@ export class SeriesService {
     });
 
     const seriesIds = rows.map((row) => row.id);
-    const [analyticsMap, creditsMap, authorMap] = await Promise.all([
+    const [analyticsMap, creditsMap] = await Promise.all([
       loadSeriesAnalytics(this.prisma, seriesIds),
       this.creatorCreditsService.getCreditsMap(seriesIds),
-      this.creatorCreditsService.getLegacyAuthorMap(seriesIds),
     ]);
 
     const series = rows.map((row) =>
@@ -151,7 +154,6 @@ export class SeriesService {
           views: 0,
         },
         creditsMap.get(row.id) || [],
-        authorMap.get(row.id),
       ),
     );
 
@@ -188,7 +190,7 @@ export class SeriesService {
         return null;
       }
 
-      const [episodes, analyticsMap, credits, authorMap] = await Promise.all([
+      const [episodes, analyticsMap, credits] = await Promise.all([
         this.prisma.episode.findMany({
           where: {
             seriesId,
@@ -209,7 +211,6 @@ export class SeriesService {
         }),
         loadSeriesAnalytics(this.prisma, [seriesId]),
         this.creatorCreditsService.getCreditsForSeries(seriesId),
-        this.creatorCreditsService.getLegacyAuthorMap([seriesId]),
       ]);
 
       const analytics = analyticsMap.get(seriesId) || {
@@ -220,7 +221,7 @@ export class SeriesService {
         views: 0,
       };
 
-      const summary = this.buildSeriesSummary(row, analytics, credits, authorMap.get(seriesId));
+      const summary = this.buildSeriesSummary(row, analytics, credits);
       cached = {
         series: summary,
         episodes,
@@ -239,9 +240,11 @@ export class SeriesService {
       series: cached.series,
       episodes: episodes.map((episode) => ({
         ...mapEpisodeListItem(episode),
-        pricePts: episode.pricePts,
-        ttfEligible: episode.ttfEligible,
-        ttfReadyAt: episode.ttfReadyAt,
+        access: {
+          pricePts: episode.pricePts,
+          ttfEligible: episode.ttfEligible,
+          ttfReadyAt: episode.ttfReadyAt,
+        } satisfies EpisodeAccessSnapshot,
       })),
     };
   }

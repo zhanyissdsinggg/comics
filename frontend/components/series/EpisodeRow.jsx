@@ -621,7 +621,7 @@ const MemoEpisodeRow = memo(EpisodeRow, (prev, next) => {
   if (prev.episode?.id !== next.episode?.id) {
     return false;
   }
-  if (prev.episode?.ttfReadyAt !== next.episode?.ttfReadyAt) {
+  if (prev.episode?.access?.ttfReadyAt !== next.episode?.access?.ttfReadyAt) {
     return false;
   }
   if (prev.episode?.title !== next.episode?.title) {

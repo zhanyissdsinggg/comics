@@ -47,15 +47,14 @@ export class RecommendationService {
 
   private async hydrateSeries(rows: RecommendationSeriesRow[]) {
     const seriesIds = rows.map((row) => row.id);
-    const [analyticsMap, creditsMap, authorMap] = await Promise.all([
+    const [analyticsMap, creditsMap] = await Promise.all([
       loadSeriesAnalytics(this.prisma, seriesIds),
       this.creatorCreditsService.getCreditsMap(seriesIds),
-      this.creatorCreditsService.getLegacyAuthorMap(seriesIds),
     ]);
 
     return rows.map((row) => {
       const credits = creditsMap.get(row.id) || [];
-      const identity = this.creatorCreditsService.buildIdentity(credits, authorMap.get(row.id));
+      const identity = this.creatorCreditsService.buildIdentity(credits);
       return mapStorefrontSeriesSummary(
         row,
         analyticsMap.get(row.id) || {

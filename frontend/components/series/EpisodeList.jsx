@@ -196,12 +196,13 @@ export default function EpisodeList({
             const key = episode?.id || `${series.id || "series"}-${index}`;
             const unlocked = unlockedEpisodeIds.includes(episode?.id);
             const progress = series?.id ? getProgress(series.id) : null;
-            const ttfEligible = Boolean(episode?.ttfEligible && series?.ttf?.enabled);
+            const episodeAccess = episode?.access || {};
+            const ttfEligible = Boolean(episodeAccess?.ttfEligible);
             const ttfStatus = {
               eligible: ttfEligible,
-              readyAt: episode?.ttfReadyAt || null,
+              readyAt: episodeAccess?.ttfReadyAt || null,
             };
-            const pricePts = episode?.pricePts ?? series?.pricing?.episodePrice ?? 0;
+            const pricePts = episodeAccess?.pricePts ?? series?.access?.episodePrice ?? series?.pricing?.episodePrice ?? 0;
             const nowMsForRow = !unlocked && ttfEligible ? nowMs : null;
 
             return (

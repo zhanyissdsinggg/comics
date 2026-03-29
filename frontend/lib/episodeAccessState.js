@@ -180,6 +180,13 @@ function toPrice(value, fallback = 0) {
   return Number(fallback || 0);
 }
 
+function getEpisodeAccessPayload(episode) {
+  if (episode && typeof episode === "object" && episode.access && typeof episode.access === "object") {
+    return episode.access;
+  }
+  return {};
+}
+
 function buildEpisodeAccessState(primaryState, overrides = {}) {
   const meta = EPISODE_PRIMARY_STATE_META[primaryState] || EPISODE_PRIMARY_STATE_META.locked;
   return {
@@ -200,11 +207,13 @@ export function getEpisodeAccessState({
   nowMs = Date.now(),
   fallbackPrice = 0,
 }) {
-  const basePrice = toPrice(episode?.pricePts, fallbackPrice);
+  const access = getEpisodeAccessPayload(episode);
+  const basePrice = toPrice(access?.pricePts ?? episode?.pricePts, fallbackPrice);
   const previewPages = Number(episode?.previewFreePages || 0);
   const hasPreview = previewPages > 0;
-  const readyAtMs = episode?.ttfReadyAt ? Date.parse(episode.ttfReadyAt) : null;
-  const hasTtf = Boolean(episode?.ttfEligible);
+  const rawReadyAt = access?.ttfReadyAt ?? episode?.ttfReadyAt;
+  const readyAtMs = rawReadyAt ? Date.parse(rawReadyAt) : null;
+  const hasTtf = Boolean(access?.ttfEligible ?? episode?.ttfEligible);
   const isTtfReady = hasTtf ? !readyAtMs || readyAtMs <= nowMs : false;
   const pricing = calculatePrice({
     basePrice,
@@ -483,7 +492,7 @@ export function getSeriesPrimaryReadAction({
     subscriptionUsage,
     coupons,
     nowMs,
-    fallbackPrice: series?.pricing?.episodePrice ?? 0,
+    fallbackPrice: series?.access?.episodePrice ?? series?.pricing?.episodePrice ?? 0,
   });
 
   if (state.kind === "unlocked") {
