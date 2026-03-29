@@ -1,13 +1,65 @@
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+DO $$
+BEGIN
+  CREATE TYPE "CreatorType" AS ENUM ('PERSON', 'TEAM', 'STUDIO');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  CREATE TYPE "CreditRole" AS ENUM ('CREATOR', 'WRITER', 'ARTIST', 'AUTHOR', 'ADAPTER', 'STUDIO', 'TEAM');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 ALTER TABLE "progress"
 ALTER COLUMN "lastEpisodeId" DROP NOT NULL;
 
+CREATE TABLE IF NOT EXISTS "creators" (
+  "id" TEXT NOT NULL,
+  "slug" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "normalizedName" TEXT NOT NULL,
+  "type" "CreatorType" NOT NULL DEFAULT 'PERSON',
+  "bio" TEXT,
+  "isPublic" BOOLEAN NOT NULL DEFAULT true,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT "creators_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "series_credits" (
+  "id" TEXT NOT NULL,
+  "seriesId" TEXT NOT NULL,
+  "creatorId" TEXT NOT NULL,
+  "role" "CreditRole" NOT NULL DEFAULT 'CREATOR',
+  "source" TEXT NOT NULL DEFAULT 'manual',
+  "sortOrder" INTEGER NOT NULL DEFAULT 0,
+  "isPrimary" BOOLEAN NOT NULL DEFAULT false,
+  "isPublic" BOOLEAN NOT NULL DEFAULT true,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT "series_credits_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "series_credits_seriesId_fkey" FOREIGN KEY ("seriesId") REFERENCES "series"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "series_credits_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "creators"("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS "search_logs_dateKey_count_idx"
 ON "search_logs" ("dateKey", "count");
 
+CREATE UNIQUE INDEX IF NOT EXISTS "creators_slug_key"
+ON "creators" ("slug");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "creators_normalizedName_key"
+ON "creators" ("normalizedName");
+
 CREATE INDEX IF NOT EXISTS "creators_isPublic_name_idx"
 ON "creators" ("isPublic", "name");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "series_credits_seriesId_creatorId_role_key"
+ON "series_credits" ("seriesId", "creatorId", "role");
 
 CREATE INDEX IF NOT EXISTS "series_credits_creatorId_isPublic_idx"
 ON "series_credits" ("creatorId", "isPublic");
@@ -23,20 +75,6 @@ ON "episodes" ("seriesId", "isDeleted", "releasedAt");
 
 CREATE UNIQUE INDEX IF NOT EXISTS "episodes_seriesId_number_key"
 ON "episodes" ("seriesId", "number");
-
-CREATE INDEX IF NOT EXISTS "series_title_trgm_idx"
-ON "series"
-USING GIN (LOWER("title") gin_trgm_ops);
-
-CREATE INDEX IF NOT EXISTS "series_search_document_idx"
-ON "series"
-USING GIN (
-  (
-    setweight(to_tsvector('simple', COALESCE("title", '')), 'A') ||
-    setweight(to_tsvector('simple', COALESCE("description", '')), 'B') ||
-    setweight(to_tsvector('simple', array_to_string("genres", ' ')), 'C')
-  )
-);
 
 INSERT INTO "creators" ("id", "slug", "name", "normalizedName", "type", "isPublic", "createdAt", "updatedAt")
 SELECT
