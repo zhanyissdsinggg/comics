@@ -74,6 +74,7 @@ Creator identity is now normalized through:
 Admin series writes still bridge legacy `author` input into normalized credits as a temporary compatibility layer while admin credit editing catches up. That bridge is now isolated to the admin write path instead of the public read path.
 
 Local seed data now creates real `Creator` and `SeriesCredit` rows, and it seeds novel episodes with paragraph payloads so creator discovery and episode detail paths can be exercised without fallback-only fixtures.
+It also seeds storefront homepage recommendation slots so a fresh environment does not boot into an empty homepage recommendations state.
 
 ## Cache invalidation pipeline
 
@@ -87,6 +88,7 @@ Storefront reads now use a centralized content invalidation layer:
   - invalidates hot-search caches when search logs are updated
 
 Admin series writes, admin episode writes/uploads, generated content, recommendation config changes, and search-log writes now all route through this centralized invalidation layer instead of deleting cache patterns ad hoc.
+The `creator:import` script now also invalidates Redis-backed storefront caches for imported series so public creator identity updates do not stay stale after a credit import.
 
 ## Compatibility notes
 

@@ -16,6 +16,8 @@ const STOREFRONT_SLOT_IDS = [
   "library-return",
 ] as const;
 
+const HOMEPAGE_SLOT_SERIES_LIMIT = 3;
+
 export interface HomepageRecommendationSlot {
   id: string;
   slot: string;
@@ -73,7 +75,64 @@ export class RecommendationService {
     });
   }
 
-  async getContentBasedRecommendations(seriesId: string, limit = 10, userId?: string) {
+  private buildAudienceKey(adult: boolean): string {
+    return adult ? "adult" : "standard";
+  }
+
+  private async buildFallbackHomepageSlots(
+    adult: boolean,
+  ): Promise<HomepageRecommendationSlot[]> {
+    const fallbackSeries = await this.getPopularSeries(
+      STOREFRONT_SLOT_IDS.length * HOMEPAGE_SLOT_SERIES_LIMIT,
+      adult,
+    );
+    const uniqueSeriesIds = [
+      ...new Set(
+        fallbackSeries.map((item) => String(item?.id || "").trim()).filter(Boolean),
+      ),
+    ];
+
+    return STOREFRONT_SLOT_IDS.map((slot, index) => ({
+      id: `fallback:${this.buildAudienceKey(adult)}:${slot}`,
+      slot,
+      seriesIds: uniqueSeriesIds.slice(
+        index * HOMEPAGE_SLOT_SERIES_LIMIT,
+        (index + 1) * HOMEPAGE_SLOT_SERIES_LIMIT,
+      ),
+    })).filter((slot) => slot.seriesIds.length > 0);
+  }
+
+  private async filterAllowedSeriesIds(seriesIds: string[], adult: boolean): Promise<Set<string>> {
+    const normalizedSeriesIds = [...new Set(seriesIds.map((item) => String(item || "").trim()).filter(Boolean))];
+    if (normalizedSeriesIds.length === 0) {
+      return new Set<string>();
+    }
+
+    const rows = await this.prisma.series.findMany({
+      where: adult
+        ? {
+            id: { in: normalizedSeriesIds },
+            isPublished: true,
+            status: { not: "draft" },
+          }
+        : {
+            id: { in: normalizedSeriesIds },
+            isPublished: true,
+            adult: false,
+            status: { not: "draft" },
+          },
+      select: { id: true },
+    });
+
+    return new Set(rows.map((row) => row.id));
+  }
+
+  async getContentBasedRecommendations(
+    seriesId: string,
+    limit = 10,
+    userId?: string,
+    adult = false,
+  ) {
     const currentSeries = await this.prisma.series.findUnique({
       where: { id: seriesId },
       select: {
@@ -86,6 +145,9 @@ export class RecommendationService {
     });
 
     if (!currentSeries || currentSeries.isPublished === false) {
+      return [];
+    }
+    if (currentSeries.adult && !adult) {
       return [];
     }
 
@@ -164,7 +226,7 @@ export class RecommendationService {
       .slice(0, limit);
   }
 
-  async getPersonalizedRecommendations(userId: string, limit = 10) {
+  async getPersonalizedRecommendations(userId: string, limit = 10, adult = false) {
     const recentProgress = await this.prisma.progress.findMany({
       where: { userId },
       orderBy: { updatedAt: "desc" },
@@ -173,7 +235,7 @@ export class RecommendationService {
     });
 
     if (recentProgress.length === 0) {
-      return this.getPopularSeries(limit);
+      return this.getPopularSeries(limit, adult);
     }
 
     const followedSeries = await this.prisma.follow.findMany({
@@ -190,7 +252,12 @@ export class RecommendationService {
 
     const allRecommendations = [];
     for (const currentSeriesId of userInterestSeriesIds.slice(0, 3)) {
-      const recommendations = await this.getContentBasedRecommendations(currentSeriesId, 5, userId);
+      const recommendations = await this.getContentBasedRecommendations(
+        currentSeriesId,
+        5,
+        userId,
+        adult,
+      );
       allRecommendations.push(...recommendations);
     }
 
@@ -207,8 +274,8 @@ export class RecommendationService {
       .slice(0, limit);
   }
 
-  async getPopularSeries(limit = 10) {
-    const cacheKey = `recommendations:popular:${limit}`;
+  async getPopularSeries(limit = 10, adult = false) {
+    const cacheKey = `recommendations:popular:${this.buildAudienceKey(adult)}:${limit}`;
     const cached = await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
     if (cached) {
       return cached.map((item) => sanitizeStorefrontSeriesSummary(item));
@@ -218,6 +285,7 @@ export class RecommendationService {
       where: {
         status: { not: "draft" },
         isPublished: true,
+        ...(adult ? {} : { adult: false }),
       },
       orderBy: [{ follows: { _count: "desc" } }, { updatedAt: "desc" }],
       take: Math.max(1, limit),
@@ -243,8 +311,8 @@ export class RecommendationService {
     return series;
   }
 
-  async getHomepageSlots(): Promise<HomepageRecommendationSlot[]> {
-    const cacheKey = "recommendations:homepage-slots";
+  async getHomepageSlots(adult = false): Promise<HomepageRecommendationSlot[]> {
+    const cacheKey = `recommendations:homepage-slots:${this.buildAudienceKey(adult)}`;
     const cached = await this.cacheService.get<HomepageRecommendationSlot[]>(cacheKey);
     if (cached) {
       return cached;
@@ -267,21 +335,38 @@ export class RecommendationService {
       },
     });
 
+    const allowedSeriesIds = await this.filterAllowedSeriesIds(
+      slots.flatMap((slot) =>
+        Array.isArray(slot.seriesIds)
+          ? slot.seriesIds.map((item) => String(item || "").trim()).filter(Boolean)
+          : [],
+      ),
+      adult,
+    );
+
     const normalized = slots
       .map((slot) => ({
         id: slot.id,
         slot: slot.slot,
         seriesIds: Array.isArray(slot.seriesIds)
-          ? slot.seriesIds.map((item) => String(item || "").trim()).filter(Boolean)
+          ? slot.seriesIds
+              .map((item) => String(item || "").trim())
+              .filter((item) => Boolean(item) && allowedSeriesIds.has(item))
           : [],
       }))
+      .filter((slot) => slot.seriesIds.length > 0)
       .sort(
         (left, right) =>
           (orderMap.get(left.slot) ?? Number.MAX_SAFE_INTEGER) -
           (orderMap.get(right.slot) ?? Number.MAX_SAFE_INTEGER),
       );
 
-    await this.cacheService.set(cacheKey, normalized, 120);
-    return normalized;
+    const payload =
+      normalized.length > 0
+        ? normalized
+        : await this.buildFallbackHomepageSlots(adult);
+
+    await this.cacheService.set(cacheKey, payload, 120);
+    return payload;
   }
 }

@@ -55,7 +55,7 @@ describe("RecommendationController", () => {
         count: 1,
       });
 
-    expect(recommendationService.getHomepageSlots).toHaveBeenCalledTimes(1);
+    expect(recommendationService.getHomepageSlots).toHaveBeenCalledWith(false);
   });
 
   it("keeps the adult gate on homepage slots when adult mode is requested", async () => {
@@ -70,5 +70,17 @@ describe("RecommendationController", () => {
       });
 
     expect(recommendationService.getHomepageSlots).not.toHaveBeenCalled();
+  });
+
+  it("defaults popular recommendations to the standard non-adult catalog", async () => {
+    await request(app!.getHttpServer())
+      .get("/recommendations/popular")
+      .expect(200)
+      .expect({
+        series: [],
+        count: 0,
+      });
+
+    expect(recommendationService.getPopularSeries).toHaveBeenCalledWith(10, false);
   });
 });

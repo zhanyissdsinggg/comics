@@ -19,6 +19,29 @@ const DISCOVERY_CONFIGURATION_CACHE_PATTERNS = [
 
 const SEARCH_TELEMETRY_CACHE_PATTERNS = ["search:hot:*"] as const;
 
+export function buildSeriesContentInvalidationPatterns(
+  seriesIds: string | string[],
+): string[] {
+  const normalizedSeriesIds = [
+    ...new Set(
+      (Array.isArray(seriesIds) ? seriesIds : [seriesIds])
+        .map((item) => String(item || "").trim())
+        .filter(Boolean),
+    ),
+  ];
+
+  if (normalizedSeriesIds.length === 0) {
+    return [];
+  }
+
+  const seriesScopedPatterns = normalizedSeriesIds.flatMap((seriesId) => [
+    `series:detail:${seriesId}`,
+    `episode:detail:${seriesId}:*`,
+  ]);
+
+  return [...seriesScopedPatterns, ...SERIES_CONTENT_CACHE_PATTERNS];
+}
+
 @Injectable()
 export class ContentCacheInvalidationService {
   private readonly logger = new Logger(ContentCacheInvalidationService.name);
@@ -60,13 +83,8 @@ export class ContentCacheInvalidationService {
       return;
     }
 
-    const seriesScopedPatterns = normalizedSeriesIds.flatMap((seriesId) => [
-      `series:detail:${seriesId}`,
-      `episode:detail:${seriesId}:*`,
-    ]);
-
     await this.invalidatePatterns(
-      [...seriesScopedPatterns, ...SERIES_CONTENT_CACHE_PATTERNS],
+      buildSeriesContentInvalidationPatterns(normalizedSeriesIds),
       reason,
     );
   }

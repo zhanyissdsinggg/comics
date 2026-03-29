@@ -36,6 +36,17 @@ function toCreditRole(name: string): "AUTHOR" | "TEAM" | "STUDIO" {
 export class CreatorCreditsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private buildPublicSeriesVisibilityWhere(adult: boolean) {
+    return adult
+      ? {
+          isPublished: true,
+        }
+      : {
+          isPublished: true,
+          adult: false,
+        };
+  }
+
   private async reserveSlug(baseSlug: string, creatorId?: string): Promise<string> {
     const fallbackBase = baseSlug || "creator";
     let nextSlug = fallbackBase;
@@ -183,16 +194,15 @@ export class CreatorCreditsService {
     });
   }
 
-  async listPublicCreators(limit = 100) {
+  async listPublicCreators(limit = 100, adult = false) {
+    const publicSeriesWhere = this.buildPublicSeriesVisibilityWhere(adult);
     const creators = await this.prisma.creator.findMany({
       where: {
         isPublic: true,
         seriesCredits: {
           some: {
             isPublic: true,
-            series: {
-              isPublished: true,
-            },
+            series: publicSeriesWhere,
           },
         },
       },
@@ -202,9 +212,7 @@ export class CreatorCreditsService {
         seriesCredits: {
           where: {
             isPublic: true,
-            series: {
-              isPublished: true,
-            },
+            series: publicSeriesWhere,
           },
           orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
           include: {
@@ -255,11 +263,13 @@ export class CreatorCreditsService {
     });
   }
 
-  async getPublicCreatorBySlug(slug: string) {
+  async getPublicCreatorBySlug(slug: string, adult = false) {
     const normalizedSlug = String(slug || "").trim();
     if (!normalizedSlug) {
       return null;
     }
+
+    const publicSeriesWhere = this.buildPublicSeriesVisibilityWhere(adult);
 
     const creator = await this.prisma.creator.findUnique({
       where: { slug: normalizedSlug },
@@ -267,9 +277,7 @@ export class CreatorCreditsService {
         seriesCredits: {
           where: {
             isPublic: true,
-            series: {
-              isPublished: true,
-            },
+            series: publicSeriesWhere,
           },
           orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
           include: {
@@ -308,6 +316,10 @@ export class CreatorCreditsService {
       role: String(credit.role || "").toLowerCase(),
       isPrimary: Boolean(credit.isPrimary),
     }));
+
+    if (series.length === 0) {
+      return null;
+    }
 
     return {
       id: creator.id,

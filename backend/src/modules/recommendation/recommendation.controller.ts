@@ -1,8 +1,8 @@
 import { Controller, Get, Header, Param, Query, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
+import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { getUserIdFromRequest } from "../../common/utils/auth";
-import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
 import { RecommendationService } from "./recommendation.service";
 
 @Controller("recommendations")
@@ -25,7 +25,7 @@ export class RecommendationController {
       }
     }
 
-    const slots = await this.recommendationService.getHomepageSlots();
+    const slots = await this.recommendationService.getHomepageSlots(adult === true);
     return {
       slots,
       count: slots.length,
@@ -37,8 +37,19 @@ export class RecommendationController {
   async getSimilarSeries(
     @Param("seriesId") seriesId: string,
     @Query("limit") limit?: string,
+    @Query("adult") adultParam?: string,
     @Req() req?: Request,
+    @Res({ passthrough: true }) res?: Response,
   ) {
+    const adult = parseBool(adultParam);
+    if (adult === true) {
+      const gate = checkAdultGate(req?.cookies || {});
+      if (!gate.ok) {
+        res?.status(403);
+        return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+      }
+    }
+
     const userId = (req ? getUserIdFromRequest(req, true) : null) || undefined;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
@@ -46,6 +57,7 @@ export class RecommendationController {
       seriesId,
       limitNum,
       userId,
+      adult === true,
     );
 
     return {
@@ -59,14 +71,25 @@ export class RecommendationController {
   @Header("Cache-Control", "private, max-age=60, s-maxage=60")
   async getPersonalizedRecommendations(
     @Query("limit") limit?: string,
+    @Query("adult") adultParam?: string,
     @Req() req?: Request,
+    @Res({ passthrough: true }) res?: Response,
   ) {
+    const adult = parseBool(adultParam);
+    if (adult === true) {
+      const gate = checkAdultGate(req?.cookies || {});
+      if (!gate.ok) {
+        res?.status(403);
+        return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+      }
+    }
+
     const userId = (req ? getUserIdFromRequest(req, true) : null) || undefined;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
     const recommendations = userId
-      ? await this.recommendationService.getPersonalizedRecommendations(userId, limitNum)
-      : await this.recommendationService.getPopularSeries(limitNum);
+      ? await this.recommendationService.getPersonalizedRecommendations(userId, limitNum, adult === true)
+      : await this.recommendationService.getPopularSeries(limitNum, adult === true);
 
     return {
       recommendations,
@@ -77,9 +100,23 @@ export class RecommendationController {
 
   @Get("popular")
   @Header("Cache-Control", "public, max-age=300, s-maxage=300")
-  async getPopularSeries(@Query("limit") limit?: string) {
+  async getPopularSeries(
+    @Query("limit") limit?: string,
+    @Query("adult") adultParam?: string,
+    @Req() req?: Request,
+    @Res({ passthrough: true }) res?: Response,
+  ) {
+    const adult = parseBool(adultParam);
+    if (adult === true) {
+      const gate = checkAdultGate(req?.cookies || {});
+      if (!gate.ok) {
+        res?.status(403);
+        return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
+      }
+    }
+
     const limitNum = limit ? parseInt(limit, 10) : 10;
-    const series = await this.recommendationService.getPopularSeries(limitNum);
+    const series = await this.recommendationService.getPopularSeries(limitNum, adult === true);
 
     return {
       series,

@@ -150,20 +150,18 @@ export class SeriesService {
   }
 
   async list(adult: boolean | null) {
-    const cacheKey = `series:list:${adult === null ? "all" : adult ? "adult" : "standard"}`;
+    const adultEnabled = adult === true;
+    const cacheKey = `series:list:${adultEnabled ? "adult" : "standard"}`;
     const cached =
       await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
     if (Array.isArray(cached) && cached.length > 0) {
       return cached.map((item) => sanitizeStorefrontSeriesSummary(item));
     }
 
-    const where =
-      adult === null
-        ? { isPublished: true }
-        : {
-            isPublished: true,
-            adult,
-          };
+    const where = {
+      isPublished: true,
+      adult: adultEnabled,
+    };
 
     const rows = await this.prisma.series.findMany({
       where,

@@ -369,6 +369,32 @@ const seriesData: SeriesSeed[] = [
   },
 ];
 
+const recommendationSlotData: Array<{
+  slot: string;
+  seriesIds: string[];
+}> = [
+  {
+    slot: "home-hero",
+    seriesIds: ["series-001", "series-009", "series-005"],
+  },
+  {
+    slot: "home-free-start",
+    seriesIds: ["series-004", "series-010", "series-007"],
+  },
+  {
+    slot: "home-binge-ready",
+    seriesIds: ["series-008", "series-011", "series-003"],
+  },
+  {
+    slot: "home-breakout",
+    seriesIds: ["series-012", "series-002", "series-006"],
+  },
+  {
+    slot: "library-return",
+    seriesIds: ["series-001", "series-008", "series-011"],
+  },
+];
+
 async function upsertCreatorCredits(series: SeriesSeed) {
   await prisma.seriesCredit.deleteMany({
     where: {
@@ -586,10 +612,26 @@ async function seedTopupPackages() {
   }
 }
 
+async function seedRecommendationSlots() {
+  for (const slot of recommendationSlotData) {
+    await prisma.recommendationSlot.upsert({
+      where: { slot: slot.slot },
+      update: {
+        seriesIds: slot.seriesIds,
+      },
+      create: {
+        slot: slot.slot,
+        seriesIds: slot.seriesIds,
+      },
+    });
+  }
+}
+
 async function main() {
   console.log("seeding backend fixtures...");
   await seedSeries();
   await seedEpisodes();
+  await seedRecommendationSlots();
   await seedTopupPackages();
   console.log("seed complete.");
 }

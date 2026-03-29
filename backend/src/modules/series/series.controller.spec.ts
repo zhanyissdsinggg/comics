@@ -32,6 +32,16 @@ describe("SeriesController", () => {
     expect(seriesService.detail).toHaveBeenCalledWith("series-001");
   });
 
+  it("defaults the public series list to the standard non-adult catalog", async () => {
+    seriesService.list.mockResolvedValue([]);
+
+    const req = { cookies: {} } as any;
+    const res = { status: jest.fn() } as any;
+
+    await expect(controller.list(undefined as any, req, res)).resolves.toEqual({ series: [] });
+    expect(seriesService.list).toHaveBeenCalledWith(false);
+  });
+
   it("returns not found when the service returns null", async () => {
     seriesService.detail.mockResolvedValue(null);
 

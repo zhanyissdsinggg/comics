@@ -151,14 +151,15 @@ describe("RecommendationService", () => {
         where: {
           status: { not: "draft" },
           isPublished: true,
+          adult: false,
         },
       }),
     );
     expect(result.map((item) => item.id)).toEqual(["series-1"]);
-    expect(cacheService.set).toHaveBeenCalledWith("recommendations:popular:5", expect.any(Array), 180);
+    expect(cacheService.set).toHaveBeenCalledWith("recommendations:popular:standard:5", expect.any(Array), 180);
   });
 
-  it("returns storefront slots in curated order, including the library return lane", async () => {
+  it("filters homepage slots down to published standard-audience series by default", async () => {
     prisma.recommendationSlot.findMany.mockResolvedValue([
       {
         id: "slot-library-return",
@@ -176,8 +177,14 @@ describe("RecommendationService", () => {
         seriesIds: ["series-7"],
       },
     ]);
+    prisma.series.findMany.mockResolvedValue([
+      { id: "series-1" },
+      { id: "series-2" },
+      { id: "series-7" },
+      { id: "series-9" },
+    ]);
 
-    await expect(service.getHomepageSlots()).resolves.toEqual([
+    await expect(service.getHomepageSlots(false)).resolves.toEqual([
       {
         id: "slot-home-hero",
         slot: "home-hero",
@@ -191,7 +198,90 @@ describe("RecommendationService", () => {
       {
         id: "slot-library-return",
         slot: "library-return",
-        seriesIds: ["series-9", "series-8"],
+        seriesIds: ["series-9"],
+      },
+    ]);
+  });
+
+  it("falls back to a stable popular-series homepage layout when no manual slots exist", async () => {
+    prisma.recommendationSlot.findMany.mockResolvedValue([]);
+    prisma.series.findMany.mockResolvedValue([
+      {
+        id: "series-1",
+        title: "Visible 1",
+        author: "",
+        description: "Visible",
+        coverTone: "warm",
+        coverUrl: "",
+        type: "comic",
+        genres: ["Action"],
+        status: "Completed",
+        adult: false,
+        isPublished: true,
+        latestEpisodeId: "series-1e10",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-03-04T00:00:00.000Z"),
+      },
+      {
+        id: "series-2",
+        title: "Visible 2",
+        author: "",
+        description: "Visible",
+        coverTone: "warm",
+        coverUrl: "",
+        type: "comic",
+        genres: ["Action"],
+        status: "Completed",
+        adult: false,
+        isPublished: true,
+        latestEpisodeId: "series-2e10",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-03-04T00:00:00.000Z"),
+      },
+      {
+        id: "series-3",
+        title: "Visible 3",
+        author: "",
+        description: "Visible",
+        coverTone: "warm",
+        coverUrl: "",
+        type: "comic",
+        genres: ["Action"],
+        status: "Completed",
+        adult: false,
+        isPublished: true,
+        latestEpisodeId: "series-3e10",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-03-04T00:00:00.000Z"),
+      },
+      {
+        id: "series-4",
+        title: "Visible 4",
+        author: "",
+        description: "Visible",
+        coverTone: "warm",
+        coverUrl: "",
+        type: "comic",
+        genres: ["Action"],
+        status: "Completed",
+        adult: false,
+        isPublished: true,
+        latestEpisodeId: "series-4e10",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-03-04T00:00:00.000Z"),
+      },
+    ]);
+
+    await expect(service.getHomepageSlots(false)).resolves.toEqual([
+      {
+        id: "fallback:standard:home-hero",
+        slot: "home-hero",
+        seriesIds: ["series-1", "series-2", "series-3"],
+      },
+      {
+        id: "fallback:standard:home-free-start",
+        slot: "home-free-start",
+        seriesIds: ["series-4"],
       },
     ]);
   });

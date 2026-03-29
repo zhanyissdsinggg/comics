@@ -27,7 +27,7 @@ export class SeriesController {
       }
     }
 
-    return { series: await this.seriesService.list(adult) };
+    return { series: await this.seriesService.list(adult === true) };
   }
 
   @Get(":id/commerce")

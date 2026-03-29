@@ -1,6 +1,9 @@
 import { createHash } from "crypto";
 import { CreditRole, CreatorType, PrismaClient } from "@prisma/client";
 import { resolve } from "path";
+import { CacheService } from "../src/common/cache/cache.service";
+import { buildSeriesContentInvalidationPatterns } from "../src/common/cache/content-cache-invalidation.service";
+import { disconnectRedisClient } from "../src/common/redis/client";
 
 const envLoader = process as NodeJS.Process & {
   loadEnvFile?: (path?: string) => void;
@@ -15,6 +18,7 @@ if (typeof envLoader.loadEnvFile === "function") {
 }
 
 const prisma = new PrismaClient();
+const cacheService = new CacheService();
 
 type CreditSeed = {
   name: string;
@@ -142,6 +146,7 @@ function inferCreatorType(name: string): CreatorType {
 }
 
 async function importSeriesCredits() {
+  const importedSeriesIds: string[] = [];
   const existingSeries = await prisma.series.findMany({
     where: {
       id: {
@@ -226,11 +231,25 @@ async function importSeriesCredits() {
     }
 
     console.log(`imported creator credits for ${series.id} (${series.title})`);
+    importedSeriesIds.push(series.id);
   }
+
+  return importedSeriesIds;
+}
+
+async function invalidateImportedSeriesCaches(seriesIds: string[]) {
+  const patterns = buildSeriesContentInvalidationPatterns(seriesIds);
+  if (patterns.length === 0) {
+    return;
+  }
+
+  await cacheService.deletePatterns(patterns);
+  console.log(`invalidated storefront caches for ${seriesIds.length} imported series`);
 }
 
 async function main() {
-  await importSeriesCredits();
+  const importedSeriesIds = await importSeriesCredits();
+  await invalidateImportedSeriesCaches(importedSeriesIds);
 }
 
 main()
@@ -240,4 +259,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await disconnectRedisClient().catch(() => undefined);
   });

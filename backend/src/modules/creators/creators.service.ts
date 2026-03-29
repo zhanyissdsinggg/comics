@@ -2,7 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { CacheService } from "../../common/cache/cache.service";
 import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
 
-const CREATORS_LIST_CACHE_KEY = "creators:list:public";
+function buildCreatorsListCacheKey(adult: boolean): string {
+  return `creators:list:${adult ? "adult" : "standard"}:public`;
+}
 
 @Injectable()
 export class CreatorsService {
@@ -11,21 +13,22 @@ export class CreatorsService {
     private readonly cacheService: CacheService,
   ) {}
 
-  async listPublicCreators() {
+  async listPublicCreators(adult = false) {
+    const cacheKey = buildCreatorsListCacheKey(adult);
     const cached = await this.cacheService.get<Awaited<ReturnType<CreatorCreditsService["listPublicCreators"]>>>(
-      CREATORS_LIST_CACHE_KEY,
+      cacheKey,
     );
     if (cached) {
       return cached;
     }
 
-    const creators = await this.creatorCreditsService.listPublicCreators();
-    await this.cacheService.set(CREATORS_LIST_CACHE_KEY, creators, 300);
+    const creators = await this.creatorCreditsService.listPublicCreators(100, adult);
+    await this.cacheService.set(cacheKey, creators, 300);
     return creators;
   }
 
-  async getPublicCreator(slug: string) {
-    const cacheKey = `creators:detail:${slug}`;
+  async getPublicCreator(slug: string, adult = false) {
+    const cacheKey = `creators:detail:${adult ? "adult" : "standard"}:${slug}`;
     const cached = await this.cacheService.get<Awaited<ReturnType<CreatorCreditsService["getPublicCreatorBySlug"]>>>(
       cacheKey,
     );
@@ -33,7 +36,7 @@ export class CreatorsService {
       return cached;
     }
 
-    const creator = await this.creatorCreditsService.getPublicCreatorBySlug(slug);
+    const creator = await this.creatorCreditsService.getPublicCreatorBySlug(slug, adult);
     if (creator) {
       await this.cacheService.set(cacheKey, creator, 300);
     }
