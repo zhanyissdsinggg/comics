@@ -15,7 +15,7 @@ import { memoryStorage } from "multer";
 import AdmZip = require("adm-zip");
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { extname, join } from "path";
-import { CacheService } from "../../../common/cache/cache.service";
+import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { buildPublicAssetUrl } from "../../../common/utils/public-asset-url";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
@@ -53,7 +53,12 @@ function toChapterTitle(filename: string) {
   return filename.replace(/\.zip$/i, "").trim();
 }
 
-function createEpisodeAssetPath(seriesId: string, chapterTitle: string, index: number, entryName: string): string {
+function createEpisodeAssetPath(
+  seriesId: string,
+  chapterTitle: string,
+  index: number,
+  entryName: string,
+): string {
   const safeSeriesId = sanitizePathSegment(seriesId);
   const safeChapter = sanitizePathSegment(chapterTitle || "episode");
   const extension = extname(entryName).toLowerCase() || ".bin";
@@ -71,21 +76,16 @@ export class AdminEpisodesUploadController {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cacheService: CacheService,
+    private readonly contentCacheInvalidation: ContentCacheInvalidationService,
   ) {
     ensureDirectory(episodeUploadsDir);
   }
 
   private async invalidateReadCaches(seriesId: string) {
-    await this.cacheService.deletePatterns([
-      `series:detail:${seriesId}`,
-      `episode:detail:${seriesId}:*`,
-      "series:list:*",
-      "search:*",
-      "rankings:*",
-      "creators:*",
-      "recommendations:*",
-    ]);
+    await this.contentCacheInvalidation.invalidateSeriesContent(
+      seriesId,
+      "admin-episode-upload",
+    );
   }
 
   private async syncLatest(seriesId: string) {
@@ -98,7 +98,9 @@ export class AdminEpisodesUploadController {
         where: { id: seriesId },
         data: { latestEpisodeId: latest.id },
       });
-      this.logger.log(`Synced latest episode for series ${seriesId}: ${latest.id}`);
+      this.logger.log(
+        `Synced latest episode for series ${seriesId}: ${latest.id}`,
+      );
     }
   }
 
@@ -109,12 +111,19 @@ export class AdminEpisodesUploadController {
       limits: { fileSize: 50 * 1024 * 1024 },
     }),
   )
-  async uploadEpisodes(@UploadedFiles() files: Array<{ originalname: string; buffer: Buffer }>, @Req() req: Request) {
+  async uploadEpisodes(
+    @UploadedFiles() files: Array<{ originalname: string; buffer: Buffer }>,
+    @Req() req: Request,
+  ) {
     const seriesId = String(req.params.id || "");
 
-    this.logger.log(`Starting episode upload for series: ${seriesId}, files: ${files?.length || 0}`);
+    this.logger.log(
+      `Starting episode upload for series: ${seriesId}, files: ${files?.length || 0}`,
+    );
 
-    const series = await this.prisma.series.findUnique({ where: { id: seriesId } });
+    const series = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+    });
     if (!series) {
       throw new NotFoundException("作品不存在");
     }
@@ -127,13 +136,17 @@ export class AdminEpisodesUploadController {
       throw new BadRequestException("单次最多上传 50 个文件");
     }
 
-    const requestedType = String(req.body?.type ?? series.type ?? "comic").trim().toLowerCase();
+    const requestedType = String(req.body?.type ?? series.type ?? "comic")
+      .trim()
+      .toLowerCase();
     if (requestedType !== "comic" && requestedType !== "novel") {
       throw new BadRequestException("Invalid episode type.");
     }
 
     const type = requestedType;
-    const sortedFiles = [...files].sort((a, b) => sortByName(a.originalname, b.originalname));
+    const sortedFiles = [...files].sort((a, b) =>
+      sortByName(a.originalname, b.originalname),
+    );
 
     const existing = await this.prisma.episode.findMany({
       where: { seriesId },
@@ -142,7 +155,11 @@ export class AdminEpisodesUploadController {
     });
 
     const maxNumber = existing[0]?.number ?? 0;
-    const startNumber = readIntLike(req.body?.startNumber ?? req.body?.episodeNumber, 0, 0);
+    const startNumber = readIntLike(
+      req.body?.startNumber ?? req.body?.episodeNumber,
+      0,
+      0,
+    );
     let currentNumber = startNumber > 0 ? startNumber - 1 : maxNumber;
     const created: Array<{ id: string; number: number }> = [];
 
@@ -156,12 +173,18 @@ export class AdminEpisodesUploadController {
         entries.sort((a, b) => sortByName(a.entryName, b.entryName));
 
         if (type === "novel") {
-          const textEntries = entries.filter((entry) => entry.entryName.toLowerCase().endsWith(".txt"));
+          const textEntries = entries.filter((entry) =>
+            entry.entryName.toLowerCase().endsWith(".txt"),
+          );
           if (textEntries.length === 0) {
-            throw new BadRequestException(`No text files found in ${file.originalname}.`);
+            throw new BadRequestException(
+              `No text files found in ${file.originalname}.`,
+            );
           }
 
-          const textParts = textEntries.map((entry) => entry.getData().toString("utf8"));
+          const textParts = textEntries.map((entry) =>
+            entry.getData().toString("utf8"),
+          );
           const combined = textParts.join("\n").trim();
           const paragraphs = combined
             .split(/\r?\n/)
@@ -169,7 +192,9 @@ export class AdminEpisodesUploadController {
             .filter(Boolean);
 
           if (paragraphs.length === 0) {
-            throw new BadRequestException(`No readable text content found in ${file.originalname}.`);
+            throw new BadRequestException(
+              `No readable text content found in ${file.originalname}.`,
+            );
           }
 
           const episode = {
@@ -192,17 +217,28 @@ export class AdminEpisodesUploadController {
           });
 
           created.push({ id: episode.id, number: episode.number });
-          this.logger.log(`Created novel episode: ${episode.id}, paragraphs: ${paragraphs.length}`);
+          this.logger.log(
+            `Created novel episode: ${episode.id}, paragraphs: ${paragraphs.length}`,
+          );
           continue;
         }
 
-        const imageEntries = entries.filter((entry) => /\.(png|jpe?g|webp|gif)$/i.test(entry.entryName));
+        const imageEntries = entries.filter((entry) =>
+          /\.(png|jpe?g|webp|gif)$/i.test(entry.entryName),
+        );
         if (imageEntries.length === 0) {
-          throw new BadRequestException(`No image files found in ${file.originalname}.`);
+          throw new BadRequestException(
+            `No image files found in ${file.originalname}.`,
+          );
         }
 
         const pages = imageEntries.map((entry, index) => {
-          const absolutePath = createEpisodeAssetPath(seriesId, chapterTitle || `episode-${currentNumber}`, index, entry.entryName);
+          const absolutePath = createEpisodeAssetPath(
+            seriesId,
+            chapterTitle || `episode-${currentNumber}`,
+            index,
+            entry.entryName,
+          );
           writeFileSync(absolutePath, entry.getData());
 
           const relativePath = absolutePath
@@ -235,9 +271,14 @@ export class AdminEpisodesUploadController {
         });
 
         created.push({ id: episode.id, number: episode.number });
-        this.logger.log(`Created comic episode: ${episode.id}, pages: ${pages.length}`);
+        this.logger.log(
+          `Created comic episode: ${episode.id}, pages: ${pages.length}`,
+        );
       } catch (error) {
-        this.logger.error(`Failed to process file ${file.originalname}:`, error as Error);
+        this.logger.error(
+          `Failed to process file ${file.originalname}:`,
+          error as Error,
+        );
         if (error instanceof BadRequestException) {
           throw error;
         }
@@ -252,7 +293,9 @@ export class AdminEpisodesUploadController {
       orderBy: { number: "asc" },
     });
 
-    this.logger.log(`Successfully uploaded ${created.length} episodes for series: ${seriesId}`);
+    this.logger.log(
+      `Successfully uploaded ${created.length} episodes for series: ${seriesId}`,
+    );
     await this.invalidateReadCaches(seriesId);
     return { episodes, created: created.length };
   }

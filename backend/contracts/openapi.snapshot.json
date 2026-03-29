@@ -113,9 +113,9 @@
   },
   "info": {
     "contact": {},
-    "description": "Mock backend API for Gush.",
-    "title": "Gush Backend",
-    "version": "0.1.0"
+    "description": "Production backend for the Gush comics-and-novels reading platform.",
+    "title": "Gush Reading Platform Backend",
+    "version": "1.0.0"
   },
   "openapi": "3.0.0",
   "paths": {
@@ -1851,6 +1851,17 @@
         }
       }
     },
+    "/api/admin/series/{id}/episodes/reorder": {
+      "post": {
+        "operationId": "AdminEpisodesController_reorderEpisodes",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/admin/series/{id}/episodes/upload": {
       "post": {
         "operationId": "AdminEpisodesUploadController_uploadEpisodes",
@@ -2389,6 +2400,37 @@
         }
       }
     },
+    "/api/creators": {
+      "get": {
+        "operationId": "CreatorsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/creators/{slug}": {
+      "get": {
+        "operationId": "CreatorsController_detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/entitlements": {
       "get": {
         "operationId": "EntitlementsController_getEntitlement",
@@ -2865,6 +2907,26 @@
         "parameters": [],
         "responses": {
           "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/recommendations/homepage": {
+      "get": {
+        "operationId": "RecommendationController_getHomepageSlots",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "adult",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
             "description": ""
           }
         }

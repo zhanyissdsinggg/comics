@@ -28,9 +28,11 @@ export function toStableJson(value: any): string {
 
 function buildSwaggerDocumentConfig() {
   return new DocumentBuilder()
-    .setTitle("Gush Backend")
-    .setDescription("Mock backend API for Gush.")
-    .setVersion("0.1.0")
+    .setTitle("Gush Reading Platform Backend")
+    .setDescription(
+      "Production backend for the Gush comics-and-novels reading platform.",
+    )
+    .setVersion("1.0.0")
     .build();
 }
 

@@ -1,4 +1,5 @@
 import { CacheService } from "../../common/cache/cache.service";
+import { ContentCacheInvalidationService } from "../../common/cache/content-cache-invalidation.service";
 import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
@@ -18,7 +19,9 @@ describe("SearchService", () => {
   let cacheService: {
     get: jest.Mock;
     set: jest.Mock;
-    deletePatterns: jest.Mock;
+  };
+  let contentCacheInvalidation: {
+    invalidateSearchTelemetry: jest.Mock;
   };
   let creatorCreditsService: {
     getCreditsMap: jest.Mock;
@@ -39,7 +42,9 @@ describe("SearchService", () => {
     cacheService = {
       get: jest.fn().mockResolvedValue(null),
       set: jest.fn().mockResolvedValue(undefined),
-      deletePatterns: jest.fn().mockResolvedValue(undefined),
+    };
+    contentCacheInvalidation = {
+      invalidateSearchTelemetry: jest.fn().mockResolvedValue(undefined),
     };
     creatorCreditsService = {
       getCreditsMap: jest.fn().mockResolvedValue(new Map()),
@@ -67,6 +72,7 @@ describe("SearchService", () => {
     service = new SearchService(
       prisma as unknown as PrismaService,
       cacheService as unknown as CacheService,
+      contentCacheInvalidation as unknown as ContentCacheInvalidationService,
       creatorCreditsService as unknown as CreatorCreditsService,
     );
   });
@@ -147,7 +153,10 @@ describe("SearchService", () => {
       { keyword: "action", _sum: { count: 9 } },
     ]);
 
-    await expect(service.hot(false, "week")).resolves.toEqual(["romance", "action"]);
+    await expect(service.hot(false, "week")).resolves.toEqual([
+      "romance",
+      "action",
+    ]);
     expect(prisma.searchLog.groupBy).toHaveBeenCalledWith(
       expect.objectContaining({
         by: ["keyword"],
@@ -160,6 +169,8 @@ describe("SearchService", () => {
     await service.log("user-1", "romance");
 
     expect(prisma.searchLog.upsert).toHaveBeenCalled();
-    expect(cacheService.deletePatterns).toHaveBeenCalledWith(["search:hot:*", "search:results:*"]);
+    expect(
+      contentCacheInvalidation.invalidateSearchTelemetry,
+    ).toHaveBeenCalledWith("search-log-upsert");
   });
 });

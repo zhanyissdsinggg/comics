@@ -1,6 +1,6 @@
 import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
-import { CacheService } from "../../../common/cache/cache.service";
+import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminEpisodesController } from "./admin-episodes.controller";
 
@@ -11,8 +11,8 @@ describe("AdminEpisodesController", () => {
     series: Record<string, jest.Mock>;
     $transaction: jest.Mock;
   };
-  let cacheService: {
-    deletePatterns: jest.Mock;
+  let contentCacheInvalidation: {
+    invalidateSeriesContent: jest.Mock;
   };
 
   const existingEpisode = {
@@ -43,7 +43,9 @@ describe("AdminEpisodesController", () => {
       deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
     };
     const seriesDelegate = {
-      update: jest.fn().mockResolvedValue({ id: "series-1", latestEpisodeId: "series-1e7" }),
+      update: jest
+        .fn()
+        .mockResolvedValue({ id: "series-1", latestEpisodeId: "series-1e7" }),
     };
 
     prisma = {
@@ -58,8 +60,8 @@ describe("AdminEpisodesController", () => {
       ),
     };
 
-    cacheService = {
-      deletePatterns: jest.fn().mockResolvedValue(undefined),
+    contentCacheInvalidation = {
+      invalidateSeriesContent: jest.fn().mockResolvedValue(undefined),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -73,7 +75,10 @@ describe("AdminEpisodesController", () => {
           },
         },
         { provide: PrismaService, useValue: prisma },
-        { provide: CacheService, useValue: cacheService },
+        {
+          provide: ContentCacheInvalidationService,
+          useValue: contentCacheInvalidation,
+        },
       ],
     }).compile();
 
@@ -86,7 +91,9 @@ describe("AdminEpisodesController", () => {
 
   it("accepts flat create payloads from the admin frontend", async () => {
     prisma.episode.findUnique.mockResolvedValueOnce(null);
-    prisma.episode.findMany.mockResolvedValueOnce([{ id: "series-1e1", number: 1 }]).mockResolvedValueOnce([]);
+    prisma.episode.findMany
+      .mockResolvedValueOnce([{ id: "series-1e1", number: 1 }])
+      .mockResolvedValueOnce([]);
 
     await controller.createEpisode(
       {
@@ -113,11 +120,15 @@ describe("AdminEpisodesController", () => {
         }),
       }),
     );
-    expect(cacheService.deletePatterns).toHaveBeenCalled();
+    expect(
+      contentCacheInvalidation.invalidateSeriesContent,
+    ).toHaveBeenCalledWith("series-1", "admin-episode-change");
   });
 
   it("supports search filters sorting and pagination when listing episodes", async () => {
-    prisma.episode.findMany.mockResolvedValueOnce([{ ...existingEpisode, id: "series-1e9", number: 9 }]);
+    prisma.episode.findMany.mockResolvedValueOnce([
+      { ...existingEpisode, id: "series-1e9", number: 9 },
+    ]);
     prisma.episode.count.mockResolvedValueOnce(5);
 
     const result = await controller.listEpisodes({
@@ -161,10 +172,9 @@ describe("AdminEpisodesController", () => {
   it("preserves existing fields during partial updates", async () => {
     prisma.episode.findUnique.mockResolvedValueOnce(existingEpisode);
 
-    await controller.updateEpisode(
-      { title: "Updated Episode" },
-      { params: { id: "series-1", episodeId: "series-1e7" } } as never,
-    );
+    await controller.updateEpisode({ title: "Updated Episode" }, {
+      params: { id: "series-1", episodeId: "series-1e7" },
+    } as never);
 
     expect(prisma.episode.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -178,7 +188,9 @@ describe("AdminEpisodesController", () => {
         }),
       }),
     );
-    expect(cacheService.deletePatterns).toHaveBeenCalled();
+    expect(
+      contentCacheInvalidation.invalidateSeriesContent,
+    ).toHaveBeenCalledWith("series-1", "admin-episode-change");
   });
 
   it("reorders selected episodes inside a transaction and syncs latest metadata", async () => {
@@ -216,15 +228,17 @@ describe("AdminEpisodesController", () => {
     prisma.episode.findFirst.mockResolvedValueOnce(null);
     prisma.episode.findMany.mockResolvedValueOnce([]);
 
-    const result = await controller.removeEpisode(
-      { params: { id: "series-1", episodeId: "series-1e7" } } as never,
-    );
+    const result = await controller.removeEpisode({
+      params: { id: "series-1", episodeId: "series-1e7" },
+    } as never);
 
     expect(prisma.series.update).toHaveBeenCalledWith({
       where: { id: "series-1" },
       data: { latestEpisodeId: null },
     });
     expect(result).toEqual({ episodes: [] });
-    expect(cacheService.deletePatterns).toHaveBeenCalled();
+    expect(
+      contentCacheInvalidation.invalidateSeriesContent,
+    ).toHaveBeenCalledWith("series-1", "admin-episode-change");
   });
 });

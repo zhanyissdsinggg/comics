@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { CacheService } from "../../common/cache/cache.service";
+import { ContentCacheInvalidationService } from "../../common/cache/content-cache-invalidation.service";
 import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
 import { mapStorefrontSeriesSummary } from "../../common/mappers/storefront-series.mapper";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -37,7 +38,11 @@ const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 48;
 const SEARCH_RESULTS_TTL_SECONDS = 120;
 
-function parsePositiveInt(value: number | string | undefined, fallback: number, max?: number): number {
+function parsePositiveInt(
+  value: number | string | undefined,
+  fallback: number,
+  max?: number,
+): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) {
     return fallback;
@@ -54,7 +59,9 @@ function splitCsv(value: string | undefined): string[] {
 }
 
 function normalizeText(value: string | undefined): string {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function normalizeStatus(value: string): string {
@@ -99,6 +106,7 @@ export class SearchService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cacheService: CacheService,
+    private readonly contentCacheInvalidation: ContentCacheInvalidationService,
     private readonly creatorCreditsService: CreatorCreditsService,
   ) {}
 
@@ -200,10 +208,14 @@ export class SearchService {
       clauses.push(Prisma.sql`s."adult" = false`);
     }
     if (input.requestedTypes.length > 0) {
-      clauses.push(Prisma.sql`LOWER(s."type") IN (${Prisma.join(input.requestedTypes)})`);
+      clauses.push(
+        Prisma.sql`LOWER(s."type") IN (${Prisma.join(input.requestedTypes)})`,
+      );
     }
     if (input.requestedStatuses.length > 0) {
-      clauses.push(Prisma.sql`LOWER(s."status") IN (${Prisma.join(input.requestedStatuses)})`);
+      clauses.push(
+        Prisma.sql`LOWER(s."status") IN (${Prisma.join(input.requestedStatuses)})`,
+      );
     }
     if (input.requestedGenres.length > 0) {
       const genreMatchers = input.requestedGenres.map((genre) => `%${genre}%`);
@@ -242,18 +254,16 @@ export class SearchService {
       : Prisma.empty;
   }
 
-  private async runSearchQuery(
-    input: {
-      adult: boolean;
-      query: string;
-      requestedTypes: string[];
-      requestedStatuses: string[];
-      requestedGenres: string[];
-      sort: string;
-      page: number;
-      pageSize: number;
-    },
-  ) {
+  private async runSearchQuery(input: {
+    adult: boolean;
+    query: string;
+    requestedTypes: string[];
+    requestedStatuses: string[];
+    requestedGenres: string[];
+    sort: string;
+    page: number;
+    pageSize: number;
+  }) {
     const whereSql = this.buildFilterSql(input);
     const orderSql = this.buildSortSql(input.sort, input.query);
     const offset = (input.page - 1) * input.pageSize;
@@ -309,12 +319,20 @@ export class SearchService {
   async search(options: SearchOptions) {
     const adult = options.adult === true;
     const query = normalizeText(options.q);
-    const requestedTypes = splitCsv(options.type).map((item) => normalizeText(item));
+    const requestedTypes = splitCsv(options.type).map((item) =>
+      normalizeText(item),
+    );
     const requestedStatuses = splitCsv(options.status).map(normalizeStatus);
-    const requestedGenres = splitCsv(options.genre).map((item) => normalizeText(item));
+    const requestedGenres = splitCsv(options.genre).map((item) =>
+      normalizeText(item),
+    );
     const sort = normalizeText(options.sort) || "relevance";
     const page = parsePositiveInt(options.page, DEFAULT_PAGE);
-    const pageSize = parsePositiveInt(options.pageSize, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+    const pageSize = parsePositiveInt(
+      options.pageSize,
+      DEFAULT_PAGE_SIZE,
+      MAX_PAGE_SIZE,
+    );
     const cacheKey = buildSearchResultsCacheKey({
       adult,
       query,
@@ -383,7 +401,9 @@ export class SearchService {
         `,
       ),
       this.prisma.series.findMany({
-        where: adult ? { isPublished: true } : { isPublished: true, adult: false },
+        where: adult
+          ? { isPublished: true }
+          : { isPublished: true, adult: false },
         orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
         take: 4,
         select: { title: true },
@@ -442,13 +462,19 @@ export class SearchService {
       ),
     ]);
 
-    const suggestions = Array.from(new Set([...titles, ...genres].map((item) => item.value))).slice(0, 8);
+    const suggestions = Array.from(
+      new Set([...titles, ...genres].map((item) => item.value)),
+    ).slice(0, 8);
     await this.cacheService.set(cacheKey, suggestions, 120);
     return suggestions;
   }
 
   async hot(adult: boolean, windowParam?: string) {
-    const windowKey = ["week", "month"].includes(String(windowParam || "").trim()) ? windowParam : "day";
+    const windowKey = ["week", "month"].includes(
+      String(windowParam || "").trim(),
+    )
+      ? windowParam
+      : "day";
     const cacheKey = `search:hot:${adult ? "adult" : "standard"}:${windowKey}`;
     const cached = await this.cacheService.get<string[]>(cacheKey);
     if (cached) {
@@ -481,6 +507,8 @@ export class SearchService {
       update: { count: { increment: 1 } },
       create: { dateKey: today, keyword, count: 1 },
     });
-    await this.cacheService.deletePatterns(["search:hot:*", "search:results:*"]);
+    await this.contentCacheInvalidation.invalidateSearchTelemetry(
+      "search-log-upsert",
+    );
   }
 }

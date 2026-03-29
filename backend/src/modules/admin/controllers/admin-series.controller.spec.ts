@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { CacheService } from "../../../common/cache/cache.service";
+import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { CreatorCreditsService } from "../../../common/creators/creator-credits.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
@@ -27,6 +27,7 @@ describe("AdminSeriesController", () => {
               delete: jest.fn(),
             },
             episode: {
+              findMany: jest.fn().mockResolvedValue([]),
               deleteMany: jest.fn(),
             },
             follow: {
@@ -38,15 +39,20 @@ describe("AdminSeriesController", () => {
           },
         },
         {
-          provide: CacheService,
+          provide: ContentCacheInvalidationService,
           useValue: {
-            deletePatterns: jest.fn().mockResolvedValue(undefined),
+            invalidateSeriesContent: jest.fn().mockResolvedValue(undefined),
+            invalidateDiscoveryConfiguration: jest
+              .fn()
+              .mockResolvedValue(undefined),
           },
         },
         {
           provide: CreatorCreditsService,
           useValue: {
-            syncPrimaryCreditFromAuthorField: jest.fn().mockResolvedValue(undefined),
+            syncPrimaryCreditFromAuthorField: jest
+              .fn()
+              .mockResolvedValue(undefined),
           },
         },
       ],
@@ -69,12 +75,24 @@ describe("AdminSeriesController", () => {
       { id: "series-2", title: "B Title", _count: { episodes: 0 } },
     ];
 
-    jest.spyOn(prisma.series, "findMany").mockResolvedValue(mockSeries as never);
+    jest
+      .spyOn(prisma.series, "findMany")
+      .mockResolvedValue(mockSeries as never);
 
     await expect(controller.list()).resolves.toEqual({
       series: [
-        expect.objectContaining({ id: "series-1", title: "A Title", _count: { episodes: 3 }, episodeCount: 3 }),
-        expect.objectContaining({ id: "series-2", title: "B Title", _count: { episodes: 0 }, episodeCount: 0 }),
+        expect.objectContaining({
+          id: "series-1",
+          title: "A Title",
+          _count: { episodes: 3 },
+          episodeCount: 3,
+        }),
+        expect.objectContaining({
+          id: "series-2",
+          title: "B Title",
+          _count: { episodes: 0 },
+          episodeCount: 0,
+        }),
       ],
     });
     expect(prisma.series.findMany).toHaveBeenCalledWith({
@@ -97,7 +115,9 @@ describe("AdminSeriesController", () => {
       isPublished: false,
     };
 
-    jest.spyOn(prisma.series, "create").mockResolvedValue(createdSeries as never);
+    jest
+      .spyOn(prisma.series, "create")
+      .mockResolvedValue(createdSeries as never);
 
     const result = await controller.create({
       series: {
@@ -119,20 +139,33 @@ describe("AdminSeriesController", () => {
   });
 
   it("throws when series id is missing during create", async () => {
-    await expect(controller.create({ series: { title: "Missing ID" } })).rejects.toThrow();
+    await expect(
+      controller.create({ series: { title: "Missing ID" } }),
+    ).rejects.toThrow();
   });
 
   it("throws conflict when series id already exists", async () => {
     jest.spyOn(prisma.series, "create").mockRejectedValue({ code: "P2002" });
 
     await expect(
-      controller.create({ series: { id: "duplicate-series", title: "Duplicate Series" } }),
+      controller.create({
+        series: { id: "duplicate-series", title: "Duplicate Series" },
+      }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it("supports publish status filtering in advanced search", async () => {
-    const mockSeries = [{ id: "series-1", title: "Published", isPublished: true, _count: { episodes: 5 } }];
-    jest.spyOn(prisma.series, "findMany").mockResolvedValue(mockSeries as never);
+    const mockSeries = [
+      {
+        id: "series-1",
+        title: "Published",
+        isPublished: true,
+        _count: { episodes: 5 },
+      },
+    ];
+    jest
+      .spyOn(prisma.series, "findMany")
+      .mockResolvedValue(mockSeries as never);
     jest.spyOn(prisma.series, "count").mockResolvedValue(1 as never);
 
     const result = await controller.advancedSearch({
@@ -143,7 +176,13 @@ describe("AdminSeriesController", () => {
     });
 
     expect(result.series).toEqual([
-      expect.objectContaining({ id: "series-1", title: "Published", isPublished: true, _count: { episodes: 5 }, episodeCount: 5 }),
+      expect.objectContaining({
+        id: "series-1",
+        title: "Published",
+        isPublished: true,
+        _count: { episodes: 5 },
+        episodeCount: 5,
+      }),
     ]);
     expect(prisma.series.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -190,8 +229,13 @@ describe("AdminSeriesController", () => {
     jest
       .spyOn(prisma.series, "findUnique")
       .mockResolvedValueOnce(existingSeries as never)
-      .mockResolvedValueOnce({ ...updatedSeries, _count: { episodes: 0 } } as never);
-    jest.spyOn(prisma.series, "update").mockResolvedValue(updatedSeries as never);
+      .mockResolvedValueOnce({
+        ...updatedSeries,
+        _count: { episodes: 0 },
+      } as never);
+    jest
+      .spyOn(prisma.series, "update")
+      .mockResolvedValue(updatedSeries as never);
 
     const result = await controller.update(
       { series: { title: "New Title", isPublished: false } },
@@ -216,28 +260,44 @@ describe("AdminSeriesController", () => {
     jest.spyOn(prisma.series, "findUnique").mockResolvedValue(null as never);
 
     await expect(
-      controller.update({ series: { title: "Missing" } }, { params: { id: "missing" } } as never),
+      controller.update({ series: { title: "Missing" } }, {
+        params: { id: "missing" },
+      } as never),
     ).rejects.toThrow(NotFoundException);
   });
 
   it("deletes episodes before deleting the series", async () => {
-    jest.spyOn(prisma.series, "findUnique").mockResolvedValue({ id: "series-1" } as never);
-    jest.spyOn(prisma.episode, "deleteMany").mockResolvedValue({ count: 3 } as never);
-    jest.spyOn(prisma.series, "delete").mockResolvedValue({ id: "series-1" } as never);
+    jest
+      .spyOn(prisma.series, "findUnique")
+      .mockResolvedValue({ id: "series-1" } as never);
+    jest
+      .spyOn(prisma.episode, "deleteMany")
+      .mockResolvedValue({ count: 3 } as never);
+    jest
+      .spyOn(prisma.series, "delete")
+      .mockResolvedValue({ id: "series-1" } as never);
 
-    const result = await controller.remove({ params: { id: "series-1" } } as never);
+    const result = await controller.remove({
+      params: { id: "series-1" },
+    } as never);
 
     expect(result).toEqual({ ok: true });
-    expect(prisma.series.findUnique).toHaveBeenCalledWith({ where: { id: "series-1" } });
-    expect(prisma.episode.deleteMany).toHaveBeenCalledWith({ where: { seriesId: "series-1" } });
-    expect(prisma.series.delete).toHaveBeenCalledWith({ where: { id: "series-1" } });
+    expect(prisma.series.findUnique).toHaveBeenCalledWith({
+      where: { id: "series-1" },
+    });
+    expect(prisma.episode.deleteMany).toHaveBeenCalledWith({
+      where: { seriesId: "series-1" },
+    });
+    expect(prisma.series.delete).toHaveBeenCalledWith({
+      where: { id: "series-1" },
+    });
   });
 
   it("throws not found when deleting a missing series", async () => {
     jest.spyOn(prisma.series, "findUnique").mockResolvedValue(null as never);
 
-    await expect(controller.remove({ params: { id: "missing" } } as never)).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(
+      controller.remove({ params: { id: "missing" } } as never),
+    ).rejects.toThrow(NotFoundException);
   });
 });

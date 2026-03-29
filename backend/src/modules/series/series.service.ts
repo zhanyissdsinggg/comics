@@ -1,7 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { CacheService } from "../../common/cache/cache.service";
 import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
-import { mapEpisodeListItem, mapStorefrontSeriesSummary, type SeriesAnalyticsSnapshot } from "../../common/mappers/storefront-series.mapper";
+import {
+  mapEpisodeListItem,
+  mapStorefrontSeriesSummary,
+  type SeriesAnalyticsSnapshot,
+  type StorefrontEpisodeAccess,
+  type StorefrontSeriesSummary,
+} from "../../common/mappers/storefront-series.mapper";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
 
@@ -37,16 +43,17 @@ type SeriesEpisodeRow = {
   previewFreePages: number;
 };
 
-type StorefrontSeriesSummary = ReturnType<typeof mapStorefrontSeriesSummary>;
-type EpisodeAccessSnapshot = {
-  pricePts: number;
-  ttfEligible: boolean;
-  ttfReadyAt: Date | null;
+type CachedSeriesEpisodeRow = Omit<
+  SeriesEpisodeRow,
+  "releasedAt" | "ttfReadyAt"
+> & {
+  releasedAt: Date | string | null;
+  ttfReadyAt: Date | string | null;
 };
 
 type CachedSeriesDetail = {
   series: StorefrontSeriesSummary;
-  episodes: SeriesEpisodeRow[];
+  episodes: CachedSeriesEpisodeRow[];
   ttfIntervalHours: number;
 };
 
@@ -61,12 +68,41 @@ export class SeriesService {
     private readonly creatorCreditsService: CreatorCreditsService,
   ) {}
 
+  private normalizeEpisodeDate(
+    value: Date | string | null | undefined,
+  ): Date | null {
+    if (!value) {
+      return null;
+    }
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? null : value;
+    }
+
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  private normalizeCachedEpisode(
+    episode: CachedSeriesEpisodeRow,
+  ): SeriesEpisodeRow {
+    return {
+      ...episode,
+      releasedAt: this.normalizeEpisodeDate(episode.releasedAt),
+      ttfReadyAt: this.normalizeEpisodeDate(episode.ttfReadyAt),
+    };
+  }
+
   private applyTtfAcceleration(
     episode: SeriesEpisodeRow,
     series: { ttfIntervalHours: number },
     subscription?: { perks?: { ttfMultiplier?: number } } | null,
   ): SeriesEpisodeRow {
-    if (!subscription || !episode.ttfEligible || !episode.ttfReadyAt || !episode.releasedAt) {
+    if (
+      !subscription ||
+      !episode.ttfEligible ||
+      !episode.ttfReadyAt ||
+      !episode.releasedAt
+    ) {
       return episode;
     }
 
@@ -77,7 +113,8 @@ export class SeriesService {
 
     const releasedAtMs = episode.releasedAt.getTime();
     const intervalHours = Math.max(1, Number(series.ttfIntervalHours || 24));
-    const acceleratedReadyAtMs = releasedAtMs + intervalHours * multiplier * 60 * 60 * 1000;
+    const acceleratedReadyAtMs =
+      releasedAtMs + intervalHours * multiplier * 60 * 60 * 1000;
     const existingReadyAtMs = episode.ttfReadyAt.getTime();
 
     return {
@@ -96,7 +133,9 @@ export class SeriesService {
       row,
       {
         ...analytics,
-        latestEpisodeId: analytics.latestEpisodeId || String((row as Partial<SeriesDetailRow>).latestEpisodeId || ""),
+        latestEpisodeId:
+          analytics.latestEpisodeId ||
+          String((row as Partial<SeriesDetailRow>).latestEpisodeId || ""),
       },
       identity,
       credits,
@@ -105,7 +144,8 @@ export class SeriesService {
 
   async list(adult: boolean | null) {
     const cacheKey = `series:list:${adult === null ? "all" : adult ? "adult" : "standard"}`;
-    const cached = await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
+    const cached =
+      await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -161,7 +201,10 @@ export class SeriesService {
     return series;
   }
 
-  async detail(seriesId: string, subscription?: { perks?: { ttfMultiplier?: number } } | null) {
+  async detail(
+    seriesId: string,
+    subscription?: { perks?: { ttfMultiplier?: number } } | null,
+  ) {
     const cacheKey = `series:detail:${seriesId}`;
     let cached = await this.cacheService.get<CachedSeriesDetail>(cacheKey);
 
@@ -230,11 +273,18 @@ export class SeriesService {
       await this.cacheService.set(cacheKey, cached, SERIES_DETAIL_TTL_SECONDS);
     }
 
+    const normalizedEpisodes = cached.episodes.map((episode) =>
+      this.normalizeCachedEpisode(episode),
+    );
     const episodes = subscription
-      ? cached.episodes.map((episode) =>
-          this.applyTtfAcceleration(episode, { ttfIntervalHours: cached!.ttfIntervalHours }, subscription),
+      ? normalizedEpisodes.map((episode) =>
+          this.applyTtfAcceleration(
+            episode,
+            { ttfIntervalHours: cached!.ttfIntervalHours },
+            subscription,
+          ),
         )
-      : cached.episodes;
+      : normalizedEpisodes;
 
     return {
       series: cached.series,
@@ -244,7 +294,7 @@ export class SeriesService {
           pricePts: episode.pricePts,
           ttfEligible: episode.ttfEligible,
           ttfReadyAt: episode.ttfReadyAt,
-        } satisfies EpisodeAccessSnapshot,
+        } satisfies StorefrontEpisodeAccess,
       })),
     };
   }

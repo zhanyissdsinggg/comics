@@ -13,10 +13,14 @@
 } from "@nestjs/common";
 import type { Episode, Prisma } from "@prisma/client";
 import type { Request } from "express";
-import { CacheService } from "../../../common/cache/cache.service";
+import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
-import { readBooleanLike, readDateLike, readIntLike } from "../utils/param-parsing";
+import {
+  readBooleanLike,
+  readDateLike,
+  readIntLike,
+} from "../utils/param-parsing";
 
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
@@ -86,13 +90,21 @@ function readEpisodeParagraphs(value: unknown, fallback: string[]): string[] {
   return value.filter((item): item is string => typeof item === "string");
 }
 
-function normalizeEpisodeSortField(value: unknown): keyof Prisma.EpisodeOrderByWithRelationInput {
+function normalizeEpisodeSortField(
+  value: unknown,
+): keyof Prisma.EpisodeOrderByWithRelationInput {
   const candidate = String(value ?? "").trim();
-  return EPISODE_SORT_FIELDS.has(candidate) ? (candidate as keyof Prisma.EpisodeOrderByWithRelationInput) : "number";
+  return EPISODE_SORT_FIELDS.has(candidate)
+    ? (candidate as keyof Prisma.EpisodeOrderByWithRelationInput)
+    : "number";
 }
 
 function normalizeEpisodeSortOrder(value: unknown): Prisma.SortOrder {
-  return String(value ?? "").trim().toLowerCase() === "desc" ? "desc" : "asc";
+  return String(value ?? "")
+    .trim()
+    .toLowerCase() === "desc"
+    ? "desc"
+    : "asc";
 }
 
 function readQueryPrimitive(value: unknown): string | undefined {
@@ -120,30 +132,51 @@ interface EpisodeDraft {
   text: string | null;
 }
 
-function buildEpisodeDraft(seriesId: string, input: EpisodeInput, existing?: Episode | null): EpisodeDraft {
+function buildEpisodeDraft(
+  seriesId: string,
+  input: EpisodeInput,
+  existing?: Episode | null,
+): EpisodeDraft {
   const fallbackNumber = existing?.number ?? 1;
   const number =
     input.number !== undefined
-      ? readIntLike(input.number as number | string | null | undefined, fallbackNumber, 1)
+      ? readIntLike(
+          input.number as number | string | null | undefined,
+          fallbackNumber,
+          1,
+        )
       : fallbackNumber;
 
   return {
-    id: typeof input.id === "string" && input.id.trim() ? input.id.trim() : existing?.id ?? `${seriesId}e${number}`,
+    id:
+      typeof input.id === "string" && input.id.trim()
+        ? input.id.trim()
+        : (existing?.id ?? `${seriesId}e${number}`),
     seriesId,
     number,
     title:
       input.title !== undefined
         ? String(input.title)
-        : existing?.title ?? `Episode ${number}`,
-    releasedAt: readEpisodeDate(input.releasedAt, existing?.releasedAt ?? new Date()),
+        : (existing?.title ?? `Episode ${number}`),
+    releasedAt: readEpisodeDate(
+      input.releasedAt,
+      existing?.releasedAt ?? new Date(),
+    ),
     pricePts:
       input.pricePts !== undefined
-        ? readIntLike(input.pricePts as number | string | null | undefined, existing?.pricePts ?? 0, 0)
-        : existing?.pricePts ?? 0,
+        ? readIntLike(
+            input.pricePts as number | string | null | undefined,
+            existing?.pricePts ?? 0,
+            0,
+          )
+        : (existing?.pricePts ?? 0),
     ttfEligible:
       input.ttfEligible !== undefined
-        ? readBooleanLike(input.ttfEligible as boolean | string | null | undefined, existing?.ttfEligible ?? false)
-        : existing?.ttfEligible ?? false,
+        ? readBooleanLike(
+            input.ttfEligible as boolean | string | null | undefined,
+            existing?.ttfEligible ?? false,
+          )
+        : (existing?.ttfEligible ?? false),
     ttfReadyAt: readEpisodeDate(input.ttfReadyAt, existing?.ttfReadyAt ?? null),
     previewFreePages:
       input.previewFreePages !== undefined
@@ -152,19 +185,27 @@ function buildEpisodeDraft(seriesId: string, input: EpisodeInput, existing?: Epi
             existing?.previewFreePages ?? 0,
             0,
           )
-        : existing?.previewFreePages ?? 0,
-    pages: readEpisodeJson(input.pages, (existing?.pages as Prisma.InputJsonValue | undefined) ?? []),
-    paragraphs: readEpisodeParagraphs(input.paragraphs, existing?.paragraphs ?? []),
+        : (existing?.previewFreePages ?? 0),
+    pages: readEpisodeJson(
+      input.pages,
+      (existing?.pages as Prisma.InputJsonValue | undefined) ?? [],
+    ),
+    paragraphs: readEpisodeParagraphs(
+      input.paragraphs,
+      existing?.paragraphs ?? [],
+    ),
     text:
       input.text !== undefined
         ? input.text === null
           ? null
           : String(input.text)
-        : existing?.text ?? null,
+        : (existing?.text ?? null),
   };
 }
 
-function toEpisodeCreateData(draft: EpisodeDraft): Prisma.EpisodeUncheckedCreateInput {
+function toEpisodeCreateData(
+  draft: EpisodeDraft,
+): Prisma.EpisodeUncheckedCreateInput {
   return {
     id: draft.id,
     seriesId: draft.seriesId,
@@ -181,7 +222,9 @@ function toEpisodeCreateData(draft: EpisodeDraft): Prisma.EpisodeUncheckedCreate
   };
 }
 
-function toEpisodeUpdateData(draft: EpisodeDraft): Prisma.EpisodeUncheckedUpdateInput {
+function toEpisodeUpdateData(
+  draft: EpisodeDraft,
+): Prisma.EpisodeUncheckedUpdateInput {
   return {
     seriesId: draft.seriesId,
     number: draft.number,
@@ -204,19 +247,14 @@ export class AdminEpisodesController {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cacheService: CacheService,
+    private readonly contentCacheInvalidation: ContentCacheInvalidationService,
   ) {}
 
   private async invalidateReadCaches(seriesId: string) {
-    await this.cacheService.deletePatterns([
-      `series:detail:${seriesId}`,
-      `episode:detail:${seriesId}:*`,
-      "series:list:*",
-      "search:*",
-      "rankings:*",
-      "creators:*",
-      "recommendations:*",
-    ]);
+    await this.contentCacheInvalidation.invalidateSeriesContent(
+      seriesId,
+      "admin-episode-change",
+    );
   }
 
   private async syncLatest(seriesId: string) {
@@ -228,26 +266,46 @@ export class AdminEpisodesController {
       where: { id: seriesId },
       data: { latestEpisodeId: latest?.id ?? null },
     });
-    this.logger.log(`Synced latest episode for series ${seriesId}: ${latest?.id ?? "none"}`);
+    this.logger.log(
+      `Synced latest episode for series ${seriesId}: ${latest?.id ?? "none"}`,
+    );
   }
 
   @Get()
   async listEpisodes(@Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const search = String(readQueryPrimitive(req.query.search) || "").trim();
-    const page = Math.max(1, readIntLike(readQueryPrimitive(req.query.page), 1, 1));
+    const page = Math.max(
+      1,
+      readIntLike(readQueryPrimitive(req.query.page), 1, 1),
+    );
     const pageSize = Math.min(
       MAX_PAGE_SIZE,
       Math.max(
         1,
-        readIntLike(readQueryPrimitive(req.query.pageSize) ?? readQueryPrimitive(req.query.limit), DEFAULT_PAGE_SIZE, 1),
+        readIntLike(
+          readQueryPrimitive(req.query.pageSize) ??
+            readQueryPrimitive(req.query.limit),
+          DEFAULT_PAGE_SIZE,
+          1,
+        ),
       ),
     );
-    const sortBy = normalizeEpisodeSortField(readQueryPrimitive(req.query.sortBy));
-    const sortOrder = normalizeEpisodeSortOrder(readQueryPrimitive(req.query.sortOrder));
-    const priceType = String(readQueryPrimitive(req.query.priceType) || "").trim();
-    const previewStatus = String(readQueryPrimitive(req.query.previewStatus) || "").trim();
-    const ttfEligibleFilter = String(readQueryPrimitive(req.query.ttfEligible) || "").trim();
+    const sortBy = normalizeEpisodeSortField(
+      readQueryPrimitive(req.query.sortBy),
+    );
+    const sortOrder = normalizeEpisodeSortOrder(
+      readQueryPrimitive(req.query.sortOrder),
+    );
+    const priceType = String(
+      readQueryPrimitive(req.query.priceType) || "",
+    ).trim();
+    const previewStatus = String(
+      readQueryPrimitive(req.query.previewStatus) || "",
+    ).trim();
+    const ttfEligibleFilter = String(
+      readQueryPrimitive(req.query.ttfEligible) || "",
+    ).trim();
 
     this.logger.log(`Listing episodes for series: ${seriesId}`);
 
@@ -309,18 +367,32 @@ export class AdminEpisodesController {
   }
 
   @Post()
-  async createEpisode(@Body() body: Record<string, unknown>, @Req() req: Request) {
+  async createEpisode(
+    @Body() body: Record<string, unknown>,
+    @Req() req: Request,
+  ) {
     const seriesId = String(req.params.id || "");
 
     if (isRecord(body.bulk)) {
-      const count = readIntLike(body.bulk.count as number | string | null | undefined, 0, 0, 100);
-      const pricePts = readIntLike(body.bulk.pricePts as number | string | null | undefined, 0, 0);
+      const count = readIntLike(
+        body.bulk.count as number | string | null | undefined,
+        0,
+        0,
+        100,
+      );
+      const pricePts = readIntLike(
+        body.bulk.pricePts as number | string | null | undefined,
+        0,
+        0,
+      );
 
       if (count <= 0 || count > 100) {
         throw new BadRequestException("批量创建数量必须在 1-100 之间");
       }
 
-      this.logger.log(`Bulk creating ${count} episodes for series: ${seriesId}`);
+      this.logger.log(
+        `Bulk creating ${count} episodes for series: ${seriesId}`,
+      );
 
       const existing = await this.prisma.episode.findMany({
         where: { seriesId, isDeleted: false },
@@ -351,7 +423,9 @@ export class AdminEpisodesController {
         orderBy: { number: "asc" },
       });
 
-      this.logger.log(`Successfully created ${count} episodes for series: ${seriesId}`);
+      this.logger.log(
+        `Successfully created ${count} episodes for series: ${seriesId}`,
+      );
       await this.invalidateReadCaches(seriesId);
       return { episodes };
     }
@@ -362,7 +436,9 @@ export class AdminEpisodesController {
     }
 
     const seedDraft = buildEpisodeDraft(seriesId, episodeInput);
-    const existing = await this.prisma.episode.findUnique({ where: { id: seedDraft.id } });
+    const existing = await this.prisma.episode.findUnique({
+      where: { id: seedDraft.id },
+    });
     const draft = buildEpisodeDraft(seriesId, episodeInput, existing);
 
     this.logger.log(`Creating/updating episode: ${draft.id}`);
@@ -385,19 +461,28 @@ export class AdminEpisodesController {
   }
 
   @Post("bulk")
-  async bulkUpdateEpisodes(@Body() body: Record<string, unknown>, @Req() req: Request) {
+  async bulkUpdateEpisodes(
+    @Body() body: Record<string, unknown>,
+    @Req() req: Request,
+  ) {
     const seriesId = String(req.params.id || "");
     const updates = isRecord(body.updates) ? body.updates : {};
     const ids = Array.isArray(body.ids) ? body.ids : [];
 
-    this.logger.log(`Bulk updating episodes for series: ${seriesId}, count: ${ids.length || "all"}`);
+    this.logger.log(
+      `Bulk updating episodes for series: ${seriesId}, count: ${ids.length || "all"}`,
+    );
 
     const list = await this.prisma.episode.findMany({
       where: { seriesId, isDeleted: false },
       orderBy: { number: "asc" },
     });
 
-    const intervalHours = readIntLike(body.intervalHours as number | string | null | undefined, 24, 1);
+    const intervalHours = readIntLike(
+      body.intervalHours as number | string | null | undefined,
+      24,
+      1,
+    );
     const updatedList = list.map((episode) => {
       if (ids.length > 0 && !ids.includes(episode.id)) {
         return buildEpisodeDraft(seriesId, {}, episode);
@@ -415,8 +500,8 @@ export class AdminEpisodesController {
         this.prisma.episode.update({
           where: { id: episode.id },
           data: toEpisodeUpdateData(episode),
-        })
-      )
+        }),
+      ),
     );
 
     const episodes = await this.prisma.episode.findMany({
@@ -424,16 +509,28 @@ export class AdminEpisodesController {
       orderBy: { number: "asc" },
     });
 
-    this.logger.log(`Successfully bulk updated episodes for series: ${seriesId}`);
+    this.logger.log(
+      `Successfully bulk updated episodes for series: ${seriesId}`,
+    );
     await this.invalidateReadCaches(seriesId);
     return { episodes };
   }
 
   @Post("reorder")
-  async reorderEpisodes(@Body() body: Record<string, unknown>, @Req() req: Request) {
+  async reorderEpisodes(
+    @Body() body: Record<string, unknown>,
+    @Req() req: Request,
+  ) {
     const seriesId = String(req.params.id || "");
-    const compact = readBooleanLike(body.compact as boolean | string | null | undefined, false);
-    const startNumber = readIntLike(body.startNumber as number | string | null | undefined, 1, 1);
+    const compact = readBooleanLike(
+      body.compact as boolean | string | null | undefined,
+      false,
+    );
+    const startNumber = readIntLike(
+      body.startNumber as number | string | null | undefined,
+      1,
+      1,
+    );
 
     if (compact) {
       const existingEpisodes = await this.prisma.episode.findMany({
@@ -479,7 +576,11 @@ export class AdminEpisodesController {
 
     const normalizedItems = items.map((item) => ({
       id: typeof item.id === "string" ? item.id.trim() : "",
-      number: readIntLike(item.number as number | string | null | undefined, 0, 1),
+      number: readIntLike(
+        item.number as number | string | null | undefined,
+        0,
+        1,
+      ),
     }));
 
     if (normalizedItems.some((item) => !item.id || item.number < 1)) {
@@ -489,7 +590,10 @@ export class AdminEpisodesController {
     const idSet = new Set(normalizedItems.map((item) => item.id));
     const numberSet = new Set(normalizedItems.map((item) => item.number));
 
-    if (idSet.size !== normalizedItems.length || numberSet.size !== normalizedItems.length) {
+    if (
+      idSet.size !== normalizedItems.length ||
+      numberSet.size !== normalizedItems.length
+    ) {
       throw new BadRequestException("章节编号或章节 ID 重复。");
     }
 
@@ -536,19 +640,28 @@ export class AdminEpisodesController {
   }
 
   @Patch(":episodeId")
-  async updateEpisode(@Body() body: Record<string, unknown>, @Req() req: Request) {
+  async updateEpisode(
+    @Body() body: Record<string, unknown>,
+    @Req() req: Request,
+  ) {
     const seriesId = String(req.params.id || "");
     const episodeId = String(req.params.episodeId || "");
     const episodeInput = getEpisodeInput(body) ?? {};
 
     this.logger.log(`Updating episode: ${episodeId}`);
 
-    const existing = await this.prisma.episode.findUnique({ where: { id: episodeId } });
+    const existing = await this.prisma.episode.findUnique({
+      where: { id: episodeId },
+    });
     if (!existing || existing.seriesId !== seriesId) {
       throw new NotFoundException("Episode not found.");
     }
 
-    const draft = buildEpisodeDraft(seriesId, { ...episodeInput, id: episodeId }, existing);
+    const draft = buildEpisodeDraft(
+      seriesId,
+      { ...episodeInput, id: episodeId },
+      existing,
+    );
 
     const updated = await this.prisma.episode.update({
       where: { id: episodeId },
@@ -569,7 +682,9 @@ export class AdminEpisodesController {
 
     this.logger.log(`Deleting episode: ${episodeId}`);
 
-    await this.prisma.episode.deleteMany({ where: { id: episodeId, seriesId } });
+    await this.prisma.episode.deleteMany({
+      where: { id: episodeId, seriesId },
+    });
     await this.syncLatest(seriesId);
 
     const episodes = await this.prisma.episode.findMany({
@@ -582,4 +697,3 @@ export class AdminEpisodesController {
     return { episodes };
   }
 }
-

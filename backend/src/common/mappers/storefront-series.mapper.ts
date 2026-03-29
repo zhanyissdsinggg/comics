@@ -1,4 +1,7 @@
-import type { PublicCreatorCredit, PublicCreatorIdentity } from "../creators/creator-identity";
+import type {
+  PublicCreatorCredit,
+  PublicCreatorIdentity,
+} from "../creators/creator-identity";
 
 export type SeriesAnalyticsSnapshot = {
   episodeCount: number;
@@ -8,12 +11,51 @@ export type SeriesAnalyticsSnapshot = {
   views: number;
 };
 
+export type StorefrontEpisodeListItem = {
+  id: string;
+  seriesId: string;
+  number: number;
+  title: string;
+  releasedAt: Date | null;
+  previewFreePages: number;
+};
+
+export type StorefrontEpisodeAccess = {
+  pricePts: number;
+  ttfEligible: boolean;
+  ttfReadyAt: Date | null;
+};
+
+export type StorefrontSeriesSummary = {
+  id: string;
+  title: string;
+  type: string;
+  adult: boolean;
+  coverTone: string;
+  coverUrl: string;
+  latest: string;
+  latestEpisodeId: string;
+  episodeCount: number;
+  genres: string[];
+  status: string;
+  description: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  author: string;
+  creator: PublicCreatorIdentity;
+  creatorCredits: PublicCreatorCredit[];
+  followers: number;
+  views: number;
+};
+
 function extractEpisodeNumber(value: unknown): number {
   const numeric = Number(value);
   if (Number.isFinite(numeric) && numeric > 0) {
     return Math.floor(numeric);
   }
-  const match = String(value || "").trim().match(/(\d+)$/);
+  const match = String(value || "")
+    .trim()
+    .match(/(\d+)$/);
   const parsed = Number(match?.[1] || 0);
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
 }
@@ -30,7 +72,7 @@ export function mapEpisodeListItem(episode: {
   title: string;
   releasedAt?: Date | null;
   previewFreePages?: number | null;
-}) {
+}): StorefrontEpisodeListItem {
   return {
     id: String(episode.id || "").trim(),
     seriesId: String(episode.seriesId || "").trim(),
@@ -59,7 +101,7 @@ export function mapStorefrontSeriesSummary(
   analytics: SeriesAnalyticsSnapshot,
   identity: PublicCreatorIdentity,
   credits: PublicCreatorCredit[],
-) {
+): StorefrontSeriesSummary {
   const latestEpisodeId = String(analytics.latestEpisodeId || "").trim();
   const latestEpisodeLabel = analytics.latestEpisodeNumber
     ? formatLatestEpisodeLabel(analytics.latestEpisodeNumber)
@@ -80,9 +122,12 @@ export function mapStorefrontSeriesSummary(
     description: String(series.description || ""),
     createdAt: series.createdAt || null,
     updatedAt: series.updatedAt || null,
+    // Keep `author` only as a storefront compatibility alias.
+    // Public creator identity must continue to come from normalized credits.
     author: identity.label,
     creator: identity,
     creatorCredits: credits,
+    // Followers/views remain real analytics snapshots, not legacy rating-style fallbacks.
     followers: Math.max(0, Number(analytics.followers || 0)),
     views: Math.max(0, Number(analytics.views || 0)),
   };

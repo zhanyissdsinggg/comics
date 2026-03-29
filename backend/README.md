@@ -69,8 +69,27 @@ Creator identity is now normalized through:
 - `Creator`
 - `SeriesCredit`
 
-`Series.author` remains as a transitional source field, but public creator identity should come from normalized credits wherever available.
+`Series.author` now remains only as a legacy admin input field. Public creator identity comes from normalized credits, and the storefront `author` field is kept only as a compatibility alias derived from those credits.
 
-Admin series writes sync the legacy author field into normalized credits so new titles do not regress to string-only attribution.
+Admin series writes still bridge legacy `author` input into normalized credits as a temporary compatibility layer while admin credit editing catches up. That bridge is now isolated to the admin write path instead of the public read path.
 
 Local seed data now creates real `Creator` and `SeriesCredit` rows, and it seeds novel episodes with paragraph payloads so creator discovery and episode detail paths can be exercised without fallback-only fixtures.
+
+## Cache invalidation pipeline
+
+Storefront reads now use a centralized content invalidation layer:
+
+- `ContentCacheInvalidationService.invalidateSeriesContent(...)`
+  - invalidates series detail, episode detail, creators, storefront lists, rankings, recommendations, and search read caches when series metadata, episodes, or creator credits change
+- `ContentCacheInvalidationService.invalidateDiscoveryConfiguration(...)`
+  - invalidates recommendation/ranking/discovery caches when editorial configuration changes
+- `ContentCacheInvalidationService.invalidateSearchTelemetry(...)`
+  - invalidates hot-search caches when search logs are updated
+
+Admin series writes, admin episode writes/uploads, generated content, recommendation config changes, and search-log writes now all route through this centralized invalidation layer instead of deleting cache patterns ad hoc.
+
+## Compatibility notes
+
+- The old schema-drift fallback that retried episode queries without `isDeleted` has been removed from the normal runtime path.
+- Legacy commercial fields still exist in the database for internal/admin flows, but the public series/episode read model no longer exposes TTF/pricing fields at the top level.
+- If admin author input is retired later, the temporary author-to-credit bridge should be the next compatibility layer deleted.

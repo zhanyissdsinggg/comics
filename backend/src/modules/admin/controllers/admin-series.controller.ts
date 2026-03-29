@@ -13,35 +13,36 @@
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
-import { CacheService } from "../../../common/cache/cache.service";
+import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { logger } from "../../../common/logger/winston.init";
 import { CreatorCreditsService } from "../../../common/creators/creator-credits.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
-import { enrichSeriesWithStorefrontFields, syncSeriesAuthorField } from "../../../common/utils/series-storefront-fields";
+import {
+  enrichSeriesWithStorefrontFields,
+  syncSeriesAuthorField,
+} from "../../../common/utils/series-storefront-fields";
 
 @Controller("admin/series")
 @UseGuards(AdminAuthGuard)
 export class AdminSeriesController {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cacheService: CacheService,
+    private readonly contentCacheInvalidation: ContentCacheInvalidationService,
     private readonly creatorCreditsService: CreatorCreditsService,
   ) {}
 
   private async invalidateReadCaches(seriesId?: string) {
-    const patterns = [
-      "series:list:*",
-      "search:*",
-      "rankings:*",
-      "creators:*",
-      "recommendations:*",
-    ];
-    if (seriesId) {
-      patterns.push(`series:detail:${seriesId}`);
-      patterns.push(`episode:detail:${seriesId}:*`);
+    if (!seriesId) {
+      await this.contentCacheInvalidation.invalidateDiscoveryConfiguration(
+        "admin-series-list-change",
+      );
+      return;
     }
-    await this.cacheService.deletePatterns(patterns);
+    await this.contentCacheInvalidation.invalidateSeriesContent(
+      seriesId,
+      "admin-series-change",
+    );
   }
 
   private mapSeriesSummary(series: any) {
@@ -76,7 +77,9 @@ export class AdminSeriesController {
   private toSeriesPayload(input: any, existing?: any) {
     const pricing = input?.pricing || {};
     const ttf = input?.ttf || {};
-    const genres = Array.isArray(input?.genres) ? input.genres : existing?.genres || [];
+    const genres = Array.isArray(input?.genres)
+      ? input.genres
+      : existing?.genres || [];
     const badges = Array.isArray(input?.badges)
       ? input.badges
       : input?.badge
@@ -98,9 +101,18 @@ export class AdminSeriesController {
       rating: input.rating ?? existing?.rating ?? 0,
       ratingCount: input.ratingCount ?? existing?.ratingCount ?? 0,
       description: input.description ?? existing?.description ?? "",
-      episodePrice: pricing.episodePrice ?? input.episodePrice ?? existing?.episodePrice ?? 0,
-      ttfEnabled: ttf.enabled ?? input.ttfEnabled ?? existing?.ttfEnabled ?? false,
-      ttfIntervalHours: ttf.intervalHours ?? input.ttfIntervalHours ?? existing?.ttfIntervalHours ?? 24,
+      episodePrice:
+        pricing.episodePrice ??
+        input.episodePrice ??
+        existing?.episodePrice ??
+        0,
+      ttfEnabled:
+        ttf.enabled ?? input.ttfEnabled ?? existing?.ttfEnabled ?? false,
+      ttfIntervalHours:
+        ttf.intervalHours ??
+        input.ttfIntervalHours ??
+        existing?.ttfIntervalHours ??
+        24,
       latestEpisodeId: input.latestEpisodeId ?? existing?.latestEpisodeId ?? "",
     };
   }
@@ -112,7 +124,10 @@ export class AdminSeriesController {
 
     await Promise.all([
       syncSeriesAuthorField(this.prisma, seriesId, input?.author),
-      this.creatorCreditsService.syncPrimaryCreditFromAuthorField(seriesId, input?.author),
+      this.creatorCreditsService.syncPrimaryCreditFromAuthorField(
+        seriesId,
+        input?.author,
+      ),
     ]);
   }
 
@@ -133,8 +148,14 @@ export class AdminSeriesController {
 
   @Get("search/advanced")
   async advancedSearch(@Query() query: Record<string, string>) {
-    const page = Math.max(1, Number.parseInt(String(query?.page || "1"), 10) || 1);
-    const limit = Math.min(100, Math.max(1, Number.parseInt(String(query?.limit || "20"), 10) || 20));
+    const page = Math.max(
+      1,
+      Number.parseInt(String(query?.page || "1"), 10) || 1,
+    );
+    const limit = Math.min(
+      100,
+      Math.max(1, Number.parseInt(String(query?.limit || "20"), 10) || 20),
+    );
     const search = String(query?.search || "").trim();
     const type = String(query?.type || "").trim();
     const status = String(query?.status || "").trim();
@@ -168,9 +189,18 @@ export class AdminSeriesController {
     }
 
     const [sortField, sortDirectionRaw] = sortBy.split("_");
-    const allowedSortFields = new Set(["createdAt", "updatedAt", "title", "rating", "ratingCount"]);
-    const finalSortField = allowedSortFields.has(sortField) ? sortField : "createdAt";
-    const finalSortDirection: "asc" | "desc" = sortDirectionRaw === "asc" ? "asc" : "desc";
+    const allowedSortFields = new Set([
+      "createdAt",
+      "updatedAt",
+      "title",
+      "rating",
+      "ratingCount",
+    ]);
+    const finalSortField = allowedSortFields.has(sortField)
+      ? sortField
+      : "createdAt";
+    const finalSortDirection: "asc" | "desc" =
+      sortDirectionRaw === "asc" ? "asc" : "desc";
 
     const [series, total] = await Promise.all([
       this.prisma.series.findMany({
@@ -208,7 +238,9 @@ export class AdminSeriesController {
     }
 
     try {
-      const created = await this.prisma.series.create({ data: this.toSeriesPayload(series) });
+      const created = await this.prisma.series.create({
+        data: this.toSeriesPayload(series),
+      });
       await this.applyStorefrontMetadata(created.id, series);
       const nextSeries = await this.prisma.series.findUnique({
         where: { id: created.id },
@@ -254,7 +286,9 @@ export class AdminSeriesController {
   async update(@Body() body: Record<string, any>, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const series = body?.series || {};
-    const existing = await this.prisma.series.findUnique({ where: { id: seriesId } });
+    const existing = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+    });
     if (!existing) {
       throw new NotFoundException("Series not found.");
     }
@@ -281,7 +315,9 @@ export class AdminSeriesController {
   @Delete(":id")
   async remove(@Req() req: Request) {
     const seriesId = String(req.params.id || "");
-    const existing = await this.prisma.series.findUnique({ where: { id: seriesId } });
+    const existing = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+    });
     if (!existing) {
       throw new NotFoundException("Series not found.");
     }

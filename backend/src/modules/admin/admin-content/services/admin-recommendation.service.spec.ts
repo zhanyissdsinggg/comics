@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { CacheService } from "../../../../common/cache/cache.service";
+import { ContentCacheInvalidationService } from "../../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminRecommendationService } from "./admin-recommendation.service";
 
@@ -11,16 +11,23 @@ describe("AdminRecommendationService", () => {
     recommendationAnalytics: Record<string, jest.Mock>;
     series: Record<string, jest.Mock>;
   };
-  let cacheService: {
-    deletePatterns: jest.Mock;
+  let contentCacheInvalidation: {
+    invalidateDiscoveryConfiguration: jest.Mock;
   };
 
   beforeEach(async () => {
     prisma = {
       recommendationSlot: {
-        findMany: jest.fn().mockResolvedValue([
-          { id: "slot-1", slot: "homepage-banner", seriesIds: ["series-1"], createdAt: new Date() },
-        ]),
+        findMany: jest
+          .fn()
+          .mockResolvedValue([
+            {
+              id: "slot-1",
+              slot: "homepage-banner",
+              seriesIds: ["series-1"],
+              createdAt: new Date(),
+            },
+          ]),
         count: jest.fn().mockResolvedValue(1),
         create: jest.fn().mockResolvedValue({
           id: "slot-2",
@@ -124,15 +131,18 @@ describe("AdminRecommendationService", () => {
       },
     };
 
-    cacheService = {
-      deletePatterns: jest.fn().mockResolvedValue(undefined),
+    contentCacheInvalidation = {
+      invalidateDiscoveryConfiguration: jest.fn().mockResolvedValue(undefined),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminRecommendationService,
         { provide: PrismaService, useValue: prisma },
-        { provide: CacheService, useValue: cacheService },
+        {
+          provide: ContentCacheInvalidationService,
+          useValue: contentCacheInvalidation,
+        },
       ],
     }).compile();
 
@@ -144,7 +154,10 @@ describe("AdminRecommendationService", () => {
   });
 
   it("lists recommendation slots with mapped admin metadata", async () => {
-    const result = await service.getRecommendationSlots({ limit: 20, offset: 0 });
+    const result = await service.getRecommendationSlots({
+      limit: 20,
+      offset: 0,
+    });
 
     expect(result.total).toBe(1);
     expect(result.slots[0]).toEqual(
@@ -174,15 +187,15 @@ describe("AdminRecommendationService", () => {
         }),
       }),
     );
-    expect(cacheService.deletePatterns).toHaveBeenCalledWith([
-      "recommendations:*",
-      "rankings:*",
-      "search:keywords:*",
-    ]);
+    expect(
+      contentCacheInvalidation.invalidateDiscoveryConfiguration,
+    ).toHaveBeenCalledWith("admin-recommendation-change");
   });
 
   it("preserves existing ranking config fields during partial updates", async () => {
-    const result = await service.updateRankingConfig("ranking-1", { active: false });
+    const result = await service.updateRankingConfig("ranking-1", {
+      active: false,
+    });
 
     expect(prisma.rankingConfig.findUnique).toHaveBeenCalledWith({
       where: { id: "ranking-1" },
@@ -203,7 +216,9 @@ describe("AdminRecommendationService", () => {
       }),
     );
     expect(result.active).toBe(false);
-    expect(cacheService.deletePatterns).toHaveBeenCalled();
+    expect(
+      contentCacheInvalidation.invalidateDiscoveryConfiguration,
+    ).toHaveBeenCalledWith("admin-recommendation-change");
   });
 
   it("filters analytics queries by slot and series", async () => {
