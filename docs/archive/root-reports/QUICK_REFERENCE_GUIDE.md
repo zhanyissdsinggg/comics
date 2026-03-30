@@ -2,9 +2,9 @@
 
 ## 文件位置
 
-- **完整报告**: `/c/Users/86133/Downloads/tappytoon-nextjs/DEEP_CODE_REVIEW_REPORT.md`
-- **执行摘要**: `/c/Users/86133/Downloads/tappytoon-nextjs/CODE_REVIEW_EXECUTIVE_SUMMARY.md`
-- **本文件**: `/c/Users/86133/Downloads/tappytoon-nextjs/QUICK_REFERENCE_GUIDE.md`
+- **完整报告**: `./DEEP_CODE_REVIEW_REPORT.md`
+- **执行摘要**: `./CODE_REVIEW_EXECUTIVE_SUMMARY.md`
+- **本文件**: `./QUICK_REFERENCE_GUIDE.md`
 
 ---
 
@@ -348,4 +348,3 @@ A: 集成APM工具（New Relic、DataDog）或使用开源方案（Prometheus）
 ## 联系方式
 
 如有问题，请参考完整报告或执行摘要。
-

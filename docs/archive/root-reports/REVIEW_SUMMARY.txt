@@ -151,13 +151,13 @@
 ================================================================================
 
 完整报告:
-/c/Users/86133/Downloads/tappytoon-nextjs/DEEP_CODE_REVIEW_REPORT.md
+docs/archive/root-reports/DEEP_CODE_REVIEW_REPORT.md
 
 执行摘要:
-/c/Users/86133/Downloads/tappytoon-nextjs/CODE_REVIEW_EXECUTIVE_SUMMARY.md
+docs/archive/root-reports/CODE_REVIEW_EXECUTIVE_SUMMARY.md
 
 快速参考指南:
-/c/Users/86133/Downloads/tappytoon-nextjs/QUICK_REFERENCE_GUIDE.md
+docs/archive/root-reports/QUICK_REFERENCE_GUIDE.md
 
 ================================================================================
                           建议优先级排序
