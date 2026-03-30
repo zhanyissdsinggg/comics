@@ -145,6 +145,7 @@ function buildRecommendationSlotState(body: unknown): Array<Record<string, unkno
 async function installAdminApiMocks(
   page: Page,
   options: {
+    dashboardStatsBody?: unknown;
     supportBody?: unknown;
     usersBody?: unknown;
     seriesBody?: unknown;
@@ -197,6 +198,18 @@ async function installAdminApiMocks(
     if (pathname.endsWith("/api/admin/auth/refresh")) {
       await fulfillJson(route, {
         success: true,
+      });
+      return;
+    }
+
+    if (pathname.endsWith("/api/admin/stats/dashboard")) {
+      await fulfillJson(route, options.dashboardStatsBody ?? {
+        users: { total: 0, change: 0, trend: "up" },
+        series: { total: 0, change: 0, trend: "up" },
+        orders: { total: 0, change: 0, trend: "up" },
+        revenue: { total: 0, change: 0, trend: "up" },
+        views: { total: 0, change: 0, trend: "up" },
+        comments: { total: 0, change: 0, trend: "up" },
       });
       return;
     }
@@ -414,6 +427,119 @@ async function installAdminApiMocks(
 }
 
 test.describe("Admin route regression", () => {
+  test("should render admin dashboard with actionable content data", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminApiMocks(page, {
+      dashboardStatsBody: {
+        users: { total: 340, change: 4.2, trend: "up" },
+        series: { total: 12, change: 0, trend: "up" },
+        orders: { total: 18, change: 6.5, trend: "up" },
+        revenue: { total: 2400, change: 6.5, trend: "up" },
+        views: { total: 5600, change: 8.1, trend: "up" },
+        comments: { total: 38, change: 3.4, trend: "up" },
+      },
+      seriesBody: {
+        series: [
+          {
+            id: "series-alpha",
+            title: "Alpha Signal",
+            author: "Studio North",
+            type: "comic",
+            status: "Ongoing",
+            description: "A polished fantasy series with enough details to ship confidently to storefront readers.",
+            coverUrl: "https://cdn.example.com/alpha.jpg",
+            genres: ["Fantasy"],
+            episodeCount: 24,
+            isPublished: true,
+            updatedAt: "2026-03-28T10:00:00.000Z",
+          },
+          {
+            id: "series-beta",
+            title: "Beta Draft",
+            author: "",
+            type: "novel",
+            status: "Ongoing",
+            description: "Short draft.",
+            coverUrl: "",
+            genres: [],
+            episodeCount: 0,
+            isPublished: false,
+            updatedAt: "2026-03-29T08:00:00.000Z",
+          },
+        ],
+      },
+      supportBody: {
+        data: [
+          {
+            id: "ticket-1",
+            subject: "支付失败",
+            status: "open",
+            userEmail: "reader@example.com",
+            updatedAt: "2026-03-29T09:00:00.000Z",
+          },
+        ],
+        pagination: {
+          page: 1,
+          pageSize: 5,
+          total: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      },
+      ordersBody: {
+        data: [
+          {
+            id: "order-1",
+            orderId: "order-1",
+            userId: "user-1",
+            amount: 9.99,
+            currency: "USD",
+            status: "paid",
+            createdAt: "2026-03-29T07:30:00.000Z",
+          },
+        ],
+        pagination: {
+          page: 1,
+          pageSize: 5,
+          total: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      },
+      commentsBody: {
+        comments: [
+          {
+            id: "comment-1",
+            author: "reader@example.com",
+            text: "这一话节奏很好，继续保持。",
+            hidden: false,
+            createdAt: "2026-03-29T06:00:00.000Z",
+          },
+        ],
+      },
+    });
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "上来先看待处理，再看趋势。" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "待处理事项" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("待补公开署名").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "最近更新的作品" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "客服队列" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "最近订单" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "最新评论" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("Beta Draft").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("支付失败").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("reader@example.com").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin", runtimeIssues);
+  });
+
   for (const scenario of ADMIN_ROUTE_CASES) {
     test(`should render ${scenario.route} empty state without runtime crash`, async ({ page }) => {
       await primeAdminSession(page);

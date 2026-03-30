@@ -34,7 +34,7 @@ export default function AdminPage() {
   return (
     <AdminShell
       title="仪表盘"
-      subtitle="用更克制的方式查看今天最需要处理的出版、发现和运营信号。"
+      subtitle="上来先看待处理事项，再看作品、读者、订单和评论这些真实后台数据。"
     >
       <AdminDashboardNew />
     </AdminShell>
