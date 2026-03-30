@@ -155,14 +155,24 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
           isLight
             ? scrolled
-              ? "border-black/8 bg-[rgba(244,241,234,0.92)] shadow-[0_10px_26px_rgba(15,23,42,0.045)] backdrop-blur-xl"
-              : "border-transparent bg-[rgba(244,241,234,0.82)] backdrop-blur-xl"
+              ? "border-[color:var(--gush-border-strong)] bg-[rgba(251,247,240,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl"
+              : "border-transparent bg-[rgba(251,247,240,0.6)] backdrop-blur-xl"
             : scrolled
-              ? "border-white/10 bg-neutral-950/90 shadow-[0_18px_56px_rgba(0,0,0,0.26)] backdrop-blur-2xl"
-              : "border-white/8 bg-neutral-950/76 backdrop-blur-xl"
+              ? "border-white/10 bg-[rgba(17,16,15,0.92)] shadow-[0_20px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
+              : "border-white/6 bg-[rgba(17,16,15,0.72)] backdrop-blur-xl"
         }`}
       >
-        <div className="relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8">
+        <div
+          className={`relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8 ${
+            isLight
+              ? scrolled
+                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(36,30,20,0.12),transparent)] before:content-['']"
+                : ""
+              : scrolled
+                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] before:content-['']"
+                : ""
+          }`}
+        >
           <div className="flex min-h-[58px] items-center gap-2 py-2 sm:min-h-[64px] sm:gap-4 sm:py-2.5 lg:gap-6">
             <HeaderLogo variant={variant} />
             <HomeProvider>

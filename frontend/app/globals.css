@@ -6,37 +6,50 @@
 
 :root {
   color-scheme: light;
-  --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --gush-accent: #2f58c6;
-  --gush-accent-strong: #2144a8;
-  --gush-page-bg: #f4f1ea;
-  --gush-page-bg-elevated: #faf7f1;
-  --gush-page-bg-muted: #ece7dd;
-  --gush-surface: rgba(255, 255, 255, 0.92);
+  --font-body: "Manrope", "Segoe UI", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --gush-accent: #3657b7;
+  --gush-accent-strong: #24439a;
+  --gush-page-bg: #f5f0e8;
+  --gush-page-bg-elevated: #fcf8f2;
+  --gush-page-bg-muted: #ebe4d8;
+  --gush-surface: rgba(255, 252, 247, 0.9);
   --gush-surface-strong: #ffffff;
-  --gush-surface-muted: rgba(250, 247, 241, 0.94);
-  --gush-surface-accent: rgba(47, 88, 198, 0.07);
-  --gush-border: rgba(15, 23, 42, 0.075);
-  --gush-border-strong: rgba(15, 23, 42, 0.14);
-  --gush-ink-strong: #141b24;
-  --gush-ink: #263241;
-  --gush-ink-soft: #5c6675;
-  --gush-ink-faint: #808896;
+  --gush-surface-muted: rgba(249, 244, 236, 0.94);
+  --gush-surface-accent: rgba(54, 87, 183, 0.06);
+  --gush-border: rgba(36, 30, 20, 0.08);
+  --gush-border-strong: rgba(36, 30, 20, 0.14);
+  --gush-border-faint: rgba(36, 30, 20, 0.04);
+  --gush-ink-strong: #171412;
+  --gush-ink: #302924;
+  --gush-ink-soft: #645b54;
+  --gush-ink-faint: #90857c;
   --gush-success: #0f766e;
   --gush-warning: #a16207;
   --gush-danger: #b42318;
-  --gush-shadow-soft: 0 14px 34px rgba(15, 23, 42, 0.045);
-  --gush-shadow-panel: 0 22px 54px rgba(15, 23, 42, 0.055);
-  --gush-shadow-floating: 0 12px 24px rgba(15, 23, 42, 0.065);
+  --gush-shadow-soft: 0 10px 28px rgba(32, 25, 18, 0.045);
+  --gush-shadow-panel: 0 18px 40px rgba(32, 25, 18, 0.05);
+  --gush-shadow-floating: 0 12px 24px rgba(32, 25, 18, 0.065);
+  --gush-shadow-button: 0 10px 22px rgba(17, 20, 28, 0.12);
+  --gush-shadow-card: 0 16px 32px rgba(32, 25, 18, 0.035);
+  --gush-shadow-header: 0 16px 34px rgba(32, 25, 18, 0.07);
   --gush-radius-sm: 12px;
-  --gush-radius-md: 16px;
-  --gush-radius-lg: 22px;
-  --gush-radius-xl: 28px;
+  --gush-radius-md: 18px;
+  --gush-radius-lg: 24px;
+  --gush-radius-xl: 32px;
   --gush-page-gutter: clamp(1rem, 3vw, 2rem);
   --gush-page-max: 1280px;
   --gush-page-max-wide: 1320px;
   --gush-section-gap: clamp(1.5rem, 3vw, 2.4rem);
+  --gush-text-display-xl: clamp(2.35rem, 5.4vw, 4.8rem);
+  --gush-text-display-lg: clamp(1.9rem, 3.8vw, 3.25rem);
+  --gush-text-title-lg: clamp(1.35rem, 2.5vw, 1.9rem);
+  --gush-text-title-md: clamp(1.1rem, 1.8vw, 1.35rem);
+  --gush-text-body-lg: 1.05rem;
+  --gush-text-body: 0.96rem;
+  --gush-text-body-sm: 0.875rem;
+  --gush-leading-display: 0.98;
+  --gush-leading-copy: 1.72;
   --gush-mobile-bottom-nav-height: 5.4rem;
 }
 
@@ -55,12 +68,14 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 0%, rgba(47, 88, 198, 0.07), transparent 22%),
-    radial-gradient(circle at 88% 4%, rgba(255, 255, 255, 0.7), transparent 18%),
-    linear-gradient(180deg, #f8f5ef 0%, var(--gush-page-bg) 24%, #f1ede5 100%);
+    radial-gradient(circle at 12% 0%, rgba(54, 87, 183, 0.065), transparent 22%),
+    radial-gradient(circle at 88% 4%, rgba(255, 255, 255, 0.72), transparent 18%),
+    linear-gradient(180deg, #faf6ef 0%, var(--gush-page-bg) 24%, #f2ece3 100%);
   color: var(--gush-ink-strong);
   font-family: var(--font-body);
-  letter-spacing: -0.01em;
+  font-size: var(--gush-text-body);
+  line-height: var(--gush-leading-copy);
+  letter-spacing: -0.012em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation;
@@ -108,10 +123,35 @@ h6 {
   color: var(--gush-ink-strong);
   font-family: var(--font-display), var(--font-body);
   letter-spacing: -0.04em;
+  line-height: 1.04;
   font-weight: 600;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--gush-text-display-lg);
+  line-height: var(--gush-leading-display);
+}
+
+h2 {
+  font-size: var(--gush-text-title-lg);
+}
+
+h3 {
+  font-size: var(--gush-text-title-md);
+}
+
+h4,
+h5,
+h6 {
+  font-size: 1rem;
+  letter-spacing: -0.03em;
 }
 
 p {
+  color: var(--gush-ink-soft);
+  font-size: var(--gush-text-body);
+  line-height: var(--gush-leading-copy);
   text-wrap: pretty;
 }
 
@@ -205,9 +245,9 @@ textarea {
   top: 0;
   height: clamp(19rem, 36vw, 30rem);
   background:
-    radial-gradient(circle at 14% 2%, rgba(47, 88, 198, 0.09), transparent 22%),
-    radial-gradient(circle at 84% 0%, rgba(255, 255, 255, 0.72), transparent 18%),
-    linear-gradient(180deg, rgba(248, 245, 239, 0.94) 0%, rgba(244, 241, 234, 0.04) 100%);
+    radial-gradient(circle at 14% 2%, rgba(54, 87, 183, 0.08), transparent 22%),
+    radial-gradient(circle at 84% 0%, rgba(255, 255, 255, 0.7), transparent 18%),
+    linear-gradient(180deg, rgba(250, 246, 239, 0.95) 0%, rgba(245, 240, 232, 0.06) 100%);
 }
 
 .gush-page-main {
@@ -237,15 +277,15 @@ textarea {
 }
 
 .gush-eyebrow {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--gush-ink-faint);
 }
 
 .gush-kicker {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--gush-accent);
 }
@@ -260,7 +300,8 @@ textarea {
 
 .gush-body-copy {
   color: var(--gush-ink-soft);
-  line-height: 1.7;
+  font-size: var(--gush-text-body);
+  line-height: var(--gush-leading-copy);
 }
 
 .gush-panel-divider {

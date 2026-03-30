@@ -12,7 +12,7 @@ function Card({
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-4 overflow-hidden rounded-[26px] border border-black/8 bg-white/94 py-4 text-sm text-slate-900 shadow-[0_14px_32px_rgba(15,23,42,0.045)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[26px] *:[img:last-child]:rounded-b-[26px]",
+        "group/card flex flex-col gap-4 overflow-hidden rounded-[24px] border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(252,248,242,0.94))] py-4 text-sm text-[color:var(--gush-ink-strong)] shadow-[var(--gush-shadow-card)] ring-1 ring-white/70 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[24px] *:[img:last-child]:rounded-b-[24px]",
         className
       )}
       {...props} />
@@ -27,7 +27,7 @@ function CardHeader({
     <div
       data-slot="card-header"
       className={cn(
-        "group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-[26px] px-5 group-data-[size=sm]/card:px-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3",
+        "group/card-header @container/card-header grid auto-rows-min items-start gap-1.5 rounded-t-[24px] px-5 group-data-[size=sm]/card:px-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:border-[color:var(--gush-border)] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3",
         className
       )}
       {...props} />
@@ -42,7 +42,7 @@ function CardTitle({
     <div
       data-slot="card-title"
       className={cn(
-        "text-base leading-snug font-semibold tracking-tight group-data-[size=sm]/card:text-sm",
+        "text-[1.02rem] leading-snug font-semibold tracking-[-0.03em] text-[color:var(--gush-ink-strong)] group-data-[size=sm]/card:text-sm",
         className
       )}
       {...props} />
@@ -56,7 +56,7 @@ function CardDescription({
   return (
     <div
       data-slot="card-description"
-      className={cn("text-sm text-slate-500", className)}
+      className={cn("text-sm text-[color:var(--gush-ink-soft)]", className)}
       {...props} />
   );
 }
@@ -83,7 +83,7 @@ function CardContent({
   return (
     <div
       data-slot="card-content"
-      className={cn("px-5 group-data-[size=sm]/card:px-4", className)}
+      className={cn("px-5 text-[color:var(--gush-ink-soft)] group-data-[size=sm]/card:px-4", className)}
       {...props} />
   );
 }
@@ -96,7 +96,7 @@ function CardFooter({
     <div
       data-slot="card-footer"
       className={cn(
-        "flex items-center rounded-b-[26px] border-t border-black/8 bg-[rgba(246,243,237,0.88)] p-5 group-data-[size=sm]/card:p-4",
+        "flex items-center rounded-b-[24px] border-t border-[color:var(--gush-border)] bg-[rgba(247,242,234,0.8)] p-5 group-data-[size=sm]/card:p-4",
         className
       )}
       {...props} />
