@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -48,7 +48,7 @@ function normalizeSeries(entry, index) {
 }
 
 function formatCompactNumber(value) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("zh-CN", {
     notation: value >= 1000 ? "compact" : "standard",
     maximumFractionDigits: value >= 1000 ? 1 : 0,
   }).format(Math.max(0, toNumber(value)));
@@ -64,7 +64,7 @@ function formatDateLabel(value) {
     return "No recent update";
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("zh-CN", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -746,3 +746,4 @@ export default function AdminStorefrontAuditPage() {
     </AdminShell>
   );
 }
+

@@ -613,7 +613,7 @@ test.describe("Admin route regression", () => {
     });
 
     await expect(performanceSection.getByText("Impressions", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(performanceSection.getByText(/7K|7,000/)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(performanceSection.getByText(/7K|7,000|7000/)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(performanceSection.getByText("2.70%", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(performanceSection.getByText("Current titles: Midnight Signal / Neon Contract", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
@@ -712,10 +712,10 @@ test.describe("Admin route regression", () => {
     await expect.poll(() => rankingsRequests).toBe(0);
     await expect.poll(() => analyticsRequests).toBe(0);
 
-    await page.getByRole("button", { name: "Rankings" }).click();
+    await page.getByRole("button", { name: /榜单|Rankings/ }).click();
     await expect.poll(() => rankingsRequests).toBe(1);
 
-    await page.getByRole("button", { name: "Analytics" }).click();
+    await page.getByRole("button", { name: /分析|Analytics/ }).click();
     await expect.poll(() => analyticsRequests).toBe(1);
 
     await page.waitForTimeout(300);
@@ -739,7 +739,7 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await page.getByRole("button", { name: "Analytics" }).click();
+    await page.getByRole("button", { name: /分析|Analytics/ }).click();
     await expect(page.locator("#analytics-slot-filter")).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await page.locator("#analytics-slot-filter").selectOption("library-return");
 

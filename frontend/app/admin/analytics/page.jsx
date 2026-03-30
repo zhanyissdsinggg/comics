@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +44,7 @@ function getErrorMessage(error, fallbackMessage) {
 
 function formatCurrency(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('zh-CN', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 2,
@@ -70,7 +70,7 @@ function formatDate(value) {
     return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -79,7 +79,7 @@ function formatDate(value) {
 
 function formatNumber(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat('en-US').format(Number.isFinite(amount) ? amount : 0);
+  return new Intl.NumberFormat('zh-CN').format(Number.isFinite(amount) ? amount : 0);
 }
 
 function getSegmentLabel(segment) {
@@ -546,3 +546,4 @@ export default function AdminUserAnalyticsPage() {
     </AdminShell>
   );
 }
+

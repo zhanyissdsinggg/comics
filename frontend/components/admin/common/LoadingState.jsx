@@ -3,14 +3,14 @@ import { RefreshCw } from "lucide-react";
 import SharedEmptyState from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 
-const DEFAULT_EMPTY_TITLE = "Nothing to show yet";
+const DEFAULT_EMPTY_TITLE = "暂时没有内容";
 const DEFAULT_EMPTY_DESCRIPTION =
-  "There are no records matching this view right now.";
-const DEFAULT_LOADING_TEXT = "Loading workspace";
-const DEFAULT_ERROR_TITLE = "This view could not be loaded";
+  "当前视图下还没有可显示的记录。";
+const DEFAULT_LOADING_TEXT = "正在加载后台内容";
+const DEFAULT_ERROR_TITLE = "这个页面暂时无法加载";
 const DEFAULT_ERROR_MESSAGE =
-  "The request did not finish cleanly. Try again in a moment.";
-const RETRY_LABEL = "Try again";
+  "这次请求没有正常完成，请稍后再试。";
+const RETRY_LABEL = "重新加载";
 
 export const SkeletonLoader = React.memo(function SkeletonLoader({
   count = 5,
@@ -93,7 +93,7 @@ export const EmptyState = React.memo(function AdminEmptyState({
       description={resolvedDescription}
       action={action}
       appearance="light"
-      eyebrow="Admin"
+      eyebrow="后台"
     />
   );
 });

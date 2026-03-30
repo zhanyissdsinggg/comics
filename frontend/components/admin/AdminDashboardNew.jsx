@@ -18,100 +18,72 @@ import {
 import SurfacePanel from "@/components/common/SurfacePanel";
 import { Button } from "@/components/ui/button";
 
-const number = new Intl.NumberFormat("en-US");
-const money = new Intl.NumberFormat("en-US", {
+const number = new Intl.NumberFormat("zh-CN");
+const money = new Intl.NumberFormat("zh-CN", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
 });
 
-const DEFAULT_STATS = {
-  users: { total: 12543, change: 12.5, trend: "up" },
-  series: { total: 856, change: 3.2, trend: "up" },
-  orders: { total: 3421, change: -2.1, trend: "down" },
-  revenue: { total: 45678, change: 18.3, trend: "up" },
-  views: { total: 234567, change: 8.7, trend: "up" },
-  comments: { total: 1234, change: 5.4, trend: "up" },
+const createEmptyMetric = () => ({
+  total: null,
+  change: null,
+  trend: "up",
+  available: false,
+});
+
+const EMPTY_STATS = {
+  users: createEmptyMetric(),
+  series: createEmptyMetric(),
+  orders: createEmptyMetric(),
+  revenue: createEmptyMetric(),
+  views: createEmptyMetric(),
+  comments: createEmptyMetric(),
   seriesByType: {
-    comic: { total: 520, change: 5.2, trend: "up" },
-    novel: { total: 336, change: 1.8, trend: "up" },
+    comic: createEmptyMetric(),
+    novel: createEmptyMetric(),
   },
-  episodes: { total: 12456, change: 15.3, trend: "up" },
+  episodes: createEmptyMetric(),
 };
 
-const DEFAULT_TOP = {
-  byViews: [
-    { id: 1, title: "Midnight Contract", type: "comic", views: 45678, revenue: 0 },
-    { id: 2, title: "Crimson Promise", type: "novel", views: 38921, revenue: 0 },
-    { id: 3, title: "Shadow Realm", type: "comic", views: 32145, revenue: 0 },
-  ],
-  byRevenue: [
-    { id: 1, title: "Midnight Contract", type: "comic", views: 0, revenue: 8934 },
-    { id: 2, title: "Shadow Realm", type: "comic", views: 0, revenue: 7821 },
-    { id: 3, title: "Crimson Promise", type: "novel", views: 0, revenue: 6543 },
-  ],
+const EMPTY_DASHBOARD = {
+  stats: EMPTY_STATS,
+  top: {
+    byViews: [],
+    byRevenue: [],
+  },
+  updates: [],
+  activity: [],
 };
-
-const DEFAULT_UPDATES = [
-  {
-    id: 1,
-    title: "Midnight Contract",
-    type: "comic",
-    updatedAt: "2024-01-15T10:30:00Z",
-    episodeCount: 45,
-  },
-  {
-    id: 2,
-    title: "Crimson Promise",
-    type: "novel",
-    updatedAt: "2024-01-15T09:15:00Z",
-    episodeCount: 32,
-  },
-  {
-    id: 3,
-    title: "Shadow Realm",
-    type: "comic",
-    updatedAt: "2024-01-14T18:45:00Z",
-    episodeCount: 28,
-  },
-];
-
-const DEFAULT_ACTIVITY = [
-  { id: 1, user: "Reader A", action: "purchased Midnight Contract", time: "5 min ago" },
-  { id: 2, user: "Reader B", action: "commented on Crimson Promise", time: "10 min ago" },
-  { id: 3, user: "Editor", action: "published a new title", time: "30 min ago" },
-];
 
 const RANGE_OPTIONS = [
-  { value: "all", label: "All time" },
-  { value: "7days", label: "Last 7 days" },
-  { value: "30days", label: "Last 30 days" },
-  { value: "custom", label: "Custom range" },
+  { value: "all", label: "全部时间" },
+  { value: "7days", label: "最近 7 天" },
+  { value: "30days", label: "最近 30 天" },
+  { value: "custom", label: "自定义区间" },
 ];
 
 const QUICK_ACTIONS = [
-  { href: "/admin/series", label: "New Series", description: "Add or update titles.", icon: BookOpen },
+  { href: "/admin/series", label: "管理作品", description: "新增作品或更新作品信息。", icon: BookOpen },
   {
     href: "/admin/creators",
-    label: "Update Credits",
-    description: "Keep creator identity clean.",
+    label: "更新署名",
+    description: "维护创作者身份和公开署名。",
     icon: Users,
   },
   {
     href: "/admin/merchandising",
-    label: "Edit Collections",
-    description: "Control featured discovery lanes.",
+    label: "调整编排",
+    description: "管理首页与发现页的内容编排。",
     icon: Sparkles,
   },
   {
     href: "/admin/storefront",
-    label: "Review Live Pages",
-    description: "Check what readers actually see.",
+    label: "检查前台",
+    description: "确认读者真正看到的页面效果。",
     icon: Layers,
   },
 ];
-
-const safeArray = (value, fallback) => (Array.isArray(value) ? value : fallback);
 
 const safeNumber = (value, fallback = 0) => {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -122,34 +94,48 @@ const safeNumber = (value, fallback = 0) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
-const normalizeMetric = (metric, fallback) => {
+const normalizeMetric = (metric, fallback = createEmptyMetric()) => {
   const source = metric && typeof metric === "object" ? metric : {};
-  const total = safeNumber(source.total, fallback.total);
-  const change = safeNumber(source.change ?? source.delta ?? source.growth, fallback.change);
-  return { total, change, trend: source.trend || (change < 0 ? "down" : "up") };
+  const hasTotal = source.total !== undefined && source.total !== null;
+  const hasChange =
+    source.change !== undefined ||
+    source.delta !== undefined ||
+    source.growth !== undefined;
+  const total = hasTotal ? safeNumber(source.total) : fallback.total;
+  const change = hasChange
+    ? safeNumber(source.change ?? source.delta ?? source.growth)
+    : fallback.change;
+  const available = hasTotal || fallback.available;
+
+  return {
+    total,
+    change,
+    trend: source.trend || ((change ?? 0) < 0 ? "down" : "up"),
+    available,
+  };
 };
 
 const relativeTime = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Just now";
+    return "刚刚";
   }
 
   const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
   if (minutes < 1) {
-    return "Just now";
+    return "刚刚";
   }
   if (minutes < 60) {
-    return `${minutes} min ago`;
+    return `${minutes} 分钟前`;
   }
 
   const hours = Math.floor(minutes / 60);
   if (hours < 24) {
-    return `${hours} hr ago`;
+    return `${hours} 小时前`;
   }
 
   const days = Math.floor(hours / 24);
-  return `${days} day${days === 1 ? "" : "s"} ago`;
+  return `${days} 天前`;
 };
 
 function normalize(payload) {
@@ -158,59 +144,79 @@ function normalize(payload) {
 
   return {
     stats: {
-      users: normalizeMetric(stats.users, DEFAULT_STATS.users),
-      series: normalizeMetric(stats.series, DEFAULT_STATS.series),
-      orders: normalizeMetric(stats.orders, DEFAULT_STATS.orders),
-      revenue: normalizeMetric(stats.revenue, DEFAULT_STATS.revenue),
-      views: normalizeMetric(stats.views, DEFAULT_STATS.views),
-      comments: normalizeMetric(stats.comments, DEFAULT_STATS.comments),
+      users: normalizeMetric(stats.users, EMPTY_STATS.users),
+      series: normalizeMetric(stats.series, EMPTY_STATS.series),
+      orders: normalizeMetric(stats.orders, EMPTY_STATS.orders),
+      revenue: normalizeMetric(stats.revenue, EMPTY_STATS.revenue),
+      views: normalizeMetric(stats.views, EMPTY_STATS.views),
+      comments: normalizeMetric(stats.comments, EMPTY_STATS.comments),
       seriesByType: {
-        comic: normalizeMetric(stats.seriesByType?.comic, DEFAULT_STATS.seriesByType.comic),
-        novel: normalizeMetric(stats.seriesByType?.novel, DEFAULT_STATS.seriesByType.novel),
+        comic: normalizeMetric(stats.seriesByType?.comic, EMPTY_STATS.seriesByType.comic),
+        novel: normalizeMetric(stats.seriesByType?.novel, EMPTY_STATS.seriesByType.novel),
       },
-      episodes: normalizeMetric(stats.episodes, DEFAULT_STATS.episodes),
+      episodes: normalizeMetric(stats.episodes, EMPTY_STATS.episodes),
     },
     top: {
-      byViews: safeArray(
-        root.topSeries?.byViews ?? root.rankings?.byViews ?? root.byViews,
-        DEFAULT_TOP.byViews,
-      ),
-      byRevenue: safeArray(
+      byViews: Array.isArray(root.topSeries?.byViews ?? root.rankings?.byViews ?? root.byViews)
+        ? (root.topSeries?.byViews ?? root.rankings?.byViews ?? root.byViews).filter(Boolean)
+        : [],
+      byRevenue: Array.isArray(
         root.topSeries?.byRevenue ?? root.rankings?.byRevenue ?? root.byRevenue,
-        DEFAULT_TOP.byRevenue,
-      ),
+      )
+        ? (root.topSeries?.byRevenue ?? root.rankings?.byRevenue ?? root.byRevenue).filter(Boolean)
+        : [],
     },
-    updates: safeArray(
-      root.recentUpdates ?? root.latestSeries ?? root.updatedSeries,
-      DEFAULT_UPDATES,
-    ),
-    activity: safeArray(
-      root.recentActivities ?? root.activities ?? root.timeline,
-      DEFAULT_ACTIVITY,
-    ).map((item, index) => ({
-      id: item?.id || `activity-${index}`,
-      user:
-        item?.user ||
-        item?.username ||
-        item?.operator ||
-        DEFAULT_ACTIVITY[index % DEFAULT_ACTIVITY.length].user,
-      action:
-        item?.action ||
-        item?.description ||
-        item?.message ||
-        DEFAULT_ACTIVITY[index % DEFAULT_ACTIVITY.length].action,
-      time:
-        item?.time ||
-        (item?.createdAt
-          ? relativeTime(item.createdAt)
-          : DEFAULT_ACTIVITY[index % DEFAULT_ACTIVITY.length].time),
-    })),
+    updates: Array.isArray(root.recentUpdates ?? root.latestSeries ?? root.updatedSeries)
+      ? (root.recentUpdates ?? root.latestSeries ?? root.updatedSeries).filter(Boolean)
+      : [],
+    activity: Array.isArray(root.recentActivities ?? root.activities ?? root.timeline)
+      ? (root.recentActivities ?? root.activities ?? root.timeline)
+          .map((item, index) => ({
+            id: item?.id || `activity-${index}`,
+            user: item?.user || item?.username || item?.operator || "",
+            action: item?.action || item?.description || item?.message || "",
+            time: item?.time || (item?.createdAt ? relativeTime(item.createdAt) : ""),
+          }))
+          .filter((item) => item.user || item.action)
+      : [],
   };
 }
 
 function formatTrend(change) {
+  if (!Number.isFinite(change)) {
+    return "暂无";
+  }
   const prefix = change > 0 ? "+" : "";
   return `${prefix}${Math.abs(change).toFixed(1)}%`;
+}
+
+function formatMetricValue(metric, formatter = number) {
+  if (!metric?.available || metric.total === null) {
+    return "--";
+  }
+
+  return formatter.format(metric.total);
+}
+
+function formatMetricDetail(metric, detailWhenAvailable, detailWhenMissing = "等待真实数据接入") {
+  if (!metric?.available) {
+    return detailWhenMissing;
+  }
+
+  return detailWhenAvailable(metric);
+}
+
+function formatSeriesFormatLabel(value) {
+  return value === "novel" ? "小说" : "漫画";
+}
+
+function EmptyListState({ title, description }) {
+  return (
+    <div className="rounded-[22px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.76)] px-4 py-6 text-center">
+      <p className="text-sm font-semibold text-slate-950">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+    </div>
+  );
 }
 
 function OverviewCard({ label, value, detail, emphasis = false }) {
@@ -261,14 +267,10 @@ function ListRow({ title, detail, meta }) {
 }
 
 export default function AdminDashboardNew() {
-  const [data, setData] = useState({
-    stats: DEFAULT_STATS,
-    top: DEFAULT_TOP,
-    updates: DEFAULT_UPDATES,
-    activity: DEFAULT_ACTIVITY,
-  });
+  const [data, setData] = useState(EMPTY_DASHBOARD);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
   const [range, setRange] = useState("all");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -294,6 +296,7 @@ export default function AdminDashboardNew() {
     async function load() {
       try {
         setLoading(true);
+        setError("");
         const response = await apiGet(`/api/admin/stats/dashboard${query}`);
         if (!response.ok) {
           throw new Error(`request failed: ${response.status}`);
@@ -305,12 +308,8 @@ export default function AdminDashboardNew() {
       } catch (error) {
         console.error("admin dashboard load failed:", error);
         if (!cancelled) {
-          setData({
-            stats: DEFAULT_STATS,
-            top: DEFAULT_TOP,
-            updates: DEFAULT_UPDATES,
-            activity: DEFAULT_ACTIVITY,
-          });
+          setData(EMPTY_DASHBOARD);
+          setError("仪表盘数据暂时加载失败，页面只显示当前能确认的真实信息。");
         }
       } finally {
         if (!cancelled) {
@@ -328,6 +327,7 @@ export default function AdminDashboardNew() {
   const refresh = async () => {
     setRefreshing(true);
     try {
+      setError("");
       const response = await apiGet(`/api/admin/stats/dashboard${query}`);
       if (!response.ok) {
         throw new Error(`request failed: ${response.status}`);
@@ -336,6 +336,7 @@ export default function AdminDashboardNew() {
       setData(normalize(response.data));
     } catch (error) {
       console.error("admin dashboard refresh failed:", error);
+      setError("刷新失败，当前页面保留最近一次拿到的真实数据。");
     } finally {
       setRefreshing(false);
     }
@@ -343,34 +344,34 @@ export default function AdminDashboardNew() {
 
   const exportCsv = () => {
     const rows = [
-      ["Metric", "Value", "Change", "Trend"],
-      ["Users", data.stats.users.total, `${data.stats.users.change}%`, data.stats.users.trend],
-      ["Series", data.stats.series.total, `${data.stats.series.change}%`, data.stats.series.trend],
-      ["Orders", data.stats.orders.total, `${data.stats.orders.change}%`, data.stats.orders.trend],
-      ["Revenue", data.stats.revenue.total, `${data.stats.revenue.change}%`, data.stats.revenue.trend],
-      ["Views", data.stats.views.total, `${data.stats.views.change}%`, data.stats.views.trend],
+      ["指标", "数值", "变化", "趋势"],
+      ["用户", data.stats.users.total ?? "--", formatTrend(data.stats.users.change), data.stats.users.trend],
+      ["作品", data.stats.series.total ?? "--", formatTrend(data.stats.series.change), data.stats.series.trend],
+      ["订单", data.stats.orders.total ?? "--", formatTrend(data.stats.orders.change), data.stats.orders.trend],
+      ["收入", data.stats.revenue.total ?? "--", formatTrend(data.stats.revenue.change), data.stats.revenue.trend],
+      ["浏览", data.stats.views.total ?? "--", formatTrend(data.stats.views.change), data.stats.views.trend],
       [
-        "Comments",
-        data.stats.comments.total,
-        `${data.stats.comments.change}%`,
+        "评论",
+        data.stats.comments.total ?? "--",
+        formatTrend(data.stats.comments.change),
         data.stats.comments.trend,
       ],
       [
-        "Comic series",
-        data.stats.seriesByType.comic.total,
-        `${data.stats.seriesByType.comic.change}%`,
+        "漫画作品",
+        data.stats.seriesByType.comic.total ?? "--",
+        formatTrend(data.stats.seriesByType.comic.change),
         data.stats.seriesByType.comic.trend,
       ],
       [
-        "Novel series",
-        data.stats.seriesByType.novel.total,
-        `${data.stats.seriesByType.novel.change}%`,
+        "小说作品",
+        data.stats.seriesByType.novel.total ?? "--",
+        formatTrend(data.stats.seriesByType.novel.change),
         data.stats.seriesByType.novel.trend,
       ],
       [
-        "Episodes",
-        data.stats.episodes.total,
-        `${data.stats.episodes.change}%`,
+        "章节",
+        data.stats.episodes.total ?? "--",
+        formatTrend(data.stats.episodes.change),
         data.stats.episodes.trend,
       ],
     ];
@@ -390,25 +391,25 @@ export default function AdminDashboardNew() {
 
   const overviewCards = [
     {
-      label: "Live series",
-      value: number.format(data.stats.series.total),
-      detail: `${formatTrend(data.stats.series.change)} vs. the previous period`,
+      label: "已上线作品",
+      value: formatMetricValue(data.stats.series),
+      detail: formatMetricDetail(data.stats.series, (metric) => `${formatTrend(metric.change)}，对比上一周期`),
       emphasis: true,
     },
     {
-      label: "Episodes in catalog",
-      value: number.format(data.stats.episodes.total),
-      detail: `${formatTrend(data.stats.episodes.change)} in recent volume`,
+      label: "作品章节数",
+      value: formatMetricValue(data.stats.episodes),
+      detail: formatMetricDetail(data.stats.episodes, (metric) => `${formatTrend(metric.change)}，近期收录变化`),
     },
     {
-      label: "Orders processed",
-      value: number.format(data.stats.orders.total),
-      detail: `${formatTrend(data.stats.orders.change)} across commercial flows`,
+      label: "已处理订单",
+      value: formatMetricValue(data.stats.orders),
+      detail: formatMetricDetail(data.stats.orders, (metric) => `${formatTrend(metric.change)}，当前商业链路`),
     },
     {
-      label: "Reader signals",
-      value: number.format(data.stats.comments.total),
-      detail: `${formatTrend(data.stats.comments.change)} in comment volume`,
+      label: "读者互动",
+      value: formatMetricValue(data.stats.comments),
+      detail: formatMetricDetail(data.stats.comments, (metric) => `${formatTrend(metric.change)}，评论量变化`),
     },
   ];
 
@@ -418,23 +419,23 @@ export default function AdminDashboardNew() {
         <div className="grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Publishing overview
+              今日概览
             </p>
             <h2 className="mt-3 text-[2.1rem] font-semibold tracking-tight text-slate-950 sm:text-[2.6rem]">
-              Keep the catalog clean, current, and ready to publish.
+              先把真实内容看清楚，再做后台操作。
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
-              This dashboard is a quiet starting point for the day. Refresh the latest signals, jump into the content queue, and keep discovery surfaces aligned with what is actually live.
+              这里优先展示真实统计和真实后台入口，不再用样板热度、样板作品或样板活动冒充线上状态。
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2.5">
               <Button type="button" onClick={refresh} disabled={refreshing}>
                 <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
-                {refreshing ? "Refreshing..." : "Refresh"}
+                {refreshing ? "刷新中..." : "刷新"}
               </Button>
               <Button type="button" variant="outline" onClick={exportCsv}>
                 <Download size={16} />
-                Export CSV
+                导出 CSV
               </Button>
             </div>
 
@@ -459,8 +460,8 @@ export default function AdminDashboardNew() {
             {range === "custom" ? (
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <label className="text-sm text-slate-600">
-                  <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    From
+                    <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    开始日期
                   </span>
                   <input
                     type="date"
@@ -470,8 +471,8 @@ export default function AdminDashboardNew() {
                   />
                 </label>
                 <label className="text-sm text-slate-600">
-                  <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    To
+                    <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    结束日期
                   </span>
                   <input
                     type="date"
@@ -492,6 +493,12 @@ export default function AdminDashboardNew() {
         </div>
       </SurfacePanel>
 
+      {error ? (
+        <div className="rounded-[24px] border border-amber-200 bg-amber-50/90 px-4 py-4 text-sm leading-6 text-amber-800">
+          {error}
+        </div>
+      ) : null}
+
       {loading ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, index) => (
@@ -505,8 +512,8 @@ export default function AdminDashboardNew() {
         <>
           <SurfacePanel appearance="light" tone="default" accent="blue">
             <SectionHeading
-              title="Quick actions"
-              description="Start with the tasks that affect stories, credits, and front-page presentation first."
+              title="快捷入口"
+              description="先处理直接影响作品、署名和前台展示的后台任务。"
             />
             <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {QUICK_ACTIONS.map((item) => {
@@ -524,7 +531,7 @@ export default function AdminDashboardNew() {
                     <p className="mt-4 text-base font-semibold text-slate-950">{item.label}</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
                     <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition group-hover:text-slate-950">
-                      <span>Open</span>
+                      <span>进入</span>
                       <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                     </div>
                   </Link>
@@ -536,48 +543,61 @@ export default function AdminDashboardNew() {
           <div className="grid gap-6 xl:grid-cols-2">
             <SurfacePanel appearance="light" tone="default" accent="blue">
               <SectionHeading
-                title="Publishing queue"
-                description="Watch the titles that changed most recently and make sure they are ready for discovery."
+                title="最近更新的作品"
+                description="只展示接口真正返回的更新队列，没有真实数据时就老实留空。"
               />
               <div className="mt-5 space-y-3">
-                {data.updates.map((series, index) => (
-                  <ListRow
-                    key={series.id || index}
-                    title={series.title}
-                    detail={`${series.type === "comic" ? "Comic" : "Novel"} · ${number.format(
-                      safeNumber(series.episodeCount),
-                    )} episodes`}
-                    meta={relativeTime(series.updatedAt)}
+                {data.updates.length > 0 ? (
+                  data.updates.map((series, index) => (
+                    <ListRow
+                      key={series.id || index}
+                      title={series.title}
+                      detail={`${formatSeriesFormatLabel(series.type)} · ${number.format(
+                        safeNumber(series.episodeCount),
+                      )} 话`}
+                      meta={relativeTime(series.updatedAt)}
+                    />
+                  ))
+                ) : (
+                  <EmptyListState
+                    title="暂时没有真实更新队列"
+                    description="当前接口还没有返回最近更新作品，所以这里不再展示样板作品。"
                   />
-                ))}
+                )}
               </div>
             </SurfacePanel>
 
             <SurfacePanel appearance="light" tone="default" accent="emerald">
               <SectionHeading
-                title="Catalog mix"
-                description="Keep the storefront balanced across formats and audience activity."
+                title="目录结构"
+                description="只展示当前确实有统计支持的目录数据。"
               />
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <OverviewCard
-                  label="Comic series"
-                  value={number.format(data.stats.seriesByType.comic.total)}
-                  detail={`${formatTrend(data.stats.seriesByType.comic.change)} this period`}
+                  label="漫画作品"
+                  value={formatMetricValue(data.stats.seriesByType.comic)}
+                  detail={formatMetricDetail(
+                    data.stats.seriesByType.comic,
+                    (metric) => `${formatTrend(metric.change)}，当前统计区间`,
+                  )}
                 />
                 <OverviewCard
-                  label="Novel series"
-                  value={number.format(data.stats.seriesByType.novel.total)}
-                  detail={`${formatTrend(data.stats.seriesByType.novel.change)} this period`}
+                  label="小说作品"
+                  value={formatMetricValue(data.stats.seriesByType.novel)}
+                  detail={formatMetricDetail(
+                    data.stats.seriesByType.novel,
+                    (metric) => `${formatTrend(metric.change)}，当前统计区间`,
+                  )}
                 />
                 <OverviewCard
-                  label="Readers tracked"
-                  value={number.format(data.stats.users.total)}
-                  detail={`${formatTrend(data.stats.users.change)} in active user volume`}
+                  label="纳入统计的用户"
+                  value={formatMetricValue(data.stats.users)}
+                  detail={formatMetricDetail(data.stats.users, (metric) => `${formatTrend(metric.change)}，用户规模变化`)}
                 />
                 <OverviewCard
-                  label="Revenue"
-                  value={money.format(data.stats.revenue.total)}
-                  detail={`${formatTrend(data.stats.revenue.change)} in the selected range`}
+                  label="收入"
+                  value={formatMetricValue(data.stats.revenue, money)}
+                  detail={formatMetricDetail(data.stats.revenue, (metric) => `${formatTrend(metric.change)}，所选时间范围`)}
                 />
               </div>
             </SurfacePanel>
@@ -586,55 +606,76 @@ export default function AdminDashboardNew() {
           <div className="grid gap-6 xl:grid-cols-2">
             <SurfacePanel appearance="light" tone="default" accent="amber">
               <SectionHeading
-                title="Reader attention"
-                description="These titles are drawing the most visits right now, so their live presentation matters most."
+                title="访问关注"
+                description="只有接口返回真实访问榜单时才会显示，缺失时不再伪造热门作品。"
               />
               <div className="mt-5 space-y-3">
-                {data.top.byViews.map((series, index) => (
-                  <ListRow
-                    key={series.id || index}
-                    title={series.title}
-                    detail={`${series.type === "comic" ? "Comic" : "Novel"} · ${number.format(
-                      safeNumber(series.views),
-                    )} visits`}
+                {data.top.byViews.length > 0 ? (
+                  data.top.byViews.map((series, index) => (
+                    <ListRow
+                      key={series.id || index}
+                      title={series.title}
+                      detail={`${formatSeriesFormatLabel(series.type)} · ${number.format(
+                        safeNumber(series.views),
+                      )} 次访问`}
+                    />
+                  ))
+                ) : (
+                  <EmptyListState
+                    title="暂时没有真实访问榜单"
+                    description="后端当前没有返回访问排行，所以这里不会再展示虚假的热门作品。"
                   />
-                ))}
+                )}
               </div>
             </SurfacePanel>
 
             <SurfacePanel appearance="light" tone="default" accent="rose">
               <SectionHeading
-                title="Commercial watch"
-                description="A quieter view of which titles are carrying the most revenue in the current window."
+                title="收入观察"
+                description="只在后端确实返回作品收入排行时展示。"
               />
               <div className="mt-5 space-y-3">
-                {data.top.byRevenue.map((series, index) => (
-                  <ListRow
-                    key={series.id || index}
-                    title={series.title}
-                    detail={`${series.type === "comic" ? "Comic" : "Novel"} · ${money.format(
-                      safeNumber(series.revenue),
-                    )}`}
+                {data.top.byRevenue.length > 0 ? (
+                  data.top.byRevenue.map((series, index) => (
+                    <ListRow
+                      key={series.id || index}
+                      title={series.title}
+                      detail={`${formatSeriesFormatLabel(series.type)} · ${money.format(
+                        safeNumber(series.revenue),
+                      )}`}
+                    />
+                  ))
+                ) : (
+                  <EmptyListState
+                    title="暂时没有真实收入排行"
+                    description="当前接口没有返回作品收入榜，所以这里保持空状态。"
                   />
-                ))}
+                )}
               </div>
             </SurfacePanel>
           </div>
 
           <SurfacePanel appearance="light" tone="default" accent="cyan">
             <SectionHeading
-              title="Recent activity"
-              description="A quick feed of reader and operator activity without turning the page into a noisy monitoring console."
+              title="最近活动"
+              description="只展示接口真正返回的读者或运营活动，不再用样板动态占位。"
             />
             <div className="mt-5 grid gap-3 lg:grid-cols-3">
-              {data.activity.map((entry, index) => (
-                <ListRow
-                  key={entry.id || index}
-                  title={`${entry.user}`}
-                  detail={entry.action}
-                  meta={entry.time}
+              {data.activity.length > 0 ? (
+                data.activity.map((entry, index) => (
+                  <ListRow
+                    key={entry.id || index}
+                    title={`${entry.user}`}
+                    detail={entry.action}
+                    meta={entry.time}
+                  />
+                ))
+              ) : (
+                <EmptyListState
+                  title="暂时没有真实活动流"
+                  description="接口没有返回活动数据时，这里不会再伪造读者或运营动作。"
                 />
-              ))}
+              )}
             </div>
           </SurfacePanel>
         </>

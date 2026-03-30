@@ -142,7 +142,7 @@ function formatDateTime(value) {
   if (!value) return 'Not available';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'Not available';
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -154,7 +154,7 @@ function formatDateTime(value) {
 function formatCompactNumber(value) {
   const safeValue = Number(value || 0);
   if (!Number.isFinite(safeValue)) return '0';
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('zh-CN', {
     notation: safeValue >= 10000 ? 'compact' : 'standard',
     maximumFractionDigits: safeValue >= 10000 ? 1 : 0,
   }).format(safeValue);

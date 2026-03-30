@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -61,7 +61,7 @@ function formatAttemptAt(value) {
     return String(value);
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("zh-CN", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
@@ -288,3 +288,4 @@ export default function AdminEmailJobsPage() {
     </div>
   );
 }
+

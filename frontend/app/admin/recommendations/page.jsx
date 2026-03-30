@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -141,7 +141,7 @@ function formatDateTime(value) {
     return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -151,7 +151,7 @@ function formatDateTime(value) {
 }
 
 function formatNumber(value) {
-  return new Intl.NumberFormat('en-US').format(Number(value || 0));
+  return new Intl.NumberFormat('zh-CN').format(Number(value || 0));
 }
 
 function formatPercent(value) {
@@ -594,7 +594,7 @@ export default function AdminRecommendationsPage() {
                   <RecommendationCard
                     key={ranking.id}
                     title={ranking.name || 'Untitled ranking'}
-                    description={`${formatRankingTypeLabel(ranking.rankingType)} · ${formatTimeRangeLabel(ranking.timeRange)} · ${formatSeriesTypeLabel(ranking.seriesType)}`}
+                    description={`${formatRankingTypeLabel(ranking.rankingType)} 路 ${formatTimeRangeLabel(ranking.timeRange)} 路 ${formatSeriesTypeLabel(ranking.seriesType)}`}
                     meta={
                       <AdminBadge tone={ranking.active ? 'success' : 'default'}>
                         {ranking.active ? 'Active' : 'Paused'}
@@ -940,3 +940,4 @@ export default function AdminRecommendationsPage() {
     </AdminShell>
   );
 }
+

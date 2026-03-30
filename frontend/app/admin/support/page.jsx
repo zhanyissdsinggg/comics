@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +62,7 @@ function formatDateTime(value) {
     return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -453,7 +453,7 @@ export default function AdminSupportPage() {
         title="Reply to ticket"
         subtitle={
           selectedTicket
-            ? `${selectedTicket.subject || 'Untitled ticket'} · ${selectedTicket.userEmail || selectedTicket.userId || 'Unknown reader'}`
+            ? `${selectedTicket.subject || 'Untitled ticket'} 路 ${selectedTicket.userEmail || selectedTicket.userId || 'Unknown reader'}`
             : ''
         }
         onClose={() => {
@@ -505,3 +505,4 @@ export default function AdminSupportPage() {
     </AdminShell>
   );
 }
+

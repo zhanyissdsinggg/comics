@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +52,7 @@ function formatDate(value) {
     return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -254,3 +254,4 @@ export default function AdminNotificationsPage() {
     </AdminShell>
   );
 }
+

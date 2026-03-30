@@ -175,7 +175,7 @@ test.describe("Admin system page regressions", () => {
     await inputs.nth(2).fill("+1");
     await inputs.nth(3).fill("Duplicate United States");
 
-    await page.getByRole("button", { name: /保存修改|Save changes/ }).click();
+    await page.getByRole("button", { name: /保存更改|保存修改|Save changes/ }).click();
     await expect(page.getByText(/国家区号必须唯一：\+1。|Country calling codes must be unique: \+1\./)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });

@@ -28,129 +28,129 @@ const RECENT_SEARCH_STORAGE_KEY = "admin_recent_searches";
 const SEARCH_ITEMS = [
   {
     id: "dashboard",
-    label: "Dashboard",
+    label: "仪表盘",
     href: "/admin",
     icon: BookOpen,
-    keywords: ["dashboard", "overview", "workspace", "home"],
+    keywords: ["dashboard", "overview", "workspace", "home", "仪表盘", "概览", "工作区"],
   },
   {
     id: "series",
-    label: "Series",
+    label: "作品",
     href: "/admin/series",
     icon: BookOpen,
-    keywords: ["series", "story", "comic", "novel", "catalog"],
+    keywords: ["series", "story", "comic", "novel", "catalog", "作品", "漫画", "小说", "目录"],
   },
   {
     id: "storefront",
-    label: "Storefront Audit",
+    label: "前台巡检",
     href: "/admin/storefront",
     icon: Search,
-    keywords: ["storefront", "audit", "readiness", "public page"],
+    keywords: ["storefront", "audit", "readiness", "public page", "前台", "巡检", "上线", "读者页面"],
   },
   {
     id: "merchandising",
-    label: "Collections",
+    label: "内容编排",
     href: "/admin/merchandising",
     icon: Sparkles,
-    keywords: ["collections", "home", "curation", "featured"],
+    keywords: ["collections", "home", "curation", "featured", "编排", "推荐", "合集", "首页"],
   },
   {
     id: "users",
-    label: "Users",
+    label: "用户",
     href: "/admin/users",
     icon: Users,
-    keywords: ["users", "accounts", "reader", "customer"],
+    keywords: ["users", "accounts", "reader", "customer", "用户", "账号", "读者"],
   },
   {
     id: "orders",
-    label: "Orders",
+    label: "订单",
     href: "/admin/orders",
     icon: Receipt,
-    keywords: ["orders", "payments", "transactions"],
+    keywords: ["orders", "payments", "transactions", "订单", "支付", "交易"],
   },
   {
     id: "promotions",
-    label: "Promotions",
+    label: "活动",
     href: "/admin/promotions",
     icon: Megaphone,
-    keywords: ["promotions", "marketing", "campaigns"],
+    keywords: ["promotions", "marketing", "campaigns", "活动", "营销", "促销"],
   },
   {
     id: "comments",
-    label: "Comments",
+    label: "评论",
     href: "/admin/comments",
     icon: MessageSquare,
-    keywords: ["comments", "reviews", "feedback"],
+    keywords: ["comments", "reviews", "feedback", "评论", "反馈"],
   },
   {
     id: "billing",
-    label: "Billing",
+    label: "计费",
     href: "/admin/billing",
     icon: CreditCard,
-    keywords: ["billing", "pricing", "wallet", "commercial"],
+    keywords: ["billing", "pricing", "wallet", "commercial", "计费", "钱包", "商业"],
   },
   {
     id: "notifications",
-    label: "Notifications",
+    label: "通知",
     href: "/admin/notifications",
     icon: Bell,
-    keywords: ["notifications", "messages", "alerts"],
+    keywords: ["notifications", "messages", "alerts", "通知", "消息", "提醒"],
   },
   {
     id: "support",
-    label: "Support",
+    label: "客服支持",
     href: "/admin/support",
     icon: LifeBuoy,
-    keywords: ["support", "tickets", "help"],
+    keywords: ["support", "tickets", "help", "客服", "工单", "支持"],
   },
   {
     id: "creators",
-    label: "Creators",
+    label: "创作者",
     href: "/admin/creators",
     icon: PenSquare,
-    keywords: ["creators", "author", "artist", "studio", "credits"],
+    keywords: ["creators", "author", "artist", "studio", "credits", "创作者", "作者", "画师", "工作室", "署名"],
   },
   {
     id: "branding",
-    label: "Branding",
+    label: "品牌素材",
     href: "/admin/branding",
     icon: BookOpen,
-    keywords: ["branding", "logo", "banner", "assets"],
+    keywords: ["branding", "logo", "banner", "assets", "品牌", "logo", "横幅", "素材"],
   },
   {
     id: "email-settings",
-    label: "Email Settings",
+    label: "邮件设置",
     href: "/admin/email-settings",
     icon: Mail,
-    keywords: ["email", "smtp", "mail settings"],
+    keywords: ["email", "smtp", "mail settings", "邮件", "发信", "邮箱"],
   },
   {
     id: "email-jobs",
-    label: "Email Jobs",
+    label: "邮件任务",
     href: "/admin/email-jobs",
     icon: Mail,
-    keywords: ["email", "deliveries", "jobs"],
+    keywords: ["email", "deliveries", "jobs", "邮件", "投递", "任务"],
   },
   {
     id: "tracking",
-    label: "Tracking",
+    label: "跟踪设置",
     href: "/admin/tracking",
     icon: Radar,
-    keywords: ["tracking", "analytics", "pixels"],
+    keywords: ["tracking", "analytics", "pixels", "跟踪", "埋点", "像素"],
   },
   {
     id: "regions",
-    label: "Regions",
+    label: "地区",
     href: "/admin/regions",
     icon: Globe,
-    keywords: ["regions", "country", "locale"],
+    keywords: ["regions", "country", "locale", "地区", "国家", "区号"],
   },
   {
     id: "settings",
-    label: "Settings",
+    label: "系统设置",
     href: "/admin/settings",
     icon: Settings,
-    keywords: ["settings", "system", "configuration"],
+    keywords: ["settings", "system", "configuration", "设置", "系统", "配置"],
   },
 ];
 
@@ -290,14 +290,14 @@ export default function GlobalSearch({ isOpen, onClose }) {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Search pages, tools, or settings"
+              placeholder="搜索页面、工具或设置"
               className="flex-1 bg-transparent text-base text-slate-950 outline-none placeholder:text-slate-400"
             />
             <button
               type="button"
               onClick={onClose}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
-              aria-label="Close search"
+              aria-label="关闭搜索"
             >
               <X size={18} />
             </button>
@@ -344,23 +344,23 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-semibold text-slate-900">No matching admin pages</p>
+              <p className="text-sm font-semibold text-slate-900">没有匹配的后台页面</p>
               <p className="mt-1 text-xs text-slate-500">
-                Try a different keyword or page name.
+                换个关键词或页面名称再试试。
               </p>
             </div>
           ) : recentItems.length > 0 ? (
             <div className="space-y-1">
               <div className="flex items-center justify-between px-3 py-2">
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Recent
+                  最近访问
                 </div>
                 <button
                   type="button"
                   onClick={handleClearRecent}
                   className="text-xs text-slate-500 transition-colors hover:text-slate-950"
                 >
-                  Clear
+                  清空
                 </button>
               </div>
               {recentItems.map((item) => (
@@ -391,9 +391,9 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-semibold text-slate-900">Start typing to search admin</p>
+              <p className="text-sm font-semibold text-slate-900">输入内容即可搜索后台</p>
               <p className="mt-1 text-xs text-slate-500">
-                Search by page name, task, or object type.
+                可以按页面名、任务或对象类型搜索。
               </p>
             </div>
           )}
@@ -409,20 +409,20 @@ export default function GlobalSearch({ isOpen, onClose }) {
                 <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
                   ↓
                 </kbd>
-                <span>Move</span>
+                <span>移动</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
                   Enter
                 </kbd>
-                <span>Open</span>
+                <span>打开</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
                 Esc
               </kbd>
-              <span>Close</span>
+              <span>关闭</span>
             </div>
           </div>
         </div>

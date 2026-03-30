@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +61,7 @@ function formatDate(value) {
     return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -73,7 +73,7 @@ function formatCurrency(value, currency = 'USD') {
   const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
 
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('zh-CN', {
       style: 'currency',
       currency: normalizedCurrency,
       minimumFractionDigits: 2,
@@ -85,7 +85,7 @@ function formatCurrency(value, currency = 'USD') {
 }
 
 function formatPoints(value) {
-  return new Intl.NumberFormat('en-US').format(toNumber(value));
+  return new Intl.NumberFormat('zh-CN').format(toNumber(value));
 }
 
 function getBillingModeLabel(mode) {
@@ -276,13 +276,13 @@ export default function AdminBillingPage() {
     {
       label: 'Best value pack',
       value: packageSummary.bestDensity
-        ? `${packageSummary.bestDensity.name} · ${packageSummary.bestDensity.value.toFixed(1)} pts/${packageSummary.bestDensity.currency}`
+        ? `${packageSummary.bestDensity.name} 路 ${packageSummary.bestDensity.value.toFixed(1)} pts/${packageSummary.bestDensity.currency}`
         : 'Not available',
     },
     {
       label: 'Largest package',
       value: packageSummary.largest
-        ? `${packageSummary.largest.name || packageSummary.largest.id} · ${formatPoints(toNumber(packageSummary.largest.points) || toNumber(packageSummary.largest.paidPts) + toNumber(packageSummary.largest.bonusPts))} pts`
+        ? `${packageSummary.largest.name || packageSummary.largest.id} 路 ${formatPoints(toNumber(packageSummary.largest.points) || toNumber(packageSummary.largest.paidPts) + toNumber(packageSummary.largest.bonusPts))} pts`
         : 'Not available',
     },
     { label: 'Highest member discount', value: `${planSummary.maxDiscount}%` },
@@ -429,7 +429,7 @@ export default function AdminBillingPage() {
                       <td className="px-4 py-4">
                         <div className="font-medium text-slate-950">{formatPoints(totalPoints)} pts</div>
                         <div className="mt-1 text-xs text-slate-500">
-                          Paid {formatPoints(pkg.paidPts || pkg.points || 0)} · Bonus {formatPoints(pkg.bonusPts || 0)}
+                          Paid {formatPoints(pkg.paidPts || pkg.points || 0)} 路 Bonus {formatPoints(pkg.bonusPts || 0)}
                         </div>
                       </td>
                       <td className="px-4 py-4">
@@ -470,3 +470,4 @@ export default function AdminBillingPage() {
     </AdminShell>
   );
 }
+

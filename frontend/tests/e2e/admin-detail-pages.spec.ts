@@ -111,16 +111,16 @@ test.describe("Admin detail page regressions", () => {
     const response = await page.goto("/admin/analytics", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await page.getByRole("button", { name: "Audience segments" }).click();
+    await page.getByRole("button", { name: /用户分群|Audience segments/ }).click();
     await expect(page.getByText("all-user-1@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
-    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: /下一页|Next/ }).click();
     await expect(page.getByText("all-user-21@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Page 2 of 2", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText(/第 2 页，共 2 页|Page 2 of 2/, { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.getByRole("button").filter({ hasText: /VIP/ }).click();
     await expect(page.getByText("vip-reader@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Page 1 of 1", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText(/第 1 页，共 1 页|Page 1 of 1/, { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/analytics", runtimeIssues);
@@ -165,11 +165,11 @@ test.describe("Admin detail page regressions", () => {
     const response = await page.goto("/admin/series/series-qa-001", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("button", { name: "Edit details" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: "Edit details" }).click();
+    await expect(page.getByRole("button", { name: /编辑详情|Edit details/ })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: /编辑详情|Edit details/ }).click();
 
     await page.getByLabel("Default episode price").fill("3.5");
-    await page.getByRole("button", { name: "Save changes" }).click();
+    await page.getByRole("button", { name: /保存更改|保存修改|Save changes/ }).click();
 
     await expect(page.getByText("Default episode price must be a whole-number point value.", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
@@ -262,8 +262,8 @@ test.describe("Admin detail page regressions", () => {
     await expect(page.getByText("Total episodes", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.getByLabel("Select episode 1").check();
-    await expect(page.getByRole("button", { name: "Bulk edit" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: "Bulk edit" }).click();
+    await expect(page.getByRole("button", { name: /批量编辑|Bulk edit/ })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: /批量编辑|Bulk edit/ }).click();
 
     await page.getByLabel("Bulk price").fill("9");
     await page.getByRole("button", { name: "Apply bulk update" }).click();

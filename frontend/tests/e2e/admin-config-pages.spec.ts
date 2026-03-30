@@ -81,7 +81,7 @@ test.describe("Admin config page regressions", () => {
     const response = await page.goto("/admin/branding", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Loading branding settings...")).toBeVisible({
+    await expect(page.getByText(/正在加载品牌配置|Loading branding settings/)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     await expect(page.locator('input[placeholder="https://.../logo.png"]')).toHaveValue(
@@ -90,7 +90,7 @@ test.describe("Admin config page regressions", () => {
         timeout: ADMIN_UI_TIMEOUT_MS,
       },
     );
-    await expect(page.getByRole("button", { name: "Save branding" })).toBeEnabled({
+    await expect(page.getByRole("button", { name: /保存品牌配置|Save branding/ })).toBeEnabled({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
@@ -160,8 +160,8 @@ test.describe("Admin config page regressions", () => {
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: "Failed only" }).dispatchEvent("click");
-    await page.getByRole("button", { name: "All jobs" }).dispatchEvent("click");
+    await page.getByRole("button", { name: /仅失败任务|Failed only/ }).dispatchEvent("click");
+    await page.getByRole("button", { name: /全部任务|All jobs/ }).dispatchEvent("click");
 
     await page.waitForTimeout(900);
     await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({

@@ -38,11 +38,11 @@ export default function BulkActionsToolbar({
   const isProcessing = operationState.isProcessing;
   const progressLabel =
     operationState.currentOperation === "publish"
-      ? `Publishing ${selectedCount} selected titles...`
+      ? `正在发布 ${selectedCount} 个已选作品...`
       : operationState.currentOperation === "unpublish"
-        ? `Moving ${selectedCount} selected titles back to draft...`
+        ? `正在将 ${selectedCount} 个已选作品移回草稿...`
         : operationState.currentOperation === "delete"
-          ? `Deleting ${selectedCount} selected titles...`
+          ? `正在删除 ${selectedCount} 个已选作品...`
           : null;
 
   return (
@@ -60,7 +60,7 @@ export default function BulkActionsToolbar({
               {selectedCount}
             </div>
             <span className="text-sm font-medium text-slate-700">
-              {selectedCount} selected
+              已选 {selectedCount} 项
             </span>
           </div>
 
@@ -69,44 +69,44 @@ export default function BulkActionsToolbar({
               type="button"
               onClick={() => wrapOperation(onPublish, "publish")}
               disabled={isProcessing}
-              title="Publish selected titles"
+              title="发布已选作品"
               className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Eye size={14} />
-              <span>Publish</span>
+              <span>发布</span>
             </button>
 
             <button
               type="button"
               onClick={() => wrapOperation(onUnpublish, "unpublish")}
               disabled={isProcessing}
-              title="Move selected titles back to draft"
+              title="将已选作品移回草稿"
               className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <EyeOff size={14} />
-              <span>Move to draft</span>
+              <span>转为草稿</span>
             </button>
 
             <button
               type="button"
               onClick={() => wrapOperation(onDelete, "delete")}
               disabled={isProcessing}
-              title="Delete selected titles"
+              title="删除已选作品"
               className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Trash2 size={14} />
-              <span>Delete</span>
+              <span>删除</span>
             </button>
 
             <button
               type="button"
               onClick={onCancel}
               disabled={isProcessing}
-              title="Clear selection"
+              title="清空选择"
               className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <X size={14} />
-              <span>Clear</span>
+              <span>清空</span>
             </button>
           </div>
         </div>

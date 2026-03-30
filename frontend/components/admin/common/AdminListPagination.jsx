@@ -17,15 +17,14 @@ export function AdminListPagination({
   return (
     <div className={containerClassName}>
       <div>
-        Page <span className="font-semibold text-slate-950">{page}</span> of{" "}
-        <span className="font-semibold text-slate-950">{totalPages}</span>
-        {" · "}
-        <span className="font-semibold text-slate-950">{total}</span> total items
+        第 <span className="font-semibold text-slate-950">{page}</span> 页，共{" "}
+        <span className="font-semibold text-slate-950">{totalPages}</span> 页，
+        共 <span className="font-semibold text-slate-950">{total}</span> 条
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2">
-          <span>Rows</span>
+          <span>每页</span>
           <select
             value={pageSize}
             onChange={(event) => onPageSizeChange(Number(event.target.value))}
@@ -47,7 +46,7 @@ export function AdminListPagination({
             onClick={() => onPageChange(Math.max(1, page - 1))}
             disabled={!pagination?.hasPrevPage}
           >
-            Previous
+            上一页
           </Button>
           <Button
             type="button"
@@ -56,7 +55,7 @@ export function AdminListPagination({
             onClick={() => onPageChange(page + 1)}
             disabled={!pagination?.hasNextPage}
           >
-            Next
+            下一页
           </Button>
         </div>
       </div>

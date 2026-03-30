@@ -5,7 +5,7 @@ export function AdminSelectionBar({
   children,
   onClear,
   className = "",
-  clearLabel = "Clear selection",
+  clearLabel = "清空选择",
 }) {
   if (!selectedCount) {
     return null;
@@ -16,7 +16,7 @@ export function AdminSelectionBar({
       className={`mb-6 flex flex-col gap-3 rounded-[24px] border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)] p-4 shadow-[var(--gush-shadow-soft)] sm:flex-row sm:items-center sm:justify-between ${className}`.trim()}
     >
       <span className="text-sm font-medium text-slate-700">
-        {selectedCount} item{selectedCount === 1 ? "" : "s"} selected
+        已选择 {selectedCount} 项
       </span>
       <div className="flex flex-wrap gap-2">
         {children}

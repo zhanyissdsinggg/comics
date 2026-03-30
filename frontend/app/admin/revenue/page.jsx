@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -130,7 +130,7 @@ function formatCurrency(value, currency = 'USD') {
   const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
 
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('zh-CN', {
       style: 'currency',
       currency: normalizedCurrency,
       minimumFractionDigits: 2,
@@ -142,7 +142,7 @@ function formatCurrency(value, currency = 'USD') {
 }
 
 function formatCount(value) {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('zh-CN', {
     maximumFractionDigits: 0,
   }).format(toNumber(value));
 }
@@ -695,3 +695,4 @@ export default function AdminRevenuePage() {
     </AdminLayout>
   );
 }
+

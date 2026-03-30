@@ -33,22 +33,22 @@ import GlobalSearch from "./GlobalSearch";
 
 const NAV_GROUPS = [
   {
-    label: "Workspace",
+    label: "工作区",
     items: [
-      { label: "Dashboard", href: "/admin", icon: BarChart3, match: ["/admin"], exact: true },
+      { label: "仪表盘", href: "/admin", icon: BarChart3, match: ["/admin"], exact: true },
       {
-        label: "Series",
+        label: "作品",
         href: "/admin/series",
         icon: BookOpen,
         match: ["/admin/series"],
         children: [
-          { label: "All Series", href: "/admin/series" },
-          { label: "Comics", href: "/admin/series?type=comic" },
-          { label: "Novels", href: "/admin/series?type=novel" },
+          { label: "全部作品", href: "/admin/series" },
+          { label: "漫画", href: "/admin/series?type=comic" },
+          { label: "小说", href: "/admin/series?type=novel" },
         ],
       },
       {
-        label: "Creators",
+        label: "创作者",
         href: "/admin/creators",
         icon: PenSquare,
         match: ["/admin/creators"],
@@ -56,22 +56,22 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Discovery",
+    label: "发现与前台",
     items: [
       {
-        label: "Storefront Audit",
+        label: "前台巡检",
         href: "/admin/storefront",
         icon: Search,
         match: ["/admin/storefront"],
       },
       {
-        label: "Collections",
+        label: "内容编排",
         href: "/admin/merchandising",
         icon: Sparkles,
         match: ["/admin/merchandising"],
       },
       {
-        label: "Comments",
+        label: "评论",
         href: "/admin/comments",
         icon: MessageSquare,
         match: ["/admin/comments"],
@@ -79,12 +79,12 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Audience",
+    label: "用户与服务",
     items: [
-      { label: "Users", href: "/admin/users", icon: Users, match: ["/admin/users"] },
-      { label: "Support", href: "/admin/support", icon: LifeBuoy, match: ["/admin/support"] },
+      { label: "用户", href: "/admin/users", icon: Users, match: ["/admin/users"] },
+      { label: "客服支持", href: "/admin/support", icon: LifeBuoy, match: ["/admin/support"] },
       {
-        label: "Notifications",
+        label: "通知",
         href: "/admin/notifications",
         icon: Bell,
         match: ["/admin/notifications"],
@@ -92,53 +92,53 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Commerce",
+    label: "商业",
     items: [
       {
-        label: "Promotions",
+        label: "活动",
         href: "/admin/promotions",
         icon: Megaphone,
         match: ["/admin/promotions"],
       },
-      { label: "Orders", href: "/admin/orders", icon: Receipt, match: ["/admin/orders"] },
-      { label: "Billing", href: "/admin/billing", icon: CreditCard, match: ["/admin/billing"] },
+      { label: "订单", href: "/admin/orders", icon: Receipt, match: ["/admin/orders"] },
+      { label: "计费", href: "/admin/billing", icon: CreditCard, match: ["/admin/billing"] },
     ],
   },
   {
-    label: "Settings",
+    label: "设置",
     items: [
       {
-        label: "Branding",
+        label: "品牌素材",
         href: "/admin/branding",
         icon: Image,
         match: ["/admin/branding"],
       },
       {
-        label: "Email Settings",
+        label: "邮件设置",
         href: "/admin/email-settings",
         icon: Mail,
         match: ["/admin/email-settings"],
       },
       {
-        label: "Email Jobs",
+        label: "邮件任务",
         href: "/admin/email-jobs",
         icon: MailCheck,
         match: ["/admin/email-jobs"],
       },
       {
-        label: "Tracking",
+        label: "跟踪设置",
         href: "/admin/tracking",
         icon: Radar,
         match: ["/admin/tracking"],
       },
       {
-        label: "Regions",
+        label: "地区",
         href: "/admin/regions",
         icon: Globe,
         match: ["/admin/regions"],
       },
       {
-        label: "Settings",
+        label: "系统设置",
         href: "/admin/settings",
         icon: Settings,
         match: ["/admin/settings"],
@@ -148,24 +148,24 @@ const NAV_GROUPS = [
 ];
 
 const BREADCRUMB_MAP = [
-  { match: "/admin", label: "Dashboard", exact: true },
-  { match: "/admin/series", label: "Series" },
-  { match: "/admin/creators", label: "Creators" },
-  { match: "/admin/storefront", label: "Storefront Audit" },
-  { match: "/admin/merchandising", label: "Collections" },
-  { match: "/admin/comments", label: "Comments" },
-  { match: "/admin/promotions", label: "Promotions" },
-  { match: "/admin/orders", label: "Orders" },
-  { match: "/admin/billing", label: "Billing" },
-  { match: "/admin/notifications", label: "Notifications" },
-  { match: "/admin/users", label: "Users" },
-  { match: "/admin/support", label: "Support" },
-  { match: "/admin/branding", label: "Branding" },
-  { match: "/admin/email-settings", label: "Email Settings" },
-  { match: "/admin/email-jobs", label: "Email Jobs" },
-  { match: "/admin/tracking", label: "Tracking" },
-  { match: "/admin/regions", label: "Regions" },
-  { match: "/admin/settings", label: "Settings" },
+  { match: "/admin", label: "仪表盘", exact: true },
+  { match: "/admin/series", label: "作品" },
+  { match: "/admin/creators", label: "创作者" },
+  { match: "/admin/storefront", label: "前台巡检" },
+  { match: "/admin/merchandising", label: "内容编排" },
+  { match: "/admin/comments", label: "评论" },
+  { match: "/admin/promotions", label: "活动" },
+  { match: "/admin/orders", label: "订单" },
+  { match: "/admin/billing", label: "计费" },
+  { match: "/admin/notifications", label: "通知" },
+  { match: "/admin/users", label: "用户" },
+  { match: "/admin/support", label: "客服支持" },
+  { match: "/admin/branding", label: "品牌素材" },
+  { match: "/admin/email-settings", label: "邮件设置" },
+  { match: "/admin/email-jobs", label: "邮件任务" },
+  { match: "/admin/tracking", label: "跟踪设置" },
+  { match: "/admin/regions", label: "地区" },
+  { match: "/admin/settings", label: "系统设置" },
 ];
 
 function getBreadcrumb(pathname) {
@@ -177,7 +177,7 @@ function getBreadcrumb(pathname) {
     return pathname.startsWith(item.match);
   });
 
-  return hit ? hit.label : "Admin";
+  return hit ? hit.label : "后台";
 }
 
 function isChildLinkActive(pathname, searchParams, href) {
@@ -212,7 +212,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
       ),
     );
 
-    return group?.label || "Workspace";
+    return group?.label || "工作区";
   }, [pathname]);
 
   const toggleMenu = (href) => {
@@ -277,10 +277,10 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   {!isCollapsed ? (
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                        Admin
+                        后台
                       </p>
                       <h1 className="mt-1 text-base font-semibold text-slate-950">
-                        Publishing workspace
+                        内容管理后台
                       </h1>
                     </div>
                   ) : null}
@@ -290,7 +290,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   type="button"
                   onClick={() => setIsCollapsed((current) => !current)}
                   className="hidden h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950 lg:flex"
-                  aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
                 >
                   {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
                 </button>
@@ -299,11 +299,11 @@ export default function AdminShell({ title, subtitle, children, actions }) {
               {!isCollapsed ? (
                 <div className="mt-4 rounded-[24px] border border-black/8 bg-white/76 px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    Current area
+                    当前分区
                   </p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{activeGroupLabel}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    A calmer backstage for stories, credits, and editorial updates.
+                    用更安静的方式处理作品、署名和前台编排。
                   </p>
                 </div>
               ) : null}
@@ -318,10 +318,10 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   isCollapsed ? "justify-center px-0" : "",
                 )}
               >
-                <Search size={17} className="shrink-0 text-slate-500" />
+                    <Search size={17} className="shrink-0 text-slate-500" />
                 {!isCollapsed ? (
                   <>
-                    <span className="flex-1">Search admin</span>
+                    <span className="flex-1">搜索后台页面</span>
                     <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                       Ctrl+K
                     </span>
@@ -445,13 +445,13 @@ export default function AdminShell({ title, subtitle, children, actions }) {
               <div className="border-t border-black/6 p-4">
                 <div className="rounded-[24px] border border-black/8 bg-white/76 px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    Session
+                    会话
                   </p>
                   <p className="mt-2 text-sm font-semibold text-slate-950">
-                    Admin access is active
+                    后台权限已生效
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Use this workspace to update stories, credits, and editorial presentation without the usual dashboard noise.
+                    在这里处理作品更新、创作者署名和前台展示，不需要再看一堆没用的噪音指标。
                   </p>
                 </div>
               </div>
@@ -474,7 +474,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   type="button"
                   onClick={() => setIsMobileMenuOpen((current) => !current)}
                   className="flex h-11 w-11 items-center justify-center rounded-full border border-black/8 bg-white text-slate-600 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950 lg:hidden"
-                  aria-label="Open navigation"
+                  aria-label="打开导航"
                 >
                   <Menu size={20} />
                 </button>
@@ -501,7 +501,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   className="hidden h-11 items-center gap-2 rounded-full border border-black/8 bg-white px-4 text-sm font-medium text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950 md:flex"
                 >
                   <Search size={16} className="text-slate-500" />
-                  <span>Search</span>
+                  <span>搜索</span>
                   <kbd className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                     Ctrl+K
                   </kbd>

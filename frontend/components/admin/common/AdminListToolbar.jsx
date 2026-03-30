@@ -12,9 +12,9 @@ export function AdminListToolbar({
   onToggleSortOrder,
   extraActions = null,
   className = "",
-  filtersLabel = "Filters",
-  ascendingLabel = "Oldest first",
-  descendingLabel = "Newest first",
+  filtersLabel = "筛选",
+  ascendingLabel = "最早优先",
+  descendingLabel = "最新优先",
 }) {
   return (
     <div

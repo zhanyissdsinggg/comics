@@ -14,7 +14,7 @@ export function AdminDataState({
   children,
 }) {
   if (isLoading) {
-    return <LoadingState.Spinner size={spinnerSize} text="Loading content" />;
+    return <LoadingState.Spinner size={spinnerSize} text="正在加载内容" />;
   }
 
   if (!hasData) {

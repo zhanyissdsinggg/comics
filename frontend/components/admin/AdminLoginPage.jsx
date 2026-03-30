@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
         router.push("/admin");
       }
     } else {
-      setError(result.error || "Sign-in failed.");
+      setError(result.error || "登录失败。");
     }
 
     setIsLoading(false);
@@ -46,13 +46,13 @@ export default function AdminLoginPage() {
             <ShieldCheck className="size-8" />
           </div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Admin
+            后台
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-            Sign in to the publishing workspace
+            登录内容管理后台
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            Use your admin key to manage stories, creator credits, and editorial surfaces.
+            使用后台密钥进入管理台，处理作品、创作者署名和前台编排。
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
           />
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">Admin key</span>
+            <span className="text-sm font-medium text-slate-700">后台密钥</span>
             <input
               id="adminKey"
               name="password"
@@ -78,14 +78,14 @@ export default function AdminLoginPage() {
               onChange={(event) => setAdminKey(event.target.value)}
               autoComplete="current-password"
               className="h-12 w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
-              placeholder="Enter your admin key"
+              placeholder="输入后台密钥"
               required
               disabled={isLoading}
             />
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">Authenticator code</span>
+            <span className="text-sm font-medium text-slate-700">动态验证码</span>
             <input
               id="totpCode"
               type="text"
@@ -99,7 +99,7 @@ export default function AdminLoginPage() {
               }}
               autoComplete="one-time-code"
               className="h-12 w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
-              placeholder="Optional 6-digit code"
+              placeholder="可选的 6 位验证码"
               disabled={isLoading}
             />
           </label>
@@ -111,12 +111,12 @@ export default function AdminLoginPage() {
           ) : null}
 
           <Button type="submit" className="h-12 w-full" disabled={isLoading}>
-            {isLoading ? "Signing in..." : "Sign in"}
+            {isLoading ? "登录中..." : "登录"}
           </Button>
         </form>
 
         <div className="mt-6 rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-          Admin sessions are stored with secure cookies. If two-factor access is enabled, add the current authenticator code before you continue.
+          后台会话会通过安全 Cookie 保存。如果启用了双重验证，请继续前填入当前动态验证码。
         </div>
       </div>
     </div>

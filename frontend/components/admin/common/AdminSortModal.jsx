@@ -8,9 +8,9 @@ export function AdminSortModal({
   sortBy,
   onSortByChange,
   options,
-  title = "Sort options",
-  label = "Sort field",
-  actionLabel = "Done",
+  title = "排序设置",
+  label = "排序字段",
+  actionLabel = "完成",
 }) {
   return (
     <Modal isOpen={isOpen} title={title} onClose={onClose}>

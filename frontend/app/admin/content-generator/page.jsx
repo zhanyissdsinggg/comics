@@ -52,29 +52,29 @@ function buildGeneratorPayload(form) {
 function validateForm(form) {
   const seriesPerType = parsePositiveInteger(form.seriesPerType);
   if (!seriesPerType) {
-    return "Series per type must be a whole number.";
+    return "每种类型作品数必须是整数。";
   }
   if (seriesPerType > 20) {
-    return "Series per type cannot be greater than 20.";
+    return "每种类型作品数不能大于 20。";
   }
 
   const minEpisodes = parsePositiveInteger(form.minEpisodes);
   if (!minEpisodes) {
-    return "Minimum episodes must be a whole number.";
+    return "最少章节数必须是整数。";
   }
   if (minEpisodes > 30) {
-    return "Minimum episodes cannot be greater than 30.";
+    return "最少章节数不能大于 30。";
   }
 
   const maxEpisodes = parsePositiveInteger(form.maxEpisodes);
   if (!maxEpisodes) {
-    return "Maximum episodes must be a whole number.";
+    return "最多章节数必须是整数。";
   }
   if (maxEpisodes > 30) {
-    return "Maximum episodes cannot be greater than 30.";
+    return "最多章节数不能大于 30。";
   }
   if (minEpisodes > maxEpisodes) {
-    return "Maximum episodes must be greater than or equal to minimum episodes.";
+    return "最多章节数必须大于或等于最少章节数。";
   }
 
   return "";
@@ -84,7 +84,7 @@ function readErrorMessage(error) {
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return "Content generation failed.";
+  return "内容生成失败。";
 }
 
 export default function ContentGeneratorPage() {
@@ -119,15 +119,15 @@ export default function ContentGeneratorPage() {
     try {
       const response = await adminPost("/api/admin/generate-content", payload);
       if (!response.ok) {
-        throw new Error(response.error || response.message || "Content generation failed.");
+        throw new Error(response.error || response.message || "内容生成失败。");
       }
 
       setResult({ ...(response.data || {}), requestPayload: payload });
       setFeedback({
         type: "success",
         message: response.data?.runId
-          ? `Generation finished. Run ID: ${response.data.runId}.`
-          : "Generation finished.",
+          ? `生成完成。运行 ID：${response.data.runId}。`
+          : "生成完成。",
       });
     } catch (error) {
       setFeedback({ type: "error", message: readErrorMessage(error) });
@@ -138,26 +138,26 @@ export default function ContentGeneratorPage() {
 
   return (
     <AdminLayout
-      title="Content Generator"
-      subtitle="Create demo catalog data for QA, layout checks, and backstage workflow reviews without turning the admin into a noisy tooling console."
+      title="内容生成器"
+      subtitle="这是给 QA、版式检查和后台流程核验用的测试工具，不是正式内容录入入口。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <AdminMetricCard
-            label="Estimated series"
+            label="预计作品数"
             value={String(estimatedSeriesTotal)}
-            detail="The generator creates the same number of comics and novels per run."
+            detail="每次会按相同数量生成漫画和小说。"
             tone="accent"
           />
           <AdminMetricCard
-            label="Episode range"
+            label="章节范围"
             value={`${previewMinEpisodes}-${previewMaxEpisodes}`}
-            detail="Each generated series stays within the configured episode window."
+            detail="每部生成作品都会落在设定的章节区间里。"
           />
           <AdminMetricCard
-            label="Access"
-            value="Admin-only"
-            detail="Production use should stay gated behind ADMIN_CONTENT_GENERATOR_ENABLED."
+            label="访问范围"
+            value="仅 QA / 测试"
+            detail="生产环境必须通过 ADMIN_CONTENT_GENERATOR_ENABLED 开关保护。"
           />
         </div>
 
@@ -167,28 +167,28 @@ export default function ContentGeneratorPage() {
         />
 
         <AdminPageSection
-          title="Demo Content Generator"
-          description="Generate controlled demo catalog data for QA and publishing checks. Keep the output intentional so the workspace stays useful instead of noisy."
-          action={<AdminBadge tone="accent">Utility route</AdminBadge>}
+          title="演示内容生成器"
+          description="这里只生成可控的测试目录数据，方便 QA 和流程核验，不应该被当成正式作品录入通道。"
+          action={<AdminBadge tone="accent">仅测试工具</AdminBadge>}
         >
           <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
             <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <AdminFormField
-                  label="Seed"
-                  helperText="Optional. Use a repeatable seed when QA needs the same dataset again."
+                  label="种子"
+                  helperText="可选。QA 需要复现同一批数据时可填写固定种子。"
                 >
                   <input
                     value={form.seed}
                     onChange={(event) => updateField("seed", event.target.value)}
-                    placeholder="Optional repeatable seed"
+                    placeholder="可选的可复现种子"
                     className={adminInputClassName}
                   />
                 </AdminFormField>
 
                 <AdminFormField
-                  label="Series per type"
-                  helperText="Allowed range: 1 to 20."
+                  label="每种类型作品数"
+                  helperText="允许范围：1 到 20。"
                 >
                   <input
                     value={form.seriesPerType}
@@ -199,8 +199,8 @@ export default function ContentGeneratorPage() {
                 </AdminFormField>
 
                 <AdminFormField
-                  label="Minimum episodes"
-                  helperText="Allowed range: 1 to 30."
+                  label="最少章节数"
+                  helperText="允许范围：1 到 30。"
                 >
                   <input
                     value={form.minEpisodes}
@@ -211,8 +211,8 @@ export default function ContentGeneratorPage() {
                 </AdminFormField>
 
                 <AdminFormField
-                  label="Maximum episodes"
-                  helperText="Allowed range: 1 to 30."
+                  label="最多章节数"
+                  helperText="允许范围：1 到 30。"
                 >
                   <input
                     value={form.maxEpisodes}
@@ -225,7 +225,7 @@ export default function ContentGeneratorPage() {
 
               <div className="flex flex-wrap gap-3">
                 <Button type="button" onClick={generateContent} disabled={generating}>
-                  {generating ? "Generating..." : "Generate content"}
+                  {generating ? "生成中..." : "生成内容"}
                 </Button>
                 <Button
                   type="button"
@@ -233,29 +233,29 @@ export default function ContentGeneratorPage() {
                   onClick={() => setForm(DEFAULT_FORM)}
                   disabled={generating}
                 >
-                  Reset settings
+                  重置设置
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.push("/admin/series")}>
-                  View series
+                  查看作品
                 </Button>
               </div>
             </div>
 
             <div className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
-              <h3 className="text-base font-semibold text-slate-950">What this run will create</h3>
+              <h3 className="text-base font-semibold text-slate-950">本次将生成的内容</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                This generator stays focused on usable demo inventory rather than fake dashboard theater.
+                这个工具只生成可用于测试的演示库存，不应该再被后台当成“看起来很热闹”的假数据来源。
               </p>
 
               <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-                <li>{previewSeriesPerType} comic series</li>
-                <li>{previewSeriesPerType} novel series</li>
+                <li>{previewSeriesPerType} 部漫画作品</li>
+                <li>{previewSeriesPerType} 部小说作品</li>
                 <li>
                   {previewMinEpisodes === previewMaxEpisodes
-                    ? `${previewMinEpisodes} episodes per series`
-                    : `${previewMinEpisodes} to ${previewMaxEpisodes} episodes per series`}
+                    ? `每部 ${previewMinEpisodes} 话`
+                    : `每部 ${previewMinEpisodes} 到 ${previewMaxEpisodes} 话`}
                 </li>
-                <li>Metadata shaped for QA, layout review, and backstage workflow testing</li>
+                <li>元数据只面向 QA、版式检查和后台流程测试</li>
               </ul>
 
               <div className="mt-5 rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">

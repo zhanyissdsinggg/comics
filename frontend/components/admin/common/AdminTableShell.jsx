@@ -26,7 +26,7 @@ export function AdminTableShell({
   }
 
   if (isLoading) {
-    return loadingFallback || <LoadingState.Spinner size="md" text="Loading table" />;
+    return loadingFallback || <LoadingState.Spinner size="md" text="正在加载表格" />;
   }
 
   if (!hasItems) {

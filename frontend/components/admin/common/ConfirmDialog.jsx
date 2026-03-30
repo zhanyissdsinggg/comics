@@ -8,10 +8,10 @@ import { Modal } from "./Modal";
 
 export const ConfirmDialog = React.memo(function ConfirmDialog({
   isOpen,
-  title = "Confirm action",
+  title = "确认操作",
   message,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText = "确认",
+  cancelText = "取消",
   isDangerous = false,
   isLoading = false,
   onConfirm,
@@ -24,7 +24,7 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
           <div className="flex items-center gap-3 rounded-[22px] border border-red-200 bg-red-50/90 p-4">
             <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-600" />
             <p className="text-sm leading-6 text-red-700">
-              This change cannot be undone. Please confirm before continuing.
+              这个操作无法撤销，请确认后再继续。
             </p>
           </div>
         ) : null}
@@ -48,7 +48,7 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
               isDangerous ? "bg-red-600 hover:bg-red-500" : "bg-slate-950 hover:bg-slate-800"
             }`}
           >
-            {isLoading ? "Working..." : confirmText}
+            {isLoading ? "处理中..." : confirmText}
           </button>
         </div>
       </div>

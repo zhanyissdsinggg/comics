@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,7 +80,7 @@ function getErrorMessage(error, fallback) {
 
 function formatCurrency(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('zh-CN', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 2,
@@ -89,7 +89,7 @@ function formatCurrency(value) {
 
 function formatNumber(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat('en-US').format(Number.isFinite(amount) ? amount : 0);
+  return new Intl.NumberFormat('zh-CN').format(Number.isFinite(amount) ? amount : 0);
 }
 
 function formatPercent(value) {
@@ -101,7 +101,7 @@ function formatDate(value, fallback = 'Not scheduled') {
   if (!value) return fallback;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'Invalid date';
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -743,3 +743,4 @@ export default function AdminMarketingPage() {
     </AdminLayout>
   );
 }
+

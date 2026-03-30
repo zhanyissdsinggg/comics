@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +51,7 @@ function formatDate(value) {
     return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -59,7 +59,7 @@ function formatDate(value) {
 }
 
 function formatNumber(value) {
-  return new Intl.NumberFormat('en-US').format(Number(value || 0));
+  return new Intl.NumberFormat('zh-CN').format(Number(value || 0));
 }
 
 export default function AdminUsersPage() {
@@ -403,3 +403,4 @@ export default function AdminUsersPage() {
     </AdminShell>
   );
 }
+

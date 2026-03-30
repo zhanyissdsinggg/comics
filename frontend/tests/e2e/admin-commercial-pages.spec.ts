@@ -135,7 +135,7 @@ test.describe("Admin commercial page regressions", () => {
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: "Overview" }).click();
+    await page.getByRole("button", { name: /总览|Overview/ }).click();
     await expect(page.getByText("Attributed revenue", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
@@ -226,7 +226,7 @@ test.describe("Admin commercial page regressions", () => {
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: "Channels" }).click();
+    await page.getByRole("button", { name: /渠道|Channels/ }).click();
     await expect(page.getByText("Apple Store", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });

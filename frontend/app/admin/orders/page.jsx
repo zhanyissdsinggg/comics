@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +52,7 @@ function formatDate(value) {
     return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -64,7 +64,7 @@ function formatAmount(amount, currency = 'USD') {
   const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
 
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('zh-CN', {
       style: 'currency',
       currency: normalizedCurrency,
       minimumFractionDigits: 2,
@@ -430,3 +430,4 @@ export default function AdminOrdersPage() {
     </AdminShell>
   );
 }
+
