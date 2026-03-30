@@ -1,6 +1,6 @@
-﻿import React from 'react';
-import { LoadingState } from './LoadingState';
-import { AdminListPagination } from './AdminListPagination';
+import React from "react";
+import { LoadingState } from "./LoadingState";
+import { AdminListPagination } from "./AdminListPagination";
 
 export function AdminTableShell({
   isError,
@@ -16,8 +16,8 @@ export function AdminTableShell({
   pageSize,
   onPageChange,
   onPageSizeChange,
-  containerClassName = 'overflow-hidden rounded-lg border border-neutral-700 bg-neutral-800',
-  tableWrapperClassName = 'overflow-x-auto',
+  containerClassName = "overflow-hidden rounded-[28px] border border-black/8 bg-white/92 shadow-[var(--gush-shadow-soft)]",
+  tableWrapperClassName = "overflow-x-auto",
   paginationProps = {},
   children,
 }) {
@@ -26,7 +26,7 @@ export function AdminTableShell({
   }
 
   if (isLoading) {
-    return loadingFallback || <LoadingState.Spinner size="md" />;
+    return loadingFallback || <LoadingState.Spinner size="md" text="Loading table" />;
   }
 
   if (!hasItems) {

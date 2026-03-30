@@ -5,7 +5,10 @@ export const dynamic = "force-dynamic";
 
 export default function RegionsPage() {
   return (
-    <AdminLayout title="地区设置">
+    <AdminLayout
+      title="Regions"
+      subtitle="Manage locale and regional settings without crowding the core publishing workflow."
+    >
       <AdminRegionsPage />
     </AdminLayout>
   );

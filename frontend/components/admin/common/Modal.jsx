@@ -26,30 +26,34 @@ export const Modal = React.memo(function Modal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,27,36,0.28)] px-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
-        className={`w-full rounded-[20px] bg-neutral-900/95 p-6 shadow-2xl ${sizeClasses[size]}`}
+        className={`w-full rounded-[28px] border border-black/8 bg-white/96 p-6 shadow-[var(--gush-shadow-panel)] ${sizeClasses[size]}`}
+        onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            {title ? <h3 className="text-lg font-semibold text-neutral-100">{title}</h3> : null}
-            {subtitle ? <p className="mt-1 text-sm text-neutral-400">{subtitle}</p> : null}
+            {title ? <h3 className="text-xl font-semibold text-slate-950">{title}</h3> : null}
+            {subtitle ? <p className="mt-1 text-sm leading-6 text-slate-600">{subtitle}</p> : null}
           </div>
           {closeButton ? (
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-neutral-200"
-              aria-label="关闭弹窗"
+              className="rounded-full border border-black/8 bg-white p-2 text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
+              aria-label="Close dialog"
             >
               <X className="h-5 w-5" />
             </button>
           ) : null}
         </div>
 
-        <div className="text-neutral-300">{children}</div>
+        <div className="text-slate-700">{children}</div>
       </div>
     </div>
   );

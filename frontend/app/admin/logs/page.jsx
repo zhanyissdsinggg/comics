@@ -4,40 +4,58 @@ export const dynamic = 'force-dynamic';
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { EmptyState, ErrorState, LoadingState } from '@/components/admin/common/LoadingState';
+import { RefreshCw } from 'lucide-react';
+
+import AdminShell from '@/components/admin/AdminShell';
+import { LoadingState } from '@/components/admin/common/LoadingState';
+import {
+  AdminBadge,
+  AdminDataTable,
+  AdminMetricCard,
+  AdminPageSection,
+  AdminTableHeader,
+  AdminTableRow,
+  adminInputClassName,
+  adminSelectClassName,
+} from '@/components/admin/common/AdminWorkspacePrimitives';
+import { Button } from '@/components/ui/button';
 import { adminGet } from '@/lib/adminApiClient';
 
 function formatDateTime(value) {
   if (!value) {
-    return '-';
+    return 'Not available';
   }
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return '-';
+    return 'Not available';
   }
-  return date.toLocaleString('zh-CN', {
+
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
+    day: 'numeric',
+    hour: 'numeric',
     minute: '2-digit',
-  });
+  }).format(date);
 }
 
 function summarizeDetails(value) {
   if (!value) {
-    return '-';
+    return 'No detail payload';
   }
 
   try {
     const parsed = typeof value === 'string' ? JSON.parse(value) : value;
     const entries = Object.entries(parsed || {}).slice(0, 3);
+
     if (!entries.length) {
-      return '-';
+      return 'No detail payload';
     }
+
     return entries.map(([key, item]) => `${key}: ${String(item)}`).join(' | ');
   } catch {
-    return String(value).slice(0, 120);
+    return String(value).slice(0, 160);
   }
 }
 
@@ -54,10 +72,12 @@ export default function AdminLogsPage() {
     queryKey: ['admin', 'logs', 'readonly'],
     queryFn: async () => {
       const response = await adminGet('/api/admin/logs?page=1&pageSize=200');
+
       if (!response.ok) {
-        throw new Error(response.error || '审计日志加载失败。');
+        throw new Error(response.error || 'Audit logs could not be loaded.');
       }
-      return response.data;
+
+      return response.data || {};
     },
     staleTime: 60_000,
   });
@@ -66,152 +86,145 @@ export default function AdminLogsPage() {
 
   const filteredLogs = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
+
     return logs.filter((log) => {
-      const matchesSearch = !term || [
-        log.id,
-        log.action,
-        log.resource,
-        getAdminIdentity(log),
-        log.resourceId,
-      ]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(term));
+      const matchesSearch =
+        !term
+        || [log.id, log.action, log.resource, getAdminIdentity(log), log.resourceId]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(term));
 
       const matchesAction = !actionFilter || log.action === actionFilter;
       const matchesAdmin = !adminFilter || getAdminIdentity(log) === adminFilter;
+
       return matchesSearch && matchesAction && matchesAdmin;
     });
   }, [actionFilter, adminFilter, logs, searchTerm]);
 
-  const actionOptions = useMemo(() => {
-    return [...new Set(logs.map((log) => log.action).filter(Boolean))].sort();
-  }, [logs]);
-
-  const adminOptions = useMemo(() => {
-    return [...new Set(logs.map((log) => getAdminIdentity(log)).filter(Boolean))].sort();
-  }, [logs]);
+  const actionOptions = useMemo(
+    () => [...new Set(logs.map((log) => log.action).filter(Boolean))].sort(),
+    [logs],
+  );
+  const adminOptions = useMemo(
+    () => [...new Set(logs.map((log) => getAdminIdentity(log)).filter(Boolean))].sort(),
+    [logs],
+  );
 
   return (
-    <div className="min-h-screen bg-neutral-900 p-6 text-neutral-100">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white">审计日志</h1>
-            <p className="mt-2 text-sm text-neutral-400">
-              仅追加的后台操作流水。此页默认不提供删除能力。
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => logsQuery.refetch()}
-            className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
-          >
-            刷新
-          </button>
+    <AdminShell
+      title="Audit logs"
+      subtitle="A quiet, read-first history of backstage actions. Use it to confirm who changed what, not to create another noisy control panel."
+      actions={
+        <Button type="button" variant="outline" onClick={() => logsQuery.refetch()}>
+          <RefreshCw className="size-4" />
+          Refresh
+        </Button>
+      }
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <AdminMetricCard
+            label="Logs in view"
+            value={String(filteredLogs.length)}
+            detail="Records that match the current search and filter state."
+            tone="accent"
+          />
+          <AdminMetricCard
+            label="Action types"
+            value={String(actionOptions.length)}
+            detail="Unique action labels currently represented in the dataset."
+          />
+          <AdminMetricCard
+            label="Operators"
+            value={String(adminOptions.length)}
+            detail="Distinct admin or fallback user identities found in the logs."
+          />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">当前可见</div>
-            <div className="mt-3 text-3xl font-semibold text-white">{filteredLogs.length}</div>
-            <div className="mt-1 text-sm text-neutral-400">当前视图记录数</div>
+        <AdminPageSection
+          title="Audit filters"
+          description="Filter by action or operator when you need to narrow the list, but keep the base view simple and readable."
+        >
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_220px_220px]">
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search ID, action, resource, target, or operator"
+              className={adminInputClassName}
+            />
+            <select
+              value={actionFilter}
+              onChange={(event) => setActionFilter(event.target.value)}
+              className={adminSelectClassName}
+            >
+              <option value="">All actions</option>
+              {actionOptions.map((action) => (
+                <option key={action} value={action}>
+                  {action}
+                </option>
+              ))}
+            </select>
+            <select
+              value={adminFilter}
+              onChange={(event) => setAdminFilter(event.target.value)}
+              className={adminSelectClassName}
+            >
+              <option value="">All operators</option>
+              {adminOptions.map((adminId) => (
+                <option key={adminId} value={adminId}>
+                  {adminId}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">操作类型</div>
-            <div className="mt-3 text-3xl font-semibold text-white">{actionOptions.length}</div>
-            <div className="mt-1 text-sm text-neutral-400">不同操作种类</div>
-          </div>
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <div className="text-xs uppercase tracking-[0.2em] text-neutral-500">操作员</div>
-            <div className="mt-3 text-3xl font-semibold text-white">{adminOptions.length}</div>
-            <div className="mt-1 text-sm text-neutral-400">不同操作员身份</div>
-          </div>
-        </div>
+        </AdminPageSection>
 
-        <div className="grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-4 lg:grid-cols-[minmax(0,1.5fr)_220px_220px]">
-          <input
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="搜索 ID、操作、资源、目标或操作员"
-            className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400/50"
-          />
-          <select
-            value={actionFilter}
-            onChange={(event) => setActionFilter(event.target.value)}
-            className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50"
-          >
-            <option value="">全部操作</option>
-            {actionOptions.map((action) => (
-              <option key={action} value={action}>
-                {action}
-              </option>
-            ))}
-          </select>
-          <select
-            value={adminFilter}
-            onChange={(event) => setAdminFilter(event.target.value)}
-            className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50"
-          >
-            <option value="">全部操作员</option>
-            {adminOptions.map((adminId) => (
-              <option key={adminId} value={adminId}>
-                {adminId}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {logsQuery.isLoading ? (
-          <LoadingState isLoading type="skeleton" count={8} height="h-16" />
-        ) : logsQuery.error ? (
-          <ErrorState
-            error={logsQuery.error.message}
-            onRetry={() => logsQuery.refetch()}
-          />
-        ) : filteredLogs.length === 0 ? (
-          <EmptyState
-            title="未找到审计日志"
-            description="可以放宽筛选条件，或先执行一次新的后台操作。"
-          />
-        ) : (
-          <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5">
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-white/5 text-xs uppercase tracking-[0.2em] text-neutral-500">
+        <AdminPageSection
+          title="Change history"
+          description="Start with when the action happened, who performed it, and the shortest useful detail summary."
+        >
+          {logsQuery.isLoading ? (
+            <LoadingState.Spinner size="md" text="Loading audit logs" />
+          ) : logsQuery.error ? (
+            <LoadingState.ErrorState error={logsQuery.error.message} onRetry={() => logsQuery.refetch()} />
+          ) : filteredLogs.length === 0 ? (
+            <LoadingState.EmptyState message="No audit logs were found for this view." />
+          ) : (
+            <AdminDataTable>
+              <table className="min-w-full text-sm">
+                <AdminTableHeader>
                   <tr>
-                    <th className="px-4 py-3">时间</th>
-                    <th className="px-4 py-3">操作员</th>
-                    <th className="px-4 py-3">操作</th>
-                    <th className="px-4 py-3">资源</th>
-                    <th className="px-4 py-3">目标</th>
-                    <th className="px-4 py-3">详情</th>
+                    <th className="px-4 py-3">Time</th>
+                    <th className="px-4 py-3">Operator</th>
+                    <th className="px-4 py-3">Action</th>
+                    <th className="px-4 py-3">Resource</th>
+                    <th className="px-4 py-3">Target</th>
+                    <th className="px-4 py-3">Details</th>
                   </tr>
-                </thead>
+                </AdminTableHeader>
                 <tbody>
                   {filteredLogs.map((log) => (
-                    <tr key={log.id} className="border-t border-white/5 align-top text-neutral-200">
-                      <td className="px-4 py-4 text-neutral-400">{formatDateTime(log.createdAt || log.timestamp)}</td>
+                    <AdminTableRow key={log.id}>
+                      <td className="px-4 py-4 text-slate-600">{formatDateTime(log.createdAt || log.timestamp)}</td>
                       <td className="px-4 py-4">
-                        <div className="font-medium text-white">{getAdminIdentity(log) || '-'}</div>
-                        <div className="mt-1 text-xs text-neutral-500">{log.ip || '-'}</div>
+                        <div className="font-medium text-slate-950">{getAdminIdentity(log) || 'Unknown operator'}</div>
+                        <div className="mt-1 text-xs text-slate-500">{log.ip || 'No IP recorded'}</div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-                          {log.action || '-'}
-                        </span>
+                        <AdminBadge tone="accent">{log.action || 'Unknown action'}</AdminBadge>
                       </td>
-                      <td className="px-4 py-4 text-neutral-300">{log.resource || '-'}</td>
-                      <td className="px-4 py-4 text-neutral-300">{log.resourceId || '-'}</td>
-                      <td className="max-w-[320px] px-4 py-4 text-xs text-neutral-400">{summarizeDetails(log.details)}</td>
-                    </tr>
+                      <td className="px-4 py-4 text-slate-700">{log.resource || 'Unknown resource'}</td>
+                      <td className="px-4 py-4 text-slate-700">{log.resourceId || 'No target ID'}</td>
+                      <td className="max-w-[28rem] px-4 py-4 text-xs leading-6 text-slate-600">{summarizeDetails(log.details)}</td>
+                    </AdminTableRow>
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        )}
+            </AdminDataTable>
+          )}
+        </AdminPageSection>
       </div>
-    </div>
+    </AdminShell>
   );
 }

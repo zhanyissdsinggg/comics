@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Eye, EyeOff, Trash2, X } from "lucide-react";
@@ -38,82 +38,79 @@ export default function BulkActionsToolbar({
   const isProcessing = operationState.isProcessing;
   const progressLabel =
     operationState.currentOperation === "publish"
-      ? `正在发布 ${selectedCount} 部作品...`
+      ? `Publishing ${selectedCount} selected titles...`
       : operationState.currentOperation === "unpublish"
-        ? `正在取消发布 ${selectedCount} 部作品...`
+        ? `Moving ${selectedCount} selected titles back to draft...`
         : operationState.currentOperation === "delete"
-          ? `正在删除 ${selectedCount} 部作品...`
+          ? `Deleting ${selectedCount} selected titles...`
           : null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-slide-up">
-      <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/95 px-6 py-4 shadow-ios-xl backdrop-blur-2xl">
+    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
+      <div className="min-w-[320px] rounded-[28px] border border-black/8 bg-white/96 px-5 py-4 shadow-[var(--gush-shadow-panel)] backdrop-blur-xl">
         {progressLabel ? (
-          <div className="mb-4 rounded-3xl border border-ios-blue/20 bg-ios-blue/10 px-4 py-3 text-xs font-medium text-ios-blue">
+          <div className="mb-4 rounded-[18px] border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.06)] px-4 py-3 text-sm text-[var(--gush-accent,#2f58c6)]">
             {progressLabel}
           </div>
         ) : null}
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ios-green/20 text-sm font-bold text-ios-green">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(47,88,198,0.08)] text-sm font-semibold text-[var(--gush-accent,#2f58c6)]">
               {selectedCount}
             </div>
-            <span className="text-sm font-medium text-neutral-200">已选择 {selectedCount} 项</span>
+            <span className="text-sm font-medium text-slate-700">
+              {selectedCount} selected
+            </span>
           </div>
 
-          <div className="h-8 w-px bg-ios-gray-700" />
-
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => wrapOperation(onPublish, "publish")}
               disabled={isProcessing}
-              title="发布所选作品"
-              className="flex items-center gap-2 rounded-3xl border border-ios-green/20 bg-ios-green/10 px-4 py-2 text-xs font-bold text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              title="Publish selected titles"
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Eye size={14} />
-              <span>发布</span>
+              <span>Publish</span>
             </button>
 
             <button
               type="button"
               onClick={() => wrapOperation(onUnpublish, "unpublish")}
               disabled={isProcessing}
-              title="取消发布所选作品"
-              className="flex items-center gap-2 rounded-3xl border border-ios-gray-600/20 bg-ios-gray-700/10 px-4 py-2 text-xs font-bold text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-700/20 hover:text-neutral-200 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              title="Move selected titles back to draft"
+              className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <EyeOff size={14} />
-              <span>取消发布</span>
+              <span>Move to draft</span>
             </button>
 
             <button
               type="button"
               onClick={() => wrapOperation(onDelete, "delete")}
               disabled={isProcessing}
-              title="删除所选作品"
-              className="flex items-center gap-2 rounded-3xl border border-ios-red/20 bg-ios-red/10 px-4 py-2 text-xs font-bold text-ios-red transition-all duration-300 hover:bg-ios-red/20 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              title="Delete selected titles"
+              className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Trash2 size={14} />
-              <span>删除</span>
+              <span>Delete</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={isProcessing}
+              title="Clear selection"
+              className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <X size={14} />
+              <span>Clear</span>
             </button>
           </div>
-
-          <div className="h-8 w-px bg-ios-gray-700" />
-
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isProcessing}
-            title="清空选择"
-            className="flex items-center gap-2 rounded-3xl border border-ios-gray-600/20 bg-ios-gray-700/10 px-4 py-2 text-xs font-bold text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-700/20 hover:text-neutral-200 hover:scale-105 hover:shadow-ios-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <X size={14} />
-            <span>清空</span>
-          </button>
         </div>
       </div>
     </div>
   );
 }
-

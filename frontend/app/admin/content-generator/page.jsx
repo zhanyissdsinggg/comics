@@ -4,7 +4,17 @@ export const dynamic = "force-dynamic";
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import {
+  AdminBadge,
+  AdminFormField,
+  AdminMetricCard,
+  AdminPageSection,
+  adminInputClassName,
+} from "@/components/admin/common/AdminWorkspacePrimitives";
 import { adminPost } from "../../../lib/adminApiClient";
 
 const DEFAULT_FORM = {
@@ -42,29 +52,29 @@ function buildGeneratorPayload(form) {
 function validateForm(form) {
   const seriesPerType = parsePositiveInteger(form.seriesPerType);
   if (!seriesPerType) {
-    return "每种类型的作品数必须是正整数。";
+    return "Series per type must be a whole number.";
   }
   if (seriesPerType > 20) {
-    return "每种类型的作品数不能大于 20。";
+    return "Series per type cannot be greater than 20.";
   }
 
   const minEpisodes = parsePositiveInteger(form.minEpisodes);
   if (!minEpisodes) {
-    return "最小章节数必须是正整数。";
+    return "Minimum episodes must be a whole number.";
   }
   if (minEpisodes > 30) {
-    return "最小章节数不能大于 30。";
+    return "Minimum episodes cannot be greater than 30.";
   }
 
   const maxEpisodes = parsePositiveInteger(form.maxEpisodes);
   if (!maxEpisodes) {
-    return "最大章节数必须是正整数。";
+    return "Maximum episodes must be a whole number.";
   }
   if (maxEpisodes > 30) {
-    return "最大章节数不能大于 30。";
+    return "Maximum episodes cannot be greater than 30.";
   }
   if (minEpisodes > maxEpisodes) {
-    return "最大章节数必须大于或等于最小章节数。";
+    return "Maximum episodes must be greater than or equal to minimum episodes.";
   }
 
   return "";
@@ -74,20 +84,21 @@ function readErrorMessage(error) {
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return "内容生成失败。";
+  return "Content generation failed.";
 }
 
 export default function ContentGeneratorPage() {
   const router = useRouter();
   const [form, setForm] = useState(DEFAULT_FORM);
   const [generating, setGenerating] = useState(false);
-  const [progress, setProgress] = useState("");
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [result, setResult] = useState(null);
 
   const validationError = useMemo(() => validateForm(form), [form]);
   const previewSeriesPerType = parsePositiveInteger(form.seriesPerType) ?? 20;
   const previewMinEpisodes = parsePositiveInteger(form.minEpisodes) ?? 10;
   const previewMaxEpisodes = parsePositiveInteger(form.maxEpisodes) ?? 30;
+  const estimatedSeriesTotal = previewSeriesPerType * 2;
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -96,176 +107,182 @@ export default function ContentGeneratorPage() {
   const generateContent = async () => {
     if (validationError) {
       setResult(null);
-      setProgress(`错误：${validationError}`);
+      setFeedback({ type: "error", message: validationError });
       return;
     }
 
     const payload = buildGeneratorPayload(form);
     setGenerating(true);
-    setProgress("正在生成演示内容...");
+    setFeedback({ type: "", message: "" });
     setResult(null);
 
     try {
       const response = await adminPost("/api/admin/generate-content", payload);
       if (!response.ok) {
-        throw new Error(response.error || response.message || "内容生成失败。");
+        throw new Error(response.error || response.message || "Content generation failed.");
       }
 
       setResult({ ...(response.data || {}), requestPayload: payload });
-      setProgress(
-        response.data?.runId
-            ? `生成完成，运行 ID：${response.data.runId}。`
-            : "生成完成。",
-      );
+      setFeedback({
+        type: "success",
+        message: response.data?.runId
+          ? `Generation finished. Run ID: ${response.data.runId}.`
+          : "Generation finished.",
+      });
     } catch (error) {
-      setProgress(`错误：${readErrorMessage(error)}`);
+      setFeedback({ type: "error", message: readErrorMessage(error) });
     } finally {
       setGenerating(false);
     }
   };
 
   return (
-    <AdminLayout title="内容生成器">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h1 className="text-3xl font-bold text-white">演示内容生成器</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-300">
-            一键生成用于 QA、布局检查和后台流程联调的演示漫画与小说数据。
-            该接口仅允许后台访问，生产环境也可以按需关闭。
-          </p>
+    <AdminLayout
+      title="Content Generator"
+      subtitle="Create demo catalog data for QA, layout checks, and backstage workflow reviews without turning the admin into a noisy tooling console."
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <AdminMetricCard
+            label="Estimated series"
+            value={String(estimatedSeriesTotal)}
+            detail="The generator creates the same number of comics and novels per run."
+            tone="accent"
+          />
+          <AdminMetricCard
+            label="Episode range"
+            value={`${previewMinEpisodes}-${previewMaxEpisodes}`}
+            detail="Each generated series stays within the configured episode window."
+          />
+          <AdminMetricCard
+            label="Access"
+            value="Admin-only"
+            detail="Production use should stay gated behind ADMIN_CONTENT_GENERATOR_ENABLED."
+          />
+        </div>
 
-          <div className="mt-6 grid gap-3 text-sm text-neutral-300 lg:grid-cols-[1.2fr,0.8fr]">
-            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <p className="font-semibold text-white">将生成的内容</p>
-              <ul className="mt-2 list-disc space-y-1 pl-5">
-                <li>{previewSeriesPerType} 部漫画作品</li>
-                <li>{previewSeriesPerType} 部小说作品</li>
-                <li>
-                  每部作品 {previewMinEpisodes} 到 {previewMaxEpisodes} 章
-                </li>
-                <li>包含评分、标签、定价和预览内容</li>
-              </ul>
+        <AdminFeedbackBanner
+          feedback={feedback}
+          onDismiss={() => setFeedback({ type: "", message: "" })}
+        />
+
+        <AdminPageSection
+          title="Demo Content Generator"
+          description="Generate controlled demo catalog data for QA and publishing checks. Keep the output intentional so the workspace stays useful instead of noisy."
+          action={<AdminBadge tone="accent">Utility route</AdminBadge>}
+        >
+          <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <AdminFormField
+                  label="Seed"
+                  helperText="Optional. Use a repeatable seed when QA needs the same dataset again."
+                >
+                  <input
+                    value={form.seed}
+                    onChange={(event) => updateField("seed", event.target.value)}
+                    placeholder="Optional repeatable seed"
+                    className={adminInputClassName}
+                  />
+                </AdminFormField>
+
+                <AdminFormField
+                  label="Series per type"
+                  helperText="Allowed range: 1 to 20."
+                >
+                  <input
+                    value={form.seriesPerType}
+                    onChange={(event) => updateField("seriesPerType", event.target.value)}
+                    inputMode="numeric"
+                    className={adminInputClassName}
+                  />
+                </AdminFormField>
+
+                <AdminFormField
+                  label="Minimum episodes"
+                  helperText="Allowed range: 1 to 30."
+                >
+                  <input
+                    value={form.minEpisodes}
+                    onChange={(event) => updateField("minEpisodes", event.target.value)}
+                    inputMode="numeric"
+                    className={adminInputClassName}
+                  />
+                </AdminFormField>
+
+                <AdminFormField
+                  label="Maximum episodes"
+                  helperText="Allowed range: 1 to 30."
+                >
+                  <input
+                    value={form.maxEpisodes}
+                    onChange={(event) => updateField("maxEpisodes", event.target.value)}
+                    inputMode="numeric"
+                    className={adminInputClassName}
+                  />
+                </AdminFormField>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button type="button" onClick={generateContent} disabled={generating}>
+                  {generating ? "Generating..." : "Generate content"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setForm(DEFAULT_FORM)}
+                  disabled={generating}
+                >
+                  Reset settings
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.push("/admin/series")}>
+                  View series
+                </Button>
+              </div>
             </div>
-            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <p className="font-semibold text-white">运行说明</p>
-              <p className="mt-2 leading-6 text-neutral-400">
-                生产环境需要先启用 <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code>，才允许执行该操作。
+
+            <div className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+              <h3 className="text-base font-semibold text-slate-950">What this run will create</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                This generator stays focused on usable demo inventory rather than fake dashboard theater.
               </p>
+
+              <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+                <li>{previewSeriesPerType} comic series</li>
+                <li>{previewSeriesPerType} novel series</li>
+                <li>
+                  {previewMinEpisodes === previewMaxEpisodes
+                    ? `${previewMinEpisodes} episodes per series`
+                    : `${previewMinEpisodes} to ${previewMaxEpisodes} episodes per series`}
+                </li>
+                <li>Metadata shaped for QA, layout review, and backstage workflow testing</li>
+              </ul>
+
+              <div className="mt-5 rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
+                Enable <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code> in production-like environments before using this route.
+              </div>
             </div>
           </div>
-        </section>
-
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <label className="space-y-2 text-sm text-neutral-300">
-              <span className="font-semibold text-white">种子</span>
-              <input
-                value={form.seed}
-                onChange={(event) => updateField("seed", event.target.value)}
-                placeholder="可选，用于复现结果的种子"
-                className="w-full rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400/50"
-              />
-            </label>
-            <label className="space-y-2 text-sm text-neutral-300">
-              <span className="font-semibold text-white">每种类型作品数</span>
-              <input
-                value={form.seriesPerType}
-                onChange={(event) => updateField("seriesPerType", event.target.value)}
-                inputMode="numeric"
-                className="w-full rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50"
-              />
-            </label>
-            <label className="space-y-2 text-sm text-neutral-300">
-              <span className="font-semibold text-white">最小章节数</span>
-              <input
-                value={form.minEpisodes}
-                onChange={(event) => updateField("minEpisodes", event.target.value)}
-                inputMode="numeric"
-                className="w-full rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50"
-              />
-            </label>
-            <label className="space-y-2 text-sm text-neutral-300">
-              <span className="font-semibold text-white">最大章节数</span>
-              <input
-                value={form.maxEpisodes}
-                onChange={(event) => updateField("maxEpisodes", event.target.value)}
-                inputMode="numeric"
-                className="w-full rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50"
-              />
-            </label>
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-3 text-xs text-neutral-500">
-            <span>每种类型作品数：1-20</span>
-            <span>章节范围：1-30</span>
-            <span>种子是可选项，可用于后续复现同样结果。</span>
-          </div>
-
-          {validationError ? (
-            <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {validationError}
-            </div>
-          ) : null}
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={generateContent}
-              disabled={generating}
-              className={`rounded-2xl px-6 py-3 font-semibold text-white transition-colors ${
-                generating ? "cursor-not-allowed bg-neutral-600" : "bg-emerald-500 hover:bg-emerald-600"
-              }`}
-            >
-              {generating ? "生成中..." : "生成内容"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setForm(DEFAULT_FORM)}
-              disabled={generating}
-              className="rounded-2xl border border-white/10 px-6 py-3 font-semibold text-neutral-200 transition hover:border-emerald-400 hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              重置参数
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/admin/series")}
-              className="rounded-2xl border border-white/10 px-6 py-3 font-semibold text-neutral-200 transition hover:border-emerald-400 hover:text-emerald-300"
-            >
-              查看作品
-            </button>
-          </div>
-        </section>
-
-        {progress ? (
-          <section className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-neutral-300">
-            {progress}
-          </section>
-        ) : null}
+        </AdminPageSection>
 
         {result ? (
-          <section className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
-            <h2 className="text-lg font-semibold text-emerald-400">生成结果</h2>
-            <div className="mt-3 grid gap-2 text-sm text-neutral-200 sm:grid-cols-2 lg:grid-cols-3">
-              <p>运行 ID：{result.runId || "-"}</p>
-              <p>漫画作品数：{result.comicsCount}</p>
-              <p>小说作品数：{result.novelsCount}</p>
-              <p>总章节数：{result.totalEpisodes}</p>
-              <p>耗时：{result.duration} 秒</p>
-              <p>种子：{String(result.requestPayload?.seed || "随机")}</p>
-              <p>
-                每种类型作品数：
-                {result.settings?.seriesPerType ?? result.requestPayload?.seriesPerType ?? previewSeriesPerType}
-              </p>
-              <p>
-                最小章节数：
-                {result.settings?.minEpisodes ?? result.requestPayload?.minEpisodes ?? previewMinEpisodes}
-              </p>
-              <p>
-                最大章节数：
-                {result.settings?.maxEpisodes ?? result.requestPayload?.maxEpisodes ?? previewMaxEpisodes}
-              </p>
+          <AdminPageSection
+            title="Latest run"
+            description="A short summary of the most recent demo generation request."
+          >
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <AdminMetricCard label="Run ID" value={result.runId || "-"} detail="The backend identifier for this generation request." />
+              <AdminMetricCard label="Comic series" value={String(result.comicsCount ?? 0)} detail="Generated comic entries in this run." />
+              <AdminMetricCard label="Novel series" value={String(result.novelsCount ?? 0)} detail="Generated novel entries in this run." />
+              <AdminMetricCard label="Total episodes" value={String(result.totalEpisodes ?? 0)} detail="Episode count across all generated titles." />
+              <AdminMetricCard label="Duration" value={`${result.duration ?? 0} s`} detail="Reported backend execution time." />
+              <AdminMetricCard
+                label="Seed"
+                value={String(result.requestPayload?.seed || "Random")}
+                detail="Use the same seed again when QA needs a repeatable run."
+              />
             </div>
-          </section>
+          </AdminPageSection>
         ) : null}
       </div>
     </AdminLayout>

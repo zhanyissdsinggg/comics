@@ -1,5 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { UploadCloud, X } from 'lucide-react';
+
 import { adminFetch, readAdminResponseMessage } from '@/lib/adminApiClient';
 
 interface UploadProgress {
@@ -51,14 +53,14 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '批量上传失败。'));
+        throw new Error(await readAdminResponseMessage(response, 'Bulk upload failed.'));
       }
 
       return response.json();
     },
     onSuccess: () => {
       setUploadProgress((current) => current.map((item) => ({ ...item, status: 'success', progress: 100 })));
-      setFeedback({ type: 'success', message: '批量上传完成，正在刷新章节列表。' });
+      setFeedback({ type: 'success', message: 'Bulk upload finished. Refreshing the episode list now.' });
 
       window.setTimeout(() => {
         onSuccess();
@@ -73,7 +75,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
           error: error.message,
         })),
       );
-      setFeedback({ type: 'error', message: error.message || '批量上传失败。' });
+      setFeedback({ type: 'error', message: error.message || 'Bulk upload failed.' });
     },
   });
 
@@ -85,12 +87,12 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
     const zipFiles = Array.from(selectedFiles).filter((file) => file.name.toLowerCase().endsWith('.zip'));
 
     if (zipFiles.length === 0) {
-      setFeedback({ type: 'error', message: '请至少选择一个 ZIP 文件。' });
+      setFeedback({ type: 'error', message: 'Choose at least one ZIP file.' });
       return;
     }
 
     if (zipFiles.length > 50) {
-      setFeedback({ type: 'error', message: '单次最多上传 50 个 ZIP 文件。' });
+      setFeedback({ type: 'error', message: 'Upload up to 50 ZIP files at a time.' });
       return;
     }
 
@@ -126,7 +128,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
 
   const handleUpload = () => {
     if (files.length === 0) {
-      setFeedback({ type: 'error', message: '请先选择要上传的 ZIP 文件。' });
+      setFeedback({ type: 'error', message: 'Choose the ZIP files you want to upload first.' });
       return;
     }
 
@@ -154,32 +156,35 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-neutral-700 bg-neutral-900 p-6 shadow-2xl">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,27,36,0.28)] p-4 backdrop-blur-sm" onClick={handleClose}>
+      <div
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-black/8 bg-white/96 p-6 shadow-[var(--gush-shadow-panel)]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-neutral-100">批量上传章节</h2>
-            <p className="mt-1 text-sm text-neutral-400">上传 ZIP 压缩包，系统会按文件顺序自动创建章节。</p>
+            <h2 className="text-xl font-semibold text-slate-950">Bulk upload episodes</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              Upload ZIP packages and let the workspace create episodes in file order.
+            </p>
           </div>
           <button
             type="button"
             onClick={handleClose}
             disabled={uploadMutation.isPending}
-            className="rounded-lg p-2 text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-200 disabled:opacity-50"
-            aria-label="关闭批量上传弹窗"
+            className="rounded-full border border-black/8 bg-white p-2 text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950 disabled:opacity-50"
+            aria-label="Close bulk upload dialog"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {feedback.message ? (
           <div
-            className={`mb-4 rounded-lg border p-3 text-sm ${
+            className={`mb-4 rounded-[22px] border p-4 text-sm ${
               feedback.type === 'success'
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                : 'border-red-500/30 bg-red-500/10 text-red-300'
+                ? 'border-emerald-200 bg-emerald-50/90 text-emerald-700'
+                : 'border-red-200 bg-red-50/90 text-red-700'
             }`}
           >
             {feedback.message}
@@ -187,15 +192,15 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
         ) : null}
 
         <div className="mb-6">
-          <label className="mb-2 block text-sm text-neutral-400">起始章节号</label>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">Starting episode number</label>
           <input
             type="number"
             min="1"
             value={startNumber}
             onChange={(event) => setStartNumber(event.target.value)}
             disabled={uploadMutation.isPending}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100"
-            placeholder="可选，留空则自动接在当前最后一章后面"
+            className="h-11 w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
+            placeholder="Optional. Leave blank to continue after the latest episode."
           />
         </div>
 
@@ -203,24 +208,17 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`rounded-2xl border-2 border-dashed p-8 text-center transition ${
+          className={`rounded-[26px] border-2 border-dashed p-8 text-center transition ${
             isDragging
-              ? 'border-cyan-500 bg-cyan-500/10 text-cyan-300'
-              : 'border-neutral-600 bg-neutral-950/50 text-neutral-400'
+              ? 'border-[var(--gush-accent,#2f58c6)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]'
+              : 'border-black/10 bg-[rgba(250,247,241,0.76)] text-slate-500'
           }`}
         >
           <div className="mb-4 flex justify-center">
-            <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
-            </svg>
+            <UploadCloud className="h-12 w-12" />
           </div>
-          <p className="text-sm">把 ZIP 文件拖到这里，或者点击下方按钮手动选择。</p>
-          <p className="mt-2 text-xs text-neutral-500">单次最多 50 个 ZIP 文件，每个文件建议控制在 50MB 以内。</p>
+          <p className="text-sm font-medium text-slate-950">Drop ZIP files here, or choose them manually.</p>
+          <p className="mt-2 text-xs text-slate-500">Upload up to 50 ZIP files per run. Keep each file under about 50MB when possible.</p>
           <input
             id="episode-bulk-upload"
             type="file"
@@ -232,46 +230,48 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
           />
           <label
             htmlFor="episode-bulk-upload"
-            className="mt-4 inline-block cursor-pointer rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-cyan-400"
+            className="mt-4 inline-flex cursor-pointer items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
-            选择 ZIP 文件
+            Choose ZIP files
           </label>
         </div>
 
         {uploadProgress.length > 0 ? (
           <div className="mt-6 space-y-2">
-            <h3 className="mb-3 text-sm font-medium text-neutral-300">待上传文件（{uploadProgress.length}）</h3>
+            <h3 className="mb-3 text-sm font-semibold text-slate-950">
+              Upload queue ({uploadProgress.length})
+            </h3>
             <div className="max-h-60 space-y-2 overflow-y-auto">
               {uploadProgress.map((item, index) => (
-                <div key={`${item.fileName}-${index}`} className="rounded-lg border border-neutral-700 bg-neutral-950 p-3">
+                <div key={`${item.fileName}-${index}`} className="rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.78)] p-4">
                   <div className="mb-2 flex items-center justify-between gap-3">
-                    <span className="flex-1 truncate text-sm text-neutral-300">{item.fileName}</span>
+                    <span className="flex-1 truncate text-sm text-slate-700">{item.fileName}</span>
                     <span
-                      className={`rounded px-2 py-1 text-xs ${
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                         item.status === 'success'
-                          ? 'bg-emerald-900/30 text-emerald-400'
+                          ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
                           : item.status === 'error'
-                            ? 'bg-red-900/30 text-red-400'
+                            ? 'border border-red-200 bg-red-50 text-red-700'
                             : item.status === 'uploading'
-                              ? 'bg-cyan-900/30 text-cyan-300'
-                              : 'bg-neutral-700 text-neutral-300'
+                              ? 'border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]'
+                              : 'border border-black/8 bg-white text-slate-600'
                       }`}
                     >
                       {item.status === 'success'
-                        ? '完成'
+                        ? 'Done'
                         : item.status === 'error'
-                          ? '失败'
+                          ? 'Failed'
                           : item.status === 'uploading'
-                            ? '上传中...'
-                            : '等待中'}
+                            ? 'Uploading...'
+                            : 'Waiting'}
                     </span>
                   </div>
                   {item.status === 'uploading' ? (
-                    <div className="h-1.5 w-full rounded-full bg-neutral-700">
-                      <div className="h-1.5 rounded-full bg-cyan-500 transition-all" style={{ width: `${item.progress}%` }} />
+                    <div className="h-1.5 w-full rounded-full bg-white">
+                      <div className="h-1.5 rounded-full bg-[var(--gush-accent,#2f58c6)] transition-all" style={{ width: `${item.progress}%` }} />
                     </div>
                   ) : null}
-                  {item.error ? <p className="mt-1 text-xs text-red-400">{item.error}</p> : null}
+                  {item.error ? <p className="mt-2 text-xs text-red-700">{item.error}</p> : null}
                 </div>
               ))}
             </div>
@@ -283,17 +283,17 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
             type="button"
             onClick={handleUpload}
             disabled={files.length === 0 || uploadMutation.isPending}
-            className="flex-1 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-neutral-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {uploadMutation.isPending ? '上传中...' : `开始上传（${files.length}）`}
+            {uploadMutation.isPending ? 'Uploading...' : `Start upload (${files.length})`}
           </button>
           <button
             type="button"
             onClick={handleClose}
             disabled={uploadMutation.isPending}
-            className="rounded-lg bg-neutral-700 px-4 py-2 text-neutral-300 transition hover:bg-neutral-600 disabled:opacity-50"
+            className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:opacity-50"
           >
-            取消
+            Cancel
           </button>
         </div>
       </div>

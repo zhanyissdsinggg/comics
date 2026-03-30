@@ -1,5 +1,6 @@
-﻿import React from 'react';
-import { Modal } from './Modal';
+import React from "react";
+import { Modal } from "./Modal";
+import { adminSelectClassName } from "./AdminWorkspacePrimitives";
 
 export function AdminSortModal({
   isOpen,
@@ -7,19 +8,19 @@ export function AdminSortModal({
   sortBy,
   onSortByChange,
   options,
-  title = '筛选与排序',
-  label = '排序字段',
-  actionLabel = '应用',
+  title = "Sort options",
+  label = "Sort field",
+  actionLabel = "Done",
 }) {
   return (
     <Modal isOpen={isOpen} title={title} onClose={onClose}>
       <div className="space-y-4">
         <div>
-          <label className="text-sm text-neutral-400">{label}</label>
+          <label className="text-sm font-semibold text-slate-700">{label}</label>
           <select
             value={sortBy}
             onChange={(event) => onSortByChange(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+            className={`mt-2 ${adminSelectClassName}`}
           >
             {options.map((option) => (
               <option key={option.value} value={option.value}>
@@ -32,7 +33,7 @@ export function AdminSortModal({
         <button
           type="button"
           onClick={onClose}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
+          className="w-full rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
           {actionLabel}
         </button>
@@ -40,4 +41,3 @@ export function AdminSortModal({
     </Modal>
   );
 }
-

@@ -4,54 +4,67 @@ export const dynamic = 'force-dynamic';
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { Plus, Trash2 } from 'lucide-react';
+
+import AdminShell from '@/components/admin/AdminShell';
 import { AdminDataState } from '@/components/admin/common/AdminDataState';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { Modal } from '@/components/admin/common/Modal';
+import {
+  AdminBadge,
+  AdminFormField,
+  AdminMetricCard,
+  AdminPageSection,
+  AdminTabs,
+  adminInputClassName,
+  adminSelectClassName,
+  adminTextareaClassName,
+} from '@/components/admin/common/AdminWorkspacePrimitives';
+import { Button } from '@/components/ui/button';
 import { adminFetchJson } from '@/lib/adminApiClient';
 import {
   STOREFRONT_SLOT_PRESETS,
-  getStorefrontSlotDisplayMeta as getSlotDisplayMeta,
-  getStorefrontSlotPreset as getSlotPreset,
-  normalizeStorefrontSlotToken as normalizeSlotToken,
+  getStorefrontSlotDisplayMeta,
+  getStorefrontSlotPreset,
 } from '@/lib/storefrontSlots';
 
 const VIEW_TABS = [
-  { key: 'slots', label: '推荐位' },
-  { key: 'rankings', label: '榜单' },
-  { key: 'analytics', label: '分析' },
+  { value: 'slots', label: 'Slots' },
+  { value: 'rankings', label: 'Rankings' },
+  { value: 'analytics', label: 'Analytics' },
 ];
 
 const RANKING_TYPE_OPTIONS = [
-  { value: 'views', label: '浏览量' },
-  { value: 'rating', label: '评分' },
-  { value: 'trending', label: '趋势热度' },
-  { value: 'ratingCount', label: '评分人数' },
+  { value: 'views', label: 'Views' },
+  { value: 'rating', label: 'Rating' },
+  { value: 'trending', label: 'Trending' },
+  { value: 'ratingCount', label: 'Rating count' },
 ];
 
 const TIME_RANGE_OPTIONS = [
-  { value: 'day', label: '日' },
-  { value: 'week', label: '周' },
-  { value: 'month', label: '月' },
-  { value: 'all', label: '全部时间' },
+  { value: 'day', label: 'Day' },
+  { value: 'week', label: 'Week' },
+  { value: 'month', label: 'Month' },
+  { value: 'all', label: 'All time' },
 ];
 
 const SERIES_TYPE_OPTIONS = [
-  { value: 'all', label: '全部作品' },
-  { value: 'comic', label: '漫画' },
-  { value: 'novel', label: '小说' },
-  { value: 'manga', label: '日漫' },
-  { value: 'manhwa', label: '韩漫' },
+  { value: 'all', label: 'All titles' },
+  { value: 'comic', label: 'Comics' },
+  { value: 'novel', label: 'Novels' },
+  { value: 'manga', label: 'Manga' },
+  { value: 'manhwa', label: 'Manhwa' },
 ];
 
-const EMPTY_FEEDBACK = { type: '', message: '' };
-
 const ANALYTICS_SLOT_FILTER_OPTIONS = [
-  { value: 'all', label: '全部推荐位' },
+  { value: 'all', label: 'All slots' },
   ...STOREFRONT_SLOT_PRESETS.filter((item) => item.token !== 'custom').map((item) => ({
     value: item.token,
     label: item.label,
   })),
 ];
+
+const EMPTY_FEEDBACK = { type: '', message: '' };
 
 const INITIAL_SLOT_FORM = {
   preset: 'library-return',
@@ -86,10 +99,7 @@ function parseSeriesIds(value) {
 
 function buildSlotPayload(form) {
   const presetToken = String(form.preset || '').trim();
-  const slotToken =
-    presetToken && presetToken !== 'custom'
-      ? presetToken
-      : String(form.slotToken || '').trim();
+  const slotToken = presetToken && presetToken !== 'custom' ? presetToken : String(form.slotToken || '').trim();
 
   return {
     slot: slotToken,
@@ -110,39 +120,38 @@ function buildRankingPayload(form) {
 }
 
 function formatRankingTypeLabel(value) {
-  return RANKING_TYPE_OPTIONS.find((option) => option.value === value)?.label || '未知';
+  return RANKING_TYPE_OPTIONS.find((option) => option.value === value)?.label || 'Unknown';
 }
 
 function formatTimeRangeLabel(value) {
-  return TIME_RANGE_OPTIONS.find((option) => option.value === value)?.label || '未知';
+  return TIME_RANGE_OPTIONS.find((option) => option.value === value)?.label || 'Unknown';
 }
 
 function formatSeriesTypeLabel(value) {
-  return SERIES_TYPE_OPTIONS.find((option) => option.value === value)?.label || '未知';
+  return SERIES_TYPE_OPTIONS.find((option) => option.value === value)?.label || 'Unknown';
 }
 
 function formatDateTime(value) {
   if (!value) {
-    return '暂无';
+    return 'Not available';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return '日期无效';
+    return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
+    day: 'numeric',
+    hour: 'numeric',
     minute: '2-digit',
   }).format(date);
 }
 
 function formatNumber(value) {
-  const numericValue = Number(value || 0);
-  return new Intl.NumberFormat('zh-CN').format(Number.isFinite(numericValue) ? numericValue : 0);
+  return new Intl.NumberFormat('en-US').format(Number(value || 0));
 }
 
 function formatPercent(value) {
@@ -150,137 +159,41 @@ function formatPercent(value) {
   return `${numericValue.toFixed(2)}%`;
 }
 
-function ErrorPanel({ title, message, onRetry }) {
-  return (
-    <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-100">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h3 className="text-base font-semibold text-red-50">{title}</h3>
-          <p className="mt-1 text-red-100/80">{message}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="rounded-xl border border-red-400/30 px-4 py-2 font-medium text-red-50 transition hover:bg-red-400/10"
-        >
-          重试
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ label, value, hint }) {
-  return (
-    <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">{label}</p>
-      <p className="mt-3 text-2xl font-semibold text-neutral-50">{value}</p>
-      {hint ? <p className="mt-2 text-sm text-neutral-400">{hint}</p> : null}
-    </div>
-  );
-}
-
-function getDeferredStatValue(query, isLoaded) {
-  if (!isLoaded) {
-    return '待加载';
-  }
-
-  if (query.isLoading && !query.data) {
-    return '加载中...';
-  }
-
-  if (query.isError) {
-    return '错误';
-  }
-
-  return formatNumber(query.data?.total || 0);
-}
-
-function getDeferredStatHint(hint, isLoaded) {
-  return isLoaded ? hint : '打开此页签后加载';
-}
-
-function SectionHeader({ title, description, action }) {
-  return (
-    <div className="flex flex-col gap-4 border-b border-neutral-800/80 pb-5 lg:flex-row lg:items-end lg:justify-between">
-      <div>
-        <h2 className="text-xl font-semibold text-neutral-50">{title}</h2>
-        <p className="mt-2 max-w-2xl text-sm text-neutral-400">{description}</p>
-      </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
-    </div>
-  );
-}
-
-function SlotIdentity({ slotKey, itemId = '', hint = '', compact = false, showHint = true }) {
-  const slotMeta = getSlotDisplayMeta(slotKey);
+function SlotIdentity({ slotKey, itemId = '', hint = '' }) {
+  const slotMeta = getStorefrontSlotDisplayMeta(slotKey);
   const resolvedHint = hint || slotMeta.hint;
 
   return (
-    <div className={compact ? 'space-y-1' : 'space-y-2'}>
-      <div className={compact ? 'font-medium text-neutral-50' : 'text-lg font-semibold text-neutral-50'}>
-        {slotMeta.label}
-      </div>
+    <div className="space-y-2">
+      <div className="text-lg font-semibold text-slate-950">{slotMeta.label}</div>
       <div className="flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 font-mono text-neutral-300">
+        <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-3 py-1 font-mono text-slate-600">
           {slotMeta.token}
         </span>
         {itemId ? (
-          <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 font-mono text-neutral-500">
+          <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-3 py-1 font-mono text-slate-500">
             {itemId}
           </span>
         ) : null}
       </div>
-      {showHint && resolvedHint ? (
-        <p className="text-sm text-neutral-400">{resolvedHint}</p>
-      ) : null}
+      {resolvedHint ? <p className="text-sm leading-6 text-slate-600">{resolvedHint}</p> : null}
     </div>
   );
 }
 
-function AnalyticsTable({ analytics }) {
+function RecommendationCard({ title, description, meta = null, footer = null, children }) {
   return (
-    <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-950/70">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-neutral-800 text-sm">
-          <thead className="bg-neutral-900/80 text-left text-xs uppercase tracking-[0.2em] text-neutral-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">日期</th>
-              <th className="px-4 py-3 font-medium">推荐位</th>
-              <th className="px-4 py-3 font-medium">作品</th>
-              <th className="px-4 py-3 font-medium">曝光</th>
-              <th className="px-4 py-3 font-medium">浏览</th>
-              <th className="px-4 py-3 font-medium">点击</th>
-              <th className="px-4 py-3 font-medium">转化</th>
-              <th className="px-4 py-3 font-medium">点击率</th>
-              <th className="px-4 py-3 font-medium">转化率</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-800 text-neutral-200">
-            {analytics.map((item) => (
-              <tr key={item.id} className="bg-neutral-950/30 transition hover:bg-neutral-900/60">
-                <td className="px-4 py-3">{formatDateTime(item.date)}</td>
-                <td className="px-4 py-3 align-top">
-                  <SlotIdentity
-                    slotKey={item.slot || item.slotId}
-                    itemId={item.slotId || ''}
-                    compact
-                    showHint={false}
-                  />
-                </td>
-                <td className="px-4 py-3 font-mono text-xs text-neutral-300">{item.seriesId || '未知'}</td>
-                <td className="px-4 py-3">{formatNumber(item.impressions)}</td>
-                <td className="px-4 py-3">{formatNumber(item.views)}</td>
-                <td className="px-4 py-3">{formatNumber(item.clicks)}</td>
-                <td className="px-4 py-3">{formatNumber(item.conversions)}</td>
-                <td className="px-4 py-3">{formatPercent(item.ctr)}</td>
-                <td className="px-4 py-3">{formatPercent(item.conversionRate)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <article className="rounded-[26px] border border-black/8 bg-white/86 p-5 shadow-[var(--gush-shadow-soft)]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
+          {description ? <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p> : null}
+        </div>
+        {meta}
       </div>
-    </div>
+      {children ? <div className="mt-4">{children}</div> : null}
+      {footer ? <div className="mt-4 border-t border-black/6 pt-4">{footer}</div> : null}
+    </article>
   );
 }
 
@@ -300,16 +213,14 @@ export default function AdminRecommendationsPage() {
 
   const handleTabChange = (nextTab) => {
     setActiveTab(nextTab);
-    setLoadedTabs((current) => {
-      if (current[nextTab]) {
-        return current;
-      }
-
-      return {
-        ...current,
-        [nextTab]: true,
-      };
-    });
+    setLoadedTabs((current) =>
+      current[nextTab]
+        ? current
+        : {
+            ...current,
+            [nextTab]: true,
+          },
+    );
   };
 
   const slotsQuery = useQuery({
@@ -319,7 +230,7 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson('/api/admin/recommendations/slots?limit=100');
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '推荐位加载失败。');
+        throw new Error(data?.message || data?.error || 'Recommendation slots could not be loaded.');
       }
 
       return {
@@ -337,7 +248,7 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson('/api/admin/recommendations/rankings?limit=100');
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '榜单配置加载失败。');
+        throw new Error(data?.message || data?.error || 'Ranking settings could not be loaded.');
       }
 
       return {
@@ -361,7 +272,7 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson(`/api/admin/recommendations/analytics?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '推荐分析加载失败。');
+        throw new Error(data?.message || data?.error || 'Recommendation analytics could not be loaded.');
       }
 
       return {
@@ -376,19 +287,17 @@ export default function AdminRecommendationsPage() {
       const payload = buildSlotPayload(slotForm);
 
       if (!payload.slot) {
-        throw new Error('推荐位标识不能为空。');
+        throw new Error('A slot token is required.');
       }
 
       const { response, data } = await adminFetchJson('/api/admin/recommendations/slots', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '创建推荐位失败。');
+        throw new Error(data?.message || data?.error || 'The slot could not be created.');
       }
 
       return data?.slot || null;
@@ -396,11 +305,11 @@ export default function AdminRecommendationsPage() {
     onSuccess: async () => {
       setCreateTarget(null);
       setSlotForm(INITIAL_SLOT_FORM);
-      setFeedback({ type: 'success', message: '推荐位已创建。' });
+      setFeedback({ type: 'success', message: 'The recommendation slot was created.' });
       await slotsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '创建推荐位失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'The slot could not be created.') });
     },
   });
 
@@ -409,23 +318,21 @@ export default function AdminRecommendationsPage() {
       const payload = buildRankingPayload(rankingForm);
 
       if (!payload.name) {
-        throw new Error('榜单名称不能为空。');
+        throw new Error('A ranking name is required.');
       }
 
       if (!Number.isInteger(payload.maxItems) || payload.maxItems < 1 || payload.maxItems > 200) {
-        throw new Error('最大条目数必须在 1 到 200 之间。');
+        throw new Error('Max items must stay between 1 and 200.');
       }
 
       const { response, data } = await adminFetchJson('/api/admin/recommendations/rankings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '创建榜单配置失败。');
+        throw new Error(data?.message || data?.error || 'The ranking could not be created.');
       }
 
       return data?.config || null;
@@ -433,11 +340,11 @@ export default function AdminRecommendationsPage() {
     onSuccess: async () => {
       setCreateTarget(null);
       setRankingForm(INITIAL_RANKING_FORM);
-      setFeedback({ type: 'success', message: '榜单配置已创建。' });
+      setFeedback({ type: 'success', message: 'The ranking configuration was created.' });
       await rankingsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '创建榜单配置失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'The ranking could not be created.') });
     },
   });
 
@@ -448,18 +355,18 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '删除推荐位失败。');
+        throw new Error(data?.message || data?.error || 'The slot could not be removed.');
       }
 
       return data;
     },
     onSuccess: async () => {
       setDeleteTarget(null);
-      setFeedback({ type: 'success', message: '推荐位已删除。' });
+      setFeedback({ type: 'success', message: 'The recommendation slot was removed.' });
       await slotsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '删除推荐位失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'The slot could not be removed.') });
     },
   });
 
@@ -470,18 +377,18 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '删除榜单配置失败。');
+        throw new Error(data?.message || data?.error || 'The ranking could not be removed.');
       }
 
       return data;
     },
     onSuccess: async () => {
       setDeleteTarget(null);
-      setFeedback({ type: 'success', message: '榜单配置已删除。' });
+      setFeedback({ type: 'success', message: 'The ranking configuration was removed.' });
       await rankingsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '删除榜单配置失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'The ranking could not be removed.') });
     },
   });
 
@@ -489,35 +396,36 @@ export default function AdminRecommendationsPage() {
   const rankings = rankingsQuery.data?.items || [];
   const analytics = analyticsQuery.data?.items || [];
   const selectedSlotMeta = useMemo(
-    () => getSlotDisplayMeta(slotForm.preset === 'custom' ? slotForm.slotToken : slotForm.preset),
+    () => getStorefrontSlotDisplayMeta(slotForm.preset === 'custom' ? slotForm.slotToken : slotForm.preset),
     [slotForm.preset, slotForm.slotToken],
   );
   const selectedAnalyticsSlotMeta = useMemo(
-    () => (analyticsSlotFilter === 'all' ? null : getSlotDisplayMeta(analyticsSlotFilter)),
+    () => (analyticsSlotFilter === 'all' ? null : getStorefrontSlotDisplayMeta(analyticsSlotFilter)),
     [analyticsSlotFilter],
   );
 
-  const analyticsSummary = useMemo(() => {
-    return analytics.reduce(
-      (summary, item) => ({
-        impressions: summary.impressions + Number(item.impressions || 0),
-        views: summary.views + Number(item.views || 0),
-        clicks: summary.clicks + Number(item.clicks || 0),
-        conversions: summary.conversions + Number(item.conversions || 0),
-      }),
-      {
-        impressions: 0,
-        views: 0,
-        clicks: 0,
-        conversions: 0,
-      }
-    );
-  }, [analytics]);
+  const analyticsSummary = useMemo(
+    () =>
+      analytics.reduce(
+        (summary, item) => ({
+          impressions: summary.impressions + Number(item.impressions || 0),
+          views: summary.views + Number(item.views || 0),
+          clicks: summary.clicks + Number(item.clicks || 0),
+          conversions: summary.conversions + Number(item.conversions || 0),
+        }),
+        {
+          impressions: 0,
+          views: 0,
+          clicks: 0,
+          conversions: 0,
+        },
+      ),
+    [analytics],
+  );
 
   const averageCtr = analyticsSummary.impressions > 0
     ? (analyticsSummary.clicks / analyticsSummary.impressions) * 100
     : 0;
-
   const averageConversionRate = analyticsSummary.clicks > 0
     ? (analyticsSummary.conversions / analyticsSummary.clicks) * 100
     : 0;
@@ -536,14 +444,11 @@ export default function AdminRecommendationsPage() {
   };
 
   const handleSlotPresetChange = (nextPreset) => {
-    const preset = getSlotPreset(nextPreset);
+    const preset = getStorefrontSlotPreset(nextPreset);
     setSlotForm((current) => ({
       ...current,
       preset: nextPreset,
-      slotToken:
-        preset && preset.token !== 'custom'
-          ? preset.token
-          : current.slotToken,
+      slotToken: preset && preset.token !== 'custom' ? preset.token : current.slotToken,
     }));
   };
 
@@ -565,316 +470,273 @@ export default function AdminRecommendationsPage() {
     await deleteRankingMutation.mutateAsync(deleteTarget.item.id);
   };
 
-  const renderSlots = () => {
-    if (slotsQuery.isError) {
-      return (
-        <ErrorPanel
-          title="推荐位加载失败"
-          message={getErrorMessage(slotsQuery.error, '推荐位列表无法加载。')}
-          onRetry={() => slotsQuery.refetch()}
-        />
-      );
-    }
-
-    return (
-      <AdminDataState
-        isLoading={slotsQuery.isLoading}
-        hasData={slots.length > 0}
-        emptyMessage="暂无推荐位。"
-        wrap={false}
-      >
-        <div className="grid gap-4 xl:grid-cols-2">
-          {slots.map((slot) => {
-            const seriesIds = Array.isArray(slot.seriesIds) ? slot.seriesIds : [];
-            const slotMeta = getSlotDisplayMeta(slot.slot || slot.name);
-
-            return (
-              <article key={slot.id} className="rounded-3xl border border-neutral-800 bg-neutral-950/70 p-5">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">推荐位</p>
-                    <div className="mt-2">
-                      <SlotIdentity slotKey={slotMeta.token} itemId={slot.id} hint={slotMeta.hint} />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => openDeleteModal('slot', slot)}
-                    className="rounded-xl border border-red-500/30 px-4 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/10"
-                  >
-                    删除推荐位
-                  </button>
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  <StatCard label="作品数量" value={formatNumber(seriesIds.length)} hint="已关联作品 ID" />
-                  <StatCard label="创建时间" value={formatDateTime(slot.createdAt)} hint="首次创建时间" />
-                  <StatCard label="更新时间" value={formatDateTime(slot.updatedAt)} hint="最近保存时间" />
-                </div>
-
-                <div className="mt-5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">作品 ID</p>
-                  {seriesIds.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {seriesIds.map((seriesId) => (
-                        <span
-                          key={seriesId}
-                          className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 font-mono text-xs text-neutral-300"
-                        >
-                          {seriesId}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-3 text-sm text-neutral-400">该推荐位还没有关联作品 ID。</p>
-                  )}
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </AdminDataState>
-    );
-  };
-
-  const renderRankings = () => {
-    if (rankingsQuery.isError) {
-      return (
-        <ErrorPanel
-          title="榜单配置加载失败"
-          message={getErrorMessage(rankingsQuery.error, '榜单配置列表无法加载。')}
-          onRetry={() => rankingsQuery.refetch()}
-        />
-      );
-    }
-
-    return (
-      <AdminDataState
-        isLoading={rankingsQuery.isLoading}
-        hasData={rankings.length > 0}
-        emptyMessage="暂无榜单配置。"
-        wrap={false}
-      >
-        <div className="grid gap-4 xl:grid-cols-2">
-          {rankings.map((ranking) => (
-            <article key={ranking.id} className="rounded-3xl border border-neutral-800 bg-neutral-950/70 p-5">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">榜单</p>
-                  <h3 className="mt-2 text-lg font-semibold text-neutral-50">
-                    {ranking.name || ranking.ranking || '未命名榜单'}
-                  </h3>
-                  <p className="mt-2 font-mono text-xs text-neutral-400">{ranking.id}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => openDeleteModal('ranking', ranking)}
-                  className="rounded-xl border border-red-500/30 px-4 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/10"
-                >
-                  删除榜单
-                </button>
-              </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                <StatCard label="类型" value={formatRankingTypeLabel(ranking.rankingType)} hint="排序依据" />
-                <StatCard label="范围" value={formatTimeRangeLabel(ranking.timeRange)} hint="聚合时间窗口" />
-                <StatCard label="作品范围" value={formatSeriesTypeLabel(ranking.seriesType)} hint="内容筛选" />
-                <StatCard label="最大条目数" value={formatNumber(ranking.maxItems)} hint="返回条目上限" />
-                <StatCard label="成人内容" value={ranking.adult ? '开启' : '关闭'} hint="受众过滤" />
-                <StatCard label="启用状态" value={ranking.active ? '开启' : '关闭'} hint="当前可用状态" />
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-2 text-xs text-neutral-400">
-                <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1">创建于 {formatDateTime(ranking.createdAt)}</span>
-                <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1">更新于 {formatDateTime(ranking.updatedAt)}</span>
-              </div>
-            </article>
-          ))}
-        </div>
-      </AdminDataState>
-    );
-  };
-
-  const renderAnalytics = () => {
-    if (analyticsQuery.isError) {
-      return (
-        <ErrorPanel
-          title="分析数据加载失败"
-          message={getErrorMessage(analyticsQuery.error, '分析数据无法加载。')}
-          onRetry={() => analyticsQuery.refetch()}
-        />
-      );
-    }
-
-    return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-neutral-50">分析筛选</h3>
-              <p className="mt-2 text-sm text-neutral-400">
-                先按推荐位筛选，再看曝光、点击和转化，别把不同入口的表现混在一起。
-              </p>
-            </div>
-            <div className="w-full max-w-sm">
-              <label className="text-sm font-medium text-neutral-300" htmlFor="analytics-slot-filter">
-                推荐位
-              </label>
-              <select
-                id="analytics-slot-filter"
-                value={analyticsSlotFilter}
-                onChange={(event) => setAnalyticsSlotFilter(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
-              >
-                {ANALYTICS_SLOT_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          {selectedAnalyticsSlotMeta ? (
-            <div className="mt-4">
-              <SlotIdentity slotKey={selectedAnalyticsSlotMeta.token} hint={selectedAnalyticsSlotMeta.hint} />
-            </div>
-          ) : null}
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="曝光" value={formatNumber(analyticsSummary.impressions)} hint="当前已加载数据汇总" />
-          <StatCard label="浏览" value={formatNumber(analyticsSummary.views)} hint="作品详情访问量" />
-          <StatCard label="点击" value={formatNumber(analyticsSummary.clicks)} hint="推荐位点击量" />
-          <StatCard label="转化" value={formatNumber(analyticsSummary.conversions)} hint="已完成动作" />
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <StatCard label="平均点击率" value={formatPercent(averageCtr)} hint="点击数除以曝光数" />
-          <StatCard
-            label="平均转化率"
-            value={formatPercent(averageConversionRate)}
-            hint="转化数除以点击数"
-          />
-        </div>
-        <AdminDataState
-          isLoading={analyticsQuery.isLoading}
-          hasData={analytics.length > 0}
-          emptyMessage="暂无推荐分析数据。"
-          wrap={false}
-        >
-          <AnalyticsTable analytics={analytics} />
-        </AdminDataState>
-      </div>
-    );
-  };
+  const statCards = [
+    {
+      label: 'Slots',
+      value: formatNumber(slotsQuery.data?.total || 0),
+      detail: 'Current recommendation placements under editorial control.',
+      tone: 'accent',
+    },
+    {
+      label: 'Rankings',
+      value: loadedTabs.rankings ? formatNumber(rankingsQuery.data?.total || 0) : 'Open tab',
+      detail: loadedTabs.rankings ? 'Configured ranking views.' : 'Loaded only when the rankings tab is opened.',
+    },
+    {
+      label: 'Analytics rows',
+      value: loadedTabs.analytics ? formatNumber(analyticsQuery.data?.total || 0) : 'Open tab',
+      detail: loadedTabs.analytics ? 'Recent recommendation performance rows.' : 'Loaded only when the analytics tab is opened.',
+    },
+  ];
 
   return (
-    <div className="space-y-8 p-6 text-neutral-100">
-      <header className="rounded-[32px] border border-neutral-800 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_35%),linear-gradient(180deg,rgba(10,10,10,0.96),rgba(10,10,10,0.88))] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.28em] text-emerald-300">后台控制台</p>
-            <h1 className="mt-3 text-3xl font-semibold text-white">推荐管理</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-300">
-              在一个稳定页面内统一管理推荐位、榜单配置和推荐分析数据。
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3 xl:min-w-[420px]">
-            <StatCard label="推荐位" value={getDeferredStatValue(slotsQuery, true)} hint="推荐展示位置" />
-            <StatCard
-              label="榜单"
-              value={getDeferredStatValue(rankingsQuery, loadedTabs.rankings)}
-              hint={getDeferredStatHint('榜单配置数量', loadedTabs.rankings)}
-            />
-            <StatCard
-              label="分析记录"
-              value={getDeferredStatValue(analyticsQuery, loadedTabs.analytics)}
-              hint={getDeferredStatHint('当前已加载记录数', loadedTabs.analytics)}
-            />
-          </div>
+    <AdminShell
+      title="Search & Discovery"
+      subtitle="Treat discovery like editorial work. Manage recommendation slots, ranking rules, and slot performance without slipping into a noisy growth dashboard."
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 lg:grid-cols-3">
+          {statCards.map((card) => (
+            <AdminMetricCard key={card.label} {...card} />
+          ))}
         </div>
-      </header>
 
-      <AdminFeedbackBanner
-        feedback={feedback}
-        onDismiss={() => setFeedback(EMPTY_FEEDBACK)}
-        dismissAriaLabel="关闭提示"
-      />
+        <AdminFeedbackBanner
+          feedback={feedback}
+          onDismiss={() => setFeedback(EMPTY_FEEDBACK)}
+          dismissAriaLabel="Dismiss feedback"
+        />
 
-      <div className="flex flex-wrap gap-3">
-        {VIEW_TABS.map((tab) => {
-          const isActive = activeTab === tab.key;
+        <AdminTabs items={VIEW_TABS} value={activeTab} onChange={handleTabChange} />
 
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => handleTabChange(tab.key)}
-              className={[
-                'rounded-full border px-4 py-2 text-sm font-medium transition',
-                isActive
-                  ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-100'
-                  : 'border-neutral-800 bg-neutral-950/70 text-neutral-400 hover:border-neutral-700 hover:text-neutral-200',
-              ].join(' ')}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <section className="space-y-6 rounded-[32px] border border-neutral-800 bg-neutral-950/60 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
         {activeTab === 'slots' ? (
-          <>
-            <SectionHeader
-              title="推荐位"
-              description="推荐位仅提交后端支持的字段：名称和可选的作品 ID 列表。"
-              action={
-                <button
-                  type="button"
-                  onClick={() => openCreateModal('slot')}
-                  className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400"
-                >
-                  新建推荐位
-                </button>
-              }
-            />
-            {renderSlots()}
-          </>
+          <AdminPageSection
+            title="Recommendation slots"
+            description="Slots are the stable editorial entry points that feed the storefront. Keep the machine token predictable and the title mix intentional."
+            action={
+              <Button type="button" onClick={() => openCreateModal('slot')}>
+                <Plus className="size-4" />
+                New slot
+              </Button>
+            }
+          >
+            <AdminDataState
+              isLoading={slotsQuery.isLoading}
+              hasData={slots.length > 0}
+              emptyMessage={slotsQuery.isError ? getErrorMessage(slotsQuery.error, 'Recommendation slots could not be loaded.') : 'No recommendation slots exist yet.'}
+              wrap={false}
+            >
+              <div className="grid gap-4 xl:grid-cols-2">
+                {slots.map((slot) => {
+                  const seriesIds = Array.isArray(slot.seriesIds) ? slot.seriesIds : [];
+                  const slotMeta = getStorefrontSlotDisplayMeta(slot.slot || slot.name);
+
+                  return (
+                    <RecommendationCard
+                      key={slot.id}
+                      title={slotMeta.label}
+                      description={slotMeta.hint}
+                      meta={<AdminBadge tone="accent">{seriesIds.length} title{seriesIds.length === 1 ? '' : 's'}</AdminBadge>}
+                      footer={
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <p className="text-xs text-slate-500">
+                            Updated {formatDateTime(slot.updatedAt)}
+                          </p>
+                          <Button type="button" variant="destructive" size="sm" onClick={() => openDeleteModal('slot', slot)}>
+                            <Trash2 className="size-4" />
+                            Delete
+                          </Button>
+                        </div>
+                      }
+                    >
+                      <SlotIdentity slotKey={slotMeta.token} itemId={slot.id} hint="" />
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {seriesIds.length > 0 ? (
+                          seriesIds.map((seriesId) => (
+                            <span
+                              key={`${slot.id}-${seriesId}`}
+                              className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-3 py-1 text-xs text-slate-600"
+                            >
+                              {seriesId}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-sm text-slate-500">No titles are assigned yet.</span>
+                        )}
+                      </div>
+                    </RecommendationCard>
+                  );
+                })}
+              </div>
+            </AdminDataState>
+          </AdminPageSection>
         ) : null}
 
         {activeTab === 'rankings' ? (
-          <>
-            <SectionHeader
-              title="榜单配置"
-              description="榜单配置严格按后端契约提交：名称、榜单类型、时间范围、作品类型、最大条目数、成人标记和启用状态。"
-              action={
-                <button
-                  type="button"
-                  onClick={() => openCreateModal('ranking')}
-                  className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400"
-                >
-                  新建榜单
-                </button>
-              }
-            />
-            {renderRankings()}
-          </>
+          <AdminPageSection
+            title="Ranking rules"
+            description="Keep ranking logic explicit. The page shows which rule runs, which titles it covers, and whether it is active."
+            action={
+              <Button type="button" onClick={() => openCreateModal('ranking')}>
+                <Plus className="size-4" />
+                New ranking
+              </Button>
+            }
+          >
+            <AdminDataState
+              isLoading={rankingsQuery.isLoading}
+              hasData={rankings.length > 0}
+              emptyMessage={rankingsQuery.isError ? getErrorMessage(rankingsQuery.error, 'Ranking settings could not be loaded.') : 'No ranking configurations exist yet.'}
+              wrap={false}
+            >
+              <div className="grid gap-4 xl:grid-cols-2">
+                {rankings.map((ranking) => (
+                  <RecommendationCard
+                    key={ranking.id}
+                    title={ranking.name || 'Untitled ranking'}
+                    description={`${formatRankingTypeLabel(ranking.rankingType)} · ${formatTimeRangeLabel(ranking.timeRange)} · ${formatSeriesTypeLabel(ranking.seriesType)}`}
+                    meta={
+                      <AdminBadge tone={ranking.active ? 'success' : 'default'}>
+                        {ranking.active ? 'Active' : 'Paused'}
+                      </AdminBadge>
+                    }
+                    footer={
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-xs text-slate-500">
+                          Updated {formatDateTime(ranking.updatedAt)}
+                        </p>
+                        <Button type="button" variant="destructive" size="sm" onClick={() => openDeleteModal('ranking', ranking)}>
+                          <Trash2 className="size-4" />
+                          Delete
+                        </Button>
+                      </div>
+                    }
+                  >
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.82)] p-4">
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Max items</p>
+                        <p className="mt-2 text-lg font-semibold text-slate-950">{ranking.maxItems || 0}</p>
+                      </div>
+                      <div className="rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.82)] p-4">
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Audience</p>
+                        <p className="mt-2 text-lg font-semibold text-slate-950">
+                          {ranking.adult ? 'Adult allowed' : 'General audience'}
+                        </p>
+                      </div>
+                    </div>
+                  </RecommendationCard>
+                ))}
+              </div>
+            </AdminDataState>
+          </AdminPageSection>
         ) : null}
 
         {activeTab === 'analytics' ? (
-          <>
-            <SectionHeader
-              title="分析"
-              description="此页面只读，用于展示后端返回的最新推荐表现数据。"
-            />
-            {renderAnalytics()}
-          </>
+          <AdminPageSection
+            title="Slot analytics"
+            description="Filter by slot first, then compare impression, click, and conversion behavior without mixing unrelated storefront entries together."
+          >
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <AdminMetricCard label="Impressions" value={formatNumber(analyticsSummary.impressions)} detail="Loaded analytics rows." tone="accent" />
+                <AdminMetricCard label="Views" value={formatNumber(analyticsSummary.views)} detail="Story detail visits." />
+                <AdminMetricCard label="Clicks" value={formatNumber(analyticsSummary.clicks)} detail="Slot click volume." />
+                <AdminMetricCard label="Conversions" value={formatNumber(analyticsSummary.conversions)} detail="Tracked downstream actions." />
+              </div>
+              <div className="rounded-[26px] border border-black/8 bg-white/88 p-5 shadow-[var(--gush-shadow-soft)]">
+                <AdminFormField label="Slot filter">
+                  <select
+                    id="analytics-slot-filter"
+                    value={analyticsSlotFilter}
+                    onChange={(event) => setAnalyticsSlotFilter(event.target.value)}
+                    className={adminSelectClassName}
+                  >
+                    {ANALYTICS_SLOT_FILTER_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </AdminFormField>
+                {selectedAnalyticsSlotMeta ? (
+                  <div className="mt-4">
+                    <SlotIdentity slotKey={selectedAnalyticsSlotMeta.token} hint={selectedAnalyticsSlotMeta.hint} />
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm leading-6 text-slate-600">
+                    Choose a single slot to focus the analytics table on one reader entry point.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <AdminMetricCard label="Average CTR" value={formatPercent(averageCtr)} detail="Clicks divided by impressions." />
+              <AdminMetricCard label="Average conversion rate" value={formatPercent(averageConversionRate)} detail="Conversions divided by clicks." />
+            </div>
+
+            <div className="mt-6">
+              <AdminDataState
+                isLoading={analyticsQuery.isLoading}
+                hasData={analytics.length > 0}
+                emptyMessage={analyticsQuery.isError ? getErrorMessage(analyticsQuery.error, 'Recommendation analytics could not be loaded.') : 'No analytics rows are available for this filter.'}
+                wrap={false}
+              >
+                <div className="overflow-hidden rounded-[28px] border border-black/8 bg-white/92 shadow-[var(--gush-shadow-soft)]">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full">
+                      <thead className="bg-[rgba(250,247,241,0.9)] text-left text-[11px] uppercase tracking-[0.18em] text-slate-500">
+                        <tr>
+                          <th className="px-4 py-4">Date</th>
+                          <th className="px-4 py-4">Slot</th>
+                          <th className="px-4 py-4">Series</th>
+                          <th className="px-4 py-4">Impressions</th>
+                          <th className="px-4 py-4">Views</th>
+                          <th className="px-4 py-4">Clicks</th>
+                          <th className="px-4 py-4">Conversions</th>
+                          <th className="px-4 py-4">CTR</th>
+                          <th className="px-4 py-4">Conversion rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analytics.map((item) => {
+                          const slotMeta = getStorefrontSlotDisplayMeta(item.slot || item.slotId);
+                          return (
+                            <tr
+                              key={item.id}
+                              className="border-t border-black/6 text-sm text-slate-700 transition hover:bg-[rgba(250,247,241,0.52)]"
+                            >
+                              <td className="px-4 py-4">{formatDateTime(item.date)}</td>
+                              <td className="px-4 py-4">
+                                <div className="space-y-1">
+                                  <p className="font-semibold text-slate-950">{slotMeta.label}</p>
+                                  <p className="text-xs text-slate-500">{slotMeta.token}</p>
+                                </div>
+                              </td>
+                              <td className="px-4 py-4 font-mono text-xs text-slate-600">{item.seriesId || 'Unknown'}</td>
+                              <td className="px-4 py-4">{formatNumber(item.impressions)}</td>
+                              <td className="px-4 py-4">{formatNumber(item.views)}</td>
+                              <td className="px-4 py-4">{formatNumber(item.clicks)}</td>
+                              <td className="px-4 py-4">{formatNumber(item.conversions)}</td>
+                              <td className="px-4 py-4">{formatPercent(item.ctr)}</td>
+                              <td className="px-4 py-4">{formatPercent(item.conversionRate)}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </AdminDataState>
+            </div>
+          </AdminPageSection>
         ) : null}
-      </section>
+      </div>
 
       <Modal
         isOpen={createTarget === 'slot'}
-        title="新建推荐位"
-        subtitle="表单只暴露后端当前支持的字段。"
+        title="New recommendation slot"
+        subtitle="Slots should stay stable and readable so storefront wiring remains predictable."
         onClose={() => {
           if (!createSlotMutation.isPending) {
             setCreateTarget(null);
@@ -888,15 +750,12 @@ export default function AdminRecommendationsPage() {
             createSlotMutation.mutate();
           }}
         >
-          <div>
-            <label className="text-sm font-medium text-neutral-300" htmlFor="slot-preset">
-              推荐位模板
-            </label>
+          <AdminFormField label="Slot preset" helperText={selectedSlotMeta.hint || 'Start from a known storefront slot pattern to reduce wiring mistakes.'}>
             <select
               id="slot-preset"
               value={slotForm.preset}
               onChange={(event) => handleSlotPresetChange(event.target.value)}
-              className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+              className={adminSelectClassName}
             >
               {STOREFRONT_SLOT_PRESETS.map((preset) => (
                 <option key={preset.token} value={preset.token}>
@@ -904,57 +763,48 @@ export default function AdminRecommendationsPage() {
                 </option>
               ))}
             </select>
-            <p className="mt-2 text-xs text-neutral-500">
-              {selectedSlotMeta.hint || '选择一个常用推荐位模板，减少手动输错标识的风险。'}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-neutral-300" htmlFor="slot-token">
-              机器标识
-            </label>
+          </AdminFormField>
+
+          <AdminFormField
+            label="Machine token"
+            helperText={
+              slotForm.preset === 'custom'
+                ? 'Use lowercase letters, numbers, and hyphens only.'
+                : 'This token is filled from the preset automatically.'
+            }
+          >
             <input
               id="slot-token"
               type="text"
               value={slotForm.slotToken}
               readOnly={slotForm.preset !== 'custom'}
               onChange={(event) => setSlotForm((current) => ({ ...current, slotToken: event.target.value }))}
-              placeholder="例如：library-return"
-              className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 font-mono text-neutral-100 outline-none transition focus:border-emerald-400 read-only:cursor-not-allowed read-only:opacity-80"
+              placeholder="for example: library-return"
+              className={adminInputClassName}
             />
-            <p className="mt-2 text-xs text-neutral-500">
-              {slotForm.preset === 'custom'
-                ? '这个标识会用于前台联动、归因统计和实验筛选，建议只使用小写英文、数字与连字符。'
-                : '模板会自动带入稳定标识；如需手动输入，请切换到“自定义推荐位”。'}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-neutral-300" htmlFor="slot-series-ids">
-              作品 ID
-            </label>
+          </AdminFormField>
+
+          <AdminFormField label="Series IDs" helperText="Use commas or line breaks between series IDs.">
             <textarea
               id="slot-series-ids"
               rows={5}
               value={slotForm.seriesIdsText}
               onChange={(event) => setSlotForm((current) => ({ ...current, seriesIdsText: event.target.value }))}
-              placeholder="例如：series_001, series_002"
-              className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+              placeholder="series_001&#10;series_002"
+              className={adminTextareaClassName}
             />
-            <p className="mt-2 text-xs text-neutral-500">多个 ID 可用逗号或换行分隔。</p>
-          </div>
-          <button
-            type="submit"
-            disabled={createSlotMutation.isPending}
-            className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {createSlotMutation.isPending ? '创建中...' : '创建推荐位'}
-          </button>
+          </AdminFormField>
+
+          <Button type="submit" disabled={createSlotMutation.isPending}>
+            {createSlotMutation.isPending ? 'Creating...' : 'Create slot'}
+          </Button>
         </form>
       </Modal>
 
       <Modal
         isOpen={createTarget === 'ranking'}
-        title="新建榜单配置"
-        subtitle="提交数据与当前后端 DTO 和校验规则保持一致。"
+        title="New ranking"
+        subtitle="Keep ranking rules explicit so discovery remains truthful and maintainable."
         onClose={() => {
           if (!createRankingMutation.isPending) {
             setCreateTarget(null);
@@ -970,28 +820,22 @@ export default function AdminRecommendationsPage() {
           }}
         >
           <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-name">
-                榜单名称
-              </label>
+            <AdminFormField label="Ranking name">
               <input
                 id="ranking-name"
                 type="text"
                 value={rankingForm.name}
                 onChange={(event) => setRankingForm((current) => ({ ...current, name: event.target.value }))}
-                placeholder="例如：weekly-trending"
-                className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+                placeholder="for example: weekly-trending"
+                className={adminInputClassName}
               />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-type">
-                榜单类型
-              </label>
+            </AdminFormField>
+            <AdminFormField label="Ranking type">
               <select
                 id="ranking-type"
                 value={rankingForm.rankingType}
                 onChange={(event) => setRankingForm((current) => ({ ...current, rankingType: event.target.value }))}
-                className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+                className={adminSelectClassName}
               >
                 {RANKING_TYPE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -999,16 +843,13 @@ export default function AdminRecommendationsPage() {
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-range">
-                时间范围
-              </label>
+            </AdminFormField>
+            <AdminFormField label="Time range">
               <select
                 id="ranking-range"
                 value={rankingForm.timeRange}
                 onChange={(event) => setRankingForm((current) => ({ ...current, timeRange: event.target.value }))}
-                className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+                className={adminSelectClassName}
               >
                 {TIME_RANGE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -1016,16 +857,13 @@ export default function AdminRecommendationsPage() {
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-series-type">
-                作品类型
-              </label>
+            </AdminFormField>
+            <AdminFormField label="Series type">
               <select
                 id="ranking-series-type"
                 value={rankingForm.seriesType}
                 onChange={(event) => setRankingForm((current) => ({ ...current, seriesType: event.target.value }))}
-                className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+                className={adminSelectClassName}
               >
                 {SERIES_TYPE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -1033,11 +871,8 @@ export default function AdminRecommendationsPage() {
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-neutral-300" htmlFor="ranking-max-items">
-                最大条目数
-              </label>
+            </AdminFormField>
+            <AdminFormField label="Max items">
               <input
                 id="ranking-max-items"
                 type="number"
@@ -1045,44 +880,40 @@ export default function AdminRecommendationsPage() {
                 max="200"
                 value={rankingForm.maxItems}
                 onChange={(event) => setRankingForm((current) => ({ ...current, maxItems: event.target.value }))}
-                className="mt-2 w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-neutral-100 outline-none transition focus:border-emerald-400"
+                className={adminInputClassName}
               />
-            </div>
+            </AdminFormField>
             <div className="grid gap-3">
-              <label className="flex items-center justify-between rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-sm text-neutral-200">
-                <span>启用成人内容</span>
+              <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3 text-sm text-slate-700">
+                <span>Adult content allowed</span>
                 <input
                   type="checkbox"
                   checked={rankingForm.adult}
                   onChange={(event) => setRankingForm((current) => ({ ...current, adult: event.target.checked }))}
-                  className="h-4 w-4"
+                  className="h-4 w-4 rounded border-black/20 bg-transparent"
                 />
               </label>
-              <label className="flex items-center justify-between rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-sm text-neutral-200">
-                <span>配置启用</span>
+              <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3 text-sm text-slate-700">
+                <span>Rule is active</span>
                 <input
                   type="checkbox"
                   checked={rankingForm.active}
                   onChange={(event) => setRankingForm((current) => ({ ...current, active: event.target.checked }))}
-                  className="h-4 w-4"
+                  className="h-4 w-4 rounded border-black/20 bg-transparent"
                 />
               </label>
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={createRankingMutation.isPending}
-            className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {createRankingMutation.isPending ? '创建中...' : '创建榜单'}
-          </button>
+          <Button type="submit" disabled={createRankingMutation.isPending}>
+            {createRankingMutation.isPending ? 'Creating...' : 'Create ranking'}
+          </Button>
         </form>
       </Modal>
 
       <Modal
         isOpen={Boolean(deleteTarget)}
-        title="删除项目"
-        subtitle="该操作会立即删除所选记录。"
+        title="Delete item"
+        subtitle="This will remove the selected discovery record immediately."
         onClose={() => {
           if (!deleteBusy) {
             setDeleteTarget(null);
@@ -1091,32 +922,21 @@ export default function AdminRecommendationsPage() {
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-sm text-neutral-300">
+          <p className="text-sm leading-6 text-slate-600">
             {deleteTarget?.kind === 'slot'
-              ? `确定删除推荐位「${deleteTarget?.item?.name || deleteTarget?.item?.slot || '未知'}」吗？`
-              : `确定删除榜单「${deleteTarget?.item?.name || deleteTarget?.item?.ranking || '未知'}」吗？`}
+              ? `Delete slot "${deleteTarget?.item?.name || deleteTarget?.item?.slot || 'Unknown'}"?`
+              : `Delete ranking "${deleteTarget?.item?.name || deleteTarget?.item?.ranking || 'Unknown'}"?`}
           </p>
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setDeleteTarget(null)}
-              disabled={deleteBusy}
-              className="flex-1 rounded-2xl border border-neutral-700 bg-neutral-800 px-4 py-3 text-sm font-medium text-neutral-200 transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              取消
-            </button>
-            <button
-              type="button"
-              onClick={handleDeleteConfirm}
-              disabled={deleteBusy}
-              className="flex-1 rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {deleteBusy ? '删除中...' : '删除'}
-            </button>
+            <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleteBusy}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={handleDeleteConfirm} disabled={deleteBusy}>
+              {deleteBusy ? 'Deleting...' : 'Delete'}
+            </Button>
           </div>
         </div>
       </Modal>
-    </div>
+    </AdminShell>
   );
 }
-

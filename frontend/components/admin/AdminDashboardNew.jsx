@@ -5,24 +5,21 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { apiGet } from "../../lib/apiClient";
 import {
-  ArrowDown,
-  ArrowUp,
-  Award,
+  ArrowRight,
   BookOpen,
-  DollarSign,
+  CreditCard,
   Download,
-  Eye,
   Layers,
-  Megaphone,
   MessageSquare,
-  Receipt,
   RefreshCw,
-  TrendingUp,
+  Sparkles,
   Users,
 } from "lucide-react";
+import SurfacePanel from "@/components/common/SurfacePanel";
+import { Button } from "@/components/ui/button";
 
-const number = new Intl.NumberFormat("zh-CN");
-const money = new Intl.NumberFormat("zh-CN", {
+const number = new Intl.NumberFormat("en-US");
+const money = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
@@ -56,32 +53,62 @@ const DEFAULT_TOP = {
 };
 
 const DEFAULT_UPDATES = [
-  { id: 1, title: "Midnight Contract", type: "comic", updatedAt: "2024-01-15T10:30:00Z", episodeCount: 45 },
-  { id: 2, title: "Crimson Promise", type: "novel", updatedAt: "2024-01-15T09:15:00Z", episodeCount: 32 },
-  { id: 3, title: "Shadow Realm", type: "comic", updatedAt: "2024-01-14T18:45:00Z", episodeCount: 28 },
+  {
+    id: 1,
+    title: "Midnight Contract",
+    type: "comic",
+    updatedAt: "2024-01-15T10:30:00Z",
+    episodeCount: 45,
+  },
+  {
+    id: 2,
+    title: "Crimson Promise",
+    type: "novel",
+    updatedAt: "2024-01-15T09:15:00Z",
+    episodeCount: 32,
+  },
+  {
+    id: 3,
+    title: "Shadow Realm",
+    type: "comic",
+    updatedAt: "2024-01-14T18:45:00Z",
+    episodeCount: 28,
+  },
 ];
 
 const DEFAULT_ACTIVITY = [
-  { id: 1, user: "用户 A", action: "购买了《Midnight Contract》", time: "5 分钟前" },
-  { id: 2, user: "用户 B", action: "评论了《Crimson Promise》", time: "10 分钟前" },
-  { id: 3, user: "管理员", action: "发布了新作品", time: "30 分钟前" },
+  { id: 1, user: "Reader A", action: "purchased Midnight Contract", time: "5 min ago" },
+  { id: 2, user: "Reader B", action: "commented on Crimson Promise", time: "10 min ago" },
+  { id: 3, user: "Editor", action: "published a new title", time: "30 min ago" },
 ];
 
 const RANGE_OPTIONS = [
-  { value: "all", label: "全部" },
-  { value: "7days", label: "最近 7 天" },
-  { value: "30days", label: "最近 30 天" },
-  { value: "custom", label: "自定义" },
+  { value: "all", label: "All time" },
+  { value: "7days", label: "Last 7 days" },
+  { value: "30days", label: "Last 30 days" },
+  { value: "custom", label: "Custom range" },
 ];
 
 const QUICK_ACTIONS = [
-  { href: "/admin/series", label: "新增作品", icon: BookOpen },
-  { href: "/admin/storefront", label: "前台体检", icon: Eye },
-  { href: "/admin/merchandising", label: "首页编排", icon: TrendingUp },
-  { href: "/admin/creators", label: "创作者管理", icon: Award },
-  { href: "/admin/promotions", label: "创建活动", icon: Megaphone },
-  { href: "/admin/users", label: "管理用户", icon: Users },
-  { href: "/admin/orders", label: "查看订单", icon: Receipt },
+  { href: "/admin/series", label: "New Series", description: "Add or update titles.", icon: BookOpen },
+  {
+    href: "/admin/creators",
+    label: "Update Credits",
+    description: "Keep creator identity clean.",
+    icon: Users,
+  },
+  {
+    href: "/admin/merchandising",
+    label: "Edit Collections",
+    description: "Control featured discovery lanes.",
+    icon: Sparkles,
+  },
+  {
+    href: "/admin/storefront",
+    label: "Review Live Pages",
+    description: "Check what readers actually see.",
+    icon: Layers,
+  },
 ];
 
 const safeArray = (value, fallback) => (Array.isArray(value) ? value : fallback);
@@ -105,24 +132,24 @@ const normalizeMetric = (metric, fallback) => {
 const relativeTime = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "刚刚";
+    return "Just now";
   }
 
   const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
   if (minutes < 1) {
-    return "刚刚";
+    return "Just now";
   }
   if (minutes < 60) {
-    return `${minutes} 分钟前`;
+    return `${minutes} min ago`;
   }
 
   const hours = Math.floor(minutes / 60);
   if (hours < 24) {
-    return `${hours} 小时前`;
+    return `${hours} hr ago`;
   }
 
   const days = Math.floor(hours / 24);
-  return `${days} 天前`;
+  return `${days} day${days === 1 ? "" : "s"} ago`;
 };
 
 function normalize(payload) {
@@ -144,105 +171,91 @@ function normalize(payload) {
       episodes: normalizeMetric(stats.episodes, DEFAULT_STATS.episodes),
     },
     top: {
-      byViews: safeArray(root.topSeries?.byViews ?? root.rankings?.byViews ?? root.byViews, DEFAULT_TOP.byViews),
+      byViews: safeArray(
+        root.topSeries?.byViews ?? root.rankings?.byViews ?? root.byViews,
+        DEFAULT_TOP.byViews,
+      ),
       byRevenue: safeArray(
         root.topSeries?.byRevenue ?? root.rankings?.byRevenue ?? root.byRevenue,
         DEFAULT_TOP.byRevenue,
       ),
     },
-    updates: safeArray(root.recentUpdates ?? root.latestSeries ?? root.updatedSeries, DEFAULT_UPDATES),
-    activity: safeArray(root.recentActivities ?? root.activities ?? root.timeline, DEFAULT_ACTIVITY).map(
-      (item, index) => ({
-        id: item?.id || `activity-${index}`,
-        user: item?.user || item?.username || item?.operator || DEFAULT_ACTIVITY[index % DEFAULT_ACTIVITY.length].user,
-        action:
-          item?.action ||
-          item?.description ||
-          item?.message ||
-          DEFAULT_ACTIVITY[index % DEFAULT_ACTIVITY.length].action,
-        time:
-          item?.time ||
-          (item?.createdAt ? relativeTime(item.createdAt) : DEFAULT_ACTIVITY[index % DEFAULT_ACTIVITY.length].time),
-      }),
+    updates: safeArray(
+      root.recentUpdates ?? root.latestSeries ?? root.updatedSeries,
+      DEFAULT_UPDATES,
     ),
+    activity: safeArray(
+      root.recentActivities ?? root.activities ?? root.timeline,
+      DEFAULT_ACTIVITY,
+    ).map((item, index) => ({
+      id: item?.id || `activity-${index}`,
+      user:
+        item?.user ||
+        item?.username ||
+        item?.operator ||
+        DEFAULT_ACTIVITY[index % DEFAULT_ACTIVITY.length].user,
+      action:
+        item?.action ||
+        item?.description ||
+        item?.message ||
+        DEFAULT_ACTIVITY[index % DEFAULT_ACTIVITY.length].action,
+      time:
+        item?.time ||
+        (item?.createdAt
+          ? relativeTime(item.createdAt)
+          : DEFAULT_ACTIVITY[index % DEFAULT_ACTIVITY.length].time),
+    })),
   };
 }
 
-function StatCard({ icon: Icon, label, metric, format = (value) => number.format(value), accentClass }) {
-  const isUp = metric.trend !== "down";
-  const Trend = isUp ? ArrowUp : ArrowDown;
+function formatTrend(change) {
+  const prefix = change > 0 ? "+" : "";
+  return `${prefix}${Math.abs(change).toFixed(1)}%`;
+}
 
+function OverviewCard({ label, value, detail, emphasis = false }) {
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
-      <div
-        className={cn(
-          "pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent to-transparent",
-          accentClass,
-        )}
-      />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_24%,transparent_76%,rgba(255,255,255,0.03))]" />
-      <div className="relative">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-[20px] border border-white/10 bg-white/[0.06] text-white">
-            <Icon size={22} />
-          </div>
-          <div
-            className={cn(
-              "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
-              isUp
-                ? "border border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-                : "border border-rose-400/20 bg-rose-400/10 text-rose-100",
-            )}
-          >
-            <Trend size={14} />
-            <span>{Math.abs(metric.change)}%</span>
-          </div>
-        </div>
-
-        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
-          {label}
-        </p>
-        <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-white">
-          {format(metric.total)}
-        </p>
-      </div>
+    <div
+      className={cn(
+        "rounded-[22px] border px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
+        emphasis
+          ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)]"
+          : "border-black/6 bg-white/76",
+      )}
+    >
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-2 text-[1.8rem] font-semibold tracking-tight text-slate-950">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-500">{detail}</p>
     </div>
   );
 }
 
-function Panel({ title, description, children, action }) {
+function SectionHeading({ title, description, action }) {
   return (
-    <section className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.92),rgba(8,11,16,0.98))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:p-6">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_24%,transparent_76%,rgba(255,255,255,0.03))]" />
-      <div className="relative">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h3 className="font-display text-2xl font-semibold tracking-tight text-white">{title}</h3>
-            {description ? (
-              <p className="mt-2 text-sm leading-6 text-neutral-400">{description}</p>
-            ) : null}
-          </div>
-          {action}
-        </div>
-
-        <div className="mt-5 space-y-3">{children}</div>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">{title}</h2>
+        {description ? (
+          <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+        ) : null}
       </div>
-    </section>
+      {action}
+    </div>
   );
 }
 
-function ListRow({ eyebrow, title, meta }) {
+function ListRow({ title, detail, meta }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-black/20 px-4 py-4">
-      <div className="flex items-center gap-2">
-        {eyebrow ? (
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
-            {eyebrow}
-          </span>
-        ) : null}
-        <p className="text-sm font-semibold text-white">{title}</p>
+    <div className="rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.76)] px-4 py-4">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-slate-950">{title}</p>
+          {detail ? <p className="mt-1 text-sm leading-6 text-slate-600">{detail}</p> : null}
+        </div>
+        {meta ? <p className="text-xs font-medium text-slate-500">{meta}</p> : null}
       </div>
-      <p className="mt-2 text-xs text-neutral-400">{meta}</p>
     </div>
   );
 }
@@ -330,16 +343,36 @@ export default function AdminDashboardNew() {
 
   const exportCsv = () => {
     const rows = [
-      ["指标", "数值", "变化", "趋势"],
-      ["总用户数", data.stats.users.total, `${data.stats.users.change}%`, data.stats.users.trend],
-      ["作品数", data.stats.series.total, `${data.stats.series.change}%`, data.stats.series.trend],
-      ["订单数", data.stats.orders.total, `${data.stats.orders.change}%`, data.stats.orders.trend],
-      ["收入", data.stats.revenue.total, `${data.stats.revenue.change}%`, data.stats.revenue.trend],
-      ["浏览量", data.stats.views.total, `${data.stats.views.change}%`, data.stats.views.trend],
-      ["评论数", data.stats.comments.total, `${data.stats.comments.change}%`, data.stats.comments.trend],
-      ["漫画作品", data.stats.seriesByType.comic.total, `${data.stats.seriesByType.comic.change}%`, data.stats.seriesByType.comic.trend],
-      ["小说作品", data.stats.seriesByType.novel.total, `${data.stats.seriesByType.novel.change}%`, data.stats.seriesByType.novel.trend],
-      ["章节数", data.stats.episodes.total, `${data.stats.episodes.change}%`, data.stats.episodes.trend],
+      ["Metric", "Value", "Change", "Trend"],
+      ["Users", data.stats.users.total, `${data.stats.users.change}%`, data.stats.users.trend],
+      ["Series", data.stats.series.total, `${data.stats.series.change}%`, data.stats.series.trend],
+      ["Orders", data.stats.orders.total, `${data.stats.orders.change}%`, data.stats.orders.trend],
+      ["Revenue", data.stats.revenue.total, `${data.stats.revenue.change}%`, data.stats.revenue.trend],
+      ["Views", data.stats.views.total, `${data.stats.views.change}%`, data.stats.views.trend],
+      [
+        "Comments",
+        data.stats.comments.total,
+        `${data.stats.comments.change}%`,
+        data.stats.comments.trend,
+      ],
+      [
+        "Comic series",
+        data.stats.seriesByType.comic.total,
+        `${data.stats.seriesByType.comic.change}%`,
+        data.stats.seriesByType.comic.trend,
+      ],
+      [
+        "Novel series",
+        data.stats.seriesByType.novel.total,
+        `${data.stats.seriesByType.novel.change}%`,
+        data.stats.seriesByType.novel.trend,
+      ],
+      [
+        "Episodes",
+        data.stats.episodes.total,
+        `${data.stats.episodes.change}%`,
+        data.stats.episodes.trend,
+      ],
     ];
 
     const blob = new Blob([`\ufeff${rows.map((row) => row.join(",")).join("\n")}`], {
@@ -348,146 +381,134 @@ export default function AdminDashboardNew() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `dashboard-data-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `admin-dashboard-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
   };
 
+  const overviewCards = [
+    {
+      label: "Live series",
+      value: number.format(data.stats.series.total),
+      detail: `${formatTrend(data.stats.series.change)} vs. the previous period`,
+      emphasis: true,
+    },
+    {
+      label: "Episodes in catalog",
+      value: number.format(data.stats.episodes.total),
+      detail: `${formatTrend(data.stats.episodes.change)} in recent volume`,
+    },
+    {
+      label: "Orders processed",
+      value: number.format(data.stats.orders.total),
+      detail: `${formatTrend(data.stats.orders.change)} across commercial flows`,
+    },
+    {
+      label: "Reader signals",
+      value: number.format(data.stats.comments.total),
+      detail: `${formatTrend(data.stats.comments.change)} in comment volume`,
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,28,26,0.94),rgba(8,11,16,0.98))] p-5 shadow-[0_26px_90px_rgba(0,0,0,0.24)] sm:p-6">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.2),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(56,189,248,0.14),transparent_22%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_24%,transparent_76%,rgba(255,255,255,0.03))]" />
-        <div className="relative">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-100">
-                <TrendingUp size={14} />
-                运营总览
-              </div>
-              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-[2.35rem]">
-                用一套真正可运营的后台视图看全站数据。
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-neutral-300 sm:text-base">
-                这里把内容产出、收入趋势、用户行为和最近动态都压进一个清晰的工作台里，方便你起床之后直接判断今天先动哪一块。
-              </p>
+      <SurfacePanel appearance="light" tone="highlight" accent="blue" className="p-0">
+        <div className="grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Publishing overview
+            </p>
+            <h2 className="mt-3 text-[2.1rem] font-semibold tracking-tight text-slate-950 sm:text-[2.6rem]">
+              Keep the catalog clean, current, and ready to publish.
+            </h2>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
+              This dashboard is a quiet starting point for the day. Refresh the latest signals, jump into the content queue, and keep discovery surfaces aligned with what is actually live.
+            </p>
+
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              <Button type="button" onClick={refresh} disabled={refreshing}>
+                <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
+                {refreshing ? "Refreshing..." : "Refresh"}
+              </Button>
+              <Button type="button" variant="outline" onClick={exportCsv}>
+                <Download size={16} />
+                Export CSV
+              </Button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={refresh}
-                disabled={refreshing}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
-                <span>{refreshing ? "刷新中..." : "刷新数据"}</span>
-              </button>
-              <button
-                type="button"
-                onClick={exportCsv}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08]"
-              >
-                <Download size={16} />
-                <span>导出报表</span>
-              </button>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {RANGE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRange(option.value)}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-semibold transition",
+                    range === option.value
+                      ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                      : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
+
+            {range === "custom" ? (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <label className="text-sm text-slate-600">
+                  <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    From
+                  </span>
+                  <input
+                    type="date"
+                    value={from}
+                    onChange={(event) => setFrom(event.target.value)}
+                    className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
+                  />
+                </label>
+                <label className="text-sm text-slate-600">
+                  <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    To
+                  </span>
+                  <input
+                    type="date"
+                    value={to}
+                    onChange={(event) => setTo(event.target.value)}
+                    className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
+                  />
+                </label>
+              </div>
+            ) : null}
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            {RANGE_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setRange(option.value)}
-                className={cn(
-                  "rounded-full px-4 py-2 text-sm font-semibold transition",
-                  range === option.value
-                    ? "bg-white text-neutral-950 shadow-[0_18px_40px_rgba(255,255,255,0.18)]"
-                    : "border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
-                )}
-              >
-                {option.label}
-              </button>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            {overviewCards.map((item, index) => (
+              <OverviewCard key={item.label} {...item} emphasis={index === 0 || item.emphasis} />
             ))}
           </div>
-
-          {range === "custom" ? (
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <label className="text-sm text-neutral-400">
-                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                  开始日期
-                </span>
-                <input
-                  type="date"
-                  value={from}
-                  onChange={(event) => setFrom(event.target.value)}
-                  className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40"
-                />
-              </label>
-              <label className="text-sm text-neutral-400">
-                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                  结束日期
-                </span>
-                <input
-                  type="date"
-                  value={to}
-                  onChange={(event) => setTo(event.target.value)}
-                  className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400/40"
-                />
-              </label>
-            </div>
-          ) : null}
         </div>
-      </section>
+      </SurfacePanel>
 
       {loading ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 9 }).map((_, index) => (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, index) => (
             <div
               key={index}
-              className="h-40 animate-pulse rounded-[28px] border border-white/10 bg-white/[0.04]"
+              className="skeleton h-32 rounded-[28px] border border-black/6 bg-white/72"
             />
           ))}
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            <StatCard icon={Users} label="总用户数" metric={data.stats.users} accentClass="via-cyan-300/55" />
-            <StatCard icon={BookOpen} label="作品数" metric={data.stats.series} accentClass="via-blue-300/55" />
-            <StatCard icon={Receipt} label="订单数" metric={data.stats.orders} accentClass="via-amber-300/55" />
-            <StatCard
-              icon={DollarSign}
-              label="收入"
-              metric={data.stats.revenue}
-              format={(value) => money.format(value)}
-              accentClass="via-emerald-300/55"
+          <SurfacePanel appearance="light" tone="default" accent="blue">
+            <SectionHeading
+              title="Quick actions"
+              description="Start with the tasks that affect stories, credits, and front-page presentation first."
             />
-            <StatCard icon={Eye} label="浏览量" metric={data.stats.views} accentClass="via-sky-300/55" />
-            <StatCard
-              icon={MessageSquare}
-              label="评论数"
-              metric={data.stats.comments}
-              accentClass="via-rose-300/55"
-            />
-            <StatCard
-              icon={BookOpen}
-              label="漫画作品"
-              metric={data.stats.seriesByType.comic}
-              accentClass="via-indigo-300/55"
-            />
-            <StatCard
-              icon={Award}
-              label="小说作品"
-              metric={data.stats.seriesByType.novel}
-              accentClass="via-fuchsia-300/55"
-            />
-            <StatCard icon={Layers} label="章节数" metric={data.stats.episodes} accentClass="via-teal-300/55" />
-          </div>
-
-          <Panel title="快捷操作" description="常用入口做成一排，避免每天在后台里来回翻找。">
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-7">
+            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {QUICK_ACTIONS.map((item) => {
                 const Icon = item.icon;
 
@@ -495,80 +516,127 @@ export default function AdminDashboardNew() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="group rounded-[24px] border border-white/10 bg-black/20 px-4 py-5 text-center transition hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06]"
+                    className="group rounded-[24px] border border-black/6 bg-white/76 px-5 py-5 transition hover:border-black/10 hover:bg-white hover:shadow-[0_12px_24px_rgba(15,23,42,0.04)]"
                   >
-                    <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/[0.05] text-white">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-black/6 bg-[rgba(250,247,241,0.86)] text-[var(--gush-accent,#2f58c6)]">
                       <Icon size={18} />
                     </div>
-                    <p className="mt-4 text-sm font-semibold text-white">{item.label}</p>
+                    <p className="mt-4 text-base font-semibold text-slate-950">{item.label}</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+                    <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition group-hover:text-slate-950">
+                      <span>Open</span>
+                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                    </div>
                   </Link>
                 );
               })}
             </div>
-          </Panel>
+          </SurfacePanel>
 
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <Panel
-              title="浏览量最高作品"
-              description="看当前被打开最多的作品，方便你判断前台热度和曝光位是否合理。"
-            >
-              {data.top.byViews.map((series, index) => (
-                <ListRow
-                  key={series.id || index}
-                  eyebrow={series.type === "comic" ? "漫画" : "小说"}
-                  title={series.title}
-                  meta={`${number.format(safeNumber(series.views))} 次浏览`}
-                />
-              ))}
-            </Panel>
+          <div className="grid gap-6 xl:grid-cols-2">
+            <SurfacePanel appearance="light" tone="default" accent="blue">
+              <SectionHeading
+                title="Publishing queue"
+                description="Watch the titles that changed most recently and make sure they are ready for discovery."
+              />
+              <div className="mt-5 space-y-3">
+                {data.updates.map((series, index) => (
+                  <ListRow
+                    key={series.id || index}
+                    title={series.title}
+                    detail={`${series.type === "comic" ? "Comic" : "Novel"} · ${number.format(
+                      safeNumber(series.episodeCount),
+                    )} episodes`}
+                    meta={relativeTime(series.updatedAt)}
+                  />
+                ))}
+              </div>
+            </SurfacePanel>
 
-            <Panel
-              title="收入最高作品"
-              description="高收入作品会直接影响首页编排、活动资源位和充值节奏。"
-            >
-              {data.top.byRevenue.map((series, index) => (
-                <ListRow
-                  key={series.id || index}
-                  eyebrow={series.type === "comic" ? "漫画" : "小说"}
-                  title={series.title}
-                  meta={money.format(safeNumber(series.revenue))}
+            <SurfacePanel appearance="light" tone="default" accent="emerald">
+              <SectionHeading
+                title="Catalog mix"
+                description="Keep the storefront balanced across formats and audience activity."
+              />
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <OverviewCard
+                  label="Comic series"
+                  value={number.format(data.stats.seriesByType.comic.total)}
+                  detail={`${formatTrend(data.stats.seriesByType.comic.change)} this period`}
                 />
-              ))}
-            </Panel>
+                <OverviewCard
+                  label="Novel series"
+                  value={number.format(data.stats.seriesByType.novel.total)}
+                  detail={`${formatTrend(data.stats.seriesByType.novel.change)} this period`}
+                />
+                <OverviewCard
+                  label="Readers tracked"
+                  value={number.format(data.stats.users.total)}
+                  detail={`${formatTrend(data.stats.users.change)} in active user volume`}
+                />
+                <OverviewCard
+                  label="Revenue"
+                  value={money.format(data.stats.revenue.total)}
+                  detail={`${formatTrend(data.stats.revenue.change)} in the selected range`}
+                />
+              </div>
+            </SurfacePanel>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <Panel
-              title="最近更新"
-              description="最近上线和更新的内容应该跟前台的发现路径保持一致。"
-            >
-              {data.updates.map((series, index) => (
-                <ListRow
-                  key={series.id || index}
-                  eyebrow={series.type === "comic" ? "漫画" : "小说"}
-                  title={series.title}
-                  meta={`${number.format(safeNumber(series.episodeCount))} 章 · ${relativeTime(series.updatedAt)}`}
-                />
-              ))}
-            </Panel>
+          <div className="grid gap-6 xl:grid-cols-2">
+            <SurfacePanel appearance="light" tone="default" accent="amber">
+              <SectionHeading
+                title="Reader attention"
+                description="These titles are drawing the most visits right now, so their live presentation matters most."
+              />
+              <div className="mt-5 space-y-3">
+                {data.top.byViews.map((series, index) => (
+                  <ListRow
+                    key={series.id || index}
+                    title={series.title}
+                    detail={`${series.type === "comic" ? "Comic" : "Novel"} · ${number.format(
+                      safeNumber(series.views),
+                    )} visits`}
+                  />
+                ))}
+              </div>
+            </SurfacePanel>
 
-            <Panel
-              title="最近活动"
-              description="运营动作、用户购买和评论变化都应该在这里快速扫到。"
-              action={
-                <Link
-                  href="/admin/tracking"
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.08]"
-                >
-                  查看追踪
-                </Link>
-              }
-            >
+            <SurfacePanel appearance="light" tone="default" accent="rose">
+              <SectionHeading
+                title="Commercial watch"
+                description="A quieter view of which titles are carrying the most revenue in the current window."
+              />
+              <div className="mt-5 space-y-3">
+                {data.top.byRevenue.map((series, index) => (
+                  <ListRow
+                    key={series.id || index}
+                    title={series.title}
+                    detail={`${series.type === "comic" ? "Comic" : "Novel"} · ${money.format(
+                      safeNumber(series.revenue),
+                    )}`}
+                  />
+                ))}
+              </div>
+            </SurfacePanel>
+          </div>
+
+          <SurfacePanel appearance="light" tone="default" accent="cyan">
+            <SectionHeading
+              title="Recent activity"
+              description="A quick feed of reader and operator activity without turning the page into a noisy monitoring console."
+            />
+            <div className="mt-5 grid gap-3 lg:grid-cols-3">
               {data.activity.map((entry, index) => (
-                <ListRow key={entry.id || index} title={`${entry.user} ${entry.action}`} meta={entry.time} />
+                <ListRow
+                  key={entry.id || index}
+                  title={`${entry.user}`}
+                  detail={entry.action}
+                  meta={entry.time}
+                />
               ))}
-            </Panel>
-          </div>
+            </div>
+          </SurfacePanel>
         </>
       )}
     </div>

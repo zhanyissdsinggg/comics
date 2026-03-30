@@ -1,33 +1,33 @@
 export const STOREFRONT_SLOT_PRESETS = [
   {
     token: "library-return",
-    label: "书架回流位",
-    hint: "给高意图回访用户安排下一本最该继续打开的作品。",
+    label: "Library return",
+    hint: "A resume-reading lane for people already ready to come back to a story.",
   },
   {
     token: "home-hero",
-    label: "首页英雄位",
-    hint: "首页首屏轮播位，承担最大流量入口。",
+    label: "Homepage hero",
+    hint: "The main first-screen story placement on the home page.",
   },
   {
     token: "home-free-start",
-    label: "免费开篇位",
-    hint: "适合承接新客首读和低门槛转化。",
+    label: "Start here",
+    hint: "An easy-entry lane for readers who need a low-friction first title.",
   },
   {
     token: "home-binge-ready",
-    label: "完结追读位",
-    hint: "适合周末长阅读和高完成度作品。",
+    label: "Binge-ready",
+    hint: "A lane for finished or backlog-rich stories that support longer sessions.",
   },
   {
     token: "home-breakout",
-    label: "爆款新作位",
-    hint: "适合承接热度上涨和新作爆发期。",
+    label: "Breakout",
+    hint: "A lane for rising titles and recent standouts that deserve extra attention.",
   },
   {
     token: "custom",
-    label: "自定义推荐位",
-    hint: "手动输入机器标识，用于特殊活动或实验位。",
+    label: "Custom slot",
+    hint: "A manually managed recommendation slot for special campaigns or experiments.",
   },
 ];
 
@@ -50,7 +50,7 @@ export function getStorefrontSlotDisplayMeta(value) {
 
   return {
     token: normalized || "custom",
-    label: String(value || "未命名推荐位").trim() || "未命名推荐位",
-    hint: "自定义推荐位，建议保持机器标识稳定，避免前台联动失效。",
+    label: String(value || "Custom recommendation slot").trim() || "Custom recommendation slot",
+    hint: "Keep the machine token stable so storefront wiring stays predictable.",
   };
 }

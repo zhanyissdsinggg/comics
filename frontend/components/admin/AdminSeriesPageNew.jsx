@@ -27,29 +27,30 @@ import { AdminFeedbackBanner } from "./common/AdminFeedbackBanner";
 import BulkActionsToolbar from "./BulkActionsToolbar";
 import AdvancedFilters from "./AdvancedFilters";
 import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
+import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 
 const TYPE_TABS = [
-  { value: "all", label: "全部" },
-  { value: "comic", label: "漫画" },
-  { value: "novel", label: "小说" },
+  { value: "all", label: "All formats" },
+  { value: "comic", label: "Comics" },
+  { value: "novel", label: "Novels" },
 ];
 const STATUS_OPTIONS = ["Ongoing", "Completed", "Hiatus", "Cancelled"];
 const DEFAULT_FILTERS = { status: "all", publishStatus: "all", adultContent: "all", sortBy: "createdAt_desc" };
 const EMPTY_FEEDBACK = { type: "", message: "" };
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const QUICK_FILTERS = [
-  { value: "all", label: "全部" },
-  { value: "needsMetadata", label: "前台待补" },
-  { value: "noAuthor", label: "缺作者" },
-  { value: "needsEpisodes", label: "待补章节" },
-  { value: "noCover", label: "缺封面" },
-  { value: "draft", label: "未发布" },
+  { value: "all", label: "All titles" },
+  { value: "needsMetadata", label: "Needs a live-page pass" },
+  { value: "noAuthor", label: "Missing creator credit" },
+  { value: "needsEpisodes", label: "No episodes yet" },
+  { value: "noCover", label: "Missing cover" },
+  { value: "draft", label: "Draft only" },
   { value: "adult", label: "18+" },
 ];
 const CREATE_FLOW_OPTIONS = [
-  { value: "stay", label: "留在列表", helper: "创建后继续批量整理作品库。" },
-  { value: "details", label: "打开详情", helper: "继续补作品信息、封面与定价。" },
-  { value: "episodes", label: "进入章节", helper: "直接去添加漫画章节或小说章节。" },
+  { value: "stay", label: "Stay here", helper: "Keep working through the catalog list." },
+  { value: "details", label: "Open details", helper: "Continue filling in story metadata and cover art." },
+  { value: "episodes", label: "Go to episodes", helper: "Start adding comic chapters or novel episodes next." },
 ];
 
 function createEmptyCreateForm() {
@@ -93,10 +94,14 @@ function normalizeGenresInput(value) {
 }
 function normalizeSeries(entry, index) {
   const source = entry && typeof entry === "object" ? entry : {};
+  const creatorIdentity = resolveSeriesCreatorIdentity(source);
   return {
     id: String(source.id || `series-${index + 1}`),
-    title: String(source.title || "未命名作品"),
+    title: String(source.title || "Untitled series"),
     author: String(source.author || ""),
+    creatorLabel: creatorIdentity.hasPublicCredit ? creatorIdentity.displayName : "",
+    creatorHref: creatorIdentity.hasPublicCredit ? creatorIdentity.href : "",
+    hasPublicCreator: creatorIdentity.hasPublicCredit,
     type: source.type === "novel" ? "novel" : "comic",
     status: STATUS_OPTIONS.includes(source.status) ? source.status : "Ongoing",
     adult: Boolean(source.adult),
@@ -142,19 +147,19 @@ function buildSeriesPayload(series, overrides = {}) {
   };
 }
 function formatUpdatedAt(value, compact = false) {
-  if (!value) return "暂无";
+  if (!value) return "Not yet";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "暂无";
-  return new Intl.DateTimeFormat("zh-CN", compact ? { month: "short", day: "numeric" } : { month: "short", day: "numeric", year: "numeric" }).format(date);
+  if (Number.isNaN(date.getTime())) return "Not yet";
+  return new Intl.DateTimeFormat("en-US", compact ? { month: "short", day: "numeric" } : { month: "short", day: "numeric", year: "numeric" }).format(date);
 }
 function formatSeriesTypeLabel(type) {
-  return type === "novel" ? "小说" : "漫画";
+  return type === "novel" ? "Novel" : "Comic";
 }
 function formatSeriesStatusLabel(status) {
-  if (status === "Completed") return "已完结";
-  if (status === "Hiatus") return "暂停中";
-  if (status === "Cancelled") return "已停更";
-  return "连载中";
+  if (status === "Completed") return "Completed";
+  if (status === "Hiatus") return "Hiatus";
+  if (status === "Cancelled") return "Cancelled";
+  return "Ongoing";
 }
 function buildQueryString(search, typeFilter, filters) {
   const params = new URLSearchParams();
@@ -200,18 +205,18 @@ function Feedback({ feedback, onDismiss }) {
 
 function getReadinessToneClasses(tone) {
   if (tone === "emerald") {
-    return "border-emerald-500/25 bg-emerald-500/10 text-emerald-200";
+    return "border-emerald-200 bg-emerald-50 text-emerald-700";
   }
 
   if (tone === "cyan") {
-    return "border-cyan-500/25 bg-cyan-500/10 text-cyan-200";
+    return "border-sky-200 bg-sky-50 text-sky-700";
   }
 
   if (tone === "amber") {
-    return "border-amber-500/25 bg-amber-500/10 text-amber-200";
+    return "border-amber-200 bg-amber-50 text-amber-700";
   }
 
-  return "border-rose-500/25 bg-rose-500/10 text-rose-200";
+  return "border-rose-200 bg-rose-50 text-rose-700";
 }
 
 function SeriesCard(props) {
@@ -236,79 +241,145 @@ function SeriesCard(props) {
   } = props;
   const isList = viewMode === "list";
   const readiness = getAdminSeriesReadiness(series);
+  const creatorLine = series.creatorLabel || series.author || "Creator details coming soon";
   return (
-    <article className={`rounded-5xl border bg-neutral-900/60 p-4 shadow-ios transition ${isSelected ? "border-ios-blue/50 ring-1 ring-ios-blue/40" : "border-ios-gray-800"}`}>
+    <article
+      className={`rounded-[28px] border bg-white/92 p-4 shadow-[var(--gush-shadow-soft)] transition ${
+        isSelected ? "border-[rgba(47,88,198,0.24)] ring-1 ring-[rgba(47,88,198,0.18)]" : "border-black/8"
+      }`}
+    >
       <div className={`grid gap-4 ${isList ? "lg:grid-cols-[auto,84px,1.6fr,1fr,auto] lg:items-center" : ""}`}>
-        <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-ios-gray-900/70">
-          <input type="checkbox" checked={isSelected} onChange={() => onSelect(series.id)} className="h-4 w-4 cursor-pointer rounded border-white/30 bg-transparent text-ios-blue" />
+        <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[rgba(250,247,241,0.92)]">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onSelect(series.id)}
+            className="h-4 w-4 cursor-pointer rounded border-black/20 bg-transparent text-[var(--gush-accent,#2f58c6)]"
+          />
         </label>
-        <div className={`${isList ? "h-24 w-16" : "aspect-[2/3] w-full"} overflow-hidden rounded-4xl bg-ios-gray-900`}>
-          {series.coverUrl ? <img src={series.coverUrl} alt={`${series.title} cover`} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-ios-gray-500"><ImageIcon size={isList ? 24 : 40} /></div>}
+        <div
+          className={`${isList ? "h-24 w-16" : "aspect-[2/3] w-full"} overflow-hidden rounded-[24px] bg-[rgba(250,247,241,0.92)]`}
+        >
+          {series.coverUrl ? (
+            <img src={series.coverUrl} alt={`${series.title} cover`} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-slate-400">
+              <ImageIcon size={isList ? 24 : 40} />
+            </div>
+          )}
         </div>
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-            <span className="rounded-full bg-ios-gray-800 px-2.5 py-1 text-ios-gray-200">{formatSeriesTypeLabel(series.type)}</span>
-            <span className="rounded-full bg-ios-blue/10 px-2.5 py-1 text-ios-blue">{formatSeriesStatusLabel(series.status)}</span>
+            <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2.5 py-1 text-slate-700">
+              {formatSeriesTypeLabel(series.type)}
+            </span>
+            <span className="rounded-full border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] px-2.5 py-1 text-[var(--gush-accent,#2f58c6)]">
+              {formatSeriesStatusLabel(series.status)}
+            </span>
             <span className={`rounded-full border px-2.5 py-1 ${getReadinessToneClasses(readiness.tone)}`}>
               {readiness.statusLabel}
             </span>
-            {series.adult ? <span className="rounded-full bg-rose-500/15 px-2.5 py-1 text-rose-300">18+</span> : null}
-            {!series.isPublished ? <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-amber-300">未发布</span> : null}
+            {series.adult ? (
+              <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-rose-700">
+                18+
+              </span>
+            ) : null}
+            {!series.isPublished ? (
+              <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700">
+                Draft
+              </span>
+            ) : null}
           </div>
           {isEditing ? (
-            <div className="space-y-3 rounded-3xl border border-ios-gray-800 bg-ios-gray-950/60 p-4">
-              <input value={editDraft?.title || ""} onChange={(event) => onEditDraftChange({ ...editDraft, title: event.target.value })} className="w-full rounded-2xl border border-ios-gray-700 bg-ios-gray-950 px-4 py-3 text-sm text-white outline-none focus:border-ios-blue" placeholder="作品标题" />
+            <div className="space-y-3 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.76)] p-4">
+              <input
+                value={editDraft?.title || ""}
+                onChange={(event) => onEditDraftChange({ ...editDraft, title: event.target.value })}
+                className="w-full rounded-[18px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-950 outline-none focus:border-[var(--gush-accent,#2f58c6)]"
+                placeholder="Series title"
+              />
               <div className="grid gap-3 md:grid-cols-2">
-                <select value={editDraft?.status || "Ongoing"} onChange={(event) => onEditDraftChange({ ...editDraft, status: event.target.value })} className="rounded-2xl border border-ios-gray-700 bg-ios-gray-950 px-4 py-3 text-sm text-white outline-none focus:border-ios-blue">
+                <select
+                  value={editDraft?.status || "Ongoing"}
+                  onChange={(event) => onEditDraftChange({ ...editDraft, status: event.target.value })}
+                  className="rounded-[18px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-950 outline-none focus:border-[var(--gush-accent,#2f58c6)]"
+                >
                   {STATUS_OPTIONS.map((option) => <option key={option} value={option}>{formatSeriesStatusLabel(option)}</option>)}
                 </select>
-                <label className="flex items-center gap-3 rounded-2xl border border-ios-gray-800 bg-ios-gray-950/40 px-4 py-3 text-sm text-ios-gray-200">
-                  <input type="checkbox" checked={Boolean(editDraft?.adult)} onChange={(event) => onEditDraftChange({ ...editDraft, adult: event.target.checked })} className="h-4 w-4 rounded border-ios-gray-600 bg-ios-gray-900 text-ios-blue" />
-                  <span>成人内容（18+）</span>
+                <label className="flex items-center gap-3 rounded-[18px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(editDraft?.adult)}
+                    onChange={(event) => onEditDraftChange({ ...editDraft, adult: event.target.checked })}
+                    className="h-4 w-4 rounded border-black/20 bg-white text-[var(--gush-accent,#2f58c6)]"
+                  />
+                  <span>Adult title</span>
                 </label>
               </div>
             </div>
           ) : (
             <div className="space-y-1">
-              <button type="button" onClick={() => onOpenDetails(series.id)} className="text-left text-lg font-semibold text-white transition hover:text-ios-blue">{series.title}</button>
-              <p className="text-xs uppercase tracking-wide text-ios-gray-500">{series.id}</p>
-              <p className="text-sm text-ios-gray-400">
-                作者：
-                <span className={series.author ? "text-white" : "text-amber-300"}>
-                  {series.author || "未填写"}
+              <button
+                type="button"
+                onClick={() => onOpenDetails(series.id)}
+                className="text-left text-lg font-semibold text-slate-950 transition hover:text-[var(--gush-accent,#2f58c6)]"
+              >
+                {series.title}
+              </button>
+              <p className="text-xs uppercase tracking-wide text-slate-400">{series.id}</p>
+              <p className="text-sm text-slate-600">
+                Creator:{" "}
+                <span
+                  className={
+                    series.creatorLabel || series.author ? "font-medium text-slate-950" : "text-amber-700"
+                  }
+                >
+                  {creatorLine}
                 </span>
               </p>
-              <p className="line-clamp-2 text-sm text-ios-gray-300">{series.description || "暂无简介。"}</p>
-              <p className="text-xs text-ios-gray-500">
-                前台就绪度 {readiness.score} 分
-                {readiness.missingCount > 0 ? ` · 待补 ${readiness.topIssues.join("、")}` : " · 可直接承接前台分发"}
+              <p className="line-clamp-2 text-sm text-slate-600">
+                {series.description || "No series summary yet."}
+              </p>
+              <p className="text-xs text-slate-500">
+                Storefront readiness {readiness.score}
+                {readiness.missingCount > 0
+                  ? ` · Fix ${readiness.topIssues.join(", ")}`
+                  : " · Ready for live discovery"}
               </p>
               <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-medium">
-                <span className="rounded-full bg-ios-gray-800/80 px-2.5 py-1 text-ios-gray-300">
-                  {series.episodePrice > 0 ? `${series.episodePrice} 金币/章` : "免费章节"}
+                <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2.5 py-1 text-slate-600">
+                  {series.episodeCount > 0 ? `${series.episodeCount} episodes` : "Episodes still missing"}
                 </span>
-                {!series.author ? (
-                  <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-amber-300">缺作者</span>
+                {!series.creatorLabel && !series.author ? (
+                  <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700">
+                    Missing creator credit
+                  </span>
                 ) : null}
                 {!series.coverUrl ? (
-                  <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-amber-300">缺少封面</span>
+                  <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700">
+                    Missing cover
+                  </span>
                 ) : null}
                 {!series.description?.trim() ? (
-                  <span className="rounded-full bg-white/10 px-2.5 py-1 text-ios-gray-300">缺简介</span>
+                  <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2.5 py-1 text-slate-600">
+                    Summary still needed
+                  </span>
                 ) : null}
                 {!series.genres.length ? (
-                  <span className="rounded-full bg-white/10 px-2.5 py-1 text-ios-gray-300">缺标签</span>
+                  <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2.5 py-1 text-slate-600">
+                    Tags still needed
+                  </span>
                 ) : null}
                 {series.episodeCount === 0 ? (
-                  <span className="rounded-full bg-orange-500/15 px-2.5 py-1 text-orange-300">还没有章节</span>
-                ) : null}
-                {series.ttfEnabled ? (
-                  <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-emerald-300">
-                    免费券 {series.ttfIntervalHours}h
+                  <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700">
+                    No episodes yet
                   </span>
                 ) : null}
                 {series.genres.slice(0, 3).map((genre) => (
-                  <span key={`${series.id}-${genre}`} className="rounded-full bg-ios-blue/10 px-2.5 py-1 text-ios-blue">
+                  <span
+                    key={`${series.id}-${genre}`}
+                    className="rounded-full border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] px-2.5 py-1 text-[var(--gush-accent,#2f58c6)]"
+                  >
                     {genre}
                   </span>
                 ))}
@@ -316,42 +387,42 @@ function SeriesCard(props) {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-2 gap-3 rounded-3xl bg-ios-gray-950/50 p-4 text-sm lg:grid-cols-2">
-          <div><p className="text-ios-gray-500">章节数</p><p className="mt-1 font-semibold text-white">{series.episodeCount || 0}</p></div>
-          <div><p className="text-ios-gray-500">更新时间</p><p className="mt-1 font-semibold text-white">{formatUpdatedAt(series.updatedAt, true)}</p></div>
-          <div><p className="text-ios-gray-500">封面状态</p><p className="mt-1 font-semibold text-white">{series.coverUrl ? "已上传" : "待补充"}</p></div>
-          <div><p className="text-ios-gray-500">发布状态</p><p className="mt-1 font-semibold text-white">{series.isPublished ? "已发布" : "草稿"}</p></div>
+        <div className="grid grid-cols-2 gap-3 rounded-[24px] bg-[rgba(250,247,241,0.76)] p-4 text-sm lg:grid-cols-2">
+          <div><p className="text-slate-500">Episodes</p><p className="mt-1 font-semibold text-slate-950">{series.episodeCount || 0}</p></div>
+          <div><p className="text-slate-500">Updated</p><p className="mt-1 font-semibold text-slate-950">{formatUpdatedAt(series.updatedAt, true)}</p></div>
+          <div><p className="text-slate-500">Cover</p><p className="mt-1 font-semibold text-slate-950">{series.coverUrl ? "Ready" : "Missing"}</p></div>
+          <div><p className="text-slate-500">Visibility</p><p className="mt-1 font-semibold text-slate-950">{series.isPublished ? "Published" : "Draft"}</p></div>
         </div>
         <div className="flex flex-wrap gap-2 lg:justify-end">
           {isEditing ? (
             <>
-              <button type="button" onClick={onSaveEdit} disabled={isSaving} className="rounded-full bg-ios-blue px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50">{isSaving ? "保存中..." : "保存"}</button>
-              <button type="button" onClick={onCancelEdit} disabled={isSaving} className="rounded-full border border-ios-gray-700 px-4 py-2 text-sm font-semibold text-ios-gray-200 transition hover:bg-ios-gray-800 disabled:cursor-not-allowed disabled:opacity-50">取消</button>
+              <button type="button" onClick={onSaveEdit} disabled={isSaving} className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">{isSaving ? "Saving..." : "Save"}</button>
+              <button type="button" onClick={onCancelEdit} disabled={isSaving} className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50">Cancel</button>
             </>
           ) : (
             <>
-              <button type="button" onClick={() => onOpenEpisodes(series.id)} className="inline-flex items-center gap-2 rounded-full border border-ios-blue/30 px-3 py-2 text-xs font-semibold text-ios-blue transition hover:bg-ios-blue/10" title="管理章节">
+              <button type="button" onClick={() => onOpenEpisodes(series.id)} className="inline-flex items-center gap-2 rounded-full border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)] px-3 py-2 text-xs font-semibold text-[var(--gush-accent,#2f58c6)] transition hover:bg-[rgba(47,88,198,0.1)]" title="Manage episodes">
                 <BookOpen size={15} />
-                <span>章节</span>
+                <span>Episodes</span>
               </button>
               <button
                 type="button"
                 onClick={() => onOpenFrontend(series.id)}
                 disabled={!series.isPublished}
-                className="inline-flex items-center gap-2 rounded-full border border-ios-gray-700 px-3 py-2 text-xs font-semibold text-ios-gray-200 transition hover:bg-ios-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
-                title={series.isPublished ? "查看前台页面" : "未发布作品不能预览"}
+                className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50"
+                title={series.isPublished ? "View live page" : "Draft titles cannot open a live page"}
               >
                 <ExternalLink size={15} />
-                <span>前台</span>
+                <span>Live page</span>
               </button>
-              <button type="button" onClick={() => onOpenDetails(series.id)} className="inline-flex items-center gap-2 rounded-full border border-ios-gray-700 px-3 py-2 text-xs font-semibold text-ios-gray-200 transition hover:bg-ios-gray-800" title="编辑详情">
+              <button type="button" onClick={() => onOpenDetails(series.id)} className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]" title="Edit details">
                 <Edit size={15} />
-                <span>详情</span>
+                <span>Details</span>
               </button>
-              <button type="button" onClick={() => onStartEdit(series)} className="rounded-full border border-ios-gray-700 px-3 py-2 text-ios-gray-200 transition hover:bg-ios-gray-800" title="快速编辑"><Edit size={16} /></button>
-              <button type="button" onClick={() => onTogglePublish(series)} className="rounded-full border border-ios-gray-700 px-3 py-2 text-ios-gray-200 transition hover:bg-ios-gray-800" title={series.isPublished ? "取消发布" : "立即发布"}>{series.isPublished ? <EyeOff size={16} /> : <Eye size={16} />}</button>
-              <button type="button" onClick={() => onDuplicate(series)} className="rounded-full border border-ios-gray-700 px-3 py-2 text-ios-gray-200 transition hover:bg-ios-gray-800" title="复制作品"><Copy size={16} /></button>
-              <button type="button" onClick={() => onDelete(series)} className="rounded-full border border-rose-500/30 px-3 py-2 text-rose-300 transition hover:bg-rose-500/10" title="删除作品"><Trash2 size={16} /></button>
+              <button type="button" onClick={() => onStartEdit(series)} className="rounded-full border border-black/8 bg-white px-3 py-2 text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]" title="Quick edit"><Edit size={16} /></button>
+              <button type="button" onClick={() => onTogglePublish(series)} className="rounded-full border border-black/8 bg-white px-3 py-2 text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]" title={series.isPublished ? "Move to draft" : "Publish now"}>{series.isPublished ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+              <button type="button" onClick={() => onDuplicate(series)} className="rounded-full border border-black/8 bg-white px-3 py-2 text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]" title="Duplicate series"><Copy size={16} /></button>
+              <button type="button" onClick={() => onDelete(series)} className="rounded-full border border-red-200 bg-red-50 px-3 py-2 text-red-700 transition hover:bg-red-100" title="Delete series"><Trash2 size={16} /></button>
             </>
           )}
         </div>
@@ -417,7 +488,7 @@ export default function AdminSeriesPageNew() {
       setSelectedSeries((current) => current.filter((id) => nextSeries.some((series) => series.id === id)));
     } else {
       setSeriesList([]);
-      setFeedback({ type: "error", message: response.error || "作品加载失败。" });
+      setFeedback({ type: "error", message: response.error || "Series could not be loaded." });
     }
     setLoading(false);
   }, [advancedFilters, debouncedSearchQuery, hasScopedCreatorFilter, typeFilter]);
@@ -438,7 +509,8 @@ export default function AdminSeriesPageNew() {
         !normalizedQuery ||
         series.title.toLowerCase().includes(normalizedQuery) ||
         series.id.toLowerCase().includes(normalizedQuery) ||
-        series.author.toLowerCase().includes(normalizedQuery);
+        series.author.toLowerCase().includes(normalizedQuery) ||
+        series.creatorLabel.toLowerCase().includes(normalizedQuery);
       const matchesType = typeFilter === "all" || series.type === typeFilter;
       const matchesStatus = advancedFilters.status === "all" || series.status === advancedFilters.status;
       const matchesAdult =
@@ -449,7 +521,7 @@ export default function AdminSeriesPageNew() {
       const matchesQuick =
         quickFilter === "all" ||
         (quickFilter === "needsMetadata" && readiness.missingCount > 0) ||
-        (quickFilter === "noAuthor" && !series.author.trim()) ||
+        (quickFilter === "noAuthor" && !series.creatorLabel.trim() && !series.author.trim()) ||
         (quickFilter === "needsEpisodes" && series.episodeCount === 0) ||
         (quickFilter === "noCover" && !series.coverUrl) ||
         (quickFilter === "draft" && !series.isPublished) ||
@@ -464,17 +536,17 @@ export default function AdminSeriesPageNew() {
     const comics = seriesList.filter((item) => item.type === "comic").length;
     const novels = seriesList.filter((item) => item.type === "novel").length;
     const readyCount = seriesList.filter((item) => getAdminSeriesReadiness(item).missingCount === 0).length;
-    const noAuthor = seriesList.filter((item) => !item.author.trim()).length;
+    const noAuthor = seriesList.filter((item) => !item.creatorLabel.trim() && !item.author.trim()).length;
     const drafts = seriesList.filter((item) => !item.isPublished).length;
     const noEpisodes = seriesList.filter((item) => item.episodeCount === 0).length;
     const noCover = seriesList.filter((item) => !item.coverUrl).length;
 
     return [
-      { label: "全部作品", value: total, hint: "当前作品库总量" },
-      { label: "漫画作品", value: comics, hint: `小说 ${novels} 部` },
-      { label: "前台已就绪", value: readyCount, hint: `缺作者 ${noAuthor} 部` },
-      { label: "待补章节", value: noEpisodes, hint: "适合优先处理新作" },
-      { label: "待补封面", value: noCover, hint: `草稿 ${drafts} 部` },
+      { label: "All titles", value: total, hint: "Current catalog size" },
+      { label: "Comics", value: comics, hint: `${novels} novels in the same catalog` },
+      { label: "Live-page ready", value: readyCount, hint: `${noAuthor} missing creator credit` },
+      { label: "Need episodes", value: noEpisodes, hint: "Useful for launch prep" },
+      { label: "Need covers", value: noCover, hint: `${drafts} still in draft` },
     ];
   }, [seriesList]);
 
@@ -513,7 +585,7 @@ export default function AdminSeriesPageNew() {
 
   const handleSaveEdit = async (seriesId) => {
     if (!editingDraft?.title?.trim()) {
-      setFeedback({ type: "error", message: "标题不能为空。" });
+      setFeedback({ type: "error", message: "A series title is required." });
       return;
     }
     const target = seriesList.find((series) => series.id === seriesId);
@@ -522,10 +594,10 @@ export default function AdminSeriesPageNew() {
     const response = await apiPatch(`/api/admin/series/${seriesId}`, { series: buildSeriesPayload(target, { title: editingDraft.title.trim(), status: editingDraft.status, adult: editingDraft.adult }) });
     if (response.ok) {
       updateSeriesLocally(seriesId, (current) => ({ ...current, title: editingDraft.title.trim(), status: editingDraft.status, adult: editingDraft.adult, updatedAt: new Date().toISOString() }));
-      setFeedback({ type: "success", message: "作品已更新。" });
+      setFeedback({ type: "success", message: "Series details were updated." });
       handleCancelEdit();
     } else {
-      setFeedback({ type: "error", message: response.error || "保存更改失败。" });
+      setFeedback({ type: "error", message: response.error || "Changes could not be saved." });
     }
     setIsSavingEdit(false);
   };
@@ -535,34 +607,34 @@ export default function AdminSeriesPageNew() {
     const response = await apiPatch(`/api/admin/series/${series.id}`, { series: buildSeriesPayload(series, { isPublished: nextPublished }) });
     if (response.ok) {
       updateSeriesLocally(series.id, (current) => ({ ...current, isPublished: nextPublished, updatedAt: new Date().toISOString() }));
-      setFeedback({ type: "success", message: nextPublished ? "作品已发布。" : "作品已取消发布。" });
+      setFeedback({ type: "success", message: nextPublished ? "Series is now live." : "Series moved back to draft." });
     } else {
-      setFeedback({ type: "error", message: response.error || "更新发布状态失败。" });
+      setFeedback({ type: "error", message: response.error || "Visibility could not be updated." });
     }
   };
 
   const uploadCoverImage = async (file) => {
     if (!file) return "";
-    if (!file.type.startsWith("image/")) throw new Error("请上传有效的图片文件。");
-    if (file.size > MAX_UPLOAD_BYTES) throw new Error("封面图片大小不能超过 10MB。");
+    if (!file.type.startsWith("image/")) throw new Error("Upload a valid image file.");
+    if (file.size > MAX_UPLOAD_BYTES) throw new Error("Cover images must be 10MB or smaller.");
     const formData = new FormData();
     formData.append("file", file);
     const response = await adminUpload("/api/admin/upload/image", formData);
-    if (!response.ok || !response.data?.url) throw new Error(response.error || "上传封面失败。");
+    if (!response.ok || !response.data?.url) throw new Error(response.error || "Cover upload failed.");
     return response.data.url;
   };
 
   const handleCreate = async () => {
     if (!createForm.title.trim()) {
-      setFeedback({ type: "error", message: "标题不能为空。" });
+      setFeedback({ type: "error", message: "A series title is required." });
       return;
     }
     if (!/^\d+$/.test(String(createForm.episodePrice || "0"))) {
-      setFeedback({ type: "error", message: "默认章节价格必须是非负整数。" });
+      setFeedback({ type: "error", message: "Default episode price must be a non-negative whole number." });
       return;
     }
     if (createForm.ttfEnabled && (!/^\d+$/.test(String(createForm.ttfIntervalHours || "")) || toNumber(createForm.ttfIntervalHours, 0) < 1)) {
-      setFeedback({ type: "error", message: "免费券刷新间隔至少为 1 小时。" });
+      setFeedback({ type: "error", message: "The free-pass interval must be at least 1 hour." });
       return;
     }
     setIsCreating(true);
@@ -588,7 +660,7 @@ export default function AdminSeriesPageNew() {
           isFeatured: false,
         }),
       });
-      if (!response.ok) throw new Error(response.error || "创建作品失败。");
+      if (!response.ok) throw new Error(response.error || "Series could not be created.");
       const createdSeriesId = response.data?.series?.id || nextSeriesId;
       const nextFlow = createForm.openAfterCreate || "stay";
 
@@ -596,10 +668,10 @@ export default function AdminSeriesPageNew() {
         type: "success",
         message:
           nextFlow === "episodes"
-            ? "作品已创建，正在进入章节管理。"
+            ? "Series created. Opening episodes next."
             : nextFlow === "details"
-              ? "作品已创建，正在打开详情页。"
-              : "作品创建成功。",
+              ? "Series created. Opening details next."
+              : "Series created successfully.",
       });
       setShowCreateModal(false);
       resetCreateForm();
@@ -616,7 +688,7 @@ export default function AdminSeriesPageNew() {
 
       await loadSeries();
     } catch (error) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "创建作品失败。" });
+      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Series could not be created." });
     } finally {
       setIsCreating(false);
     }
@@ -624,17 +696,17 @@ export default function AdminSeriesPageNew() {
 
   const handleDelete = (series) => setConfirmDialog({
     isOpen: true,
-    title: "删除作品",
-    message: `确定删除 ${series.title} 吗？此操作无法撤销。`,
+    title: "Delete series",
+    message: `Delete ${series.title}? This cannot be undone.`,
     variant: "danger",
     onConfirm: async () => {
       const response = await apiDelete(`/api/admin/series/${series.id}`);
       if (response.ok) {
         setSeriesList((current) => current.filter((item) => item.id !== series.id));
         setSelectedSeries((current) => current.filter((id) => id !== series.id));
-        setFeedback({ type: "success", message: "作品已删除。" });
+        setFeedback({ type: "success", message: "Series was deleted." });
       } else {
-        setFeedback({ type: "error", message: response.error || "删除作品失败。" });
+        setFeedback({ type: "error", message: response.error || "Series could not be deleted." });
       }
     },
   });
@@ -644,17 +716,17 @@ export default function AdminSeriesPageNew() {
     const source = duplicateDialog.series;
     const nextId = duplicateDialog.newId.trim();
     if (!source || !nextId) {
-      setFeedback({ type: "error", message: "必须填写新的作品 ID。" });
+      setFeedback({ type: "error", message: "A new series id is required." });
       return;
     }
     setIsDuplicating(true);
     const response = await apiPost("/api/admin/series", { series: buildSeriesPayload(source, { id: nextId, title: `${source.title} (Copy)` }) });
     if (response.ok) {
-      setFeedback({ type: "success", message: "作品已复制。" });
+      setFeedback({ type: "success", message: "Series was duplicated." });
       setDuplicateDialog({ isOpen: false, series: null, newId: "" });
       await loadSeries();
     } else {
-      setFeedback({ type: "error", message: response.error || "复制作品失败。" });
+      setFeedback({ type: "error", message: response.error || "Series could not be duplicated." });
     }
     setIsDuplicating(false);
   };
@@ -663,33 +735,33 @@ export default function AdminSeriesPageNew() {
     const targets = seriesList.filter((series) => selectedSeries.includes(series.id));
     await Promise.all(targets.map((series) => apiPatch(`/api/admin/series/${series.id}`, { series: buildSeriesPayload(series, { isPublished: nextPublished }) })));
     setSeriesList((current) => current.map((series) => (selectedSeries.includes(series.id) ? { ...series, isPublished: nextPublished, updatedAt: new Date().toISOString() } : series)));
-    setFeedback({ type: "success", message: nextPublished ? "已发布所选作品。" : "已取消发布所选作品。" });
+    setFeedback({ type: "success", message: nextPublished ? "Selected titles are now live." : "Selected titles moved back to draft." });
   };
 
   const handleBulkPublish = async () => updatePublishStateForSelection(true);
   const handleBulkUnpublish = async () => updatePublishStateForSelection(false);
   const handleBulkDelete = async () => setConfirmDialog({
     isOpen: true,
-    title: "删除所选作品",
-    message: `确定删除 ${selectedSeries.length} 个所选作品吗？此操作无法撤销。`,
+    title: "Delete selected series",
+    message: `Delete ${selectedSeries.length} selected titles? This cannot be undone.`,
     variant: "danger",
     onConfirm: async () => {
       const ids = [...selectedSeries];
       await Promise.all(ids.map((id) => apiDelete(`/api/admin/series/${id}`)));
       setSeriesList((current) => current.filter((series) => !ids.includes(series.id)));
       setSelectedSeries([]);
-      setFeedback({ type: "success", message: "已删除所选作品。" });
+      setFeedback({ type: "success", message: "Selected titles were deleted." });
     },
   });
 
   const handleCoverInput = (file) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      setFeedback({ type: "error", message: "请上传有效的图片文件。" });
+      setFeedback({ type: "error", message: "Upload a valid image file." });
       return;
     }
     if (file.size > MAX_UPLOAD_BYTES) {
-      setFeedback({ type: "error", message: "封面图片大小不能超过 10MB。" });
+      setFeedback({ type: "error", message: "Cover images must be 10MB or smaller." });
       return;
     }
     setCreateForm((current) => {
@@ -703,16 +775,17 @@ export default function AdminSeriesPageNew() {
     resetCreateForm();
   };
 
-  if (isLoading || loading) return <section className="rounded-5xl border border-ios-gray-800 bg-neutral-900/60 p-8 text-sm text-ios-gray-300">作品加载中...</section>;
-  if (!isAuthenticated) return <section className="rounded-5xl border border-dashed border-ios-gray-700 bg-neutral-900/60 p-10 text-center text-sm text-ios-gray-300">需要后台权限才能访问此页面。</section>;
+  if (isLoading || loading) return <section className="rounded-[28px] border border-black/8 bg-white/88 p-8 text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">Loading series workspace...</section>;
+  if (!isAuthenticated) return <section className="rounded-[28px] border border-dashed border-black/8 bg-white/88 p-10 text-center text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">Admin access is required to view this page.</section>;
 
   return (
     <div className="space-y-6">
-      <section className="rounded-5xl border border-ios-gray-800 bg-gradient-to-br from-ios-blue/10 to-ios-purple/10 p-6 shadow-ios">
+      <section className="rounded-[28px] border border-black/8 bg-white/92 p-6 shadow-[var(--gush-shadow-soft)]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">作品管理</h2>
-            <p className="text-sm text-ios-gray-300">把漫画、小说、章节准备度和发布状态放在同一块后台里处理，减少来回跳页。</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Series workspace</p>
+            <h2 className="text-2xl font-semibold text-slate-950">Keep titles clean, credited, and ready to publish.</h2>
+            <p className="text-sm leading-6 text-slate-600">Review the catalog by story readiness first, then move into details or episode work only when it helps the live reading path.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button
@@ -725,12 +798,12 @@ export default function AdminSeriesPageNew() {
                 });
                 setShowCreateModal(true);
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-ios-blue/30 bg-ios-blue/10 px-4 py-2.5 text-sm font-semibold text-ios-blue transition hover:bg-ios-blue/20"
+              className="inline-flex items-center gap-2 rounded-full border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] px-4 py-2.5 text-sm font-semibold text-[var(--gush-accent,#2f58c6)] transition hover:bg-[rgba(47,88,198,0.12)]"
             >
               <BookOpen size={16} />
-              <span>新建漫画并进章节</span>
+              <span>New comic</span>
             </button>
-            <button type="button" onClick={() => { setCreateForm(createEmptyCreateForm()); setShowCreateModal(true); }} className="inline-flex items-center gap-2 rounded-full bg-ios-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500"><Plus size={16} /><span>新增作品</span></button>
+            <button type="button" onClick={() => { setCreateForm(createEmptyCreateForm()); setShowCreateModal(true); }} className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"><Plus size={16} /><span>New series</span></button>
           </div>
         </div>
       </section>
@@ -739,43 +812,43 @@ export default function AdminSeriesPageNew() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {seriesStats.map((item) => (
-          <article key={item.label} className="rounded-4xl border border-ios-gray-800 bg-neutral-900/60 p-5 shadow-ios">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-ios-gray-500">{item.label}</p>
-            <p className="mt-3 text-3xl font-bold text-white">{item.value}</p>
-            <p className="mt-2 text-sm text-ios-gray-400">{item.hint}</p>
+          <article key={item.label} className="rounded-[24px] border border-black/8 bg-white/88 p-5 shadow-[var(--gush-shadow-soft)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{item.label}</p>
+            <p className="mt-3 text-3xl font-semibold text-slate-950">{item.value}</p>
+            <p className="mt-2 text-sm text-slate-600">{item.hint}</p>
           </article>
         ))}
       </section>
 
-      <section className="rounded-5xl border border-ios-gray-800 bg-neutral-900/60 p-5 shadow-ios">
+      <section className="rounded-[28px] border border-black/8 bg-white/92 p-5 shadow-[var(--gush-shadow-soft)]">
         <div className="flex flex-col gap-4">
           {hasScopedCreatorFilter ? (
-            <div className="flex flex-col gap-3 rounded-4xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-4 text-sm text-emerald-100 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-3 rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-sky-700 md:flex-row md:items-center md:justify-between">
               <p>
-                当前正按创作者关键词筛选作品库：
-                <span className="font-semibold text-white">{scopedCreatorQuery}</span>
-                。本页会在当前作品列表内匹配标题、ID 和作者字段，方便你直接修作品归因。
+                This list is filtered by creator query:
+                <span className="font-semibold text-slate-950"> {scopedCreatorQuery}</span>.
+                Matching titles, ids, and creator labels helps you fix credit attribution faster.
               </p>
               <button
                 type="button"
                 onClick={() => router.push("/admin/series")}
-                className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white transition hover:border-white/25 hover:bg-white/[0.1]"
+                className="inline-flex items-center justify-center rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"
               >
-                清除创作者筛选
+                Clear creator filter
               </button>
             </div>
           ) : null}
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex flex-wrap gap-2">
-              {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "bg-ios-blue text-white" : "bg-ios-gray-900 text-ios-gray-300 hover:bg-ios-gray-800"}`}>{tab.label}</button>)}
+              {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}>{tab.label}</button>)}
             </div>
             <div className="flex flex-1 flex-wrap items-center gap-2 xl:justify-end">
-              <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-ios-gray-800 bg-ios-gray-950/80 px-4 py-3 xl:max-w-md"><Search size={16} className="text-ios-gray-500" /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、ID、作者、发布草稿..." className="w-full bg-transparent text-sm text-white outline-none placeholder:text-ios-gray-500" /></label>
+              <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3 xl:max-w-md"><Search size={16} className="text-slate-400" /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search titles, ids, creator credits, or draft notes..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" /></label>
               <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
-              <button type="button" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0} className="rounded-full border border-ios-gray-800 bg-ios-gray-950/80 px-4 py-3 text-sm font-semibold text-ios-gray-200 transition hover:bg-ios-gray-900 disabled:cursor-not-allowed disabled:opacity-50">{allVisibleSelected ? "清空选择" : "全选"}</button>
-              <div className="flex items-center overflow-hidden rounded-full border border-ios-gray-800 bg-ios-gray-950/80">
-                <button type="button" onClick={() => setViewMode("grid")} className={`px-4 py-3 transition ${viewMode === "grid" ? "bg-ios-blue text-white" : "text-ios-gray-300 hover:bg-ios-gray-900"}`} title="网格视图"><Grid size={16} /></button>
-                <button type="button" onClick={() => setViewMode("list")} className={`px-4 py-3 transition ${viewMode === "list" ? "bg-ios-blue text-white" : "text-ios-gray-300 hover:bg-ios-gray-900"}`} title="列表视图"><List size={16} /></button>
+              <button type="button" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0} className="rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50">{allVisibleSelected ? "Clear selection" : "Select all"}</button>
+              <div className="flex items-center overflow-hidden rounded-full border border-black/8 bg-white">
+                <button type="button" onClick={() => setViewMode("grid")} className={`px-4 py-3 transition ${viewMode === "grid" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`} title="Grid view"><Grid size={16} /></button>
+                <button type="button" onClick={() => setViewMode("list")} className={`px-4 py-3 transition ${viewMode === "list" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`} title="List view"><List size={16} /></button>
               </div>
             </div>
           </div>
@@ -786,14 +859,14 @@ export default function AdminSeriesPageNew() {
                   key={filter.value}
                   type="button"
                   onClick={() => setQuickFilter(filter.value)}
-                  className={`rounded-full px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "bg-white text-neutral-950" : "bg-ios-gray-950/80 text-ios-gray-300 hover:bg-ios-gray-900"}`}
+                  className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}
                 >
                   {filter.label}
                 </button>
               ))}
             </div>
-            <p className="text-sm text-ios-gray-400">
-              当前结果 <span className="font-semibold text-white">{filteredSeries.length}</span> 部
+            <p className="text-sm text-slate-600">
+              <span className="font-semibold text-slate-950">{filteredSeries.length}</span> titles in view
             </p>
           </div>
         </div>
@@ -802,7 +875,7 @@ export default function AdminSeriesPageNew() {
       <BulkActionsToolbar selectedCount={selectedSeries.length} onPublish={handleBulkPublish} onUnpublish={handleBulkUnpublish} onDelete={handleBulkDelete} onCancel={() => setSelectedSeries([])} />
 
       {filteredSeries.length === 0 ? (
-        <section className="rounded-5xl border border-dashed border-ios-gray-700 bg-neutral-900/60 p-12 text-center"><ImageIcon size={36} className="mx-auto text-ios-gray-500" /><h3 className="mt-4 text-lg font-semibold text-white">未找到作品</h3><p className="mt-2 text-sm text-ios-gray-400">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "请尝试调整筛选条件或搜索关键词。" : "可以先通过上方按钮创建第一部作品。"}</p></section>
+        <section className="rounded-[28px] border border-dashed border-black/8 bg-white/88 p-12 text-center shadow-[var(--gush-shadow-soft)]"><ImageIcon size={36} className="mx-auto text-slate-400" /><h3 className="mt-4 text-lg font-semibold text-slate-950">No titles matched this view</h3><p className="mt-2 text-sm text-slate-600">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "Try adjusting the filters or search terms." : "Start by adding the first title to this workspace."}</p></section>
       ) : (
         <section className={viewMode === "grid" ? "grid gap-5 md:grid-cols-2 xl:grid-cols-3" : "space-y-4"}>
           {filteredSeries.map((series) => <SeriesCard key={series.id} series={series} viewMode={viewMode} isSelected={selectedSeries.includes(series.id)} isEditing={editingId === series.id} editDraft={editingId === series.id ? editingDraft : null} isSaving={isSavingEdit} onSelect={handleToggleSelection} onStartEdit={handleStartEdit} onEditDraftChange={setEditingDraft} onSaveEdit={() => handleSaveEdit(series.id)} onCancelEdit={handleCancelEdit} onOpenDetails={handleOpenDetails} onOpenEpisodes={handleOpenEpisodes} onOpenFrontend={handleOpenFrontend} onTogglePublish={handleTogglePublish} onDuplicate={handleOpenDuplicate} onDelete={handleDelete} />)}
@@ -810,29 +883,29 @@ export default function AdminSeriesPageNew() {
       )}
 
       {showCreateModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={closeCreateModal}>
-          <div className="w-full max-w-2xl rounded-5xl border border-ios-gray-800 bg-neutral-900 p-6 shadow-ios-xl" onClick={(event) => event.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,27,36,0.28)] p-4 backdrop-blur-sm" onClick={closeCreateModal}>
+          <div className="w-full max-w-2xl rounded-[28px] border border-black/8 bg-white/96 p-6 shadow-[var(--gush-shadow-panel)]" onClick={(event) => event.stopPropagation()}>
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold text-white">新增作品</h3>
-                <p className="mt-1 text-sm text-ios-gray-400">创建新的作品条目，并可选上传封面。</p>
+                <h3 className="text-xl font-semibold text-slate-950">Create a new series</h3>
+                <p className="mt-1 text-sm text-slate-600">Set the basics first, then decide whether to continue in details or episodes.</p>
               </div>
-              <button type="button" onClick={closeCreateModal} className="rounded-full border border-ios-gray-700 p-2 text-ios-gray-300 transition hover:bg-ios-gray-800"><X size={18} /></button>
+              <button type="button" onClick={closeCreateModal} className="rounded-full border border-black/8 bg-white p-2 text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"><X size={18} /></button>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[1fr,1.1fr]">
               <div>
-                <label className="mb-2 block text-sm font-semibold text-ios-gray-300">封面图片</label>
-                <div onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={(event) => { event.preventDefault(); setIsDragging(false); handleCoverInput(event.dataTransfer.files?.[0]); }} className={`rounded-5xl border border-dashed p-4 transition ${isDragging ? "border-ios-blue bg-ios-blue/10" : "border-ios-gray-700 bg-ios-gray-950/40"}`}>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Cover image</label>
+                <div onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={(event) => { event.preventDefault(); setIsDragging(false); handleCoverInput(event.dataTransfer.files?.[0]); }} className={`rounded-[28px] border border-dashed p-4 transition ${isDragging ? "border-[var(--gush-accent,#2f58c6)] bg-[rgba(47,88,198,0.08)]" : "border-black/8 bg-[rgba(250,247,241,0.76)]"}`}>
                   {createForm.coverPreviewUrl ? (
                     <div className="space-y-3">
-                      <img src={createForm.coverPreviewUrl} alt="封面预览" className="aspect-[2/3] w-full rounded-4xl object-cover" />
-                      <button type="button" onClick={() => setCreateForm((current) => { revokeObjectUrl(current.coverPreviewUrl); return { ...current, coverFile: null, coverPreviewUrl: "" }; })} className="w-full rounded-full border border-ios-gray-700 px-4 py-2 text-sm font-semibold text-ios-gray-200 transition hover:bg-ios-gray-800">移除封面</button>
+                      <img src={createForm.coverPreviewUrl} alt="Cover preview" className="aspect-[2/3] w-full rounded-[24px] object-cover" />
+                      <button type="button" onClick={() => setCreateForm((current) => { revokeObjectUrl(current.coverPreviewUrl); return { ...current, coverFile: null, coverPreviewUrl: "" }; })} className="w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]">Remove cover</button>
                     </div>
                   ) : (
-                    <label className="flex min-h-[320px] cursor-pointer flex-col items-center justify-center gap-3 rounded-4xl border border-ios-gray-800 bg-ios-gray-950/70 px-6 text-center text-ios-gray-400">
-                      <Upload size={28} className="text-ios-blue" />
-                      <div><p className="text-sm font-semibold text-white">拖拽图片到这里，或点击上传</p><p className="mt-1 text-xs text-ios-gray-500">支持 JPG、PNG 和 GIF，最大 10MB。</p></div>
+                    <label className="flex min-h-[320px] cursor-pointer flex-col items-center justify-center gap-3 rounded-[24px] border border-black/8 bg-white px-6 text-center text-slate-500">
+                      <Upload size={28} className="text-[var(--gush-accent,#2f58c6)]" />
+                      <div><p className="text-sm font-semibold text-slate-950">Drop an image here, or click to upload</p><p className="mt-1 text-xs text-slate-500">JPG, PNG, or GIF up to 10MB.</p></div>
                       <input type="file" accept="image/*" className="hidden" onChange={(event) => handleCoverInput(event.target.files?.[0])} />
                     </label>
                   )}
@@ -841,101 +914,101 @@ export default function AdminSeriesPageNew() {
 
               <div className="space-y-4">
                 <label className="block space-y-2">
-                  <span className="text-sm font-semibold text-ios-gray-300">作品标题 *</span>
-                  <input value={createForm.title} onChange={(event) => setCreateForm((current) => ({ ...current, title: event.target.value }))} placeholder="例如：午夜契约" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
-                  <span className="text-xs text-ios-gray-500">预计作品 ID：{suggestedSeriesId}</span>
+                  <span className="text-sm font-semibold text-slate-700">Series title *</span>
+                  <input value={createForm.title} onChange={(event) => setCreateForm((current) => ({ ...current, title: event.target.value }))} placeholder="For example: Midnight Contract" className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
+                  <span className="text-xs text-slate-500">Suggested series id: {suggestedSeriesId}</span>
                 </label>
 
                 <label className="block space-y-2">
-                  <span className="text-sm font-semibold text-ios-gray-300">作者 / 工作室</span>
+                  <span className="text-sm font-semibold text-slate-700">Creator or studio</span>
                   <input
                     value={createForm.author}
                     onChange={(event) => setCreateForm((current) => ({ ...current, author: event.target.value }))}
-                    placeholder="例如：Studio LICO"
-                    className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue"
+                    placeholder="For example: Studio LICO"
+                    className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
                   />
-                  <span className="text-xs text-ios-gray-500">建议在创建时就补齐，前台创作者页面和信任模块会直接依赖这个字段。</span>
+                  <span className="text-xs text-slate-500">Add public-facing creator credit early so creator pages and trust surfaces stay consistent.</span>
                 </label>
 
                 <div className="space-y-2">
-                  <span className="text-sm font-semibold text-ios-gray-300">作品类型</span>
+                  <span className="text-sm font-semibold text-slate-700">Format</span>
                   <div className="grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => setCreateForm((current) => ({ ...current, type: "comic" }))} className={`rounded-3xl px-4 py-3 text-sm font-semibold transition ${createForm.type === "comic" ? "bg-ios-blue text-white" : "bg-ios-gray-950/70 text-ios-gray-300 hover:bg-ios-gray-900"}`}>漫画</button>
-                    <button type="button" onClick={() => setCreateForm((current) => ({ ...current, type: "novel" }))} className={`rounded-3xl px-4 py-3 text-sm font-semibold transition ${createForm.type === "novel" ? "bg-ios-purple text-white" : "bg-ios-gray-950/70 text-ios-gray-300 hover:bg-ios-gray-900"}`}>小说</button>
+                    <button type="button" onClick={() => setCreateForm((current) => ({ ...current, type: "comic" }))} className={`rounded-[20px] border px-4 py-3 text-sm font-semibold transition ${createForm.type === "comic" ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}>Comic</button>
+                    <button type="button" onClick={() => setCreateForm((current) => ({ ...current, type: "novel" }))} className={`rounded-[20px] border px-4 py-3 text-sm font-semibold transition ${createForm.type === "novel" ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}>Novel</button>
                   </div>
                 </div>
 
-                <label className="flex items-center gap-3 rounded-3xl border border-ios-gray-800 bg-ios-gray-950/40 px-4 py-3 text-sm text-ios-gray-200">
-                  <input type="checkbox" checked={createForm.adult} onChange={(event) => setCreateForm((current) => ({ ...current, adult: event.target.checked }))} className="h-4 w-4 rounded border-ios-gray-600 bg-ios-gray-900 text-ios-blue" />
-                  <span>成人内容（18+）</span>
+                <label className="flex items-center gap-3 rounded-[20px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-700">
+                  <input type="checkbox" checked={createForm.adult} onChange={(event) => setCreateForm((current) => ({ ...current, adult: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-white text-[var(--gush-accent,#2f58c6)]" />
+                  <span>Adult title (18+)</span>
                 </label>
 
-                <label className="flex items-center gap-3 rounded-3xl border border-ios-gray-800 bg-ios-gray-950/40 px-4 py-3 text-sm text-ios-gray-200">
-                  <input type="checkbox" checked={createForm.isPublished} onChange={(event) => setCreateForm((current) => ({ ...current, isPublished: event.target.checked }))} className="h-4 w-4 rounded border-ios-gray-600 bg-ios-gray-900 text-ios-blue" />
-                  <span>创建后立即发布</span>
+                <label className="flex items-center gap-3 rounded-[20px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-700">
+                  <input type="checkbox" checked={createForm.isPublished} onChange={(event) => setCreateForm((current) => ({ ...current, isPublished: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-white text-[var(--gush-accent,#2f58c6)]" />
+                  <span>Publish immediately</span>
                 </label>
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold text-ios-gray-300">作品状态</span>
-                    <select value={createForm.status} onChange={(event) => setCreateForm((current) => ({ ...current, status: event.target.value }))} className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue">
+                    <span className="text-sm font-semibold text-slate-700">Status</span>
+                    <select value={createForm.status} onChange={(event) => setCreateForm((current) => ({ ...current, status: event.target.value }))} className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]">
                       {STATUS_OPTIONS.map((option) => <option key={option} value={option}>{formatSeriesStatusLabel(option)}</option>)}
                     </select>
                   </label>
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold text-ios-gray-300">角标</span>
-                    <input value={createForm.badge} onChange={(event) => setCreateForm((current) => ({ ...current, badge: event.target.value }))} placeholder="例如：HOT" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                    <span className="text-sm font-semibold text-slate-700">Badge</span>
+                    <input value={createForm.badge} onChange={(event) => setCreateForm((current) => ({ ...current, badge: event.target.value }))} placeholder="For example: NEW" className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
                   </label>
                 </div>
 
                 <label className="block space-y-2">
-                  <span className="text-sm font-semibold text-ios-gray-300">作品简介</span>
-                  <textarea value={createForm.description} onChange={(event) => setCreateForm((current) => ({ ...current, description: event.target.value }))} placeholder="填写后台简介，创建后可以继续在详情页完善。" rows={4} className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                  <span className="text-sm font-semibold text-slate-700">Summary</span>
+                  <textarea value={createForm.description} onChange={(event) => setCreateForm((current) => ({ ...current, description: event.target.value }))} placeholder="Write a clean summary for the series page." rows={4} className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
                 </label>
 
                 <label className="block space-y-2">
-                  <span className="text-sm font-semibold text-ios-gray-300">分类标签</span>
-                  <input value={createForm.genres} onChange={(event) => setCreateForm((current) => ({ ...current, genres: event.target.value }))} placeholder="动作, 恋爱, 奇幻" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                  <span className="text-sm font-semibold text-slate-700">Genres and tags</span>
+                  <input value={createForm.genres} onChange={(event) => setCreateForm((current) => ({ ...current, genres: event.target.value }))} placeholder="Action, Romance, Fantasy" className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
                 </label>
 
                 <div className="grid gap-3 md:grid-cols-2">
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold text-ios-gray-300">默认章节价格</span>
-                    <input value={createForm.episodePrice} onChange={(event) => setCreateForm((current) => ({ ...current, episodePrice: event.target.value }))} inputMode="numeric" placeholder="0" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                    <span className="text-sm font-semibold text-slate-700">Default episode price</span>
+                    <input value={createForm.episodePrice} onChange={(event) => setCreateForm((current) => ({ ...current, episodePrice: event.target.value }))} inputMode="numeric" placeholder="0" className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
                   </label>
-                  <label className="flex items-center gap-3 rounded-3xl border border-ios-gray-800 bg-ios-gray-950/40 px-4 py-3 text-sm text-ios-gray-200">
-                    <input type="checkbox" checked={createForm.ttfEnabled} onChange={(event) => setCreateForm((current) => ({ ...current, ttfEnabled: event.target.checked }))} className="h-4 w-4 rounded border-ios-gray-600 bg-ios-gray-900 text-ios-blue" />
-                    <span>开启免费券</span>
+                  <label className="flex items-center gap-3 rounded-[20px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-700">
+                    <input type="checkbox" checked={createForm.ttfEnabled} onChange={(event) => setCreateForm((current) => ({ ...current, ttfEnabled: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-white text-[var(--gush-accent,#2f58c6)]" />
+                    <span>Enable free-pass window</span>
                   </label>
                 </div>
 
                 {createForm.ttfEnabled ? (
                   <label className="block space-y-2">
-                    <span className="text-sm font-semibold text-ios-gray-300">免费券刷新间隔（小时）</span>
-                    <input value={createForm.ttfIntervalHours} onChange={(event) => setCreateForm((current) => ({ ...current, ttfIntervalHours: event.target.value }))} inputMode="numeric" placeholder="24" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+                    <span className="text-sm font-semibold text-slate-700">Free-pass interval (hours)</span>
+                    <input value={createForm.ttfIntervalHours} onChange={(event) => setCreateForm((current) => ({ ...current, ttfIntervalHours: event.target.value }))} inputMode="numeric" placeholder="24" className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
                   </label>
                 ) : null}
 
                 <div className="space-y-2">
-                  <span className="text-sm font-semibold text-ios-gray-300">创建后继续</span>
+                  <span className="text-sm font-semibold text-slate-700">After create</span>
                   <div className="grid gap-2">
                     {CREATE_FLOW_OPTIONS.map((option) => (
                       <button
                         key={option.value}
                         type="button"
                         onClick={() => setCreateForm((current) => ({ ...current, openAfterCreate: option.value }))}
-                        className={`rounded-3xl border px-4 py-3 text-left transition ${createForm.openAfterCreate === option.value ? "border-ios-blue bg-ios-blue/10 text-white" : "border-ios-gray-800 bg-ios-gray-950/40 text-ios-gray-300 hover:bg-ios-gray-900"}`}
+                        className={`rounded-[20px] border px-4 py-3 text-left transition ${createForm.openAfterCreate === option.value ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-slate-950" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}
                       >
                         <p className="text-sm font-semibold">{option.label}</p>
-                        <p className="mt-1 text-xs text-ios-gray-500">{option.helper}</p>
+                        <p className="mt-1 text-xs text-slate-500">{option.helper}</p>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={closeCreateModal} className="flex-1 rounded-full border border-ios-gray-700 px-4 py-3 text-sm font-semibold text-ios-gray-200 transition hover:bg-ios-gray-800">取消</button>
-                  <button type="button" onClick={handleCreate} disabled={isCreating} className="flex-1 rounded-full bg-ios-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50">{isCreating ? "创建中..." : "创建"}</button>
+                  <button type="button" onClick={closeCreateModal} className="flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]">Cancel</button>
+                  <button type="button" onClick={handleCreate} disabled={isCreating} className="flex-1 rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">{isCreating ? "Creating..." : "Create"}</button>
                 </div>
               </div>
             </div>
@@ -944,23 +1017,23 @@ export default function AdminSeriesPageNew() {
       ) : null}
 
       {duplicateDialog.isOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={() => setDuplicateDialog({ isOpen: false, series: null, newId: "" })}>
-          <div className="w-full max-w-lg rounded-5xl border border-ios-gray-800 bg-neutral-900 p-6 shadow-ios-xl" onClick={(event) => event.stopPropagation()}>
-            <h3 className="text-xl font-bold text-white">复制作品</h3>
-            <p className="mt-1 text-sm text-ios-gray-400">基于当前作品创建一个新的副本。</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,27,36,0.28)] p-4 backdrop-blur-sm" onClick={() => setDuplicateDialog({ isOpen: false, series: null, newId: "" })}>
+          <div className="w-full max-w-lg rounded-[28px] border border-black/8 bg-white/96 p-6 shadow-[var(--gush-shadow-panel)]" onClick={(event) => event.stopPropagation()}>
+            <h3 className="text-xl font-semibold text-slate-950">Duplicate series</h3>
+            <p className="mt-1 text-sm text-slate-600">Create a new draft from the current title.</p>
             <label className="mt-5 block space-y-2">
-              <span className="text-sm font-semibold text-ios-gray-300">新的作品 ID *</span>
-              <input value={duplicateDialog.newId} onChange={(event) => setDuplicateDialog((current) => ({ ...current, newId: event.target.value }))} placeholder="请输入新的作品 ID" className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-ios-blue" />
+              <span className="text-sm font-semibold text-slate-700">New series id *</span>
+              <input value={duplicateDialog.newId} onChange={(event) => setDuplicateDialog((current) => ({ ...current, newId: event.target.value }))} placeholder="Enter a new series id" className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
             </label>
             <div className="mt-6 flex gap-3">
-              <button type="button" onClick={() => setDuplicateDialog({ isOpen: false, series: null, newId: "" })} className="flex-1 rounded-full border border-ios-gray-700 px-4 py-3 text-sm font-semibold text-ios-gray-200 transition hover:bg-ios-gray-800">取消</button>
-              <button type="button" onClick={handleDuplicate} disabled={isDuplicating} className="flex-1 rounded-full bg-ios-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50">{isDuplicating ? "复制中..." : "复制"}</button>
+              <button type="button" onClick={() => setDuplicateDialog({ isOpen: false, series: null, newId: "" })} className="flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]">Cancel</button>
+              <button type="button" onClick={handleDuplicate} disabled={isDuplicating} className="flex-1 rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">{isDuplicating ? "Duplicating..." : "Duplicate"}</button>
             </div>
           </div>
         </div>
       ) : null}
 
-      <ConfirmModal isOpen={confirmDialog.isOpen} onClose={() => setConfirmDialog((current) => ({ ...current, isOpen: false }))} onConfirm={confirmDialog.onConfirm} title={confirmDialog.title} message={confirmDialog.message} confirmText="确认" cancelText="取消" variant={confirmDialog.variant} />
+      <ConfirmModal isOpen={confirmDialog.isOpen} onClose={() => setConfirmDialog((current) => ({ ...current, isOpen: false }))} onConfirm={confirmDialog.onConfirm} title={confirmDialog.title} message={confirmDialog.message} confirmText="Confirm" cancelText="Cancel" variant={confirmDialog.variant} />
     </div>
   );
 }

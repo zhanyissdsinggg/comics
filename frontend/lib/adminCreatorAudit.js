@@ -4,6 +4,7 @@ import {
   normalizeCreatorName,
   slugifyCreatorName,
 } from "./creators";
+import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -52,25 +53,44 @@ function sortSeriesByPriority(items) {
   });
 }
 
+function getPublicCreatorIdentity(series) {
+  const creatorIdentity = resolveSeriesCreatorIdentity(series);
+  if (creatorIdentity.hasPublicCredit) {
+    return creatorIdentity;
+  }
+
+  const rawAuthor = normalizeCreatorName(series?.author);
+  if (!rawAuthor) {
+    return null;
+  }
+
+  const slug = slugifyCreatorName(rawAuthor);
+  return {
+    hasPublicCredit: true,
+    displayName: rawAuthor,
+    slug,
+    href: buildCreatorPathFromSlug(slug),
+  };
+}
+
 export function buildAdminCreatorAudit(seriesList) {
   const creatorsMap = new Map();
-  const missingAuthorSeries = [];
+  const missingCreatorSeries = [];
   const safeSeries = Array.isArray(seriesList) ? seriesList.filter(Boolean) : [];
 
   safeSeries.forEach((series) => {
-    const rawAuthor = typeof series?.author === "string" ? series.author.trim() : "";
-    const normalizedAuthor = normalizeCreatorName(rawAuthor);
-
-    if (!normalizedAuthor) {
-      missingAuthorSeries.push(series);
+    const creatorIdentity = getPublicCreatorIdentity(series);
+    if (!creatorIdentity?.displayName) {
+      missingCreatorSeries.push(series);
       return;
     }
 
-    const slug = slugifyCreatorName(normalizedAuthor);
+    const canonicalName = normalizeCreatorName(creatorIdentity.displayName);
+    const slug = creatorIdentity.slug || slugifyCreatorName(canonicalName);
     const current = creatorsMap.get(slug) || {
       slug,
-      name: getCreatorDisplayName(normalizedAuthor),
-      path: buildCreatorPathFromSlug(slug),
+      name: getCreatorDisplayName(canonicalName),
+      path: creatorIdentity.href || buildCreatorPathFromSlug(slug),
       titleCount: 0,
       publishedCount: 0,
       unpublishedCount: 0,
@@ -103,11 +123,21 @@ export function buildAdminCreatorAudit(seriesList) {
     }
 
     const updatedAt = normalizeIsoDate(series?.updatedAt);
-    if (updatedAt && (!current.latestUpdatedAt || Date.parse(updatedAt) > Date.parse(current.latestUpdatedAt))) {
+    if (
+      updatedAt &&
+      (!current.latestUpdatedAt || Date.parse(updatedAt) > Date.parse(current.latestUpdatedAt))
+    ) {
       current.latestUpdatedAt = updatedAt;
     }
 
-    current.variants.add(rawAuthor || normalizedAuthor);
+    const aliasCandidates = [
+      creatorIdentity.displayName,
+      typeof series?.author === "string" ? series.author.trim() : "",
+    ]
+      .map((value) => normalizeCreatorName(value))
+      .filter(Boolean);
+
+    aliasCandidates.forEach((value) => current.variants.add(value));
     creatorsMap.set(slug, current);
   });
 
@@ -133,7 +163,9 @@ export function buildAdminCreatorAudit(seriesList) {
           .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
           .map(([genre]) => genre)
           .slice(0, 3),
-        variants: Array.from(creator.variants).sort((left, right) => left.localeCompare(right)),
+        variants: Array.from(creator.variants).sort((left, right) =>
+          left.localeCompare(right),
+        ),
         hasNamingRisk: creator.variants.size > 1,
         series: sortedSeries,
       };
@@ -151,7 +183,8 @@ export function buildAdminCreatorAudit(seriesList) {
         return right.readerProof - left.readerProof;
       }
 
-      const updatedDelta = Date.parse(right.latestUpdatedAt || 0) - Date.parse(left.latestUpdatedAt || 0);
+      const updatedDelta =
+        Date.parse(right.latestUpdatedAt || 0) - Date.parse(left.latestUpdatedAt || 0);
       if (updatedDelta !== 0) {
         return updatedDelta;
       }
@@ -159,19 +192,19 @@ export function buildAdminCreatorAudit(seriesList) {
       return left.name.localeCompare(right.name);
     });
 
-  const sortedMissingAuthors = sortSeriesByPriority(missingAuthorSeries);
+  const sortedMissingCreators = sortSeriesByPriority(missingCreatorSeries);
   const stats = {
     totalSeries: safeSeries.length,
     creatorCount: creators.length,
     attributedSeriesCount: creators.reduce((sum, creator) => sum + creator.titleCount, 0),
-    missingAuthorSeriesCount: sortedMissingAuthors.length,
+    missingAuthorSeriesCount: sortedMissingCreators.length,
     namingRiskCreatorCount: creators.filter((creator) => creator.hasNamingRisk).length,
     unpublishedSeriesCount: safeSeries.filter((series) => !series?.isPublished).length,
   };
 
   return {
     creators,
-    missingAuthorSeries: sortedMissingAuthors,
+    missingAuthorSeries: sortedMissingCreators,
     namingRiskCreators: creators.filter((creator) => creator.hasNamingRisk),
     stats,
   };

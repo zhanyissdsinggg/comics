@@ -3,33 +3,42 @@ import { AdminLayout } from "../../../components/admin/AdminLayout";
 function SettingsContent() {
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold">后台访问</h2>
-        <p className="mt-2 text-sm text-slate-600">
-          后台认证现在统一走共享的 HttpOnly Cookie 会话。不要再通过 URL 参数、前端本地存储或手动拼接 Bearer Token 传递后台凭据。
+      <section className="rounded-[24px] border border-black/8 bg-white p-6 shadow-[var(--gush-shadow-soft)]">
+        <h2 className="text-lg font-semibold">Admin access</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Admin authentication runs through a shared HttpOnly cookie session. Avoid passing tokens through URL params, local storage, or hand-built bearer flows for this workspace.
         </p>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold">环境说明</h2>
+      <section className="rounded-[24px] border border-black/8 bg-white p-6 shadow-[var(--gush-shadow-soft)]">
+        <h2 className="text-lg font-semibold">Environment notes</h2>
         <div className="mt-3 grid gap-3 text-sm text-slate-600 md:grid-cols-2">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs text-slate-500">后端 API</p>
-            <p className="mt-2">优先读取 `API_BASE_URL`，也兼容 `NEXT_PUBLIC_API_BASE_URL`。</p>
+          <div className="rounded-[18px] border border-black/8 bg-[rgba(250,247,241,0.82)] p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Backend API
+            </p>
+            <p className="mt-2">
+              Read from <code>API_BASE_URL</code> first, with{" "}
+              <code>NEXT_PUBLIC_API_BASE_URL</code> still supported for compatibility.
+            </p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs text-slate-500">Swagger 文档</p>
-            <p className="mt-2">当后端部署暴露文档时，可通过 `/api/docs` 访问。</p>
+          <div className="rounded-[18px] border border-black/8 bg-[rgba(250,247,241,0.82)] p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              API docs
+            </p>
+            <p className="mt-2">
+              When backend docs are exposed, visit <code>/api/docs</code> for the live Swagger reference.
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold">指标口径</h2>
-        <ul className="mt-3 space-y-2 text-sm text-slate-600">
-          <li>浏览量：章节内容请求成功返回后计一次。</li>
-          <li>注册数：新账号完成创建后计一次。</li>
-          <li>DAU：按当日触发过行为的去重登录用户统计。</li>
+      <section className="rounded-[24px] border border-black/8 bg-white p-6 shadow-[var(--gush-shadow-soft)]">
+        <h2 className="text-lg font-semibold">Metric notes</h2>
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
+          <li>View counts are recorded after an episode request returns successfully.</li>
+          <li>Registration counts increase once a new account is created successfully.</li>
+          <li>DAU tracks unique signed-in users who triggered activity on the selected day.</li>
         </ul>
       </section>
     </div>
@@ -39,8 +48,8 @@ function SettingsContent() {
 export default function Page() {
   return (
     <AdminLayout
-      title="系统设置"
-      subtitle="查看后台访问、环境变量和数据指标定义的参考说明。"
+      title="System Settings"
+      subtitle="Reference notes for admin access, environment wiring, and the core metric definitions used across this workspace."
     >
       <SettingsContent />
     </AdminLayout>

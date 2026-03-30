@@ -1,53 +1,38 @@
-﻿'use client';
+'use client';
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+
+import AdminShell from '@/components/admin/AdminShell';
 import { AdminDataState } from '@/components/admin/common/AdminDataState';
-import { AdminListPagination } from '@/components/admin/common/AdminListPagination';
-import { LoadingState } from '@/components/admin/common/LoadingState';
+import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
+import {
+  AdminBadge,
+  AdminDataTable,
+  AdminKeyValueList,
+  AdminMetricCard,
+  AdminPageSection,
+  AdminTableHeader,
+  AdminTableRow,
+  AdminTabs,
+} from '@/components/admin/common/AdminWorkspacePrimitives';
+import { Button } from '@/components/ui/button';
 import { adminFetchJson } from '@/lib/adminApiClient';
 
 const VIEW_TABS = [
-  { key: 'stats', label: '概览' },
-  { key: 'segments', label: '用户分群' },
-  { key: 'user-detail', label: '用户详情' },
+  { value: 'stats', label: 'Overview' },
+  { value: 'segments', label: 'Audience segments' },
+  { value: 'user-detail', label: 'User detail' },
 ];
 
 const SEGMENT_FILTERS = [
-  { key: 'all', label: '全部用户' },
-  { key: 'vip', label: 'VIP 用户' },
-  { key: 'high-value', label: '高价值用户' },
-  { key: 'at-risk', label: '流失风险用户' },
+  { key: 'all', label: 'All readers' },
+  { key: 'vip', label: 'VIP' },
+  { key: 'high-value', label: 'High value' },
+  { key: 'at-risk', label: 'At risk' },
 ];
-
-const STAT_CARD_STYLES = {
-  blue: {
-    container: 'border-sky-500/20 bg-sky-500/10',
-    value: 'text-sky-200',
-  },
-  emerald: {
-    container: 'border-emerald-500/20 bg-emerald-500/10',
-    value: 'text-emerald-200',
-  },
-  violet: {
-    container: 'border-violet-500/20 bg-violet-500/10',
-    value: 'text-violet-200',
-  },
-  amber: {
-    container: 'border-amber-500/20 bg-amber-500/10',
-    value: 'text-amber-200',
-  },
-  rose: {
-    container: 'border-rose-500/20 bg-rose-500/10',
-    value: 'text-rose-200',
-  },
-  teal: {
-    container: 'border-teal-500/20 bg-teal-500/10',
-    value: 'text-teal-200',
-  },
-};
 
 function getErrorMessage(error, fallbackMessage) {
   if (error instanceof Error && error.message) {
@@ -59,7 +44,7 @@ function getErrorMessage(error, fallbackMessage) {
 
 function formatCurrency(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat('zh-CN', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 2,
@@ -77,53 +62,53 @@ function formatPercent(value) {
 
 function formatDate(value) {
   if (!value) {
-    return '从未';
+    return 'Never';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return '日期无效';
+    return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
-    day: '2-digit',
+    day: 'numeric',
   }).format(date);
 }
 
 function formatNumber(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat('zh-CN').format(Number.isFinite(amount) ? amount : 0);
+  return new Intl.NumberFormat('en-US').format(Number.isFinite(amount) ? amount : 0);
 }
 
 function getSegmentLabel(segment) {
-  return SEGMENT_FILTERS.find((item) => item.key === segment)?.label || '自定义分群';
+  return SEGMENT_FILTERS.find((item) => item.key === segment)?.label || 'Custom segment';
 }
 
 function formatChurnRiskLabel(churnRisk) {
   switch (String(churnRisk || '').toLowerCase()) {
     case 'low':
-      return '低';
+      return 'Low';
     case 'medium':
-      return '中';
+      return 'Medium';
     case 'high':
-      return '高';
+      return 'High';
     default:
-      return '未知';
+      return 'Unknown';
   }
 }
 
 function getChurnTone(churnRisk) {
   switch (String(churnRisk || '').toLowerCase()) {
     case 'low':
-      return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
+      return 'success';
     case 'medium':
-      return 'border-amber-500/30 bg-amber-500/10 text-amber-200';
+      return 'warning';
     case 'high':
-      return 'border-rose-500/30 bg-rose-500/10 text-rose-200';
+      return 'danger';
     default:
-      return 'border-neutral-700 bg-neutral-900 text-neutral-300';
+      return 'default';
   }
 }
 
@@ -131,43 +116,10 @@ async function fetchAdminPayload(path) {
   const { response, data } = await adminFetchJson(path, { cache: 'no-store' });
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || `请求失败，状态码 ${response.status}。`);
+    throw new Error(data?.message || data?.error || `Request failed with status ${response.status}.`);
   }
 
   return data || {};
-}
-
-function SectionHeading({ title, description, action = null }) {
-  return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-white">{title}</h2>
-        <p className="max-w-2xl text-sm text-neutral-400">{description}</p>
-      </div>
-      {action}
-    </div>
-  );
-}
-
-function StatCard({ title, value, tone = 'blue', helperText }) {
-  const style = STAT_CARD_STYLES[tone] || STAT_CARD_STYLES.blue;
-
-  return (
-    <div className={`rounded-3xl border px-5 py-5 ${style.container}`}>
-      <p className="text-sm text-neutral-400">{title}</p>
-      <p className={`mt-3 text-3xl font-semibold ${style.value}`}>{value}</p>
-      {helperText ? <p className="mt-2 text-xs text-neutral-500">{helperText}</p> : null}
-    </div>
-  );
-}
-
-function DetailRow({ label, value }) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-neutral-800 py-3 last:border-b-0 last:pb-0">
-      <span className="text-sm text-neutral-500">{label}</span>
-      <span className="text-sm font-medium text-white">{value}</span>
-    </div>
-  );
 }
 
 export default function AdminUserAnalyticsPage() {
@@ -247,93 +199,97 @@ export default function AdminUserAnalyticsPage() {
     setSelectedUserId('');
   }, [selectedSegment]);
 
-  return (
-    <div className="min-h-screen bg-neutral-950 px-6 py-8 text-white">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-3">
-               <p className="text-xs font-semibold uppercase tracking-[0.32em] text-cyan-300">后台分析</p>
-               <div className="space-y-2">
-                 <h1 className="text-3xl font-semibold tracking-tight text-white">用户分析</h1>
-                 <p className="max-w-3xl text-sm text-neutral-400">
-                   在后台中直接查看用户价值、分群质量、流失风险和活跃信号。
-                 </p>
-              </div>
-            </div>
+  const statsCards = [
+    {
+      label: 'Total readers',
+      value: formatNumber(stats?.totalUsers),
+      detail: 'All registered reader accounts.',
+      tone: 'accent',
+    },
+    {
+      label: 'Active readers',
+      value: formatNumber(stats?.activeUsers),
+      detail: 'Accounts active in the current analysis window.',
+    },
+    {
+      label: 'Active rate',
+      value: formatPercent(stats?.activeRate),
+      detail: 'The share of all readers who were recently active.',
+    },
+    {
+      label: 'High-value readers',
+      value: formatNumber(stats?.highValueUsers),
+      detail: 'Accounts that have crossed the LTV threshold.',
+    },
+    {
+      label: 'At-risk readers',
+      value: formatNumber(stats?.atRiskUsers),
+      detail: 'Readers who may need a retention touch soon.',
+    },
+    {
+      label: 'Tracked revenue',
+      value: formatCurrency(stats?.totalRevenue),
+      detail: 'Observed spend attributed to the tracked reader base.',
+    },
+  ];
 
-            <div className="flex flex-wrap gap-3">
-              {VIEW_TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setViewMode(tab.key)}
-                  className={`rounded-2xl border px-4 py-2 text-sm font-medium transition ${
-                    viewMode === tab.key
-                      ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-100'
-                      : 'border-neutral-700 bg-neutral-900 text-neutral-300 hover:border-neutral-500 hover:text-white'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </header>
+  return (
+    <AdminShell
+      title="Dashboard"
+      subtitle="Review the audience picture without turning the page into a loud KPI wall. Start with the overall pulse, then move into segments or a single account when needed."
+    >
+      <div className="space-y-6">
+        <AdminTabs items={VIEW_TABS} value={viewMode} onChange={setViewMode} />
 
         {viewMode === 'stats' ? (
-          <section className="space-y-6">
-            <SectionHeading
-              title="表现概览"
-              description="跟踪当前活跃读者、付费表现和流失风险之间的平衡。"
-            />
-
+          <AdminPageSection
+            title="Audience overview"
+            description="Track reader scale, activity, value, and retention risk in one calm editorial workspace."
+          >
             {statsQuery.isError ? (
-              <LoadingState.ErrorState
-                error={getErrorMessage(statsQuery.error, '分析概览加载失败。')}
-                onRetry={() => statsQuery.refetch()}
+              <AdminDataState
+                isLoading={false}
+                hasData={false}
+                emptyMessage={getErrorMessage(statsQuery.error, 'Analytics could not be loaded.')}
               />
             ) : (
               <AdminDataState
                 isLoading={statsQuery.isLoading}
                 hasData={Boolean(stats)}
-                emptyMessage="暂无分析数据。"
+                emptyMessage="Analytics data is not available yet."
                 wrap={false}
               >
                 {() => (
                   <div className="space-y-6">
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      <StatCard title="总用户数" value={formatNumber(stats?.totalUsers)} tone="blue" helperText="全部注册账号。" />
-                      <StatCard title="活跃用户数" value={formatNumber(stats?.activeUsers)} tone="emerald" helperText="当前统计窗口内活跃的用户。" />
-                      <StatCard title="活跃率" value={formatPercent(stats?.activeRate)} tone="violet" helperText="全部用户中的活跃占比。" />
-                      <StatCard title="高价值用户" value={formatNumber(stats?.highValueUsers)} tone="amber" helperText="达到 LTV 阈值的用户。" />
-                      <StatCard title="风险用户" value={formatNumber(stats?.atRiskUsers)} tone="rose" helperText="被标记为需要挽回的用户。" />
-                      <StatCard title="总收入" value={formatCurrency(stats?.totalRevenue)} tone="teal" helperText="归因到已跟踪用户的实际付费收入。" />
+                      {statsCards.map((card) => (
+                        <AdminMetricCard key={card.label} {...card} />
+                      ))}
                     </div>
 
                     <div className="grid gap-4 lg:grid-cols-3">
-                      <div className="rounded-3xl border border-neutral-800 bg-neutral-900/70 px-5 py-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">留存预警</p>
-                        <p className="mt-3 text-sm leading-7 text-neutral-300">
+                      <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+                        <p className="text-sm font-semibold text-slate-950">Retention watch</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
                           {Number(stats?.atRiskUsers || 0) > 0
-                            ? `当前有 ${formatNumber(stats?.atRiskUsers)} 位用户需要重点留存干预。`
-                            : '最新分析中暂无被标记的高风险流失用户。'}
+                            ? `${formatNumber(stats?.atRiskUsers)} readers currently look like they need retention attention.`
+                            : 'No high-risk churn signal is active in the latest snapshot.'}
                         </p>
                       </div>
-                      <div className="rounded-3xl border border-neutral-800 bg-neutral-900/70 px-5 py-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">收入密度</p>
-                        <p className="mt-3 text-sm leading-7 text-neutral-300">
+                      <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+                        <p className="text-sm font-semibold text-slate-950">Revenue density</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
                           {Number(stats?.highValueUsers || 0) > 0
-                            ? `当前高价值用户的人均收入为 ${formatCurrency((Number(stats?.totalRevenue || 0)) / Number(stats?.highValueUsers || 1))}。`
-                            : '出现符合条件的高价值用户后，这里会显示收入密度。'}
+                            ? `Average spend across high-value readers is ${formatCurrency((Number(stats?.totalRevenue || 0)) / Number(stats?.highValueUsers || 1))}.`
+                            : 'This note will update once high-value readers are available in the current sample.'}
                         </p>
                       </div>
-                      <div className="rounded-3xl border border-neutral-800 bg-neutral-900/70 px-5 py-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">活跃脉冲</p>
-                        <p className="mt-3 text-sm leading-7 text-neutral-300">
+                      <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+                        <p className="text-sm font-semibold text-slate-950">Activity pulse</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
                           {Number(stats?.activeUsers || 0) > 0
-                            ? `当前周期内共有 ${formatNumber(stats?.activeUsers)} 位用户产生过活跃行为。`
-                            : '当前分析快照中没有发现近期活跃行为。'}
+                            ? `${formatNumber(stats?.activeUsers)} readers generated recent activity in the current window.`
+                            : 'No recent activity has been recorded in the latest sample.'}
                         </p>
                       </div>
                     </div>
@@ -341,17 +297,15 @@ export default function AdminUserAnalyticsPage() {
                 )}
               </AdminDataState>
             )}
-          </section>
+          </AdminPageSection>
         ) : null}
 
         {viewMode === 'segments' ? (
-          <section className="space-y-6">
-            <SectionHeading
-              title="用户分群"
-              description="按用户群体切片查看付费质量，并可在同页快速进入单个用户详情。"
-            />
-
-            <div className="flex flex-wrap gap-3">
+          <AdminPageSection
+            title="Audience segments"
+            description="Start with a reader group, then open one account only when you need the deeper story."
+          >
+            <div className="mb-6 flex flex-wrap gap-2">
               {SEGMENT_FILTERS.map((segment) => (
                 <button
                   key={segment.key}
@@ -360,10 +314,10 @@ export default function AdminUserAnalyticsPage() {
                     setSelectedSegment(segment.key);
                     setPage(1);
                   }}
-                  className={`rounded-2xl border px-4 py-2 text-sm font-medium transition ${
+                  className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                     selectedSegment === segment.key
-                      ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-100'
-                      : 'border-neutral-700 bg-neutral-900 text-neutral-300 hover:border-neutral-500 hover:text-white'
+                      ? 'border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]'
+                      : 'border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950'
                   }`}
                 >
                   {segment.label}
@@ -371,197 +325,224 @@ export default function AdminUserAnalyticsPage() {
               ))}
             </div>
 
-            {segmentsQuery.isError ? (
-              <LoadingState.ErrorState
-                error={getErrorMessage(segmentsQuery.error, '用户分群加载失败。')}
-                onRetry={() => segmentsQuery.refetch()}
-              />
-            ) : (
-              <AdminDataState
-                isLoading={segmentsQuery.isLoading}
-                hasData={users.length > 0}
-                emptyMessage="当前分群下暂无用户。"
-                wrap={false}
-              >
-                {() => (
-                  <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900/80 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-neutral-800 text-sm">
-                        <thead className="bg-neutral-950/80 text-left text-xs uppercase tracking-[0.16em] text-neutral-500">
-                          <tr>
-                            <th className="px-4 py-4">用户</th>
-                            <th className="px-4 py-4">钱包</th>
-                            <th className="px-4 py-4">LTV</th>
-                            <th className="px-4 py-4">阅读量</th>
-                            <th className="px-4 py-4">流失风险</th>
-                            <th className="px-4 py-4">注册时间</th>
-                            <th className="px-4 py-4">操作</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-neutral-800">
-                          {users.map((segmentUser) => {
-                            const metrics = segmentUser.userMetrics;
-                            const behavior = segmentUser.userBehavior;
+            <AdminTableShell
+              isError={segmentsQuery.isError}
+              errorMessage={getErrorMessage(segmentsQuery.error, 'Audience segments could not be loaded.')}
+              onRetry={() => segmentsQuery.refetch()}
+              isLoading={segmentsQuery.isLoading}
+              hasItems={users.length > 0}
+              emptyMessage="No users match this segment yet."
+              pagination={pagination}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={(value) => {
+                setPageSize(value);
+                setPage(1);
+              }}
+            >
+              <AdminDataTable className="border-0 shadow-none">
+                <table className="w-full min-w-[920px]">
+                  <AdminTableHeader>
+                    <tr>
+                      <th className="px-4 py-4">Reader</th>
+                      <th className="px-4 py-4">Wallet</th>
+                      <th className="px-4 py-4">LTV</th>
+                      <th className="px-4 py-4">Stories viewed</th>
+                      <th className="px-4 py-4">Churn risk</th>
+                      <th className="px-4 py-4">Joined</th>
+                      <th className="px-4 py-4">Actions</th>
+                    </tr>
+                  </AdminTableHeader>
+                  <tbody>
+                    {users.map((segmentUser) => {
+                      const metrics = segmentUser.userMetrics;
+                      const behavior = segmentUser.userBehavior;
 
-                            return (
-                              <tr key={segmentUser.id} className="align-top transition hover:bg-neutral-900/90">
-                                <td className="px-4 py-4">
-                                  <div className="space-y-1">
-                                    <p className="font-medium text-white">{segmentUser.email || '未知邮箱'}</p>
-                                    <p className="text-xs text-neutral-500">{segmentUser.id}</p>
-                                  </div>
-                                </td>
-                                <td className="px-4 py-4 text-neutral-300">{formatNumber(segmentUser.wallet?.coins)}</td>
-                                <td className="px-4 py-4 text-neutral-300">{formatCurrency(metrics?.ltv)}</td>
-                                <td className="px-4 py-4 text-neutral-300">{formatNumber(behavior?.seriesViewed)}</td>
-                                <td className="px-4 py-4">
-                                  <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${getChurnTone(metrics?.churnRisk)}`}>
-                                     {formatChurnRiskLabel(metrics?.churnRisk)}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-4 text-neutral-400">{formatDate(segmentUser.createdAt)}</td>
-                                <td className="px-4 py-4">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedUserId(segmentUser.id);
-                                      setViewMode('user-detail');
-                                    }}
-                                    className="rounded-2xl border border-neutral-700 px-3 py-2 text-xs font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-950"
-                                  >
-                                    查看用户
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <AdminListPagination
-                      pagination={pagination}
-                      page={page}
-                      pageSize={pageSize}
-                      onPageChange={setPage}
-                      onPageSizeChange={(value) => {
-                        setPageSize(value);
-                        setPage(1);
-                      }}
-                      containerClassName="flex flex-col gap-3 border-t border-neutral-800 bg-neutral-950/70 px-4 py-4 text-sm text-neutral-400 lg:flex-row lg:items-center lg:justify-between"
-                      pageSizeSelectClassName="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white outline-none"
-                      buttonClassName="rounded-xl border border-neutral-700 px-3 py-2 text-sm text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </div>
-                )}
-              </AdminDataState>
-            )}
-          </section>
+                      return (
+                        <AdminTableRow key={segmentUser.id}>
+                          <td className="px-4 py-4">
+                            <div className="space-y-1">
+                              <p className="font-semibold text-slate-950">
+                                {segmentUser.email || 'Unknown email'}
+                              </p>
+                              <p className="text-xs text-slate-500">{segmentUser.id}</p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-slate-600">
+                            {formatNumber(segmentUser.wallet?.coins)}
+                          </td>
+                          <td className="px-4 py-4 text-slate-600">{formatCurrency(metrics?.ltv)}</td>
+                          <td className="px-4 py-4 text-slate-600">
+                            {formatNumber(behavior?.seriesViewed)}
+                          </td>
+                          <td className="px-4 py-4">
+                            <AdminBadge tone={getChurnTone(metrics?.churnRisk)}>
+                              {formatChurnRiskLabel(metrics?.churnRisk)}
+                            </AdminBadge>
+                          </td>
+                          <td className="px-4 py-4 text-slate-600">{formatDate(segmentUser.createdAt)}</td>
+                          <td className="px-4 py-4">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUserId(segmentUser.id);
+                                setViewMode('user-detail');
+                              }}
+                            >
+                              Open user
+                            </Button>
+                          </td>
+                        </AdminTableRow>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </AdminDataTable>
+            </AdminTableShell>
+          </AdminPageSection>
         ) : null}
 
         {viewMode === 'user-detail' ? (
-          <section className="space-y-6">
-            <SectionHeading
-              title="用户深度分析"
-              description={`查看「${getSegmentLabel(selectedSegment)}」分群下单个账号的详细诊断信息。`}
-              action={
-                <button
-                  type="button"
-                  onClick={() => setViewMode('segments')}
-                  className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
-                >
-                  返回分群列表
-                </button>
-              }
-            />
-
+          <AdminPageSection
+            title="User detail"
+            description={`Review the account behind the current ${getSegmentLabel(selectedSegment)} segment selection.`}
+            action={
+              <Button type="button" variant="outline" onClick={() => setViewMode('segments')}>
+                Back to segments
+              </Button>
+            }
+          >
             {userDetailQuery.isError ? (
-              <LoadingState.ErrorState
-                error={getErrorMessage(userDetailQuery.error, '用户分析加载失败。')}
-                onRetry={() => userDetailQuery.refetch()}
+              <AdminDataState
+                isLoading={false}
+                hasData={false}
+                emptyMessage={getErrorMessage(userDetailQuery.error, 'User detail could not be loaded.')}
               />
             ) : (
               <AdminDataState
                 isLoading={userDetailQuery.isLoading}
                 hasData={Boolean(analytics && user)}
-                emptyMessage={selectedUserId ? '未找到该用户。' : '请先从分群表格中选择一个用户查看详情。'}
+                emptyMessage={
+                  selectedUserId
+                    ? 'That user record could not be found.'
+                    : 'Select a reader from the segment table to open the deeper view.'
+                }
                 wrap={false}
               >
                 {() => (
-                  <div className="grid gap-6 xl:grid-cols-[1.35fr,0.85fr]">
-                    <div className="space-y-6 rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
-                      <div className="space-y-2">
-                          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">用户身份</p>
-                          <h3 className="text-2xl font-semibold text-white">{user?.email || '未知邮箱'}</h3>
-                        <p className="text-sm text-neutral-500">{user?.id}</p>
+                  <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
+                    <div className="space-y-6">
+                      <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                          Reader profile
+                        </p>
+                        <h3 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
+                          {user?.email || 'Unknown email'}
+                        </h3>
+                        <p className="mt-2 text-sm text-slate-500">{user?.id}</p>
+
+                        <div className="mt-5 grid gap-4 md:grid-cols-2">
+                          <AdminMetricCard
+                            label="Lifetime value"
+                            value={formatCurrency(ltv?.ltv)}
+                            detail={`Average order value: ${formatCurrency(ltv?.avgOrderValue)}`}
+                            tone="accent"
+                          />
+                          <AdminMetricCard
+                            label="Total spend"
+                            value={formatCurrency(ltv?.totalSpent)}
+                            detail={`${formatNumber(ltv?.totalOrders)} recorded orders`}
+                          />
+                          <AdminMetricCard
+                            label="Wallet"
+                            value={formatNumber(user?.wallet?.coins)}
+                            detail="Current point balance."
+                          />
+                          <AdminMetricCard
+                            label="Activity score"
+                            value={formatNumber(userBehavior?.activityScore)}
+                            detail="Derived from reading and interaction signals."
+                          />
+                        </div>
                       </div>
 
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <StatCard title="生命周期价值" value={formatCurrency(ltv?.ltv)} tone="blue" helperText={`平均订单金额：${formatCurrency(ltv?.avgOrderValue)}`} />
-                        <StatCard title="总消费" value={formatCurrency(ltv?.totalSpent)} tone="emerald" helperText={`${formatNumber(ltv?.totalOrders)} 笔支付订单`} />
-                        <StatCard title="钱包余额" value={formatNumber(user?.wallet?.coins)} tone="violet" helperText="当前金币库存。" />
-                        <StatCard title="活跃分" value={formatNumber(userBehavior?.activityScore)} tone="amber" helperText="根据阅读与互动行为推导。" />
-                      </div>
-
-                      <div className="grid gap-6 lg:grid-cols-2">
-                        <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 px-5 py-5">
-                           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">付费信息</p>
-                           <div className="mt-4">
-                             <DetailRow label="首单时间" value={formatDate(ltv?.firstOrderDate)} />
-                             <DetailRow label="最近下单" value={formatDate(ltv?.lastOrderDate)} />
-                             <DetailRow label="下单次数" value={formatNumber(ltv?.totalOrders)} />
-                             <DetailRow label="当前分群" value={getSegmentLabel(selectedSegment)} />
-                           </div>
-                         </div>
-
-                         <div className="rounded-3xl border border-neutral-800 bg-neutral-950/70 px-5 py-5">
-                           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">互动行为</p>
-                           <div className="mt-4">
-                             <DetailRow label="浏览作品数" value={formatNumber(userBehavior?.seriesViewed)} />
-                             <DetailRow label="阅读分钟数" value={formatNumber(Math.round(Number(userBehavior?.readingTime || 0) / 60))} />
-                             <DetailRow label="评论数" value={formatNumber(userBehavior?.commentsCount)} />
-                             <DetailRow label="评分数" value={formatNumber(userBehavior?.ratingsCount)} />
-                             <DetailRow label="收藏数" value={formatNumber(userBehavior?.bookmarksCount)} />
-                           </div>
-                         </div>
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                          <p className="text-sm font-semibold text-slate-950">Spend history</p>
+                          <AdminKeyValueList
+                            className="mt-4"
+                            items={[
+                              { label: 'First order', value: formatDate(ltv?.firstOrderDate) },
+                              { label: 'Latest order', value: formatDate(ltv?.lastOrderDate) },
+                              { label: 'Order count', value: formatNumber(ltv?.totalOrders) },
+                              { label: 'Current segment', value: getSegmentLabel(selectedSegment) },
+                            ]}
+                          />
+                        </div>
+                        <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                          <p className="text-sm font-semibold text-slate-950">Reading behavior</p>
+                          <AdminKeyValueList
+                            className="mt-4"
+                            items={[
+                              { label: 'Stories viewed', value: formatNumber(userBehavior?.seriesViewed) },
+                              {
+                                label: 'Reading time',
+                                value: `${formatNumber(Math.round(Number(userBehavior?.readingTime || 0) / 60))} min`,
+                              },
+                              { label: 'Comments', value: formatNumber(userBehavior?.commentsCount) },
+                              { label: 'Ratings', value: formatNumber(userBehavior?.ratingsCount) },
+                              { label: 'Bookmarks', value: formatNumber(userBehavior?.bookmarksCount) },
+                            ]}
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-6">
-                      <div className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-5 py-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">留存状态</p>
-                        <div className="mt-4 flex items-center justify-between gap-3">
-                          <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${getChurnTone(analytics?.churnRisk)}`}>
+                    <div className="space-y-4">
+                      <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-950">Retention status</p>
+                            <p className="mt-2 text-sm leading-6 text-slate-600">
+                              Keep this note direct so operators can understand the risk level at a glance.
+                            </p>
+                          </div>
+                          <AdminBadge tone={getChurnTone(analytics?.churnRisk)}>
                             {formatChurnRiskLabel(analytics?.churnRisk)}
-                          </span>
-                          <span className="text-sm text-neutral-400">最近活跃：{formatDate(userBehavior?.lastActiveAt)}</span>
+                          </AdminBadge>
                         </div>
-                        <p className="mt-4 text-sm leading-7 text-neutral-300">
+                        <p className="mt-4 text-sm leading-7 text-slate-600">
                           {String(analytics?.churnRisk || '').toLowerCase() === 'high'
-                            ? '该账号存在明显流失风险，建议尽快触发召回动作。'
+                            ? 'This account shows a strong churn signal and likely needs a re-engagement touch soon.'
                             : String(analytics?.churnRisk || '').toLowerCase() === 'medium'
-                              ? '活跃度正在走弱，可以考虑发放优惠或增加内容曝光。'
-                              : '结合当前留存模型来看，该用户互动状态相对健康。'}
+                              ? 'Activity is softening, so targeted discovery or a lighter promotional touch may help.'
+                              : 'Recent engagement still looks healthy relative to the current retention model.'}
                         </p>
                       </div>
 
-                      <div className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-5 py-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">快速信息</p>
-                        <div className="mt-4">
-                          <DetailRow label="注册时间" value={formatDate(user?.createdAt)} />
-                          <DetailRow label="钱包金币" value={formatNumber(user?.wallet?.coins)} />
-                          <DetailRow label="奖励金币" value={formatNumber(user?.wallet?.bonusCoins)} />
-                          <DetailRow label="最近活跃" value={formatDate(userBehavior?.lastActiveAt)} />
-                        </div>
+                      <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                        <p className="text-sm font-semibold text-slate-950">Quick facts</p>
+                        <AdminKeyValueList
+                          className="mt-4"
+                          items={[
+                            { label: 'Joined', value: formatDate(user?.createdAt) },
+                            { label: 'Wallet', value: formatNumber(user?.wallet?.coins) },
+                            { label: 'Bonus balance', value: formatNumber(user?.wallet?.bonusCoins) },
+                            { label: 'Last active', value: formatDate(userBehavior?.lastActiveAt) },
+                          ]}
+                        />
                       </div>
                     </div>
                   </div>
                 )}
               </AdminDataState>
             )}
-          </section>
+          </AdminPageSection>
         ) : null}
       </div>
-    </div>
+    </AdminShell>
   );
 }

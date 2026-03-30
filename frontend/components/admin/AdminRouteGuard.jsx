@@ -53,9 +53,9 @@ export default function AdminRouteGuard({ children }) {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-neutral-950">
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/70 px-6 py-4 text-sm text-neutral-300">
-          正在校验后台会话...
+      <div className="flex min-h-screen items-center justify-center bg-[var(--gush-page-bg)]">
+        <div className="rounded-[24px] border border-black/8 bg-white/88 px-6 py-4 text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">
+          Checking your admin session...
         </div>
       </div>
     );

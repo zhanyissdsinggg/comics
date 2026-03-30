@@ -1,4 +1,3 @@
-﻿
 'use client';
 
 /* eslint-disable @next/next/no-img-element */
@@ -8,39 +7,39 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowUpRight, BookOpen, Image as ImageIcon, PencilLine, Save } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, BookOpen, Image as ImageIcon, PencilLine, Save } from 'lucide-react';
+
+import AdminShell from '@/components/admin/AdminShell';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { LoadingState } from '@/components/admin/common/LoadingState';
+import { AdminDataState } from '@/components/admin/common/AdminDataState';
+import {
+  AdminBadge,
+  AdminFormField,
+  AdminKeyValueList,
+  AdminMetricCard,
+  AdminPageSection,
+  adminInputClassName,
+  adminSelectClassName,
+  adminTextareaClassName,
+} from '@/components/admin/common/AdminWorkspacePrimitives';
+import { Button } from '@/components/ui/button';
 import { adminFetchJson, adminUpload } from '@/lib/adminApiClient';
 import { getAdminSeriesReadiness } from '@/lib/adminSeriesReadiness';
 
 const TYPE_OPTIONS = [
-  { value: 'comic', label: '漫画' },
-  { value: 'novel', label: '小说' },
+  { value: 'comic', label: 'Comic' },
+  { value: 'novel', label: 'Novel' },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'Ongoing', label: '连载中' },
-  { value: 'Completed', label: '已完结' },
-  { value: 'Hiatus', label: '暂停中' },
-  { value: 'Cancelled', label: '已停更' },
+  { value: 'Ongoing', label: 'Ongoing' },
+  { value: 'Completed', label: 'Completed' },
+  { value: 'Hiatus', label: 'Hiatus' },
+  { value: 'Cancelled', label: 'Cancelled' },
 ];
 
 const EMPTY_FEEDBACK = { type: '', message: '' };
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
-const PRICING_FIELDS = new Set(['episodePrice']);
-const TTF_FIELDS = new Set(['ttfEnabled', 'ttfIntervalHours']);
-const SECTION_CONFIGS = [
-  { id: 'basic', title: '基础信息', fields: ['title', 'type', 'status', 'description', 'genres', 'badge'] },
-  { id: 'creator', title: '作者与创作者信号', fields: ['author'] },
-  { id: 'distribution', title: '发布与限制', fields: ['isPublished', 'adult'] },
-  { id: 'commerce', title: '商业设置', fields: ['episodePrice', 'ttfEnabled', 'ttfIntervalHours'] },
-  { id: 'cover', title: '封面资源', fields: ['coverUrl', 'coverTone'] },
-];
-
-function getSectionConfig(sectionId) {
-  return SECTION_CONFIGS.find((section) => section.id === sectionId) || SECTION_CONFIGS[0];
-}
 
 function createEmptyForm() {
   return {
@@ -87,97 +86,28 @@ function normalizeGenresInput(value) {
     .filter(Boolean);
 }
 
-function buildSeriesPayload(formData, fields = null) {
-  const include = fields ? new Set(fields) : null;
-  const shouldInclude = (field) => !include || include.has(field);
+function buildSeriesPayload(formData) {
   const episodePrice = Number.parseInt(String(formData.episodePrice || '0'), 10);
   const intervalHours = Number.parseInt(String(formData.ttfIntervalHours || '24'), 10);
-  const payload = {};
 
-  if (shouldInclude('title')) payload.title = formData.title.trim();
-  if (shouldInclude('type')) payload.type = formData.type || 'comic';
-  if (shouldInclude('status')) payload.status = formData.status || 'Ongoing';
-  if (shouldInclude('adult')) payload.adult = Boolean(formData.adult);
-  if (shouldInclude('isPublished')) payload.isPublished = Boolean(formData.isPublished);
-  if (shouldInclude('description')) payload.description = formData.description.trim();
-  if (shouldInclude('author')) payload.author = formData.author.trim();
-  if (shouldInclude('genres')) payload.genres = String(formData.genres || '').split(',').map((genre) => genre.trim()).filter(Boolean);
-  if (shouldInclude('coverUrl')) payload.coverUrl = formData.coverUrl.trim();
-  if (shouldInclude('coverTone')) payload.coverTone = formData.coverTone.trim();
-  if (shouldInclude('badge')) payload.badge = formData.badge.trim();
-
-  if (!include || [...PRICING_FIELDS].some((field) => include.has(field))) {
-    payload.pricing = { episodePrice: Number.isFinite(episodePrice) ? episodePrice : 0 };
-  }
-  if (!include || [...TTF_FIELDS].some((field) => include.has(field))) {
-    payload.ttf = {
+  return {
+    title: formData.title.trim(),
+    type: formData.type || 'comic',
+    status: formData.status || 'Ongoing',
+    adult: Boolean(formData.adult),
+    isPublished: Boolean(formData.isPublished),
+    description: formData.description.trim(),
+    author: formData.author.trim(),
+    genres: normalizeGenresInput(formData.genres),
+    coverUrl: formData.coverUrl.trim(),
+    coverTone: formData.coverTone.trim(),
+    badge: formData.badge.trim(),
+    pricing: { episodePrice: Number.isFinite(episodePrice) ? episodePrice : 0 },
+    ttf: {
       enabled: Boolean(formData.ttfEnabled),
       intervalHours: Number.isFinite(intervalHours) && intervalHours > 0 ? intervalHours : 24,
-    };
-  }
-
-  return payload;
-}
-
-function mergeSeriesFieldsIntoForm(currentForm, series, fields = null) {
-  const nextForm = buildFormState(series);
-  if (!fields) return nextForm;
-  const include = new Set(fields);
-  return Object.keys(currentForm).reduce((acc, field) => {
-    acc[field] = include.has(field) ? nextForm[field] : currentForm[field];
-    return acc;
-  }, {});
-}
-
-function formatSeriesTypeLabel(value) {
-  return TYPE_OPTIONS.find((option) => option.value === value)?.label || '漫画';
-}
-
-function formatSeriesStatusLabel(value) {
-  return STATUS_OPTIONS.find((option) => option.value === value)?.label || '连载中';
-}
-
-function getErrorMessage(error, fallbackMessage) {
-  if (error instanceof Error && error.message) return error.message;
-  return fallbackMessage;
-}
-
-function formatDateTime(value) {
-  if (!value) return '暂无';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '暂无';
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-}
-
-function formatCompactNumber(value) {
-  const safeValue = Number(value || 0);
-  if (!Number.isFinite(safeValue)) return '0';
-  return new Intl.NumberFormat('zh-CN', {
-    notation: safeValue >= 10000 ? 'compact' : 'standard',
-    maximumFractionDigits: safeValue >= 10000 ? 1 : 0,
-  }).format(safeValue);
-}
-
-function getReadinessToneClasses(tone) {
-  if (tone === 'emerald') {
-    return 'border-emerald-500/25 bg-emerald-500/10 text-emerald-200';
-  }
-
-  if (tone === 'cyan') {
-    return 'border-cyan-500/25 bg-cyan-500/10 text-cyan-200';
-  }
-
-  if (tone === 'amber') {
-    return 'border-amber-500/25 bg-amber-500/10 text-amber-200';
-  }
-
-  return 'border-rose-500/25 bg-rose-500/10 text-rose-200';
+    },
+  };
 }
 
 function isNonNegativeIntegerString(value, { allowEmpty = false } = {}) {
@@ -186,87 +116,62 @@ function isNonNegativeIntegerString(value, { allowEmpty = false } = {}) {
   return /^\d+$/.test(normalized);
 }
 
-function validateSeriesDraft(formData, fields = null) {
-  const include = fields ? new Set(fields) : null;
-  const shouldValidate = (field) => !include || include.has(field);
-
-  if (shouldValidate('title') && !formData.title.trim()) {
-    return '标题不能为空。';
+function validateSeriesDraft(formData) {
+  if (!formData.title.trim()) {
+    return 'Title is required.';
   }
-  if (shouldValidate('author') && formData.author.trim().length > 120) {
-    return '作者 / 工作室名称请控制在 120 个字符以内。';
+  if (formData.author.trim().length > 120) {
+    return 'Creator or studio names should stay within 120 characters.';
   }
-  if (shouldValidate('episodePrice') && !isNonNegativeIntegerString(formData.episodePrice, { allowEmpty: true })) {
-    return '章节价格必须是整数金币。';
+  if (!isNonNegativeIntegerString(formData.episodePrice, { allowEmpty: true })) {
+    return 'Default episode price must be a whole-number point value.';
   }
-  if ((!include || include.has('ttfEnabled') || include.has('ttfIntervalHours')) && formData.ttfEnabled) {
+  if (formData.ttfEnabled) {
     if (!isNonNegativeIntegerString(formData.ttfIntervalHours)) {
-      return '免费券刷新间隔必须是整数小时。';
+      return 'The free-pass interval must be a whole number of hours.';
     }
     if (Number(formData.ttfIntervalHours) < 1) {
-      return '免费券刷新间隔至少为 1 小时。';
+      return 'The free-pass interval must be at least 1 hour.';
     }
   }
 
   return '';
 }
 
+function formatDateTime(value) {
+  if (!value) return 'Not available';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Not available';
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
+}
+
+function formatCompactNumber(value) {
+  const safeValue = Number(value || 0);
+  if (!Number.isFinite(safeValue)) return '0';
+  return new Intl.NumberFormat('en-US', {
+    notation: safeValue >= 10000 ? 'compact' : 'standard',
+    maximumFractionDigits: safeValue >= 10000 ? 1 : 0,
+  }).format(safeValue);
+}
+
+function getErrorMessage(error, fallbackMessage) {
+  if (error instanceof Error && error.message) return error.message;
+  return fallbackMessage;
+}
+
 async function fetchSeriesDetail(seriesId) {
   const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}`, { cache: 'no-store' });
   if (response.status === 404) return null;
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || '作品详情加载失败。');
+    throw new Error(data?.message || data?.error || 'Series details could not be loaded.');
   }
   return data?.series || null;
-}
-
-function FormField({ label, children, helperText = '' }) {
-  return (
-    <label className="block space-y-2">
-      <span className="text-sm font-medium text-neutral-300">{label}</span>
-      {children}
-      {helperText ? <span className="block text-xs text-neutral-500">{helperText}</span> : null}
-    </label>
-  );
-}
-
-function DetailRow({ label, value }) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-neutral-800 py-3 last:border-b-0 last:pb-0">
-      <span className="text-sm text-neutral-500">{label}</span>
-      <span className="text-sm font-medium text-white">{value}</span>
-    </div>
-  );
-}
-
-function SectionCard({ id, title, dirty, isEditing, isSaving, onSave, children }) {
-  return (
-    <section id={id} className="scroll-mt-28 rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
-      <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-semibold text-white">{title}</h2>
-            <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${dirty ? 'border border-amber-500/30 bg-amber-500/10 text-amber-300' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'}`}>
-              {dirty ? '未保存' : '已同步'}
-            </span>
-          </div>
-        </div>
-
-        {isEditing ? (
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={!dirty || isSaving}
-            className="inline-flex items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-200 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Save size={16} />
-            <span>{isSaving ? '保存中...' : '保存本区'}</span>
-          </button>
-        ) : null}
-      </div>
-      {children}
-    </section>
-  );
 }
 
 export default function AdminSeriesDetailPage() {
@@ -278,8 +183,6 @@ export default function AdminSeriesDetailPage() {
   const [formData, setFormData] = useState(createEmptyForm());
   const [isEditing, setIsEditing] = useState(false);
   const [feedback, setFeedback] = useState(EMPTY_FEEDBACK);
-  const [savingSectionId, setSavingSectionId] = useState('');
-  const [activeSectionId, setActiveSectionId] = useState('basic');
 
   const seriesQuery = useQuery({
     queryKey: ['admin', 'series', seriesId],
@@ -297,15 +200,11 @@ export default function AdminSeriesDetailPage() {
     }
   }, [isEditing, seriesQuery.data]);
 
-  const dirtyBySection = useMemo(
-    () => SECTION_CONFIGS.reduce((acc, section) => {
-      acc[section.id] = section.fields.some((field) => formData[field] !== baselineForm[field]);
-      return acc;
-    }, {}),
+  const overallDirty = useMemo(
+    () => JSON.stringify(formData) !== JSON.stringify(baselineForm),
     [baselineForm, formData],
   );
 
-  const overallDirty = useMemo(() => Object.values(dirtyBySection).some(Boolean), [dirtyBySection]);
   const readiness = useMemo(
     () =>
       getAdminSeriesReadiness({
@@ -322,34 +221,29 @@ export default function AdminSeriesDetailPage() {
   );
 
   const saveMutation = useMutation({
-    mutationFn: async ({ draft, fields, sectionId }) => {
+    mutationFn: async (draft) => {
       const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ series: buildSeriesPayload(draft, fields) }),
+        body: JSON.stringify({ series: buildSeriesPayload(draft) }),
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '保存作品详情失败。');
+        throw new Error(data?.message || data?.error || 'Series details could not be saved.');
       }
 
-      return { series: data?.series || null, sectionId, fields };
+      return data?.series || null;
     },
-    onSuccess: ({ series: updatedSeries, sectionId, fields }) => {
+    onSuccess: (updatedSeries) => {
       if (updatedSeries) {
         queryClient.setQueryData(['admin', 'series', seriesId], updatedSeries);
-        setFormData((current) => mergeSeriesFieldsIntoForm(current, updatedSeries, fields));
+        setFormData(buildFormState(updatedSeries));
       }
-      if (sectionId === 'all') {
-        setIsEditing(false);
-      }
-      const section = SECTION_CONFIGS.find((item) => item.id === sectionId);
-      setFeedback({ type: 'success', message: section ? `${section.title}已保存。` : '作品详情已保存。' });
-      setSavingSectionId('');
+      setIsEditing(false);
+      setFeedback({ type: 'success', message: 'Series details were saved.' });
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '保存作品详情失败。') });
-      setSavingSectionId('');
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Series details could not be saved.') });
     },
   });
 
@@ -359,19 +253,20 @@ export default function AdminSeriesDetailPage() {
       uploadPayload.append('file', file);
       const response = await adminUpload('/api/admin/upload/image', uploadPayload);
       if (!response.ok || !response.data?.url) {
-        throw new Error(response.error || response.message || '上传封面失败。');
+        throw new Error(response.error || response.message || 'The cover image could not be uploaded.');
       }
       return response.data;
     },
     onSuccess: (data) => {
       setFormData((current) => ({ ...current, coverUrl: data.url }));
-      setFeedback({ type: 'success', message: '封面上传成功，请保存封面资源。' });
-      setActiveSectionId('cover');
+      setFeedback({ type: 'success', message: 'The cover image was uploaded. Save changes to publish it to the series record.' });
+      setIsEditing(true);
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '上传封面失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'The cover image could not be uploaded.') });
     },
   });
+
   const handleFieldChange = (field) => (event) => {
     const nextValue = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
     setFormData((current) => ({ ...current, [field]: nextValue }));
@@ -387,29 +282,16 @@ export default function AdminSeriesDetailPage() {
     setFeedback(EMPTY_FEEDBACK);
     setFormData(baselineForm);
     setIsEditing(false);
-    setSavingSectionId('');
   };
 
-  const handleSaveSection = (section) => {
-    setFeedback(EMPTY_FEEDBACK);
-    const validationMessage = validateSeriesDraft(formData, section.fields);
-    if (validationMessage) {
-      setFeedback({ type: 'error', message: validationMessage });
-      return;
-    }
-    setSavingSectionId(section.id);
-    saveMutation.mutate({ draft: formData, fields: section.fields, sectionId: section.id });
-  };
-
-  const handleSaveAll = () => {
+  const handleSave = () => {
     setFeedback(EMPTY_FEEDBACK);
     const validationMessage = validateSeriesDraft(formData);
     if (validationMessage) {
       setFeedback({ type: 'error', message: validationMessage });
       return;
     }
-    setSavingSectionId('all');
-    saveMutation.mutate({ draft: formData, fields: null, sectionId: 'all' });
+    saveMutation.mutate(formData);
   };
 
   const handleCoverUpload = (event) => {
@@ -417,591 +299,252 @@ export default function AdminSeriesDetailPage() {
     event.target.value = '';
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      setFeedback({ type: 'error', message: '请上传有效的图片文件。' });
+      setFeedback({ type: 'error', message: 'Please upload a valid image file.' });
       return;
     }
     if (file.size > MAX_UPLOAD_BYTES) {
-      setFeedback({ type: 'error', message: '封面图片大小不能超过 10MB。' });
+      setFeedback({ type: 'error', message: 'Cover images must stay under 10MB.' });
       return;
     }
     uploadMutation.mutate(file);
   };
 
-  const scrollToSection = (sectionId) => {
-    setActiveSectionId(sectionId);
-    if (typeof document === 'undefined') return;
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
   if (seriesQuery.isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-950 px-6 py-8">
-        <div className="mx-auto max-w-6xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
-          <LoadingState.Spinner size="md" text="正在加载作品详情..." />
-        </div>
-      </div>
+      <AdminShell title="Series detail" subtitle="Loading the series workspace...">
+        <AdminDataState isLoading={true} hasData={false} />
+      </AdminShell>
     );
   }
 
   if (seriesQuery.isError) {
     return (
-      <div className="min-h-screen bg-neutral-950 px-6 py-8">
-        <div className="mx-auto max-w-6xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
-          <LoadingState.ErrorState error={getErrorMessage(seriesQuery.error, '作品详情加载失败。')} onRetry={() => seriesQuery.refetch()} />
-        </div>
-      </div>
+      <AdminShell title="Series detail" subtitle="The series workspace could not be loaded.">
+        <AdminDataState isLoading={false} hasData={false} emptyMessage={getErrorMessage(seriesQuery.error, 'Series details could not be loaded.')} />
+      </AdminShell>
     );
   }
 
   if (!series) {
     return (
-      <div className="min-h-screen bg-neutral-950 px-6 py-8">
-        <div className="mx-auto max-w-6xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
-          <LoadingState.EmptyState
-            message="未找到该作品。"
-            action={<button type="button" onClick={() => router.push('/admin/series')} className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900">返回作品库</button>}
-          />
-        </div>
-      </div>
+      <AdminShell title="Series detail" subtitle="The requested title could not be found.">
+        <AdminDataState isLoading={false} hasData={false} emptyMessage="This series record does not exist." />
+      </AdminShell>
     );
   }
 
   const summaryCards = [
-    { label: '章节数量', value: String(series.episodeCount || 0), helper: series.latestEpisodeId ? `最新章节 ${series.latestEpisodeId}` : '还没有章节' },
-    { label: '发布状态', value: formData.isPublished ? '已发布' : '草稿', helper: formData.adult ? '18+ 内容' : '全年龄内容' },
-    { label: '作者信息', value: formData.author || '未填写', helper: `关注 ${formatCompactNumber(series.followers || 0)} · 浏览 ${formatCompactNumber(series.views || 0)}` },
-    { label: '默认价格', value: `${formData.episodePrice || '0'} 金币`, helper: formData.ttfEnabled ? `免费券每 ${formData.ttfIntervalHours} 小时恢复` : '未开启免费券' },
-    { label: '封面资源', value: formData.coverUrl ? '已配置' : '待补充', helper: formData.coverTone || '未设置色调' },
+    {
+      label: 'Episodes',
+      value: String(series.episodeCount || 0),
+      detail: series.latestEpisodeId ? `Latest episode: ${series.latestEpisodeId}` : 'No episodes yet.',
+      tone: 'accent',
+    },
+    {
+      label: 'Visibility',
+      value: formData.isPublished ? 'Published' : 'Draft',
+      detail: formData.adult ? '18+ restrictions enabled.' : 'General audience.',
+    },
+    {
+      label: 'Creator',
+      value: formData.author || 'Not listed',
+      detail: `Followers ${formatCompactNumber(series.followers || 0)} · Views ${formatCompactNumber(series.views || 0)}`,
+    },
+    {
+      label: 'Storefront readiness',
+      value: readiness.score,
+      detail: readiness.summary,
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-950 px-4 py-6 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="overflow-hidden rounded-[32px] border border-neutral-800 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.14),_transparent_32%),linear-gradient(180deg,rgba(23,23,23,0.96),rgba(10,10,10,0.94))] px-6 py-6 shadow-[0_28px_90px_-40px_rgba(0,0,0,0.85)]">
-          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-            <div className="space-y-4">
-              <button
-                type="button"
-                onClick={() => router.push('/admin/series')}
-                className="inline-flex w-fit items-center gap-2 rounded-2xl border border-neutral-700 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-300 transition hover:border-neutral-500 hover:text-white"
-              >
-                返回作品库
-              </button>
-
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                  <span className="rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-cyan-200">
-                    {formatSeriesTypeLabel(formData.type)}
-                  </span>
-                  <span className="rounded-full border border-neutral-700 bg-neutral-900/80 px-3 py-1 text-neutral-300">
-                    {formatSeriesStatusLabel(formData.status)}
-                  </span>
-                  {formData.adult ? (
-                    <span className="rounded-full border border-rose-500/25 bg-rose-500/10 px-3 py-1 text-rose-200">
-                      18+ 限制
-                    </span>
-                  ) : null}
-                  {!formData.isPublished ? (
-                    <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-amber-200">
-                      未发布
-                    </span>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                    {formData.title || series.title || '未命名作品'}
-                  </h1>
-                  <p className="max-w-3xl text-sm leading-7 text-neutral-400">
-                    把作品基础信息、前台展示、商业规则和封面资源集中在一个编辑台里处理，少来回跳页面。
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => router.push(`/admin/series/${seriesId}/episodes`)}
-                className="inline-flex items-center gap-2 rounded-2xl border border-neutral-700 px-4 py-2.5 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
-              >
-                <BookOpen size={16} />
-                管理章节
-              </button>
-              <a
-                href={`/series/${seriesId}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-2xl border border-neutral-700 px-4 py-2.5 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
-              >
-                <ArrowUpRight size={16} />
-                预览前台
-              </a>
-
-              {isEditing ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleCancelEditing}
-                    disabled={saveMutation.isPending || uploadMutation.isPending}
-                    className="rounded-2xl border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    取消编辑
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveAll}
-                    disabled={!overallDirty || saveMutation.isPending || uploadMutation.isPending}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400 px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <Save size={16} />
-                    {savingSectionId === 'all' ? '保存全部中...' : '保存全部更改'}
-                  </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleStartEditing}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
-                >
-                  <PencilLine size={16} />
-                  开始编辑
-                </button>
-              )}
-            </div>
-          </div>
-        </header>
+    <AdminShell
+      title={series.title || 'Series detail'}
+      subtitle="Edit the reader-facing identity of this title first: story basics, creator credit, publish state, and cover quality."
+      actions={
+        <>
+          <Button type="button" variant="outline" onClick={() => router.push('/admin/series')}>
+            <ArrowLeft className="size-4" />
+            All series
+          </Button>
+          <Button type="button" variant="outline" onClick={() => router.push(`/admin/series/${seriesId}/episodes`)}>
+            <BookOpen className="size-4" />
+            Episodes
+          </Button>
+          <Button type="button" variant="outline" onClick={() => window.open(`/series/${seriesId}`, '_blank')}>
+            <ArrowUpRight className="size-4" />
+            View live page
+          </Button>
+          {isEditing ? (
+            <>
+              <Button type="button" variant="outline" onClick={handleCancelEditing}>
+                Cancel
+              </Button>
+              <Button type="button" onClick={handleSave} disabled={!overallDirty || saveMutation.isPending}>
+                <Save className="size-4" />
+                {saveMutation.isPending ? 'Saving...' : 'Save changes'}
+              </Button>
+            </>
+          ) : (
+            <Button type="button" onClick={handleStartEditing}>
+              <PencilLine className="size-4" />
+              Edit details
+            </Button>
+          )}
+        </>
+      }
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 xl:grid-cols-4">
+          {summaryCards.map((card) => (
+            <AdminMetricCard key={card.label} {...card} />
+          ))}
+        </div>
 
         <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          {summaryCards.map((card) => (
-            <article
-              key={card.label}
-              className="rounded-[28px] border border-neutral-800 bg-neutral-900/75 px-5 py-5 shadow-[0_24px_70px_-44px_rgba(0,0,0,0.75)]"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">{card.label}</p>
-              <p className="mt-4 text-2xl font-semibold text-white">{card.value}</p>
-              <p className="mt-2 text-sm text-neutral-400">{card.helper}</p>
-            </article>
-          ))}
-        </section>
+        <AdminPageSection title="Basic info" description="Keep the title, summary, and tags clean enough for storefront discovery.">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <AdminFormField label="Title">
+              <input type="text" value={formData.title} onChange={handleFieldChange('title')} disabled={!isEditing} className={adminInputClassName} />
+            </AdminFormField>
+            <AdminFormField label="Badge" helperText="Use this sparingly so editorial labels do not overwhelm the page.">
+              <input type="text" value={formData.badge} onChange={handleFieldChange('badge')} disabled={!isEditing} className={adminInputClassName} />
+            </AdminFormField>
+            <AdminFormField label="Format">
+              <select value={formData.type} onChange={handleFieldChange('type')} disabled={!isEditing} className={adminSelectClassName}>
+                {TYPE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </AdminFormField>
+            <AdminFormField label="Status">
+              <select value={formData.status} onChange={handleFieldChange('status')} disabled={!isEditing} className={adminSelectClassName}>
+                {STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </AdminFormField>
+          </div>
+          <div className="mt-5">
+            <AdminFormField label="Summary">
+              <textarea value={formData.description} onChange={handleFieldChange('description')} disabled={!isEditing} rows={6} className={adminTextareaClassName} />
+            </AdminFormField>
+          </div>
+          <div className="mt-5">
+            <AdminFormField label="Genres and tags" helperText="Separate tags with commas.">
+              <input type="text" value={formData.genres} onChange={handleFieldChange('genres')} disabled={!isEditing} className={adminInputClassName} />
+            </AdminFormField>
+          </div>
+        </AdminPageSection>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr),320px]">
-          <main className="space-y-6">
-            <SectionCard
-              id="basic"
-              title="基础信息"
-              dirty={dirtyBySection.basic}
-              isEditing={isEditing}
-              isSaving={saveMutation.isPending && savingSectionId === 'basic'}
-              onSave={() => handleSaveSection(getSectionConfig('basic'))}
-            >
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]">
+          <div className="space-y-6">
+            <AdminPageSection title="Credits" description="This name should match the public-facing creator or studio credit readers see.">
+              <AdminFormField
+                label="Creator or studio"
+                helperText="Use one stable public-facing form of the name so creator pages, series pages, and trust surfaces stay aligned."
+              >
+                <input type="text" value={formData.author} onChange={handleFieldChange('author')} disabled={!isEditing} className={adminInputClassName} />
+              </AdminFormField>
+            </AdminPageSection>
+
+            <AdminPageSection title="Publishing" description="Keep publish state and audience restrictions simple and easy to scan.">
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-4 text-sm text-slate-700">
+                  <span>Visible on the live site</span>
+                  <input type="checkbox" checked={formData.isPublished} onChange={handleFieldChange('isPublished')} disabled={!isEditing} className="h-4 w-4 rounded border-black/20 bg-transparent" />
+                </label>
+                <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-4 text-sm text-slate-700">
+                  <span>18+ title</span>
+                  <input type="checkbox" checked={formData.adult} onChange={handleFieldChange('adult')} disabled={!isEditing} className="h-4 w-4 rounded border-black/20 bg-transparent" />
+                </label>
+              </div>
+            </AdminPageSection>
+
+            <AdminPageSection title="Commerce" description="Keep commercial settings lower on the page so story identity and creator credit stay primary.">
               <div className="grid gap-5 md:grid-cols-2">
-                <FormField label="作品标题">
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={handleFieldChange('title')}
-                    disabled={!isEditing}
-                    className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </FormField>
-
-                <FormField label="作品类型">
-                  <select
-                    value={formData.type}
-                    onChange={handleFieldChange('type')}
-                    disabled={!isEditing}
-                    className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {TYPE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </FormField>
-
-                <FormField label="连载状态">
-                  <select
-                    value={formData.status}
-                    onChange={handleFieldChange('status')}
-                    disabled={!isEditing}
-                    className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </FormField>
-
-                <FormField label="作品角标" helperText="例如：新作、独家、限时免费。">
-                  <input
-                    type="text"
-                    value={formData.badge}
-                    onChange={handleFieldChange('badge')}
-                    disabled={!isEditing}
-                    className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </FormField>
+                <AdminFormField label="Default episode price" helperText="Use whole-number points only.">
+                  <input type="number" min="0" step="1" value={formData.episodePrice} onChange={handleFieldChange('episodePrice')} disabled={!isEditing} className={adminInputClassName} />
+                </AdminFormField>
+                <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-4 text-sm text-slate-700">
+                  <span>Enable free-pass window</span>
+                  <input type="checkbox" checked={formData.ttfEnabled} onChange={handleFieldChange('ttfEnabled')} disabled={!isEditing} className="h-4 w-4 rounded border-black/20 bg-transparent" />
+                </label>
               </div>
-
-              <div className="mt-5">
-                <FormField label="作品简介">
-                  <textarea
-                    rows={7}
-                    value={formData.description}
-                    onChange={handleFieldChange('description')}
-                    disabled={!isEditing}
-                    className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm leading-7 text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </FormField>
+              <div className="mt-5 max-w-sm">
+                <AdminFormField label="Free-pass interval (hours)">
+                  <input type="number" min="1" step="1" value={formData.ttfIntervalHours} onChange={handleFieldChange('ttfIntervalHours')} disabled={!isEditing || !formData.ttfEnabled} className={adminInputClassName} />
+                </AdminFormField>
               </div>
+            </AdminPageSection>
+          </div>
 
-              <div className="mt-5">
-                <FormField label="分类 / 标签" helperText="多个标签用英文逗号分隔，例如：奇幻, 校园, 少女。">
-                  <input
-                    type="text"
-                    value={formData.genres}
-                    onChange={handleFieldChange('genres')}
-                    disabled={!isEditing}
-                    className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </FormField>
-              </div>
-            </SectionCard>
-
-            <SectionCard
-              id="creator"
-              title="作者与创作者信号"
-              dirty={dirtyBySection.creator}
-              isEditing={isEditing}
-              isSaving={saveMutation.isPending && savingSectionId === 'creator'}
-              onSave={() => handleSaveSection(getSectionConfig('creator'))}
-            >
-              <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr),minmax(0,0.9fr)]">
-                <div className="space-y-5">
-                  <FormField
-                    label="作者 / 工作室"
-                    helperText="前台作品页、信任模块和创作者聚合页都会使用这个名称。尽量保持命名稳定，避免同一位创作者出现多个写法；如果保存后刷新仍为空，说明当前数据库还没开作者字段。"
-                  >
-                    <input
-                      type="text"
-                      value={formData.author}
-                      onChange={handleFieldChange('author')}
-                      disabled={!isEditing}
-                      className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </FormField>
-
-                  <div className="rounded-[28px] border border-cyan-500/15 bg-cyan-500/[0.06] px-5 py-5">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">前台用途</p>
-                    <p className="mt-3 text-sm leading-7 text-neutral-300">
-                      这里维护的名称会直接进入前台创作者卡和创作者页面，是美国漫画站里非常关键的发现入口，不建议随意改名。
-                    </p>
+          <div className="space-y-6">
+            <AdminPageSection title="Cover" description="A strong cover and a stable creator line usually do more for trust than any extra dashboard metric.">
+              <div className="overflow-hidden rounded-[26px] border border-black/8 bg-[rgba(250,247,241,0.78)]">
+                {formData.coverUrl ? (
+                  <img src={formData.coverUrl} alt={`${formData.title || 'Series'} cover`} className="aspect-[2/3] w-full object-cover" />
+                ) : (
+                  <div className="flex aspect-[2/3] flex-col items-center justify-center gap-3 px-6 text-center text-sm text-slate-500">
+                    <ImageIcon size={28} />
+                    <span>No cover image yet.</span>
                   </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-                  <div className="rounded-[28px] border border-neutral-800 bg-neutral-950/70 p-5">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">当前关注</p>
-                    <p className="mt-4 text-2xl font-semibold text-white">{formatCompactNumber(series.followers || 0)}</p>
-                    <p className="mt-2 text-sm leading-7 text-neutral-400">来自用户关注 / 收藏关系，前台会把它作为读者证明信号。</p>
-                  </div>
-
-                  <div className="rounded-[28px] border border-neutral-800 bg-neutral-950/70 p-5">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">累计浏览</p>
-                    <p className="mt-4 text-2xl font-semibold text-white">{formatCompactNumber(series.views || 0)}</p>
-                    <p className="mt-2 text-sm leading-7 text-neutral-400">来自现有浏览统计，用于前台 trust 文案和策展排序参考。</p>
-                  </div>
-                </div>
+                )}
               </div>
-            </SectionCard>
-
-            <SectionCard
-              id="distribution"
-              title="发布与限制"
-              dirty={dirtyBySection.distribution}
-              isEditing={isEditing}
-              isSaving={saveMutation.isPending && savingSectionId === 'distribution'}
-              onSave={() => handleSaveSection(getSectionConfig('distribution'))}
-            >
-              <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-[28px] border border-neutral-800 bg-neutral-950/70 p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <h3 className="text-base font-semibold text-white">前台发布</h3>
-                      <p className="text-sm leading-7 text-neutral-400">关闭后，作品会从前台列表和详情页隐藏。</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={formData.isPublished}
-                      onChange={handleFieldChange('isPublished')}
-                      disabled={!isEditing}
-                      className="mt-1 h-5 w-5 rounded border-neutral-700 bg-neutral-900"
-                    />
-                  </div>
-                  <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-                    当前状态：{formData.isPublished ? '已发布' : '草稿隐藏'}
-                  </p>
-                </div>
-
-                <div className="rounded-[28px] border border-neutral-800 bg-neutral-950/70 p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <h3 className="text-base font-semibold text-white">18+ 限制</h3>
-                      <p className="text-sm leading-7 text-neutral-400">标记后，前台会按成人内容规则进行限制和提示。</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={formData.adult}
-                      onChange={handleFieldChange('adult')}
-                      disabled={!isEditing}
-                      className="mt-1 h-5 w-5 rounded border-neutral-700 bg-neutral-900"
-                    />
-                  </div>
-                  <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-                    当前状态：{formData.adult ? '18+ 内容' : '全年龄'}
-                  </p>
-                </div>
+              <div className="mt-5 space-y-4">
+                <AdminFormField label="Cover URL">
+                  <input type="url" value={formData.coverUrl} onChange={handleFieldChange('coverUrl')} disabled={!isEditing} className={adminInputClassName} />
+                </AdminFormField>
+                <AdminFormField label="Cover tone" helperText="Optional editorial note such as warm, blue, neon, or moody.">
+                  <input type="text" value={formData.coverTone} onChange={handleFieldChange('coverTone')} disabled={!isEditing} className={adminInputClassName} />
+                </AdminFormField>
+                {isEditing ? (
+                  <label className="block rounded-[22px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.78)] px-4 py-4 text-sm text-slate-600">
+                    <span className="font-semibold text-slate-950">Upload a new cover</span>
+                    <span className="mt-1 block text-xs text-slate-500">JPG, PNG, GIF, or WEBP up to 10MB.</span>
+                    <input type="file" accept="image/*" onChange={handleCoverUpload} disabled={uploadMutation.isPending} className="mt-4 block w-full text-xs text-slate-500" />
+                  </label>
+                ) : null}
               </div>
-            </SectionCard>
+            </AdminPageSection>
 
-            <SectionCard
-              id="commerce"
-              title="商业设置"
-              dirty={dirtyBySection.commerce}
-              isEditing={isEditing}
-              isSaving={saveMutation.isPending && savingSectionId === 'commerce'}
-              onSave={() => handleSaveSection(getSectionConfig('commerce'))}
-            >
-              <div className="grid gap-5 md:grid-cols-2">
-                <FormField label="默认章节价格" helperText="单位为金币，0 表示免费章节。">
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={formData.episodePrice}
-                    onChange={handleFieldChange('episodePrice')}
-                    disabled={!isEditing}
-                    className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  />
-                </FormField>
-
-                <div className="rounded-[28px] border border-neutral-800 bg-neutral-950/70 p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <h3 className="text-base font-semibold text-white">免费券</h3>
-                      <p className="text-sm leading-7 text-neutral-400">按固定时间恢复，适合引导用户持续回访。</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={formData.ttfEnabled}
-                      onChange={handleFieldChange('ttfEnabled')}
-                      disabled={!isEditing}
-                      className="mt-1 h-5 w-5 rounded border-neutral-700 bg-neutral-900"
-                    />
-                  </div>
-
-                  <div className="mt-4">
-                    <FormField label="恢复间隔（小时）">
-                      <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        value={formData.ttfIntervalHours}
-                        onChange={handleFieldChange('ttfIntervalHours')}
-                        disabled={!isEditing || !formData.ttfEnabled}
-                        className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                      />
-                    </FormField>
-                  </div>
-                </div>
-              </div>
-            </SectionCard>
-
-            <SectionCard
-              id="cover"
-              title="封面资源"
-              dirty={dirtyBySection.cover}
-              isEditing={isEditing}
-              isSaving={saveMutation.isPending && savingSectionId === 'cover'}
-              onSave={() => handleSaveSection(getSectionConfig('cover'))}
-            >
-              <div className="grid gap-6 lg:grid-cols-[280px,minmax(0,1fr)]">
-                <div className="overflow-hidden rounded-[28px] border border-neutral-800 bg-neutral-950">
-                  {formData.coverUrl ? (
-                    <img
-                      src={formData.coverUrl}
-                      alt={`${formData.title || '作品'}封面`}
-                      className="aspect-[2/3] h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex aspect-[2/3] flex-col items-center justify-center gap-3 px-6 text-center text-sm text-neutral-500">
-                      <ImageIcon size={28} />
-                      <span>还没有上传封面资源。</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-5">
-                  <FormField label="封面链接" helperText="可以直接贴 CDN / 图床链接，也可以先用下方上传。">
-                    <input
-                      type="url"
-                      value={formData.coverUrl}
-                      onChange={handleFieldChange('coverUrl')}
-                      disabled={!isEditing}
-                      className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </FormField>
-
-                  <FormField label="封面色调" helperText="用于前台配色或人工标记，例如：warm、blue、neon。">
-                    <input
-                      type="text"
-                      value={formData.coverTone}
-                      onChange={handleFieldChange('coverTone')}
-                      disabled={!isEditing}
-                      className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  </FormField>
-
-                  {isEditing ? (
-                    <label className="block rounded-[28px] border border-dashed border-neutral-700 bg-neutral-950/60 px-5 py-5 text-sm text-neutral-300 transition hover:border-neutral-500 hover:bg-neutral-950">
-                      <span className="font-semibold text-white">上传新封面</span>
-                      <span className="mt-2 block text-xs text-neutral-500">
-                        支持 JPG、PNG、GIF、WEBP，文件大小不超过 10MB。
-                      </span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleCoverUpload}
-                        disabled={uploadMutation.isPending}
-                        className="mt-4 block w-full text-xs text-neutral-400 disabled:cursor-not-allowed disabled:opacity-60"
-                      />
-                    </label>
-                  ) : null}
-                </div>
-              </div>
-            </SectionCard>
-          </main>
-
-          <aside className="space-y-6 xl:sticky xl:top-6 xl:self-start">
-            <section className="rounded-[28px] border border-neutral-800 bg-neutral-900/80 px-5 py-5 shadow-[0_24px_70px_-44px_rgba(0,0,0,0.75)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">编辑导航</p>
-              <div className="mt-4 space-y-2">
-                {SECTION_CONFIGS.map((section) => (
-                  <button
-                    key={section.id}
-                    type="button"
-                    onClick={() => scrollToSection(section.id)}
-                    className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm transition ${
-                      activeSectionId === section.id
-                        ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-100'
-                        : 'border-neutral-800 bg-neutral-950/70 text-neutral-300 hover:border-neutral-700 hover:text-white'
-                    }`}
-                  >
-                    <span>{section.title}</span>
-                    <span className={`text-xs font-semibold ${dirtyBySection[section.id] ? 'text-amber-300' : 'text-neutral-500'}`}>
-                      {dirtyBySection[section.id] ? '待保存' : '已同步'}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="rounded-[28px] border border-neutral-800 bg-neutral-900/80 px-5 py-5 shadow-[0_24px_70px_-44px_rgba(0,0,0,0.75)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">快捷操作</p>
-              <div className="mt-4 space-y-2">
-                <button
-                  type="button"
-                  onClick={() => router.push(`/admin/series/${seriesId}/episodes`)}
-                  className="flex w-full items-center justify-between rounded-2xl border border-neutral-800 bg-neutral-950/70 px-4 py-3 text-left text-sm text-neutral-300 transition hover:border-neutral-700 hover:text-white"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <BookOpen size={16} />
-                    去章节管理
-                  </span>
-                  <ArrowUpRight size={16} />
-                </button>
-                <a
-                  href={`/series/${seriesId}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex w-full items-center justify-between rounded-2xl border border-neutral-800 bg-neutral-950/70 px-4 py-3 text-left text-sm text-neutral-300 transition hover:border-neutral-700 hover:text-white"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <ArrowUpRight size={16} />
-                    打开前台详情
-                  </span>
-                  <ArrowUpRight size={16} />
-                </a>
-                <button
-                  type="button"
-                  onClick={() => scrollToSection('cover')}
-                  className="flex w-full items-center justify-between rounded-2xl border border-neutral-800 bg-neutral-950/70 px-4 py-3 text-left text-sm text-neutral-300 transition hover:border-neutral-700 hover:text-white"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <ImageIcon size={16} />
-                    跳到封面资源
-                  </span>
-                  <ArrowUpRight size={16} />
-                </button>
-              </div>
-            </section>
-
-            <section className="rounded-[28px] border border-neutral-800 bg-neutral-900/80 px-5 py-5 shadow-[0_24px_70px_-44px_rgba(0,0,0,0.75)]">
+            <AdminPageSection title="Readiness" description="A quick view of what still weakens the live series page.">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">前台就绪度</p>
-                  <p className="mt-3 text-3xl font-semibold text-white">{readiness.score}</p>
+                  <p className="text-3xl font-semibold tracking-tight text-slate-950">{readiness.score}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{readiness.summary}</p>
                 </div>
-                <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getReadinessToneClasses(readiness.tone)}`}>
+                <AdminBadge tone={readiness.tone === 'emerald' ? 'success' : readiness.tone === 'amber' ? 'warning' : readiness.tone === 'rose' ? 'danger' : 'accent'}>
                   {readiness.statusLabel}
-                </span>
+                </AdminBadge>
               </div>
-              <p className="mt-3 text-sm leading-7 text-neutral-400">{readiness.summary}</p>
               <div className="mt-4 space-y-2">
                 {readiness.checks.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`rounded-2xl border px-4 py-3 ${
-                      item.ok
-                        ? 'border-emerald-500/20 bg-emerald-500/5'
-                        : 'border-amber-500/20 bg-amber-500/5'
-                    }`}
-                  >
+                  <div key={item.id} className="rounded-[20px] border border-black/6 bg-[rgba(250,247,241,0.82)] px-4 py-3">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-white">{item.label}</p>
-                      <span className={`text-xs font-semibold ${item.ok ? 'text-emerald-200' : 'text-amber-200'}`}>
-                        {item.ok ? '已就绪' : '待补'}
-                      </span>
+                      <p className="text-sm font-semibold text-slate-950">{item.label}</p>
+                      <AdminBadge tone={item.ok ? 'success' : 'warning'}>
+                        {item.ok ? 'Ready' : 'Needs work'}
+                      </AdminBadge>
                     </div>
-                    <p className="mt-2 text-xs leading-6 text-neutral-400">{item.hint}</p>
+                    <p className="mt-2 text-xs leading-6 text-slate-500">{item.hint}</p>
                   </div>
                 ))}
               </div>
-            </section>
+            </AdminPageSection>
 
-            <section className="rounded-[28px] border border-neutral-800 bg-neutral-900/80 px-5 py-5 shadow-[0_24px_70px_-44px_rgba(0,0,0,0.75)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">作品信息</p>
-              <div className="mt-3">
-                <DetailRow label="作品 ID" value={series.id} />
-                <DetailRow label="作者 / 工作室" value={formData.author || '未填写'} />
-                <DetailRow label="关注人数" value={formatCompactNumber(series.followers || 0)} />
-                <DetailRow label="累计浏览" value={formatCompactNumber(series.views || 0)} />
-                <DetailRow label="最新章节" value={series.latestEpisodeId || '暂无'} />
-                <DetailRow label="创建时间" value={formatDateTime(series.createdAt)} />
-                <DetailRow label="更新时间" value={formatDateTime(series.updatedAt)} />
-                <DetailRow label="当前类型" value={formatSeriesTypeLabel(formData.type)} />
-                <DetailRow label="当前状态" value={formatSeriesStatusLabel(formData.status)} />
-              </div>
-            </section>
-          </aside>
+            <AdminPageSection title="Series record" description="Useful metadata for operators who need to confirm what is already live.">
+              <AdminKeyValueList
+                items={[
+                  { label: 'Series ID', value: series.id },
+                  { label: 'Created', value: formatDateTime(series.createdAt) },
+                  { label: 'Updated', value: formatDateTime(series.updatedAt) },
+                  { label: 'Latest episode', value: series.latestEpisodeId || 'Not available' },
+                  { label: 'Followers', value: formatCompactNumber(series.followers || 0) },
+                  { label: 'Views', value: formatCompactNumber(series.views || 0) },
+                ]}
+              />
+            </AdminPageSection>
+          </div>
         </div>
       </div>
-    </div>
+    </AdminShell>
   );
 }

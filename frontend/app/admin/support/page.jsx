@@ -4,13 +4,26 @@ export const dynamic = 'force-dynamic';
 
 import React, { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Mail, MessageSquare, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { Mail, MessageSquare, RefreshCw, Trash2 } from 'lucide-react';
 
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import AdminShell from '@/components/admin/AdminShell';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
+import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
-import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
+import {
+  AdminBadge,
+  AdminDataTable,
+  AdminFormField,
+  AdminMetricCard,
+  AdminPageSection,
+  AdminTableHeader,
+  AdminTableRow,
+  adminInputClassName,
+  adminSelectClassName,
+  adminTextareaClassName,
+} from '@/components/admin/common/AdminWorkspacePrimitives';
+import { Button } from '@/components/ui/button';
 import { adminFetch, readAdminResponseMessage } from '@/lib/adminApiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
@@ -30,61 +43,64 @@ const sortFields = [
 ];
 
 const STATUS_OPTIONS = [
-  { value: '', label: '全部状态' },
-  { value: 'open', label: '待处理' },
-  { value: 'in_progress', label: '处理中' },
-  { value: 'closed', label: '已关闭' },
-  { value: 'OPEN', label: '待处理（旧版）' },
-  { value: 'IN_PROGRESS', label: '处理中（旧版）' },
-  { value: 'CLOSED', label: '已关闭（旧版）' },
+  { value: '', label: 'All statuses' },
+  { value: 'open', label: 'Open' },
+  { value: 'in_progress', label: 'In progress' },
+  { value: 'closed', label: 'Closed' },
+  { value: 'OPEN', label: 'Open (legacy)' },
+  { value: 'IN_PROGRESS', label: 'In progress (legacy)' },
+  { value: 'CLOSED', label: 'Closed (legacy)' },
 ];
-
-const DEFAULT_PAGE_SIZE = 20;
 
 function formatDateTime(value) {
   if (!value) {
-    return '-';
+    return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('zh-CN', {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Not available';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
     minute: '2-digit',
-  }).format(new Date(value));
+  }).format(date);
 }
 
 function getStatusLabel(status) {
   switch (String(status || '').toLowerCase()) {
     case 'open':
-      return '待处理';
+      return 'Open';
     case 'in_progress':
-      return '处理中';
+      return 'In progress';
     case 'closed':
-      return '已关闭';
+      return 'Closed';
     default:
-      return status || '-';
+      return status || 'Unknown';
   }
 }
 
-function getStatusColor(status) {
+function getStatusTone(status) {
   switch (String(status || '').toLowerCase()) {
     case 'open':
-      return 'bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/20';
+      return 'warning';
     case 'in_progress':
-      return 'bg-sky-500/15 text-sky-300 ring-1 ring-sky-500/20';
+      return 'accent';
     case 'closed':
-      return 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/20';
+      return 'success';
     default:
-      return 'bg-neutral-800 text-neutral-300 ring-1 ring-neutral-700';
+      return 'default';
   }
 }
 
-function getMessagePreview(message, limit = 120) {
+function getMessagePreview(message, limit = 140) {
   const normalized = String(message || '').replace(/\s+/g, ' ').trim();
   if (!normalized) {
-    return '未提供消息内容';
+    return 'No message was included.';
   }
 
   return normalized.length > limit ? `${normalized.slice(0, limit)}...` : normalized;
@@ -124,18 +140,28 @@ export default function AdminSupportPage() {
   } = useAdminList('support', searchFields, sortFields, 'createdAt', 'desc');
 
   const statusFilter = typeof filters.status === 'string' ? filters.status : '';
-  const hasActiveFilters = Boolean(searchTerm.trim() || statusFilter);
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const hasActiveFilters = Boolean(searchTerm.trim() || statusFilter);
+
+  const openCount = useMemo(
+    () => tickets.filter((ticket) => String(ticket.status || '').toLowerCase() === 'open').length,
+    [tickets],
+  );
+  const pendingReplies = useMemo(
+    () =>
+      tickets.filter((ticket) => String(ticket.status || '').toLowerCase() !== 'closed').length,
+    [tickets],
+  );
 
   const bulkDeleteMutation = useBulkDelete('support', {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: '工单已删除。' });
+      setFeedback({ type: 'success', message: 'The selected tickets were removed.' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
+      setFeedback({ type: 'error', message: `Could not remove the selected tickets: ${mutationError.message}` });
     },
   });
 
@@ -147,7 +173,7 @@ export default function AdminSupportPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '发送回复失败。'));
+        throw new Error(await readAdminResponseMessage(response, 'Could not send the reply.'));
       }
 
       return response.json();
@@ -156,11 +182,11 @@ export default function AdminSupportPage() {
       setReplyContent('');
       setSelectedTicket(null);
       setIsReplyModalOpen(false);
-      setFeedback({ type: 'success', message: '回复已发送。' });
+      setFeedback({ type: 'success', message: 'The reply was sent.' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `回复失败：${mutationError.message}` });
+      setFeedback({ type: 'error', message: `Could not send the reply: ${mutationError.message}` });
     },
   });
 
@@ -171,19 +197,30 @@ export default function AdminSupportPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '关闭工单失败。'));
+        throw new Error(await readAdminResponseMessage(response, 'Could not close the ticket.'));
       }
 
       return response.json();
     },
     onSuccess: () => {
-      setFeedback({ type: 'success', message: '工单已关闭。' });
+      setFeedback({ type: 'success', message: 'The ticket was closed.' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `关闭失败：${mutationError.message}` });
+      setFeedback({ type: 'error', message: `Could not close the ticket: ${mutationError.message}` });
     },
   });
+
+  const resetControls = () => {
+    setSearchTerm('');
+    clearFilters();
+    setSortBy('createdAt');
+    setSortOrder('desc');
+    setPage(1);
+    setPageSize(20);
+    clearSelection();
+    setFeedback({ type: '', message: '' });
+  };
 
   const openReplyModal = (ticket) => {
     setSelectedTicket(ticket);
@@ -195,285 +232,276 @@ export default function AdminSupportPage() {
     const message = replyContent.trim();
 
     if (!selectedTicket?.id || !message) {
-      setFeedback({ type: 'error', message: '回复内容不能为空。' });
+      setFeedback({ type: 'error', message: 'Reply text cannot be empty.' });
       return;
     }
 
     replyTicketMutation.mutate({ ticketId: selectedTicket.id, message });
   };
 
-  const handleCloseTicket = (ticketId) => {
-    closeTicketMutation.mutate(ticketId);
-  };
-
-  const handleBulkDelete = () => {
-    bulkDeleteMutation.mutate(selectedIds);
-  };
-
-  const resetControls = () => {
-    setSearchTerm('');
-    clearFilters();
-    setSortBy('createdAt');
-    setSortOrder('desc');
-    setPage(1);
-    setPageSize(DEFAULT_PAGE_SIZE);
-    clearSelection();
-    setFeedback({ type: '', message: '' });
-  };
-
   return (
-    <div className="space-y-6 p-6 text-neutral-100">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">后台</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-white">工单支持</h1>
-          <p className="max-w-2xl text-sm text-neutral-400">
-            在这里统一处理站内工单。你可以按邮箱、主题、用户或消息内容搜索，并在当前页面直接回复、关闭或删除工单。
-          </p>
+    <AdminShell
+      title="Support"
+      subtitle="Keep support work readable: what the ticket is about, who sent it, and what should happen next."
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <AdminMetricCard
+            label="Tickets in view"
+            value={String(pagination.total)}
+            detail="The current support queue after search and status filters."
+            tone="accent"
+          />
+          <AdminMetricCard
+            label="Open tickets"
+            value={String(openCount)}
+            detail="Readers still waiting for a first operator response."
+          />
+          <AdminMetricCard
+            label="Needs follow-up"
+            value={String(pendingReplies)}
+            detail="Tickets that are not yet marked closed."
+          />
         </div>
 
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/80 px-4 py-3 text-sm text-neutral-400">
-          当前结果 <span className="font-semibold text-white">{pagination.total}</span> 条
-        </div>
-      </div>
+        <AdminFeedbackBanner
+          feedback={feedback}
+          onDismiss={() => setFeedback({ type: '', message: '' })}
+        />
 
-      <AdminFeedbackBanner
-        feedback={feedback}
-        onDismiss={() => setFeedback({ type: '', message: '' })}
-        dismissLabel="关闭"
-      />
+        <AdminPageSection
+          title="Support queue"
+          description="Search by subject, user, or ticket ID. Keep the action row compact so the message itself stays readable."
+          action={
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" onClick={resetControls}>
+                <RefreshCw className="size-4" />
+                Reset view
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setIsDeleteConfirmOpen(true)}
+                disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
+              >
+                <Trash2 className="size-4" />
+                Delete selected
+              </Button>
+            </div>
+          }
+        >
+          <div className="mb-6 grid gap-3 xl:grid-cols-[minmax(0,1.3fr)_220px_220px_auto]">
+            <label className="relative">
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search by ticket ID, user, subject, or message..."
+                className={adminInputClassName}
+              />
+            </label>
 
-      <section className="rounded-3xl border border-neutral-800 bg-neutral-950/80 p-4 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.7)]">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_220px_auto]">
-          <label className="flex items-center gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-neutral-300">
-            <Search className="h-4 w-4 text-neutral-500" />
-            <input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="搜索工单 ID、用户 ID、邮箱、主题或消息内容"
-              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-500"
-            />
-          </label>
+            <select
+              value={statusFilter}
+              onChange={(event) => setFilter('status', event.target.value)}
+              className={adminSelectClassName}
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.value || 'all'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={statusFilter}
-            onChange={(event) => setFilter('status', event.target.value)}
-            className="rounded-2xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white outline-none"
-          >
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option.value || 'all'} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          <div className="grid grid-cols-[minmax(0,1fr)_92px] gap-3">
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value)}
-              className="rounded-2xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white outline-none"
+              className={adminSelectClassName}
             >
-              <option value="createdAt">创建时间</option>
-              <option value="updatedAt">更新时间</option>
-              <option value="status">状态</option>
+              <option value="createdAt">Created time</option>
+              <option value="updatedAt">Updated time</option>
+              <option value="status">Status</option>
             </select>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="rounded-2xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm font-medium text-white transition hover:border-neutral-700 hover:bg-neutral-800"
             >
-              {sortOrder === 'asc' ? '升序' : '降序'}
-            </button>
+              {sortOrder === 'asc' ? 'Oldest first' : 'Newest first'}
+            </Button>
           </div>
 
-          <div className="flex gap-3 lg:justify-end">
-            <button
-              type="button"
-              onClick={resetControls}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm font-medium text-neutral-200 transition hover:border-neutral-700 hover:bg-neutral-800"
-            >
-              <RefreshCw className="h-4 w-4" />
-              重置
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsDeleteConfirmOpen(true)}
-              disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Trash2 className="h-4 w-4" />
-              删除所选
-            </button>
-          </div>
-        </div>
-      </section>
+          <AdminTableShell
+            isError={isError}
+            errorMessage={error?.message || 'The support queue could not be loaded.'}
+            onRetry={refetch}
+            isLoading={isLoading}
+            hasItems={tickets.length > 0}
+            emptyMessage={
+              hasActiveFilters ? 'No tickets match the current filters.' : 'No support tickets yet.'
+            }
+            pagination={pagination}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          >
+            <AdminDataTable className="border-0 shadow-none">
+              <table className="w-full min-w-[980px]">
+                <AdminTableHeader>
+                  <tr>
+                    <th className="px-4 py-4">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all tickets"
+                        checked={tickets.length > 0 && selectedIds.length === tickets.length}
+                        onChange={(event) => {
+                          if (event.target.checked) {
+                            selectAll(tickets);
+                            return;
+                          }
 
-      <AdminTableShell
-        isError={isError}
-        errorMessage={error?.message || '工单加载失败。'}
-        onRetry={refetch}
-        isLoading={isLoading}
-        hasItems={tickets.length > 0}
-        emptyMessage={hasActiveFilters ? '当前筛选条件下没有匹配的工单。' : '暂无工单。'}
-        loadingFallback={<LoadingState isLoading={true} count={6} height="h-24" />}
-        pagination={pagination}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-        containerClassName="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-950/90 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.7)]"
-        paginationProps={{
-          containerClassName:
-            'flex flex-col gap-3 border-t border-neutral-800 bg-neutral-900/70 px-4 py-4 text-sm text-neutral-400 lg:flex-row lg:items-center lg:justify-between',
-          pageSizeSelectClassName:
-            'rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white outline-none',
-          buttonClassName:
-            'rounded-xl border border-neutral-700 px-3 py-2 text-sm text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50',
-        }}
-      >
-        <table className="min-w-full divide-y divide-neutral-800 text-sm">
-          <thead className="bg-neutral-900/90 text-left text-xs uppercase tracking-[0.16em] text-neutral-500">
-            <tr>
-              <th className="px-4 py-4">
-                <input
-                  type="checkbox"
-                  aria-label="选择全部工单"
-                  checked={tickets.length > 0 && selectedIds.length === tickets.length}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      selectAll(tickets);
-                      return;
-                    }
+                          clearSelection();
+                        }}
+                        className="h-4 w-4 rounded border-black/20 bg-transparent"
+                      />
+                    </th>
+                    <th className="px-4 py-4">Ticket</th>
+                    <th className="px-4 py-4">Reader</th>
+                    <th className="px-4 py-4">Status</th>
+                    <th className="px-4 py-4">Created</th>
+                    <th className="px-4 py-4">Updated</th>
+                    <th className="px-4 py-4">Actions</th>
+                  </tr>
+                </AdminTableHeader>
+                <tbody>
+                  {tickets.map((ticket) => (
+                    <AdminTableRow key={ticket.id}>
+                      <td className="px-4 py-4">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select ticket ${ticket.id}`}
+                          checked={selectedIdsSet.has(ticket.id)}
+                          onChange={() => toggleSelect(ticket.id)}
+                          className="h-4 w-4 rounded border-black/20 bg-transparent"
+                        />
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="space-y-2">
+                          <p className="font-semibold text-slate-950">{ticket.subject || 'Untitled ticket'}</p>
+                          <p className="text-xs text-slate-500">#{ticket.id}</p>
+                          <p className="max-w-xl text-sm leading-6 text-slate-600">
+                            {getMessagePreview(ticket.message)}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="space-y-2">
+                          <div className="inline-flex items-center gap-2 text-sm text-slate-700">
+                            <Mail className="h-4 w-4 text-slate-400" />
+                            <span>{ticket.userEmail || 'No email listed'}</span>
+                          </div>
+                          <p className="text-xs text-slate-500">User ID: {ticket.userId || '-'}</p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <AdminBadge tone={getStatusTone(ticket.status)}>
+                          {getStatusLabel(ticket.status)}
+                        </AdminBadge>
+                      </td>
+                      <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.createdAt)}</td>
+                      <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.updatedAt)}</td>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-col items-start gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openReplyModal(ticket)}
+                            disabled={replyTicketMutation.isPending}
+                          >
+                            <MessageSquare className="size-4" />
+                            Reply
+                          </Button>
 
-                    clearSelection();
-                  }}
-                  className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
-                />
-              </th>
-              <th className="px-4 py-4">工单</th>
-              <th className="px-4 py-4">用户</th>
-              <th className="px-4 py-4">状态</th>
-              <th className="px-4 py-4">创建时间</th>
-              <th className="px-4 py-4">更新时间</th>
-              <th className="px-4 py-4">操作</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-800">
-            {tickets.map((ticket) => (
-              <tr key={ticket.id} className="align-top transition hover:bg-neutral-900/80">
-                <td className="px-4 py-4">
-                  <input
-                    type="checkbox"
-                    aria-label={`选择工单 ${ticket.id}`}
-                    checked={selectedIdsSet.has(ticket.id)}
-                    onChange={() => toggleSelect(ticket.id)}
-                    className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
-                  />
-                </td>
-                <td className="px-4 py-4">
-                  <div className="space-y-2">
-                    <div className="font-medium text-white">{ticket.subject || '未命名工单'}</div>
-                    <div className="text-xs text-neutral-500">#{ticket.id}</div>
-                    <p className="max-w-xl text-sm leading-6 text-neutral-300">{getMessagePreview(ticket.message)}</p>
-                  </div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 text-sm font-medium text-white">
-                      <Mail className="h-4 w-4 text-neutral-500" />
-                      <span>{ticket.userEmail || '未绑定邮箱'}</span>
-                    </div>
-                    <div className="text-xs text-neutral-500">用户 ID：{ticket.userId || '-'}</div>
-                  </div>
-                </td>
-                <td className="px-4 py-4">
-                  <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStatusColor(ticket.status)}`}>
-                    {getStatusLabel(ticket.status)}
-                  </span>
-                </td>
-                <td className="px-4 py-4 text-neutral-300">{formatDateTime(ticket.createdAt)}</td>
-                <td className="px-4 py-4 text-neutral-300">{formatDateTime(ticket.updatedAt)}</td>
-                <td className="px-4 py-4">
-                  <div className="flex flex-col items-start gap-2">
-                    <button
-                      type="button"
-                      onClick={() => openReplyModal(ticket)}
-                      disabled={replyTicketMutation.isPending}
-                      className="inline-flex items-center gap-2 rounded-full border border-neutral-700 px-3 py-1.5 text-xs font-medium text-white transition hover:border-neutral-600 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <MessageSquare className="h-3.5 w-3.5" />
-                      回复
-                    </button>
-
-                    {String(ticket.status || '').toLowerCase() !== 'closed' ? (
-                      <button
-                        type="button"
-                        onClick={() => handleCloseTicket(ticket.id)}
-                        disabled={closeTicketMutation.isPending}
-                        className="rounded-full border border-emerald-500/30 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        关闭工单
-                      </button>
-                    ) : (
-                      <span className="text-xs text-neutral-500">工单已关闭</span>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </AdminTableShell>
+                          {String(ticket.status || '').toLowerCase() !== 'closed' ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => closeTicketMutation.mutate(ticket.id)}
+                              disabled={closeTicketMutation.isPending}
+                            >
+                              Close ticket
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-slate-500">Already closed</span>
+                          )}
+                        </div>
+                      </td>
+                    </AdminTableRow>
+                  ))}
+                </tbody>
+              </table>
+            </AdminDataTable>
+          </AdminTableShell>
+        </AdminPageSection>
+      </div>
 
       <Modal
         isOpen={isReplyModalOpen}
-        title="回复工单"
-        subtitle={selectedTicket ? `${selectedTicket.subject || '未命名工单'} · ${selectedTicket.userEmail || selectedTicket.userId}` : ''}
+        title="Reply to ticket"
+        subtitle={
+          selectedTicket
+            ? `${selectedTicket.subject || 'Untitled ticket'} · ${selectedTicket.userEmail || selectedTicket.userId || 'Unknown reader'}`
+            : ''
+        }
         onClose={() => {
           setIsReplyModalOpen(false);
           setSelectedTicket(null);
           setReplyContent('');
         }}
+        size="lg"
       >
         <div className="space-y-4">
           {selectedTicket ? (
-            <div className="rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-neutral-300">
-              <p className="font-medium text-white">原始消息</p>
-              <p className="mt-2 leading-6 text-neutral-400">{selectedTicket.message || '未提供消息内容'}</p>
+            <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.78)] px-4 py-4 text-sm text-slate-600">
+              <p className="font-semibold text-slate-950">Original message</p>
+              <p className="mt-2 leading-6">{selectedTicket.message || 'No message was included.'}</p>
             </div>
           ) : null}
 
-          <textarea
-            value={replyContent}
-            onChange={(event) => setReplyContent(event.target.value)}
-            placeholder="输入要发送给用户的回复内容"
-            rows={7}
-            className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-sm text-white outline-none placeholder:text-neutral-500"
-          />
+          <AdminFormField label="Reply" helperText="Keep replies direct, calm, and specific to the reader's request.">
+            <textarea
+              value={replyContent}
+              onChange={(event) => setReplyContent(event.target.value)}
+              placeholder="Write the response you want to send..."
+              rows={7}
+              className={adminTextareaClassName}
+            />
+          </AdminFormField>
 
-          <button
+          <Button
             type="button"
             onClick={handleReplyTicket}
             disabled={!replyContent.trim() || replyTicketMutation.isPending}
-            className="w-full rounded-2xl bg-sky-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {replyTicketMutation.isPending ? '发送中...' : '发送回复'}
-          </button>
+            {replyTicketMutation.isPending ? 'Sending...' : 'Send reply'}
+          </Button>
         </div>
       </Modal>
 
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        title="删除所选工单"
-        message={`确认删除 ${selectedIds.length} 个选中工单吗？此操作无法撤销。`}
-        confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除'}
-        cancelText="取消"
+        title="Delete selected tickets"
+        message={`Delete ${selectedIds.length} selected ticket${selectedIds.length === 1 ? '' : 's'}? This action cannot be undone.`}
+        confirmText={bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete tickets'}
+        cancelText="Cancel"
         isDangerous={true}
         isLoading={bulkDeleteMutation.isPending}
-        onConfirm={handleBulkDelete}
+        onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}
         onCancel={() => setIsDeleteConfirmOpen(false)}
       />
-    </div>
+    </AdminShell>
   );
 }

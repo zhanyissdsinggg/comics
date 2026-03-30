@@ -1,47 +1,62 @@
-import React from 'react';
-import { RefreshCw } from 'lucide-react';
+import React from "react";
+import { RefreshCw } from "lucide-react";
+import SharedEmptyState from "@/components/common/EmptyState";
+import { Button } from "@/components/ui/button";
 
-const DEFAULT_EMPTY_TITLE = '暂无数据';
-const DEFAULT_EMPTY_DESCRIPTION = '当前没有匹配的数据记录。';
-const DEFAULT_LOADING_TEXT = '加载中...';
-const DEFAULT_ERROR_TITLE = '数据加载失败';
-const DEFAULT_ERROR_MESSAGE = '当前页面加载时发生异常，请重试。';
-const RETRY_LABEL = '重试';
+const DEFAULT_EMPTY_TITLE = "Nothing to show yet";
+const DEFAULT_EMPTY_DESCRIPTION =
+  "There are no records matching this view right now.";
+const DEFAULT_LOADING_TEXT = "Loading workspace";
+const DEFAULT_ERROR_TITLE = "This view could not be loaded";
+const DEFAULT_ERROR_MESSAGE =
+  "The request did not finish cleanly. Try again in a moment.";
+const RETRY_LABEL = "Try again";
 
-export const SkeletonLoader = React.memo(function SkeletonLoader({ count = 5, height = 'h-12' }) {
+export const SkeletonLoader = React.memo(function SkeletonLoader({
+  count = 5,
+  height = "h-12",
+}) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className={`${height} animate-pulse rounded-lg bg-neutral-800`} />
+        <div
+          key={index}
+          className={`${height} skeleton rounded-[20px] border border-black/6 bg-white/70`}
+        />
       ))}
     </div>
   );
 });
 
-SkeletonLoader.displayName = 'SkeletonLoader';
+SkeletonLoader.displayName = "SkeletonLoader";
 
-export const Spinner = React.memo(function Spinner({ size = 'md', text = DEFAULT_LOADING_TEXT }) {
+export const Spinner = React.memo(function Spinner({
+  size = "md",
+  text = DEFAULT_LOADING_TEXT,
+}) {
   const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-6 w-6',
-    lg: 'h-8 w-8',
+    sm: "h-4 w-4",
+    md: "h-6 w-6",
+    lg: "h-8 w-8",
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3">
-      <RefreshCw className={`${sizeClasses[size]} animate-spin text-emerald-500`} />
-      {text ? <p className="text-sm text-neutral-400">{text}</p> : null}
+    <div className="flex flex-col items-center justify-center gap-3 rounded-[24px] border border-black/6 bg-white/80 px-6 py-10 text-center shadow-[var(--gush-shadow-soft)]">
+      <RefreshCw
+        className={`${sizeClasses[size]} animate-spin text-[var(--gush-accent,#2f58c6)]`}
+      />
+      {text ? <p className="text-sm text-slate-500">{text}</p> : null}
     </div>
   );
 });
 
-Spinner.displayName = 'Spinner';
+Spinner.displayName = "Spinner";
 
 export const LoadingState = React.memo(function LoadingState({
   isLoading,
-  type = 'skeleton',
+  type = "skeleton",
   count = 5,
-  height = 'h-12',
+  height = "h-12",
   text = DEFAULT_LOADING_TEXT,
   children,
 }) {
@@ -49,17 +64,17 @@ export const LoadingState = React.memo(function LoadingState({
     return children;
   }
 
-  if (type === 'skeleton') {
+  if (type === "skeleton") {
     return <SkeletonLoader count={count} height={height} />;
   }
 
   return <Spinner size="md" text={text} />;
 });
 
-LoadingState.displayName = 'LoadingState';
+LoadingState.displayName = "LoadingState";
 
-export const EmptyState = React.memo(function EmptyState({
-  icon: Icon,
+export const EmptyState = React.memo(function AdminEmptyState({
+  icon,
   title = DEFAULT_EMPTY_TITLE,
   description = DEFAULT_EMPTY_DESCRIPTION,
   message,
@@ -68,44 +83,42 @@ export const EmptyState = React.memo(function EmptyState({
   const resolvedTitle = message && title === DEFAULT_EMPTY_TITLE ? message : title;
   const resolvedDescription =
     message && title === DEFAULT_EMPTY_TITLE && description === DEFAULT_EMPTY_DESCRIPTION
-      ? ''
+      ? ""
       : description;
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-neutral-800 bg-neutral-900/50 py-12">
-      {Icon ? <Icon className="h-12 w-12 text-neutral-600" /> : null}
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-neutral-300">{resolvedTitle}</h3>
-        {resolvedDescription ? <p className="mt-1 text-sm text-neutral-500">{resolvedDescription}</p> : null}
-      </div>
-      {action ? <div className="mt-4">{action}</div> : null}
-    </div>
+    <SharedEmptyState
+      icon={icon || "inbox"}
+      title={resolvedTitle}
+      description={resolvedDescription}
+      action={action}
+      appearance="light"
+      eyebrow="Admin"
+    />
   );
 });
 
-EmptyState.displayName = 'EmptyState';
+EmptyState.displayName = "AdminEmptyState";
 
 export const ErrorState = React.memo(function ErrorState({ error, onRetry }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-red-900/30 bg-red-900/10 py-12">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-red-400">{DEFAULT_ERROR_TITLE}</h3>
-        <p className="mt-1 text-sm text-red-300">{error || DEFAULT_ERROR_MESSAGE}</p>
-      </div>
+    <div className="rounded-[28px] border border-red-200 bg-red-50/90 px-6 py-10 text-center shadow-[var(--gush-shadow-soft)]">
+      <h3 className="text-lg font-semibold text-red-700">{DEFAULT_ERROR_TITLE}</h3>
+      <p className="mt-2 text-sm leading-6 text-red-600">
+        {error || DEFAULT_ERROR_MESSAGE}
+      </p>
       {onRetry ? (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
-        >
-          {RETRY_LABEL}
-        </button>
+        <div className="mt-5 flex justify-center">
+          <Button type="button" variant="destructive" onClick={onRetry}>
+            {RETRY_LABEL}
+          </Button>
+        </div>
       ) : null}
     </div>
   );
 });
 
-ErrorState.displayName = 'ErrorState';
+ErrorState.displayName = "ErrorState";
 
 LoadingState.SkeletonLoader = SkeletonLoader;
 LoadingState.Spinner = Spinner;

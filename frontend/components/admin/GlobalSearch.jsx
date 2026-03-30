@@ -28,136 +28,129 @@ const RECENT_SEARCH_STORAGE_KEY = "admin_recent_searches";
 const SEARCH_ITEMS = [
   {
     id: "dashboard",
-    label: "仪表盘",
+    label: "Dashboard",
     href: "/admin",
     icon: BookOpen,
-    keywords: ["仪表盘", "总览", "分析", "统计", "dashboard", "overview"],
+    keywords: ["dashboard", "overview", "workspace", "home"],
   },
   {
     id: "series",
-    label: "作品",
+    label: "Series",
     href: "/admin/series",
     icon: BookOpen,
-    keywords: ["作品", "漫画", "小说", "内容", "series", "content"],
+    keywords: ["series", "story", "comic", "novel", "catalog"],
   },
   {
     id: "storefront",
-    label: "前台体检",
+    label: "Storefront Audit",
     href: "/admin/storefront",
     icon: Search,
-    keywords: ["前台体检", "前台", "就绪度", "审核", "审计", "storefront", "audit", "readiness"],
+    keywords: ["storefront", "audit", "readiness", "public page"],
   },
   {
     id: "merchandising",
-    label: "首页编排",
+    label: "Collections",
     href: "/admin/merchandising",
     icon: Sparkles,
-    keywords: ["首页编排", "首页", "英雄位", "爆款位", "免费开篇", "merchandising", "hero", "curation"],
-  },
-  {
-    id: "recommendations",
-    label: "推荐管理",
-    href: "/admin/recommendations",
-    icon: Sparkles,
-    keywords: ["推荐管理", "推荐位", "榜单", "推荐分析", "slot", "ranking", "recommendations"],
+    keywords: ["collections", "home", "curation", "featured"],
   },
   {
     id: "users",
-    label: "用户",
+    label: "Users",
     href: "/admin/users",
     icon: Users,
-    keywords: ["用户", "账号", "会员", "customers", "users"],
+    keywords: ["users", "accounts", "reader", "customer"],
   },
   {
     id: "orders",
-    label: "订单",
+    label: "Orders",
     href: "/admin/orders",
     icon: Receipt,
-    keywords: ["订单", "支付", "交易", "orders", "payments"],
+    keywords: ["orders", "payments", "transactions"],
   },
   {
     id: "promotions",
-    label: "活动",
+    label: "Promotions",
     href: "/admin/promotions",
     icon: Megaphone,
-    keywords: ["活动", "营销", "优惠", "promotions", "marketing"],
+    keywords: ["promotions", "marketing", "campaigns"],
   },
   {
     id: "comments",
-    label: "评论",
+    label: "Comments",
     href: "/admin/comments",
     icon: MessageSquare,
-    keywords: ["评论", "评分", "反馈", "comments", "reviews"],
+    keywords: ["comments", "reviews", "feedback"],
   },
   {
     id: "billing",
-    label: "计费",
+    label: "Billing",
     href: "/admin/billing",
     icon: CreditCard,
-    keywords: ["计费", "套餐", "价格", "点数", "billing", "pricing"],
+    keywords: ["billing", "pricing", "wallet", "commercial"],
   },
   {
     id: "notifications",
-    label: "通知",
+    label: "Notifications",
     href: "/admin/notifications",
     icon: Bell,
-    keywords: ["通知", "消息", "提醒", "notifications"],
+    keywords: ["notifications", "messages", "alerts"],
   },
   {
     id: "support",
-    label: "工单",
+    label: "Support",
     href: "/admin/support",
     icon: LifeBuoy,
-    keywords: ["工单", "客服", "帮助", "support", "tickets"],
+    keywords: ["support", "tickets", "help"],
   },
   {
     id: "creators",
-    label: "创作者",
+    label: "Creators",
     href: "/admin/creators",
     icon: PenSquare,
-    keywords: ["创作者", "作者", "工作室", "creator", "author", "studio"],
+    keywords: ["creators", "author", "artist", "studio", "credits"],
   },
   {
     id: "branding",
-    label: "品牌设置",
+    label: "Branding",
     href: "/admin/branding",
     icon: BookOpen,
-    keywords: ["品牌", "Logo", "图标", "横幅", "branding", "assets"],
+    keywords: ["branding", "logo", "banner", "assets"],
   },
   {
     id: "email-settings",
-    label: "邮件设置",
+    label: "Email Settings",
     href: "/admin/email-settings",
     icon: Mail,
-    keywords: ["邮件", "邮箱", "SMTP", "mail", "settings"],
+    keywords: ["email", "smtp", "mail settings"],
   },
   {
     id: "email-jobs",
-    label: "邮件任务",
+    label: "Email Jobs",
     href: "/admin/email-jobs",
     icon: Mail,
-    keywords: ["邮件", "投递", "任务", "delivery", "jobs"],
+    keywords: ["email", "deliveries", "jobs"],
   },
   {
     id: "tracking",
-    label: "追踪设置",
+    label: "Tracking",
     href: "/admin/tracking",
     icon: Radar,
-    keywords: ["追踪", "埋点", "像素", "analytics", "tracking"],
+    keywords: ["tracking", "analytics", "pixels"],
   },
   {
     id: "regions",
-    label: "地区设置",
+    label: "Regions",
     href: "/admin/regions",
     icon: Globe,
-    keywords: ["地区", "国家", "区号", "regions", "locales"],
+    keywords: ["regions", "country", "locale"],
   },
   {
     id: "settings",
-    label: "系统设置",
+    label: "Settings",
     href: "/admin/settings",
     icon: Settings,
-    keywords: ["设置", "系统", "配置", "settings", "system"],
+    keywords: ["settings", "system", "configuration"],
   },
 ];
 
@@ -234,7 +227,10 @@ export default function GlobalSearch({ isOpen, onClose }) {
   }, [query]);
 
   const handleNavigate = (item) => {
-    const nextRecentIds = [item.id, ...recentSearchIds.filter((id) => id !== item.id)].slice(0, 5);
+    const nextRecentIds = [item.id, ...recentSearchIds.filter((id) => id !== item.id)].slice(
+      0,
+      5,
+    );
     setRecentSearchIds(nextRecentIds);
     writeRecentSearchIds(nextRecentIds);
     setQuery("");
@@ -281,11 +277,11 @@ export default function GlobalSearch({ isOpen, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/70 p-4 pt-[10vh] backdrop-blur-md">
-      <div className="w-full max-w-2xl animate-scale-in overflow-hidden rounded-[2rem] border border-ios-gray-800 bg-neutral-900/95 shadow-ios-xl backdrop-blur-2xl">
-        <div className="border-b border-ios-gray-800 px-5 py-4">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-[rgba(20,27,36,0.28)] p-4 pt-[10vh] backdrop-blur-sm">
+      <div className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-black/8 bg-[rgba(255,255,255,0.94)] shadow-[var(--gush-shadow-panel)]">
+        <div className="border-b border-black/6 px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-3xl bg-ios-green/10 text-ios-green">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[18px] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]">
               <Search size={20} />
             </div>
             <input
@@ -294,14 +290,14 @@ export default function GlobalSearch({ isOpen, onClose }) {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="搜索后台页面"
-              className="flex-1 bg-transparent text-base text-neutral-100 outline-none placeholder:text-ios-gray-500"
+              placeholder="Search pages, tools, or settings"
+              className="flex-1 bg-transparent text-base text-slate-950 outline-none placeholder:text-slate-400"
             />
             <button
               type="button"
               onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-3xl bg-ios-gray-800 text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-700 hover:text-neutral-100"
-              aria-label="关闭搜索"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
+              aria-label="Close search"
             >
               <X size={18} />
             </button>
@@ -320,20 +316,23 @@ export default function GlobalSearch({ isOpen, onClose }) {
                     key={item.id}
                     type="button"
                     onClick={() => handleNavigate(item)}
-                    className={`group flex w-full items-center gap-3 rounded-4xl px-4 py-3 text-left transition-all duration-300 ${
+                    className={`group flex w-full items-center gap-3 rounded-[22px] px-4 py-3 text-left transition-all ${
                       isActive
-                        ? "bg-ios-green/15 text-ios-green"
-                        : "text-neutral-200 hover:bg-ios-green/10 hover:text-ios-green"
+                        ? "bg-[rgba(47,88,198,0.06)] text-slate-950"
+                        : "text-slate-700 hover:bg-[rgba(15,23,42,0.04)] hover:text-slate-950"
                     }`}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-3xl bg-ios-gray-800 transition-all duration-300 group-hover:bg-ios-green/10">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-black/6 bg-[rgba(250,247,241,0.9)] text-slate-500 transition-all group-hover:text-[var(--gush-accent,#2f58c6)]">
                       <Icon size={18} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium">{item.label}</div>
-                      <div className="truncate text-xs text-ios-gray-500">{item.href}</div>
+                      <div className="truncate text-sm font-semibold">{item.label}</div>
+                      <div className="truncate text-xs text-slate-500">{item.href}</div>
                     </div>
-                    <ArrowRight size={16} className="opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <ArrowRight
+                      size={16}
+                      className="text-slate-400 opacity-0 transition-opacity group-hover:opacity-100"
+                    />
                   </button>
                 );
               })}
@@ -341,23 +340,27 @@ export default function GlobalSearch({ isOpen, onClose }) {
           ) : query ? (
             <div className="py-12 text-center">
               <div className="mb-3 flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-4xl bg-ios-gray-800 text-ios-gray-500">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.9)] text-slate-400">
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-medium text-ios-gray-400">没有匹配的后台页面</p>
-              <p className="mt-1 text-xs text-ios-gray-500">试试别的关键词或页面名称。</p>
+              <p className="text-sm font-semibold text-slate-900">No matching admin pages</p>
+              <p className="mt-1 text-xs text-slate-500">
+                Try a different keyword or page name.
+              </p>
             </div>
           ) : recentItems.length > 0 ? (
             <div className="space-y-1">
               <div className="flex items-center justify-between px-3 py-2">
-                <div className="text-xs font-semibold uppercase tracking-wider text-ios-green/60">最近访问</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Recent
+                </div>
                 <button
                   type="button"
                   onClick={handleClearRecent}
-                  className="text-xs text-ios-gray-500 transition-colors duration-300 hover:text-ios-green"
+                  className="text-xs text-slate-500 transition-colors hover:text-slate-950"
                 >
-                  清空
+                  Clear
                 </button>
               </div>
               {recentItems.map((item) => (
@@ -365,48 +368,61 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   key={item.id}
                   type="button"
                   onClick={() => handleNavigate(item)}
-                  className="group flex w-full items-center gap-3 rounded-4xl px-4 py-3 text-left text-neutral-200 transition-all duration-300 hover:bg-ios-green/10 hover:text-ios-green"
+                  className="group flex w-full items-center gap-3 rounded-[22px] px-4 py-3 text-left text-slate-700 transition-all hover:bg-[rgba(15,23,42,0.04)] hover:text-slate-950"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-3xl bg-ios-gray-800 transition-all duration-300 group-hover:bg-ios-green/10">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-black/6 bg-[rgba(250,247,241,0.9)] text-slate-400 transition-all group-hover:text-[var(--gush-accent,#2f58c6)]">
                     <Clock size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">{item.label}</div>
-                    <div className="truncate text-xs text-ios-gray-500">{item.href}</div>
+                    <div className="truncate text-sm font-semibold">{item.label}</div>
+                    <div className="truncate text-xs text-slate-500">{item.href}</div>
                   </div>
-                  <ArrowRight size={16} className="opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <ArrowRight
+                    size={16}
+                    className="text-slate-400 opacity-0 transition-opacity group-hover:opacity-100"
+                  />
                 </button>
               ))}
             </div>
           ) : (
             <div className="py-12 text-center">
               <div className="mb-3 flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-4xl bg-ios-gray-800 text-ios-gray-500">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.9)] text-slate-400">
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-medium text-ios-gray-400">输入关键词开始搜索</p>
-              <p className="mt-1 text-xs text-ios-gray-500">可以按页面名称、功能或关键词查找。</p>
+              <p className="text-sm font-semibold text-slate-900">Start typing to search admin</p>
+              <p className="mt-1 text-xs text-slate-500">
+                Search by page name, task, or object type.
+              </p>
             </div>
           )}
         </div>
 
-        <div className="border-t border-ios-gray-800 px-4 py-3">
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-ios-gray-500">
+        <div className="border-t border-black/6 px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
-                <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">↑</kbd>
-                <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">↓</kbd>
-                <span>切换结果</span>
+                <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
+                  ↑
+                </kbd>
+                <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
+                  ↓
+                </kbd>
+                <span>Move</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">Enter</kbd>
-                <span>打开页面</span>
+                <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
+                  Enter
+                </kbd>
+                <span>Open</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
-              <kbd className="rounded-lg border border-ios-gray-700 bg-ios-gray-800 px-1.5 py-0.5 font-medium">Esc</kbd>
-              <span>关闭</span>
+              <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
+                Esc
+              </kbd>
+              <span>Close</span>
             </div>
           </div>
         </div>

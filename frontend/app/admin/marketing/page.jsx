@@ -2,18 +2,36 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { AdminDataState } from '@/components/admin/common/AdminDataState';
+import { Plus, RefreshCw } from 'lucide-react';
+
+import { AdminLayout } from '../../../components/admin/AdminLayout';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
+import { AdminDataState } from '@/components/admin/common/AdminDataState';
+import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { Modal } from '@/components/admin/common/Modal';
+import {
+  AdminBadge,
+  AdminDataTable,
+  AdminFormField,
+  AdminMetricCard,
+  AdminPageSection,
+  AdminTableHeader,
+  AdminTableRow,
+  AdminTabs,
+  adminInputClassName,
+  adminSelectClassName,
+  adminTextareaClassName,
+} from '@/components/admin/common/AdminWorkspacePrimitives';
+import { Button } from '@/components/ui/button';
 import { adminFetchJson } from '@/lib/adminApiClient';
 
-const TABS = [
-  { key: 'campaigns', label: '活动列表' },
-  { key: 'stats', label: '统计概览' },
-  { key: 'by-segment', label: '按人群' },
-  { key: 'by-type', label: '按类型' },
+const MARKETING_TABS = [
+  { value: 'campaigns', label: 'Campaigns' },
+  { value: 'stats', label: 'Overview' },
+  { value: 'by-segment', label: 'By segment' },
+  { value: 'by-type', label: 'By type' },
 ];
 
 const INITIAL_FORM = {
@@ -34,25 +52,25 @@ const STATUS_OPTIONS = ['draft', 'active', 'paused', 'completed'];
 const SEGMENT_OPTIONS = ['all', 'vip', 'new', 'at-risk', 'high-value'];
 
 function formatCampaignTypeLabel(value) {
-  if (value === 'push') return '推送';
-  if (value === 'banner') return '横幅';
-  if (value === 'discount') return '折扣';
-  return '邮件';
+  if (value === 'push') return 'Push';
+  if (value === 'banner') return 'Banner';
+  if (value === 'discount') return 'Discount';
+  return 'Email';
 }
 
 function formatCampaignStatusLabel(value) {
-  if (value === 'active') return '进行中';
-  if (value === 'paused') return '已暂停';
-  if (value === 'completed') return '已完成';
-  return '草稿';
+  if (value === 'active') return 'Active';
+  if (value === 'paused') return 'Paused';
+  if (value === 'completed') return 'Completed';
+  return 'Draft';
 }
 
 function formatSegmentLabel(value) {
-  if (value === 'vip') return 'VIP 用户';
-  if (value === 'new') return '新用户';
-  if (value === 'at-risk') return '流失风险';
-  if (value === 'high-value') return '高价值用户';
-  return '全部用户';
+  if (value === 'vip') return 'VIP readers';
+  if (value === 'new') return 'New readers';
+  if (value === 'at-risk') return 'At-risk readers';
+  if (value === 'high-value') return 'High-value readers';
+  return 'All readers';
 }
 
 function getErrorMessage(error, fallback) {
@@ -62,7 +80,7 @@ function getErrorMessage(error, fallback) {
 
 function formatCurrency(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat('zh-CN', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 2,
@@ -71,7 +89,7 @@ function formatCurrency(value) {
 
 function formatNumber(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat('zh-CN').format(Number.isFinite(amount) ? amount : 0);
+  return new Intl.NumberFormat('en-US').format(Number.isFinite(amount) ? amount : 0);
 }
 
 function formatPercent(value) {
@@ -79,11 +97,11 @@ function formatPercent(value) {
   return `${amount.toFixed(1)}%`;
 }
 
-function formatDate(value, fallback = '未安排') {
+function formatDate(value, fallback = 'Not scheduled') {
   if (!value) return fallback;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '日期无效';
-  return new Intl.DateTimeFormat('zh-CN', {
+  if (Number.isNaN(date.getTime())) return 'Invalid date';
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -93,13 +111,13 @@ function formatDate(value, fallback = '未安排') {
 function getStatusTone(status) {
   switch (String(status || '').toLowerCase()) {
     case 'active':
-      return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
+      return 'success';
     case 'paused':
-      return 'border-amber-500/30 bg-amber-500/10 text-amber-200';
+      return 'warning';
     case 'completed':
-      return 'border-sky-500/30 bg-sky-500/10 text-sky-200';
+      return 'accent';
     default:
-      return 'border-neutral-700 bg-neutral-900 text-neutral-300';
+      return 'default';
   }
 }
 
@@ -115,7 +133,7 @@ function getCampaignMetrics(campaign) {
 async function requestPayload(path, init = {}) {
   const { response, data } = await adminFetchJson(path, init);
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || `请求失败，状态码 ${response.status}。`);
+    throw new Error(data?.message || data?.error || `Request failed with status ${response.status}.`);
   }
   return data || {};
 }
@@ -141,67 +159,29 @@ function buildCampaignPayload(formData) {
   };
 }
 
-function StatCard({ title, value, helperText }) {
-  return (
-    <div className="rounded-3xl border border-neutral-800 bg-neutral-900/80 px-5 py-5 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
-      <p className="text-sm text-neutral-400">{title}</p>
-      <p className="mt-3 text-3xl font-semibold text-white">{value}</p>
-      {helperText ? <p className="mt-2 text-xs text-neutral-500">{helperText}</p> : null}
-    </div>
-  );
-}
-
-function SectionHeader({ title, description, action = null }) {
-  return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-white">{title}</h2>
-        <p className="max-w-2xl text-sm text-neutral-400">{description}</p>
-      </div>
-      {action}
-    </div>
-  );
-}
-function LoadingPanel({ message }) {
-  return (
-    <div className="flex min-h-[220px] items-center justify-center rounded-3xl border border-neutral-800 bg-neutral-900/60 px-6 py-10">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
-        <p className="text-sm text-neutral-400">{message}</p>
-      </div>
-    </div>
-  );
-}
-
-function ErrorPanel({ title, message, onRetry }) {
-  return (
-    <div className="rounded-3xl border border-red-500/25 bg-red-500/10 px-5 py-5 text-red-100 shadow-[0_24px_80px_-36px_rgba(127,29,29,0.9)]">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-200">错误</p>
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
-          <p className="max-w-2xl text-sm text-red-100/85">{message}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="rounded-2xl border border-red-400/30 bg-red-400/10 px-4 py-2 text-sm font-medium text-red-100 transition hover:bg-red-400/20"
-        >
-          重试
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Field({ label, children, hint = '' }) {
-  return (
-    <label className="block space-y-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">{label}</span>
-      {children}
-      {hint ? <p className="text-xs text-neutral-500">{hint}</p> : null}
-    </label>
-  );
+function tabMeta(tabKey) {
+  switch (tabKey) {
+    case 'stats':
+      return {
+        title: 'Performance overview',
+        description: 'A compact snapshot of budget, spend, revenue, and conversions inside the selected date range.',
+      };
+    case 'by-segment':
+      return {
+        title: 'Segment performance',
+        description: 'Compare audience segments without turning the page into an analytics dashboard wall.',
+      };
+    case 'by-type':
+      return {
+        title: 'Type performance',
+        description: 'See which delivery types are doing the work before you add more campaign noise.',
+      };
+    default:
+      return {
+        title: 'Campaign directory',
+        description: 'Review live and draft campaigns with just the details operators actually need: scope, timing, spend, and outcome.',
+      };
+  }
 }
 
 export default function AdminMarketingPage() {
@@ -273,11 +253,11 @@ export default function AdminMarketingPage() {
       setViewMode('campaigns');
       setIsCreateModalOpen(false);
       setFormData(INITIAL_FORM);
-      setFeedback({ type: 'success', message: '活动已创建。' });
+      setFeedback({ type: 'success', message: 'Campaign created.' });
       await refreshAll();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '创建活动失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Campaign creation failed.') });
     },
   });
 
@@ -289,11 +269,11 @@ export default function AdminMarketingPage() {
     onSuccess: async () => {
       setIsDeleteModalOpen(false);
       setSelectedCampaign(null);
-      setFeedback({ type: 'success', message: '活动已删除。' });
+      setFeedback({ type: 'success', message: 'Campaign deleted.' });
       await refreshAll();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '删除活动失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Campaign deletion failed.') });
     },
   });
 
@@ -301,6 +281,19 @@ export default function AdminMarketingPage() {
   const stats = statsQuery.data;
   const segments = Array.isArray(segmentsQuery.data) ? segmentsQuery.data : [];
   const types = Array.isArray(typesQuery.data) ? typesQuery.data : [];
+
+  const metricSnapshot = useMemo(() => {
+    const activeCampaigns = campaigns.filter(
+      (campaign) => String(campaign?.status || '').toLowerCase() === 'active',
+    ).length;
+
+    return {
+      totalCampaigns: stats?.totalCampaigns ?? campaigns.length,
+      activeCampaigns: stats?.activeCampaigns ?? activeCampaigns,
+      totalBudget: stats?.totalBudget ?? 0,
+      avgRoi: stats?.avgRoi ?? 0,
+    };
+  }, [campaigns, stats]);
 
   const setFormValue = (key, value) => setFormData((current) => ({ ...current, [key]: value }));
   const setRangeValue = (key, value) => setDateRange((current) => ({ ...current, [key]: value }));
@@ -315,362 +308,438 @@ export default function AdminMarketingPage() {
     const budgetValue = formData.budget === '' ? null : Number(formData.budget);
 
     if (!formData.name.trim()) {
-      setFeedback({ type: 'error', message: '活动名称不能为空。' });
+      setFeedback({ type: 'error', message: 'Campaign name is required.' });
       return;
     }
 
     if (budgetValue !== null && (!Number.isFinite(budgetValue) || budgetValue < 0)) {
-      setFeedback({ type: 'error', message: '预算必须是合法的非负数。' });
+      setFeedback({ type: 'error', message: 'Budget must be a valid non-negative number.' });
       return;
     }
 
     if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
-      setFeedback({ type: 'error', message: '结束日期不能早于开始日期。' });
+      setFeedback({ type: 'error', message: 'End date cannot be earlier than the start date.' });
       return;
     }
 
     createCampaignMutation.mutate(formData);
   };
+
   const handleDeleteCampaign = () => {
     if (!selectedCampaign?.id) {
-      setFeedback({ type: 'error', message: '无法识别当前选中的活动。' });
+      setFeedback({ type: 'error', message: 'The selected campaign could not be identified.' });
       setIsDeleteModalOpen(false);
       return;
     }
+
     deleteCampaignMutation.mutate(selectedCampaign.id);
   };
 
-  let content = null;
+  const tabContentMeta = tabMeta(viewMode);
 
-  if (viewMode === 'campaigns') {
-    if (campaignsQuery.isLoading) {
-      content = <LoadingPanel message="活动加载中..." />;
-    } else if (campaignsQuery.isError) {
-      content = (
-        <ErrorPanel
-          title="活动列表加载失败"
-          message={getErrorMessage(campaignsQuery.error, '活动加载失败。')}
-          onRetry={() => campaignsQuery.refetch()}
-        />
-      );
-    } else {
-      content = (
-        <AdminDataState isLoading={false} hasData={campaigns.length > 0} emptyMessage="暂无活动。" wrap={false}>
-          <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900/70 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.85)]">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-neutral-800 text-sm">
-                <thead className="bg-neutral-950/60 text-left text-xs uppercase tracking-[0.18em] text-neutral-500">
-                  <tr>
-                    <th className="px-5 py-4 font-semibold">活动</th>
-                    <th className="px-5 py-4 font-semibold">状态</th>
-                    <th className="px-5 py-4 font-semibold">目标人群</th>
-                    <th className="px-5 py-4 font-semibold">排期</th>
-                    <th className="px-5 py-4 font-semibold">花费</th>
-                    <th className="px-5 py-4 font-semibold">结果</th>
-                    <th className="px-5 py-4 font-semibold text-right">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-800/80">
-                  {campaigns.map((campaign) => {
-                    const metric = getCampaignMetrics(campaign);
-                    const schedule = campaign.startDate || campaign.endDate
-                      ? `${formatDate(campaign.startDate, '任意时间')} 至 ${formatDate(campaign.endDate, '长期有效')}`
-                      : '未安排';
+  return (
+    <AdminLayout
+      title="Marketing"
+      subtitle="Manage campaign planning and read the outcome without letting the page drift back into a noisy growth console."
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <AdminMetricCard
+            label="Campaigns"
+            value={formatNumber(metricSnapshot.totalCampaigns)}
+            detail="The total number of campaigns currently in this workspace."
+            tone="accent"
+          />
+          <AdminMetricCard
+            label="Active now"
+            value={formatNumber(metricSnapshot.activeCampaigns)}
+            detail="Campaigns still running or scheduled to stay live."
+          />
+          <AdminMetricCard
+            label="Budget in range"
+            value={formatCurrency(metricSnapshot.totalBudget)}
+            detail="Planned spend inside the selected reporting window."
+          />
+          <AdminMetricCard
+            label="Average ROI"
+            value={formatPercent(metricSnapshot.avgRoi)}
+            detail="A quick directional read on the current portfolio."
+          />
+        </div>
 
-                    return (
-                      <tr key={campaign.id || campaign.name} className="align-top transition hover:bg-neutral-900/90">
-                        <td className="px-5 py-4">
-                          <div className="space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="font-semibold text-white">{campaign.name || '未命名活动'}</p>
-                              <span className="rounded-full border border-neutral-700 bg-neutral-900 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-neutral-400">
-                                {formatCampaignTypeLabel(campaign.type)}
-                              </span>
-                            </div>
-                            {campaign.description ? <p className="max-w-md text-sm text-neutral-400">{campaign.description}</p> : null}
-                          </div>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${getStatusTone(campaign.status)}`}>
-                            {formatCampaignStatusLabel(campaign.status)}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4 text-neutral-300">
-                          <div className="space-y-1">
-                            <p>{formatSegmentLabel(campaign.targetSegment)}</p>
-                            <p className="text-xs text-neutral-500">创建于 {formatDate(campaign.createdAt, '未知')}</p>
-                          </div>
-                        </td>
-                        <td className="px-5 py-4 text-neutral-300">{schedule}</td>
-                        <td className="px-5 py-4 text-neutral-300">
-                          <div className="space-y-1">
-                            <p>预算 {formatCurrency(campaign.budget)}</p>
-                            <p className="text-xs text-neutral-500">已花费 {formatCurrency(campaign.spent)}</p>
-                          </div>
-                        </td>
-                        <td className="px-5 py-4 text-neutral-300">
-                          <div className="space-y-1">
-                            <p>收入 {formatCurrency(metric.revenue)}</p>
-                            <p className="text-xs text-neutral-500">{formatNumber(metric.converted)} 次转化，ROI {formatPercent(metric.roi)}</p>
-                          </div>
-                        </td>
-                        <td className="px-5 py-4 text-right">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedCampaign(campaign);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            disabled={deleteCampaignMutation.isPending}
-                            className="rounded-2xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {deleteCampaignMutation.isPending && selectedCampaign?.id === campaign.id ? '删除中...' : '删除'}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+        <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
+
+        <AdminPageSection
+          title="Campaign controls"
+          description="Switch views, update the reporting window, and create a new campaign from one calm control row."
+          action={
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="button" variant="outline" onClick={() => refreshAll()}>
+                <RefreshCw className="size-4" />
+                Refresh
+              </Button>
+              <Button type="button" onClick={openCreateModal}>
+                <Plus className="size-4" />
+                New campaign
+              </Button>
+            </div>
+          }
+        >
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-end">
+            <div className="space-y-3">
+              <AdminTabs items={MARKETING_TABS} value={viewMode} onChange={setViewMode} />
+              <p className="text-sm leading-6 text-slate-500">{tabContentMeta.description}</p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <AdminFormField label="Start date">
+                <input
+                  type="date"
+                  value={dateRange.startDate}
+                  onChange={(event) => setRangeValue('startDate', event.target.value)}
+                  max={dateRange.endDate || undefined}
+                  className={adminInputClassName}
+                />
+              </AdminFormField>
+              <AdminFormField label="End date">
+                <input
+                  type="date"
+                  value={dateRange.endDate}
+                  onChange={(event) => setRangeValue('endDate', event.target.value)}
+                  min={dateRange.startDate || undefined}
+                  className={adminInputClassName}
+                />
+              </AdminFormField>
             </div>
           </div>
-        </AdminDataState>
-      );
-    }
-  } else if (viewMode === 'stats') {
-    if (statsQuery.isLoading) {
-      content = <LoadingPanel message="统计数据加载中..." />;
-    } else if (statsQuery.isError) {
-      content = (
-        <ErrorPanel
-          title="统计概览加载失败"
-          message={getErrorMessage(statsQuery.error, '统计数据加载失败。')}
-          onRetry={() => statsQuery.refetch()}
-        />
-      );
-    } else {
-      content = (
-        <AdminDataState isLoading={false} hasData={Boolean(stats)} emptyMessage="当前时间范围暂无统计数据。" wrap={false}>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <StatCard title="活动总数" value={formatNumber(stats?.totalCampaigns)} helperText="当前范围内的全部活动" />
-            <StatCard title="进行中活动" value={formatNumber(stats?.activeCampaigns)} helperText="当前仍在运行" />
-            <StatCard title="总预算" value={formatCurrency(stats?.totalBudget)} helperText="计划投入" />
-            <StatCard title="总花费" value={formatCurrency(stats?.totalSpent)} helperText="实际消耗" />
-            <StatCard title="总收入" value={formatCurrency(stats?.totalRevenue)} helperText="归因收入" />
-            <StatCard title="平均 ROI" value={formatPercent(stats?.avgRoi)} helperText={`${formatNumber(stats?.totalConverted)} 次总转化`} />
-          </div>
-        </AdminDataState>
-      );
-    }
-  } else if (viewMode === 'by-segment') {
-    if (segmentsQuery.isLoading) {
-      content = <LoadingPanel message="人群数据加载中..." />;
-    } else if (segmentsQuery.isError) {
-      content = (
-        <ErrorPanel
-          title="人群统计加载失败"
-          message={getErrorMessage(segmentsQuery.error, '人群统计加载失败。')}
-          onRetry={() => segmentsQuery.refetch()}
-        />
-      );
-    } else {
-      content = (
-        <AdminDataState isLoading={false} hasData={segments.length > 0} emptyMessage="当前时间范围暂无人群数据。" wrap={false}>
-          <div className="grid gap-4 xl:grid-cols-2">
-            {segments.map((segment) => (
-              <div key={segment.segment || 'unknown'} className="rounded-3xl border border-neutral-800 bg-neutral-900/75 px-5 py-5 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.8)]">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">人群</p>
-                    <h3 className="mt-2 text-xl font-semibold text-white">{formatSegmentLabel(segment.segment)}</h3>
-                  </div>
-                  <span className="rounded-full border border-neutral-700 bg-neutral-950/70 px-3 py-1 text-xs text-neutral-300">
-                    {formatNumber(segment.count)} 个活动
-                  </span>
-                </div>
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <StatCard title="预算" value={formatCurrency(segment.budget)} helperText="计划投入" />
-                  <StatCard title="花费" value={formatCurrency(segment.spent)} helperText="实际消耗" />
-                  <StatCard title="收入" value={formatCurrency(segment.revenue)} helperText="归因结果" />
-                  <StatCard title="转化" value={formatNumber(segment.converted)} helperText="已完成动作" />
-                </div>
+        </AdminPageSection>
+
+        <AdminPageSection title={tabContentMeta.title} description={tabContentMeta.description}>
+          {viewMode === 'campaigns' ? (
+            <AdminDataState
+              isLoading={campaignsQuery.isLoading}
+              hasData={campaigns.length > 0}
+              emptyMessage="No campaigns are available for this view."
+              wrap={false}
+            >
+              <AdminDataTable>
+                <table className="min-w-full text-sm">
+                  <AdminTableHeader>
+                    <tr>
+                      <th className="px-4 py-4">Campaign</th>
+                      <th className="px-4 py-4">Status</th>
+                      <th className="px-4 py-4">Audience</th>
+                      <th className="px-4 py-4">Schedule</th>
+                      <th className="px-4 py-4">Budget</th>
+                      <th className="px-4 py-4">Outcome</th>
+                      <th className="px-4 py-4 text-right">Action</th>
+                    </tr>
+                  </AdminTableHeader>
+                  <tbody>
+                    {campaigns.map((campaign) => {
+                      const metric = getCampaignMetrics(campaign);
+                      const schedule =
+                        campaign.startDate || campaign.endDate
+                          ? `${formatDate(campaign.startDate, 'Any time')} to ${formatDate(campaign.endDate, 'Open ended')}`
+                          : 'Not scheduled';
+
+                      return (
+                        <AdminTableRow key={campaign.id || campaign.name}>
+                          <td className="px-4 py-4">
+                            <div className="space-y-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="font-semibold text-slate-950">
+                                  {campaign.name || 'Untitled campaign'}
+                                </p>
+                                <AdminBadge tone="default">
+                                  {formatCampaignTypeLabel(campaign.type)}
+                                </AdminBadge>
+                              </div>
+                              {campaign.description ? (
+                                <p className="max-w-md text-sm leading-6 text-slate-600">
+                                  {campaign.description}
+                                </p>
+                              ) : null}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <AdminBadge tone={getStatusTone(campaign.status)}>
+                              {formatCampaignStatusLabel(campaign.status)}
+                            </AdminBadge>
+                          </td>
+                          <td className="px-4 py-4 text-slate-700">
+                            <div className="space-y-1">
+                              <p>{formatSegmentLabel(campaign.targetSegment)}</p>
+                              <p className="text-xs text-slate-500">
+                                Created {formatDate(campaign.createdAt, 'Unknown')}
+                              </p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-slate-700">{schedule}</td>
+                          <td className="px-4 py-4 text-slate-700">
+                            <div className="space-y-1">
+                              <p>Budget {formatCurrency(campaign.budget)}</p>
+                              <p className="text-xs text-slate-500">
+                                Spent {formatCurrency(campaign.spent)}
+                              </p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-slate-700">
+                            <div className="space-y-1">
+                              <p>Revenue {formatCurrency(metric.revenue)}</p>
+                              <p className="text-xs text-slate-500">
+                                {formatNumber(metric.converted)} conversions, ROI {formatPercent(metric.roi)}
+                              </p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-right">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                setSelectedCampaign(campaign);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              disabled={deleteCampaignMutation.isPending}
+                            >
+                              {deleteCampaignMutation.isPending && selectedCampaign?.id === campaign.id
+                                ? 'Deleting...'
+                                : 'Delete'}
+                            </Button>
+                          </td>
+                        </AdminTableRow>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </AdminDataTable>
+            </AdminDataState>
+          ) : null}
+
+          {viewMode === 'stats' ? (
+            <AdminDataState
+              isLoading={statsQuery.isLoading}
+              hasData={Boolean(stats)}
+              emptyMessage="No marketing performance summary is available for this range."
+              wrap={false}
+            >
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <AdminMetricCard label="Total campaigns" value={formatNumber(stats?.totalCampaigns)} detail="Campaigns counted inside the selected window." tone="accent" />
+                <AdminMetricCard label="Active campaigns" value={formatNumber(stats?.activeCampaigns)} detail="Campaigns currently active in the selected window." />
+                <AdminMetricCard label="Total budget" value={formatCurrency(stats?.totalBudget)} detail="Planned campaign spend." />
+                <AdminMetricCard label="Total spent" value={formatCurrency(stats?.totalSpent)} detail="Actual spend captured so far." />
+                <AdminMetricCard label="Attributed revenue" value={formatCurrency(stats?.totalRevenue)} detail="Revenue currently attributed to these campaigns." />
+                <AdminMetricCard label="Average ROI" value={formatPercent(stats?.avgRoi)} detail={`${formatNumber(stats?.totalConverted)} total conversions`} />
               </div>
-            ))}
-          </div>
-        </AdminDataState>
-      );
-    }
-  } else if (typesQuery.isLoading) {
-    content = <LoadingPanel message="活动类型数据加载中..." />;
-  } else if (typesQuery.isError) {
-    content = (
-      <ErrorPanel
-        title="活动类型统计加载失败"
-        message={getErrorMessage(typesQuery.error, '活动类型统计加载失败。')}
-        onRetry={() => typesQuery.refetch()}
-      />
-    );
-  } else {
-    content = (
-      <AdminDataState isLoading={false} hasData={types.length > 0} emptyMessage="当前时间范围暂无活动类型数据。" wrap={false}>
-        <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900/70 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.85)]">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-neutral-800 text-sm">
-              <thead className="bg-neutral-950/60 text-left text-xs uppercase tracking-[0.18em] text-neutral-500">
-                <tr>
-                  <th className="px-5 py-4 font-semibold">类型</th>
-                  <th className="px-5 py-4 font-semibold">活动数</th>
-                  <th className="px-5 py-4 font-semibold">预算</th>
-                  <th className="px-5 py-4 font-semibold">花费</th>
-                  <th className="px-5 py-4 font-semibold">收入</th>
-                  <th className="px-5 py-4 font-semibold">转化</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-800/80">
-                {types.map((typeRow) => (
-                  <tr key={typeRow.type || 'unknown'} className="transition hover:bg-neutral-900/90">
-                    <td className="px-5 py-4 font-medium text-white">{formatCampaignTypeLabel(typeRow.type)}</td>
-                    <td className="px-5 py-4 text-neutral-300">{formatNumber(typeRow.count)}</td>
-                    <td className="px-5 py-4 text-neutral-300">{formatCurrency(typeRow.budget)}</td>
-                    <td className="px-5 py-4 text-neutral-300">{formatCurrency(typeRow.spent)}</td>
-                    <td className="px-5 py-4 text-neutral-300">{formatCurrency(typeRow.revenue)}</td>
-                    <td className="px-5 py-4 text-neutral-300">{formatNumber(typeRow.converted)}</td>
-                  </tr>
+            </AdminDataState>
+          ) : null}
+
+          {viewMode === 'by-segment' ? (
+            <AdminDataState
+              isLoading={segmentsQuery.isLoading}
+              hasData={segments.length > 0}
+              emptyMessage="No segment performance is available for this range."
+              wrap={false}
+            >
+              <div className="grid gap-4 xl:grid-cols-2">
+                {segments.map((segment) => (
+                  <div
+                    key={segment.segment || 'unknown'}
+                    className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                          Segment
+                        </p>
+                        <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                          {formatSegmentLabel(segment.segment)}
+                        </h3>
+                      </div>
+                      <AdminBadge tone="default">{formatNumber(segment.count)} campaigns</AdminBadge>
+                    </div>
+
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      <AdminMetricCard label="Budget" value={formatCurrency(segment.budget)} detail="Planned spend." />
+                      <AdminMetricCard label="Spent" value={formatCurrency(segment.spent)} detail="Actual spend." />
+                      <AdminMetricCard label="Revenue" value={formatCurrency(segment.revenue)} detail="Attributed revenue." tone="accent" />
+                      <AdminMetricCard label="Conversions" value={formatNumber(segment.converted)} detail="Completed outcomes." />
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </AdminDataState>
-    );
-  }
-  return (
-    <div className="space-y-6 p-6 text-neutral-100">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-neutral-500">后台</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-white">营销中心</h1>
-          <p className="max-w-3xl text-sm text-neutral-400">
-            在一个稳定的后台页面里查看活动、对比人群与类型汇总，并完成创建和删除。
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => refreshAll()}
-            className="rounded-2xl border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-800"
-          >
-            刷新
-          </button>
-          <button
-            type="button"
-            onClick={openCreateModal}
-            className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400"
-          >
-            新建活动
-          </button>
-        </div>
+              </div>
+            </AdminDataState>
+          ) : null}
+
+          {viewMode === 'by-type' ? (
+            <AdminDataState
+              isLoading={typesQuery.isLoading}
+              hasData={types.length > 0}
+              emptyMessage="No type-level marketing performance is available for this range."
+              wrap={false}
+            >
+              <AdminDataTable>
+                <table className="min-w-full text-sm">
+                  <AdminTableHeader>
+                    <tr>
+                      <th className="px-4 py-4">Type</th>
+                      <th className="px-4 py-4">Campaigns</th>
+                      <th className="px-4 py-4">Budget</th>
+                      <th className="px-4 py-4">Spent</th>
+                      <th className="px-4 py-4">Revenue</th>
+                      <th className="px-4 py-4">Conversions</th>
+                    </tr>
+                  </AdminTableHeader>
+                  <tbody>
+                    {types.map((typeRow) => (
+                      <AdminTableRow key={typeRow.type || 'unknown'}>
+                        <td className="px-4 py-4 font-medium text-slate-950">
+                          {formatCampaignTypeLabel(typeRow.type)}
+                        </td>
+                        <td className="px-4 py-4 text-slate-700">{formatNumber(typeRow.count)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCurrency(typeRow.budget)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCurrency(typeRow.spent)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCurrency(typeRow.revenue)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatNumber(typeRow.converted)}</td>
+                      </AdminTableRow>
+                    ))}
+                  </tbody>
+                </table>
+              </AdminDataTable>
+            </AdminDataState>
+          ) : null}
+        </AdminPageSection>
       </div>
-
-      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="活动总数" value={campaignsQuery.isLoading ? '...' : formatNumber(stats?.totalCampaigns ?? campaigns.length)} helperText="当前活动数量" />
-        <StatCard title="进行中" value={statsQuery.isLoading ? '...' : statsQuery.isError ? '--' : formatNumber(stats?.activeCampaigns)} helperText="当前在运行的活动" />
-        <StatCard title="预算" value={statsQuery.isLoading ? '...' : statsQuery.isError ? '--' : formatCurrency(stats?.totalBudget)} helperText="当前范围内预算" />
-        <StatCard title="平均 ROI" value={statsQuery.isLoading ? '...' : statsQuery.isError ? '--' : formatPercent(stats?.avgRoi)} helperText="最新汇总 ROI" />
-      </div>
-
-      <div className="rounded-3xl border border-neutral-800 bg-neutral-950/60 p-4 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.85)]">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div className="flex flex-wrap gap-2">
-            {TABS.map((tab) => {
-              const active = viewMode === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setViewMode(tab.key)}
-                  className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${active ? 'bg-white text-neutral-950' : 'border border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-600 hover:text-white'}`}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:min-w-[340px]">
-            <Field label="开始日期">
-              <input
-                type="date"
-                value={dateRange.startDate}
-                onChange={(event) => setRangeValue('startDate', event.target.value)}
-                max={dateRange.endDate || undefined}
-                className="w-full rounded-2xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white outline-none transition focus:border-emerald-400"
-              />
-            </Field>
-            <Field label="结束日期">
-              <input
-                type="date"
-                value={dateRange.endDate}
-                onChange={(event) => setRangeValue('endDate', event.target.value)}
-                min={dateRange.startDate || undefined}
-                className="w-full rounded-2xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white outline-none transition focus:border-emerald-400"
-              />
-            </Field>
-          </div>
-        </div>
-      </div>
-
-      <section className="space-y-4">
-        <SectionHeader
-          title={viewMode === 'campaigns' ? '活动列表' : viewMode === 'stats' ? '表现概览' : viewMode === 'by-segment' ? '按人群表现' : '按类型表现'}
-          description={viewMode === 'campaigns' ? '每一行展示活动的最新配置、花费、收入和转化快照。' : viewMode === 'stats' ? '这里会汇总所选日期范围内的预算、花费、收入和转化。' : viewMode === 'by-segment' ? '对比不同用户人群在预算、花费和收入上的表现。' : '对比不同投放类型，快速发现更强的渠道。'}
-        />
-        {content}
-      </section>
 
       <Modal
         isOpen={isCreateModalOpen}
-        onClose={() => !createCampaignMutation.isPending && setIsCreateModalOpen(false)}
-        title="新建活动"
-        subtitle="先配置活动基础信息，数据开始回流后再补充分析。"
+        title="New campaign"
+        subtitle="Keep campaign setup direct: what it is, who it targets, and when it should run."
+        onClose={() => setIsCreateModalOpen(false)}
         size="xl"
       >
-        <div className="space-y-5">
-          {createCampaignMutation.isError ? <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">{getErrorMessage(createCampaignMutation.error, '创建活动失败。')}</div> : null}
+        <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="活动名称"><input type="text" value={formData.name} onChange={(event) => setFormValue('name', event.target.value)} placeholder="暑期活动" className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400" /></Field>
-            <Field label="预算" hint="如果活动没有固定预算，可以留空。"><input type="number" min="0" step="0.01" value={formData.budget} onChange={(event) => setFormValue('budget', event.target.value)} placeholder="0.00" className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400" /></Field>
-            <Field label="类型"><select value={formData.type} onChange={(event) => setFormValue('type', event.target.value)} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400">{TYPE_OPTIONS.map((option) => <option key={option} value={option}>{formatCampaignTypeLabel(option)}</option>)}</select></Field>
-            <Field label="状态"><select value={formData.status} onChange={(event) => setFormValue('status', event.target.value)} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400">{STATUS_OPTIONS.map((option) => <option key={option} value={option}>{formatCampaignStatusLabel(option)}</option>)}</select></Field>
-            <Field label="目标人群"><select value={formData.targetSegment} onChange={(event) => setFormValue('targetSegment', event.target.value)} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400">{SEGMENT_OPTIONS.map((option) => <option key={option} value={option}>{formatSegmentLabel(option)}</option>)}</select></Field>
-            <Field label="开始日期"><input type="date" value={formData.startDate} onChange={(event) => setFormValue('startDate', event.target.value)} max={formData.endDate || undefined} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400" /></Field>
-            <Field label="结束日期"><input type="date" value={formData.endDate} onChange={(event) => setFormValue('endDate', event.target.value)} min={formData.startDate || undefined} className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-3 py-2.5 text-sm text-white outline-none transition focus:border-emerald-400" /></Field>
+            <AdminFormField label="Campaign name">
+              <input
+                value={formData.name}
+                onChange={(event) => setFormValue('name', event.target.value)}
+                className={adminInputClassName}
+                placeholder="Spring comeback campaign"
+              />
+            </AdminFormField>
+
+            <AdminFormField label="Audience segment">
+              <select
+                value={formData.targetSegment}
+                onChange={(event) => setFormValue('targetSegment', event.target.value)}
+                className={adminSelectClassName}
+              >
+                {SEGMENT_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {formatSegmentLabel(option)}
+                  </option>
+                ))}
+              </select>
+            </AdminFormField>
+
+            <AdminFormField label="Campaign type">
+              <select
+                value={formData.type}
+                onChange={(event) => setFormValue('type', event.target.value)}
+                className={adminSelectClassName}
+              >
+                {TYPE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {formatCampaignTypeLabel(option)}
+                  </option>
+                ))}
+              </select>
+            </AdminFormField>
+
+            <AdminFormField label="Status">
+              <select
+                value={formData.status}
+                onChange={(event) => setFormValue('status', event.target.value)}
+                className={adminSelectClassName}
+              >
+                {STATUS_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {formatCampaignStatusLabel(option)}
+                  </option>
+                ))}
+              </select>
+            </AdminFormField>
+
+            <AdminFormField label="Budget">
+              <input
+                value={formData.budget}
+                onChange={(event) => setFormValue('budget', event.target.value)}
+                className={adminInputClassName}
+                inputMode="decimal"
+                placeholder="1500"
+              />
+            </AdminFormField>
+
+            <AdminFormField label="Start date">
+              <input
+                type="date"
+                value={formData.startDate}
+                onChange={(event) => setFormValue('startDate', event.target.value)}
+                className={adminInputClassName}
+              />
+            </AdminFormField>
+
+            <AdminFormField label="End date">
+              <input
+                type="date"
+                value={formData.endDate}
+                onChange={(event) => setFormValue('endDate', event.target.value)}
+                className={adminInputClassName}
+              />
+            </AdminFormField>
           </div>
-          <Field label="描述" hint="给后台操作员看的内部备注，可选。"><textarea value={formData.description} onChange={(event) => setFormValue('description', event.target.value)} rows={4} placeholder="简短活动说明" className="w-full rounded-3xl border border-neutral-800 bg-neutral-950 px-3 py-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-emerald-400" /></Field>
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <button type="button" onClick={() => setIsCreateModalOpen(false)} disabled={createCampaignMutation.isPending} className="rounded-2xl border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60">取消</button>
-            <button type="button" onClick={handleCreateCampaign} disabled={createCampaignMutation.isPending} className="rounded-2xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60">{createCampaignMutation.isPending ? '创建中...' : '创建活动'}</button>
+
+          <AdminFormField label="Notes">
+            <textarea
+              value={formData.description}
+              onChange={(event) => setFormValue('description', event.target.value)}
+              rows={5}
+              className={adminTextareaClassName}
+              placeholder="What this campaign is trying to change, and what operators should watch."
+            />
+          </AdminFormField>
+
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleCreateCampaign}
+              disabled={createCampaignMutation.isPending}
+            >
+              {createCampaignMutation.isPending ? 'Creating...' : 'Create campaign'}
+            </Button>
           </div>
         </div>
       </Modal>
 
-      <Modal
+      <ConfirmDialog
         isOpen={isDeleteModalOpen}
-        onClose={() => !deleteCampaignMutation.isPending && setIsDeleteModalOpen(false)}
-        title="删除活动"
-        subtitle="此操作无法撤销。"
-        size="md"
-      >
-        <div className="space-y-5">
-          <p className="text-sm text-neutral-300">{selectedCampaign?.name ? `确定删除 ${selectedCampaign.name} 吗？` : '确定删除这个活动吗？'}</p>
-          {deleteCampaignMutation.isError ? <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">{getErrorMessage(deleteCampaignMutation.error, '删除活动失败。')}</div> : null}
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <button type="button" onClick={() => { setIsDeleteModalOpen(false); setSelectedCampaign(null); }} disabled={deleteCampaignMutation.isPending} className="rounded-2xl border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-neutral-500 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60">取消</button>
-            <button type="button" onClick={handleDeleteCampaign} disabled={deleteCampaignMutation.isPending} className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60">{deleteCampaignMutation.isPending ? '删除中...' : '删除活动'}</button>
-          </div>
-        </div>
-      </Modal>
-    </div>
+        title="Delete campaign"
+        message={`Delete "${selectedCampaign?.name || 'this campaign'}"? This cannot be undone.`}
+        confirmText={deleteCampaignMutation.isPending ? 'Deleting...' : 'Delete campaign'}
+        cancelText="Cancel"
+        isDangerous={true}
+        isLoading={deleteCampaignMutation.isPending}
+        onConfirm={handleDeleteCampaign}
+        onCancel={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedCampaign(null);
+        }}
+      />
+    </AdminLayout>
   );
 }

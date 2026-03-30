@@ -59,7 +59,7 @@ test.describe("Admin system page regressions", () => {
     await expect(page.getByRole("heading", { name: /后台访问|Admin access/ })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("heading", { name: /指标口径|Metric rules/ })).toBeVisible({
+    await expect(page.getByRole("heading", { name: /指标口径|Metric notes/ })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     await expect(page.getByText(/HttpOnly/i)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });

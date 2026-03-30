@@ -5,53 +5,30 @@ export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
+import { AdminLayout } from '../../../components/admin/AdminLayout';
 import { AdminDataState } from '@/components/admin/common/AdminDataState';
+import {
+  AdminBadge,
+  AdminDataTable,
+  AdminFormField,
+  AdminMetricCard,
+  AdminPageSection,
+  AdminTableHeader,
+  AdminTableRow,
+  AdminTabs,
+  adminInputClassName,
+} from '@/components/admin/common/AdminWorkspacePrimitives';
 import { adminFetchJson } from '@/lib/adminApiClient';
 
 const LEGACY_REVENUE_CACHE_TTL_MS = 60_000;
-const EMPTY_MESSAGE = '暂无收入数据。';
+const EMPTY_MESSAGE = 'No revenue data is available for this range.';
 const legacyRevenueCache = new Map();
 
-const STAT_CARD_STYLES = {
-  blue: {
-    container: 'border-blue-700 bg-blue-900/20',
-    value: 'text-blue-400',
-  },
-  emerald: {
-    container: 'border-emerald-700 bg-emerald-900/20',
-    value: 'text-emerald-400',
-  },
-  purple: {
-    container: 'border-purple-700 bg-purple-900/20',
-    value: 'text-purple-400',
-  },
-  red: {
-    container: 'border-red-700 bg-red-900/20',
-    value: 'text-red-400',
-  },
-  green: {
-    container: 'border-green-700 bg-green-900/20',
-    value: 'text-green-400',
-  },
-  yellow: {
-    container: 'border-yellow-700 bg-yellow-900/20',
-    value: 'text-yellow-400',
-  },
-  orange: {
-    container: 'border-orange-700 bg-orange-900/20',
-    value: 'text-orange-400',
-  },
-  gray: {
-    container: 'border-gray-700 bg-gray-900/20',
-    value: 'text-gray-400',
-  },
-};
-
 const REVENUE_TABS = [
-  { key: 'overview', label: '概览' },
-  { key: 'trend', label: '趋势' },
-  { key: 'channels', label: '渠道' },
-  { key: 'promotions', label: '活动' },
+  { value: 'overview', label: 'Overview' },
+  { value: 'trend', label: 'Trend' },
+  { value: 'channels', label: 'Channels' },
+  { value: 'promotions', label: 'Promotions' },
 ];
 
 async function fetchAdminJson(path) {
@@ -120,7 +97,7 @@ function toOptionalNumber(value) {
 }
 
 function formatPercentage(value) {
-  return value === null || value === undefined ? '暂无' : `${value}%`;
+  return value === null || value === undefined ? 'Not available' : `${value}%`;
 }
 
 function dateKeyFromIso(value) {
@@ -153,7 +130,7 @@ function formatCurrency(value, currency = 'USD') {
   const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
 
   try {
-    return new Intl.NumberFormat('zh-CN', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: normalizedCurrency,
       minimumFractionDigits: 2,
@@ -165,12 +142,12 @@ function formatCurrency(value, currency = 'USD') {
 }
 
 function formatCount(value) {
-  return new Intl.NumberFormat('zh-CN', {
+  return new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
   }).format(toNumber(value));
 }
 
-function formatLabel(value, fallback = '未知') {
+function formatLabel(value, fallback = 'Unknown') {
   const rawValue = String(value || '').trim();
   if (!rawValue || rawValue.toLowerCase() === 'unknown') {
     return fallback;
@@ -265,7 +242,7 @@ async function getLegacyRevenueFallback(dateRange) {
     }
 
     const provider = String(
-      order?.provider || order?.paymentChannel || order?.channel || order?.paymentMethod || 'unknown'
+      order?.provider || order?.paymentChannel || order?.channel || order?.paymentMethod || 'unknown',
     ).toLowerCase();
     const channelStats = channelMap.get(provider) || { orders: 0, revenue: 0 };
     channelStats.orders += 1;
@@ -344,7 +321,7 @@ async function getLegacyRevenueFallback(dateRange) {
     channels,
     promotions: promotions.map((item) => ({
       promotionId: item?.id || item?.promotionId || '',
-      title: item?.title || '未命名活动',
+      title: item?.title || 'Untitled promotion',
       orders: toNumber(item?.orders),
       revenue: Number(toNumber(item?.revenue).toFixed(2)),
       roi: toOptionalNumber(item?.roi),
@@ -365,15 +342,29 @@ async function getLegacyRevenueFallback(dateRange) {
   return value;
 }
 
-function StatCard({ title, value, tone = 'blue', formatter = (item) => item }) {
-  const style = STAT_CARD_STYLES[tone] || STAT_CARD_STYLES.blue;
-
-  return (
-    <div className={`rounded-xl border p-4 ${style.container}`}>
-      <p className="text-sm text-neutral-400">{title}</p>
-      <p className={`mt-2 text-2xl font-bold ${style.value}`}>{formatter(value)}</p>
-    </div>
-  );
+function viewMeta(tab) {
+  switch (tab) {
+    case 'trend':
+      return {
+        title: 'Revenue trend',
+        description: 'Read the daily movement without wrapping the page in charts and dashboard chrome.',
+      };
+    case 'channels':
+      return {
+        title: 'Channel performance',
+        description: 'See which payment or purchase channels actually drive revenue.',
+      };
+    case 'promotions':
+      return {
+        title: 'Promotion performance',
+        description: 'Keep promotional attribution explicit, especially where ROI is still limited by backend inputs.',
+      };
+    default:
+      return {
+        title: 'Revenue overview',
+        description: 'A clear operational read on revenue, refunds, reader value mix, and order outcomes.',
+      };
+  }
 }
 
 export default function AdminRevenuePage() {
@@ -391,7 +382,7 @@ export default function AdminRevenuePage() {
         `/api/admin/revenue/stats?${params}`,
         dateRange,
         (fallback) => ({ stats: fallback.stats }),
-        { stats: null }
+        { stats: null },
       );
     },
     staleTime: 5 * 60 * 1000,
@@ -405,7 +396,7 @@ export default function AdminRevenuePage() {
         `/api/admin/revenue/trend?${params}`,
         dateRange,
         (fallback) => ({ trend: fallback.trend }),
-        { trend: [] }
+        { trend: [] },
       );
     },
     staleTime: 5 * 60 * 1000,
@@ -419,7 +410,7 @@ export default function AdminRevenuePage() {
         `/api/admin/revenue/channels?${params}`,
         dateRange,
         (fallback) => ({ channels: fallback.channels }),
-        { channels: [] }
+        { channels: [] },
       );
     },
     staleTime: 5 * 60 * 1000,
@@ -437,22 +428,21 @@ export default function AdminRevenuePage() {
           attributionModel: fallback.attributionModel,
           roiAvailable: fallback.roiAvailable,
         }),
-        { promotions: [], attributionModel: null, roiAvailable: true }
+        { promotions: [], attributionModel: null, roiAvailable: true },
       );
     },
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: userValueData, isLoading: userValueLoading } = useQuery({
-    queryKey: ['admin', 'revenue', 'user-value-distribution'],
-    queryFn: async () => {
-      return loadRevenueResource(
+    queryKey: ['admin', 'revenue', 'user-value-distribution', dateRange],
+    queryFn: async () =>
+      loadRevenueResource(
         '/api/admin/revenue/user-value-distribution',
         dateRange,
         (fallback) => ({ distribution: fallback.distribution }),
-        { distribution: null }
-      );
-    },
+        { distribution: null },
+      ),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -464,7 +454,7 @@ export default function AdminRevenuePage() {
         `/api/admin/revenue/order-status-distribution?${params}`,
         dateRange,
         (fallback) => ({ distribution: fallback.orderStatus }),
-        { distribution: null }
+        { distribution: null },
       );
     },
     staleTime: 5 * 60 * 1000,
@@ -481,228 +471,227 @@ export default function AdminRevenuePage() {
   const promotionsRoiAvailable = promotionsData?.roiAvailable !== false;
   const promotionsAttributionCopy =
     promotionsAttributionModel === 'order_audit'
-      ? '收入当前基于支付创建审计元数据归因，ROI 在接入投放成本归因前仍不可用。'
+      ? 'Revenue is currently attributed from payment-creation audit metadata. ROI will remain unavailable until spend attribution is wired in.'
       : promotionsAttributionModel === 'hybrid_order_audit_and_derived_rules'
-        ? '收入优先使用支付创建审计元数据，缺失时回退到活动规则推导；ROI 在接入投放成本归因前仍不可用。'
-        : '收入当前由活动规则推导，ROI 在接入投放成本归因前仍不可用。';
+        ? 'Revenue uses payment-creation audit metadata first and falls back to derived promotion rules when audit metadata is missing. ROI remains unavailable until spend attribution is wired in.'
+        : 'Revenue is currently derived from promotion rules. ROI remains unavailable until spend attribution is wired in.';
 
   const overviewLoading = statsLoading || userValueLoading || orderStatusLoading;
   const hasOverviewData = Boolean(stats) || Boolean(userValue) || Boolean(orderStatus);
+  const meta = viewMeta(viewMode);
 
   return (
-    <div className="min-h-screen bg-neutral-900 p-6">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">收入分析</h1>
-          <p className="mt-2 max-w-3xl text-neutral-400">
-            在选定时间范围内查看收入、渠道表现、活动产出和订单质量。
-          </p>
+    <AdminLayout
+      title="Revenue"
+      subtitle="Read revenue outcomes, channel mix, and promotion impact in the same calm editorial admin language as the rest of the workspace."
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <AdminMetricCard
+            label="Revenue"
+            value={stats ? formatCurrency(stats.totalRevenue) : '--'}
+            detail="Gross paid revenue in the selected range."
+            tone="accent"
+          />
+          <AdminMetricCard
+            label="Paid orders"
+            value={stats ? formatCount(stats.totalOrders) : '--'}
+            detail="Orders counted in the current revenue snapshot."
+          />
+          <AdminMetricCard
+            label="Average order value"
+            value={stats ? formatCurrency(stats.avgOrderValue) : '--'}
+            detail="A quick read on order quality, not just order count."
+          />
+          <AdminMetricCard
+            label="Net revenue"
+            value={stats ? formatCurrency(stats.netRevenue) : '--'}
+            detail="Revenue after refunded volume is removed."
+          />
         </div>
 
-        <div className="mb-6 rounded-xl border border-neutral-700 bg-neutral-800 p-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="revenue-start-date" className="text-sm text-neutral-400">
-                  开始日期
-                </label>
+        <AdminPageSection
+          title="Revenue filters"
+          description="Switch views and update the reporting window without falling back to a generic BI dashboard layout."
+        >
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-end">
+            <div className="space-y-3">
+              <AdminTabs items={REVENUE_TABS} value={viewMode} onChange={setViewMode} />
+              <p className="text-sm leading-6 text-slate-500">{meta.description}</p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <AdminFormField label="Start date">
                 <input
                   id="revenue-start-date"
                   type="date"
                   value={dateRange.startDate}
                   onChange={(event) => setDateRange((current) => ({ ...current, startDate: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100"
+                  className={adminInputClassName}
                 />
-              </div>
-              <div>
-                <label htmlFor="revenue-end-date" className="text-sm text-neutral-400">
-                  结束日期
-                </label>
+              </AdminFormField>
+              <AdminFormField label="End date">
                 <input
                   id="revenue-end-date"
                   type="date"
                   value={dateRange.endDate}
                   onChange={(event) => setDateRange((current) => ({ ...current, endDate: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100"
+                  className={adminInputClassName}
                 />
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              {REVENUE_TABS.map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => setViewMode(item.key)}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                    viewMode === item.key
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-700'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
+              </AdminFormField>
             </div>
           </div>
-        </div>
+        </AdminPageSection>
 
         {viewMode === 'overview' ? (
-          <AdminDataState
-            isLoading={overviewLoading}
-            hasData={hasOverviewData}
-            emptyMessage={EMPTY_MESSAGE}
-            wrap={false}
-          >
+          <AdminDataState isLoading={overviewLoading} hasData={hasOverviewData} emptyMessage={EMPTY_MESSAGE} wrap={false}>
             <div className="space-y-6">
               {stats ? (
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-                  <StatCard title="总收入" value={stats.totalRevenue} tone="emerald" formatter={(value) => formatCurrency(value)} />
-                  <StatCard title="总订单数" value={stats.totalOrders} tone="blue" formatter={(value) => formatCount(value)} />
-                  <StatCard title="客单价" value={stats.avgOrderValue} tone="purple" formatter={(value) => formatCurrency(value)} />
-                  <StatCard title="退款金额" value={stats.totalRefunded} tone="red" formatter={(value) => formatCurrency(value)} />
-                  <StatCard title="净收入" value={stats.netRevenue} tone="green" formatter={(value) => formatCurrency(value)} />
-                </div>
+                <AdminPageSection
+                  title="Revenue overview"
+                  description="A compact operational read on revenue, refunds, and order quality in the selected window."
+                >
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                    <AdminMetricCard label="Gross revenue" value={formatCurrency(stats.totalRevenue)} detail="Paid revenue before refunds." tone="accent" />
+                    <AdminMetricCard label="Total orders" value={formatCount(stats.totalOrders)} detail="Orders counted in this snapshot." />
+                    <AdminMetricCard label="Average order value" value={formatCurrency(stats.avgOrderValue)} detail="Average paid order size." />
+                    <AdminMetricCard label="Refunded" value={formatCurrency(stats.totalRefunded)} detail="Refunded value in the same range." />
+                    <AdminMetricCard label="Net revenue" value={formatCurrency(stats.netRevenue)} detail="Revenue remaining after refunds." />
+                  </div>
+                </AdminPageSection>
               ) : null}
 
               {userValue ? (
-                <div className="rounded-xl border border-neutral-700 bg-neutral-800 p-5">
-                  <h2 className="text-lg font-semibold text-neutral-100">用户价值分布</h2>
-                  <p className="mt-1 text-sm text-neutral-400">
-                    根据累计付费金额划分用户价值层级。
-                  </p>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <StatCard title="高价值" value={userValue.highValue} tone="emerald" formatter={(value) => formatCount(value)} />
-                    <StatCard title="中价值" value={userValue.mediumValue} tone="yellow" formatter={(value) => formatCount(value)} />
-                    <StatCard title="低价值" value={userValue.lowValue} tone="orange" formatter={(value) => formatCount(value)} />
-                    <StatCard title="暂无付费" value={userValue.noValue} tone="gray" formatter={(value) => formatCount(value)} />
+                <AdminPageSection
+                  title="Reader value mix"
+                  description="A lightweight segmentation of paying readers based on cumulative spend."
+                >
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <AdminMetricCard label="High value" value={formatCount(userValue.highValue)} detail="Readers with the strongest cumulative spend." tone="accent" />
+                    <AdminMetricCard label="Mid value" value={formatCount(userValue.mediumValue)} detail="Readers in the mid-spend band." />
+                    <AdminMetricCard label="Low value" value={formatCount(userValue.lowValue)} detail="Paying readers below the mid band." />
+                    <AdminMetricCard label="No spend" value={formatCount(userValue.noValue)} detail="Readers without recorded spend." />
                   </div>
-                </div>
+                </AdminPageSection>
               ) : null}
 
               {orderStatus ? (
-                <div className="rounded-xl border border-neutral-700 bg-neutral-800 p-5">
-                  <h2 className="text-lg font-semibold text-neutral-100">订单状态分布</h2>
-                  <p className="mt-1 text-sm text-neutral-400">
-                    查看当前时间范围内的订单结果分布。
-                  </p>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <StatCard title="待支付" value={orderStatus.pending} tone="yellow" formatter={(value) => formatCount(value)} />
-                    <StatCard title="已支付" value={orderStatus.paid} tone="green" formatter={(value) => formatCount(value)} />
-                    <StatCard title="失败" value={orderStatus.failed} tone="red" formatter={(value) => formatCount(value)} />
-                    <StatCard title="已退款" value={orderStatus.refunded} tone="gray" formatter={(value) => formatCount(value)} />
+                <AdminPageSection
+                  title="Order outcome mix"
+                  description="Keep order health readable so support and commerce decisions stay grounded in real outcomes."
+                >
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <AdminMetricCard label="Pending" value={formatCount(orderStatus.pending)} detail="Orders still waiting on completion." />
+                    <AdminMetricCard label="Paid" value={formatCount(orderStatus.paid)} detail="Orders that completed successfully." tone="accent" />
+                    <AdminMetricCard label="Failed" value={formatCount(orderStatus.failed)} detail="Orders that failed or were charged back." />
+                    <AdminMetricCard label="Refunded" value={formatCount(orderStatus.refunded)} detail="Orders later refunded." />
                   </div>
-                </div>
+                </AdminPageSection>
               ) : null}
             </div>
           </AdminDataState>
         ) : null}
 
         {viewMode === 'trend' ? (
-          <AdminDataState isLoading={trendLoading} hasData={trend.length > 0} emptyMessage={EMPTY_MESSAGE}>
-            <div>
-              <h2 className="mb-4 text-lg font-semibold text-neutral-100">收入趋势</h2>
-              <div className="overflow-x-auto">
+          <AdminDataState isLoading={trendLoading} hasData={trend.length > 0} emptyMessage={EMPTY_MESSAGE} wrap={false}>
+            <AdminPageSection title="Revenue trend" description="A day-by-day read on revenue and paid orders.">
+              <AdminDataTable>
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-neutral-700">
-                      <th className="px-4 py-3 text-left text-neutral-400">日期</th>
-                      <th className="px-4 py-3 text-left text-neutral-400">收入</th>
-                      <th className="px-4 py-3 text-left text-neutral-400">支付订单</th>
+                  <AdminTableHeader>
+                    <tr>
+                      <th className="px-4 py-4">Date</th>
+                      <th className="px-4 py-4">Revenue</th>
+                      <th className="px-4 py-4">Paid orders</th>
                     </tr>
-                  </thead>
+                  </AdminTableHeader>
                   <tbody>
                     {trend.map((item) => (
-                      <tr key={item.date} className="border-b border-neutral-700 hover:bg-neutral-700/40">
-                        <td className="px-4 py-3 text-neutral-300">{item.date}</td>
-                        <td className="px-4 py-3 text-emerald-400">{formatCurrency(item.revenue)}</td>
-                        <td className="px-4 py-3 text-neutral-300">{formatCount(item.orders)}</td>
-                      </tr>
+                      <AdminTableRow key={item.date}>
+                        <td className="px-4 py-4 text-slate-700">{item.date}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCurrency(item.revenue)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCount(item.orders)}</td>
+                      </AdminTableRow>
                     ))}
                   </tbody>
                 </table>
-              </div>
-            </div>
+              </AdminDataTable>
+            </AdminPageSection>
           </AdminDataState>
         ) : null}
 
         {viewMode === 'channels' ? (
-          <AdminDataState isLoading={channelsLoading} hasData={channels.length > 0} emptyMessage={EMPTY_MESSAGE}>
-            <div>
-              <h2 className="mb-4 text-lg font-semibold text-neutral-100">渠道表现</h2>
-              <div className="overflow-x-auto">
+          <AdminDataState isLoading={channelsLoading} hasData={channels.length > 0} emptyMessage={EMPTY_MESSAGE} wrap={false}>
+            <AdminPageSection title="Channel performance" description="Compare revenue by purchase or payment channel without turning the page into dashboard clutter.">
+              <AdminDataTable>
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-neutral-700">
-                      <th className="px-4 py-3 text-left text-neutral-400">渠道</th>
-                      <th className="px-4 py-3 text-left text-neutral-400">订单数</th>
-                      <th className="px-4 py-3 text-left text-neutral-400">收入</th>
-                      <th className="px-4 py-3 text-left text-neutral-400">平均订单金额</th>
+                  <AdminTableHeader>
+                    <tr>
+                      <th className="px-4 py-4">Channel</th>
+                      <th className="px-4 py-4">Orders</th>
+                      <th className="px-4 py-4">Revenue</th>
+                      <th className="px-4 py-4">Average order value</th>
                     </tr>
-                  </thead>
+                  </AdminTableHeader>
                   <tbody>
                     {channels.map((item) => (
-                      <tr key={item.channel} className="border-b border-neutral-700 hover:bg-neutral-700/40">
-                        <td className="px-4 py-3 text-neutral-300">{formatLabel(item.channel)}</td>
-                        <td className="px-4 py-3 text-neutral-300">{formatCount(item.orders)}</td>
-                        <td className="px-4 py-3 text-emerald-400">{formatCurrency(item.revenue)}</td>
-                        <td className="px-4 py-3 text-neutral-300">{formatCurrency(item.avgOrderValue)}</td>
-                      </tr>
+                      <AdminTableRow key={item.channel}>
+                        <td className="px-4 py-4 text-slate-700">{formatLabel(item.channel)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCount(item.orders)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCurrency(item.revenue)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCurrency(item.avgOrderValue)}</td>
+                      </AdminTableRow>
                     ))}
                   </tbody>
                 </table>
-              </div>
-            </div>
+              </AdminDataTable>
+            </AdminPageSection>
           </AdminDataState>
         ) : null}
 
         {viewMode === 'promotions' ? (
-          <AdminDataState isLoading={promotionsLoading} hasData={promotions.length > 0} emptyMessage={EMPTY_MESSAGE}>
-            <div>
-              <h2 className="mb-2 text-lg font-semibold text-neutral-100">活动表现</h2>
+          <AdminDataState isLoading={promotionsLoading} hasData={promotions.length > 0} emptyMessage={EMPTY_MESSAGE} wrap={false}>
+            <AdminPageSection
+              title="Promotion performance"
+              description="Track promotion outcomes while keeping attribution limitations explicit."
+            >
               {!promotionsRoiAvailable || promotionsAttributionModel ? (
-                <p className="mb-4 text-xs text-neutral-400">{promotionsAttributionCopy}</p>
+                <div className="mb-5 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
+                  {promotionsAttributionCopy}
+                </div>
               ) : null}
-              <div className="overflow-x-auto">
+
+              <AdminDataTable>
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-neutral-700">
-                      <th className="px-4 py-3 text-left text-neutral-400">活动</th>
-                      <th className="px-4 py-3 text-left text-neutral-400">订单数</th>
-                      <th className="px-4 py-3 text-left text-neutral-400">收入</th>
-                      <th className="px-4 py-3 text-left text-neutral-400">ROI</th>
-                      <th className="px-4 py-3 text-left text-neutral-400">状态</th>
+                  <AdminTableHeader>
+                    <tr>
+                      <th className="px-4 py-4">Promotion</th>
+                      <th className="px-4 py-4">Orders</th>
+                      <th className="px-4 py-4">Revenue</th>
+                      <th className="px-4 py-4">ROI</th>
+                      <th className="px-4 py-4">Status</th>
                     </tr>
-                  </thead>
+                  </AdminTableHeader>
                   <tbody>
                     {promotions.map((item) => (
-                      <tr key={item.promotionId} className="border-b border-neutral-700 hover:bg-neutral-700/40">
-                        <td className="px-4 py-3 text-neutral-300">{item.title}</td>
-                        <td className="px-4 py-3 text-neutral-300">{formatCount(item.orders)}</td>
-                        <td className="px-4 py-3 text-emerald-400">{formatCurrency(item.revenue)}</td>
-                        <td className={`px-4 py-3 ${item.roi == null ? 'text-neutral-500' : 'text-blue-400'}`}>
-                          {formatPercentage(item.roi)}
+                      <AdminTableRow key={item.promotionId}>
+                        <td className="px-4 py-4 text-slate-700">{item.title}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCount(item.orders)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatCurrency(item.revenue)}</td>
+                        <td className="px-4 py-4 text-slate-700">{formatPercentage(item.roi)}</td>
+                        <td className="px-4 py-4">
+                          <AdminBadge tone={item.active ? 'success' : 'default'}>
+                            {item.active ? 'Active' : 'Inactive'}
+                          </AdminBadge>
                         </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                              item.active
-                                ? 'bg-green-900/30 text-green-300'
-                                : 'bg-neutral-700 text-neutral-300'
-                            }`}
-                          >
-                            {item.active ? '进行中' : '未启用'}
-                          </span>
-                        </td>
-                      </tr>
+                      </AdminTableRow>
                     ))}
                   </tbody>
                 </table>
-              </div>
-            </div>
+              </AdminDataTable>
+            </AdminPageSection>
           </AdminDataState>
         ) : null}
       </div>
-    </div>
+    </AdminLayout>
   );
 }

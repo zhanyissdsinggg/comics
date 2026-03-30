@@ -81,11 +81,18 @@ test.describe("Admin config page regressions", () => {
     const response = await page.goto("/admin/branding", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText(/正在加载品牌配置|姝ｅ湪鍔犺浇鍝佺墝閰嶇疆/)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.locator('input[placeholder="https://.../logo.png"]')).toHaveValue("https://cdn.example.com/logo.png", {
+    await expect(page.getByText("Loading branding settings...")).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: /保存品牌配置|淇濆瓨鍝佺墝閰嶇疆/ })).toBeEnabled({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.locator('input[placeholder="https://.../logo.png"]')).toHaveValue(
+      "https://cdn.example.com/logo.png",
+      {
+        timeout: ADMIN_UI_TIMEOUT_MS,
+      },
+    );
+    await expect(page.getByRole("button", { name: "Save branding" })).toBeEnabled({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/branding", runtimeIssues);
@@ -149,13 +156,17 @@ test.describe("Admin config page regressions", () => {
     const response = await page.goto("/admin/email-jobs", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
 
-    await page.getByRole("button", { name: /仅失败任务|浠呭け璐ヤ换鍔?/ }).dispatchEvent("click");
-    await page.getByRole("button", { name: /全部任务|鍏ㄩ儴浠诲姟/ }).dispatchEvent("click");
+    await page.getByRole("button", { name: "Failed only" }).dispatchEvent("click");
+    await page.getByRole("button", { name: "All jobs" }).dispatchEvent("click");
 
     await page.waitForTimeout(900);
-    await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
     await expect(page.getByText("failed@example.com", { exact: true })).toHaveCount(0);
 
     await page.waitForTimeout(300);
@@ -196,10 +207,10 @@ test.describe("Admin config page regressions", () => {
     const response = await page.goto("/admin/tracking", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.locator('input[value="LOCAL-PIXEL"]')).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText(/已使用较新的本地追踪草稿。点击保存后会同步到服务器。|Using newer local tracking draft\. Save to sync it to the server\./)).toBeVisible({
+    await expect(page.locator('input[value="LOCAL-PIXEL"]')).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
+    await expect(page.locator('input[value="SERVER-PIXEL"]')).toHaveCount(0);
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/tracking", runtimeIssues);

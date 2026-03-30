@@ -3,10 +3,10 @@
 import AdminShell from "./AdminShell";
 
 /**
- * Backward-compatible admin layout wrapper.
- * Legacy pages still render through AdminLayout, but the shared AdminShell owns the UI.
+ * Legacy admin pages still render through AdminLayout, but the shared AdminShell
+ * now owns the product-family shell, spacing, and navigation language.
  */
-export function AdminLayout({ children, title = "仪表盘", subtitle, actions }) {
+export function AdminLayout({ children, title = "Dashboard", subtitle, actions }) {
   return (
     <AdminShell title={title} subtitle={subtitle} actions={actions}>
       {children}

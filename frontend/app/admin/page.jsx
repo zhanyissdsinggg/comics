@@ -21,11 +21,11 @@ export default function AdminPage() {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-neutral-950">
+      <div className="min-h-screen bg-[var(--gush-page-bg)]">
         <div className="mx-auto max-w-6xl space-y-4 px-4 py-10">
-          <Skeleton className="h-10 w-56 rounded-2xl" />
-          <Skeleton className="h-32 w-full rounded-3xl" />
-          <Skeleton className="h-64 w-full rounded-3xl" />
+          <Skeleton className="h-10 w-56 rounded-[20px]" />
+          <Skeleton className="h-32 w-full rounded-[28px]" />
+          <Skeleton className="h-64 w-full rounded-[28px]" />
         </div>
       </div>
     );
@@ -33,8 +33,8 @@ export default function AdminPage() {
 
   return (
     <AdminShell
-      title="仪表盘"
-      subtitle="实时查看运营状态、收入表现与平台健康度。"
+      title="Dashboard"
+      subtitle="A quieter overview of publishing work, discovery readiness, and the operational signals that matter today."
     >
       <AdminDashboardNew />
     </AdminShell>

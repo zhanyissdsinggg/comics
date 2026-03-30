@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Route } from "@playwright/test";
+﻿import { expect, test, type Page, type Route } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const ADMIN_UI_TIMEOUT_MS = 15000;
@@ -111,17 +111,16 @@ test.describe("Admin detail page regressions", () => {
     const response = await page.goto("/admin/analytics", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await page.getByRole("button", { name: "用户分群" }).click();
-    await expect(page.getByRole("heading", { name: "用户分群" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: "Audience segments" }).click();
     await expect(page.getByText("all-user-1@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
-    await page.getByRole("button", { name: "下一页" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
     await expect(page.getByText("all-user-21@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("第 2 / 2 页，共 21 条", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("Page 2 of 2", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
-    await page.getByRole("button", { name: "VIP 用户" }).click();
+    await page.getByRole("button").filter({ hasText: /VIP/ }).click();
     await expect(page.getByText("vip-reader@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("第 1 / 1 页，共 1 条", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("Page 1 of 1", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/analytics", runtimeIssues);
@@ -166,13 +165,13 @@ test.describe("Admin detail page regressions", () => {
     const response = await page.goto("/admin/series/series-qa-001", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("button", { name: "开始编辑" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: "开始编辑" }).click();
+    await expect(page.getByRole("button", { name: "Edit details" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: "Edit details" }).click();
 
-    await page.getByLabel("默认章节价格").fill("3.5");
-    await page.getByRole("button", { name: "保存全部更改" }).click();
+    await page.getByLabel("Default episode price").fill("3.5");
+    await page.getByRole("button", { name: "Save changes" }).click();
 
-    await expect(page.getByText("章节价格必须是整数金币。", { exact: true })).toBeVisible({
+    await expect(page.getByText("Default episode price must be a whole-number point value.", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     expect(patchCalls).toBe(0);
@@ -260,17 +259,17 @@ test.describe("Admin detail page regressions", () => {
     await expect(page.getByRole("heading", { name: "Regression Test Series" })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText("总章节数", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("Total episodes", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
-    await page.getByLabel("选择章节 1").check();
-    await expect(page.getByRole("button", { name: "批量编辑" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: "批量编辑" }).click();
+    await page.getByLabel("Select episode 1").check();
+    await expect(page.getByRole("button", { name: "Bulk edit" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: "Bulk edit" }).click();
 
-    await page.getByLabel("批量金币价格").fill("9");
-    await page.getByRole("button", { name: "应用批量更新" }).click();
+    await page.getByLabel("Bulk price").fill("9");
+    await page.getByRole("button", { name: "Apply bulk update" }).click();
     await expect.poll(() => bulkCalls).toBe(1);
 
-    await page.getByRole("button", { name: "自动重排章节号" }).click();
+    await page.getByRole("button", { name: "Auto-renumber" }).click();
     await expect.poll(() => reorderCalls).toBe(1);
 
     await page.waitForTimeout(300);

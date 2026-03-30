@@ -2,16 +2,16 @@
  * Shared confirmation dialog for destructive admin actions.
  */
 
-import React from 'react';
-import { AlertCircle } from 'lucide-react';
-import { Modal } from './Modal';
+import React from "react";
+import { AlertCircle } from "lucide-react";
+import { Modal } from "./Modal";
 
 export const ConfirmDialog = React.memo(function ConfirmDialog({
   isOpen,
-  title = '确认操作',
+  title = "Confirm action",
   message,
-  confirmText = '确认',
-  cancelText = '取消',
+  confirmText = "Confirm",
+  cancelText = "Cancel",
   isDangerous = false,
   isLoading = false,
   onConfirm,
@@ -21,20 +21,22 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
     <Modal isOpen={isOpen} title={title} onClose={onCancel} size="sm" closeButton={!isLoading}>
       <div className="space-y-4">
         {isDangerous ? (
-          <div className="flex items-center gap-3 rounded-lg bg-red-900/20 p-3">
-            <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-400" />
-            <p className="text-sm text-red-300">此操作无法撤销，请确认后再继续。</p>
+          <div className="flex items-center gap-3 rounded-[22px] border border-red-200 bg-red-50/90 p-4">
+            <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-600" />
+            <p className="text-sm leading-6 text-red-700">
+              This change cannot be undone. Please confirm before continuing.
+            </p>
           </div>
         ) : null}
 
-        <p className="text-neutral-300">{message}</p>
+        <p className="text-sm leading-6 text-slate-600">{message}</p>
 
         <div className="flex gap-3 pt-4">
           <button
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="flex-1 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700 disabled:opacity-50"
+            className="flex-1 rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:opacity-50"
           >
             {cancelText}
           </button>
@@ -42,13 +44,11 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
-              isDangerous
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-emerald-600 hover:bg-emerald-700'
+            className={`flex-1 rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50 ${
+              isDangerous ? "bg-red-600 hover:bg-red-500" : "bg-slate-950 hover:bg-slate-800"
             }`}
           >
-            {isLoading ? '处理中...' : confirmText}
+            {isLoading ? "Working..." : confirmText}
           </button>
         </div>
       </div>
@@ -56,4 +56,4 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
   );
 });
 
-ConfirmDialog.displayName = 'ConfirmDialog';
+ConfirmDialog.displayName = "ConfirmDialog";

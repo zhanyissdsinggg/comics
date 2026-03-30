@@ -2,6 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import {
+  AdminBadge,
+  AdminFormField,
+  AdminPageSection,
+  adminInputClassName,
+  adminSelectClassName,
+} from "@/components/admin/common/AdminWorkspacePrimitives";
 import { useAdminAuth } from "./AuthContext";
 import { adminGet, adminPost } from "../../lib/adminApiClient";
 
@@ -16,6 +26,31 @@ const defaultDraft = {
   testRecipient: "",
 };
 
+const providerOptions = [
+  { value: "console", label: "Console" },
+  { value: "webhook", label: "Webhook" },
+  { value: "resend", label: "Resend" },
+  { value: "sendgrid", label: "SendGrid" },
+];
+
+const secretFields = [
+  {
+    key: "resendApiKey",
+    label: "Resend API key",
+    placeholder: "re_...",
+  },
+  {
+    key: "sendgridApiKey",
+    label: "SendGrid API key",
+    placeholder: "SG...",
+  },
+  {
+    key: "smsWebhookUrl",
+    label: "SMS webhook URL",
+    placeholder: "https://sms.example.com/webhook",
+  },
+];
+
 function normalizeDraft(config) {
   return { ...defaultDraft, ...(config || {}) };
 }
@@ -24,37 +59,16 @@ function serializeDraft(config) {
   return JSON.stringify(normalizeDraft(config));
 }
 
-function Section({ title, description, children }) {
-  return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
-      </div>
-      <div className="space-y-4">{children}</div>
-    </section>
-  );
-}
-
-function Field({ label, children, hint }) {
-  return (
-    <label className="block">
-      <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{label}</div>
-      <div className="mt-2">{children}</div>
-      {hint ? <div className="mt-2 text-xs text-slate-500">{hint}</div> : null}
-    </label>
-  );
-}
-
 export default function AdminEmailSettingsPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAdminAuth();
+
   const [draft, setDraft] = useState(defaultDraft);
   const [savedDraft, setSavedDraft] = useState(defaultDraft);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [status, setStatus] = useState({ type: "idle", message: "" });
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -73,9 +87,12 @@ export default function AdminEmailSettingsPage() {
     const response = await adminGet("/api/admin/email");
     if (response.ok && response.data?.config) {
       applyConfig(response.data.config);
-      setStatus({ type: "idle", message: "" });
+      setFeedback({ type: "", message: "" });
     } else if (!response.ok) {
-      setStatus({ type: "error", message: response.error || response.message || "邮件设置加载失败。" });
+      setFeedback({
+        type: "error",
+        message: response.error || response.message || "Email settings could not be loaded.",
+      });
     }
     setLoading(false);
   }, [applyConfig]);
@@ -95,19 +112,22 @@ export default function AdminEmailSettingsPage() {
   const persist = useCallback(
     async (payload, successMessage) => {
       setSaving(true);
-      setStatus({ type: "idle", message: "" });
+      setFeedback({ type: "", message: "" });
 
       const response = await adminPost("/api/admin/email", payload);
       if (response.ok && response.data?.config) {
         applyConfig(response.data.config);
-        setStatus({ type: "success", message: successMessage });
+        setFeedback({ type: "success", message: successMessage });
       } else if (response.ok) {
         const nextDraft = normalizeDraft(payload);
         setDraft(nextDraft);
         setSavedDraft(nextDraft);
-        setStatus({ type: "success", message: successMessage });
+        setFeedback({ type: "success", message: successMessage });
       } else {
-        setStatus({ type: "error", message: response.error || response.message || "修改保存失败。" });
+        setFeedback({
+          type: "error",
+          message: response.error || response.message || "Email settings could not be saved.",
+        });
       }
 
       setSaving(false);
@@ -117,14 +137,17 @@ export default function AdminEmailSettingsPage() {
   );
 
   const handleSave = async () => {
-    await persist(draft, "邮件设置已保存。");
+    await persist(draft, "Email settings saved.");
   };
 
   const handleClearSecret = async (field) => {
-    await persist({ ...draft, [field]: "" }, "密钥已清空。");
+    await persist({ ...draft, [field]: "" }, "Secret cleared.");
   };
 
-  const hasUnsavedChanges = useMemo(() => serializeDraft(draft) !== serializeDraft(savedDraft), [draft, savedDraft]);
+  const hasUnsavedChanges = useMemo(
+    () => serializeDraft(draft) !== serializeDraft(savedDraft),
+    [draft, savedDraft],
+  );
 
   const handleTest = async () => {
     const recipient = String(draft.testRecipient || "").trim();
@@ -133,11 +156,11 @@ export default function AdminEmailSettingsPage() {
     }
 
     setTesting(true);
-    setStatus({ type: "idle", message: "" });
+    setFeedback({ type: "", message: "" });
 
     let savedBeforeTest = false;
     if (hasUnsavedChanges) {
-      const saveResponse = await persist(draft, "邮件设置已保存。");
+      const saveResponse = await persist(draft, "Email settings saved.");
       if (!saveResponse.ok) {
         setTesting(false);
         return;
@@ -147,202 +170,181 @@ export default function AdminEmailSettingsPage() {
 
     const response = await adminPost("/api/admin/email/test", { to: recipient });
     if (response.ok) {
-      setStatus({
+      setFeedback({
         type: "success",
         message: savedBeforeTest
-          ? "邮件设置已保存，并已发送测试邮件。"
-          : "测试邮件已发送。",
+          ? "Email settings saved, then the test email was sent."
+          : "Test email sent.",
       });
     } else {
-      setStatus({ type: "error", message: response.error || response.message || "测试邮件发送失败。" });
+      setFeedback({
+        type: "error",
+        message: response.error || response.message || "The test email could not be sent.",
+      });
     }
 
     setTesting(false);
   };
 
-  const statusClassName = useMemo(() => {
-    if (status.type === "success") {
-      return "border-emerald-200 bg-emerald-50 text-emerald-700";
-    }
-    if (status.type === "error") {
-      return "border-red-200 bg-red-50 text-red-700";
-    }
-    return "border-slate-200 bg-slate-50 text-slate-600";
-  }, [status.type]);
-
   const testButtonLabel = testing
     ? hasUnsavedChanges
-      ? "保存并发送中..."
-      : "发送中..."
+      ? "Saving and sending..."
+      : "Sending..."
     : hasUnsavedChanges
-      ? "保存并发送测试"
-      : "发送测试";
-
-  const secretFields = [
-    {
-      key: "resendApiKey",
-      label: "Resend API 密钥",
-      placeholder: "re_...",
-    },
-    {
-      key: "sendgridApiKey",
-      label: "SendGrid API 密钥",
-      placeholder: "SG...",
-    },
-    {
-      key: "smsWebhookUrl",
-      label: "短信 Webhook 地址",
-      placeholder: "https://sms.example.com/webhook",
-    },
-  ];
+      ? "Save and send test"
+      : "Send test";
 
   if (!isAuthenticated) {
     return (
-      <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-        需要先以管理员身份登录，才能管理邮件投递。
-      </div>
+      <AdminPageSection title="Email delivery" description="Admin access is required before delivery settings can be edited.">
+        <p className="text-sm text-slate-500">Sign in as an admin to manage sender and delivery settings.</p>
+      </AdminPageSection>
     );
   }
 
   if (loading) {
     return (
-      <div className="rounded-3xl border border-slate-200 bg-white p-10 text-slate-500">
-        正在加载邮件设置...
-      </div>
+      <AdminPageSection title="Email delivery" description="Loading the saved sender and provider configuration.">
+        <p className="text-sm text-slate-500">Loading email settings...</p>
+      </AdminPageSection>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">邮件设置</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            配置邮件投递服务商、发件人身份，以及系统邮件流程依赖的密钥信息。
-          </p>
-          {hasUnsavedChanges ? (
-            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">
-              尚未保存的修改
-            </p>
-          ) : null}
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={handleTest}
-            disabled={testing || saving || !draft.testRecipient}
-            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {testButtonLabel}
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving || !hasUnsavedChanges}
-            className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {saving ? "保存中..." : "保存设置"}
-          </button>
-        </div>
-      </div>
+      <AdminFeedbackBanner
+        feedback={feedback}
+        onDismiss={() => setFeedback({ type: "", message: "" })}
+      />
 
-      {status.message ? (
-        <div className={`rounded-2xl border px-4 py-3 text-sm ${statusClassName}`}>
-          {status.message}
-        </div>
-      ) : null}
-
-      <Section
-        title="投递服务"
-        description="选择事务邮件使用的投递服务商与发件人身份。"
+      <AdminPageSection
+        title="Delivery defaults"
+        description="Set the provider, sender address, and internal alert inbox the rest of the admin workspace depends on."
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            {hasUnsavedChanges ? <AdminBadge tone="warning">Unsaved changes</AdminBadge> : null}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleTest}
+              disabled={testing || saving || !draft.testRecipient}
+            >
+              {testButtonLabel}
+            </Button>
+            <Button type="button" onClick={handleSave} disabled={saving || !hasUnsavedChanges}>
+              {saving ? "Saving..." : "Save settings"}
+            </Button>
+          </div>
+        }
       >
-        <Field label="服务商">
-          <select
-            value={draft.provider}
-            onChange={(event) => handleChange("provider", event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
-          >
-            <option value="console">控制台（Console）</option>
-            <option value="webhook">自定义 Webhook</option>
-            <option value="resend">Resend（邮件服务）</option>
-            <option value="sendgrid">SendGrid（邮件服务）</option>
-          </select>
-        </Field>
-        <Field label="发件地址" hint="例如：no-reply@yourdomain.com">
-          <input
-            value={draft.from}
-            onChange={(event) => handleChange("from", event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
-            placeholder="no-reply@yourdomain.com"
-          />
-        </Field>
-        <Field label="管理员告警邮箱" hint="运营告警和错误摘要会发送到这里。">
-          <input
-            value={draft.adminNotifyEmail}
-            onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
-            placeholder="alerts@yourdomain.com"
-          />
-        </Field>
-      </Section>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <AdminFormField label="Provider" helperText="Choose the delivery path used for operational email.">
+            <select
+              value={draft.provider}
+              onChange={(event) => handleChange("provider", event.target.value)}
+              className={adminSelectClassName}
+            >
+              {providerOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </AdminFormField>
 
-      <Section
-        title="接口与密钥"
-        description="Webhook 地址和服务商密钥在保存后会保持脱敏显示。"
+          <AdminFormField label="From address" helperText="The default sender readers will see.">
+            <input
+              value={draft.from}
+              onChange={(event) => handleChange("from", event.target.value)}
+              className={adminInputClassName}
+              placeholder="no-reply@yourdomain.com"
+            />
+          </AdminFormField>
+
+          <AdminFormField label="Admin alert inbox" helperText="Operational notices and delivery problems are routed here.">
+            <input
+              value={draft.adminNotifyEmail}
+              onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
+              className={adminInputClassName}
+              placeholder="alerts@yourdomain.com"
+            />
+          </AdminFormField>
+        </div>
+      </AdminPageSection>
+
+      <AdminPageSection
+        title="Provider secrets"
+        description="Keep sensitive provider credentials separate from the main content workflow, but still easy to review when email behavior changes."
       >
-        <Field label="默认 Webhook 地址" hint="当服务商选择 Webhook 时使用。">
-          <input
-            value={draft.webhookUrl}
-            onChange={(event) => handleChange("webhookUrl", event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
-            placeholder="https://provider.example.com/webhook"
-          />
-        </Field>
+        <div className="space-y-4">
+          <AdminFormField label="Default webhook URL" helperText="Used when webhook delivery is the active provider path.">
+            <input
+              value={draft.webhookUrl}
+              onChange={(event) => handleChange("webhookUrl", event.target.value)}
+              className={adminInputClassName}
+              placeholder="https://provider.example.com/webhook"
+            />
+          </AdminFormField>
 
-        {secretFields.map((field) => (
-          <Field
-            key={field.key}
-            label={field.label}
-            hint="如果要保留当前密钥，请保持脱敏值不变。"
-          >
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <input
-                value={draft[field.key]}
-                onChange={(event) => handleChange(field.key, event.target.value)}
-                className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
-                placeholder={field.placeholder}
-              />
-              <button
-                type="button"
-                onClick={() => handleClearSecret(field.key)}
-                disabled={saving || testing}
-                className="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          <div className="grid gap-4 xl:grid-cols-3">
+            {secretFields.map((field) => (
+              <div
+                key={field.key}
+                className="rounded-[24px] border border-black/8 bg-white/86 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
               >
-                清空
-              </button>
-            </div>
-          </Field>
-        ))}
-      </Section>
+                <AdminFormField
+                  label={field.label}
+                  helperText="Keep masked values in place if the existing secret should remain active."
+                >
+                  <input
+                    value={draft[field.key]}
+                    onChange={(event) => handleChange(field.key, event.target.value)}
+                    className={adminInputClassName}
+                    placeholder={field.placeholder}
+                  />
+                </AdminFormField>
 
-      <Section
-        title="验证"
-        description="发送测试邮件，确认当前服务商和发件配置是否可用。"
+                <div className="mt-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleClearSecret(field.key)}
+                    disabled={saving || testing}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </AdminPageSection>
+
+      <AdminPageSection
+        title="Test email"
+        description="Send a real test message from the current draft so operators can verify delivery without digging through provider dashboards."
       >
-        <Field label="测试收件人">
-          <input
-            value={draft.testRecipient}
-            onChange={(event) => handleChange("testRecipient", event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-900"
-            placeholder="you@example.com"
-          />
-        </Field>
-        <p className="text-xs text-slate-500">
-          {hasUnsavedChanges
-            ? "发送测试邮件前会先保存当前最新草稿。"
-            : "测试邮件将使用当前已保存的投递配置。"}
-        </p>
-      </Section>
+        <div className="grid gap-4">
+          <AdminFormField
+            label="Test recipient"
+            helperText={
+              hasUnsavedChanges
+                ? "The latest draft will be saved before the test email is sent."
+                : "The saved configuration will be used for the next test email."
+            }
+          >
+            <input
+              value={draft.testRecipient}
+              onChange={(event) => handleChange("testRecipient", event.target.value)}
+              className={adminInputClassName}
+              placeholder="you@example.com"
+            />
+          </AdminFormField>
+          <p className="text-sm leading-6 text-slate-500">
+            Use the action row above to send the test message once the recipient is ready.
+          </p>
+        </div>
+      </AdminPageSection>
     </div>
   );
 }

@@ -1,38 +1,36 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import { ChevronDown, Filter, X } from "lucide-react";
 
 const STATUS_OPTIONS = [
-  { value: "all", label: "全部状态" },
-  { value: "Ongoing", label: "连载中" },
-  { value: "Completed", label: "已完结" },
-  { value: "Hiatus", label: "暂停中" },
+  { value: "all", label: "All statuses" },
+  { value: "Ongoing", label: "Ongoing" },
+  { value: "Completed", label: "Completed" },
+  { value: "Hiatus", label: "Hiatus" },
 ];
 
 const PUBLISH_OPTIONS = [
-  { value: "all", label: "全部" },
-  { value: "published", label: "已发布" },
-  { value: "unpublished", label: "未发布" },
+  { value: "all", label: "All" },
+  { value: "published", label: "Published" },
+  { value: "unpublished", label: "Drafts" },
 ];
 
 const ADULT_OPTIONS = [
-  { value: "all", label: "全部" },
+  { value: "all", label: "All audiences" },
   { value: "adult", label: "18+" },
-  { value: "general", label: "全年龄" },
+  { value: "general", label: "General" },
 ];
 
 const SORT_OPTIONS = [
-  { value: "createdAt_desc", label: "创建时间（最新优先）" },
-  { value: "createdAt_asc", label: "创建时间（最早优先）" },
-  { value: "updatedAt_desc", label: "更新时间（最新优先）" },
-  { value: "updatedAt_asc", label: "更新时间（最早优先）" },
-  { value: "episodeCount_desc", label: "章节数（最多优先）" },
-  { value: "episodeCount_asc", label: "章节数（最少优先）" },
-  { value: "title_asc", label: "标题（A-Z）" },
-  { value: "title_desc", label: "标题（Z-A）" },
-  { value: "rating_desc", label: "评分（最高优先）" },
-  { value: "ratingCount_desc", label: "评分数（最多优先）" },
+  { value: "createdAt_desc", label: "Newest created" },
+  { value: "createdAt_asc", label: "Oldest created" },
+  { value: "updatedAt_desc", label: "Recently updated" },
+  { value: "updatedAt_asc", label: "Least recently updated" },
+  { value: "episodeCount_desc", label: "Most episodes" },
+  { value: "episodeCount_asc", label: "Fewest episodes" },
+  { value: "title_asc", label: "Title A-Z" },
+  { value: "title_desc", label: "Title Z-A" },
 ];
 
 const DEFAULT_FILTERS = {
@@ -42,6 +40,22 @@ const DEFAULT_FILTERS = {
   sortBy: "createdAt_desc",
 };
 
+function FilterChip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+        active
+          ? "border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+          : "border border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function AdvancedFilters({ filters, onFiltersChange }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -50,7 +64,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
       ...DEFAULT_FILTERS,
       ...filters,
     }),
-    [filters]
+    [filters],
   );
 
   const activeFiltersCount = Object.entries(resolvedFilters).filter(([key, value]) => {
@@ -77,113 +91,103 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className={`flex items-center gap-2 rounded-4xl border px-5 py-2.5 text-xs font-bold transition-all duration-300 hover:scale-105 hover:shadow-ios-sm active:scale-95 ${
+        className={`flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition ${
           activeFiltersCount > 0
-            ? "border-ios-green/30 bg-ios-green/10 text-ios-green shadow-ios-sm"
-            : "border-ios-gray-700 bg-ios-gray-800/50 text-ios-gray-400 hover:bg-ios-gray-800 hover:text-neutral-200"
+            ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+            : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
         }`}
       >
         <Filter size={14} />
-        <span>筛选</span>
+        <span>Filters</span>
         {activeFiltersCount > 0 ? (
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ios-green text-[10px] text-white">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--gush-accent,#2f58c6)] text-[10px] text-white">
             {activeFiltersCount}
           </span>
         ) : null}
-        <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown size={14} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen ? (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 top-full z-50 mt-2 w-80 animate-scale-in">
-            <div className="rounded-5xl border border-ios-gray-800 bg-neutral-900/95 p-6 shadow-ios-xl backdrop-blur-2xl">
+          <div className="absolute right-0 top-full z-50 mt-2 w-[22rem]">
+            <div className="rounded-[28px] border border-black/8 bg-white/96 p-6 shadow-[var(--gush-shadow-panel)] backdrop-blur-xl">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-base font-bold text-neutral-100">高级筛选</h3>
+                <div>
+                  <h3 className="text-base font-semibold text-slate-950">Refine this list</h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Keep the catalog readable and easy to review.
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-ios-gray-800 text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-700 hover:text-neutral-200 active:scale-95"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] text-slate-500 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
                 >
                   <X size={16} />
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ios-green/60">
-                    状态
+                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Status
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {STATUS_OPTIONS.map((option) => (
-                      <button
+                      <FilterChip
                         key={option.value}
-                        type="button"
+                        active={resolvedFilters.status === option.value}
                         onClick={() => handleFilterChange("status", option.value)}
-                        className={`rounded-3xl px-3 py-2 text-xs font-medium transition-all duration-300 ${
-                          resolvedFilters.status === option.value
-                            ? "bg-ios-green/20 text-ios-green shadow-ios-sm"
-                            : "bg-ios-gray-800/50 text-ios-gray-400 hover:bg-ios-gray-800 hover:text-neutral-200"
-                        }`}
                       >
                         {option.label}
-                      </button>
+                      </FilterChip>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ios-green/60">
-                    发布状态
+                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Visibility
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {PUBLISH_OPTIONS.map((option) => (
-                      <button
+                      <FilterChip
                         key={option.value}
-                        type="button"
+                        active={resolvedFilters.publishStatus === option.value}
                         onClick={() => handleFilterChange("publishStatus", option.value)}
-                        className={`rounded-3xl px-3 py-2 text-xs font-medium transition-all duration-300 ${
-                          resolvedFilters.publishStatus === option.value
-                            ? "bg-ios-green/20 text-ios-green shadow-ios-sm"
-                            : "bg-ios-gray-800/50 text-ios-gray-400 hover:bg-ios-gray-800 hover:text-neutral-200"
-                        }`}
                       >
                         {option.label}
-                      </button>
+                      </FilterChip>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ios-green/60">
-                    内容分级
+                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Audience
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {ADULT_OPTIONS.map((option) => (
-                      <button
+                      <FilterChip
                         key={option.value}
-                        type="button"
+                        active={resolvedFilters.adultContent === option.value}
                         onClick={() => handleFilterChange("adultContent", option.value)}
-                        className={`rounded-3xl px-3 py-2 text-xs font-medium transition-all duration-300 ${
-                          resolvedFilters.adultContent === option.value
-                            ? "bg-ios-green/20 text-ios-green shadow-ios-sm"
-                            : "bg-ios-gray-800/50 text-ios-gray-400 hover:bg-ios-gray-800 hover:text-neutral-200"
-                        }`}
                       >
                         {option.label}
-                      </button>
+                      </FilterChip>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ios-green/60">
-                    排序方式
+                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Sort
                   </label>
                   <select
                     value={resolvedFilters.sortBy}
                     onChange={(event) => handleFilterChange("sortBy", event.target.value)}
-                    className="w-full rounded-3xl border border-ios-gray-700 bg-ios-gray-800/50 px-4 py-2.5 text-sm text-neutral-200 transition-all duration-300 focus:border-ios-green/50 focus:outline-none focus:ring-2 focus:ring-ios-green/20"
+                    className="h-11 w-full rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 text-sm text-slate-900 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
                   >
                     {SORT_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -198,16 +202,16 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="flex-1 rounded-3xl border border-ios-gray-700 bg-ios-gray-800/50 px-4 py-2.5 text-xs font-bold text-ios-gray-400 transition-all duration-300 hover:bg-ios-gray-800 hover:text-neutral-200 active:scale-95"
+                  className="flex-1 rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"
                 >
-                  重置
+                  Reset
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="flex-1 rounded-3xl border border-ios-green/20 bg-ios-green/10 px-4 py-2.5 text-xs font-bold text-ios-green transition-all duration-300 hover:bg-ios-green/20 hover:scale-105 hover:shadow-ios-sm active:scale-95"
+                  className="flex-1 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
-                  应用
+                  Apply
                 </button>
               </div>
             </div>
@@ -217,4 +221,3 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
     </div>
   );
 }
-

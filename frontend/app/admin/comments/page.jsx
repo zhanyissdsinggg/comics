@@ -4,12 +4,21 @@ export const dynamic = 'force-dynamic';
 
 import React, { useMemo, useState } from 'react';
 
+import AdminShell from '@/components/admin/AdminShell';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { AdminListToolbar } from '@/components/admin/common/AdminListToolbar';
 import { AdminSelectionBar } from '@/components/admin/common/AdminSelectionBar';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
 import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
+import {
+  AdminBadge,
+  AdminMetricCard,
+  AdminPageSection,
+  AdminTableHeader,
+  AdminTableRow,
+} from '@/components/admin/common/AdminWorkspacePrimitives';
+import { Button } from '@/components/ui/button';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
 
@@ -28,41 +37,41 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: '创建时间' },
-  { value: 'rating', label: '评分' },
-  { value: 'userId', label: '用户 ID' },
+  { value: 'createdAt', label: 'Created time' },
+  { value: 'rating', label: 'Rating' },
+  { value: 'userId', label: 'Reader ID' },
 ];
 
 function getContentPreview(content) {
-  const text = String(content || '').trim();
-  return text.length > 96 ? `${text.slice(0, 96)}...` : text || '-';
+  const text = String(content || '').replace(/\s+/g, ' ').trim();
+  return text.length > 120 ? `${text.slice(0, 120)}...` : text || 'No comment text';
 }
 
 function formatDate(value) {
   if (!value) {
-    return '-';
+    return 'Not available';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return '-';
+    return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
-    day: '2-digit',
+    day: 'numeric',
   }).format(date);
 }
 
 function formatRating(value) {
   if (value === null || value === undefined || value === '') {
-    return 'N/A';
+    return 'Not rated';
   }
 
   const rating = Number(value);
   if (!Number.isFinite(rating)) {
-    return 'N/A';
+    return 'Not rated';
   }
 
   return `${rating}/5`;
@@ -97,116 +106,152 @@ export default function AdminCommentsPage() {
   } = useAdminList('comments', searchFields, sortFields, 'createdAt', 'desc');
 
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const ratedCount = useMemo(
+    () => comments.filter((comment) => comment.rating !== null && comment.rating !== undefined && comment.rating !== '').length,
+    [comments],
+  );
+  const uniqueReaders = useMemo(
+    () => new Set(comments.map((comment) => comment.userEmail || comment.userId).filter(Boolean)).size,
+    [comments],
+  );
 
   const bulkDeleteMutation = useBulkDelete('comments', {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-        setFeedback({ type: 'success', message: '已删除所选评论。' });
+      setFeedback({ type: 'success', message: 'The selected comments were removed.' });
       refetch();
     },
     onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `删除失败：${mutationError.message}` });
+      setFeedback({ type: 'error', message: `Could not remove the selected comments: ${mutationError.message}` });
     },
   });
 
   return (
-    <div className="min-h-screen bg-neutral-900 p-6">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-100">评论管理</h1>
-          <p className="mt-2 text-neutral-400">
-            查看读者反馈，并移除不符合审核规范的评论。
-          </p>
+    <AdminShell
+      title="Comments"
+      subtitle="Review reader feedback in a calmer moderation queue, then remove the items that should no longer stay live."
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <AdminMetricCard
+            label="Comments in view"
+            value={String(pagination.total)}
+            detail="The current moderation list after search and sorting."
+            tone="accent"
+          />
+          <AdminMetricCard
+            label="Rated comments"
+            value={String(ratedCount)}
+            detail="Entries that still include a star score alongside the written feedback."
+          />
+          <AdminMetricCard
+            label="Readers in view"
+            value={String(uniqueReaders)}
+            detail="Unique readers represented in this current queue."
+          />
         </div>
 
         <AdminFeedbackBanner
           feedback={feedback}
           onDismiss={() => setFeedback({ type: '', message: '' })}
-          className="mb-6"
         />
 
-        <AdminListToolbar
-          searchTerm={searchTerm}
-          onSearchTermChange={setSearchTerm}
-          searchPlaceholder="搜索评论 ID、用户 ID、邮箱或内容"
-          onOpenFilters={() => setIsSortModalOpen(true)}
-          sortOrder={sortOrder}
-          onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-        />
-
-        <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
-          <button
-            type="button"
-            onClick={() => setIsDeleteConfirmOpen(true)}
-            disabled={bulkDeleteMutation.isPending}
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
-          >
-            {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
-          </button>
-        </AdminSelectionBar>
-
-        <AdminTableShell
-          isError={isError}
-          errorMessage={error?.message || '评论加载失败。'}
-          onRetry={refetch}
-          isLoading={isLoading}
-          hasItems={comments.length > 0}
-          emptyMessage="暂无评论。"
-          pagination={pagination}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
+        <AdminPageSection
+          title="Moderation queue"
+          description="Keep the table readable: who wrote the comment, what it says, and whether it needs action."
         >
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-neutral-700 bg-neutral-900">
-                <th className="px-4 py-3 text-left">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.length === comments.length && comments.length > 0}
-                    onChange={(event) => {
-                      if (event.target.checked) {
-                        selectAll(comments);
-                        return;
-                      }
+          <AdminListToolbar
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
+            searchPlaceholder="Search comment ID, reader ID, email, or text"
+            onOpenFilters={() => setIsSortModalOpen(true)}
+            sortOrder={sortOrder}
+            onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          />
 
-                      clearSelection();
-                    }}
-                    className="rounded"
-                    aria-label="选择全部评论"
-                  />
-                </th>
-                <th className="px-4 py-3 text-left text-neutral-400">ID</th>
-                <th className="px-4 py-3 text-left text-neutral-400">用户</th>
-                <th className="px-4 py-3 text-left text-neutral-400">评论内容</th>
-                <th className="px-4 py-3 text-left text-neutral-400">评分</th>
-                <th className="px-4 py-3 text-left text-neutral-400">创建时间</th>
-              </tr>
-            </thead>
-            <tbody>
-              {comments.map((comment) => (
-                <tr key={comment.id} className="border-b border-neutral-700 hover:bg-neutral-700/50">
-                  <td className="px-4 py-3">
+          <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => setIsDeleteConfirmOpen(true)}
+              disabled={bulkDeleteMutation.isPending}
+            >
+              {bulkDeleteMutation.isPending ? 'Removing...' : 'Delete comments'}
+            </Button>
+          </AdminSelectionBar>
+
+          <AdminTableShell
+            isError={isError}
+            errorMessage={error?.message || 'Comments could not be loaded.'}
+            onRetry={refetch}
+            isLoading={isLoading}
+            hasItems={comments.length > 0}
+            emptyMessage="No comments match this view yet."
+            pagination={pagination}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          >
+            <table className="min-w-full text-sm">
+              <AdminTableHeader>
+                <tr>
+                  <th className="px-4 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedIdsSet.has(comment.id)}
-                      onChange={() => toggleSelect(comment.id)}
+                      checked={selectedIds.length === comments.length && comments.length > 0}
+                      onChange={(event) => {
+                        if (event.target.checked) {
+                          selectAll(comments);
+                          return;
+                        }
+
+                        clearSelection();
+                      }}
                       className="rounded"
-                      aria-label={`选择评论 ${comment.id}`}
+                      aria-label="Select all comments"
                     />
-                  </td>
-                  <td className="px-4 py-3 font-medium text-neutral-300">{comment.id}</td>
-                  <td className="px-4 py-3 text-neutral-300">{comment.userEmail || comment.userId || '-'}</td>
-                  <td className="max-w-md px-4 py-3 text-neutral-400">{getContentPreview(comment.content || comment.text)}</td>
-                  <td className="px-4 py-3 text-yellow-400">{formatRating(comment.rating)}</td>
-                  <td className="px-4 py-3 text-neutral-400">{formatDate(comment.createdAt)}</td>
+                  </th>
+                  <th className="px-4 py-3">Comment</th>
+                  <th className="px-4 py-3">Reader</th>
+                  <th className="px-4 py-3">Rating</th>
+                  <th className="px-4 py-3">Submitted</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </AdminTableShell>
+              </AdminTableHeader>
+              <tbody>
+                {comments.map((comment) => (
+                  <AdminTableRow key={comment.id}>
+                    <td className="px-4 py-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedIdsSet.has(comment.id)}
+                        onChange={() => toggleSelect(comment.id)}
+                        className="rounded"
+                        aria-label={`Select comment ${comment.id}`}
+                      />
+                    </td>
+                    <td className="max-w-[34rem] px-4 py-4">
+                      <div className="font-medium text-slate-950">{getContentPreview(comment.content || comment.text)}</div>
+                      <div className="mt-1 text-xs text-slate-500">{comment.id}</div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="font-medium text-slate-950">{comment.userEmail || comment.userId || 'Unknown reader'}</div>
+                      {comment.userEmail && comment.userId ? (
+                        <div className="mt-1 text-xs text-slate-500">{comment.userId}</div>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-4">
+                      <AdminBadge tone={comment.rating ? 'warning' : 'default'}>{formatRating(comment.rating)}</AdminBadge>
+                    </td>
+                    <td className="px-4 py-4 text-slate-600">{formatDate(comment.createdAt)}</td>
+                  </AdminTableRow>
+                ))}
+              </tbody>
+            </table>
+          </AdminTableShell>
+        </AdminPageSection>
 
         <AdminSortModal
           isOpen={isSortModalOpen}
@@ -214,23 +259,23 @@ export default function AdminCommentsPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="评论排序"
-          label="排序字段"
-          actionLabel="应用"
+          title="Sort comments"
+          label="Sort by"
+          actionLabel="Apply"
         />
 
         <ConfirmDialog
           isOpen={isDeleteConfirmOpen}
-          title="删除评论"
-          message={`确定删除 ${selectedIds.length} 条选中评论吗？此操作无法撤销。`}
-          confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除'}
-          cancelText="取消"
+          title="Delete comments"
+          message={`Delete ${selectedIds.length} selected comment${selectedIds.length === 1 ? '' : 's'}?`}
+          confirmText="Delete"
+          cancelText="Cancel"
           isDangerous={true}
           isLoading={bulkDeleteMutation.isPending}
           onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}
           onCancel={() => setIsDeleteConfirmOpen(false)}
         />
       </div>
-    </div>
+    </AdminShell>
   );
 }

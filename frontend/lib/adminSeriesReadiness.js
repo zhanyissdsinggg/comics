@@ -1,3 +1,5 @@
+import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
+
 function normalizeText(value) {
   return String(value || "").trim();
 }
@@ -21,7 +23,12 @@ function normalizeGenres(value) {
 }
 
 export function getAdminSeriesReadiness(series) {
-  const author = normalizeText(series?.author);
+  const creatorIdentity = resolveSeriesCreatorIdentity(series);
+  const fallbackAuthor = normalizeText(series?.author);
+  const hasCreatorCredit = creatorIdentity.hasPublicCredit || Boolean(fallbackAuthor);
+  const creatorLabel = creatorIdentity.hasPublicCredit
+    ? creatorIdentity.displayName
+    : fallbackAuthor;
   const coverUrl = normalizeText(series?.coverUrl || series?.coverImage);
   const description = normalizeText(series?.description);
   const genres = normalizeGenres(series?.genres);
@@ -32,61 +39,61 @@ export function getAdminSeriesReadiness(series) {
 
   const checks = [
     {
-      id: "author",
-      label: "作者归因",
-      ok: Boolean(author),
+      id: "creator",
+      label: "Creator credit",
+      ok: hasCreatorCredit,
       weight: 20,
-      hint: author
-        ? "creator 页面和前台信任模块可以直接复用。"
-        : "缺作者会切断 creator 聚合与作者发现入口。",
+      hint: hasCreatorCredit
+        ? `${creatorLabel} can flow into creator pages, series credits, and discovery surfaces.`
+        : "Missing creator credit weakens trust and breaks creator-led discovery.",
     },
     {
       id: "cover",
-      label: "封面资源",
+      label: "Cover art",
       ok: Boolean(coverUrl),
       weight: 20,
       hint: coverUrl
-        ? "作品列表、详情头图和推荐卡片都有可用素材。"
-        : "没有封面会明显拖低首页、搜索和榜单点击率。",
+        ? "The title already has art for lists, detail headers, and editorial placements."
+        : "A missing cover makes list pages, search, and featured placements feel unfinished.",
     },
     {
       id: "description",
-      label: "作品简介",
+      label: "Summary",
       ok: description.length >= 40,
       weight: 15,
       hint:
         description.length >= 40
-          ? "简介长度足够支撑详情页、SEO 摘要和分享文案。"
-          : "简介过短会让系列页和搜索摘要显得单薄。",
+          ? "The summary is long enough for series detail, SEO snippets, and social previews."
+          : "A short summary makes the title page feel thin and harder to browse with confidence.",
     },
     {
       id: "genres",
-      label: "分类标签",
+      label: "Genres and tags",
       ok: genres.length > 0,
       weight: 15,
       hint:
         genres.length > 0
-          ? "搜索过滤、相关推荐和 creator 聚合都能吃到标签。"
-          : "缺标签会削弱搜索过滤和相关推荐命中。",
+          ? "Tags can support search, browse filters, related reading, and editorial grouping."
+          : "Missing tags weakens filtering, recommendations, and collection curation.",
     },
     {
       id: "episodes",
-      label: "章节准备",
+      label: "Episodes ready",
       ok: episodeCount > 0,
       weight: 20,
       hint:
         episodeCount > 0
-          ? "读者可以从详情页直接进入阅读，不会撞到空壳页。"
-          : "没有章节时，前台作品页很难承接任何转化。",
+          ? "Readers can move from the series page into a real reading path."
+          : "No episodes means the live series page cannot carry discovery traffic well.",
     },
     {
       id: "published",
-      label: "前台发布",
+      label: "Live visibility",
       ok: isPublished,
       weight: 10,
       hint: isPublished
-        ? "前台列表和详情页都可以正常承接流量。"
-        : "未发布作品不会进入前台分发链路。",
+        ? "The title is available to normal storefront routes."
+        : "Draft titles stay out of public discovery until they are published.",
     },
   ];
 
@@ -95,17 +102,17 @@ export function getAdminSeriesReadiness(series) {
   const topIssues = missingItems.slice(0, 3).map((item) => item.label);
 
   let tone = "rose";
-  let statusLabel = "基础信息不足";
+  let statusLabel = "Needs core setup";
 
   if (missingItems.length === 0) {
     tone = "emerald";
-    statusLabel = "头部站就绪";
+    statusLabel = "Ready for storefront";
   } else if (score >= 70) {
     tone = "cyan";
-    statusLabel = "接近头部站";
+    statusLabel = "Close to ready";
   } else if (score >= 45) {
     tone = "amber";
-    statusLabel = "待补关键信息";
+    statusLabel = "Needs a focused pass";
   }
 
   return {
@@ -119,7 +126,7 @@ export function getAdminSeriesReadiness(series) {
     isReady: missingItems.length === 0,
     summary:
       missingItems.length === 0
-        ? "前台发现、详情转化和基础分发资料已经齐备。"
-        : `优先补 ${topIssues.join("、")}，会最快改善前台发现和转化承接。`,
+        ? "This title is ready for normal discovery, series detail, and creator-led browse paths."
+        : `Focus on ${topIssues.join(", ")} first to improve live discovery and reader trust faster.`,
   };
 }

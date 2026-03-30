@@ -1,28 +1,29 @@
-﻿'use client';
+'use client';
 
 export const dynamic = 'force-dynamic';
 
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ArrowUpRight,
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  Plus,
-  RotateCcw,
-  Save,
-  Search,
-  Trash2,
-  Upload,
-} from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, BookOpen, ChevronDown, ChevronUp, Plus, Upload } from 'lucide-react';
 
+import AdminShell from '@/components/admin/AdminShell';
 import { BulkUploadModal } from '@/components/admin/episodes/BulkUploadModal';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { LoadingState } from '@/components/admin/common/LoadingState';
 import { Modal } from '@/components/admin/common/Modal';
+import {
+  AdminBadge,
+  AdminDataTable,
+  AdminFormField,
+  AdminMetricCard,
+  AdminPageSection,
+  AdminTableHeader,
+  AdminTableRow,
+  adminInputClassName,
+  adminSelectClassName,
+} from '@/components/admin/common/AdminWorkspacePrimitives';
+import { Button } from '@/components/ui/button';
 import { adminFetch, adminFetchJson, readAdminResponseMessage } from '@/lib/adminApiClient';
 
 const EMPTY_FEEDBACK = { type: '', message: '' };
@@ -39,19 +40,19 @@ const EMPTY_BULK_FORM = {
   ttfEligible: 'unchanged',
 };
 const QUICK_FILTERS = [
-  { id: 'all', label: '全部章节', filters: { priceType: 'all', previewStatus: 'all', ttfEligible: 'all' } },
-  { id: 'paid', label: '收费章', filters: { priceType: 'paid', previewStatus: 'all', ttfEligible: 'all' } },
-  { id: 'free', label: '免费章', filters: { priceType: 'free', previewStatus: 'all', ttfEligible: 'all' } },
-  { id: 'preview', label: '有预览', filters: { priceType: 'all', previewStatus: 'enabled', ttfEligible: 'all' } },
-  { id: 'ttf', label: 'TTF 开启', filters: { priceType: 'all', previewStatus: 'all', ttfEligible: 'true' } },
+  { id: 'all', label: 'All episodes', filters: { priceType: 'all', previewStatus: 'all', ttfEligible: 'all' } },
+  { id: 'paid', label: 'Paid', filters: { priceType: 'paid', previewStatus: 'all', ttfEligible: 'all' } },
+  { id: 'free', label: 'Free', filters: { priceType: 'free', previewStatus: 'all', ttfEligible: 'all' } },
+  { id: 'preview', label: 'Has preview', filters: { priceType: 'all', previewStatus: 'enabled', ttfEligible: 'all' } },
+  { id: 'ttf', label: 'Free-pass on', filters: { priceType: 'all', previewStatus: 'all', ttfEligible: 'true' } },
 ];
 const SORT_OPTIONS = [
-  { value: 'number', label: '章节号' },
-  { value: 'updatedAt', label: '最近更新' },
-  { value: 'title', label: '标题' },
-  { value: 'pricePts', label: '金币价格' },
-  { value: 'previewFreePages', label: '预览页数' },
-  { value: 'releasedAt', label: '发布时间' },
+  { value: 'number', label: 'Episode number' },
+  { value: 'updatedAt', label: 'Updated time' },
+  { value: 'title', label: 'Title' },
+  { value: 'pricePts', label: 'Price' },
+  { value: 'previewFreePages', label: 'Preview pages' },
+  { value: 'releasedAt', label: 'Release time' },
 ];
 
 function normalizeParam(value) {
@@ -78,19 +79,19 @@ function isNonNegativeIntegerString(value, { allowEmpty = false } = {}) {
 
 function formatDateTime(value) {
   if (!value) {
-    return '暂无';
+    return 'Not available';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return '暂无';
+    return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
+    day: 'numeric',
+    hour: 'numeric',
     minute: '2-digit',
   }).format(date);
 }
@@ -141,7 +142,7 @@ async function fetchSeriesDetail(seriesId) {
     return null;
   }
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || '作品信息加载失败。');
+    throw new Error(data?.message || data?.error || 'Series details could not be loaded.');
   }
 
   return data?.series || null;
@@ -152,7 +153,7 @@ async function fetchEpisodes(seriesId, options) {
   const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}/episodes?${query}`, { cache: 'no-store' });
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || '章节列表加载失败。');
+    throw new Error(data?.message || data?.error || 'Episode list could not be loaded.');
   }
 
   return {
@@ -166,28 +167,6 @@ async function fetchEpisodes(seriesId, options) {
       hasPrevPage: false,
     },
   };
-}
-
-function SummaryCard({ label, value, helper }) {
-  return (
-    <article className="rounded-[28px] border border-neutral-800 bg-neutral-900/75 px-5 py-5 shadow-[0_24px_70px_-44px_rgba(0,0,0,0.75)]">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">{label}</p>
-      <p className="mt-4 text-2xl font-semibold text-white">{value}</p>
-      <p className="mt-2 text-sm text-neutral-400">{helper}</p>
-    </article>
-  );
-}
-
-function ToolbarButton({ children, className = '', ...props }) {
-  return (
-    <button
-      type="button"
-      className={`inline-flex items-center gap-2 rounded-2xl border border-neutral-700 px-4 py-2.5 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900 ${className}`.trim()}
-      {...props}
-    >
-      {children}
-    </button>
-  );
 }
 
 export default function AdminEpisodesPage() {
@@ -280,7 +259,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '新增章节失败。'));
+        throw new Error(await readAdminResponseMessage(response, 'Could not create the episode.'));
       }
 
       return response.json();
@@ -288,11 +267,11 @@ export default function AdminEpisodesPage() {
     onSuccess: async () => {
       setIsAddModalOpen(false);
       setNewEpisode(EMPTY_NEW_EPISODE);
-      setFeedback({ type: 'success', message: '章节已创建。' });
+      setFeedback({ type: 'success', message: 'The episode was created.' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '新增章节失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not create the episode.') });
     },
   });
 
@@ -305,7 +284,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '更新章节失败。'));
+        throw new Error(await readAdminResponseMessage(response, 'Could not update the episode.'));
       }
 
       return response.json();
@@ -313,15 +292,14 @@ export default function AdminEpisodesPage() {
     onSuccess: async (_data, variables) => {
       setEpisodeDrafts((current) => {
         const next = { ...current };
-        if (next[variables.episodeId]) {
-          delete next[variables.episodeId];
-        }
+        delete next[variables.episodeId];
         return next;
       });
+      setFeedback({ type: 'success', message: 'Episode changes were saved.' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '更新章节失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not update the episode.') });
     },
   });
 
@@ -334,7 +312,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '批量更新章节失败。'));
+        throw new Error(await readAdminResponseMessage(response, 'Could not update the selected episodes.'));
       }
 
       return response.json();
@@ -343,11 +321,11 @@ export default function AdminEpisodesPage() {
       setIsBulkModalOpen(false);
       setBulkForm(EMPTY_BULK_FORM);
       setSelectedIds([]);
-      setFeedback({ type: 'success', message: '选中章节已批量更新。' });
+      setFeedback({ type: 'success', message: 'The selected episodes were updated.' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '批量更新章节失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not update the selected episodes.') });
     },
   });
 
@@ -359,7 +337,7 @@ export default function AdminEpisodesPage() {
         });
 
         if (!response.ok) {
-          throw new Error(await readAdminResponseMessage(response, '删除章节失败。'));
+          throw new Error(await readAdminResponseMessage(response, 'Could not delete the episode.'));
         }
       }
     },
@@ -367,11 +345,11 @@ export default function AdminEpisodesPage() {
       setIsDeleteConfirmOpen(false);
       setPendingDeleteIds([]);
       setSelectedIds([]);
-      setFeedback({ type: 'success', message: '章节已删除。' });
+      setFeedback({ type: 'success', message: 'The selected episodes were deleted.' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '删除章节失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not delete the episode.') });
     },
   });
 
@@ -384,17 +362,17 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '章节排序更新失败。'));
+        throw new Error(await readAdminResponseMessage(response, 'Could not update episode order.'));
       }
 
       return response.json();
     },
     onSuccess: async () => {
-      setFeedback({ type: 'success', message: '章节顺序已更新。' });
+      setFeedback({ type: 'success', message: 'Episode order was updated.' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '章节排序更新失败。') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not update episode order.') });
     },
   });
 
@@ -439,7 +417,7 @@ export default function AdminEpisodesPage() {
 
     if (type === 'number') {
       if (!isNonNegativeIntegerString(draftValue, { allowEmpty: true })) {
-        setFeedback({ type: 'error', message: '请输入合法的非负整数。' });
+        setFeedback({ type: 'error', message: 'Please enter a valid non-negative integer.' });
         return;
       }
 
@@ -460,7 +438,7 @@ export default function AdminEpisodesPage() {
     const nextValue = String(draftValue ?? '').trim();
     const currentValue = String(episode[field] ?? '').trim();
     if (!nextValue) {
-      setFeedback({ type: 'error', message: '章节标题不能为空。' });
+      setFeedback({ type: 'error', message: 'Episode titles cannot be empty.' });
       return;
     }
     if (nextValue === currentValue) {
@@ -476,11 +454,11 @@ export default function AdminEpisodesPage() {
 
   const handleCreateEpisode = () => {
     if (!isNonNegativeIntegerString(newEpisode.number) || !String(newEpisode.title || '').trim()) {
-      setFeedback({ type: 'error', message: '请填写章节号和标题。' });
+      setFeedback({ type: 'error', message: 'Episode number and title are required.' });
       return;
     }
     if (!isNonNegativeIntegerString(newEpisode.pricePts, { allowEmpty: true }) || !isNonNegativeIntegerString(newEpisode.previewFreePages, { allowEmpty: true })) {
-      setFeedback({ type: 'error', message: '金币价格和预览页数必须是非负整数。' });
+      setFeedback({ type: 'error', message: 'Price and preview pages must be non-negative integers.' });
       return;
     }
 
@@ -498,7 +476,7 @@ export default function AdminEpisodesPage() {
 
     if (bulkForm.pricePts !== '') {
       if (!isNonNegativeIntegerString(bulkForm.pricePts)) {
-        setFeedback({ type: 'error', message: '批量价格必须是非负整数。' });
+        setFeedback({ type: 'error', message: 'Bulk price must be a non-negative integer.' });
         return;
       }
       updates.pricePts = toInteger(bulkForm.pricePts, 0);
@@ -506,7 +484,7 @@ export default function AdminEpisodesPage() {
 
     if (bulkForm.previewFreePages !== '') {
       if (!isNonNegativeIntegerString(bulkForm.previewFreePages)) {
-        setFeedback({ type: 'error', message: '批量预览页数必须是非负整数。' });
+        setFeedback({ type: 'error', message: 'Bulk preview pages must be a non-negative integer.' });
         return;
       }
       updates.previewFreePages = toInteger(bulkForm.previewFreePages, 0);
@@ -519,7 +497,7 @@ export default function AdminEpisodesPage() {
     }
 
     if (Object.keys(updates).length === 0) {
-      setFeedback({ type: 'error', message: '请至少填写一个要批量更新的字段。' });
+      setFeedback({ type: 'error', message: 'Choose at least one field to update.' });
       return;
     }
 
@@ -586,9 +564,9 @@ export default function AdminEpisodesPage() {
   const quickFilterId = useMemo(() => {
     const matched = QUICK_FILTERS.find(
       (item) =>
-        item.filters.priceType === filters.priceType
-        && item.filters.previewStatus === filters.previewStatus
-        && item.filters.ttfEligible === filters.ttfEligible,
+        item.filters.priceType === filters.priceType &&
+        item.filters.previewStatus === filters.previewStatus &&
+        item.filters.ttfEligible === filters.ttfEligible,
     );
 
     return matched?.id || 'custom';
@@ -596,348 +574,177 @@ export default function AdminEpisodesPage() {
 
   if (seriesQuery.isLoading || (episodesQuery.isLoading && !episodesQuery.data)) {
     return (
-      <div className="min-h-screen bg-neutral-950 px-6 py-8">
-        <div className="mx-auto max-w-7xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
-          <LoadingState.Spinner size="md" text="正在加载章节管理台..." />
-        </div>
-      </div>
+      <AdminShell title="Episodes" subtitle="Loading the episode workspace...">
+        <AdminDataTable className="p-6">
+          <p className="text-sm text-slate-600">Loading episodes...</p>
+        </AdminDataTable>
+      </AdminShell>
     );
   }
 
   if (seriesQuery.isError) {
     return (
-      <div className="min-h-screen bg-neutral-950 px-6 py-8">
-        <div className="mx-auto max-w-7xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
-          <LoadingState.ErrorState error={getErrorMessage(seriesQuery.error, '作品信息加载失败。')} onRetry={() => seriesQuery.refetch()} />
-        </div>
-      </div>
+      <AdminShell title="Episodes" subtitle="The episode workspace could not be loaded.">
+        <AdminPageSection title="Load error" description={getErrorMessage(seriesQuery.error, 'Series details could not be loaded.')} />
+      </AdminShell>
     );
   }
 
   if (!series) {
     return (
-      <div className="min-h-screen bg-neutral-950 px-6 py-8">
-        <div className="mx-auto max-w-7xl rounded-3xl border border-neutral-800 bg-neutral-900/80 px-6 py-16">
-          <LoadingState.EmptyState
-            message="未找到该作品。"
-            action={(
-              <button
-                type="button"
-                onClick={() => router.push('/admin/series')}
-                className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
-              >
-                返回作品库
-              </button>
-            )}
-          />
-        </div>
-      </div>
+      <AdminShell title="Episodes" subtitle="The requested title could not be found.">
+        <AdminPageSection title="Missing series" description="This series record does not exist." />
+      </AdminShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 px-4 py-6 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="overflow-hidden rounded-[32px] border border-neutral-800 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.14),_transparent_32%),linear-gradient(180deg,rgba(23,23,23,0.96),rgba(10,10,10,0.94))] px-6 py-6 shadow-[0_28px_90px_-40px_rgba(0,0,0,0.85)]">
-          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-            <div className="space-y-4">
-              <button
-                type="button"
-                onClick={() => router.push(`/admin/series/${seriesId}`)}
-                className="inline-flex w-fit items-center gap-2 rounded-2xl border border-neutral-700 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-300 transition hover:border-neutral-500 hover:text-white"
-              >
-                返回作品详情
-              </button>
-
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                  <span className="rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-cyan-200">
-                    章节管理
-                  </span>
-                  <span className="rounded-full border border-neutral-700 bg-neutral-900/80 px-3 py-1 text-neutral-300">
-                    最新章节 {series.latestEpisodeId || '暂无'}
-                  </span>
-                </div>
-                <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                  {series.title || '未命名作品'}
-                </h1>
-                <p className="max-w-3xl text-sm leading-7 text-neutral-400">
-                  在这里集中处理章节创建、金币价格、预览页数、TTF 和排序调整，适合连续整理漫画或小说的章节库。
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <ToolbarButton onClick={() => router.push(`/series/${seriesId}`)}>
-                <ArrowUpRight size={16} />
-                前台详情
-              </ToolbarButton>
-              <ToolbarButton onClick={() => setIsUploadModalOpen(true)}>
-                <Upload size={16} />
-                批量上传
-              </ToolbarButton>
-              <ToolbarButton onClick={() => setIsAddModalOpen(true)} className="border-cyan-500/30 bg-cyan-500/10 text-cyan-100 hover:bg-cyan-500/20">
-                <Plus size={16} />
-                新建章节
-              </ToolbarButton>
-            </div>
-          </div>
-        </header>
+    <AdminShell
+      title={series.title || 'Episodes'}
+      subtitle="Manage numbering, release timing, preview access, and batch updates without crowding the table."
+      actions={
+        <>
+          <Button type="button" variant="outline" onClick={() => router.push(`/admin/series/${seriesId}`)}>
+            <ArrowLeft className="size-4" />
+            Series detail
+          </Button>
+          <Button type="button" variant="outline" onClick={() => window.open(`/series/${seriesId}`, '_blank')}>
+            <ArrowUpRight className="size-4" />
+            View live page
+          </Button>
+          <Button type="button" variant="outline" onClick={() => setIsUploadModalOpen(true)}>
+            <Upload className="size-4" />
+            Bulk upload
+          </Button>
+          <Button type="button" onClick={() => setIsAddModalOpen(true)}>
+            <Plus className="size-4" />
+            Add episode
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 xl:grid-cols-4">
+          <AdminMetricCard label="Total episodes" value={String(pagination.total)} detail="The current result set after filters." tone="accent" />
+          <AdminMetricCard label="Paid episodes" value={String(pageStats.paidCount)} detail="Episodes with a point price above zero." />
+          <AdminMetricCard label="Preview enabled" value={String(pageStats.previewCount)} detail="Episodes with preview pages configured." />
+          <AdminMetricCard label="Free-pass enabled" value={String(pageStats.ttfCount)} detail="Episodes currently eligible for free-pass." />
+        </div>
 
         <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryCard label="总章节数" value={String(pagination.total)} helper={series.latestEpisodeId ? `最新章节 ${series.latestEpisodeId}` : '还没有任何章节'} />
-          <SummaryCard label="本页收费章" value={String(pageStats.paidCount)} helper="当前页金币价格大于 0 的章节数量" />
-          <SummaryCard label="本页可预览" value={String(pageStats.previewCount)} helper="当前页已配置预览页数的章节数量" />
-          <SummaryCard label="本页 TTF" value={String(pageStats.ttfCount)} helper="当前页已开启 TTF 的章节数量" />
-        </section>
-
-        <section className="rounded-[32px] border border-neutral-800 bg-neutral-900/75 p-5 shadow-[0_24px_70px_-44px_rgba(0,0,0,0.75)]">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-              <div className="relative w-full max-w-xl">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="搜索章节号、章节标题或章节 ID"
-                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-11 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <ToolbarButton
-                  onClick={handleAutoRenumber}
-                  disabled={reorderEpisodesMutation.isPending || pagination.total === 0}
-                >
-                  <RotateCcw size={16} />
-                  自动重排章节号
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => {
-                    setSearchTerm('');
-                    setFilters({ priceType: 'all', previewStatus: 'all', ttfEligible: 'all' });
-                    setSortBy('number');
-                    setSortOrder('asc');
-                  }}
-                >
-                  重置视图
-                </ToolbarButton>
-              </div>
-            </div>
-
+        <AdminPageSection
+          title="Episode workspace"
+          description="Search by title, trim the view with quick filters, then make small edits directly in the table."
+          action={
             <div className="flex flex-wrap gap-2">
-              {QUICK_FILTERS.map((quickFilter) => {
-                const active = quickFilterId === quickFilter.id;
-                return (
-                  <button
-                    key={quickFilter.id}
-                    type="button"
-                    onClick={() => handleQuickFilter(quickFilter)}
-                    className={`rounded-full border px-3 py-1.5 text-sm transition ${
-                      active
-                        ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-100'
-                        : 'border-neutral-700 bg-neutral-950/70 text-neutral-300 hover:border-neutral-500 hover:text-white'
-                    }`}
-                  >
-                    {quickFilter.label}
-                  </button>
-                );
-              })}
+              <Button type="button" variant="outline" onClick={() => setIsBulkModalOpen(true)} disabled={selectedIds.length === 0}>
+                Bulk edit
+              </Button>
+              <Button type="button" variant="outline" onClick={handleAutoRenumber} disabled={reorderEpisodesMutation.isPending}>
+                Auto-renumber
+              </Button>
             </div>
-
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-              <label className="space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">价格筛选</span>
-                <select
-                  value={filters.priceType}
-                  onChange={(event) => setFilters((current) => ({ ...current, priceType: event.target.value }))}
-                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                >
-                  <option value="all">全部价格</option>
-                  <option value="paid">收费章节</option>
-                  <option value="free">免费章节</option>
-                </select>
-              </label>
-
-              <label className="space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">预览筛选</span>
-                <select
-                  value={filters.previewStatus}
-                  onChange={(event) => setFilters((current) => ({ ...current, previewStatus: event.target.value }))}
-                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                >
-                  <option value="all">全部预览状态</option>
-                  <option value="enabled">有预览页</option>
-                  <option value="disabled">无预览页</option>
-                </select>
-              </label>
-
-              <label className="space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">TTF 筛选</span>
-                <select
-                  value={filters.ttfEligible}
-                  onChange={(event) => setFilters((current) => ({ ...current, ttfEligible: event.target.value }))}
-                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                >
-                  <option value="all">全部 TTF 状态</option>
-                  <option value="true">仅显示已开启</option>
-                  <option value="false">仅显示已关闭</option>
-                </select>
-              </label>
-
-              <label className="space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">排序字段</span>
-                <select
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value)}
-                  className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">排序方向</span>
-                <button
-                  type="button"
-                  onClick={() => setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'))}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
-                >
-                  {sortOrder === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  {sortOrder === 'asc' ? '升序' : '降序'}
-                </button>
-              </label>
-            </div>
+          }
+        >
+          <div className="mb-6 grid gap-3 xl:grid-cols-[minmax(0,1fr)_220px_220px_auto]">
+            <input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search by episode title or ID..."
+              className={adminInputClassName}
+            />
+            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} className={adminSelectClassName}>
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <Button type="button" variant="outline" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
+              {sortOrder === 'asc' ? 'Oldest first' : 'Newest first'}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => openDeleteConfirm(selectedIds)}
+              disabled={selectedIds.length === 0}
+            >
+              Delete selected
+            </Button>
           </div>
-        </section>
 
-        {selectedIds.length ? (
-          <section className="rounded-[28px] border border-cyan-500/20 bg-cyan-500/10 px-5 py-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <p className="text-sm text-cyan-100">
-                已选择 <span className="font-semibold">{selectedIds.length}</span> 个章节，可批量处理金币、预览页数、TTF 或删除。
-              </p>
+          <div className="mb-6 flex flex-wrap gap-2">
+            {QUICK_FILTERS.map((filter) => (
+              <button
+                key={filter.id}
+                type="button"
+                onClick={() => handleQuickFilter(filter)}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  quickFilterId === filter.id
+                    ? 'border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]'
+                    : 'border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
 
-              <div className="flex flex-wrap gap-2">
-                <ToolbarButton onClick={() => setIsBulkModalOpen(true)}>
-                  <Save size={16} />
-                  批量编辑
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => bulkUpdateMutation.mutate({ ids: selectedIds, updates: { ttfEligible: true } })}
-                  disabled={bulkUpdateMutation.isPending}
-                >
-                  开启 TTF
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => bulkUpdateMutation.mutate({ ids: selectedIds, updates: { ttfEligible: false } })}
-                  disabled={bulkUpdateMutation.isPending}
-                >
-                  关闭 TTF
-                </ToolbarButton>
-                <ToolbarButton
-                  onClick={() => openDeleteConfirm(selectedIds)}
-                  disabled={deleteEpisodesMutation.isPending}
-                  className="border-rose-500/30 bg-rose-500/10 text-rose-100 hover:bg-rose-500/20"
-                >
-                  <Trash2 size={16} />
-                  删除所选
-                </ToolbarButton>
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        <section className="overflow-hidden rounded-[32px] border border-neutral-800 bg-neutral-900/80 shadow-[0_24px_70px_-44px_rgba(0,0,0,0.75)]">
           {episodesQuery.isError ? (
-            <div className="px-6 py-16">
-              <LoadingState.ErrorState error={getErrorMessage(episodesQuery.error, '章节列表加载失败。')} onRetry={() => episodesQuery.refetch()} />
-            </div>
+            <AdminPageSection title="Load error" description={getErrorMessage(episodesQuery.error, 'Episode list could not be loaded.')} />
           ) : episodes.length === 0 ? (
-            <div className="px-6 py-16">
-              <LoadingState.EmptyState
-                message="当前筛选条件下没有章节。"
-                action={(
-                  <button
-                    type="button"
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="rounded-2xl border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition hover:border-neutral-500 hover:bg-neutral-900"
-                  >
-                    新建第一章
-                  </button>
-                )}
-              />
-            </div>
+            <AdminPageSection title="No episodes in this view" description="Try a different filter or add the first episode to get started." />
           ) : (
-            <>
+            <div className="overflow-hidden rounded-[28px] border border-black/8 bg-white/92 shadow-[var(--gush-shadow-soft)]">
               <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-neutral-950/80 text-left text-neutral-400">
+                <table className="min-w-full">
+                  <AdminTableHeader>
                     <tr>
-                      <th className="px-5 py-4">
+                      <th className="px-4 py-4">
                         <input
                           type="checkbox"
                           checked={allCurrentPageSelected}
                           onChange={handleSelectAllCurrentPage}
-                          className="h-4 w-4 rounded border-neutral-600 bg-neutral-900"
-                          aria-label="选择当前页全部章节"
+                          className="h-4 w-4 rounded border-black/20 bg-transparent"
+                          aria-label="Select the current page"
                         />
                       </th>
-                      <th className="px-5 py-4">章节号</th>
-                      <th className="px-5 py-4">标题</th>
-                      <th className="px-5 py-4">金币价格</th>
-                      <th className="px-5 py-4">预览页数</th>
-                      <th className="px-5 py-4">TTF</th>
-                      <th className="px-5 py-4">更新时间</th>
-                      <th className="px-5 py-4">操作</th>
+                      <th className="px-4 py-4">Number</th>
+                      <th className="px-4 py-4">Title</th>
+                      <th className="px-4 py-4">Price</th>
+                      <th className="px-4 py-4">Preview</th>
+                      <th className="px-4 py-4">Free-pass</th>
+                      <th className="px-4 py-4">Updated</th>
+                      <th className="px-4 py-4">Actions</th>
                     </tr>
-                  </thead>
+                  </AdminTableHeader>
                   <tbody>
                     {episodes.map((episode) => (
-                      <tr key={episode.id} className="border-t border-neutral-800 text-neutral-200">
-                        <td className="px-5 py-4 align-top">
+                      <AdminTableRow key={episode.id}>
+                        <td className="px-4 py-4">
                           <input
                             type="checkbox"
                             checked={selectedSet.has(episode.id)}
                             onChange={() => handleToggleSelect(episode.id)}
-                            className="mt-2 h-4 w-4 rounded border-neutral-600 bg-neutral-900"
-                            aria-label={`选择章节 ${episode.number}`}
+                            className="h-4 w-4 rounded border-black/20 bg-transparent"
+                            aria-label={`Select episode ${episode.number}`}
                           />
                         </td>
-                        <td className="px-5 py-4 align-top">
-                          <div className="space-y-3">
-                            <div className="text-base font-semibold text-white">#{episode.number}</div>
+                        <td className="px-4 py-4">
+                          <div className="space-y-2">
+                            <p className="font-semibold text-slate-950">#{episode.number}</p>
                             <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleMoveEpisode(episode, 'up')}
-                                disabled={!isCanonicalNumberSort || reorderEpisodesMutation.isPending}
-                                className="rounded-xl border border-neutral-700 px-2.5 py-1.5 text-xs transition hover:border-neutral-500 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
-                              >
-                                上移
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleMoveEpisode(episode, 'down')}
-                                disabled={!isCanonicalNumberSort || reorderEpisodesMutation.isPending}
-                                className="rounded-xl border border-neutral-700 px-2.5 py-1.5 text-xs transition hover:border-neutral-500 hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
-                              >
-                                下移
-                              </button>
+                              <Button type="button" variant="outline" size="xs" onClick={() => handleMoveEpisode(episode, 'up')} disabled={!isCanonicalNumberSort || reorderEpisodesMutation.isPending}>
+                                <ChevronUp className="size-4" />
+                              </Button>
+                              <Button type="button" variant="outline" size="xs" onClick={() => handleMoveEpisode(episode, 'down')} disabled={!isCanonicalNumberSort || reorderEpisodesMutation.isPending}>
+                                <ChevronDown className="size-4" />
+                              </Button>
                             </div>
-                            {!isCanonicalNumberSort ? (
-                              <p className="text-xs text-neutral-500">切换到“章节号 + 升序”后可直接调整顺序。</p>
-                            ) : null}
                           </div>
                         </td>
-                        <td className="px-5 py-4 align-top">
+                        <td className="px-4 py-4">
                           <div className="space-y-2">
                             <input
                               type="text"
@@ -949,12 +756,12 @@ export default function AdminEpisodesPage() {
                                   event.currentTarget.blur();
                                 }
                               }}
-                              className="w-full min-w-[240px] rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                              className={`${adminInputClassName} min-w-[220px]`}
                             />
-                            <p className="text-xs text-neutral-500">{episode.id}</p>
+                            <p className="text-xs text-slate-500">{episode.id}</p>
                           </div>
                         </td>
-                        <td className="px-5 py-4 align-top">
+                        <td className="px-4 py-4">
                           <input
                             type="number"
                             min="0"
@@ -966,11 +773,11 @@ export default function AdminEpisodesPage() {
                                 event.currentTarget.blur();
                               }
                             }}
-                            className="w-28 rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                            aria-label={`章节 ${episode.number} 金币价格`}
+                            className={`${adminInputClassName} w-28`}
+                            aria-label={`Episode ${episode.number} price`}
                           />
                         </td>
-                        <td className="px-5 py-4 align-top">
+                        <td className="px-4 py-4">
                           <input
                             type="number"
                             min="0"
@@ -982,12 +789,12 @@ export default function AdminEpisodesPage() {
                                 event.currentTarget.blur();
                               }
                             }}
-                            className="w-28 rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                            aria-label={`章节 ${episode.number} 预览页数`}
+                            className={`${adminInputClassName} w-28`}
+                            aria-label={`Episode ${episode.number} preview pages`}
                           />
                         </td>
-                        <td className="px-5 py-4 align-top">
-                          <label className="inline-flex items-center gap-2 rounded-full border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm">
+                        <td className="px-4 py-4">
+                          <label className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-3 py-2 text-sm text-slate-700">
                             <input
                               type="checkbox"
                               checked={Boolean(episode.ttfEligible)}
@@ -997,58 +804,44 @@ export default function AdminEpisodesPage() {
                                   payload: { ttfEligible: event.target.checked },
                                 })
                               }
-                              className="h-4 w-4 rounded border-neutral-600 bg-neutral-900"
+                              className="h-4 w-4 rounded border-black/20 bg-transparent"
                             />
-                            <span>{episode.ttfEligible ? '已开启' : '已关闭'}</span>
+                            <span>{episode.ttfEligible ? 'On' : 'Off'}</span>
                           </label>
                         </td>
-                        <td className="px-5 py-4 align-top">
-                          <div className="space-y-1 text-sm text-neutral-300">
+                        <td className="px-4 py-4">
+                          <div className="space-y-1 text-sm text-slate-600">
                             <p>{formatDateTime(episode.updatedAt)}</p>
-                            <p className="text-xs text-neutral-500">发布时间：{formatDateTime(episode.releasedAt)}</p>
+                            <p className="text-xs text-slate-500">Released: {formatDateTime(episode.releasedAt)}</p>
                           </div>
                         </td>
-                        <td className="px-5 py-4 align-top">
+                        <td className="px-4 py-4">
                           <div className="flex flex-col gap-2">
-                            <a
-                              href={`/read/${seriesId}/${episode.id}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-2 rounded-2xl border border-neutral-700 px-3 py-2 text-sm transition hover:border-neutral-500 hover:bg-neutral-900"
-                            >
-                              <BookOpen size={15} />
-                              阅读页
-                            </a>
-                            <button
-                              type="button"
-                              onClick={() => openDeleteConfirm([episode.id])}
-                              className="inline-flex items-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100 transition hover:bg-rose-500/20"
-                            >
-                              <Trash2 size={15} />
-                              删除
-                            </button>
+                            <Button type="button" variant="outline" size="sm" onClick={() => window.open(`/read/${seriesId}/${episode.id}`, '_blank')}>
+                              <BookOpen className="size-4" />
+                              Read page
+                            </Button>
+                            <Button type="button" variant="destructive" size="sm" onClick={() => openDeleteConfirm([episode.id])}>
+                              Delete
+                            </Button>
                           </div>
                         </td>
-                      </tr>
+                      </AdminTableRow>
                     ))}
                   </tbody>
                 </table>
               </div>
 
-              <div className="flex flex-col gap-4 border-t border-neutral-800 bg-neutral-950/60 px-5 py-4 text-sm text-neutral-400 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-4 border-t border-black/6 bg-[rgba(250,247,241,0.72)] px-5 py-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  第 <span className="font-medium text-white">{pagination.page}</span> / {pagination.totalPages} 页，共{' '}
-                  <span className="font-medium text-white">{pagination.total}</span> 章
+                  Page <span className="font-medium text-slate-950">{pagination.page}</span> of {pagination.totalPages} ·{' '}
+                  <span className="font-medium text-slate-950">{pagination.total}</span> total episodes
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
                   <label className="flex items-center gap-2">
-                    <span>每页</span>
-                    <select
-                      value={pageSize}
-                      onChange={(event) => setPageSize(Number(event.target.value))}
-                      className="rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white outline-none"
-                    >
+                    <span>Per page</span>
+                    <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} className="h-10 rounded-full border border-black/8 bg-white px-3 text-sm text-slate-700 outline-none">
                       {[20, 50, 100].map((size) => (
                         <option key={size} value={size}>
                           {size}
@@ -1058,166 +851,75 @@ export default function AdminEpisodesPage() {
                   </label>
 
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPage((current) => Math.max(1, current - 1))}
-                      disabled={!pagination.hasPrevPage}
-                      className="rounded-xl border border-neutral-700 px-3 py-2 text-sm text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      上一页
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPage((current) => current + 1)}
-                      disabled={!pagination.hasNextPage}
-                      className="rounded-xl border border-neutral-700 px-3 py-2 text-sm text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      下一页
-                    </button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={!pagination.hasPrevPage}>
+                      Previous
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setPage((current) => current + 1)} disabled={!pagination.hasNextPage}>
+                      Next
+                    </Button>
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
-        </section>
+        </AdminPageSection>
       </div>
 
-      <Modal
-        isOpen={isAddModalOpen}
-        title="新建章节"
-        subtitle="快速创建新章节，创建后就可以继续上传内容或补价格。"
-        onClose={() => setIsAddModalOpen(false)}
-        size="lg"
-      >
+      <Modal isOpen={isAddModalOpen} title="New episode" subtitle="Create the episode shell first, then keep editing in the table." onClose={() => setIsAddModalOpen(false)} size="lg">
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-2">
-              <span className="text-sm text-neutral-300">章节号</span>
-              <input
-                type="number"
-                min="1"
-                value={newEpisode.number}
-                onChange={(event) => setNewEpisode((current) => ({ ...current, number: event.target.value }))}
-                className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-              />
-            </label>
-
-            <label className="space-y-2">
-              <span className="text-sm text-neutral-300">章节标题</span>
-              <input
-                type="text"
-                value={newEpisode.title}
-                onChange={(event) => setNewEpisode((current) => ({ ...current, title: event.target.value }))}
-                className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-              />
-            </label>
-
-            <label className="space-y-2">
-              <span className="text-sm text-neutral-300">金币价格</span>
-              <input
-                type="number"
-                min="0"
-                value={newEpisode.pricePts}
-                onChange={(event) => setNewEpisode((current) => ({ ...current, pricePts: event.target.value }))}
-                className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-              />
-            </label>
-
-            <label className="space-y-2">
-              <span className="text-sm text-neutral-300">预览页数</span>
-              <input
-                type="number"
-                min="0"
-                value={newEpisode.previewFreePages}
-                onChange={(event) => setNewEpisode((current) => ({ ...current, previewFreePages: event.target.value }))}
-                className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-              />
-            </label>
+            <AdminFormField label="Episode number">
+              <input type="number" min="1" value={newEpisode.number} onChange={(event) => setNewEpisode((current) => ({ ...current, number: event.target.value }))} className={adminInputClassName} />
+            </AdminFormField>
+            <AdminFormField label="Title">
+              <input type="text" value={newEpisode.title} onChange={(event) => setNewEpisode((current) => ({ ...current, title: event.target.value }))} className={adminInputClassName} />
+            </AdminFormField>
+            <AdminFormField label="Price">
+              <input type="number" min="0" value={newEpisode.pricePts} onChange={(event) => setNewEpisode((current) => ({ ...current, pricePts: event.target.value }))} className={adminInputClassName} />
+            </AdminFormField>
+            <AdminFormField label="Preview pages">
+              <input type="number" min="0" value={newEpisode.previewFreePages} onChange={(event) => setNewEpisode((current) => ({ ...current, previewFreePages: event.target.value }))} className={adminInputClassName} />
+            </AdminFormField>
           </div>
-
-          <label className="inline-flex items-center gap-3 rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-neutral-200">
-            <input
-              type="checkbox"
-              checked={newEpisode.ttfEligible}
-              onChange={(event) => setNewEpisode((current) => ({ ...current, ttfEligible: event.target.checked }))}
-              className="h-4 w-4 rounded border-neutral-600 bg-neutral-900"
-            />
-            <span>创建时直接开启 TTF</span>
+          <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-4 text-sm text-slate-700">
+            <span>Enable free-pass immediately</span>
+            <input type="checkbox" checked={newEpisode.ttfEligible} onChange={(event) => setNewEpisode((current) => ({ ...current, ttfEligible: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-transparent" />
           </label>
-
-          <button
-            type="button"
-            onClick={handleCreateEpisode}
-            disabled={createEpisodeMutation.isPending}
-            className="w-full rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {createEpisodeMutation.isPending ? '创建中...' : '创建章节'}
-          </button>
+          <Button type="button" onClick={handleCreateEpisode} disabled={createEpisodeMutation.isPending}>
+            {createEpisodeMutation.isPending ? 'Creating...' : 'Create episode'}
+          </Button>
         </div>
       </Modal>
 
-      <Modal
-        isOpen={isBulkModalOpen}
-        title="批量编辑章节"
-        subtitle={`当前已选 ${selectedIds.length} 个章节。留空表示保持原值不变。`}
-        onClose={() => setIsBulkModalOpen(false)}
-        size="lg"
-      >
+      <Modal isOpen={isBulkModalOpen} title="Bulk edit episodes" subtitle={`Apply the same change to ${selectedIds.length} selected episode${selectedIds.length === 1 ? '' : 's'}.`} onClose={() => setIsBulkModalOpen(false)} size="lg">
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-2">
-              <span className="text-sm text-neutral-300">批量金币价格</span>
-              <input
-                type="number"
-                min="0"
-                value={bulkForm.pricePts}
-                onChange={(event) => setBulkForm((current) => ({ ...current, pricePts: event.target.value }))}
-                className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-              />
-            </label>
-
-            <label className="space-y-2">
-              <span className="text-sm text-neutral-300">批量预览页数</span>
-              <input
-                type="number"
-                min="0"
-                value={bulkForm.previewFreePages}
-                onChange={(event) => setBulkForm((current) => ({ ...current, previewFreePages: event.target.value }))}
-                className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-              />
-            </label>
+            <AdminFormField label="Bulk price">
+              <input type="number" min="0" value={bulkForm.pricePts} onChange={(event) => setBulkForm((current) => ({ ...current, pricePts: event.target.value }))} className={adminInputClassName} />
+            </AdminFormField>
+            <AdminFormField label="Bulk preview pages">
+              <input type="number" min="0" value={bulkForm.previewFreePages} onChange={(event) => setBulkForm((current) => ({ ...current, previewFreePages: event.target.value }))} className={adminInputClassName} />
+            </AdminFormField>
           </div>
-
-          <label className="space-y-2">
-            <span className="text-sm text-neutral-300">批量 TTF</span>
-            <select
-              value={bulkForm.ttfEligible}
-              onChange={(event) => setBulkForm((current) => ({ ...current, ttfEligible: event.target.value }))}
-              className="w-full rounded-2xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-            >
-              <option value="unchanged">保持不变</option>
-              <option value="true">全部开启</option>
-              <option value="false">全部关闭</option>
+          <AdminFormField label="Bulk free-pass">
+            <select value={bulkForm.ttfEligible} onChange={(event) => setBulkForm((current) => ({ ...current, ttfEligible: event.target.value }))} className={adminSelectClassName}>
+              <option value="unchanged">Keep current value</option>
+              <option value="true">Turn on</option>
+              <option value="false">Turn off</option>
             </select>
-          </label>
-
-          <button
-            type="button"
-            onClick={handleBulkUpdate}
-            disabled={bulkUpdateMutation.isPending}
-            className="w-full rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {bulkUpdateMutation.isPending ? '批量保存中...' : '应用批量更新'}
-          </button>
+          </AdminFormField>
+          <Button type="button" onClick={handleBulkUpdate} disabled={bulkUpdateMutation.isPending}>
+            {bulkUpdateMutation.isPending ? 'Applying...' : 'Apply bulk update'}
+          </Button>
         </div>
       </Modal>
 
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        title="删除章节"
-        message={`确定要删除 ${pendingDeleteIds.length} 个章节吗？删除后无法恢复。`}
-        confirmText={deleteEpisodesMutation.isPending ? '删除中...' : '确认删除'}
-        cancelText="取消"
+        title="Delete episodes"
+        message={`Delete ${pendingDeleteIds.length} episode${pendingDeleteIds.length === 1 ? '' : 's'}? This action cannot be undone.`}
+        confirmText={deleteEpisodesMutation.isPending ? 'Deleting...' : 'Delete episodes'}
+        cancelText="Cancel"
         isDangerous={true}
         isLoading={deleteEpisodesMutation.isPending}
         onConfirm={() => deleteEpisodesMutation.mutate(pendingDeleteIds)}
@@ -1229,10 +931,10 @@ export default function AdminEpisodesPage() {
         seriesId={seriesId}
         onClose={() => setIsUploadModalOpen(false)}
         onSuccess={async () => {
-          setFeedback({ type: 'success', message: '批量上传完成，章节列表已刷新。' });
+          setFeedback({ type: 'success', message: 'Bulk upload finished and the episode list was refreshed.' });
           await invalidateEpisodeData();
         }}
       />
-    </div>
+    </AdminShell>
   );
 }

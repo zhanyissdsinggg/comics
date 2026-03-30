@@ -2,22 +2,38 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import {
+  AdminBadge,
+  AdminDataTable,
+  AdminPageSection,
+  AdminTableHeader,
+  AdminTableRow,
+  AdminTabs,
+} from "@/components/admin/common/AdminWorkspacePrimitives";
 import { useAdminAuth } from "./AuthContext";
 import { adminGet, adminPost } from "../../lib/adminApiClient";
 
-const STATUS_CLASS_MAP = {
-  FAILED: "border-red-200 bg-red-50 text-red-700",
-  QUEUED: "border-amber-200 bg-amber-50 text-amber-700",
-  SENT: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  SUCCESS: "border-emerald-200 bg-emerald-50 text-emerald-700",
+const STATUS_TONES = {
+  FAILED: "danger",
+  QUEUED: "warning",
+  SENT: "success",
+  SUCCESS: "success",
 };
 
-const STATUS_LABEL_MAP = {
-  FAILED: "失败",
-  QUEUED: "排队中",
-  SENT: "已发送",
-  SUCCESS: "成功",
+const STATUS_LABELS = {
+  FAILED: "Failed",
+  QUEUED: "Queued",
+  SENT: "Sent",
+  SUCCESS: "Success",
 };
+
+const viewOptions = [
+  { value: "all", label: "All jobs" },
+  { value: "failed", label: "Failed only" },
+];
 
 function toCsv(rows) {
   const header = ["status", "to", "subject", "provider", "priority", "retries", "lastAttemptAt", "error"];
@@ -37,7 +53,7 @@ function toCsv(rows) {
 
 function formatAttemptAt(value) {
   if (!value) {
-    return "从未";
+    return "Never";
   }
 
   const date = new Date(value);
@@ -45,7 +61,7 @@ function formatAttemptAt(value) {
     return String(value);
   }
 
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
@@ -53,19 +69,6 @@ function formatAttemptAt(value) {
 
 function normalizeJobs(payload) {
   return Array.isArray(payload?.jobs) ? payload.jobs.filter(Boolean) : [];
-}
-
-function StatusBanner({ state }) {
-  if (!state?.message) {
-    return null;
-  }
-
-  const className =
-    state.tone === "error"
-      ? "border-red-200 bg-red-50 text-red-700"
-      : "border-emerald-200 bg-emerald-50 text-emerald-700";
-
-  return <div className={`rounded-2xl border px-4 py-3 text-sm ${className}`}>{state.message}</div>;
 }
 
 export default function AdminEmailJobsPage() {
@@ -76,7 +79,7 @@ export default function AdminEmailJobsPage() {
   const [jobs, setJobs] = useState([]);
   const [view, setView] = useState("all");
   const [retryingId, setRetryingId] = useState("");
-  const [status, setStatus] = useState({ tone: "success", message: "" });
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
   const latestLoadIdRef = useRef(0);
 
   useEffect(() => {
@@ -85,34 +88,40 @@ export default function AdminEmailJobsPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  const loadData = useCallback(async ({ preserveStatus = false } = {}) => {
-    const loadId = latestLoadIdRef.current + 1;
-    latestLoadIdRef.current = loadId;
+  const loadData = useCallback(
+    async ({ preserveStatus = false } = {}) => {
+      const loadId = latestLoadIdRef.current + 1;
+      latestLoadIdRef.current = loadId;
 
-    setLoading(true);
-    if (!preserveStatus) {
-      setStatus({ tone: "success", message: "" });
-    }
-
-    const endpoint = view === "failed" ? "/api/admin/email/jobs/failed" : "/api/admin/email/jobs";
-    const response = await adminGet(endpoint);
-
-    if (loadId !== latestLoadIdRef.current) {
-      return;
-    }
-
-    if (response.ok) {
-      setJobs(normalizeJobs(response.data));
+      setLoading(true);
       if (!preserveStatus) {
-        setStatus({ tone: "success", message: "" });
+        setFeedback({ type: "", message: "" });
       }
-    } else {
-      setJobs([]);
-      setStatus({ tone: "error", message: response.error || "邮件任务加载失败。" });
-    }
 
-    setLoading(false);
-  }, [view]);
+      const endpoint = view === "failed" ? "/api/admin/email/jobs/failed" : "/api/admin/email/jobs";
+      const response = await adminGet(endpoint);
+
+      if (loadId !== latestLoadIdRef.current) {
+        return;
+      }
+
+      if (response.ok) {
+        setJobs(normalizeJobs(response.data));
+        if (!preserveStatus) {
+          setFeedback({ type: "", message: "" });
+        }
+      } else {
+        setJobs([]);
+        setFeedback({
+          type: "error",
+          message: response.error || response.message || "Email jobs could not be loaded.",
+        });
+      }
+
+      setLoading(false);
+    },
+    [view],
+  );
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -126,19 +135,26 @@ export default function AdminEmailJobsPage() {
   }, [isAuthenticated, isLoading, loadData]);
 
   const csvData = useMemo(() => toCsv(jobs), [jobs]);
+  const failedCount = useMemo(
+    () => jobs.filter((job) => String(job.status || "").toUpperCase() === "FAILED").length,
+    [jobs],
+  );
 
   const handleRetry = async (jobId) => {
     setRetryingId(String(jobId));
-    setStatus({ tone: "success", message: "" });
+    setFeedback({ type: "", message: "" });
 
     try {
       const response = await adminPost("/api/admin/email/jobs/retry", { jobId });
 
       if (response.ok) {
-        setStatus({ tone: "success", message: "重试任务已成功加入队列。" });
+        setFeedback({ type: "success", message: "The job was queued for another delivery attempt." });
         await loadData({ preserveStatus: true });
       } else {
-        setStatus({ tone: "error", message: response.error || "重试失败。" });
+        setFeedback({
+          type: "error",
+          message: response.error || response.message || "The retry request failed.",
+        });
       }
     } finally {
       setRetryingId("");
@@ -163,128 +179,112 @@ export default function AdminEmailJobsPage() {
 
   if (isLoading || loading) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white p-6">
-        <p className="text-sm text-slate-500">正在加载邮件任务...</p>
-      </section>
+      <AdminPageSection title="Delivery queue" description="Loading the outbound job queue and recent email attempts.">
+        <p className="text-sm text-slate-500">Loading email jobs...</p>
+      </AdminPageSection>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <section className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-        需要管理员权限，请重新登录后刷新页面。
-      </section>
+      <AdminPageSection title="Delivery queue" description="Admin access is required before email operations can be reviewed.">
+        <p className="text-sm text-slate-500">Sign in as an admin to review delivery jobs.</p>
+      </AdminPageSection>
     );
   }
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-slate-900">投递记录</h2>
+    <div className="space-y-6">
+      <AdminFeedbackBanner
+        feedback={feedback}
+        onDismiss={() => setFeedback({ type: "", message: "" })}
+      />
+
+      <AdminPageSection
+        title="Delivery queue"
+        description="Keep this queue readable: what was sent, where it went, and whether another delivery attempt is still needed."
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <AdminBadge tone={failedCount > 0 ? "warning" : "success"}>
+              {failedCount > 0 ? `${failedCount} failed in this view` : "No failures in this view"}
+            </AdminBadge>
+            <Button type="button" variant="outline" onClick={handleExport} disabled={!jobs.length}>
+              Export CSV
+            </Button>
+          </div>
+        }
+      >
+        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <AdminTabs items={viewOptions} value={view} onChange={setView} />
           <p className="text-sm text-slate-500">
-            查看后台邮件队列中的投递任务、失败记录与重试状态。
+            {view === "failed"
+              ? "Only failed deliveries stay in view here so operators can retry cleanly."
+              : "All queued and completed delivery jobs stay visible in one calm table."}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setView("all")}
-            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-              view === "all"
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
-            }`}
-          >
-            全部任务
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("failed")}
-            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-              view === "failed"
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
-            }`}
-          >
-            仅失败任务
-          </button>
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={!jobs.length}
-            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            导出 CSV
-          </button>
-        </div>
-      </div>
-
-      <StatusBanner state={status} />
-
-      {jobs.length === 0 ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-          当前筛选下暂无邮件任务。
-        </section>
-      ) : (
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          <div className="overflow-x-auto">
+        {jobs.length === 0 ? (
+          <div className="rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.82)] p-8 text-center text-sm text-slate-500">
+            No email jobs match this view yet.
+          </div>
+        ) : (
+          <AdminDataTable>
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+              <AdminTableHeader>
                 <tr>
-                  <th className="px-4 py-3">状态</th>
-                  <th className="px-4 py-3">收件人</th>
-                  <th className="px-4 py-3">主题</th>
-                  <th className="px-4 py-3">服务商</th>
-                  <th className="px-4 py-3">优先级</th>
-                  <th className="px-4 py-3">重试次数</th>
-                  <th className="px-4 py-3">最近尝试</th>
-                  <th className="px-4 py-3">错误信息</th>
-                  <th className="px-4 py-3">操作</th>
+                  <th className="px-4 py-4">Status</th>
+                  <th className="px-4 py-4">Recipient</th>
+                  <th className="px-4 py-4">Subject</th>
+                  <th className="px-4 py-4">Provider</th>
+                  <th className="px-4 py-4">Priority</th>
+                  <th className="px-4 py-4">Retries</th>
+                  <th className="px-4 py-4">Last attempt</th>
+                  <th className="px-4 py-4">Error</th>
+                  <th className="px-4 py-4">Action</th>
                 </tr>
-              </thead>
+              </AdminTableHeader>
               <tbody>
                 {jobs.map((job) => {
-                  const statusClassName = STATUS_CLASS_MAP[job.status] || "border-slate-200 bg-slate-50 text-slate-700";
-                  const canRetry = job.status === "FAILED";
+                  const status = String(job.status || "").toUpperCase();
+                  const canRetry = status === "FAILED";
 
                   return (
-                    <tr key={job.id} className="border-t border-slate-100 align-top">
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClassName}`}>
-                          {STATUS_LABEL_MAP[job.status] || job.status || "未知"}
-                        </span>
+                    <AdminTableRow key={job.id}>
+                      <td className="px-4 py-4">
+                        <AdminBadge tone={STATUS_TONES[status] || "default"}>
+                          {STATUS_LABELS[status] || status || "Unknown"}
+                        </AdminBadge>
                       </td>
-                      <td className="px-4 py-3 text-slate-700">{job.to || "-"}</td>
-                      <td className="px-4 py-3 text-slate-700">{job.subject || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{job.provider || "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{job.priority ?? "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{job.retries ?? 0}</td>
-                      <td className="px-4 py-3 text-slate-600">{formatAttemptAt(job.lastAttemptAt)}</td>
-                      <td className="px-4 py-3 text-red-600">{job.error || "-"}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-4 text-slate-700">{job.to || "-"}</td>
+                      <td className="px-4 py-4 text-slate-700">{job.subject || "-"}</td>
+                      <td className="px-4 py-4 text-slate-600">{job.provider || "-"}</td>
+                      <td className="px-4 py-4 text-slate-600">{job.priority ?? "-"}</td>
+                      <td className="px-4 py-4 text-slate-600">{job.retries ?? 0}</td>
+                      <td className="px-4 py-4 text-slate-600">{formatAttemptAt(job.lastAttemptAt)}</td>
+                      <td className="px-4 py-4 text-sm text-red-600">{job.error || "-"}</td>
+                      <td className="px-4 py-4">
                         {canRetry ? (
-                          <button
+                          <Button
                             type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleRetry(job.id)}
                             disabled={retryingId === String(job.id)}
-                            className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            {retryingId === String(job.id) ? "重试中..." : "重试"}
-                          </button>
+                            {retryingId === String(job.id) ? "Retrying..." : "Retry"}
+                          </Button>
                         ) : (
-                          <span className="text-xs text-slate-400">-</span>
+                          <span className="text-xs text-slate-400">No action needed</span>
                         )}
                       </td>
-                    </tr>
+                    </AdminTableRow>
                   );
                 })}
               </tbody>
             </table>
-          </div>
-        </section>
-      )}
-    </section>
+          </AdminDataTable>
+        )}
+      </AdminPageSection>
+    </div>
   );
 }
