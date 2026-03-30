@@ -20,6 +20,7 @@ import {
   ExternalLink,
   Image as ImageIcon,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useAdminAuth } from "./AuthContext";
 import { adminDelete as apiDelete, adminGet as apiGet, adminPatch as apiPatch, adminPost as apiPost, adminUpload } from "../../lib/adminApiClient";
 import { ConfirmModal } from "../common/Modal";
@@ -376,36 +377,61 @@ function SeriesCard(props) {
           <div><p className="text-slate-500">封面</p><p className="mt-1 font-semibold text-slate-950">{series.coverUrl ? "已补齐" : "待补充"}</p></div>
           <div><p className="text-slate-500">发布状态</p><p className="mt-1 font-semibold text-slate-950">{series.isPublished ? "已发布" : "草稿"}</p></div>
         </div>
-        <div className="flex flex-wrap gap-2 lg:justify-end">
+        <div className="flex flex-col gap-3 lg:items-end">
           {isEditing ? (
-            <>
-              <button type="button" onClick={onSaveEdit} disabled={isSaving} className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">{isSaving ? "保存中..." : "保存"}</button>
-              <button type="button" onClick={onCancelEdit} disabled={isSaving} className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50">取消</button>
-            </>
+            <div className="flex flex-wrap gap-2 lg:justify-end">
+              <Button type="button" variant="secondary" size="sm" onClick={onCancelEdit} disabled={isSaving}>
+                取消
+              </Button>
+              <Button type="button" size="sm" onClick={onSaveEdit} disabled={isSaving}>
+                {isSaving ? "保存中..." : "保存"}
+              </Button>
+            </div>
           ) : (
             <>
-              <button type="button" onClick={() => onOpenEpisodes(series.id)} className="inline-flex items-center gap-2 rounded-full border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)] px-3 py-2 text-xs font-semibold text-[var(--gush-accent,#2f58c6)] transition hover:bg-[rgba(47,88,198,0.1)]" title="管理章节">
-                <BookOpen size={15} />
-                <span>章节</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenFrontend(series.id)}
-                disabled={!series.isPublished}
-                className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50"
-                title={series.isPublished ? "查看前台作品页" : "草稿状态不能直接打开前台页"}
-              >
-                <ExternalLink size={15} />
-                <span>前台页</span>
-              </button>
-              <button type="button" onClick={() => onOpenDetails(series.id)} className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]" title="编辑详情">
-                <Edit size={15} />
-                <span>详情</span>
-              </button>
-              <button type="button" onClick={() => onStartEdit(series)} className="rounded-full border border-black/8 bg-white px-3 py-2 text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]" title="快速编辑"><Edit size={16} /></button>
-              <button type="button" onClick={() => onTogglePublish(series)} className="rounded-full border border-black/8 bg-white px-3 py-2 text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]" title={series.isPublished ? "转为草稿" : "立即发布"}>{series.isPublished ? <EyeOff size={16} /> : <Eye size={16} />}</button>
-              <button type="button" onClick={() => onDuplicate(series)} className="rounded-full border border-black/8 bg-white px-3 py-2 text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]" title="复制作品"><Copy size={16} /></button>
-              <button type="button" onClick={() => onDelete(series)} className="rounded-full border border-red-200 bg-red-50 px-3 py-2 text-red-700 transition hover:bg-red-100" title="删除作品"><Trash2 size={16} /></button>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <Button type="button" size="sm" onClick={() => onOpenDetails(series.id)} title="编辑详情">
+                  <Edit className="size-4" />
+                  详情
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => onOpenEpisodes(series.id)} title="管理章节">
+                  <BookOpen className="size-4" />
+                  章节
+                </Button>
+              </div>
+
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onOpenFrontend(series.id)}
+                  disabled={!series.isPublished}
+                  title={series.isPublished ? "查看前台作品页" : "草稿状态不能直接打开前台页"}
+                >
+                  <ExternalLink className="size-4" />
+                  前台页
+                </Button>
+                <Button type="button" variant="secondary" size="sm" onClick={() => onStartEdit(series)} title="快速编辑">
+                  <Edit className="size-4" />
+                  快速编辑
+                </Button>
+                <Button type="button" variant="secondary" size="sm" onClick={() => onTogglePublish(series)} title={series.isPublished ? "转为草稿" : "立即发布"}>
+                  {series.isPublished ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {series.isPublished ? "转为草稿" : "立即发布"}
+                </Button>
+                <Button type="button" variant="secondary" size="sm" onClick={() => onDuplicate(series)} title="复制作品">
+                  <Copy className="size-4" />
+                  复制
+                </Button>
+              </div>
+
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <Button type="button" variant="destructive" size="sm" onClick={() => onDelete(series)} title="删除作品">
+                  <Trash2 className="size-4" />
+                  删除
+                </Button>
+              </div>
             </>
           )}
         </div>
@@ -758,9 +784,10 @@ export default function AdminSeriesPageNew() {
             <h2 className="text-2xl font-semibold text-slate-950">先把作品信息补真，再决定是否发布。</h2>
             <p className="text-sm leading-6 text-slate-600">优先按前台可读性检查作品，再进入详情页或章节管理做下一步处理。</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button
+          <div className="flex flex-wrap items-center justify-end gap-2 rounded-full border border-black/8 bg-[rgba(250,247,241,0.72)] p-1.5">
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => {
                 setCreateForm({
                   ...createEmptyCreateForm(),
@@ -769,12 +796,14 @@ export default function AdminSeriesPageNew() {
                 });
                 setShowCreateModal(true);
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] px-4 py-2.5 text-sm font-semibold text-[var(--gush-accent,#2f58c6)] transition hover:bg-[rgba(47,88,198,0.12)]"
             >
-              <BookOpen size={16} />
+              <BookOpen className="size-4" />
               <span>新增漫画</span>
-            </button>
-            <button type="button" onClick={() => { setCreateForm(createEmptyCreateForm()); setShowCreateModal(true); }} className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"><Plus size={16} /><span>新增作品</span></button>
+            </Button>
+            <Button type="button" onClick={() => { setCreateForm(createEmptyCreateForm()); setShowCreateModal(true); }}>
+              <Plus className="size-4" />
+              <span>新增作品</span>
+            </Button>
           </div>
         </div>
       </section>
@@ -809,36 +838,50 @@ export default function AdminSeriesPageNew() {
               </button>
             </div>
           ) : null}
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="flex flex-wrap gap-2">
               {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}>{tab.label}</button>)}
             </div>
-            <div className="flex flex-1 flex-wrap items-center gap-2 xl:justify-end">
-              <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3 xl:max-w-md"><Search size={16} className="text-slate-400" /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、ID、创作者署名或草稿备注..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" /></label>
-              <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
-              <button type="button" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0} className="rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] disabled:cursor-not-allowed disabled:opacity-50">{allVisibleSelected ? "清空选择" : "全选"}</button>
-              <div className="flex items-center overflow-hidden rounded-full border border-black/8 bg-white">
-                <button type="button" onClick={() => setViewMode("grid")} className={`px-4 py-3 transition ${viewMode === "grid" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`} title="网格视图"><Grid size={16} /></button>
-                <button type="button" onClick={() => setViewMode("list")} className={`px-4 py-3 transition ${viewMode === "list" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`} title="列表视图"><List size={16} /></button>
+
+            <div className="flex flex-1 flex-col gap-3 xl:items-end">
+              <div className="flex w-full flex-col gap-3 xl:max-w-3xl xl:flex-row xl:justify-end">
+                <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3">
+                  <Search size={16} className="text-slate-400" />
+                  <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、ID、创作者署名或草稿备注..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
+                </label>
+                <div className="xl:shrink-0">
+                  <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
+                </div>
+              </div>
+
+              <div className="flex w-full flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_FILTERS.map((filter) => (
+                    <button
+                      key={filter.value}
+                      type="button"
+                      onClick={() => setQuickFilter(filter.value)}
+                      className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                  <p className="mr-1 text-sm text-slate-600">
+                    <span className="font-semibold text-slate-950">{filteredSeries.length}</span> 部作品
+                  </p>
+                  <Button type="button" variant="secondary" size="sm" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0}>
+                    {allVisibleSelected ? "清空选择" : "全选"}
+                  </Button>
+                  <div className="flex items-center overflow-hidden rounded-full border border-black/8 bg-white">
+                    <button type="button" onClick={() => setViewMode("grid")} className={`px-4 py-2.5 transition ${viewMode === "grid" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`} title="网格视图"><Grid size={16} /></button>
+                    <button type="button" onClick={() => setViewMode("list")} className={`px-4 py-2.5 transition ${viewMode === "list" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`} title="列表视图"><List size={16} /></button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-wrap gap-2">
-              {QUICK_FILTERS.map((filter) => (
-                <button
-                  key={filter.value}
-                  type="button"
-                  onClick={() => setQuickFilter(filter.value)}
-                  className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-            <p className="text-sm text-slate-600">
-              <span className="font-semibold text-slate-950">{filteredSeries.length}</span> 部作品
-            </p>
           </div>
         </div>
       </section>

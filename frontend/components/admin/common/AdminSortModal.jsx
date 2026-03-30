@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
 import { Modal } from "./Modal";
 import { adminSelectClassName } from "./AdminWorkspacePrimitives";
 
@@ -13,9 +14,14 @@ export function AdminSortModal({
   actionLabel = "完成",
 }) {
   return (
-    <Modal isOpen={isOpen} title={title} onClose={onClose}>
-      <div className="space-y-4">
-        <div>
+    <Modal
+      isOpen={isOpen}
+      title={title}
+      subtitle="这里只切换当前列表的排序方式，不会改动筛选条件或已选内容。"
+      onClose={onClose}
+    >
+      <div className="space-y-5">
+        <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] p-4">
           <label className="text-sm font-semibold text-slate-700">{label}</label>
           <select
             value={sortBy}
@@ -30,13 +36,14 @@ export function AdminSortModal({
           </select>
         </div>
 
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-full rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-        >
-          {actionLabel}
-        </button>
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="outline" onClick={onClose}>
+            取消
+          </Button>
+          <Button type="button" onClick={onClose}>
+            {actionLabel}
+          </Button>
+        </div>
       </div>
     </Modal>
   );

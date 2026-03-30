@@ -216,13 +216,13 @@ test.describe("Admin commercial page regressions", () => {
     const response = await page.goto("/admin/revenue", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { level: 1, name: "Revenue", exact: true })).toBeVisible({
+    await expect(page.getByRole("heading", { level: 1, name: "营收", exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("heading", { name: "Revenue overview" })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "收入总览" })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText("Reader value mix", { exact: true })).toBeVisible({
+    await expect(page.getByText("付费读者层级", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
@@ -231,11 +231,11 @@ test.describe("Admin commercial page regressions", () => {
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: "Promotions" }).click();
+    await page.getByRole("button", { name: /活动|Promotions/ }).click();
     await expect(page.getByText("Spring relaunch", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText(/ROI will remain unavailable until spend attribution is wired in\./)).toBeVisible({
+    await expect(page.getByText(/ROI 仍会保持不可用/)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 

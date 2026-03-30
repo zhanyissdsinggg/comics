@@ -468,7 +468,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
 
         <div className="flex min-h-screen flex-1 flex-col">
           <header className="sticky top-0 z-30 border-b border-black/6 bg-[rgba(244,241,234,0.84)] backdrop-blur-xl">
-            <div className="mx-auto flex w-[min(var(--gush-page-max-wide),calc(100%-2rem))] items-center justify-between gap-4 py-4">
+            <div className="mx-auto flex w-[min(var(--gush-page-max-wide),calc(100%-2rem))] flex-col gap-4 py-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="flex items-start gap-4">
                 <button
                   type="button"
@@ -494,7 +494,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex w-full flex-wrap items-center justify-end gap-2 xl:w-auto xl:max-w-[48rem]">
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(true)}
@@ -506,7 +506,11 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                     Ctrl+K
                   </kbd>
                 </button>
-                {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+                {actions ? (
+                  <div className="flex w-full flex-wrap items-center justify-end gap-2 xl:w-auto">
+                    {actions}
+                  </div>
+                ) : null}
               </div>
             </div>
           </header>

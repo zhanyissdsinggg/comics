@@ -139,12 +139,12 @@ export default function ContentGeneratorPage() {
   return (
     <AdminLayout
       title="内容生成器"
-      subtitle="这是给 QA、版式检查和后台流程核验用的测试工具，不是正式内容录入入口。"
+      subtitle="这是给测试、版式检查和后台流程核验用的工具，不是正式内容录入入口。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <AdminMetricCard
-            label="预计作品数"
+            label="预计生成作品数"
             value={String(estimatedSeriesTotal)}
             detail="每次会按相同数量生成漫画和小说。"
             tone="accent"
@@ -155,8 +155,8 @@ export default function ContentGeneratorPage() {
             detail="每部生成作品都会落在设定的章节区间里。"
           />
           <AdminMetricCard
-            label="访问范围"
-            value="仅 QA / 测试"
+            label="使用范围"
+            value="仅测试用途"
             detail="生产环境必须通过 ADMIN_CONTENT_GENERATOR_ENABLED 开关保护。"
           />
         </div>
@@ -168,7 +168,7 @@ export default function ContentGeneratorPage() {
 
         <AdminPageSection
           title="演示内容生成器"
-          description="这里只生成可控的测试目录数据，方便 QA 和流程核验，不应该被当成正式作品录入通道。"
+          description="这里只生成可控的测试目录数据，方便验证页面和流程，不应该被当成正式作品录入通道。"
           action={<AdminBadge tone="accent">仅测试工具</AdminBadge>}
         >
           <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
@@ -176,7 +176,7 @@ export default function ContentGeneratorPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <AdminFormField
                   label="种子"
-                  helperText="可选。QA 需要复现同一批数据时可填写固定种子。"
+                  helperText="可选。需要复现同一批测试数据时可填写固定种子。"
                 >
                   <input
                     value={form.seed}
@@ -255,11 +255,11 @@ export default function ContentGeneratorPage() {
                     ? `每部 ${previewMinEpisodes} 话`
                     : `每部 ${previewMinEpisodes} 到 ${previewMaxEpisodes} 话`}
                 </li>
-                <li>元数据只面向 QA、版式检查和后台流程测试</li>
+                <li>元数据只面向测试、版式检查和后台流程验证</li>
               </ul>
 
               <div className="mt-5 rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-                Enable <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code> in production-like environments before using this route.
+                在类生产环境里使用这个页面前，请先显式开启 <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code>。
               </div>
             </div>
           </div>
@@ -267,19 +267,19 @@ export default function ContentGeneratorPage() {
 
         {result ? (
           <AdminPageSection
-            title="Latest run"
-            description="A short summary of the most recent demo generation request."
+            title="最近一次生成"
+            description="这里只摘要展示最近一次测试生成请求，方便确认这轮生成到底产出了什么。"
           >
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <AdminMetricCard label="Run ID" value={result.runId || "-"} detail="The backend identifier for this generation request." />
-              <AdminMetricCard label="Comic series" value={String(result.comicsCount ?? 0)} detail="Generated comic entries in this run." />
-              <AdminMetricCard label="Novel series" value={String(result.novelsCount ?? 0)} detail="Generated novel entries in this run." />
-              <AdminMetricCard label="Total episodes" value={String(result.totalEpisodes ?? 0)} detail="Episode count across all generated titles." />
-              <AdminMetricCard label="Duration" value={`${result.duration ?? 0} s`} detail="Reported backend execution time." />
+              <AdminMetricCard label="运行 ID" value={result.runId || "-"} detail="后端记录这次生成请求的唯一标识。" />
+              <AdminMetricCard label="漫画作品" value={String(result.comicsCount ?? 0)} detail="本轮生成出的漫画条目数。" />
+              <AdminMetricCard label="小说作品" value={String(result.novelsCount ?? 0)} detail="本轮生成出的小说条目数。" />
+              <AdminMetricCard label="总章节数" value={String(result.totalEpisodes ?? 0)} detail="这轮生成覆盖到的章节总量。" />
+              <AdminMetricCard label="耗时" value={`${result.duration ?? 0} 秒`} detail="后端回传的执行耗时。" />
               <AdminMetricCard
-                label="Seed"
-                value={String(result.requestPayload?.seed || "Random")}
-                detail="Use the same seed again when QA needs a repeatable run."
+                label="种子"
+                value={String(result.requestPayload?.seed || "随机")}
+                detail="需要复现同一批测试数据时，可再次使用这个种子。"
               />
             </div>
           </AdminPageSection>

@@ -17,6 +17,8 @@ export const Modal = React.memo(function Modal({
 }) {
   if (!isOpen) return null;
 
+  const hasHeader = Boolean(title || subtitle || closeButton);
+  const handleRequestClose = closeButton ? onClose : undefined;
   const sizeClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -27,33 +29,39 @@ export const Modal = React.memo(function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,27,36,0.28)] px-4 backdrop-blur-sm"
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,27,36,0.36)] px-4 py-6 backdrop-blur-md"
+      onClick={handleRequestClose}
     >
       <div
         role="dialog"
         aria-modal="true"
-        className={`w-full rounded-[28px] border border-black/8 bg-white/96 p-6 shadow-[var(--gush-shadow-panel)] ${sizeClasses[size]}`}
+        className={`relative w-full max-h-[calc(100vh-3rem)] overflow-hidden rounded-[30px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(249,246,240,0.96))] shadow-[var(--gush-shadow-panel)] ${sizeClasses[size]}`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div>
-            {title ? <h3 className="text-xl font-semibold text-slate-950">{title}</h3> : null}
-            {subtitle ? <p className="mt-1 text-sm leading-6 text-slate-600">{subtitle}</p> : null}
-          </div>
-          {closeButton ? (
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full border border-black/8 bg-white p-2 text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
-              aria-label="关闭弹窗"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          ) : null}
-        </div>
+        <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-[rgba(47,88,198,0.2)]" />
 
-        <div className="text-slate-700">{children}</div>
+        {hasHeader ? (
+          <div className="flex items-start justify-between gap-4 border-b border-black/6 px-6 pb-5 pt-6">
+            <div className="min-w-0">
+              {title ? <h3 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">{title}</h3> : null}
+              {subtitle ? <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{subtitle}</p> : null}
+            </div>
+            {closeButton ? (
+              <button
+                type="button"
+                onClick={handleRequestClose}
+                className="shrink-0 rounded-full border border-black/8 bg-white p-2 text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
+                aria-label="关闭弹窗"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="max-h-[calc(100vh-11rem)] overflow-y-auto px-6 pb-6 pt-5 text-slate-700">
+          {children}
+        </div>
       </div>
     </div>
   );

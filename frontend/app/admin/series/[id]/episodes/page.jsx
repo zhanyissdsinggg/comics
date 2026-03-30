@@ -627,24 +627,29 @@ export default function AdminEpisodesPage() {
       title={series.title || '章节管理'}
       subtitle="按内容优先方式维护章节号、标题、试看页数和发布时间；旧商业设置保留在次级入口。"
       actions={
-        <>
-          <Button type="button" variant="outline" onClick={() => router.push(`/admin/series/${seriesId}`)}>
-            <ArrowLeft className="size-4" />
-            返回作品详情
-          </Button>
-          <Button type="button" variant="outline" onClick={() => window.open(`/series/${seriesId}`, '_blank', 'noopener,noreferrer')}>
-            <ArrowUpRight className="size-4" />
-            查看前台页
-          </Button>
-          <Button type="button" variant="outline" onClick={() => setIsUploadModalOpen(true)}>
-            <Upload className="size-4" />
-            批量上传
-          </Button>
-          <Button type="button" onClick={() => setIsAddModalOpen(true)}>
-            <Plus className="size-4" />
-            新增章节
-          </Button>
-        </>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-black/8 bg-white/78 p-1.5">
+            <Button type="button" variant="ghost" onClick={() => router.push(`/admin/series/${seriesId}`)}>
+              <ArrowLeft className="size-4" />
+              返回作品详情
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => window.open(`/series/${seriesId}`, '_blank', 'noopener,noreferrer')}>
+              <ArrowUpRight className="size-4" />
+              查看前台页
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-black/8 bg-white/88 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+            <Button type="button" variant="secondary" onClick={() => setIsUploadModalOpen(true)}>
+              <Upload className="size-4" />
+              批量上传
+            </Button>
+            <Button type="button" onClick={() => setIsAddModalOpen(true)}>
+              <Plus className="size-4" />
+              新增章节
+            </Button>
+          </div>
+        </div>
       }
     >
       <div className="space-y-6">
@@ -671,31 +676,41 @@ export default function AdminEpisodesPage() {
             </div>
           }
         >
-          <div className="mb-6 grid gap-3 xl:grid-cols-[minmax(0,1fr)_220px_220px_auto]">
-            <input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="搜索章节标题或章节 ID..."
-              className={adminInputClassName}
-            />
-            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} className={adminSelectClassName}>
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <Button type="button" variant="outline" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
-              {sortOrder === 'asc' ? '当前升序' : '当前降序'}
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={() => openDeleteConfirm(selectedIds)}
-              disabled={selectedIds.length === 0}
-            >
-              删除所选章节
-            </Button>
+          <div className="mb-6 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.72)] p-4">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+              <div className="grid gap-3 xl:flex-1 xl:grid-cols-[minmax(0,1fr)_220px_180px]">
+                <input
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="搜索章节标题或章节 ID..."
+                  className={adminInputClassName}
+                />
+                <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} className={adminSelectClassName}>
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <Button type="button" variant="outline" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
+                  {sortOrder === 'asc' ? '当前升序' : '当前降序'}
+                </Button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                <span className="rounded-full border border-black/8 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
+                  已选 {selectedIds.length} 章
+                </span>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => openDeleteConfirm(selectedIds)}
+                  disabled={selectedIds.length === 0}
+                >
+                  删除所选章节
+                </Button>
+              </div>
+            </div>
           </div>
 
           <div className="mb-6 flex flex-wrap gap-2">
@@ -807,7 +822,7 @@ export default function AdminEpisodesPage() {
                           </div>
                         </td>
                         <td className="px-4 py-4">
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-wrap gap-2">
                             <Button type="button" variant="outline" size="sm" onClick={() => window.open(`/read/${seriesId}/${episode.id}`, '_blank', 'noopener,noreferrer')}>
                               <BookOpen className="size-4" />
                               阅读页

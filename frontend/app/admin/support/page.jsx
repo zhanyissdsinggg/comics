@@ -9,6 +9,7 @@ import { Mail, MessageSquare, RefreshCw, Trash2 } from 'lucide-react';
 import AdminShell from '@/components/admin/AdminShell';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
+import { AdminSelectionBar } from '@/components/admin/common/AdminSelectionBar';
 import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
 import { Modal } from '@/components/admin/common/Modal';
 import {
@@ -273,21 +274,10 @@ export default function AdminSupportPage() {
           title="客服队列"
           description="按主题、用户或工单 ID 搜索，让操作行保持克制，把消息正文留给真正需要判断的人。"
           action={
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" onClick={resetControls}>
-                <RefreshCw className="size-4" />
-                重置视图
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={() => setIsDeleteConfirmOpen(true)}
-                disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
-              >
-                <Trash2 className="size-4" />
-                删除已选
-              </Button>
-            </div>
+            <Button type="button" variant="outline" onClick={resetControls}>
+              <RefreshCw className="size-4" />
+              重置视图
+            </Button>
           }
         >
           <div className="mb-6 grid gap-3 xl:grid-cols-[minmax(0,1.3fr)_220px_220px_auto]">
@@ -330,6 +320,18 @@ export default function AdminSupportPage() {
               {sortOrder === 'asc' ? '最早创建优先' : '最新创建优先'}
             </Button>
           </div>
+
+          <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => setIsDeleteConfirmOpen(true)}
+              disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
+            >
+              <Trash2 className="size-4" />
+              删除已选
+            </Button>
+          </AdminSelectionBar>
 
           <AdminTableShell
             isError={isError}

@@ -22,14 +22,14 @@ import { adminFetchJson } from '@/lib/adminApiClient';
 import { normalizeUSDisplayCurrency } from '@/lib/localization';
 
 const LEGACY_REVENUE_CACHE_TTL_MS = 60_000;
-const EMPTY_MESSAGE = 'No revenue data is available for this range.';
+const EMPTY_MESSAGE = '当前时间范围内还没有收入数据。';
 const legacyRevenueCache = new Map();
 
 const REVENUE_TABS = [
-  { value: 'overview', label: 'Overview' },
-  { value: 'trend', label: 'Trend' },
-  { value: 'channels', label: 'Channels' },
-  { value: 'promotions', label: 'Promotions' },
+  { value: 'overview', label: '总览' },
+  { value: 'trend', label: '趋势' },
+  { value: 'channels', label: '渠道' },
+  { value: 'promotions', label: '活动' },
 ];
 
 async function fetchAdminJson(path) {
@@ -98,7 +98,7 @@ function toOptionalNumber(value) {
 }
 
 function formatPercentage(value) {
-  return value === null || value === undefined ? 'Not available' : `${value}%`;
+  return value === null || value === undefined ? '暂无' : `${value}%`;
 }
 
 function dateKeyFromIso(value) {
@@ -148,7 +148,7 @@ function formatCount(value) {
   }).format(toNumber(value));
 }
 
-function formatLabel(value, fallback = 'Unknown') {
+function formatLabel(value, fallback = '未命名渠道') {
   const rawValue = String(value || '').trim();
   if (!rawValue || rawValue.toLowerCase() === 'unknown') {
     return fallback;
@@ -322,7 +322,7 @@ async function getLegacyRevenueFallback(dateRange) {
     channels,
     promotions: promotions.map((item) => ({
       promotionId: item?.id || item?.promotionId || '',
-      title: item?.title || 'Untitled promotion',
+      title: item?.title || '未命名活动',
       orders: toNumber(item?.orders),
       revenue: Number(toNumber(item?.revenue).toFixed(2)),
       roi: toOptionalNumber(item?.roi),
@@ -347,23 +347,23 @@ function viewMeta(tab) {
   switch (tab) {
     case 'trend':
       return {
-        title: 'Revenue trend',
-        description: 'Read the daily movement without wrapping the page in charts and dashboard chrome.',
+        title: '收入趋势',
+        description: '按天看收入波动和支付完成订单，不把页面做成吵闹的图表墙。',
       };
     case 'channels':
       return {
-        title: 'Channel performance',
-        description: 'See which payment or purchase channels actually drive revenue.',
+        title: '渠道表现',
+        description: '看清真正带来收入的是哪些支付或购买渠道，而不是只堆一排指标。',
       };
     case 'promotions':
       return {
-        title: 'Promotion performance',
-        description: 'Keep promotional attribution explicit, especially where ROI is still limited by backend inputs.',
+        title: '活动表现',
+        description: '把活动带来的收入和归因限制说清楚，避免后台看起来像会自己脑补结果。',
       };
     default:
       return {
-        title: 'Revenue overview',
-        description: 'A clear operational read on revenue, refunds, reader value mix, and order outcomes.',
+        title: '收入总览',
+        description: '用一个更克制的方式阅读收入、退款、读者层级和订单结果，不回到旧 BI 面板语气。',
       };
   }
 }
@@ -472,10 +472,10 @@ export default function AdminRevenuePage() {
   const promotionsRoiAvailable = promotionsData?.roiAvailable !== false;
   const promotionsAttributionCopy =
     promotionsAttributionModel === 'order_audit'
-      ? 'Revenue is currently attributed from payment-creation audit metadata. ROI will remain unavailable until spend attribution is wired in.'
+      ? '当前收入归因来自支付创建时记录的审计元数据。在活动花费归因接线完成前，ROI 仍会保持不可用。'
       : promotionsAttributionModel === 'hybrid_order_audit_and_derived_rules'
-        ? 'Revenue uses payment-creation audit metadata first and falls back to derived promotion rules when audit metadata is missing. ROI remains unavailable until spend attribution is wired in.'
-        : 'Revenue is currently derived from promotion rules. ROI remains unavailable until spend attribution is wired in.';
+        ? '当前收入会优先使用支付创建审计元数据；缺失时再回退到活动规则推导。在活动花费归因接线完成前，ROI 仍会保持不可用。'
+        : '当前收入暂时通过活动规则推导得出。在活动花费归因接线完成前，ROI 仍会保持不可用。';
 
   const overviewLoading = statsLoading || userValueLoading || orderStatusLoading;
   const hasOverviewData = Boolean(stats) || Boolean(userValue) || Boolean(orderStatus);
@@ -483,37 +483,37 @@ export default function AdminRevenuePage() {
 
   return (
     <AdminLayout
-      title="Revenue"
-      subtitle="Read revenue outcomes, channel mix, and promotion impact in the same calm editorial admin language as the rest of the workspace."
+      title="营收"
+      subtitle="用和后台其余页面一致的克制语气，查看收入结果、渠道结构和活动影响，不把这里重新做成一块吵闹 BI 面板。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <AdminMetricCard
-            label="Revenue"
+            label="总营收"
             value={stats ? formatCurrency(stats.totalRevenue) : '--'}
-            detail="Gross paid revenue in the selected range."
+            detail="当前时间范围内的支付成功总收入。"
             tone="accent"
           />
           <AdminMetricCard
-            label="Paid orders"
+            label="支付成功订单"
             value={stats ? formatCount(stats.totalOrders) : '--'}
-            detail="Orders counted in the current revenue snapshot."
+            detail="当前营收快照里计入的订单数量。"
           />
           <AdminMetricCard
-            label="Average order value"
+            label="客单价"
             value={stats ? formatCurrency(stats.avgOrderValue) : '--'}
-            detail="A quick read on order quality, not just order count."
+            detail="快速判断订单质量，不只看订单数量。"
           />
           <AdminMetricCard
-            label="Net revenue"
+            label="净营收"
             value={stats ? formatCurrency(stats.netRevenue) : '--'}
-            detail="Revenue after refunded volume is removed."
+            detail="扣除退款金额后的剩余收入。"
           />
         </div>
 
         <AdminPageSection
-          title="Revenue filters"
-          description="Switch views and update the reporting window without falling back to a generic BI dashboard layout."
+          title="查看范围"
+          description="切换视角和时间窗口时，页面保持清楚、轻量、可读，不回到通用 BI 仪表盘写法。"
         >
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-end">
             <div className="space-y-3">
@@ -522,7 +522,7 @@ export default function AdminRevenuePage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <AdminFormField label="Start date">
+              <AdminFormField label="开始日期">
                 <input
                   id="revenue-start-date"
                   type="date"
@@ -531,7 +531,7 @@ export default function AdminRevenuePage() {
                   className={adminInputClassName}
                 />
               </AdminFormField>
-              <AdminFormField label="End date">
+              <AdminFormField label="结束日期">
                 <input
                   id="revenue-end-date"
                   type="date"
@@ -549,43 +549,43 @@ export default function AdminRevenuePage() {
             <div className="space-y-6">
               {stats ? (
                 <AdminPageSection
-                  title="Revenue overview"
-                  description="A compact operational read on revenue, refunds, and order quality in the selected window."
+                  title="收入总览"
+                  description="在当前时间窗口内，先把收入、退款和订单质量读清楚。"
                 >
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-                    <AdminMetricCard label="Gross revenue" value={formatCurrency(stats.totalRevenue)} detail="Paid revenue before refunds." tone="accent" />
-                    <AdminMetricCard label="Total orders" value={formatCount(stats.totalOrders)} detail="Orders counted in this snapshot." />
-                    <AdminMetricCard label="Average order value" value={formatCurrency(stats.avgOrderValue)} detail="Average paid order size." />
-                    <AdminMetricCard label="Refunded" value={formatCurrency(stats.totalRefunded)} detail="Refunded value in the same range." />
-                    <AdminMetricCard label="Net revenue" value={formatCurrency(stats.netRevenue)} detail="Revenue remaining after refunds." />
+                    <AdminMetricCard label="总收入" value={formatCurrency(stats.totalRevenue)} detail="退款前的支付成功收入。" tone="accent" />
+                    <AdminMetricCard label="订单总数" value={formatCount(stats.totalOrders)} detail="当前快照里统计到的订单数。" />
+                    <AdminMetricCard label="平均订单金额" value={formatCurrency(stats.avgOrderValue)} detail="支付成功订单的平均金额。" />
+                    <AdminMetricCard label="退款金额" value={formatCurrency(stats.totalRefunded)} detail="同一时间范围内发生的退款总额。" />
+                    <AdminMetricCard label="净收入" value={formatCurrency(stats.netRevenue)} detail="扣除退款后真正留下的收入。" />
                   </div>
                 </AdminPageSection>
               ) : null}
 
               {userValue ? (
                 <AdminPageSection
-                  title="Reader value mix"
-                  description="A lightweight segmentation of paying readers based on cumulative spend."
+                  title="付费读者层级"
+                  description="按照累计消费做一个轻量分层，帮助判断读者价值结构。"
                 >
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <AdminMetricCard label="High value" value={formatCount(userValue.highValue)} detail="Readers with the strongest cumulative spend." tone="accent" />
-                    <AdminMetricCard label="Mid value" value={formatCount(userValue.mediumValue)} detail="Readers in the mid-spend band." />
-                    <AdminMetricCard label="Low value" value={formatCount(userValue.lowValue)} detail="Paying readers below the mid band." />
-                    <AdminMetricCard label="No spend" value={formatCount(userValue.noValue)} detail="Readers without recorded spend." />
+                    <AdminMetricCard label="高价值" value={formatCount(userValue.highValue)} detail="累计消费最强的一批读者。" tone="accent" />
+                    <AdminMetricCard label="中价值" value={formatCount(userValue.mediumValue)} detail="处在中间消费带的读者。" />
+                    <AdminMetricCard label="低价值" value={formatCount(userValue.lowValue)} detail="已付费但还未进入中段的读者。" />
+                    <AdminMetricCard label="未付费" value={formatCount(userValue.noValue)} detail="当前没有记录到消费的读者。" />
                   </div>
                 </AdminPageSection>
               ) : null}
 
               {orderStatus ? (
                 <AdminPageSection
-                  title="Order outcome mix"
-                  description="Keep order health readable so support and commerce decisions stay grounded in real outcomes."
+                  title="订单结果结构"
+                  description="让订单健康度保持可读，这样客服和商业判断才建立在真实结果上。"
                 >
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <AdminMetricCard label="Pending" value={formatCount(orderStatus.pending)} detail="Orders still waiting on completion." />
-                    <AdminMetricCard label="Paid" value={formatCount(orderStatus.paid)} detail="Orders that completed successfully." tone="accent" />
-                    <AdminMetricCard label="Failed" value={formatCount(orderStatus.failed)} detail="Orders that failed or were charged back." />
-                    <AdminMetricCard label="Refunded" value={formatCount(orderStatus.refunded)} detail="Orders later refunded." />
+                    <AdminMetricCard label="待完成" value={formatCount(orderStatus.pending)} detail="仍在等待支付完成的订单。" />
+                    <AdminMetricCard label="已支付" value={formatCount(orderStatus.paid)} detail="已经成功完成支付的订单。" tone="accent" />
+                    <AdminMetricCard label="失败" value={formatCount(orderStatus.failed)} detail="支付失败或被拒付的订单。" />
+                    <AdminMetricCard label="已退款" value={formatCount(orderStatus.refunded)} detail="后续完成退款的订单。" />
                   </div>
                 </AdminPageSection>
               ) : null}
@@ -595,14 +595,14 @@ export default function AdminRevenuePage() {
 
         {viewMode === 'trend' ? (
           <AdminDataState isLoading={trendLoading} hasData={trend.length > 0} emptyMessage={EMPTY_MESSAGE} wrap={false}>
-            <AdminPageSection title="Revenue trend" description="A day-by-day read on revenue and paid orders.">
+            <AdminPageSection title="收入趋势" description="按天看收入和支付完成订单的变化。">
               <AdminDataTable>
                 <table className="w-full text-sm">
                   <AdminTableHeader>
                     <tr>
-                      <th className="px-4 py-4">Date</th>
-                      <th className="px-4 py-4">Revenue</th>
-                      <th className="px-4 py-4">Paid orders</th>
+                      <th className="px-4 py-4">日期</th>
+                      <th className="px-4 py-4">收入</th>
+                      <th className="px-4 py-4">支付成功订单</th>
                     </tr>
                   </AdminTableHeader>
                   <tbody>
@@ -622,15 +622,15 @@ export default function AdminRevenuePage() {
 
         {viewMode === 'channels' ? (
           <AdminDataState isLoading={channelsLoading} hasData={channels.length > 0} emptyMessage={EMPTY_MESSAGE} wrap={false}>
-            <AdminPageSection title="Channel performance" description="Compare revenue by purchase or payment channel without turning the page into dashboard clutter.">
+            <AdminPageSection title="渠道表现" description="比较不同支付或购买渠道带来的收入，不把页面做成密密麻麻的仪表盘。">
               <AdminDataTable>
                 <table className="w-full text-sm">
                   <AdminTableHeader>
                     <tr>
-                      <th className="px-4 py-4">Channel</th>
-                      <th className="px-4 py-4">Orders</th>
-                      <th className="px-4 py-4">Revenue</th>
-                      <th className="px-4 py-4">Average order value</th>
+                      <th className="px-4 py-4">渠道</th>
+                      <th className="px-4 py-4">订单数</th>
+                      <th className="px-4 py-4">收入</th>
+                      <th className="px-4 py-4">平均订单金额</th>
                     </tr>
                   </AdminTableHeader>
                   <tbody>
@@ -652,8 +652,8 @@ export default function AdminRevenuePage() {
         {viewMode === 'promotions' ? (
           <AdminDataState isLoading={promotionsLoading} hasData={promotions.length > 0} emptyMessage={EMPTY_MESSAGE} wrap={false}>
             <AdminPageSection
-              title="Promotion performance"
-              description="Track promotion outcomes while keeping attribution limitations explicit."
+              title="活动表现"
+              description="把活动结果和归因限制同时说明白，避免看起来像后台自己编出了完整效果。"
             >
               {!promotionsRoiAvailable || promotionsAttributionModel ? (
                 <div className="mb-5 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
@@ -665,11 +665,11 @@ export default function AdminRevenuePage() {
                 <table className="w-full text-sm">
                   <AdminTableHeader>
                     <tr>
-                      <th className="px-4 py-4">Promotion</th>
-                      <th className="px-4 py-4">Orders</th>
-                      <th className="px-4 py-4">Revenue</th>
+                      <th className="px-4 py-4">活动</th>
+                      <th className="px-4 py-4">订单数</th>
+                      <th className="px-4 py-4">收入</th>
                       <th className="px-4 py-4">ROI</th>
-                      <th className="px-4 py-4">Status</th>
+                      <th className="px-4 py-4">状态</th>
                     </tr>
                   </AdminTableHeader>
                   <tbody>
@@ -681,7 +681,7 @@ export default function AdminRevenuePage() {
                         <td className="px-4 py-4 text-slate-700">{formatPercentage(item.roi)}</td>
                         <td className="px-4 py-4">
                           <AdminBadge tone={item.active ? 'success' : 'default'}>
-                            {item.active ? 'Active' : 'Inactive'}
+                            {item.active ? '进行中' : '已停用'}
                           </AdminBadge>
                         </td>
                       </AdminTableRow>

@@ -54,13 +54,13 @@ export default function BulkActionsToolbar({
           </div>
         ) : null}
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(47,88,198,0.08)] text-sm font-semibold text-[var(--gush-accent,#2f58c6)]">
               {selectedCount}
             </div>
             <span className="text-sm font-medium text-slate-700">
-              已选 {selectedCount} 项
+              已选择 {selectedCount} 项
             </span>
           </div>
 
@@ -89,17 +89,6 @@ export default function BulkActionsToolbar({
 
             <button
               type="button"
-              onClick={() => wrapOperation(onDelete, "delete")}
-              disabled={isProcessing}
-              title="删除已选作品"
-              className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Trash2 size={14} />
-              <span>删除</span>
-            </button>
-
-            <button
-              type="button"
               onClick={onCancel}
               disabled={isProcessing}
               title="清空选择"
@@ -107,6 +96,19 @@ export default function BulkActionsToolbar({
             >
               <X size={14} />
               <span>清空</span>
+            </button>
+
+            <div className="hidden h-6 w-px bg-black/8 md:block" />
+
+            <button
+              type="button"
+              onClick={() => wrapOperation(onDelete, "delete")}
+              disabled={isProcessing}
+              title="删除已选作品"
+              className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Trash2 size={14} />
+              <span>删除</span>
             </button>
           </div>
         </div>

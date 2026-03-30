@@ -365,48 +365,53 @@ export default function AdminSeriesDetailPage() {
       title={series.title || '作品详情'}
       subtitle="先处理读者真正会看到的作品身份信息：标题、署名、发布状态和封面。"
       actions={
-        <>
-          <Button type="button" variant="outline" onClick={() => router.push('/admin/series')}>
-            <ArrowLeft className="size-4" />
-            返回作品列表
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push(`/admin/series/${seriesId}/episodes`)}
-          >
-            <BookOpen className="size-4" />
-            章节管理
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => window.open(`/series/${seriesId}`, '_blank', 'noopener,noreferrer')}
-          >
-            <ArrowUpRight className="size-4" />
-            查看前台页
-          </Button>
-          {isEditing ? (
-            <>
-              <Button type="button" variant="outline" onClick={handleCancelEditing}>
-                取消
-              </Button>
-              <Button
-                type="button"
-                onClick={handleSave}
-                disabled={!overallDirty || saveMutation.isPending}
-              >
-                <Save className="size-4" />
-                {saveMutation.isPending ? '保存中...' : '保存更改'}
-              </Button>
-            </>
-          ) : (
-            <Button type="button" onClick={handleStartEditing}>
-              <PencilLine className="size-4" />
-              编辑详情
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-black/8 bg-white/78 p-1.5">
+            <Button type="button" variant="ghost" onClick={() => router.push('/admin/series')}>
+              <ArrowLeft className="size-4" />
+              返回作品列表
             </Button>
-          )}
-        </>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => router.push(`/admin/series/${seriesId}/episodes`)}
+            >
+              <BookOpen className="size-4" />
+              章节管理
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => window.open(`/series/${seriesId}`, '_blank', 'noopener,noreferrer')}
+            >
+              <ArrowUpRight className="size-4" />
+              查看前台页
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-black/8 bg-white/88 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+            {isEditing ? (
+              <>
+                <Button type="button" variant="secondary" onClick={handleCancelEditing}>
+                  取消
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={!overallDirty || saveMutation.isPending}
+                >
+                  <Save className="size-4" />
+                  {saveMutation.isPending ? '保存中...' : '保存更改'}
+                </Button>
+              </>
+            ) : (
+              <Button type="button" onClick={handleStartEditing}>
+                <PencilLine className="size-4" />
+                编辑详情
+              </Button>
+            )}
+          </div>
+        </div>
       }
     >
       <div className="space-y-6">

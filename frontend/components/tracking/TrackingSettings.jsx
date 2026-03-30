@@ -1,17 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  AdminBadge,
+  AdminFormField,
+  AdminPageSection,
+  adminInputClassName,
+  adminTextareaClassName,
+} from "@/components/admin/common/AdminWorkspacePrimitives";
 import { adminGet as apiGet, adminPost as apiPost } from "../../lib/adminApiClient";
 
 const TRACKING_GROUPS = [
   {
     id: "facebook",
-    title: "Facebook Pixel",
-    desc: "用于追踪 Facebook 广告转化和归因数据。",
+    title: "Facebook 像素",
+    desc: "用于维护 Facebook 广告归因需要的像素标识、访问令牌和页面注入脚本。",
     fields: [
       {
         key: "pixelId",
-        label: "Pixel ID",
+        label: "像素 ID",
         legacyName: "Pixel ID",
         placeholder: "例如：1234567890",
         inputType: "text",
@@ -20,19 +29,19 @@ const TRACKING_GROUPS = [
         key: "accessToken",
         label: "访问令牌",
         legacyName: "Access Token",
-        placeholder: "用于 CAPI 请求的令牌",
+        placeholder: "用于 CAPI 请求的访问令牌",
         inputType: "text",
       },
       {
         key: "headScript",
-        label: "头部脚本",
+        label: "页面头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* fb pixel */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Body 脚本",
+        label: "页面主体脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -43,7 +52,7 @@ const TRACKING_GROUPS = [
   {
     id: "instagram",
     title: "Instagram",
-    desc: "用于追踪 Instagram 活动转化和受众信号。",
+    desc: "用于维护 Instagram 活动转化归因与受众信号所需的配置。",
     fields: [
       {
         key: "businessId",
@@ -56,19 +65,19 @@ const TRACKING_GROUPS = [
         key: "accessToken",
         label: "访问令牌",
         legacyName: "Access Token",
-        placeholder: "用于 API 请求的令牌",
+        placeholder: "用于 API 请求的访问令牌",
         inputType: "text",
       },
       {
         key: "headScript",
-        label: "头部脚本",
+        label: "页面头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* instagram */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Body 脚本",
+        label: "页面主体脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -78,12 +87,12 @@ const TRACKING_GROUPS = [
   },
   {
     id: "snapchat",
-    title: "Snapchat Pixel",
-    desc: "用于追踪 Snapchat Ads 广告转化。",
+    title: "Snapchat 像素",
+    desc: "用于同步 Snapchat Ads 的像素标识、令牌和转化脚本。",
     fields: [
       {
         key: "pixelId",
-        label: "Pixel ID",
+        label: "像素 ID",
         legacyName: "Pixel ID",
         placeholder: "例如：SNAP-PIXEL-XXXX",
         inputType: "text",
@@ -97,14 +106,14 @@ const TRACKING_GROUPS = [
       },
       {
         key: "headScript",
-        label: "头部脚本",
+        label: "页面头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* snap pixel */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Body 脚本",
+        label: "页面主体脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -115,11 +124,11 @@ const TRACKING_GROUPS = [
   {
     id: "google",
     title: "Google Analytics / Ads",
-    desc: "用于追踪 GA4 与 Google Ads 的转化数据。",
+    desc: "用于维护 GA4、Google Ads 以及相关转化追踪脚本。",
     fields: [
       {
         key: "measurementId",
-        label: "Measurement ID",
+        label: "测量 ID",
         legacyName: "Measurement ID",
         placeholder: "例如：G-XXXXXXX",
         inputType: "text",
@@ -133,14 +142,14 @@ const TRACKING_GROUPS = [
       },
       {
         key: "headScript",
-        label: "头部脚本",
+        label: "页面头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* gtag */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Body 脚本",
+        label: "页面主体脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -150,19 +159,19 @@ const TRACKING_GROUPS = [
   },
   {
     id: "global",
-    title: "全局追踪",
-    desc: "用于配置不依赖具体平台的通用追踪脚本。",
+    title: "全局脚本",
+    desc: "用于配置不依赖具体平台的通用跟踪代码或公共注入片段。",
     fields: [
       {
         key: "headScript",
-        label: "头部脚本",
+        label: "页面头部脚本",
         legacyName: "Script (Head)",
         placeholder: "<script>/* any */</script>",
         inputType: "textarea",
       },
       {
         key: "bodyScript",
-        label: "Body 脚本",
+        label: "页面主体脚本",
         legacyName: "Script (Body)",
         placeholder: "<noscript>...</noscript>",
         inputType: "textarea",
@@ -202,11 +211,12 @@ function normalizeValues(input, defaults) {
     group.fields.forEach((field) => {
       const stableValue = groupValues[field.key];
       const legacyValue = groupValues[field.legacyName];
-      const value = typeof stableValue === "string"
-        ? stableValue
-        : typeof legacyValue === "string"
-          ? legacyValue
-          : "";
+      const value =
+        typeof stableValue === "string"
+          ? stableValue
+          : typeof legacyValue === "string"
+            ? legacyValue
+            : "";
 
       next[group.id][field.key] = value;
     });
@@ -218,6 +228,21 @@ function normalizeValues(input, defaults) {
 function parseTimestamp(value) {
   const parsed = Date.parse(String(value || ""));
   return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function formatSavedAt(value) {
+  const parsed = parseTimestamp(value);
+  if (!parsed) {
+    return "尚未保存";
+  }
+
+  return new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(parsed));
 }
 
 function readLocalTrackingSnapshot(defaults) {
@@ -263,11 +288,26 @@ function writeLocalTrackingSnapshot(values, savedAt, shouldBroadcast = true) {
 }
 
 const STATUS_STYLES = {
-  neutral: "border-neutral-800 bg-neutral-950/60 text-neutral-300",
-  success: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
-  warning: "border-amber-500/30 bg-amber-500/10 text-amber-200",
-  danger: "border-red-500/30 bg-red-500/10 text-red-200",
+  neutral: "border-black/8 bg-[rgba(250,247,241,0.9)] text-slate-700",
+  success: "border-emerald-200 bg-emerald-50/90 text-emerald-700",
+  warning: "border-amber-200 bg-amber-50/90 text-amber-700",
+  danger: "border-red-200 bg-red-50/90 text-red-700",
 };
+
+const STATUS_BADGE_TONE = {
+  neutral: "default",
+  success: "success",
+  warning: "warning",
+  danger: "danger",
+};
+
+function getFieldHelperText(field) {
+  if (field.inputType === "textarea") {
+    return "粘贴提供商要求的脚本片段，保存时保持原样。";
+  }
+
+  return "保持和投放平台上的配置完全一致。";
+}
 
 export default function TrackingSettings() {
   const defaultValues = useMemo(() => createDefaults(), []);
@@ -275,7 +315,7 @@ export default function TrackingSettings() {
   const [savedAt, setSavedAt] = useState("");
   const [status, setStatus] = useState({
     tone: "neutral",
-    message: "正在加载追踪设置...",
+    message: "正在加载跟踪设置...",
   });
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -306,9 +346,10 @@ export default function TrackingSettings() {
         }
 
         if (response.ok && response.data?.config) {
-          const serverUpdatedAt = typeof response.data.config.updatedAt === "string"
-            ? response.data.config.updatedAt
-            : "";
+          const serverUpdatedAt =
+            typeof response.data.config.updatedAt === "string"
+              ? response.data.config.updatedAt
+              : "";
           const serverUpdatedAtMs = parseTimestamp(serverUpdatedAt);
 
           if (localSnapshot?.savedAtMs && localSnapshot.savedAtMs > serverUpdatedAtMs) {
@@ -320,7 +361,7 @@ export default function TrackingSettings() {
             setReadOnly(false);
             setStatus({
               tone: "warning",
-              message: "已使用较新的本地追踪草稿。点击保存后会同步到服务器。",
+              message: "当前正在使用更新日期更晚的本地草稿。点击保存后会把它同步到服务器。",
             });
             setHydrating(false);
             return;
@@ -334,7 +375,7 @@ export default function TrackingSettings() {
           writeLocalTrackingSnapshot(normalizedValues, serverUpdatedAt, false);
           setStatus({
             tone: "success",
-            message: "已从服务器载入追踪设置。",
+            message: "已从服务器载入当前跟踪配置。",
           });
           setHydrating(false);
           return;
@@ -345,7 +386,7 @@ export default function TrackingSettings() {
           setDirty(false);
           setStatus({
             tone: "warning",
-            message: "当前账号没有编辑或同步追踪设置的权限，页面已切为只读。",
+            message: "当前账号没有编辑或同步跟踪设置的权限，页面已切为只读模式。",
           });
           setHydrating(false);
           return;
@@ -353,7 +394,7 @@ export default function TrackingSettings() {
 
         setStatus({
           tone: "danger",
-          message: response.error || "服务器追踪设置加载失败，当前仍可使用本地草稿。",
+          message: response.error || "服务器配置读取失败，当前仍会保留本地草稿。",
         });
       } catch {
         if (!mounted) {
@@ -361,7 +402,7 @@ export default function TrackingSettings() {
         }
         setStatus({
           tone: "danger",
-          message: "服务器追踪设置加载失败，当前仍可使用本地草稿。",
+          message: "服务器配置读取失败，当前仍会保留本地草稿。",
         });
       } finally {
         if (mounted) {
@@ -415,9 +456,10 @@ export default function TrackingSettings() {
 
       if (response.ok && response.data?.config) {
         const normalizedValues = normalizeValues(response.data.config.values, defaultValues);
-        const syncedAt = typeof response.data.config.updatedAt === "string"
-          ? response.data.config.updatedAt
-          : localTimestamp;
+        const syncedAt =
+          typeof response.data.config.updatedAt === "string"
+            ? response.data.config.updatedAt
+            : localTimestamp;
 
         setValues(normalizedValues);
         setSavedAt(syncedAt);
@@ -454,91 +496,147 @@ export default function TrackingSettings() {
     }
   };
 
+  const syncStateLabel = readOnly ? "只读模式" : dirty ? "待同步" : "已同步";
+  const syncStateDetail = readOnly
+    ? "当前账号只能查看配置，不能提交到服务器。"
+    : dirty
+      ? "页面里还有未同步到服务器的变更。"
+      : "本地草稿和服务器配置目前保持一致。";
+  const localModeLabel = hydrating
+    ? "正在比对版本"
+    : dirty
+      ? "本地草稿优先"
+      : "服务器版本优先";
+
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-neutral-900 bg-neutral-900/50 p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <h1 className="text-2xl font-semibold">追踪设置</h1>
-            <p className="mt-2 text-sm text-neutral-400">
-              在这里配置各平台脚本、API 令牌和 Pixel 标识。点击统一保存后，会先把当前草稿保存到本地，再在有权限时同步到后端。
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2 text-xs">
-              <span className="rounded-full border border-neutral-800 px-3 py-1 text-neutral-300">
-                {readOnly ? "只读模式" : dirty ? "有未同步修改" : "草稿已同步"}
-              </span>
-              <span className="rounded-full border border-neutral-800 px-3 py-1 text-neutral-400">
-                {savedAt ? `最近保存时间：${savedAt}` : "尚未保存"}
-              </span>
-            </div>
+    <div className="space-y-6">
+      <AdminPageSection
+        title="同步状态"
+        description="先把本地草稿、服务器版本和权限状态讲清楚，再决定是否继续调整平台脚本。"
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <AdminBadge tone={STATUS_BADGE_TONE[status.tone] || "default"}>
+              {syncStateLabel}
+            </AdminBadge>
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={hydrating || saving || readOnly || !dirty}
+            >
+              {saving ? "正在保存全部修改..." : "保存全部修改"}
+            </Button>
           </div>
-
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={hydrating || saving || readOnly || !dirty}
-            className="rounded-full border border-neutral-700 px-5 py-3 text-sm font-semibold text-white transition hover:border-emerald-300 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saving ? "正在保存全部修改..." : "保存全部修改"}
-          </button>
-        </div>
-
-        <div
-          className={`mt-5 rounded-2xl border px-4 py-3 text-sm ${STATUS_STYLES[status.tone] || STATUS_STYLES.neutral}`}
-        >
-          {status.message}
-        </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2">
-        {TRACKING_GROUPS.map((group) => (
+        }
+      >
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
           <div
-            key={group.id}
-            className="space-y-4 rounded-2xl border border-neutral-900 bg-neutral-900/40 p-5"
+            className={`rounded-[24px] border px-4 py-4 text-sm leading-6 ${STATUS_STYLES[status.tone] || STATUS_STYLES.neutral}`}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold text-white">{group.title}</h2>
-                <p className="mt-1 text-xs leading-6 text-neutral-400">{group.desc}</p>
-              </div>
-              <span className="rounded-full border border-neutral-800 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-                {group.fields.length} 个字段
-              </span>
+            <p className="text-sm font-semibold text-current">当前状态</p>
+            <p className="mt-2">{status.message}</p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-[24px] border border-black/8 bg-white/78 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                最近保存
+              </p>
+              <p className="mt-3 text-base font-semibold text-slate-950">{formatSavedAt(savedAt)}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                本地草稿和服务器同步成功时都会更新这个时间。
+              </p>
             </div>
 
-            <div className="space-y-3">
-              {group.fields.map((field) => (
-                <div key={field.key} className="space-y-1">
-                  <label className="text-xs text-neutral-500">{field.label}</label>
-                  {field.inputType === "textarea" ? (
-                    <textarea
-                      rows={3}
-                      placeholder={field.placeholder}
-                      value={values[group.id]?.[field.key] || ""}
-                      onChange={(event) => handleChange(group.id, field.key, event.target.value)}
-                      disabled={readOnly || hydrating}
-                      className="w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-2 text-xs text-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      placeholder={field.placeholder}
-                      value={values[group.id]?.[field.key] || ""}
-                      onChange={(event) => handleChange(group.id, field.key, event.target.value)}
-                      disabled={readOnly || hydrating}
-                      className="w-full rounded-full border border-neutral-800 bg-neutral-950 px-4 py-2 text-xs text-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
-                    />
-                  )}
-                </div>
-              ))}
+            <div className="rounded-[24px] border border-black/8 bg-white/78 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                版本来源
+              </p>
+              <p className="mt-3 text-base font-semibold text-slate-950">{localModeLabel}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                页面会优先保留更新时间更晚的版本，避免把新草稿被旧配置覆盖。
+              </p>
             </div>
 
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-[10px] text-neutral-400">
-              {group.sample}
+            <div className="rounded-[24px] border border-black/8 bg-white/78 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] sm:col-span-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                当前模式
+              </p>
+              <p className="mt-3 text-base font-semibold text-slate-950">{syncStateLabel}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{syncStateDetail}</p>
             </div>
           </div>
-        ))}
-      </section>
+        </div>
+      </AdminPageSection>
+
+      <AdminPageSection
+        title="平台配置"
+        description="每个平台都按同一套节奏维护：先填标识，再补令牌，最后放脚本，让配置页面保持整洁、可读、可回扫。"
+      >
+        <div className="grid gap-4 xl:grid-cols-2">
+          {TRACKING_GROUPS.map((group) => (
+            <section
+              key={group.id}
+              className="rounded-[26px] border border-black/8 bg-white/82 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold tracking-tight text-slate-950">{group.title}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{group.desc}</p>
+                </div>
+                <AdminBadge tone="default">{group.fields.length} 项</AdminBadge>
+              </div>
+
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                {group.fields.map((field) => {
+                  const isTextarea = field.inputType === "textarea";
+
+                  return (
+                    <AdminFormField
+                      key={field.key}
+                      label={field.label}
+                      helperText={getFieldHelperText(field)}
+                      className={isTextarea ? "sm:col-span-2" : ""}
+                    >
+                      {isTextarea ? (
+                        <textarea
+                          rows={4}
+                          placeholder={field.placeholder}
+                          value={values[group.id]?.[field.key] || ""}
+                          onChange={(event) =>
+                            handleChange(group.id, field.key, event.target.value)
+                          }
+                          disabled={readOnly || hydrating}
+                          className={adminTextareaClassName}
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          placeholder={field.placeholder}
+                          value={values[group.id]?.[field.key] || ""}
+                          onChange={(event) =>
+                            handleChange(group.id, field.key, event.target.value)
+                          }
+                          disabled={readOnly || hydrating}
+                          className={adminInputClassName}
+                        />
+                      )}
+                    </AdminFormField>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  示例片段
+                </p>
+                <code className="mt-3 block break-all text-xs leading-6 text-slate-600">
+                  {group.sample}
+                </code>
+              </div>
+            </section>
+          ))}
+        </div>
+      </AdminPageSection>
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Button } from "@/components/ui/button";
+
 export function AdminSelectionBar({
   selectedCount,
   children,
@@ -13,20 +15,23 @@ export function AdminSelectionBar({
 
   return (
     <div
-      className={`mb-6 flex flex-col gap-3 rounded-[24px] border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)] p-4 shadow-[var(--gush-shadow-soft)] sm:flex-row sm:items-center sm:justify-between ${className}`.trim()}
+      className={`mb-6 flex flex-col gap-3 rounded-[24px] border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)] p-4 shadow-[var(--gush-shadow-soft)] lg:flex-row lg:items-center lg:justify-between ${className}`.trim()}
     >
-      <span className="text-sm font-medium text-slate-700">
-        已选择 {selectedCount} 项
-      </span>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-sm font-semibold text-[var(--gush-accent,#2f58c6)] shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+          {selectedCount}
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-slate-900">已选择 {selectedCount} 项</p>
+          <p className="text-xs text-slate-500">批量操作会按当前选择立即生效。</p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
         {children}
-        <button
-          type="button"
-          onClick={onClear}
-          className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"
-        >
+        <Button type="button" variant="ghost" onClick={onClear}>
           {clearLabel}
-        </button>
+        </Button>
       </div>
     </div>
   );

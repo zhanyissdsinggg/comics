@@ -235,7 +235,7 @@ export default function AdminUsersPage() {
           <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
             <Button
               type="button"
-              variant="destructive"
+              variant="secondary"
               onClick={() => bulkBlockMutation.mutate(selectedIds)}
               disabled={selectedIds.length === 0 || bulkBlockMutation.isPending}
             >
@@ -351,13 +351,13 @@ export default function AdminUsersPage() {
         </AdminPageSection>
 
         <AdminPageSection
-          title="这个页面负责什么"
+          title="这个页面要保持什么样子"
           description="用户后台就回答三件事：这是谁、能不能正常使用、钱包状态有没有需要处理的地方。"
           accent="amber"
         >
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
-              <p className="text-sm font-semibold text-slate-950">Status first</p>
+              <p className="text-sm font-semibold text-slate-950">先看账号状态</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 封禁和恢复按钮保持可见，但不过度抢戏，让处理动作不至于压过账号信息本身。
               </p>
@@ -369,7 +369,7 @@ export default function AdminUsersPage() {
               </p>
             </div>
             <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
-              <p className="text-sm font-semibold text-slate-950">Bulk when helpful</p>
+              <p className="text-sm font-semibold text-slate-950">只在真省事时批量处理</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 批量操作只在选中后出现，默认页面先保持安静、清楚、好扫一眼。
               </p>
