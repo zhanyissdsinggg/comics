@@ -9,7 +9,7 @@ import CommerceSuccessBanner from "../../components/common/CommerceSuccessBanner
 import StorefrontPathwaysGrid from "../../components/common/StorefrontPathwaysGrid";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
-import { formatUSCurrency } from "../../lib/localization";
+import { formatUSDisplayCurrency } from "../../lib/localization";
 import { useAuthStore } from "../../store/useAuthStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import {
@@ -21,11 +21,7 @@ import { buildSupportPath } from "../../lib/supportRouting";
 
 function formatOrderAmount(amount, currency) {
   const numericAmount = Number(amount || 0);
-  const normalizedCurrency = String(currency || "USD").toUpperCase();
-  if (normalizedCurrency === "USD") {
-    return formatUSCurrency(numericAmount);
-  }
-  return `${normalizedCurrency} ${numericAmount.toFixed(2)}`;
+  return formatUSDisplayCurrency(numericAmount, currency);
 }
 
 function formatOrderDate(value) {

@@ -13,6 +13,7 @@ import {
 import { getPlanCatalog } from "../../../../common/config/plans";
 import { listTopupPackages } from "../../../../common/config/topup";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
+import { normalizeUsStorefrontCurrencyCode } from "../../../../common/utils/currency";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { CreateTopupDto, UpdateTopupDto } from "../dtos/admin-billing.dto";
 
@@ -61,7 +62,7 @@ export class AdminBillingController {
       paidPts: Number(body.paidPts || 0),
       bonusPts: Number(body.bonusPts || 0),
       price: Number(body.price || 0),
-      currency: body.currency || "USD",
+      currency: normalizeUsStorefrontCurrencyCode(body.currency),
       active: body.active !== false,
       label: body.label || "",
       tags: Array.isArray(body.tags) ? body.tags : [],
@@ -88,7 +89,7 @@ export class AdminBillingController {
         paidPts: body.paidPts !== undefined ? Number(body.paidPts) : undefined,
         bonusPts: body.bonusPts !== undefined ? Number(body.bonusPts) : undefined,
         price: body.price !== undefined ? Number(body.price) : undefined,
-        currency: body.currency || undefined,
+        currency: body.currency !== undefined ? normalizeUsStorefrontCurrencyCode(body.currency) : undefined,
         active: body.active !== undefined ? Boolean(body.active) : undefined,
         label: body.label || undefined,
         tags: Array.isArray(body.tags) ? body.tags : undefined,

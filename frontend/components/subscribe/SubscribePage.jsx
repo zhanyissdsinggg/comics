@@ -23,7 +23,7 @@ import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 import { buildSupportPath } from "../../lib/supportRouting";
 import { useAuthStore } from "../../store/useAuthStore";
-import { formatUSCurrency, formatUSDate } from "../../lib/localization";
+import { formatUSDate, formatUSDisplayCurrency } from "../../lib/localization";
 import { resolvePublicCommerceMode } from "../../lib/storefrontBillingState";
 
 function openAuthPrompt() {
@@ -59,17 +59,12 @@ const PLAN_FIT_GUIDE = {
 
 function formatPlanPrice(amount, currency = "USD") {
   const numericAmount = Number(amount);
-  const normalizedCurrency = String(currency || "USD").toUpperCase();
 
   if (!Number.isFinite(numericAmount)) {
     return "";
   }
 
-  if (normalizedCurrency === "USD") {
-    return formatUSCurrency(numericAmount);
-  }
-
-  return `${normalizedCurrency} ${numericAmount.toFixed(2)}`;
+  return formatUSDisplayCurrency(numericAmount, currency);
 }
 
 export default function SubscribePage({

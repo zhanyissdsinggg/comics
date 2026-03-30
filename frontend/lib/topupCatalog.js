@@ -1,4 +1,5 @@
 import { apiGet } from "./apiClient";
+import { normalizeUSDisplayCurrency } from "./localization";
 
 let catalogPromise = null;
 let cachedCatalog = null;
@@ -19,6 +20,7 @@ function normalizePackage(item) {
     ...item,
     packageId,
     price,
+    currency: normalizeUSDisplayCurrency(item.currency),
   };
 }
 

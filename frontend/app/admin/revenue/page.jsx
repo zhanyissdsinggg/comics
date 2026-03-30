@@ -19,6 +19,7 @@ import {
   adminInputClassName,
 } from '@/components/admin/common/AdminWorkspacePrimitives';
 import { adminFetchJson } from '@/lib/adminApiClient';
+import { normalizeUSDisplayCurrency } from '@/lib/localization';
 
 const LEGACY_REVENUE_CACHE_TTL_MS = 60_000;
 const EMPTY_MESSAGE = 'No revenue data is available for this range.';
@@ -127,7 +128,7 @@ function toDateInputValue(value) {
 
 function formatCurrency(value, currency = 'USD') {
   const amount = Number(value || 0);
-  const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
+  const normalizedCurrency = normalizeUSDisplayCurrency(currency);
 
   try {
     return new Intl.NumberFormat('zh-CN', {

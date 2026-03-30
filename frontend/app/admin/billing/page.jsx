@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { apiGet } from '@/lib/apiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
+import { normalizeUSDisplayCurrency } from '@/lib/localization';
 
 const searchFields = [
   { field: 'id', type: 'string' },
@@ -70,7 +71,7 @@ function formatDate(value) {
 
 function formatCurrency(value, currency = 'USD') {
   const amount = toNumber(value);
-  const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
+  const normalizedCurrency = normalizeUSDisplayCurrency(currency);
 
   try {
     return new Intl.NumberFormat('zh-CN', {

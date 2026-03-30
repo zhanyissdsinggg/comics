@@ -18,6 +18,7 @@ import { logger } from "../../../../common/logger/winston.init";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { getIdempotencyRecord, setIdempotencyRecord } from "../../../../common/storage/limits";
+import { normalizeUsStorefrontCurrencyCode } from "../../../../common/utils/currency";
 import { isDemoBillingEnabled } from "../../../../common/utils/billing-mode";
 import { ORDER_STATUS } from "../../../../common/utils/order-status";
 import {
@@ -60,6 +61,14 @@ function resolveOrderId(order: RawOrderRow): string {
   return "";
 }
 
+function normalizeOrderRecord<T extends Record<string, unknown>>(order: T): T & { currency: string; orderId: string } {
+  return {
+    ...order,
+    currency: normalizeUsStorefrontCurrencyCode(order?.currency),
+    orderId: resolveOrderId(order),
+  };
+}
+
 function readIdempotencyKey(body: CreateOrderDto, req: Request): string | null {
   const headerValue = req.headers["idempotency-key"] || req.headers["x-idempotency-key"];
   const rawValue = body?.idempotencyKey || headerValue;
@@ -100,10 +109,7 @@ export class AdminOrdersController {
       ]);
 
       return buildPaginationResult(
-        orders.map((order) => ({
-          ...order,
-          orderId: order.id,
-        })),
+        orders.map((order) => normalizeOrderRecord(order)),
         total,
         page,
         pageSize,
@@ -118,10 +124,7 @@ export class AdminOrdersController {
         this.prisma.$queryRaw<Array<{ count: number | bigint | string }>>`SELECT COUNT(*)::int AS count FROM "orders"`,
       ]);
       const total = Number(totalRows?.[0]?.count || 0);
-      const normalized = rawOrders.map((order) => ({
-        ...order,
-        orderId: resolveOrderId(order),
-      }));
+      const normalized = rawOrders.map((order) => normalizeOrderRecord(order));
       return buildPaginationResult(normalized, total, page, pageSize);
     }
   }
@@ -239,7 +242,7 @@ export class AdminOrdersController {
 
     return {
       ok: true,
-      order: { ...next.nextOrder, orderId: next.nextOrder.id },
+      order: normalizeOrderRecord(next.nextOrder),
       wallet: next.nextWallet,
     };
   }

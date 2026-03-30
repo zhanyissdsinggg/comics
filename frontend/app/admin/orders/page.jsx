@@ -21,6 +21,7 @@ import {
   AdminTableRow,
 } from '@/components/admin/common/AdminWorkspacePrimitives';
 import { Button } from '@/components/ui/button';
+import { normalizeUSDisplayCurrency } from '@/lib/localization';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
 
@@ -61,7 +62,7 @@ function formatDate(value) {
 
 function formatAmount(amount, currency = 'USD') {
   const numericAmount = Number(amount || 0);
-  const normalizedCurrency = typeof currency === 'string' && currency.trim() ? currency : 'USD';
+  const normalizedCurrency = normalizeUSDisplayCurrency(currency);
 
   try {
     return new Intl.NumberFormat('zh-CN', {

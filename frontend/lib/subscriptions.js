@@ -1,3 +1,5 @@
+import { normalizeUSDisplayCurrency } from "./localization";
+
 export const SUBSCRIPTION_PLANS = {
   basic: {
     id: "basic",
@@ -33,14 +35,33 @@ export const SUBSCRIPTION_PLANS = {
 
 let dynamicCatalog = null;
 
-export function setPlanCatalog(plans) {
+function normalizePlanCatalog(plans) {
   if (!plans || typeof plans !== "object") {
+    return null;
+  }
+
+  return Object.entries(plans).reduce((catalog, [planId, plan]) => {
+    if (!plan || typeof plan !== "object") {
+      return catalog;
+    }
+
+    catalog[planId] = {
+      ...plan,
+      currency: normalizeUSDisplayCurrency(plan.currency),
+    };
+    return catalog;
+  }, {});
+}
+
+export function setPlanCatalog(plans) {
+  const normalizedPlans = normalizePlanCatalog(plans);
+  if (!normalizedPlans) {
     return;
   }
-  dynamicCatalog = plans;
+  dynamicCatalog = normalizedPlans;
   if (typeof window !== "undefined") {
     try {
-      window.localStorage.setItem("mn_plan_catalog", JSON.stringify(plans));
+      window.localStorage.setItem("mn_plan_catalog", JSON.stringify(normalizedPlans));
     } catch (err) {
       // ignore storage errors
     }
@@ -56,8 +77,9 @@ export function getPlanCatalog() {
       const raw = window.localStorage.getItem("mn_plan_catalog");
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === "object") {
-          dynamicCatalog = parsed;
+        const normalizedPlans = normalizePlanCatalog(parsed);
+        if (normalizedPlans) {
+          dynamicCatalog = normalizedPlans;
           return dynamicCatalog;
         }
       }

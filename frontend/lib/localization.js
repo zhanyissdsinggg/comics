@@ -6,6 +6,11 @@ export const US_LOCALE = 'en-US';
 export const US_TIMEZONE = 'America/New_York';
 export const US_CURRENCY = 'USD';
 
+export function normalizeUSDisplayCurrency(currency) {
+  const normalizedCurrency = String(currency || US_CURRENCY).trim().toUpperCase();
+  return normalizedCurrency === US_CURRENCY ? normalizedCurrency : US_CURRENCY;
+}
+
 export function formatUSDate(date, options = {}) {
   if (!date) {
     return '';
@@ -117,6 +122,20 @@ export function formatUSCurrency(amount, options = {}) {
   return new Intl.NumberFormat(US_LOCALE, {
     style: 'currency',
     currency: US_CURRENCY,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    ...options,
+  }).format(amount);
+}
+
+export function formatUSDisplayCurrency(amount, currency = US_CURRENCY, options = {}) {
+  if (amount === null || amount === undefined || Number.isNaN(Number(amount))) {
+    return '$0.00';
+  }
+
+  return new Intl.NumberFormat(US_LOCALE, {
+    style: 'currency',
+    currency: normalizeUSDisplayCurrency(currency),
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
     ...options,

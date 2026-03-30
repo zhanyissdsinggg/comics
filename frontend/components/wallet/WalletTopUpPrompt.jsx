@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Gift, Sparkles, Wallet, X, Zap } from "lucide-react";
-import { formatUSCurrency, formatUSNumber } from "../../lib/localization";
+import { formatUSDisplayCurrency, formatUSNumber } from "../../lib/localization";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 import NetworkFallback from "../common/NetworkFallback";
 
@@ -30,14 +30,10 @@ function getPackageTitle(pkg) {
 
 function formatPackagePrice(pkg) {
   const price = Number(pkg?.price);
-  const currency = String(pkg?.currency || "USD").toUpperCase();
   if (!Number.isFinite(price) || price <= 0) {
     return "";
   }
-  if (currency === "USD") {
-    return formatUSCurrency(price);
-  }
-  return `${currency} ${price.toFixed(2)}`;
+  return formatUSDisplayCurrency(price, pkg?.currency);
 }
 
 const WalletTopUpPrompt = memo(function WalletTopUpPrompt({

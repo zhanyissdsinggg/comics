@@ -42,6 +42,7 @@ temp/
 *.tmp
 .tmp_*
 .tmp-*
+check-*.png
 .audit-*.json
 .outdated-*.json
 .lighthouse-*.json

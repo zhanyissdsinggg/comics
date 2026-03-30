@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { logger } from "../../common/logger/winston.init";
+import { normalizeUsStorefrontCurrencyCode } from "../../common/utils/currency";
 import { ORDER_STATUS } from "../../common/utils/order-status";
 
 type RawOrderRow = {
@@ -48,7 +49,7 @@ function normalizeRawOrder(order: RawOrderRow) {
     userId: String(order.userId || ""),
     packageId: String(order.packageId || ""),
     amount: toNumber(order.amount),
-    currency: String(order.currency || ""),
+    currency: normalizeUsStorefrontCurrencyCode(order.currency),
     status: String(order.status || ""),
     priceSnapshot: toNumber(order.priceSnapshot),
     idempotencyKey: order.idempotencyKey ? String(order.idempotencyKey) : null,

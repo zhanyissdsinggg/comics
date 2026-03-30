@@ -2,6 +2,7 @@ import { Controller, Get, Post, Req, Res } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
 import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../common/utils/auth";
+import { normalizeUsStorefrontCurrencyCode } from "../../common/utils/currency";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 
 @Controller("orders")
@@ -19,6 +20,7 @@ export class OrdersController {
     return {
       orders: orders.map((order: any) => ({
         ...order,
+        currency: normalizeUsStorefrontCurrencyCode(order?.currency),
         orderId: order.id,
       })),
     };
@@ -36,6 +38,7 @@ export class OrdersController {
       updated: result.updated,
       orders: result.orders.map((order: any) => ({
         ...order,
+        currency: normalizeUsStorefrontCurrencyCode(order?.currency),
         orderId: order.id,
       })),
     };

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, LockKeyhole, ShieldCheck, Sparkles, Wallet, X } from "lucide-react";
 import { OFFERS } from "../../lib/offers/catalog";
-import { formatUSCurrency, formatUSNumber } from "../../lib/localization";
+import { formatUSDisplayCurrency, formatUSNumber } from "../../lib/localization";
 import { getRegionConfig } from "../../lib/region/config";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 
@@ -73,7 +73,7 @@ function resolvePackagePriceLabel(pkg, packageId) {
 
   const price = Number(pkg?.price);
   if (Number.isFinite(price) && price > 0) {
-    return formatUSCurrency(price);
+    return formatUSDisplayCurrency(price, pkg?.currency);
   }
 
   return "";

@@ -1,3 +1,5 @@
+import { normalizeUsStorefrontCurrencyCode } from "../utils/currency";
+
 export interface SubscriptionPlanConfig {
   id: string;
   discountPct: number;
@@ -110,7 +112,7 @@ function normalizePlan(input: unknown): SubscriptionPlanConfig | null {
     ttfMultiplier: toNumber(input.ttfMultiplier),
     voucherPts: toNumber(input.voucherPts),
     price: toNumber(input.price),
-    currency: typeof input.currency === "string" && input.currency ? input.currency : "USD",
+    currency: normalizeUsStorefrontCurrencyCode(input.currency),
     active: input.active !== false,
     label: typeof input.label === "string" ? input.label : "",
   };

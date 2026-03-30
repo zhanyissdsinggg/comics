@@ -18,7 +18,7 @@ import { getCookie } from "../../lib/cookies";
 import { apiGet } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
-import { formatUSCurrency, formatUSNumber } from "../../lib/localization";
+import { formatUSDisplayCurrency, formatUSNumber } from "../../lib/localization";
 import {
   buildPathWithAttribution,
   mergePaymentAttribution,
@@ -72,17 +72,12 @@ const PACKAGE_FIT_GUIDE = {
 
 function formatPriceLabel(amount, currency = "USD") {
   const numericAmount = Number(amount);
-  const normalizedCurrency = String(currency || "USD").toUpperCase();
 
   if (!Number.isFinite(numericAmount)) {
     return "";
   }
 
-  if (normalizedCurrency === "USD") {
-    return formatUSCurrency(numericAmount);
-  }
-
-  return `${normalizedCurrency} ${numericAmount.toFixed(2)}`;
+  return formatUSDisplayCurrency(numericAmount, currency);
 }
 
 function scrollToSection(id) {

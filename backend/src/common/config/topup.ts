@@ -1,3 +1,5 @@
+import { normalizeUsStorefrontCurrencyCode } from "../utils/currency";
+
 export interface TopupPackageConfig {
   packageId: string;
   paidPts: number;
@@ -85,7 +87,7 @@ function normalizePackage(input: unknown): TopupPackageConfig | null {
     paidPts: toNumber(input.paidPts),
     bonusPts: toNumber(input.bonusPts),
     price: toNumber(input.price),
-    currency: typeof input.currency === "string" && input.currency ? input.currency : "USD",
+    currency: normalizeUsStorefrontCurrencyCode(input.currency),
     active: input.active !== false,
     label: typeof input.label === "string" ? input.label : "",
     tags: toStringList(input.tags),
