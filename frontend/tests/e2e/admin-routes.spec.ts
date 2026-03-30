@@ -14,51 +14,51 @@ const EMPTY_PAGINATION = {
 const ADMIN_ROUTE_CASES = [
   {
     route: "/admin/users",
-    emptyStatePattern: /No users match this view yet\.|暂无用户|鏆傛棤鐢ㄦ埛/,
+    emptyStatePattern: /No users match this view yet\.|暂无用户|当前视图下还没有匹配的用户。|鏆傛棤鐢ㄦ埛/,
   },
   {
     route: "/admin/support",
-    emptyStatePattern: /No support tickets yet\.|No tickets match this view\.|暂无工单|鏆傛棤宸ュ崟/,
+    emptyStatePattern: /No support tickets yet\.|No tickets match the current filters\.|暂无工单|当前还没有客服工单。|当前筛选条件下没有匹配的工单。|当前视图下还没有匹配的客服工单。|鏆傛棤宸ュ崟/,
   },
   {
     route: "/admin/analytics",
-    emptyStatePattern: /Analytics data is not available yet\.|暂无分析数据|鏆傛棤鍒嗘瀽鏁版嵁/,
+    emptyStatePattern: /当前还没有可用的分析数据。|暂无分析数据|Analytics data is not available yet\./,
   },
   {
     route: "/admin/orders",
-    emptyStatePattern: /No orders match this view yet\.|暂无订单|鏆傛棤璁㈠崟/,
+    emptyStatePattern: /No orders match this view yet\.|暂无订单|当前视图下还没有匹配的订单。|鏆傛棤璁㈠崟/,
   },
   {
     route: "/admin/comments",
-    emptyStatePattern: /No comments match this view yet\.|暂无评论|鏆傛棤璇勮/,
+    emptyStatePattern: /No comments match this view yet\.|暂无评论|当前视图下还没有匹配的评论。|鏆傛棤璇勮/,
   },
   {
     route: "/admin/notifications",
-    emptyStatePattern: /No notifications match this view yet\.|暂无通知|鏆傛棤閫氱煡/,
+    emptyStatePattern: /No notifications match this view yet\.|暂无通知|当前视图下还没有匹配的通知。|鏆傛棤閫氱煡/,
   },
   {
     route: "/admin/promotions",
-    emptyStatePattern: /No promotions match this view yet\.|暂无活动|鏆傛棤娲诲姩/,
+    emptyStatePattern: /No promotions match this view yet\.|暂无活动|当前视图下还没有匹配的活动。|鏆傛棤娲诲姩/,
   },
   {
     route: "/admin/billing",
-    emptyStatePattern: /No top-up packages match this view yet\.|暂无充值套餐|鏆傛棤鍏呭€煎椁?/,
+    emptyStatePattern: /No top-up packages match this view yet\.|暂无充值套餐|当前视图下还没有匹配的充值套餐。|鏆傛棤鍏呭€煎椁?/,
   },
   {
     route: "/admin/marketing",
-    emptyStatePattern: /No campaigns are available for this view\.|暂无活动|鏆傛棤娲诲姩/,
+    emptyStatePattern: /No campaigns are available for this view\.|暂无活动|当前视图下还没有可用的活动。|鏆傛棤娲诲姩/,
   },
   {
     route: "/admin/recommendations",
-    emptyStatePattern: /No recommendation slots exist yet\.|暂无推荐位|鏆傛棤鎺ㄨ崘浣?/,
+    emptyStatePattern: /No recommendation slots exist yet\.|暂无推荐位|当前还没有推荐位。|鏆傛棤鎺ㄨ崘浣?/,
   },
   {
     route: "/admin/logs",
-    emptyStatePattern: /No audit logs were found for this view\.|未找到审计日志|鏈壘鍒板璁℃棩蹇?/,
+    emptyStatePattern: /No audit logs were found for this view\.|未找到审计日志|当前视图下没有审计日志。|鏈壘鍒板璁℃棩蹇?/,
   },
   {
     route: "/admin/revenue",
-    emptyStatePattern: /No revenue data is available for this range\.|暂无收入数据|鏆傛棤鏀跺叆鏁版嵁/,
+    emptyStatePattern: /No revenue data is available for this range\.|暂无收入数据|当前时间范围内还没有收入数据。|鏆傛棤鏀跺叆鏁版嵁/,
   },
 ] as const;
 
@@ -74,17 +74,11 @@ const MERCH_SERIES_BODY = {
       description: "A binge-ready romance thriller built for homepage rotation.",
       coverUrl: "https://cdn.example.com/series-hero-001-cover.jpg",
       bannerUrl: "https://cdn.example.com/series-hero-001-banner.jpg",
-      badge: "HOT",
-      badges: ["HOT", "NEW"],
       genres: ["Romance", "Thriller"],
       episodeCount: 48,
       latestEpisodeId: "episode-48",
       freeEpisodeCount: 4,
       hasFreeEpisodes: true,
-      rating: 4.9,
-      ratingCount: 1680,
-      followers: 24500,
-      views: 102400,
       isPublished: true,
       updatedAt: "2026-03-12T08:00:00.000Z",
     },
@@ -97,17 +91,11 @@ const MERCH_SERIES_BODY = {
       adult: false,
       description: "Fast-start fantasy with strong click appeal.",
       coverUrl: "https://cdn.example.com/series-hero-002-cover.jpg",
-      badge: "NEW",
-      badges: ["NEW"],
       genres: ["Fantasy", "Action"],
       episodeCount: 21,
       latestEpisodeId: "episode-21",
       freeEpisodeCount: 3,
       hasFreeEpisodes: true,
-      rating: 4.7,
-      ratingCount: 920,
-      followers: 9800,
-      views: 35600,
       isPublished: true,
       updatedAt: "2026-03-10T08:00:00.000Z",
     },
@@ -451,8 +439,8 @@ test.describe("Admin route regression", () => {
       recommendationSlotsBody: { slots: [], total: 0 },
       hotKeywordsBody: {
         keywords: [
-          { keyword: "romance", count: 1820, growthLabel: "Today" },
-          { keyword: "fantasy", count: 1210, growthLabel: "Rising" },
+          { keyword: "romance", count: 1820, growthLabel: "今日关注" },
+          { keyword: "fantasy", count: 1210, growthLabel: "热度上升" },
         ],
       },
     });
@@ -461,14 +449,14 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Collections" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "Slot health" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "Hero candidates" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Library return", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Binge-ready", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "首页编排" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "推荐位状态" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "主视觉候选作品" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("继续读这部", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("适合连看", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByRole("heading", { name: "Midnight Signal" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Today", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("button", { name: "Apply recommendation" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("今日关注", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("button", { name: "应用当前建议" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
@@ -484,9 +472,9 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/storefront", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Storefront Audit" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Fix the gaps readers actually feel.", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "Recommended order" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "前台巡检" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("先补读者真的会感觉到的缺口。", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "建议处理顺序" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/storefront", runtimeIssues);
@@ -502,9 +490,9 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/creators", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Creators" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Finish attribution first, then clean naming.", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "Filter the creator directory" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { level: 1, name: "创作者" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("先补齐署名，再收命名。", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "筛选创作者目录" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/creators", runtimeIssues);
@@ -528,7 +516,7 @@ test.describe("Admin route regression", () => {
         total: 1,
       },
       hotKeywordsBody: {
-        keywords: [{ keyword: "romance", count: 1820, growthLabel: "Today" }],
+        keywords: [{ keyword: "romance", count: 1820, growthLabel: "今日关注" }],
       },
     });
     const runtimeIssues = collectRuntimeIssues(page);
@@ -537,19 +525,19 @@ test.describe("Admin route regression", () => {
     expect(response?.ok()).toBeTruthy();
 
     const slotHealthSection = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Slot health" }),
+      has: page.getByRole("heading", { name: "推荐位状态" }),
     });
     const heroSlotCard = slotHealthSection.locator("article").filter({
-      has: page.getByRole("heading", { name: "Homepage hero" }),
+      has: page.getByRole("heading", { name: "首页主视觉" }),
     });
 
-    await expect(heroSlotCard.getByText("Needs sync", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await heroSlotCard.getByRole("button", { name: "Sync to recommendation" }).click();
+    await expect(heroSlotCard.getByText("待同步", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await heroSlotCard.getByRole("button", { name: "同步当前建议" }).click();
 
-    await expect(page.getByText("Homepage hero synced to the current editorial recommendation.", { exact: true })).toBeVisible({
+    await expect(page.getByText("首页主视觉 已同步到当前编排建议。", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(heroSlotCard.getByText("Aligned", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(heroSlotCard.getByText("已对齐", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(heroSlotCard.getByText("Midnight Signal", { exact: true }).first()).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
@@ -600,7 +588,7 @@ test.describe("Admin route regression", () => {
         },
       },
       hotKeywordsBody: {
-        keywords: [{ keyword: "romance", count: 1820, growthLabel: "Today" }],
+        keywords: [{ keyword: "romance", count: 1820, growthLabel: "今日关注" }],
       },
     });
     const runtimeIssues = collectRuntimeIssues(page);
@@ -609,16 +597,16 @@ test.describe("Admin route regression", () => {
     expect(response?.ok()).toBeTruthy();
 
     const performanceSection = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Live slot performance" }),
+      has: page.getByRole("heading", { name: "推荐位表现" }),
     });
 
-    await expect(performanceSection.getByText("Impressions", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(performanceSection.getByText("曝光", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(performanceSection.getByText(/7K|7,000|7000/)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(performanceSection.getByText("2.70%", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(performanceSection.getByText("Current titles: Midnight Signal / Neon Contract", { exact: true })).toBeVisible({
+    await expect(performanceSection.getByText("当前作品：Midnight Signal / Neon Contract", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(performanceSection.getByText("Healthy", { exact: true }).first()).toBeVisible({
+    await expect(performanceSection.getByText("状态稳定", { exact: true }).first()).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
@@ -653,7 +641,7 @@ test.describe("Admin route regression", () => {
         },
       },
       hotKeywordsBody: {
-        keywords: [{ keyword: "romance", count: 1820, growthLabel: "Today" }],
+        keywords: [{ keyword: "romance", count: 1820, growthLabel: "今日关注" }],
       },
     });
     const runtimeIssues = collectRuntimeIssues(page);
@@ -662,13 +650,13 @@ test.describe("Admin route regression", () => {
     expect(response?.ok()).toBeTruthy();
 
     const optimizationSection = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Optimization queue" }),
+      has: page.getByRole("heading", { name: "待优化队列" }),
     });
     const lowCtrCard = optimizationSection.locator("article").filter({
-      hasText: "Click-through is soft",
+      hasText: "点击承接偏弱",
     });
 
-    await expect(lowCtrCard).toContainText("Copy backup IDs", { timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(lowCtrCard).toContainText("复制备选作品 ID", { timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(lowCtrCard).toContainText("Neon Contract", { timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(lowCtrCard).toContainText("1.09%", { timeout: ADMIN_UI_TIMEOUT_MS });
 
@@ -704,8 +692,8 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Search & Discovery" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Loaded only when the rankings tab is opened.", { exact: true })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "搜索与发现" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("只有打开“榜单规则”标签后才会加载。", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     await expect.poll(() => slotsRequests).toBe(1);
@@ -717,6 +705,26 @@ test.describe("Admin route regression", () => {
 
     await page.getByRole("button", { name: /分析|Analytics/ }).click();
     await expect.poll(() => analyticsRequests).toBe(1);
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
+  });
+
+  test("should only offer current ranking strategies when creating a new ranking rule", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminApiMocks(page);
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await page.getByRole("button", { name: /榜单|Rankings/ }).click();
+    await page.getByRole("button", { name: "新建榜单规则" }).click();
+
+    const rankingOptions = page.locator("#ranking-type option");
+    await expect(rankingOptions).toHaveText(["趋势排序", "新作优先"]);
+    await expect(page.getByText("旧评分（兼容）", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("旧评分人数（兼容）", { exact: true })).toHaveCount(0);
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
@@ -769,7 +777,7 @@ test.describe("Admin route regression", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: "New slot" }).click();
+    await page.getByRole("button", { name: "新建推荐位" }).click();
 
     await expect(page.locator("#slot-preset")).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.locator("#slot-token")).toHaveValue("library-return");
@@ -814,7 +822,7 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/logs", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Audit logs" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "审计日志" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await page.locator("select").nth(1).selectOption("operator-fallback");
 
     const rows = page.locator("tbody tr");
@@ -865,10 +873,10 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin/support", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { level: 1, name: "Support" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { level: 1, name: "客服" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("reader@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("I was charged twice and need a refund update.", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.locator("tbody span").filter({ hasText: /^Open$/ }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.locator("tbody span").filter({ hasText: /^(Open|待处理)$/ }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/support", runtimeIssues);

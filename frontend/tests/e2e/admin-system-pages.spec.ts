@@ -59,7 +59,7 @@ test.describe("Admin system page regressions", () => {
     await expect(page.getByRole("heading", { name: /后台访问|Admin access/ })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("heading", { name: /指标口径|Metric notes/ })).toBeVisible({
+    await expect(page.getByRole("heading", { name: /指标说明|Metric notes/ })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     await expect(page.getByText(/HttpOnly/i)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
@@ -129,7 +129,7 @@ test.describe("Admin system page regressions", () => {
     await expect(sendTestButton).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await sendTestButton.click();
 
-    await expect(page.getByText(/邮件设置已保存，并已发送测试邮件。|Email settings saved, then the test email was sent\./)).toBeVisible({
+    await expect(page.getByText(/邮件配置已保存.*测试邮件|Email settings saved.*test email/i)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     expect(savePayloads).toHaveLength(1);
@@ -176,7 +176,7 @@ test.describe("Admin system page regressions", () => {
     await inputs.nth(3).fill("Duplicate United States");
 
     await page.getByRole("button", { name: /保存更改|保存修改|Save changes/ }).click();
-    await expect(page.getByText(/国家区号必须唯一：\+1。|Country calling codes must be unique: \+1\./)).toBeVisible({
+    await expect(page.getByText(/国际区号不能重复：\+1。|Country calling codes must be unique: \+1\./)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     expect(saveRequests).toBe(0);

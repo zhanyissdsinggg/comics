@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,24 +37,24 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created time' },
-  { value: 'rating', label: 'Rating' },
-  { value: 'userId', label: 'Reader ID' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'rating', label: '评分' },
+  { value: 'userId', label: '读者 ID' },
 ];
 
 function getContentPreview(content) {
   const text = String(content || '').replace(/\s+/g, ' ').trim();
-  return text.length > 120 ? `${text.slice(0, 120)}...` : text || 'No comment text';
+  return text.length > 120 ? `${text.slice(0, 120)}...` : text || '暂无评论内容';
 }
 
 function formatDate(value) {
   if (!value) {
-    return 'Not available';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Not available';
+    return '暂无';
   }
 
   return new Intl.DateTimeFormat('zh-CN', {
@@ -66,12 +66,12 @@ function formatDate(value) {
 
 function formatRating(value) {
   if (value === null || value === undefined || value === '') {
-    return 'Not rated';
+    return '未评分';
   }
 
   const rating = Number(value);
   if (!Number.isFinite(rating)) {
-    return 'Not rated';
+    return '未评分';
   }
 
   return `${rating}/5`;
@@ -119,36 +119,36 @@ export default function AdminCommentsPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: 'The selected comments were removed.' });
+      setFeedback({ type: 'success', message: '已删除所选评论。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Could not remove the selected comments: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `删除所选评论失败：${mutationError.message}` });
     },
   });
 
   return (
     <AdminShell
-      title="Comments"
-      subtitle="Review reader feedback in a calmer moderation queue, then remove the items that should no longer stay live."
+      title="评论审核"
+      subtitle="把读者反馈放进一个安静、好读的审核队列里，再处理那些不该继续留在线上的内容。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <AdminMetricCard
-            label="Comments in view"
+            label="当前评论"
             value={String(pagination.total)}
-            detail="The current moderation list after search and sorting."
+            detail="当前搜索和排序条件下的审核列表。"
             tone="accent"
           />
           <AdminMetricCard
-            label="Rated comments"
+            label="含评分评论"
             value={String(ratedCount)}
-            detail="Entries that still include a star score alongside the written feedback."
+            detail="同时包含文字反馈和评分的评论数量。"
           />
           <AdminMetricCard
-            label="Readers in view"
+            label="当前读者数"
             value={String(uniqueReaders)}
-            detail="Unique readers represented in this current queue."
+            detail="当前队列里涉及到的唯一读者数。"
           />
         </div>
 
@@ -158,13 +158,13 @@ export default function AdminCommentsPage() {
         />
 
         <AdminPageSection
-          title="Moderation queue"
-          description="Keep the table readable: who wrote the comment, what it says, and whether it needs action."
+          title="审核队列"
+          description="让表格先回答最关键的事：谁写的、写了什么、现在要不要处理。"
         >
           <AdminListToolbar
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            searchPlaceholder="Search comment ID, reader ID, email, or text"
+            searchPlaceholder="搜索评论 ID、读者 ID、邮箱或正文"
             onOpenFilters={() => setIsSortModalOpen(true)}
             sortOrder={sortOrder}
             onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -178,17 +178,17 @@ export default function AdminCommentsPage() {
               onClick={() => setIsDeleteConfirmOpen(true)}
               disabled={bulkDeleteMutation.isPending}
             >
-              {bulkDeleteMutation.isPending ? 'Removing...' : 'Delete comments'}
+              {bulkDeleteMutation.isPending ? '正在删除...' : '删除评论'}
             </Button>
           </AdminSelectionBar>
 
           <AdminTableShell
             isError={isError}
-            errorMessage={error?.message || 'Comments could not be loaded.'}
+            errorMessage={error?.message || '评论加载失败。'}
             onRetry={refetch}
             isLoading={isLoading}
             hasItems={comments.length > 0}
-            emptyMessage="No comments match this view yet."
+            emptyMessage="当前视图下还没有匹配的评论。"
             pagination={pagination}
             page={page}
             pageSize={pageSize}
@@ -211,13 +211,13 @@ export default function AdminCommentsPage() {
                         clearSelection();
                       }}
                       className="rounded"
-                      aria-label="Select all comments"
+                      aria-label="选择全部评论"
                     />
                   </th>
-                  <th className="px-4 py-3">Comment</th>
-                  <th className="px-4 py-3">Reader</th>
-                  <th className="px-4 py-3">Rating</th>
-                  <th className="px-4 py-3">Submitted</th>
+                  <th className="px-4 py-3">评论</th>
+                  <th className="px-4 py-3">读者</th>
+                  <th className="px-4 py-3">评分</th>
+                  <th className="px-4 py-3">提交时间</th>
                 </tr>
               </AdminTableHeader>
               <tbody>
@@ -229,7 +229,7 @@ export default function AdminCommentsPage() {
                         checked={selectedIdsSet.has(comment.id)}
                         onChange={() => toggleSelect(comment.id)}
                         className="rounded"
-                        aria-label={`Select comment ${comment.id}`}
+                        aria-label={`选择评论 ${comment.id}`}
                       />
                     </td>
                     <td className="max-w-[34rem] px-4 py-4">
@@ -237,7 +237,7 @@ export default function AdminCommentsPage() {
                       <div className="mt-1 text-xs text-slate-500">{comment.id}</div>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="font-medium text-slate-950">{comment.userEmail || comment.userId || 'Unknown reader'}</div>
+                      <div className="font-medium text-slate-950">{comment.userEmail || comment.userId || '未知读者'}</div>
                       {comment.userEmail && comment.userId ? (
                         <div className="mt-1 text-xs text-slate-500">{comment.userId}</div>
                       ) : null}
@@ -259,17 +259,17 @@ export default function AdminCommentsPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="Sort comments"
-          label="Sort by"
-          actionLabel="Apply"
+          title="排序评论"
+          label="排序方式"
+          actionLabel="应用"
         />
 
         <ConfirmDialog
           isOpen={isDeleteConfirmOpen}
-          title="Delete comments"
-          message={`Delete ${selectedIds.length} selected comment${selectedIds.length === 1 ? '' : 's'}?`}
-          confirmText="Delete"
-          cancelText="Cancel"
+          title="删除评论"
+          message={`确定删除所选 ${selectedIds.length} 条评论吗？`}
+          confirmText="删除"
+          cancelText="取消"
           isDangerous={true}
           isLoading={bulkDeleteMutation.isPending}
           onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}
@@ -279,4 +279,3 @@ export default function AdminCommentsPage() {
     </AdminShell>
   );
 }
-

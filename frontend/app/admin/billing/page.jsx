@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,11 +40,11 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created time' },
-  { value: 'price', label: 'Price' },
-  { value: 'points', label: 'Points' },
-  { value: 'name', label: 'Package name' },
-  { value: 'active', label: 'Status' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'price', label: '价格' },
+  { value: 'points', label: '点数' },
+  { value: 'name', label: '套餐名称' },
+  { value: 'active', label: '状态' },
 ];
 
 function toNumber(value) {
@@ -54,12 +54,12 @@ function toNumber(value) {
 
 function formatDate(value) {
   if (!value) {
-    return 'Not available';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Not available';
+    return '暂无';
   }
 
   return new Intl.DateTimeFormat('zh-CN', {
@@ -92,11 +92,11 @@ function formatPoints(value) {
 function getBillingModeLabel(mode) {
   switch (String(mode || '').toLowerCase()) {
     case 'demo':
-      return 'Demo mode';
+      return '演示模式';
     case 'provider':
-      return 'Live provider mode';
+      return '正式支付模式';
     default:
-      return 'Not configured';
+      return '未配置';
   }
 }
 
@@ -169,11 +169,11 @@ export default function AdminBillingPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: 'The selected top-up packages were removed.' });
+      setFeedback({ type: 'success', message: '已删除所选充值套餐。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Could not remove the selected packages: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `删除所选充值套餐失败：${mutationError.message}` });
     },
   });
 
@@ -267,57 +267,57 @@ export default function AdminBillingPage() {
   }, [plans]);
 
   const billingSnapshotItems = [
-    { label: 'Billing mode', value: getBillingModeLabel(billingAvailability?.billingMode) },
-    { label: 'Purchase actions', value: billingAvailability?.purchaseActionsEnabled ? 'Enabled' : 'Preview only' },
-    { label: 'Subscription actions', value: billingAvailability?.subscriptionActionsEnabled ? 'Enabled' : 'Preview only' },
-    { label: 'Refund actions', value: billingAvailability?.refundActionsEnabled ? 'Enabled' : 'Preview only' },
+    { label: '计费模式', value: getBillingModeLabel(billingAvailability?.billingMode) },
+    { label: '购买操作', value: billingAvailability?.purchaseActionsEnabled ? '已启用' : '仅预览' },
+    { label: '订阅操作', value: billingAvailability?.subscriptionActionsEnabled ? '已启用' : '仅预览' },
+    { label: '退款操作', value: billingAvailability?.refundActionsEnabled ? '已启用' : '仅预览' },
   ];
 
   const membershipSnapshotItems = [
     {
-      label: 'Best value pack',
+      label: '最划算套餐',
       value: packageSummary.bestDensity
-        ? `${packageSummary.bestDensity.name} 路 ${packageSummary.bestDensity.value.toFixed(1)} pts/${packageSummary.bestDensity.currency}`
-        : 'Not available',
+        ? `${packageSummary.bestDensity.name} · ${packageSummary.bestDensity.value.toFixed(1)} 点/${packageSummary.bestDensity.currency}`
+        : '暂无',
     },
     {
-      label: 'Largest package',
+      label: '最大面额套餐',
       value: packageSummary.largest
-        ? `${packageSummary.largest.name || packageSummary.largest.id} 路 ${formatPoints(toNumber(packageSummary.largest.points) || toNumber(packageSummary.largest.paidPts) + toNumber(packageSummary.largest.bonusPts))} pts`
-        : 'Not available',
+        ? `${packageSummary.largest.name || packageSummary.largest.id} · ${formatPoints(toNumber(packageSummary.largest.points) || toNumber(packageSummary.largest.paidPts) + toNumber(packageSummary.largest.bonusPts))} 点`
+        : '暂无',
     },
-    { label: 'Highest member discount', value: `${planSummary.maxDiscount}%` },
-    { label: 'Daily free unlocks', value: String(planSummary.maxDailyFree) },
-    { label: 'Monthly voucher points', value: formatPoints(planSummary.maxVoucher) },
+    { label: '最高会员折扣', value: `${planSummary.maxDiscount}%` },
+    { label: '每日免费解锁', value: String(planSummary.maxDailyFree) },
+    { label: '每月代金券点数', value: formatPoints(planSummary.maxVoucher) },
   ];
 
   return (
     <AdminShell
-      title="Billing"
-      subtitle="Keep commerce readable: top-up inventory, membership coverage, and the switches that affect what readers can actually buy."
+      title="充值与会员"
+      subtitle="把充值套餐、会员方案和支付开关收在一个清爽工作区里，先看读者现在到底能买什么。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 xl:grid-cols-4">
           <AdminMetricCard
-            label="Packages in view"
+            label="当前套餐"
             value={String(packageSummary.totalCount)}
-            detail="Top-up packages currently visible in this directory."
+            detail="当前列表里可见的充值套餐数量。"
             tone="accent"
           />
           <AdminMetricCard
-            label="Active packages"
+            label="已启用套餐"
             value={String(packageSummary.activeCount)}
-            detail="Packages still available to readers or operators."
+            detail="仍对读者或运营开放的套餐。"
           />
           <AdminMetricCard
-            label="Highest bonus"
+            label="最高赠送"
             value={formatPoints(packageSummary.highestBonus)}
-            detail="The largest bonus point amount on a single package."
+            detail="单个套餐里赠送点数最高的一档。"
           />
           <AdminMetricCard
-            label="Active memberships"
+            label="已启用会员方案"
             value={String(planSummary.activeCount)}
-            detail="Membership tiers currently marked active."
+            detail="当前仍标记为启用的会员层级。"
           />
         </div>
 
@@ -328,28 +328,28 @@ export default function AdminBillingPage() {
 
         <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <AdminPageSection
-            title="Billing snapshot"
-            description="Show the operating mode and the actions that are actually available before anyone starts changing package inventory."
+            title="支付状态概览"
+            description="先确认当前运行模式和真实可用操作，再去调整套餐和会员设置。"
           >
             <AdminKeyValueList items={billingSnapshotItems} />
           </AdminPageSection>
 
           <AdminPageSection
-            title="Membership snapshot"
-            description="Keep the member value story short: discount, free unlocks, and voucher support."
+            title="会员方案概览"
+            description="用最短的信息看清会员价值：折扣、免费解锁和代金券支持。"
           >
             <AdminKeyValueList items={membershipSnapshotItems} />
           </AdminPageSection>
         </div>
 
         <AdminPageSection
-          title="Top-up packages"
-          description="This list should answer the basics first: what the package is, what readers pay, how many points it yields, and whether it is still active."
+          title="充值套餐"
+          description="先回答最重要的几个问题：套餐是什么、读者付多少钱、可得多少点数、当前是否仍在售。"
         >
           <AdminListToolbar
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            searchPlaceholder="Search package ID, name, or label"
+            searchPlaceholder="搜索套餐 ID、名称或标签"
             onOpenFilters={() => setIsSortModalOpen(true)}
             sortOrder={sortOrder}
             onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -363,17 +363,17 @@ export default function AdminBillingPage() {
               onClick={() => setIsDeleteConfirmOpen(true)}
               disabled={bulkDeleteMutation.isPending}
             >
-              {bulkDeleteMutation.isPending ? 'Removing...' : 'Delete packages'}
+              {bulkDeleteMutation.isPending ? '正在删除...' : '删除套餐'}
             </Button>
           </AdminSelectionBar>
 
           <AdminTableShell
             isError={isError}
-            errorMessage={error?.message || 'Billing packages could not be loaded.'}
+            errorMessage={error?.message || '充值套餐加载失败。'}
             onRetry={refetch}
             isLoading={isLoading}
             hasItems={packages.length > 0}
-            emptyMessage="No top-up packages match this view yet."
+            emptyMessage="当前视图下还没有匹配的充值套餐。"
             pagination={pagination}
             page={page}
             pageSize={pageSize}
@@ -396,14 +396,14 @@ export default function AdminBillingPage() {
                         clearSelection();
                       }}
                       className="rounded"
-                      aria-label="Select all packages"
+                      aria-label="选择全部套餐"
                     />
                   </th>
-                  <th className="px-4 py-3">Package</th>
-                  <th className="px-4 py-3">Price</th>
-                  <th className="px-4 py-3">Points</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Created</th>
+                  <th className="px-4 py-3">套餐</th>
+                  <th className="px-4 py-3">价格</th>
+                  <th className="px-4 py-3">点数</th>
+                  <th className="px-4 py-3">状态</th>
+                  <th className="px-4 py-3">创建时间</th>
                 </tr>
               </AdminTableHeader>
               <tbody>
@@ -419,22 +419,22 @@ export default function AdminBillingPage() {
                           checked={selectedIdsSet.has(pkg.id)}
                           onChange={() => toggleSelect(pkg.id)}
                           className="rounded"
-                          aria-label={`Select package ${pkg.id}`}
+                          aria-label={`选择套餐 ${pkg.id}`}
                         />
                       </td>
                       <td className="px-4 py-4">
-                        <div className="font-medium text-slate-950">{pkg.name || pkg.label || 'Untitled package'}</div>
+                        <div className="font-medium text-slate-950">{pkg.name || pkg.label || '未命名套餐'}</div>
                         <div className="mt-1 text-xs text-slate-500">{pkg.id}</div>
                       </td>
                       <td className="px-4 py-4 text-slate-700">{formatCurrency(pkg.price, pkg.currency)}</td>
                       <td className="px-4 py-4">
-                        <div className="font-medium text-slate-950">{formatPoints(totalPoints)} pts</div>
+                        <div className="font-medium text-slate-950">{formatPoints(totalPoints)} 点</div>
                         <div className="mt-1 text-xs text-slate-500">
-                          Paid {formatPoints(pkg.paidPts || pkg.points || 0)} 路 Bonus {formatPoints(pkg.bonusPts || 0)}
+                          付费 {formatPoints(pkg.paidPts || pkg.points || 0)} 点 · 赠送 {formatPoints(pkg.bonusPts || 0)} 点
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <AdminBadge tone={getStatusTone(isActive)}>{isActive ? 'Active' : 'Paused'}</AdminBadge>
+                        <AdminBadge tone={getStatusTone(isActive)}>{isActive ? '启用中' : '已暂停'}</AdminBadge>
                       </td>
                       <td className="px-4 py-4 text-slate-600">{formatDate(pkg.createdAt)}</td>
                     </AdminTableRow>
@@ -451,17 +451,17 @@ export default function AdminBillingPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="Sort packages"
-          label="Sort by"
-          actionLabel="Apply"
+          title="排序套餐"
+          label="排序方式"
+          actionLabel="应用"
         />
 
         <ConfirmDialog
           isOpen={isDeleteConfirmOpen}
-          title="Delete packages"
-          message={`Delete ${selectedIds.length} selected package${selectedIds.length === 1 ? '' : 's'}?`}
-          confirmText="Delete"
-          cancelText="Cancel"
+          title="删除套餐"
+          message={`确定删除所选 ${selectedIds.length} 个套餐吗？`}
+          confirmText="删除"
+          cancelText="取消"
           isDangerous={true}
           isLoading={bulkDeleteMutation.isPending}
           onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}
@@ -471,4 +471,3 @@ export default function AdminBillingPage() {
     </AdminShell>
   );
 }
-

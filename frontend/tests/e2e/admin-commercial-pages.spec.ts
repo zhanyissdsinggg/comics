@@ -125,10 +125,10 @@ test.describe("Admin commercial page regressions", () => {
     const response = await page.goto("/admin/marketing", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Marketing" })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "营销活动" })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "New campaign" })).toBeVisible({
+    await expect(page.getByRole("button", { name: "新建活动" })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     await expect(page.getByText("Spring comeback", { exact: true })).toBeVisible({
@@ -136,12 +136,12 @@ test.describe("Admin commercial page regressions", () => {
     });
 
     await page.getByRole("button", { name: /总览|Overview/ }).click();
-    await expect(page.getByText("Attributed revenue", { exact: true })).toBeVisible({
+    await expect(page.getByText("归因收入", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: "By segment" }).click();
-    await expect(page.getByText("At-risk readers", { exact: true })).toBeVisible({
+    await page.getByRole("button", { name: /分人群|By segment/ }).click();
+    await expect(page.getByText("流失风险读者", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 

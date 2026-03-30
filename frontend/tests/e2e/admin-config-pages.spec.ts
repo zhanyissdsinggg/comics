@@ -160,7 +160,7 @@ test.describe("Admin config page regressions", () => {
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: /仅失败任务|Failed only/ }).dispatchEvent("click");
+    await page.getByRole("button", { name: /仅看失败任务|仅失败任务|Failed only/ }).dispatchEvent("click");
     await page.getByRole("button", { name: /全部任务|All jobs/ }).dispatchEvent("click");
 
     await page.waitForTimeout(900);

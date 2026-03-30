@@ -30,31 +30,31 @@ const ASSET_FIELDS = [
   {
     field: "siteLogoUrl",
     keyName: "logo",
-    label: "Site logo",
-    helperText: "Use a transparent PNG or SVG so the mark stays clean in the header and footer.",
+    label: "站点 Logo",
+    helperText: "优先使用透明 PNG 或 SVG，让页头和页脚里的品牌标识保持干净。",
     placeholder: "https://.../logo.png",
-    emptyText: "No site logo has been added yet.",
-    buttonLabel: "Upload logo",
+    emptyText: "还没有上传站点 Logo。",
+    buttonLabel: "上传 Logo",
     previewClassName: "h-10 w-auto object-contain",
   },
   {
     field: "faviconUrl",
     keyName: "favicon",
-    label: "Favicon",
-    helperText: "Keep this square and lightweight. A 32x32 or 64x64 file works well.",
+    label: "网站图标",
+    helperText: "尽量保持为轻量方图，32x32 或 64x64 的素材通常就够用。",
     placeholder: "https://.../favicon.png",
-    emptyText: "No favicon has been added yet.",
-    buttonLabel: "Upload favicon",
+    emptyText: "还没有上传网站图标。",
+    buttonLabel: "上传网站图标",
     previewClassName: "h-10 w-10 rounded-[14px] object-cover",
   },
   {
     field: "homeBannerUrl",
     keyName: "banner",
-    label: "Homepage banner",
-    helperText: "Use editorial artwork that still feels calm in the reader home hero.",
+    label: "首页横幅",
+    helperText: "这里更适合克制的编辑向主视觉，不要做成吵闹的促销大图。",
     placeholder: "https://.../banner.jpg",
-    emptyText: "No homepage banner has been added yet.",
-    buttonLabel: "Upload banner",
+    emptyText: "还没有上传首页横幅。",
+    buttonLabel: "上传横幅",
     previewClassName: "h-full max-h-28 w-full rounded-[20px] object-cover",
   },
 ];
@@ -105,7 +105,7 @@ export default function AdminBrandingPage() {
     queryFn: async () => {
       const response = await adminGet("/api/admin/branding");
       if (!response.ok) {
-        throw new Error(response.error || response.message || "Branding settings could not be loaded.");
+        throw new Error(response.error || response.message || "品牌配置加载失败。");
       }
       return toDraft(response.data?.branding);
     },
@@ -121,10 +121,10 @@ export default function AdminBrandingPage() {
   const uploadMutation = useMutation({
     mutationFn: async ({ field, file, keyName }) => {
       if (!file.type.startsWith("image/")) {
-        throw new Error("Upload an image file.");
+        throw new Error("请上传图片文件。");
       }
       if (file.size > MAX_UPLOAD_BYTES) {
-        throw new Error("Images must stay under 10 MB.");
+        throw new Error("图片大小不能超过 10 MB。");
       }
 
       const formData = new FormData();
@@ -132,18 +132,18 @@ export default function AdminBrandingPage() {
 
       const response = await adminUpload("/api/admin/upload/image", formData);
       if (!response.ok || !response.data?.url) {
-        throw new Error(response.error || response.message || "Upload failed.");
+        throw new Error(response.error || response.message || "上传失败。");
       }
 
       return { field, keyName, url: response.data.url };
     },
     onSuccess: (data) => {
       setDraft((current) => ({ ...current, [data.field]: data.url }));
-      const label = ASSET_FIELDS.find((asset) => asset.keyName === data.keyName)?.label || "Asset";
-      setFeedback({ type: "success", message: `${label} uploaded.` });
+      const label = ASSET_FIELDS.find((asset) => asset.keyName === data.keyName)?.label || "素材";
+      setFeedback({ type: "success", message: `${label}已上传。` });
     },
     onError: (error) => {
-      setFeedback({ type: "error", message: error.message || "Upload failed." });
+      setFeedback({ type: "error", message: error.message || "上传失败。" });
     },
   });
 
@@ -151,7 +151,7 @@ export default function AdminBrandingPage() {
     mutationFn: async (payload) => {
       const response = await adminPost("/api/admin/branding", payload);
       if (!response.ok) {
-        throw new Error(response.error || response.message || "Branding settings could not be saved.");
+        throw new Error(response.error || response.message || "品牌配置保存失败。");
       }
 
       return toDraft(response.data?.branding);
@@ -160,10 +160,10 @@ export default function AdminBrandingPage() {
       setDraft(nextDraft);
       setBranding(nextDraft);
       setHasHydratedDraft(true);
-      setFeedback({ type: "success", message: "Branding settings saved." });
+      setFeedback({ type: "success", message: "品牌配置已保存。" });
     },
     onError: (error) => {
-      setFeedback({ type: "error", message: error.message || "Branding settings could not be saved." });
+      setFeedback({ type: "error", message: error.message || "品牌配置保存失败。" });
     },
   });
 
@@ -204,16 +204,16 @@ export default function AdminBrandingPage() {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <AdminPageSection title="Brand assets" description="Wait until admin access is confirmed before editing live brand assets.">
-        <p className="text-sm text-slate-500">Loading branding settings...</p>
+      <AdminPageSection title="品牌素材" description="确认管理员权限后，再编辑线上品牌素材。">
+        <p className="text-sm text-slate-500">正在加载品牌配置...</p>
       </AdminPageSection>
     );
   }
 
   if (!hasHydratedDraft && brandingQuery.isLoading) {
     return (
-      <AdminPageSection title="Brand assets" description="Wait until the saved asset set is hydrated before editing the draft.">
-        <p className="text-sm text-slate-500">Loading branding settings...</p>
+      <AdminPageSection title="品牌素材" description="先把已保存的素材配置加载出来，再继续编辑草稿。">
+        <p className="text-sm text-slate-500">正在加载品牌配置...</p>
       </AdminPageSection>
     );
   }
@@ -221,12 +221,12 @@ export default function AdminBrandingPage() {
   if (!hasHydratedDraft && brandingQuery.isError) {
     return (
       <AdminPageSection
-        title="Brand assets"
-        description="The saved brand configuration could not be loaded, so edits stay locked until the source is available again."
+        title="品牌素材"
+        description="已保存的品牌配置暂时无法读取，在数据恢复前这里会保持只读。"
         action={
           <Button type="button" variant="outline" onClick={() => brandingQuery.refetch()}>
             <RefreshCw className="size-4" />
-            Retry
+            重试
           </Button>
         }
       >
@@ -236,10 +236,10 @@ export default function AdminBrandingPage() {
             message:
               brandingQuery.error instanceof Error
                 ? brandingQuery.error.message
-                : "Branding settings could not be loaded.",
+                : "品牌配置加载失败。",
           }}
           onDismiss={() => undefined}
-          dismissLabel="Close"
+          dismissLabel="关闭"
         />
       </AdminPageSection>
     );
@@ -249,20 +249,20 @@ export default function AdminBrandingPage() {
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-3">
         <AdminMetricCard
-          label="Assets configured"
+          label="已配置素材"
           value={`${configuredAssetCount}/3`}
-          detail="Logo, favicon, and homepage banner stay in one shared brand set."
+          detail="Logo、网站图标和首页横幅统一归在这一套品牌素材里。"
           tone="accent"
         />
         <AdminMetricCard
-          label="Upload limit"
+          label="上传上限"
           value="10 MB"
-          detail="Large artwork is allowed, but the upload guard keeps files practical for review."
+          detail="允许上传大图，但这里仍会限制到便于复核和替换的范围。"
         />
         <AdminMetricCard
-          label="Reader-facing surfaces"
-          value="Header, tabs, home"
-          detail="These assets shape the live storefront, so changes should stay editorial and restrained."
+          label="影响范围"
+          value="页头、标签、首页"
+          detail="这些素材会直接影响前台观感，所以改动要克制、统一、可复核。"
         />
       </div>
 
@@ -272,15 +272,15 @@ export default function AdminBrandingPage() {
       />
 
       <AdminPageSection
-        title="Brand assets"
-        description="Keep the live storefront coherent by editing the shared logo, favicon, and homepage banner in one quiet workspace."
+        title="品牌素材"
+        description="把共享 Logo、网站图标和首页横幅收在一个安静的工作区里统一维护。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge tone={configuredAssetCount === 3 ? "success" : "accent"}>
-              {configuredAssetCount === 3 ? "Ready for review" : "Needs asset coverage"}
+              {configuredAssetCount === 3 ? "可进入复核" : "素材仍待补齐"}
             </AdminBadge>
             <Button type="button" onClick={handleSave} disabled={formBusy}>
-              {saveMutation.isPending ? "Saving..." : "Save branding"}
+              {saveMutation.isPending ? "保存中..." : "保存品牌配置"}
             </Button>
           </div>
         }
@@ -306,7 +306,7 @@ export default function AdminBrandingPage() {
                     <h3 className="text-base font-semibold text-slate-950">{asset.label}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{asset.helperText}</p>
                   </div>
-                  <AdminBadge tone={value ? "success" : "default"}>{value ? "Configured" : "Missing"}</AdminBadge>
+                  <AdminBadge tone={value ? "success" : "default"}>{value ? "已配置" : "待补"}</AdminBadge>
                 </div>
 
                 <div className="mt-5 space-y-3">
@@ -326,7 +326,7 @@ export default function AdminBrandingPage() {
                       disabled={formBusy}
                     >
                       <ImageIcon className="size-4" />
-                      {isUploadingThisAsset ? "Uploading..." : asset.buttonLabel}
+                      {isUploadingThisAsset ? "上传中..." : asset.buttonLabel}
                     </Button>
                     {value ? (
                       <a
@@ -336,7 +336,7 @@ export default function AdminBrandingPage() {
                         className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
                       >
                         <ExternalLink className="size-4" />
-                        Open asset
+                        查看素材
                       </a>
                     ) : null}
                     <input
@@ -363,18 +363,18 @@ export default function AdminBrandingPage() {
       </AdminPageSection>
 
       <AdminPageSection
-        title="Editing notes"
-        description="This workspace changes shared public assets, so it favors simple rules over decorative controls."
+        title="编辑说明"
+        description="这里修改的是共享前台素材，所以规则要简单明确，不要引入花哨控制。"
       >
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-            Save after uploads so the storefront branding provider picks up the new asset set.
+            上传完成后记得保存，让前台品牌配置读取到最新素材。
           </div>
           <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-            Keep artwork neutral and legible. These assets appear beside editorial surfaces, not flashy promos.
+            素材尽量保持中性、清楚、可读，它们会贴着内容区出现，不是活动海报位。
           </div>
           <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-            Use direct asset URLs when needed, but prefer uploads here so operators can review the exact live file.
+            必要时可以直接填素材链接，但更建议在这里上传，方便运营复核线上实际文件。
           </div>
         </div>
       </AdminPageSection>

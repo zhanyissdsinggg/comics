@@ -31,8 +31,9 @@ function normalizeSeries(entry, index) {
   const source = entry && typeof entry === "object" ? entry : {};
   return {
     id: String(source.id || `series-${index + 1}`),
-    title: String(source.title || "Untitled series"),
+    title: String(source.title || "未命名作品"),
     author: String(source.author || ""),
+    creatorCredits: Array.isArray(source.creatorCredits) ? source.creatorCredits.filter(Boolean) : [],
     type: source.type === "novel" ? "novel" : "comic",
     status: String(source.status || "Ongoing"),
     adult: Boolean(source.adult),
@@ -40,17 +41,11 @@ function normalizeSeries(entry, index) {
     coverUrl: String(source.coverUrl || source.coverImage || ""),
     coverTone: String(source.coverTone || "default"),
     bannerUrl: String(source.bannerUrl || ""),
-    badge: String(source.badge || ""),
-    badges: Array.isArray(source.badges) ? source.badges.filter(Boolean) : [],
     genres: Array.isArray(source.genres) ? source.genres.filter(Boolean) : [],
     episodeCount: toNumber(source.episodeCount ?? source?._count?.episodes ?? source.totalEpisodes),
     latestEpisodeId: String(source.latestEpisodeId || ""),
     freeEpisodeCount: toNumber(source.freeEpisodeCount),
     hasFreeEpisodes: Boolean(source.hasFreeEpisodes || toNumber(source.freeEpisodeCount) > 0),
-    rating: toNumber(source.rating),
-    ratingCount: toNumber(source.ratingCount),
-    followers: toNumber(source.followers),
-    views: toNumber(source.views),
     isPublished: source.isPublished !== undefined ? Boolean(source.isPublished) : true,
     updatedAt: source.updatedAt || source.createdAt || null,
   };
@@ -70,12 +65,12 @@ function normalizeSlot(entry, index) {
 
 function formatDateLabel(value) {
   if (!value) {
-    return "No recent update";
+    return "暂无更新";
   }
 
   const parsed = Date.parse(value);
   if (Number.isNaN(parsed)) {
-    return "No recent update";
+    return "暂无更新";
   }
 
   return new Intl.DateTimeFormat("zh-CN", {
@@ -99,18 +94,18 @@ function formatPercentValue(value) {
 function formatSeriesStatusLabel(value) {
   const normalized = String(value || "").trim().toLowerCase();
   if (normalized === "completed") {
-    return "Completed";
+    return "已完结";
   }
   if (normalized === "ongoing") {
-    return "Ongoing";
+    return "连载中";
   }
   if (normalized === "hiatus") {
-    return "Hiatus";
+    return "暂停中";
   }
   if (normalized === "cancelled") {
-    return "Cancelled";
+    return "已停更";
   }
-  return String(value || "Status not set").trim() || "Status not set";
+  return String(value || "状态未设置").trim() || "状态未设置";
 }
 
 function normalizePerformance(entry) {
@@ -147,15 +142,15 @@ function buildPerformanceQuery(windowKey) {
 
 function getPerformanceState(performance) {
   if (performance.totalImpressions <= 0) {
-    return { tone: "rose", label: "No signal yet" };
+    return { tone: "rose", label: "暂无反馈" };
   }
   if (performance.totalConversions > 0 || performance.avgCtr >= 2) {
-    return { tone: "emerald", label: "Healthy" };
+    return { tone: "emerald", label: "状态稳定" };
   }
   if (performance.totalClicks > 0) {
-    return { tone: "amber", label: "Needs attention" };
+    return { tone: "amber", label: "需要跟进" };
   }
-  return { tone: "rose", label: "Weak response" };
+  return { tone: "rose", label: "反馈偏弱" };
 }
 
 function getToneClasses(tone) {
@@ -232,8 +227,8 @@ function EmptyState({ title, description }) {
 function LoadingView() {
   return (
     <AdminShell
-      title="Collections"
-      subtitle="Turn homepage slots into calm editorial placements instead of noisy dashboard widgets."
+      title="首页编排"
+      subtitle="把首页推荐位当成编辑工作区来维护，而不是当成一堆喧闹指标卡。"
     >
       <div className="space-y-6">
         <Skeleton className="h-48 rounded-[32px]" />
@@ -250,9 +245,9 @@ function LoadingView() {
 }
 
 const PERFORMANCE_WINDOWS = [
-  { id: "7d", label: "Last 7 days" },
-  { id: "30d", label: "Last 30 days" },
-  { id: "all", label: "All time" },
+  { id: "7d", label: "近 7 天" },
+  { id: "30d", label: "近 30 天" },
+  { id: "all", label: "全部时间" },
 ];
 
 function dedupeSeriesPool(seriesPool) {
@@ -283,10 +278,10 @@ function getSlotReplacementCandidates(slot, heroCandidates) {
     );
   } else if (slot?.id === "home-breakout") {
     specializedPool = heroSeriesPool.filter((series) => {
-      const badges = [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
-        .filter(Boolean)
-        .map((badge) => String(badge).trim().toUpperCase());
-      return badges.includes("HOT") || badges.includes("NEW");
+      const updatedAt = Date.parse(series?.updatedAt || "");
+      const isRecent = !Number.isNaN(updatedAt) && updatedAt >= Date.now() - 21 * 24 * 60 * 60 * 1000;
+      const episodeCount = toNumber(series?.episodeCount);
+      return isRecent || (episodeCount > 0 && episodeCount <= 24);
     });
   } else {
     specializedPool = heroSeriesPool;
@@ -315,10 +310,10 @@ function buildSlotOptimizationPlan(slot, replacementCandidates) {
     return {
       priority: 100,
       tone: "rose",
-      title: "This slot is still empty",
-      detail: "Fill key homepage positions first so important discovery entry points are not wasted.",
+      title: "推荐位仍未配置",
+      detail: "先把关键首页入口补上，别让真正承接发现流量的位置继续空着。",
       actionType: "apply",
-      actionLabel: "Apply recommendation",
+      actionLabel: "应用当前建议",
       actionIds: Array.isArray(slot?.recommendedIds) ? slot.recommendedIds : [],
       replacementCandidates,
       replacementIds,
@@ -329,10 +324,10 @@ function buildSlotOptimizationPlan(slot, replacementCandidates) {
     return {
       priority: 90,
       tone: "amber",
-      title: "Current setup is off-plan",
-      detail: "Align the slot to the current editorial recommendation before deciding whether the content or the position is the real issue.",
+      title: "当前配置和方案不一致",
+      detail: "先把推荐位对齐到当前编排方案，再判断问题出在内容本身还是入口位置。",
       actionType: "apply",
-      actionLabel: "Sync to recommendation",
+      actionLabel: "同步当前建议",
       actionIds: Array.isArray(slot?.recommendedIds) ? slot.recommendedIds : [],
       replacementCandidates,
       replacementIds,
@@ -343,10 +338,10 @@ function buildSlotOptimizationPlan(slot, replacementCandidates) {
     return {
       priority: 80,
       tone: "amber",
-      title: "The live title still needs setup",
-      detail: `${weakestEntry.series.title} is still missing ${weakestEntry.readiness.topIssues.join(", ")}. Fix the title before asking the slot to do more work.`,
+      title: "当前作品资料还没补稳",
+      detail: `${weakestEntry.series.title} 仍缺 ${weakestEntry.readiness.topIssues.join("、")}。先把作品页补稳，再期待推荐位替它扛表现。`,
       actionType: "edit",
-      actionLabel: "Open title setup",
+      actionLabel: "去补作品资料",
       actionSeriesId: weakestEntry.series.id,
       replacementCandidates,
       replacementIds,
@@ -357,10 +352,10 @@ function buildSlotOptimizationPlan(slot, replacementCandidates) {
     return {
       priority: 40,
       tone: "cyan",
-      title: "Performance data is still syncing",
-      detail: "The placement is live, but attribution has not settled yet. Hold the setup and review again once the signal returns.",
+      title: "表现数据还在回传",
+      detail: "推荐位已经上线，但归因还没稳定，先不要急着动，等数据回齐再看。",
       actionType: "review",
-      actionLabel: "Wait for data",
+      actionLabel: "等待数据",
       actionIds: [],
       replacementCandidates,
       replacementIds,
@@ -371,10 +366,10 @@ function buildSlotOptimizationPlan(slot, replacementCandidates) {
     return {
       priority: 70,
       tone: "amber",
-      title: "No exposure is coming through",
-      detail: "Confirm that the slot is actually live on the page and that tracking is returning usable data.",
+      title: "当前没有拿到曝光",
+      detail: "先确认这个推荐位是否真的在前台生效，以及埋点是否正常回传。",
       actionType: hasReplacementCandidates ? "copy" : "review",
-      actionLabel: hasReplacementCandidates ? "Copy backup IDs" : "Review placement",
+      actionLabel: hasReplacementCandidates ? "复制备选作品 ID" : "检查推荐位状态",
       actionIds: replacementIds,
       replacementCandidates,
       replacementIds,
@@ -385,10 +380,10 @@ function buildSlotOptimizationPlan(slot, replacementCandidates) {
     return {
       priority: 60,
       tone: "amber",
-      title: "Click-through is soft",
-      detail: `CTR is only ${formatPercentValue(ctr)}. Prepare stronger backup titles for the next editorial test.`,
+      title: "点击承接偏弱",
+      detail: `CTR 只有 ${formatPercentValue(ctr)}，下一轮编排前应该先准备更强的备选作品。`,
       actionType: "copy",
-      actionLabel: "Copy backup IDs",
+      actionLabel: "复制备选作品 ID",
       actionIds: replacementIds,
       replacementCandidates,
       replacementIds,
@@ -399,10 +394,10 @@ function buildSlotOptimizationPlan(slot, replacementCandidates) {
     return {
       priority: 50,
       tone: "amber",
-      title: "The click lands, but the handoff is weak",
-      detail: `Conversion is ${formatPercentValue(conversionRate)}. Test titles that better match the promise of the slot.`,
+      title: "点进去了，但后续承接偏弱",
+      detail: `转化率只有 ${formatPercentValue(conversionRate)}，要换更符合推荐位承诺的作品来试。`,
       actionType: "copy",
-      actionLabel: "Copy backup IDs",
+      actionLabel: "复制备选作品 ID",
       actionIds: replacementIds,
       replacementCandidates,
       replacementIds,
@@ -412,10 +407,10 @@ function buildSlotOptimizationPlan(slot, replacementCandidates) {
   return {
     priority: 10,
     tone: "emerald",
-    title: "This slot is stable",
-    detail: "The content and the slot are aligned well enough to keep observing without changing course.",
+    title: "当前推荐位状态稳定",
+    detail: "内容与入口已经基本匹配，可以继续观察，不必急着调整。",
     actionType: "review",
-    actionLabel: "Keep watching",
+    actionLabel: "继续观察",
     actionIds: [],
     replacementCandidates,
     replacementIds,
@@ -444,7 +439,7 @@ export default function AdminHomeMerchandisingPage() {
       cache: "no-store",
     });
     if (!response.ok) {
-      throw new Error(data?.message || data?.error || "Failed to load recommendation slots.");
+      throw new Error(data?.message || data?.error || "推荐位配置加载失败。");
     }
     const nextSlots = Array.isArray(data?.slots) ? data.slots.filter(Boolean).map(normalizeSlot) : [];
     setSlots(nextSlots);
@@ -484,10 +479,10 @@ export default function AdminHomeMerchandisingPage() {
         if (seriesResult.status !== "fulfilled" || !seriesResult.value.response.ok) {
           const message =
             seriesResult.status === "fulfilled"
-              ? seriesResult.value.data?.message || seriesResult.value.data?.error || "Failed to load title data."
+              ? seriesResult.value.data?.message || seriesResult.value.data?.error || "作品数据加载失败。"
               : seriesResult.reason instanceof Error
                 ? seriesResult.reason.message
-                : "Failed to load title data.";
+                : "作品数据加载失败。";
           setError(message);
           setSeriesList([]);
           setSlots([]);
@@ -510,14 +505,14 @@ export default function AdminHomeMerchandisingPage() {
           );
         } else {
           setSlots([]);
-          nextWarnings.push("Recommendation slots did not load, so this page is showing editorial guidance without saved slot state.");
+          nextWarnings.push("推荐位配置暂时没有加载成功，当前页面只展示编排建议，不代表已保存的线上状态。");
         }
 
         if (hotResult.status === "fulfilled" && hotResult.value.ok) {
           setHotKeywords(Array.isArray(hotResult.value.data?.keywords) ? hotResult.value.data.keywords : []);
         } else {
           setHotKeywords([]);
-          nextWarnings.push("Search heat signals are unavailable right now, but the rest of the merchandising workspace still works.");
+          nextWarnings.push("搜索关注点暂时不可用，不过首页编排的其他区块仍可正常使用。");
         }
 
         setWarnings(nextWarnings);
@@ -527,7 +522,7 @@ export default function AdminHomeMerchandisingPage() {
           return;
         }
 
-        setError(loadError instanceof Error ? loadError.message : "Failed to load home merchandising data.");
+        setError(loadError instanceof Error ? loadError.message : "首页编排工作台加载失败。");
         setSeriesList([]);
         setSlots([]);
         setHotKeywords([]);
@@ -560,11 +555,11 @@ export default function AdminHomeMerchandisingPage() {
     () =>
       (Array.isArray(hotKeywords) ? hotKeywords : []).filter(Boolean).slice(0, 6).map((item, index) => ({
         id: `${typeof item === "string" ? item : item.keyword || item.label || "keyword"}-${index}`,
-        label: typeof item === "string" ? item : item.keyword || item.label || "Search term",
+        label: typeof item === "string" ? item : item.keyword || item.label || "搜索词",
         detail:
           item && typeof item === "object"
-            ? item.growthLabel || item.badge || (typeof item.count === "number" ? `${item.count.toLocaleString()} searches` : "Search signal")
-            : "Search signal",
+            ? item.growthLabel || (typeof item.count === "number" ? `${item.count.toLocaleString()} 次搜索` : "搜索关注点")
+            : "搜索关注点",
       })),
     [hotKeywords],
   );
@@ -614,9 +609,9 @@ export default function AdminHomeMerchandisingPage() {
           recommendedSeries,
           aligned: Boolean(aligned),
           state: !current ? "rose" : aligned ? "emerald" : "amber",
-          stateLabel: !current ? "Not set" : aligned ? "Aligned" : "Needs sync",
+          stateLabel: !current ? "未配置" : aligned ? "已对齐" : "待同步",
           canApplyRecommendation: slot.recommendedIds.length > 0,
-          actionLabel: !current ? "Apply recommendation" : aligned ? "Already aligned" : "Sync to recommendation",
+          actionLabel: !current ? "应用当前建议" : aligned ? "已经对齐" : "同步当前建议",
         };
       }),
     [seriesById, slotBlueprints, slots],
@@ -746,9 +741,9 @@ export default function AdminHomeMerchandisingPage() {
         setSlotPerformanceMap(nextPerformanceMap);
 
         if (failedCount === trackedCurrentSlots.length) {
-          setPerformanceNotice("Performance data is unavailable right now, so keep using the editorial plan until attribution returns.");
+          setPerformanceNotice("表现数据暂时不可用，先按当前编排方案维护，等归因恢复后再判断。");
         } else if (failedCount > 0) {
-          setPerformanceNotice("Some slot metrics did not load, but the rest of the signal is still usable.");
+          setPerformanceNotice("部分推荐位指标暂时没有回传，但其余数据仍可参考。");
         }
       } catch (loadError) {
         if (cancelled) {
@@ -757,7 +752,7 @@ export default function AdminHomeMerchandisingPage() {
 
         setSlotPerformanceMap({});
         setPerformanceNotice(
-          loadError instanceof Error ? loadError.message : "Failed to load slot performance.",
+          loadError instanceof Error ? loadError.message : "推荐位表现数据加载失败。",
         );
       } finally {
         if (!cancelled) {
@@ -774,27 +769,27 @@ export default function AdminHomeMerchandisingPage() {
 
   const handleCopyIds = async (label, ids) => {
     if (!Array.isArray(ids) || ids.length === 0) {
-      setFeedback({ type: "error", message: `${label} does not have any IDs ready to copy.` });
+      setFeedback({ type: "error", message: `${label} 当前没有可复制的作品 ID。` });
       return;
     }
     if (typeof navigator === "undefined" || !navigator.clipboard) {
-      setFeedback({ type: "error", message: "Clipboard copy is not available in this browser." });
+      setFeedback({ type: "error", message: "当前浏览器不支持直接复制到剪贴板。"});
       return;
     }
     try {
       await navigator.clipboard.writeText(ids.join("\n"));
-      setFeedback({ type: "success", message: `${label} IDs copied.` });
+      setFeedback({ type: "success", message: `${label} 的作品 ID 已复制。` });
     } catch (copyError) {
       setFeedback({
         type: "error",
-        message: copyError instanceof Error ? copyError.message : "Copy failed. Please try again.",
+        message: copyError instanceof Error ? copyError.message : "复制失败，请稍后重试。",
       });
     }
   };
 
   const handleApplyRecommendation = async (slot) => {
     if (!slot?.id || slot.recommendedIds.length === 0) {
-      setFeedback({ type: "error", message: `${slot?.label || "This slot"} does not have a recommended title yet.` });
+      setFeedback({ type: "error", message: `${slot?.label || "当前推荐位"} 还没有可用的建议作品。` });
       return;
     }
     try {
@@ -816,19 +811,19 @@ export default function AdminHomeMerchandisingPage() {
       if (!response.ok) {
         setFeedback({
           type: "error",
-          message: data?.message || data?.error || `${slot.label} could not be saved.`,
+          message: data?.message || data?.error || `${slot.label} 保存失败。`,
         });
         return;
       }
       await loadSlotsOnly();
       setFeedback({
         type: "success",
-        message: slot.current ? `${slot.label} synced to the current editorial recommendation.` : `${slot.label} created.`,
+        message: slot.current ? `${slot.label} 已同步到当前编排建议。` : `${slot.label} 已创建。`,
       });
     } catch (saveError) {
       setFeedback({
         type: "error",
-        message: saveError instanceof Error ? saveError.message : `${slot.label} could not be saved.`,
+        message: saveError instanceof Error ? saveError.message : `${slot.label} 保存失败。`,
       });
     } finally {
       setSavingSlot("");
@@ -839,11 +834,11 @@ export default function AdminHomeMerchandisingPage() {
     try {
       setRefreshing(true);
       await loadSlotsOnly();
-      setFeedback({ type: "success", message: "Recommendation slots refreshed." });
+      setFeedback({ type: "success", message: "推荐位配置已刷新。" });
     } catch (refreshError) {
       setFeedback({
         type: "error",
-        message: refreshError instanceof Error ? refreshError.message : "Failed to refresh recommendation slots.",
+        message: refreshError instanceof Error ? refreshError.message : "推荐位配置刷新失败。",
       });
     } finally {
       setRefreshing(false);
@@ -863,8 +858,8 @@ export default function AdminHomeMerchandisingPage() {
 
   return (
     <AdminShell
-      title="Collections"
-      subtitle="Manage homepage hero, start-here lanes, and editorial collections like part of the same story-first product."
+      title="首页编排"
+      subtitle="把首页主视觉、起步推荐和回访入口当成同一套内容编排工作来维护。"
       actions={
         <div className="flex flex-wrap gap-2">
           <ActionButton
@@ -875,11 +870,11 @@ export default function AdminHomeMerchandisingPage() {
             }}
           >
             <ArrowUpRight className="h-4 w-4" />
-            View live home
+            查看线上首页
           </ActionButton>
           <ActionButton onClick={() => router.push("/admin/recommendations")}>
             <Sparkles className="h-4 w-4" />
-            Open recommendation tools
+            打开发现配置
           </ActionButton>
         </div>
       }
@@ -887,7 +882,7 @@ export default function AdminHomeMerchandisingPage() {
       <div className="space-y-6">
         {error ? (
           <div className="rounded-[24px] border border-rose-200 bg-rose-50/90 px-5 py-4 text-sm text-rose-700 shadow-[var(--gush-shadow-soft)]">
-            Collection workspace failed to load: {error}
+            首页编排工作台加载失败：{error}
           </div>
         ) : null}
 
@@ -921,28 +916,27 @@ export default function AdminHomeMerchandisingPage() {
           <div className="grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                Editorial collections
+                首页编排基线
               </p>
               <h2 className="mt-3 text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.45rem]">
-                Tighten the few placements that shape the home page most.
+                先收紧真正决定首页观感的几个入口。
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                The home page should feel edited, not noisy. Keep hero, start-here, binge-ready, breakout,
-                and library return aligned with what readers can actually enjoy right now.
+                首页要像经过编辑，而不是像乱摆出来的广告位。先保证主视觉、起步推荐、追更回访和短链路入口都能接住真实可读内容。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <ActionButton onClick={() => void handleRefreshSlots()}>
                   <RefreshCw className={cn("h-4 w-4", refreshing ? "animate-spin" : "")} />
-                  {refreshing ? "Refreshing..." : "Refresh slots"}
+                  {refreshing ? "刷新中..." : "刷新推荐位"}
                 </ActionButton>
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-              <MetricCard label="Live titles" value={publishedSeries.length.toLocaleString()} hint="Titles eligible for editorial placement." tone="blue" />
-              <MetricCard label="Filled slots" value={slotCoverageCount.toLocaleString()} hint="Key home placements already configured." tone="emerald" />
-              <MetricCard label="Slots to fix" value={slotIssueCount.toLocaleString()} hint="Missing or misaligned placements that still need attention." tone="amber" />
-              <MetricCard label="Hero-ready titles" value={readyHeroCount.toLocaleString()} hint="Strong candidates that can carry a larger home-page moment." tone={readyHeroCount > 0 ? "cyan" : "rose"} />
+              <MetricCard label="可编排作品" value={publishedSeries.length.toLocaleString()} hint="当前可以进入首页编排池的已上线作品。" tone="blue" />
+              <MetricCard label="已配置推荐位" value={slotCoverageCount.toLocaleString()} hint="关键首页入口中已经配置完成的数量。" tone="emerald" />
+              <MetricCard label="待处理推荐位" value={slotIssueCount.toLocaleString()} hint="仍需补齐或重新对齐的首页入口。" tone="amber" />
+              <MetricCard label="可上主视觉的作品" value={readyHeroCount.toLocaleString()} hint="足够完整，能承担首页强曝光的作品。" tone={readyHeroCount > 0 ? "cyan" : "rose"} />
             </div>
           </div>
         </SurfacePanel>
@@ -951,10 +945,10 @@ export default function AdminHomeMerchandisingPage() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                Slot health
+                推荐位状态
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Start with the few placements that define the home page, then move into smaller thematic lanes.
+                先把最影响首页观感的几个入口看清楚，再去处理次级主题位。
               </p>
             </div>
           </div>
@@ -973,12 +967,12 @@ export default function AdminHomeMerchandisingPage() {
                 </div>
                 <p className="mt-3 text-sm leading-6 text-slate-600">{slot.hint}</p>
 
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Recommended titles
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <div className="mt-4 space-y-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          建议作品
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
                       {slot.recommendedSeries.length > 0 ? (
                         slot.recommendedSeries.map((series) => (
                           <span key={`${slot.id}-recommended-${series.id}`} className="inline-flex items-center rounded-full border border-black/8 bg-[rgba(250,247,241,0.92)] px-2.5 py-1 text-xs font-semibold text-slate-700">
@@ -987,16 +981,16 @@ export default function AdminHomeMerchandisingPage() {
                         ))
                       ) : (
                         <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                          No strong title yet
+                          还没有足够稳的候选作品
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Current setup
-                    </p>
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          当前配置
+                        </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {slot.currentSeries.length > 0 ? (
                         slot.currentSeries.map((series) => (
@@ -1006,7 +1000,7 @@ export default function AdminHomeMerchandisingPage() {
                         ))
                       ) : (
                         <span className="inline-flex items-center rounded-full border border-black/8 bg-[rgba(250,247,241,0.92)] px-2.5 py-1 text-xs font-semibold text-slate-500">
-                          Not configured yet
+                          尚未配置
                         </span>
                       )}
                     </div>
@@ -1022,13 +1016,13 @@ export default function AdminHomeMerchandisingPage() {
                         : "opacity-60",
                     )}
                     disabled={!slot.canApplyRecommendation || savingSlot === slot.id || slot.aligned}
-                  >
-                    <RefreshCw className={cn("h-4 w-4", savingSlot === slot.id ? "animate-spin" : "")} />
-                    {savingSlot === slot.id ? "Saving..." : slot.actionLabel}
+                    >
+                      <RefreshCw className={cn("h-4 w-4", savingSlot === slot.id ? "animate-spin" : "")} />
+                      {savingSlot === slot.id ? "保存中..." : slot.actionLabel}
                   </ActionButton>
-                  <ActionButton onClick={() => void handleCopyIds(`${slot.label} recommendation`, slot.recommendedIds)}>
+                  <ActionButton onClick={() => void handleCopyIds(`${slot.label} 建议方案`, slot.recommendedIds)}>
                     <Copy className="h-4 w-4" />
-                    Copy recommended IDs
+                    复制建议作品 ID
                   </ActionButton>
                 </div>
               </article>
@@ -1040,19 +1034,19 @@ export default function AdminHomeMerchandisingPage() {
           <SurfacePanel appearance="light" accent="cyan" className="space-y-5">
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                Editorial picks
+                重点入口推荐
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Keep the main lanes easy to understand and clearly purposeful.
+                这些入口要让编辑和读者都一眼看懂，不要靠花哨标签硬撑。
               </p>
             </div>
 
             <div className="grid gap-4">
               {[
-                { id: "free", label: "Start here", icon: Zap, series: editorialSnapshot.freeStartPick },
-                { id: "binge", label: "Binge-ready", icon: BookOpen, series: editorialSnapshot.completedPick },
-                { id: "breakout", label: "Breakout", icon: Flame, series: editorialSnapshot.breakoutPick },
-                { id: "return", label: "Library return", icon: Star, series: libraryReturnCandidates[0]?.series || null },
+                { id: "free", label: "从这里开始", icon: Zap, series: editorialSnapshot.freeStartPick },
+                { id: "binge", label: "适合连看", icon: BookOpen, series: editorialSnapshot.completedPick },
+                { id: "breakout", label: "近期亮点", icon: Flame, series: editorialSnapshot.breakoutPick },
+                { id: "return", label: "继续读这部", icon: Star, series: libraryReturnCandidates[0]?.series || null },
               ].map((item) => {
                 const Icon = item.icon;
                 return (
@@ -1064,12 +1058,12 @@ export default function AdminHomeMerchandisingPage() {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-slate-950">{item.label}</p>
                         <p className="mt-2 text-base font-semibold text-slate-900">
-                          {item.series?.title || "No strong title yet"}
+                          {item.series?.title || "还没有足够稳的作品"}
                         </p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                           {item.series
-                            ? `${item.series.type === "novel" ? "Novel" : "Comic"} | ${formatSeriesStatusLabel(item.series.status)} | Updated ${formatDateLabel(item.series.updatedAt)}`
-                            : "Tighten title readiness first so this lane can carry a stronger editorial recommendation."}
+                            ? `${item.series.type === "novel" ? "小说" : "漫画"} | ${formatSeriesStatusLabel(item.series.status)} | 更新于 ${formatDateLabel(item.series.updatedAt)}`
+                            : "先把作品资料补稳，这个入口才能挂上更有把握的推荐。"}
                         </p>
                       </div>
                     </div>
@@ -1082,20 +1076,20 @@ export default function AdminHomeMerchandisingPage() {
           <SurfacePanel appearance="light" accent="amber" className="space-y-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                  Search signals
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Use search heat to judge whether breakout and start-here lanes are catching real reader demand.
-                </p>
+              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                  搜索关注点
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                  用真实搜索关注点判断“近期亮点”和“从这里开始”这些入口是不是跟上了读者需求。
+              </p>
               </div>
               <Search className="mt-1 h-5 w-5 text-amber-500" />
             </div>
 
             {hotSignals.length === 0 ? (
               <EmptyState
-                title="No search signal available"
-                description="When the hot search feed returns, it will show up here as a quick editorial input."
+                title="当前没有搜索关注点"
+                description="热搜数据恢复后，这里会继续作为首页编排的辅助参考。"
               />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -1114,10 +1108,10 @@ export default function AdminHomeMerchandisingPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                Live slot performance
+                推荐位表现
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Watch whether key placements are actually creating exposure, clicks, and clean handoff into reading.
+                看关键入口是否真正拿到曝光、点击和后续阅读承接，而不是只看表面配置。
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1141,8 +1135,8 @@ export default function AdminHomeMerchandisingPage() {
 
           {trackedCurrentSlots.length === 0 ? (
             <EmptyState
-              title="Configure slots before reading performance"
-              description="Once key placements are live, this section will show exposure, click-through, and handoff quality."
+              title="先完成推荐位配置"
+              description="关键入口上线后，这里才会有曝光、点击和承接质量的真实数据。"
             />
           ) : performanceLoading ? (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -1153,11 +1147,11 @@ export default function AdminHomeMerchandisingPage() {
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-                <MetricCard label="Tracked slots" value={trackedCurrentSlots.length.toLocaleString()} hint="Configured placements with current performance data." tone="cyan" />
-                <MetricCard label="Impressions" value={formatCompactNumber(performanceSummary.totalImpressions)} hint="Total exposure in the selected window." />
-                <MetricCard label="Clicks" value={formatCompactNumber(performanceSummary.totalClicks)} hint="Reader click-through from those slots." />
-                <MetricCard label="Conversions" value={formatCompactNumber(performanceSummary.totalConversions)} hint="The tracked action after a click." tone={performanceSummary.totalConversions > 0 ? "emerald" : "amber"} />
-                <MetricCard label="CTR" value={formatPercentValue(summaryCtr)} hint={`Conversion ${formatPercentValue(summaryConversionRate)}`} tone={summaryCtr >= 2 ? "emerald" : summaryCtr > 0 ? "amber" : "rose"} />
+                <MetricCard label="已跟踪推荐位" value={trackedCurrentSlots.length.toLocaleString()} hint="当前已配置且有表现数据的入口数量。" tone="cyan" />
+                <MetricCard label="曝光" value={formatCompactNumber(performanceSummary.totalImpressions)} hint="所选时间范围内的总曝光。" />
+                <MetricCard label="点击" value={formatCompactNumber(performanceSummary.totalClicks)} hint="这些推荐位带来的点击量。" />
+                <MetricCard label="转化" value={formatCompactNumber(performanceSummary.totalConversions)} hint="点击后的被跟踪动作。" tone={performanceSummary.totalConversions > 0 ? "emerald" : "amber"} />
+                <MetricCard label="点击率" value={formatPercentValue(summaryCtr)} hint={`转化率 ${formatPercentValue(summaryConversionRate)}`} tone={summaryCtr >= 2 ? "emerald" : summaryCtr > 0 ? "amber" : "rose"} />
               </div>
 
               <div className="grid gap-4 xl:grid-cols-2">
@@ -1178,16 +1172,16 @@ export default function AdminHomeMerchandisingPage() {
                       </div>
                       <p className="mt-3 text-sm leading-6 text-slate-600">
                         {linkedTitles.length > 0
-                          ? `Current titles: ${linkedTitles.join(" / ")}${slot.currentSeries.length > linkedTitles.length ? ` and ${slot.currentSeries.length - linkedTitles.length} more` : ""}`
-                          : "The slot is configured, but the current title data could not be resolved."}
+                          ? `当前作品：${linkedTitles.join(" / ")}${slot.currentSeries.length > linkedTitles.length ? `，另有 ${slot.currentSeries.length - linkedTitles.length} 部` : ""}`
+                          : "推荐位已经配置，但当前作品数据没有成功解析出来。"}
                       </p>
                       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        <MiniMetric label="Impressions" value={formatCompactNumber(slot.performance.totalImpressions)} />
-                        <MiniMetric label="Clicks" value={formatCompactNumber(slot.performance.totalClicks)} />
-                        <MiniMetric label="Conversions" value={formatCompactNumber(slot.performance.totalConversions)} />
-                        <MiniMetric label="CTR" value={formatPercentValue(slot.performance.avgCtr)} />
-                        <MiniMetric label="Conversion" value={formatPercentValue(slot.performance.avgConversionRate)} />
-                        <MiniMetric label="Slot ID" value={slot.id} hint="Tracking reference" />
+                        <MiniMetric label="曝光" value={formatCompactNumber(slot.performance.totalImpressions)} />
+                        <MiniMetric label="点击" value={formatCompactNumber(slot.performance.totalClicks)} />
+                        <MiniMetric label="转化" value={formatCompactNumber(slot.performance.totalConversions)} />
+                        <MiniMetric label="点击率" value={formatPercentValue(slot.performance.avgCtr)} />
+                        <MiniMetric label="转化率" value={formatPercentValue(slot.performance.avgConversionRate)} />
+                        <MiniMetric label="推荐位 ID" value={slot.id} hint="追踪参考" />
                       </div>
                     </article>
                   );
@@ -1201,14 +1195,14 @@ export default function AdminHomeMerchandisingPage() {
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                Optimization queue
+                待优化队列
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Review configuration, title readiness, and recent performance together so fixes happen in the right order.
+                把推荐位配置、作品完整度和最近表现放在一起看，避免修错顺序。
               </p>
             </div>
             <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
-              {urgentOptimizationCount} high-priority items
+              {urgentOptimizationCount} 个高优先级项
             </span>
           </div>
 
@@ -1228,16 +1222,16 @@ export default function AdminHomeMerchandisingPage() {
 
                 {slot.current ? (
                   <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                    <MiniMetric label="Impressions" value={formatCompactNumber(slot.performance.totalImpressions)} />
-                    <MiniMetric label="CTR" value={formatPercentValue(slot.performance.avgCtr)} />
-                    <MiniMetric label="Conversion" value={formatPercentValue(slot.performance.avgConversionRate)} />
+                    <MiniMetric label="曝光" value={formatCompactNumber(slot.performance.totalImpressions)} />
+                    <MiniMetric label="点击率" value={formatPercentValue(slot.performance.avgCtr)} />
+                    <MiniMetric label="转化率" value={formatPercentValue(slot.performance.avgConversionRate)} />
                   </div>
                 ) : null}
 
                 {slot.plan.replacementCandidates.length > 0 ? (
                   <div className="mt-4">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Backup titles
+                      备选作品
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {slot.plan.replacementCandidates.map((series) => (
@@ -1257,7 +1251,7 @@ export default function AdminHomeMerchandisingPage() {
                       disabled={savingSlot === slot.id || !slot.canApplyRecommendation}
                     >
                       <RefreshCw className={cn("h-4 w-4", savingSlot === slot.id ? "animate-spin" : "")} />
-                      {savingSlot === slot.id ? "Saving..." : slot.plan.actionLabel}
+                      {savingSlot === slot.id ? "保存中..." : slot.plan.actionLabel}
                     </ActionButton>
                   ) : null}
 
@@ -1269,7 +1263,7 @@ export default function AdminHomeMerchandisingPage() {
                   ) : null}
 
                   {slot.plan.actionType === "copy" ? (
-                    <ActionButton onClick={() => void handleCopyIds(`${slot.label} backup`, slot.plan.actionIds)}>
+                    <ActionButton onClick={() => void handleCopyIds(`${slot.label} 备选方案`, slot.plan.actionIds)}>
                       <Copy className="h-4 w-4" />
                       {slot.plan.actionLabel}
                     </ActionButton>
@@ -1284,10 +1278,10 @@ export default function AdminHomeMerchandisingPage() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                Hero candidates
+                主视觉候选作品
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                These titles are the closest to a confident homepage spotlight. Do not burn the hero on half-ready work.
+                这些作品最接近能稳稳接住首页强曝光，但别把主视觉位浪费在半成品上。
               </p>
             </div>
             <Star className="mt-1 h-5 w-5 text-amber-500" />
@@ -1295,8 +1289,8 @@ export default function AdminHomeMerchandisingPage() {
 
           {heroCandidates.length === 0 ? (
             <EmptyState
-              title="No strong hero candidates yet"
-              description="Tighten cover art, credits, summary, and episodes on live titles before pushing harder at the top of home."
+              title="当前还没有足够稳的主视觉候选"
+              description="先把封面、署名、简介和章节补稳，再考虑把作品推到首页最强入口。"
             />
           ) : (
             <div className="grid gap-4 xl:grid-cols-2">
@@ -1313,13 +1307,13 @@ export default function AdminHomeMerchandisingPage() {
                         {readiness.statusLabel}
                       </span>
                       <span className="inline-flex items-center rounded-full border border-black/8 bg-[rgba(250,247,241,0.92)] px-2.5 py-1 text-xs font-semibold text-slate-600">
-                        Candidate score {Math.round(score)}
+                        候选分 {Math.round(score)}
                       </span>
                     </div>
                     <p className="mt-3 text-sm leading-6 text-slate-600">
-                      {series.author ? `Creator: ${series.author}` : "Creator: not listed yet"} |{" "}
-                      {series.type === "novel" ? "Novel" : "Comic"} | {formatSeriesStatusLabel(series.status)} |
-                      {" "}Updated {formatDateLabel(series.updatedAt)}
+                      {series.author ? `署名：${series.author}` : "署名待补"} |{" "}
+                      {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)} |
+                      {" "}更新于 {formatDateLabel(series.updatedAt)}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {reasons.map((reason) => (
@@ -1329,27 +1323,27 @@ export default function AdminHomeMerchandisingPage() {
                       ))}
                       {readiness.missingItems.slice(0, 2).map((item) => (
                         <span key={`${series.id}-${item.id}`} className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                          Missing {item.label}
+                          缺：{item.label}
                         </span>
                       ))}
                     </div>
                     <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                      <MiniMetric label="Episodes" value={series.episodeCount} />
-                      <MiniMetric label="Reader signal" value={formatCompactNumber(getReaderProof(series))} />
-                      <MiniMetric label="Readiness" value={readiness.score} />
+                      <MiniMetric label="章节数" value={series.episodeCount} />
+                      <MiniMetric label="内容基础" value={formatCompactNumber(getReaderProof(series))} />
+                      <MiniMetric label="就绪分" value={readiness.score} />
                     </div>
                     <div className="mt-5 flex flex-wrap gap-2">
                       <ActionButton onClick={() => router.push(`/admin/series/${series.id}`)}>
                         <BookOpen className="h-4 w-4" />
-                        Edit title
+                        编辑作品
                       </ActionButton>
                       <ActionButton onClick={() => openSeriesPreview(series.id)}>
                         <ArrowUpRight className="h-4 w-4" />
-                        View live page
+                        查看前台页
                       </ActionButton>
                       <ActionButton onClick={() => void handleCopyIds(series.title, [series.id])}>
                         <Copy className="h-4 w-4" />
-                        Copy ID
+                        复制作品 ID
                       </ActionButton>
                     </div>
                   </article>

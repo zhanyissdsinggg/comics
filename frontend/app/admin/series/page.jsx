@@ -8,8 +8,8 @@ import AdminSeriesPageNew from '@/components/admin/AdminSeriesPageNew';
 export default function AdminSeriesPage() {
   return (
     <AdminShell
-      title="Series"
-      subtitle="Manage titles, publishing status, creator credit readiness, and the basic story metadata readers rely on."
+      title="作品"
+      subtitle="集中处理作品信息、发布状态和创作者署名准备度，让内容后台先把作品本身管清楚。"
     >
       <AdminSeriesPageNew />
     </AdminShell>

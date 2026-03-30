@@ -6,9 +6,8 @@ import {
 } from "./creators";
 import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
 
-function toNumber(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+function hasText(value) {
+  return String(value || "").trim().length > 0;
 }
 
 function normalizeIsoDate(value) {
@@ -24,13 +23,48 @@ function normalizeIsoDate(value) {
   return new Date(parsed).toISOString();
 }
 
-function getPopularityScore(series) {
-  return Math.max(
-    toNumber(series?.followers),
-    toNumber(series?.views),
-    toNumber(series?.ratingCount),
-    Math.round(toNumber(series?.rating) * 100),
-  );
+function getGenreCount(series) {
+  return (Array.isArray(series?.genres) ? series.genres : [])
+    .map((genre) => String(genre || "").trim())
+    .filter(Boolean).length;
+}
+
+function getEpisodeCount(series) {
+  const parsed = Number(series?.episodeCount || 0);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function getSeriesMetadataScore(series) {
+  let score = 0;
+
+  if (series?.isPublished) {
+    score += 6;
+  }
+
+  if (hasText(series?.coverUrl)) {
+    score += 4;
+  }
+
+  if (hasText(series?.description)) {
+    score += 3;
+  }
+
+  if (getGenreCount(series) > 0) {
+    score += 2;
+  }
+
+  score += Math.min(getEpisodeCount(series), 5);
+
+  return score;
+}
+
+function getSeriesMetadataReadiness(series) {
+  return {
+    hasCover: hasText(series?.coverUrl),
+    hasDescription: hasText(series?.description),
+    hasGenres: getGenreCount(series) > 0,
+    hasEpisodes: getEpisodeCount(series) > 0,
+  };
 }
 
 function sortSeriesByPriority(items) {
@@ -39,9 +73,9 @@ function sortSeriesByPriority(items) {
       return left?.isPublished ? -1 : 1;
     }
 
-    const popularityDelta = getPopularityScore(right) - getPopularityScore(left);
-    if (popularityDelta !== 0) {
-      return popularityDelta;
+    const metadataDelta = getSeriesMetadataScore(right) - getSeriesMetadataScore(left);
+    if (metadataDelta !== 0) {
+      return metadataDelta;
     }
 
     const updatedDelta = Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0);
@@ -96,7 +130,10 @@ export function buildAdminCreatorAudit(seriesList) {
       unpublishedCount: 0,
       completedCount: 0,
       adultCount: 0,
-      readerProof: 0,
+      coverReadyCount: 0,
+      descriptionReadyCount: 0,
+      genreReadyCount: 0,
+      episodicCount: 0,
       latestUpdatedAt: null,
       spotlightSeries: null,
       topGenres: [],
@@ -105,7 +142,6 @@ export function buildAdminCreatorAudit(seriesList) {
     };
 
     current.titleCount += 1;
-    current.readerProof += getPopularityScore(series);
     current.series.push(series);
 
     if (series?.isPublished) {
@@ -120,6 +156,20 @@ export function buildAdminCreatorAudit(seriesList) {
 
     if (series?.adult) {
       current.adultCount += 1;
+    }
+
+    const metadataReadiness = getSeriesMetadataReadiness(series);
+    if (metadataReadiness.hasCover) {
+      current.coverReadyCount += 1;
+    }
+    if (metadataReadiness.hasDescription) {
+      current.descriptionReadyCount += 1;
+    }
+    if (metadataReadiness.hasGenres) {
+      current.genreReadyCount += 1;
+    }
+    if (metadataReadiness.hasEpisodes) {
+      current.episodicCount += 1;
     }
 
     const updatedAt = normalizeIsoDate(series?.updatedAt);
@@ -159,6 +209,26 @@ export function buildAdminCreatorAudit(seriesList) {
       return {
         ...creator,
         spotlightSeries: sortedSeries[0] || null,
+        metadataCoverageScore:
+          creator.titleCount > 0
+            ? Math.round(
+                ((creator.publishedCount +
+                  creator.coverReadyCount +
+                  creator.descriptionReadyCount +
+                  creator.genreReadyCount) /
+                  (creator.titleCount * 4)) *
+                  100,
+              )
+            : 0,
+        readySeriesCount: sortedSeries.filter((series) => {
+          const metadataReadiness = getSeriesMetadataReadiness(series);
+          return (
+            Boolean(series?.isPublished) &&
+            metadataReadiness.hasCover &&
+            metadataReadiness.hasDescription &&
+            metadataReadiness.hasGenres
+          );
+        }).length,
         topGenres: Array.from(genreCounts.entries())
           .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
           .map(([genre]) => genre)
@@ -179,8 +249,8 @@ export function buildAdminCreatorAudit(seriesList) {
         return right.titleCount - left.titleCount;
       }
 
-      if (right.readerProof !== left.readerProof) {
-        return right.readerProof - left.readerProof;
+      if (right.metadataCoverageScore !== left.metadataCoverageScore) {
+        return right.metadataCoverageScore - left.metadataCoverageScore;
       }
 
       const updatedDelta =

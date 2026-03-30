@@ -24,15 +24,15 @@ const STATUS_TONES = {
 };
 
 const STATUS_LABELS = {
-  FAILED: "Failed",
-  QUEUED: "Queued",
-  SENT: "Sent",
-  SUCCESS: "Success",
+  FAILED: "失败",
+  QUEUED: "排队中",
+  SENT: "已发送",
+  SUCCESS: "成功",
 };
 
 const viewOptions = [
-  { value: "all", label: "All jobs" },
-  { value: "failed", label: "Failed only" },
+  { value: "all", label: "全部任务" },
+  { value: "failed", label: "仅看失败任务" },
 ];
 
 function toCsv(rows) {
@@ -53,7 +53,7 @@ function toCsv(rows) {
 
 function formatAttemptAt(value) {
   if (!value) {
-    return "Never";
+    return "从未尝试";
   }
 
   const date = new Date(value);
@@ -114,7 +114,7 @@ export default function AdminEmailJobsPage() {
         setJobs([]);
         setFeedback({
           type: "error",
-          message: response.error || response.message || "Email jobs could not be loaded.",
+          message: response.error || response.message || "邮件任务加载失败。",
         });
       }
 
@@ -148,12 +148,12 @@ export default function AdminEmailJobsPage() {
       const response = await adminPost("/api/admin/email/jobs/retry", { jobId });
 
       if (response.ok) {
-        setFeedback({ type: "success", message: "The job was queued for another delivery attempt." });
+        setFeedback({ type: "success", message: "该任务已重新加入投递队列。" });
         await loadData({ preserveStatus: true });
       } else {
         setFeedback({
           type: "error",
-          message: response.error || response.message || "The retry request failed.",
+          message: response.error || response.message || "重试投递失败。",
         });
       }
     } finally {
@@ -179,16 +179,16 @@ export default function AdminEmailJobsPage() {
 
   if (isLoading || loading) {
     return (
-      <AdminPageSection title="Delivery queue" description="Loading the outbound job queue and recent email attempts.">
-        <p className="text-sm text-slate-500">Loading email jobs...</p>
+      <AdminPageSection title="投递队列" description="正在加载外发任务队列和最近的邮件尝试。">
+        <p className="text-sm text-slate-500">正在加载邮件任务...</p>
       </AdminPageSection>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <AdminPageSection title="Delivery queue" description="Admin access is required before email operations can be reviewed.">
-        <p className="text-sm text-slate-500">Sign in as an admin to review delivery jobs.</p>
+      <AdminPageSection title="投递队列" description="需要管理员权限后，才能查看邮件投递任务。">
+        <p className="text-sm text-slate-500">请先以管理员身份登录，再查看邮件任务。</p>
       </AdminPageSection>
     );
   }
@@ -201,15 +201,15 @@ export default function AdminEmailJobsPage() {
       />
 
       <AdminPageSection
-        title="Delivery queue"
-        description="Keep this queue readable: what was sent, where it went, and whether another delivery attempt is still needed."
+        title="投递队列"
+        description="把队列看清楚：发给了谁、当前状态如何、是否还需要继续重试。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge tone={failedCount > 0 ? "warning" : "success"}>
-              {failedCount > 0 ? `${failedCount} failed in this view` : "No failures in this view"}
+              {failedCount > 0 ? `当前视图下有 ${failedCount} 条失败任务` : "当前视图下没有失败任务"}
             </AdminBadge>
             <Button type="button" variant="outline" onClick={handleExport} disabled={!jobs.length}>
-              Export CSV
+              导出 CSV
             </Button>
           </div>
         }
@@ -218,29 +218,29 @@ export default function AdminEmailJobsPage() {
           <AdminTabs items={viewOptions} value={view} onChange={setView} />
           <p className="text-sm text-slate-500">
             {view === "failed"
-              ? "Only failed deliveries stay in view here so operators can retry cleanly."
-              : "All queued and completed delivery jobs stay visible in one calm table."}
+              ? "这里只保留失败投递，方便运营逐条重试。"
+              : "所有排队中和已完成的投递任务都会在同一张安静的表格里展示。"}
           </p>
         </div>
 
         {jobs.length === 0 ? (
           <div className="rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.82)] p-8 text-center text-sm text-slate-500">
-            No email jobs match this view yet.
+            当前视图下还没有匹配的邮件任务。
           </div>
         ) : (
           <AdminDataTable>
             <table className="min-w-full text-left text-sm">
               <AdminTableHeader>
                 <tr>
-                  <th className="px-4 py-4">Status</th>
-                  <th className="px-4 py-4">Recipient</th>
-                  <th className="px-4 py-4">Subject</th>
-                  <th className="px-4 py-4">Provider</th>
-                  <th className="px-4 py-4">Priority</th>
-                  <th className="px-4 py-4">Retries</th>
-                  <th className="px-4 py-4">Last attempt</th>
-                  <th className="px-4 py-4">Error</th>
-                  <th className="px-4 py-4">Action</th>
+                  <th className="px-4 py-4">状态</th>
+                  <th className="px-4 py-4">收件人</th>
+                  <th className="px-4 py-4">主题</th>
+                  <th className="px-4 py-4">通道</th>
+                  <th className="px-4 py-4">优先级</th>
+                  <th className="px-4 py-4">重试次数</th>
+                  <th className="px-4 py-4">最近尝试</th>
+                  <th className="px-4 py-4">错误信息</th>
+                  <th className="px-4 py-4">操作</th>
                 </tr>
               </AdminTableHeader>
               <tbody>
@@ -252,7 +252,7 @@ export default function AdminEmailJobsPage() {
                     <AdminTableRow key={job.id}>
                       <td className="px-4 py-4">
                         <AdminBadge tone={STATUS_TONES[status] || "default"}>
-                          {STATUS_LABELS[status] || status || "Unknown"}
+                          {STATUS_LABELS[status] || status || "未知状态"}
                         </AdminBadge>
                       </td>
                       <td className="px-4 py-4 text-slate-700">{job.to || "-"}</td>
@@ -271,10 +271,10 @@ export default function AdminEmailJobsPage() {
                             onClick={() => handleRetry(job.id)}
                             disabled={retryingId === String(job.id)}
                           >
-                            {retryingId === String(job.id) ? "Retrying..." : "Retry"}
+                            {retryingId === String(job.id) ? "重试中..." : "重新投递"}
                           </Button>
                         ) : (
-                          <span className="text-xs text-slate-400">No action needed</span>
+                          <span className="text-xs text-slate-400">无需操作</span>
                         )}
                       </td>
                     </AdminTableRow>

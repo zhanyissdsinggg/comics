@@ -43,23 +43,23 @@ const sortFields = [
 ];
 
 const STATUS_OPTIONS = [
-  { value: '', label: 'All statuses' },
-  { value: 'open', label: 'Open' },
-  { value: 'in_progress', label: 'In progress' },
-  { value: 'closed', label: 'Closed' },
-  { value: 'OPEN', label: 'Open (legacy)' },
-  { value: 'IN_PROGRESS', label: 'In progress (legacy)' },
-  { value: 'CLOSED', label: 'Closed (legacy)' },
+  { value: '', label: '全部状态' },
+  { value: 'open', label: '待处理' },
+  { value: 'in_progress', label: '处理中' },
+  { value: 'closed', label: '已关闭' },
+  { value: 'OPEN', label: '待处理（旧状态）' },
+  { value: 'IN_PROGRESS', label: '处理中（旧状态）' },
+  { value: 'CLOSED', label: '已关闭（旧状态）' },
 ];
 
 function formatDateTime(value) {
   if (!value) {
-    return 'Not available';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Not available';
+    return '暂无';
   }
 
   return new Intl.DateTimeFormat('zh-CN', {
@@ -74,13 +74,13 @@ function formatDateTime(value) {
 function getStatusLabel(status) {
   switch (String(status || '').toLowerCase()) {
     case 'open':
-      return 'Open';
+      return '待处理';
     case 'in_progress':
-      return 'In progress';
+      return '处理中';
     case 'closed':
-      return 'Closed';
+      return '已关闭';
     default:
-      return status || 'Unknown';
+      return status || '未知';
   }
 }
 
@@ -100,7 +100,7 @@ function getStatusTone(status) {
 function getMessagePreview(message, limit = 140) {
   const normalized = String(message || '').replace(/\s+/g, ' ').trim();
   if (!normalized) {
-    return 'No message was included.';
+    return '未附带消息内容。';
   }
 
   return normalized.length > limit ? `${normalized.slice(0, limit)}...` : normalized;
@@ -157,11 +157,11 @@ export default function AdminSupportPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: 'The selected tickets were removed.' });
+      setFeedback({ type: 'success', message: '已删除所选工单。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Could not remove the selected tickets: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `删除所选工单失败：${mutationError.message}` });
     },
   });
 
@@ -173,7 +173,7 @@ export default function AdminSupportPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Could not send the reply.'));
+        throw new Error(await readAdminResponseMessage(response, '发送回复失败。'));
       }
 
       return response.json();
@@ -182,11 +182,11 @@ export default function AdminSupportPage() {
       setReplyContent('');
       setSelectedTicket(null);
       setIsReplyModalOpen(false);
-      setFeedback({ type: 'success', message: 'The reply was sent.' });
+      setFeedback({ type: 'success', message: '回复已发送。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Could not send the reply: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `发送回复失败：${mutationError.message}` });
     },
   });
 
@@ -197,17 +197,17 @@ export default function AdminSupportPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Could not close the ticket.'));
+        throw new Error(await readAdminResponseMessage(response, '关闭工单失败。'));
       }
 
       return response.json();
     },
     onSuccess: () => {
-      setFeedback({ type: 'success', message: 'The ticket was closed.' });
+      setFeedback({ type: 'success', message: '工单已关闭。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Could not close the ticket: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `关闭工单失败：${mutationError.message}` });
     },
   });
 
@@ -232,7 +232,7 @@ export default function AdminSupportPage() {
     const message = replyContent.trim();
 
     if (!selectedTicket?.id || !message) {
-      setFeedback({ type: 'error', message: 'Reply text cannot be empty.' });
+      setFeedback({ type: 'error', message: '回复内容不能为空。' });
       return;
     }
 
@@ -241,26 +241,26 @@ export default function AdminSupportPage() {
 
   return (
     <AdminShell
-      title="Support"
-      subtitle="Keep support work readable: what the ticket is about, who sent it, and what should happen next."
+      title="客服"
+      subtitle="把工单主题、发件人和下一步动作讲清楚，让客服页面先保持可读，再谈效率。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <AdminMetricCard
-            label="Tickets in view"
+            label="当前视图工单数"
             value={String(pagination.total)}
-            detail="The current support queue after search and status filters."
+            detail="当前搜索和状态筛选后的工单总量。"
             tone="accent"
           />
           <AdminMetricCard
-            label="Open tickets"
+            label="待处理工单"
             value={String(openCount)}
-            detail="Readers still waiting for a first operator response."
+            detail="还没有拿到首次回复的读者工单。"
           />
           <AdminMetricCard
-            label="Needs follow-up"
+            label="仍需跟进"
             value={String(pendingReplies)}
-            detail="Tickets that are not yet marked closed."
+            detail="尚未关闭、还可能需要继续处理的工单。"
           />
         </div>
 
@@ -270,13 +270,13 @@ export default function AdminSupportPage() {
         />
 
         <AdminPageSection
-          title="Support queue"
-          description="Search by subject, user, or ticket ID. Keep the action row compact so the message itself stays readable."
+          title="客服队列"
+          description="按主题、用户或工单 ID 搜索，让操作行保持克制，把消息正文留给真正需要判断的人。"
           action={
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" onClick={resetControls}>
                 <RefreshCw className="size-4" />
-                Reset view
+                重置视图
               </Button>
               <Button
                 type="button"
@@ -285,7 +285,7 @@ export default function AdminSupportPage() {
                 disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
               >
                 <Trash2 className="size-4" />
-                Delete selected
+                删除已选
               </Button>
             </div>
           }
@@ -295,7 +295,7 @@ export default function AdminSupportPage() {
               <input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search by ticket ID, user, subject, or message..."
+                placeholder="搜索工单 ID、用户、主题或消息内容..."
                 className={adminInputClassName}
               />
             </label>
@@ -317,9 +317,9 @@ export default function AdminSupportPage() {
               onChange={(event) => setSortBy(event.target.value)}
               className={adminSelectClassName}
             >
-              <option value="createdAt">Created time</option>
-              <option value="updatedAt">Updated time</option>
-              <option value="status">Status</option>
+              <option value="createdAt">创建时间</option>
+              <option value="updatedAt">更新时间</option>
+              <option value="status">状态</option>
             </select>
 
             <Button
@@ -327,18 +327,18 @@ export default function AdminSupportPage() {
               variant="outline"
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
             >
-              {sortOrder === 'asc' ? 'Oldest first' : 'Newest first'}
+              {sortOrder === 'asc' ? '最早创建优先' : '最新创建优先'}
             </Button>
           </div>
 
           <AdminTableShell
             isError={isError}
-            errorMessage={error?.message || 'The support queue could not be loaded.'}
+            errorMessage={error?.message || '客服队列加载失败。'}
             onRetry={refetch}
             isLoading={isLoading}
             hasItems={tickets.length > 0}
             emptyMessage={
-              hasActiveFilters ? 'No tickets match the current filters.' : 'No support tickets yet.'
+              hasActiveFilters ? '当前筛选条件下没有匹配的工单。' : '当前还没有客服工单。'
             }
             pagination={pagination}
             page={page}
@@ -353,7 +353,7 @@ export default function AdminSupportPage() {
                     <th className="px-4 py-4">
                       <input
                         type="checkbox"
-                        aria-label="Select all tickets"
+                        aria-label="选择全部工单"
                         checked={tickets.length > 0 && selectedIds.length === tickets.length}
                         onChange={(event) => {
                           if (event.target.checked) {
@@ -366,12 +366,12 @@ export default function AdminSupportPage() {
                         className="h-4 w-4 rounded border-black/20 bg-transparent"
                       />
                     </th>
-                    <th className="px-4 py-4">Ticket</th>
-                    <th className="px-4 py-4">Reader</th>
-                    <th className="px-4 py-4">Status</th>
-                    <th className="px-4 py-4">Created</th>
-                    <th className="px-4 py-4">Updated</th>
-                    <th className="px-4 py-4">Actions</th>
+                    <th className="px-4 py-4">工单</th>
+                    <th className="px-4 py-4">读者</th>
+                    <th className="px-4 py-4">状态</th>
+                    <th className="px-4 py-4">创建时间</th>
+                    <th className="px-4 py-4">更新时间</th>
+                    <th className="px-4 py-4">操作</th>
                   </tr>
                 </AdminTableHeader>
                 <tbody>
@@ -380,7 +380,7 @@ export default function AdminSupportPage() {
                       <td className="px-4 py-4">
                         <input
                           type="checkbox"
-                          aria-label={`Select ticket ${ticket.id}`}
+                          aria-label={`选择工单 ${ticket.id}`}
                           checked={selectedIdsSet.has(ticket.id)}
                           onChange={() => toggleSelect(ticket.id)}
                           className="h-4 w-4 rounded border-black/20 bg-transparent"
@@ -388,7 +388,7 @@ export default function AdminSupportPage() {
                       </td>
                       <td className="px-4 py-4">
                         <div className="space-y-2">
-                          <p className="font-semibold text-slate-950">{ticket.subject || 'Untitled ticket'}</p>
+                          <p className="font-semibold text-slate-950">{ticket.subject || '未命名工单'}</p>
                           <p className="text-xs text-slate-500">#{ticket.id}</p>
                           <p className="max-w-xl text-sm leading-6 text-slate-600">
                             {getMessagePreview(ticket.message)}
@@ -399,9 +399,9 @@ export default function AdminSupportPage() {
                         <div className="space-y-2">
                           <div className="inline-flex items-center gap-2 text-sm text-slate-700">
                             <Mail className="h-4 w-4 text-slate-400" />
-                            <span>{ticket.userEmail || 'No email listed'}</span>
+                            <span>{ticket.userEmail || '未填写邮箱'}</span>
                           </div>
-                          <p className="text-xs text-slate-500">User ID: {ticket.userId || '-'}</p>
+                          <p className="text-xs text-slate-500">用户 ID：{ticket.userId || '-'}</p>
                         </div>
                       </td>
                       <td className="px-4 py-4">
@@ -421,7 +421,7 @@ export default function AdminSupportPage() {
                             disabled={replyTicketMutation.isPending}
                           >
                             <MessageSquare className="size-4" />
-                            Reply
+                            回复
                           </Button>
 
                           {String(ticket.status || '').toLowerCase() !== 'closed' ? (
@@ -432,10 +432,10 @@ export default function AdminSupportPage() {
                               onClick={() => closeTicketMutation.mutate(ticket.id)}
                               disabled={closeTicketMutation.isPending}
                             >
-                              Close ticket
+                              关闭工单
                             </Button>
                           ) : (
-                            <span className="text-xs text-slate-500">Already closed</span>
+                            <span className="text-xs text-slate-500">已关闭</span>
                           )}
                         </div>
                       </td>
@@ -450,10 +450,10 @@ export default function AdminSupportPage() {
 
       <Modal
         isOpen={isReplyModalOpen}
-        title="Reply to ticket"
+        title="回复工单"
         subtitle={
           selectedTicket
-            ? `${selectedTicket.subject || 'Untitled ticket'} 路 ${selectedTicket.userEmail || selectedTicket.userId || 'Unknown reader'}`
+            ? `${selectedTicket.subject || '未命名工单'} · ${selectedTicket.userEmail || selectedTicket.userId || '未知读者'}`
             : ''
         }
         onClose={() => {
@@ -466,16 +466,16 @@ export default function AdminSupportPage() {
         <div className="space-y-4">
           {selectedTicket ? (
             <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.78)] px-4 py-4 text-sm text-slate-600">
-              <p className="font-semibold text-slate-950">Original message</p>
-              <p className="mt-2 leading-6">{selectedTicket.message || 'No message was included.'}</p>
+              <p className="font-semibold text-slate-950">原始消息</p>
+              <p className="mt-2 leading-6">{selectedTicket.message || '未附带消息内容。'}</p>
             </div>
           ) : null}
 
-          <AdminFormField label="Reply" helperText="Keep replies direct, calm, and specific to the reader's request.">
+          <AdminFormField label="回复内容" helperText="回复保持直接、克制，并准确回应读者这次提出的问题。">
             <textarea
               value={replyContent}
               onChange={(event) => setReplyContent(event.target.value)}
-              placeholder="Write the response you want to send..."
+              placeholder="输入你要发送给读者的回复..."
               rows={7}
               className={adminTextareaClassName}
             />
@@ -486,17 +486,17 @@ export default function AdminSupportPage() {
             onClick={handleReplyTicket}
             disabled={!replyContent.trim() || replyTicketMutation.isPending}
           >
-            {replyTicketMutation.isPending ? 'Sending...' : 'Send reply'}
+            {replyTicketMutation.isPending ? '发送中...' : '发送回复'}
           </Button>
         </div>
       </Modal>
 
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        title="Delete selected tickets"
-        message={`Delete ${selectedIds.length} selected ticket${selectedIds.length === 1 ? '' : 's'}? This action cannot be undone.`}
-        confirmText={bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete tickets'}
-        cancelText="Cancel"
+        title="删除所选工单"
+        message={`确定删除 ${selectedIds.length} 条已选工单吗？此操作无法撤销。`}
+        confirmText={bulkDeleteMutation.isPending ? '删除中...' : '删除工单'}
+        cancelText="取消"
         isDangerous={true}
         isLoading={bulkDeleteMutation.isPending}
         onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}

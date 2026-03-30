@@ -111,7 +111,7 @@ test.describe("Admin detail page regressions", () => {
     const response = await page.goto("/admin/analytics", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await page.getByRole("button", { name: /用户分群|Audience segments/ }).click();
+    await page.getByRole("button", { name: /读者分群|Audience segments/ }).click();
     await expect(page.getByText("all-user-1@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.getByRole("button", { name: /下一页|Next/ }).click();
@@ -126,16 +126,32 @@ test.describe("Admin detail page regressions", () => {
     await expectNoRuntimeIssues("/admin/analytics", runtimeIssues);
   });
 
-  test("series detail blocks invalid pricing payloads before patching", async ({ page }) => {
+  test("series detail keeps legacy commercial fields out of the edit form and patch payload", async ({ page }) => {
     await primeAdminSession(page);
     await installAdminBaseMocks(page);
 
-    let patchCalls = 0;
+    let patchBody: Record<string, unknown> | null = null;
 
     await page.route("**/api/admin/series/series-qa-001", async (route) => {
       if (route.request().method() === "PATCH") {
-        patchCalls += 1;
-        await fulfillJson(route, { success: true });
+        patchBody = JSON.parse(route.request().postData() || "{}") as Record<string, unknown>;
+        await fulfillJson(route, {
+          series: {
+            id: "series-qa-001",
+            title: "Regression Test Series Updated",
+            type: "comic",
+            status: "Ongoing",
+            adult: false,
+            isPublished: true,
+            description: "An updated fixture series for admin detail validation.",
+            author: "Studio North",
+            genres: ["Action", "Drama"],
+            coverUrl: "https://example.com/cover.jpg",
+            coverTone: "moody",
+            createdAt: "2026-03-01T10:00:00.000Z",
+            updatedAt: "2026-03-10T10:00:00.000Z",
+          },
+        });
         return;
       }
 
@@ -148,13 +164,10 @@ test.describe("Admin detail page regressions", () => {
           adult: false,
           isPublished: true,
           description: "A fixture series for admin detail validation.",
+          author: "Studio North",
           genres: ["Action", "Drama"],
           coverUrl: "https://example.com/cover.jpg",
           coverTone: "moody",
-          badge: "HOT",
-          episodePrice: 3,
-          ttfEnabled: true,
-          ttfIntervalHours: 24,
           createdAt: "2026-03-01T10:00:00.000Z",
           updatedAt: "2026-03-10T10:00:00.000Z",
         },
@@ -166,21 +179,34 @@ test.describe("Admin detail page regressions", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.getByRole("button", { name: /编辑详情|Edit details/ })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("关注数", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("浏览量", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("封面状态", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("简介状态", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await page.getByRole("button", { name: /编辑详情|Edit details/ }).click();
 
-    await page.getByLabel("Default episode price").fill("3.5");
+    await expect(page.getByLabel(/作品标题|Title/)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByLabel("Default episode price")).toHaveCount(0);
+    await expect(page.getByLabel(/Badge/)).toHaveCount(0);
+    await expect(page.getByLabel(/Free-pass interval \(hours\)/)).toHaveCount(0);
+
+    await page.getByLabel(/作品标题|Title/).fill("Regression Test Series Updated");
     await page.getByRole("button", { name: /保存更改|保存修改|Save changes/ }).click();
 
-    await expect(page.getByText("Default episode price must be a whole-number point value.", { exact: true })).toBeVisible({
+    await expect(page.getByText("作品详情已保存。", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    expect(patchCalls).toBe(0);
+    expect(patchBody).not.toBeNull();
+    expect(JSON.stringify(patchBody)).not.toContain("episodePrice");
+    expect(JSON.stringify(patchBody)).not.toContain("ttfEnabled");
+    expect(JSON.stringify(patchBody)).not.toContain("ttfIntervalHours");
+    expect(JSON.stringify(patchBody)).not.toContain("badge");
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/series/series-qa-001", runtimeIssues);
   });
 
-  test("episodes workspace supports bulk edits and reorder actions", async ({ page }) => {
+  test("episodes workspace supports content-first bulk edits and reorder actions", async ({ page }) => {
     await primeAdminSession(page);
     await installAdminBaseMocks(page);
 
@@ -259,17 +285,18 @@ test.describe("Admin detail page regressions", () => {
     await expect(page.getByRole("heading", { name: "Regression Test Series" })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText("Total episodes", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("当前章节数", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
-    await page.getByLabel("Select episode 1").check();
-    await expect(page.getByRole("button", { name: /批量编辑|Bulk edit/ })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: /批量编辑|Bulk edit/ }).click();
+    await page.getByLabel("选择章节 1").check();
+    await expect(page.getByRole("button", { name: /批量修改|批量编辑|Bulk edit/ })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByRole("button", { name: /批量修改|批量编辑|Bulk edit/ }).click();
 
-    await page.getByLabel("Bulk price").fill("9");
-    await page.getByRole("button", { name: "Apply bulk update" }).click();
+    await expect(page.getByLabel("批量点数价格")).toHaveCount(0);
+    await page.getByLabel("批量试看页数").fill("9");
+    await page.getByRole("button", { name: "应用批量修改" }).click();
     await expect.poll(() => bulkCalls).toBe(1);
 
-    await page.getByRole("button", { name: "Auto-renumber" }).click();
+    await page.getByRole("button", { name: "自动重排章节号" }).click();
     await expect.poll(() => reorderCalls).toBe(1);
 
     await page.waitForTimeout(300);

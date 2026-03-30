@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,23 +33,23 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created time' },
-  { value: 'title', label: 'Title' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'title', label: '标题' },
 ];
 
 function getContentPreview(content) {
   const text = String(content || '').replace(/\s+/g, ' ').trim();
-  return text.length > 120 ? `${text.slice(0, 120)}...` : text || 'No message body';
+  return text.length > 120 ? `${text.slice(0, 120)}...` : text || '暂无通知正文';
 }
 
 function formatDate(value) {
   if (!value) {
-    return 'Not available';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Not available';
+    return '暂无';
   }
 
   return new Intl.DateTimeFormat('zh-CN', {
@@ -101,36 +101,36 @@ export default function AdminNotificationsPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: 'The selected notifications were removed.' });
+      setFeedback({ type: 'success', message: '已删除所选通知。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Could not remove the selected notifications: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `删除所选通知失败：${mutationError.message}` });
     },
   });
 
   return (
     <AdminShell
-      title="Notifications"
-      subtitle="Manage the notices readers actually receive, and keep the backlog easy to scan without turning it into a noisy campaign board."
+      title="读者通知"
+      subtitle="把真正发给读者的通知收在一个清爽列表里，方便检查质量、清理积压，而不是做成吵闹的活动看板。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <AdminMetricCard
-            label="Notifications in view"
+            label="当前通知"
             value={String(pagination.total)}
-            detail="The current list after search and sort settings."
+            detail="当前搜索和排序条件下的通知数量。"
             tone="accent"
           />
           <AdminMetricCard
-            label="With titles"
+            label="有标题"
             value={String(titledCount)}
-            detail="Notices that already have a reader-facing headline."
+            detail="已经具备读者可见标题的通知。"
           />
           <AdminMetricCard
-            label="With body copy"
+            label="有正文"
             value={String(bodyCount)}
-            detail="Entries that include message text instead of title-only stubs."
+            detail="包含正文而不是只剩标题壳子的通知。"
           />
         </div>
 
@@ -140,13 +140,13 @@ export default function AdminNotificationsPage() {
         />
 
         <AdminPageSection
-          title="Reader notices"
-          description="Use the list to review message quality, trim stale notices, and confirm the queue still reads cleanly."
+          title="通知列表"
+          description="在这里检查消息质量、清理过期通知，并确认整个通知队列读起来足够清楚。"
         >
           <AdminListToolbar
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            searchPlaceholder="Search notification ID, title, or text"
+            searchPlaceholder="搜索通知 ID、标题或正文"
             onOpenFilters={() => setIsSortModalOpen(true)}
             sortOrder={sortOrder}
             onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -160,17 +160,17 @@ export default function AdminNotificationsPage() {
               onClick={() => setIsDeleteConfirmOpen(true)}
               disabled={bulkDeleteMutation.isPending}
             >
-              {bulkDeleteMutation.isPending ? 'Removing...' : 'Delete notices'}
+              {bulkDeleteMutation.isPending ? '正在删除...' : '删除通知'}
             </Button>
           </AdminSelectionBar>
 
           <AdminTableShell
             isError={isError}
-            errorMessage={error?.message || 'Notifications could not be loaded.'}
+            errorMessage={error?.message || '通知加载失败。'}
             onRetry={refetch}
             isLoading={isLoading}
             hasItems={notifications.length > 0}
-            emptyMessage="No notifications match this view yet."
+            emptyMessage="当前视图下还没有匹配的通知。"
             pagination={pagination}
             page={page}
             pageSize={pageSize}
@@ -193,12 +193,12 @@ export default function AdminNotificationsPage() {
                         clearSelection();
                       }}
                       className="rounded"
-                      aria-label="Select all notifications"
+                      aria-label="选择全部通知"
                     />
                   </th>
-                  <th className="px-4 py-3">Notification</th>
-                  <th className="px-4 py-3">Preview</th>
-                  <th className="px-4 py-3">Created</th>
+                  <th className="px-4 py-3">通知</th>
+                  <th className="px-4 py-3">预览</th>
+                  <th className="px-4 py-3">创建时间</th>
                 </tr>
               </AdminTableHeader>
               <tbody>
@@ -210,11 +210,11 @@ export default function AdminNotificationsPage() {
                         checked={selectedIdsSet.has(notification.id)}
                         onChange={() => toggleSelect(notification.id)}
                         className="rounded"
-                        aria-label={`Select notification ${notification.id}`}
+                        aria-label={`选择通知 ${notification.id}`}
                       />
                     </td>
                     <td className="px-4 py-4">
-                      <div className="font-medium text-slate-950">{notification.title || 'Untitled notice'}</div>
+                      <div className="font-medium text-slate-950">{notification.title || '未命名通知'}</div>
                       <div className="mt-1 text-xs text-slate-500">{notification.id}</div>
                     </td>
                     <td className="max-w-[36rem] px-4 py-4 text-slate-600">
@@ -234,17 +234,17 @@ export default function AdminNotificationsPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="Sort notifications"
-          label="Sort by"
-          actionLabel="Apply"
+          title="排序通知"
+          label="排序方式"
+          actionLabel="应用"
         />
 
         <ConfirmDialog
           isOpen={isDeleteConfirmOpen}
-          title="Delete notifications"
-          message={`Delete ${selectedIds.length} selected notification${selectedIds.length === 1 ? '' : 's'}?`}
-          confirmText="Delete"
-          cancelText="Cancel"
+          title="删除通知"
+          message={`确定删除所选 ${selectedIds.length} 条通知吗？`}
+          confirmText="删除"
+          cancelText="取消"
           isDangerous={true}
           isLoading={bulkDeleteMutation.isPending}
           onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}
@@ -254,4 +254,3 @@ export default function AdminNotificationsPage() {
     </AdminShell>
   );
 }
-

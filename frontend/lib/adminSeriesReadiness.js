@@ -40,60 +40,60 @@ export function getAdminSeriesReadiness(series) {
   const checks = [
     {
       id: "creator",
-      label: "Creator credit",
+      label: "创作者署名",
       ok: hasCreatorCredit,
       weight: 20,
       hint: hasCreatorCredit
-        ? `${creatorLabel} can flow into creator pages, series credits, and discovery surfaces.`
-        : "Missing creator credit weakens trust and breaks creator-led discovery.",
+        ? `当前会以“${creatorLabel}”进入创作者页、作品页署名和发现流。`
+        : "缺少公开署名会直接削弱作品可信度，也会让创作者发现页失去依据。",
     },
     {
       id: "cover",
-      label: "Cover art",
+      label: "封面素材",
       ok: Boolean(coverUrl),
       weight: 20,
       hint: coverUrl
-        ? "The title already has art for lists, detail headers, and editorial placements."
-        : "A missing cover makes list pages, search, and featured placements feel unfinished.",
+        ? "封面已可用于列表页、作品页头图和前台编排位。"
+        : "缺少封面会让列表页、搜索结果和推荐位都显得没收口。",
     },
     {
       id: "description",
-      label: "Summary",
+      label: "简介摘要",
       ok: description.length >= 40,
       weight: 15,
       hint:
         description.length >= 40
-          ? "The summary is long enough for series detail, SEO snippets, and social previews."
-          : "A short summary makes the title page feel thin and harder to browse with confidence.",
+          ? "简介长度已经足够支撑作品详情页、摘要卡片和分享预览。"
+          : "简介过短会让作品页显得单薄，也不利于读者快速判断要不要点开。",
     },
     {
       id: "genres",
-      label: "Genres and tags",
+      label: "题材标签",
       ok: genres.length > 0,
       weight: 15,
       hint:
         genres.length > 0
-          ? "Tags can support search, browse filters, related reading, and editorial grouping."
-          : "Missing tags weakens filtering, recommendations, and collection curation.",
+          ? "题材标签已足够支持搜索、筛选、专题编排和相关推荐。"
+          : "缺少题材标签会让筛选、相关推荐和首页编排都失去抓手。",
     },
     {
       id: "episodes",
-      label: "Episodes ready",
+      label: "章节可读",
       ok: episodeCount > 0,
       weight: 20,
       hint:
         episodeCount > 0
-          ? "Readers can move from the series page into a real reading path."
-          : "No episodes means the live series page cannot carry discovery traffic well.",
+          ? "读者已经可以从作品页进入真实阅读路径。"
+          : "没有章节时，就算作品上线了，也很难承接前台流量。",
     },
     {
       id: "published",
-      label: "Live visibility",
+      label: "前台可见",
       ok: isPublished,
       weight: 10,
       hint: isPublished
-        ? "The title is available to normal storefront routes."
-        : "Draft titles stay out of public discovery until they are published.",
+        ? "这部作品已经能在正常前台路由里被读者看到。"
+        : "草稿状态不会进入公开发现流，仍需要发布动作才能对外可见。",
     },
   ];
 
@@ -102,17 +102,17 @@ export function getAdminSeriesReadiness(series) {
   const topIssues = missingItems.slice(0, 3).map((item) => item.label);
 
   let tone = "rose";
-  let statusLabel = "Needs core setup";
+  let statusLabel = "基础信息待补齐";
 
   if (missingItems.length === 0) {
     tone = "emerald";
-    statusLabel = "Ready for storefront";
+    statusLabel = "已可进入前台";
   } else if (score >= 70) {
     tone = "cyan";
-    statusLabel = "Close to ready";
+    statusLabel = "接近可发布";
   } else if (score >= 45) {
     tone = "amber";
-    statusLabel = "Needs a focused pass";
+    statusLabel = "需要集中补一轮";
   }
 
   return {
@@ -126,7 +126,7 @@ export function getAdminSeriesReadiness(series) {
     isReady: missingItems.length === 0,
     summary:
       missingItems.length === 0
-        ? "This title is ready for normal discovery, series detail, and creator-led browse paths."
-        : `Focus on ${topIssues.join(", ")} first to improve live discovery and reader trust faster.`,
+        ? "这部作品已经适合进入前台发现流、作品详情页和创作者导流路径。"
+        : `优先补齐 ${topIssues.join("、")}，能最快改善前台可读性和读者信任感。`,
   };
 }

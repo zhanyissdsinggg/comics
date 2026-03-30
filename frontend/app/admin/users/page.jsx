@@ -37,18 +37,18 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created date' },
-  { value: 'email', label: 'Email address' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'email', label: '邮箱地址' },
 ];
 
 function formatDate(value) {
   if (!value) {
-    return 'Not available';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Not available';
+    return '暂无';
   }
 
   return new Intl.DateTimeFormat('zh-CN', {
@@ -115,11 +115,11 @@ export default function AdminUsersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setFeedback({ type: 'success', message: 'The selected accounts were blocked.' });
+        setFeedback({ type: 'success', message: '已封禁所选账号。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Could not block the selected users: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `封禁所选账号失败：${mutationError.message}` });
       },
     },
   );
@@ -134,11 +134,11 @@ export default function AdminUsersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setFeedback({ type: 'success', message: 'The selected accounts were unblocked.' });
+        setFeedback({ type: 'success', message: '已恢复所选账号。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Could not unblock the selected users: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `恢复所选账号失败：${mutationError.message}` });
       },
     },
   );
@@ -152,11 +152,11 @@ export default function AdminUsersPage() {
       onSuccess: () => {
         clearSelection();
         setIsDeleteConfirmOpen(false);
-        setFeedback({ type: 'success', message: 'The selected accounts were removed.' });
+        setFeedback({ type: 'success', message: '已删除所选账号。' });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `Could not remove the selected users: ${mutationError.message}` });
+        setFeedback({ type: 'error', message: `删除所选账号失败：${mutationError.message}` });
       },
     },
   );
@@ -169,7 +169,7 @@ export default function AdminUsersPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Could not update the user status.'));
+        throw new Error(await readAdminResponseMessage(response, '更新账号状态失败。'));
       }
 
       return response.json();
@@ -177,37 +177,37 @@ export default function AdminUsersPage() {
     onSuccess: (_data, variables) => {
       setFeedback({
         type: 'success',
-        message: variables.blocked ? 'The account is now blocked.' : 'The account is now active again.',
+        message: variables.blocked ? '账号已封禁。' : '账号已恢复。',
       });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Could not update the account: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `更新账号状态失败：${mutationError.message}` });
     },
   });
 
   return (
     <AdminShell
-      title="Users"
-      subtitle="A calmer directory for reader accounts, wallet balance, and access status. Keep the table readable and use bulk actions only when they save real time."
+      title="用户"
+      subtitle="把读者账号、钱包余额和访问状态放在一个安静可读的目录里，批量操作只在真的省事时出现。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <AdminMetricCard
-            label="Accounts in view"
+            label="当前视图账号数"
             value={formatNumber(pagination.total)}
-            detail="Search and sort against the current directory view."
+            detail="按当前搜索和排序条件统计。"
             tone="accent"
           />
           <AdminMetricCard
-            label="Blocked accounts"
+            label="已封禁账号"
             value={formatNumber(blockedCount)}
-            detail="Readers currently restricted in this result set."
+            detail="当前结果里被限制访问的账号数量。"
           />
           <AdminMetricCard
-            label="Wallet balance"
+            label="钱包余额"
             value={formatNumber(walletBalance)}
-            detail="Combined paid and bonus points for the visible accounts."
+            detail="当前视图内账号的付费点数和赠送点数总和。"
           />
         </div>
 
@@ -217,19 +217,19 @@ export default function AdminUsersPage() {
         />
 
         <AdminPageSection
-          title="Reader directory"
-          description="Search by email or account ID, then handle status changes without turning the page into a noisy CRM."
+          title="读者目录"
+          description="按邮箱或账号 ID 搜索，再处理状态变更，不把页面做成吵闹的 CRM。"
         >
           <AdminListToolbar
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            searchPlaceholder="Search by account ID or email..."
+            searchPlaceholder="搜索账号 ID 或邮箱..."
             onOpenFilters={() => setIsSortModalOpen(true)}
             sortOrder={sortOrder}
             onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            filtersLabel="Sort"
-            ascendingLabel="Oldest first"
-            descendingLabel="Newest first"
+            filtersLabel="排序"
+            ascendingLabel="最早创建优先"
+            descendingLabel="最新创建优先"
           />
 
           <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
@@ -240,7 +240,7 @@ export default function AdminUsersPage() {
               disabled={selectedIds.length === 0 || bulkBlockMutation.isPending}
             >
               <ShieldX className="size-4" />
-              {bulkBlockMutation.isPending ? 'Blocking...' : 'Block'}
+              {bulkBlockMutation.isPending ? '封禁中...' : '封禁'}
             </Button>
             <Button
               type="button"
@@ -249,7 +249,7 @@ export default function AdminUsersPage() {
               disabled={selectedIds.length === 0 || bulkUnblockMutation.isPending}
             >
               <ShieldOff className="size-4" />
-              {bulkUnblockMutation.isPending ? 'Restoring...' : 'Unblock'}
+              {bulkUnblockMutation.isPending ? '恢复中...' : '恢复'}
             </Button>
             <Button
               type="button"
@@ -258,17 +258,17 @@ export default function AdminUsersPage() {
               disabled={selectedIds.length === 0 || bulkDeleteMutation.isPending}
             >
               <Trash2 className="size-4" />
-              {bulkDeleteMutation.isPending ? 'Removing...' : 'Delete'}
+              {bulkDeleteMutation.isPending ? '删除中...' : '删除'}
             </Button>
           </AdminSelectionBar>
 
           <AdminTableShell
             isError={isError}
-            errorMessage={error?.message || 'The user directory could not be loaded.'}
+            errorMessage={error?.message || '用户目录加载失败。'}
             onRetry={refetch}
             isLoading={isLoading}
             hasItems={users.length > 0}
-            emptyMessage="No users match this view yet."
+            emptyMessage="当前视图下还没有匹配的用户。"
             pagination={pagination}
             page={page}
             pageSize={pageSize}
@@ -282,7 +282,7 @@ export default function AdminUsersPage() {
                     <th className="px-4 py-4">
                       <input
                         type="checkbox"
-                        aria-label="Select all users"
+                        aria-label="选择全部用户"
                         checked={users.length > 0 && selectedIds.length === users.length}
                         onChange={(event) => {
                           if (event.target.checked) {
@@ -294,11 +294,11 @@ export default function AdminUsersPage() {
                         className="h-4 w-4 rounded border-black/20 bg-transparent"
                       />
                     </th>
-                    <th className="px-4 py-4">Account</th>
-                    <th className="px-4 py-4">Joined</th>
-                    <th className="px-4 py-4">Status</th>
-                    <th className="px-4 py-4">Wallet</th>
-                    <th className="px-4 py-4">Actions</th>
+                    <th className="px-4 py-4">账号</th>
+                    <th className="px-4 py-4">加入时间</th>
+                    <th className="px-4 py-4">状态</th>
+                    <th className="px-4 py-4">钱包</th>
+                    <th className="px-4 py-4">操作</th>
                   </tr>
                 </AdminTableHeader>
                 <tbody>
@@ -307,7 +307,7 @@ export default function AdminUsersPage() {
                       <td className="px-4 py-4">
                         <input
                           type="checkbox"
-                          aria-label={`Select user ${user.id}`}
+                          aria-label={`选择用户 ${user.id}`}
                           checked={selectedIdsSet.has(user.id)}
                           onChange={() => toggleSelect(user.id)}
                           className="h-4 w-4 rounded border-black/20 bg-transparent"
@@ -315,20 +315,20 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-4">
                         <div className="space-y-1">
-                          <p className="font-semibold text-slate-950">{user.email || 'No email listed'}</p>
+                          <p className="font-semibold text-slate-950">{user.email || '未填写邮箱'}</p>
                           <p className="text-xs text-slate-500">{user.id}</p>
                         </div>
                       </td>
                       <td className="px-4 py-4 text-slate-600">{formatDate(user.createdAt)}</td>
                       <td className="px-4 py-4">
                         <AdminBadge tone={user.isBlocked ? 'danger' : 'success'}>
-                          {user.isBlocked ? 'Blocked' : 'Active'}
+                          {user.isBlocked ? '已封禁' : '正常'}
                         </AdminBadge>
                       </td>
                       <td className="px-4 py-4">
                         <div className="space-y-1 text-sm text-slate-600">
-                          <p>Paid: {formatNumber(user.wallet?.paidPts || 0)}</p>
-                          <p>Bonus: {formatNumber(user.wallet?.bonusPts || 0)}</p>
+                          <p>付费点数：{formatNumber(user.wallet?.paidPts || 0)}</p>
+                          <p>赠送点数：{formatNumber(user.wallet?.bonusPts || 0)}</p>
                         </div>
                       </td>
                       <td className="px-4 py-4">
@@ -339,7 +339,7 @@ export default function AdminUsersPage() {
                           onClick={() => userBlockMutation.mutate({ userId: user.id, blocked: !user.isBlocked })}
                           disabled={userBlockMutation.isPending}
                         >
-                          {user.isBlocked ? 'Unblock' : 'Block'}
+                          {user.isBlocked ? '恢复' : '封禁'}
                         </Button>
                       </td>
                     </AdminTableRow>
@@ -351,27 +351,27 @@ export default function AdminUsersPage() {
         </AdminPageSection>
 
         <AdminPageSection
-          title="What this page is for"
-          description="Keep user operations small and direct. The page should answer who the account belongs to, whether access is restricted, and what wallet state needs attention."
+          title="这个页面负责什么"
+          description="用户后台就回答三件事：这是谁、能不能正常使用、钱包状态有没有需要处理的地方。"
           accent="amber"
         >
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
               <p className="text-sm font-semibold text-slate-950">Status first</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Block and unblock actions stay visible, but quiet, so moderation work does not dominate the whole page.
+                封禁和恢复按钮保持可见，但不过度抢戏，让处理动作不至于压过账号信息本身。
               </p>
             </div>
             <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
-              <p className="text-sm font-semibold text-slate-950">No CRM sprawl</p>
+              <p className="text-sm font-semibold text-slate-950">不要做成 CRM</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                We keep the table focused on account identity, wallet state, and reader access rather than building a noisy sales console.
+                这里不做销售控制台，只保留账号身份、钱包状态和访问状态这些真正有用的信息。
               </p>
             </div>
             <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
               <p className="text-sm font-semibold text-slate-950">Bulk when helpful</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Bulk actions appear only after selection so the default page stays calm and readable.
+                批量操作只在选中后出现，默认页面先保持安静、清楚、好扫一眼。
               </p>
             </div>
           </div>
@@ -384,17 +384,17 @@ export default function AdminUsersPage() {
         sortBy={sortBy}
         onSortByChange={setSortBy}
         options={sortOptions}
-        title="Sort users"
-        label="Sort by"
-        actionLabel="Done"
+        title="排序用户"
+        label="排序方式"
+        actionLabel="完成"
       />
 
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        title="Delete selected users"
-        message={`Remove ${selectedIds.length} selected account${selectedIds.length === 1 ? '' : 's'}? This action cannot be undone.`}
-        confirmText="Delete users"
-        cancelText="Cancel"
+        title="删除所选用户"
+        message={`确定删除 ${selectedIds.length} 个已选账号吗？此操作无法撤销。`}
+        confirmText="删除用户"
+        cancelText="取消"
         isDangerous={true}
         isLoading={bulkDeleteMutation.isPending}
         onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}

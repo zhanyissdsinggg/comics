@@ -25,26 +25,20 @@ import Skeleton from "../common/Skeleton";
 import { adminFetchJson } from "../../lib/adminApiClient";
 import { buildAdminCreatorAudit } from "../../lib/adminCreatorAudit";
 
-function toNumber(value) {
+function formatPercent(value) {
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function formatCompactCount(value) {
-  return new Intl.NumberFormat("zh-CN", {
-    notation: value >= 1000 ? "compact" : "standard",
-    maximumFractionDigits: value >= 1000 ? 1 : 0,
-  }).format(Math.max(0, toNumber(value)));
+  const safeValue = Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
+  return `${safeValue}%`;
 }
 
 function formatDateLabel(value) {
   if (!value) {
-    return "No recent update";
+    return "暂无更新时间";
   }
 
   const parsed = Date.parse(value);
   if (Number.isNaN(parsed)) {
-    return "No recent update";
+    return "暂无更新时间";
   }
 
   return new Intl.DateTimeFormat("zh-CN", {
@@ -55,24 +49,36 @@ function formatDateLabel(value) {
 }
 
 function getErrorMessage(data, response) {
-  return data?.message || data?.error || `Request failed with status ${response.status}.`;
+  return data?.message || data?.error || `请求失败，状态码 ${response.status}。`;
 }
 
 function formatSeriesStatusLabel(value) {
   const normalized = String(value || "").trim().toLowerCase();
   if (normalized === "completed") {
-    return "Completed";
+    return "已完结";
   }
   if (normalized === "ongoing") {
-    return "Ongoing";
+    return "连载中";
   }
   if (normalized === "hiatus") {
-    return "Hiatus";
+    return "休更中";
   }
   if (normalized === "cancelled") {
-    return "Cancelled";
+    return "已下线";
   }
-  return String(value || "Status not set").trim() || "Status not set";
+  return String(value || "状态待补充").trim() || "状态待补充";
+}
+
+function getSeriesMetadataSummary(series) {
+  const genreCount = (Array.isArray(series?.genres) ? series.genres : [])
+    .map((genre) => String(genre || "").trim())
+    .filter(Boolean).length;
+
+  return [
+    series?.coverUrl ? "封面已就绪" : "封面待补",
+    String(series?.description || "").trim() ? "简介已填写" : "简介待补",
+    genreCount > 0 ? `${genreCount} 个标签` : "标签待补",
+  ].join(" · ");
 }
 
 function ActionButton({ children, className = "", ...props }) {
@@ -164,8 +170,8 @@ function StatusPill({ children, tone = "slate" }) {
 function LoadingView() {
   return (
     <AdminShell
-      title="Creators"
-      subtitle="Review creator naming, public credit coverage, and the titles that still need attribution."
+      title="创作者"
+      subtitle="核对创作者命名、公开署名覆盖率，以及仍待补齐署名的作品。"
     >
       <div className="space-y-6">
         <Skeleton className="h-48 rounded-[32px]" />
@@ -234,7 +240,7 @@ export default function AdminCreatorsPage() {
         }
 
         setSeriesList([]);
-        setError(loadError instanceof Error ? loadError.message : "Failed to load creator audit data.");
+        setError(loadError instanceof Error ? loadError.message : "创作者巡检数据加载失败。");
         setLoading(false);
       }
     }
@@ -358,7 +364,7 @@ export default function AdminCreatorsPage() {
       setCopyFeedback({
         slug: String(creator?.slug || ""),
         type: "error",
-        message: "No canonical creator name was available to copy.",
+        message: "当前没有可复制的规范创作者名称。",
       });
       return;
     }
@@ -367,7 +373,7 @@ export default function AdminCreatorsPage() {
       setCopyFeedback({
         slug: String(creator?.slug || ""),
         type: "error",
-        message: "Clipboard copy is not available in this browser.",
+        message: "当前浏览器不支持剪贴板复制。",
       });
       return;
     }
@@ -377,13 +383,13 @@ export default function AdminCreatorsPage() {
       setCopyFeedback({
         slug: String(creator?.slug || ""),
         type: "success",
-        message: `Copied canonical creator name: ${canonicalName}`,
+        message: `已复制规范创作者名称：${canonicalName}`,
       });
     } catch {
       setCopyFeedback({
         slug: String(creator?.slug || ""),
         type: "error",
-        message: "Copy failed. Please try again.",
+        message: "复制失败，请稍后重试。",
       });
     }
   };
@@ -394,14 +400,14 @@ export default function AdminCreatorsPage() {
 
   return (
     <AdminShell
-      title="Creators"
-      subtitle="Keep naming, studio credits, and title attribution strong enough for a truthful public creator layer."
+      title="创作者"
+      subtitle="把命名、团队署名和作品归属补扎实，后台和前台的创作者层才会可信。"
       actions={
         <div className="flex flex-wrap gap-2">
-          <ActionButton onClick={() => router.push("/admin/series")}>Open series list</ActionButton>
+          <ActionButton onClick={() => router.push("/admin/series")}>打开作品列表</ActionButton>
           <ActionButton onClick={() => handleOpenCreator("/creators")}>
             <Eye className="h-4 w-4" />
-            View live creators page
+            查看前台创作者页
           </ActionButton>
         </div>
       }
@@ -409,7 +415,7 @@ export default function AdminCreatorsPage() {
       <div className="space-y-6">
         {error ? (
           <div className="rounded-[24px] border border-rose-200 bg-rose-50/90 px-5 py-4 text-sm text-rose-700 shadow-[var(--gush-shadow-soft)]">
-            Creator audit failed to load: {error}
+            创作者巡检加载失败：{error}
           </div>
         ) : null}
 
@@ -430,37 +436,36 @@ export default function AdminCreatorsPage() {
           <div className="grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_280px]">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                Creator identity
+                创作者身份
               </p>
               <h2 className="mt-3 text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.45rem]">
-                Finish attribution first, then clean naming.
+                先补齐署名，再收命名。
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                This page turns public creator credit into an operational workspace. Start with the titles
-                that still have no public credit, then merge duplicate spellings so the live creator layer
-                can stay readable and trustworthy.
+                这个页面把公开创作者署名变成可执行的后台工作台。先处理还没有公开署名的作品，
+                再合并重复拼写，前台创作者层才会清楚、稳定、可信。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
-                <StatusPill tone="blue">Content-first admin</StatusPill>
+                <StatusPill tone="blue">内容优先后台</StatusPill>
                 <StatusPill tone="amber">
-                  {audit.stats.missingAuthorSeriesCount} titles still need creator credit
+                  仍有 {audit.stats.missingAuthorSeriesCount} 部作品缺少创作者署名
                 </StatusPill>
                 <StatusPill tone={audit.stats.namingRiskCreatorCount > 0 ? "rose" : "emerald"}>
-                  {audit.stats.namingRiskCreatorCount} naming risks
+                  {audit.stats.namingRiskCreatorCount} 处命名风险
                 </StatusPill>
               </div>
             </div>
 
             <div className="rounded-[24px] border border-[rgba(47,88,198,0.14)] bg-white/86 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                Coverage
+                覆盖率
               </p>
               <p className="mt-3 text-[2.4rem] font-semibold tracking-tight text-slate-950">
                 {coverageRate}%
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {audit.stats.attributedSeriesCount} of {audit.stats.totalSeries} titles already have public
-                creator identity that can flow into live creator pages and series headers.
+                {audit.stats.totalSeries} 部作品里，已有 {audit.stats.attributedSeriesCount} 部具备可进入前台
+                创作者页和作品头部的公开创作者身份。
               </p>
             </div>
           </div>
@@ -468,27 +473,27 @@ export default function AdminCreatorsPage() {
 
         <div className="grid gap-4 lg:grid-cols-4">
           <MetricCard
-            title="Creator entries"
+            title="创作者条目"
             value={audit.stats.creatorCount.toLocaleString()}
-            hint="Unique creator or studio entries currently strong enough to aggregate."
+            hint="目前已经足够稳定、可以被聚合展示的创作者或团队条目。"
             tone="blue"
           />
           <MetricCard
-            title="Attributed titles"
+            title="已挂署名作品"
             value={audit.stats.attributedSeriesCount.toLocaleString()}
-            hint="Titles already connected to a public-facing creator identity."
+            hint="已经接入公开创作者身份的作品数量。"
             tone="emerald"
           />
           <MetricCard
-            title="Missing credits"
+            title="待补署名"
             value={audit.stats.missingAuthorSeriesCount.toLocaleString()}
-            hint="These titles still cannot participate in creator-led discovery."
+            hint="这些作品暂时还无法进入创作者导向的发现流。"
             tone="amber"
           />
           <MetricCard
-            title="Naming cleanup"
+            title="命名清理"
             value={audit.stats.namingRiskCreatorCount.toLocaleString()}
-            hint="Multiple spellings can fragment the live creator directory."
+            hint="同一创作者出现多种拼写，会把前台目录拆散。"
             tone="rose"
           />
         </div>
@@ -497,14 +502,14 @@ export default function AdminCreatorsPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                Filter the creator directory
+                筛选创作者目录
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Search by creator name, series title, or genre, then handle the riskiest credit issues first.
+                可以按创作者名、作品标题或题材搜索，优先处理风险最高的署名问题。
               </p>
             </div>
             <p className="text-sm text-slate-500">
-              {filteredCreators.length.toLocaleString()} creator entries in view
+              当前共显示 {filteredCreators.length.toLocaleString()} 个创作者条目
             </p>
           </div>
 
@@ -513,17 +518,17 @@ export default function AdminCreatorsPage() {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search creator, studio, title, or genre"
+              placeholder="搜索创作者、团队、作品标题或题材"
               className="w-full rounded-full border border-black/8 bg-white px-11 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
             />
           </label>
 
           <div className="flex flex-wrap gap-2">
             {[
-              { id: "all", label: "All creators" },
-              { id: "naming-risk", label: "Naming cleanup" },
-              { id: "with-unpublished", label: "Includes drafts" },
-              { id: "published-clean", label: "Published and clean" },
+              { id: "all", label: "全部创作者" },
+              { id: "naming-risk", label: "命名待清理" },
+              { id: "with-unpublished", label: "含草稿作品" },
+              { id: "published-clean", label: "已发布且稳定" },
             ].map((item) => (
               <PillButton
                 key={item.id}
@@ -541,11 +546,10 @@ export default function AdminCreatorsPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                  Naming cleanup
+                  命名清理
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Clean these first so the live creator directory does not split one creator into multiple
-                  public entries.
+                  先处理这里，避免前台创作者目录把同一人拆成多个公开条目。
                 </p>
               </div>
               <AlertTriangle className="mt-1 h-5 w-5 text-amber-500" />
@@ -553,8 +557,8 @@ export default function AdminCreatorsPage() {
 
             {namingRiskPreview.length === 0 ? (
               <EmptyState
-                title="No naming conflicts right now"
-                description="Creator naming is stable enough that the public directory should not split traffic."
+                title="当前没有命名冲突"
+                description="现有创作者命名已经足够稳定，前台目录不会被拆散。"
               />
             ) : (
               <div className="space-y-3">
@@ -567,11 +571,11 @@ export default function AdminCreatorsPage() {
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-base font-semibold text-slate-950">{creator.name}</p>
-                          <StatusPill tone="amber">{creator.variants.length} spellings found</StatusPill>
+                          <StatusPill tone="amber">发现 {creator.variants.length} 种写法</StatusPill>
                         </div>
                         <p className="text-sm leading-6 text-slate-600">
-                          Connected to {creator.titleCount} titles, with {creator.publishedCount} live and{" "}
-                          {creator.unpublishedCount} still unpublished.
+                          关联 {creator.titleCount} 部作品，其中 {creator.publishedCount} 部已发布，
+                          {creator.unpublishedCount} 部仍是草稿。
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {creator.variants.map((variant) => (
@@ -585,13 +589,13 @@ export default function AdminCreatorsPage() {
                       <div className="flex flex-wrap gap-2">
                         <ActionButton onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}>
                           <Edit3 className="h-4 w-4" />
-                          Edit lead title
+                          编辑代表作品
                         </ActionButton>
                         <ActionButton onClick={() => handleCopyCreatorName(creator)}>
                           <Copy className="h-4 w-4" />
                           {copyFeedback.slug === creator.slug && copyFeedback.type === "success"
-                            ? "Copied"
-                            : "Copy canonical name"}
+                            ? "已复制"
+                            : "复制规范名称"}
                         </ActionButton>
                       </div>
                     </div>
@@ -605,11 +609,10 @@ export default function AdminCreatorsPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                  Titles missing creator credit
+                  缺少创作者署名的作品
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  These titles still do not have public creator identity for the live series page or the
-                  creator discovery layer.
+                  这些作品还没有可用于前台作品页和创作者发现层的公开创作者身份。
                 </p>
               </div>
               <Users className="mt-1 h-5 w-5 text-cyan-500" />
@@ -617,8 +620,8 @@ export default function AdminCreatorsPage() {
 
             {missingCreatorPreview.length === 0 ? (
               <EmptyState
-                title="No missing creator credits"
-                description="The current title set already has enough creator coverage for the public layer."
+                title="当前没有缺失署名"
+                description="现有作品集在创作者覆盖上已经能支撑前台展示。"
               />
             ) : (
               <div className="space-y-3">
@@ -632,18 +635,18 @@ export default function AdminCreatorsPage() {
                         <p className="text-base font-semibold text-slate-950">{series.title}</p>
                         <StatusPill tone="slate">{series.id}</StatusPill>
                         <StatusPill tone={series.isPublished ? "emerald" : "amber"}>
-                          {series.isPublished ? "Live" : "Draft"}
+                          {series.isPublished ? "已发布" : "草稿"}
                         </StatusPill>
                       </div>
                       <p className="text-sm leading-6 text-slate-600">
-                        {series.type === "novel" ? "Novel" : "Comic"} | {formatSeriesStatusLabel(series.status)} |
-                        {" "}Updated {formatDateLabel(series.updatedAt)}
+                        {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)} |
+                        {" "}更新于 {formatDateLabel(series.updatedAt)}
                       </p>
                     </div>
 
                     <ActionButton onClick={() => handleOpenSeries(series.id)}>
                       <Edit3 className="h-4 w-4" />
-                      Add creator credit
+                      补创作者署名
                     </ActionButton>
                   </div>
                 ))}
@@ -656,23 +659,21 @@ export default function AdminCreatorsPage() {
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                Creator directory
+                创作者目录
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Review public-facing creator entries with coverage, naming, publication state, and live page
-                paths in one place.
+                把公开创作者条目的覆盖率、命名状态、发布情况和前台路径放在一个地方统一核对。
               </p>
             </div>
             <p className="text-sm text-slate-500">
-              {audit.stats.unpublishedSeriesCount} draft titles and {audit.stats.namingRiskCreatorCount} naming
-              risks still need attention
+              还有 {audit.stats.unpublishedSeriesCount} 部草稿作品和 {audit.stats.namingRiskCreatorCount} 处命名风险需要处理
             </p>
           </div>
 
           {filteredCreators.length === 0 ? (
             <EmptyState
-              title="No creator entries match this view"
-              description="Clear the search or switch back to All creators to see the full directory."
+              title="当前筛选下没有匹配的创作者条目"
+              description="清空搜索词，或切回“全部创作者”查看完整目录。"
             />
           ) : (
             <div className="grid gap-4 xl:grid-cols-2">
@@ -691,13 +692,13 @@ export default function AdminCreatorsPage() {
                             {creator.name}
                           </h3>
                           <StatusPill tone={creator.hasNamingRisk ? "amber" : "emerald"}>
-                            {creator.hasNamingRisk ? "Naming cleanup needed" : "Naming stable"}
+                            {creator.hasNamingRisk ? "命名待清理" : "命名稳定"}
                           </StatusPill>
                         </div>
 
                         <p className="text-sm leading-6 text-slate-600">
-                          Lead title: {creator.spotlightSeries?.title || "Not set"} | Last updated{" "}
-                          {formatDateLabel(creator.latestUpdatedAt)}
+                          代表作品：{creator.spotlightSeries?.title || "暂未设置"} | 前台已就绪{" "}
+                          {creator.readySeriesCount} 部 | 最近更新于 {formatDateLabel(creator.latestUpdatedAt)}
                         </p>
 
                         {creator.topGenres.length > 0 ? (
@@ -714,29 +715,29 @@ export default function AdminCreatorsPage() {
                       <div className="grid min-w-[220px] gap-3 sm:grid-cols-2">
                         <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Titles
+                            作品数
                           </p>
                           <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.titleCount}</p>
                         </div>
                         <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Reader signal
+                            资料完整度
                           </p>
                           <p className="mt-2 text-2xl font-semibold text-slate-950">
-                            {formatCompactCount(creator.readerProof)}
+                            {formatPercent(creator.metadataCoverageScore)}
                           </p>
                         </div>
                         <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Live
+                            已发布
                           </p>
                           <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.publishedCount}</p>
                         </div>
                         <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Drafts
+                            前台已就绪
                           </p>
-                          <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.unpublishedCount}</p>
+                          <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.readySeriesCount}</p>
                         </div>
                       </div>
                     </div>
@@ -744,7 +745,7 @@ export default function AdminCreatorsPage() {
                     {creator.variants.length > 1 ? (
                       <div className="mt-4 rounded-[24px] border border-amber-200 bg-amber-50/70 px-4 py-4">
                         <p className="text-sm font-semibold text-amber-900">
-                          Merge these spellings into one public-facing creator name:
+                          请把这些写法合并成一个稳定的公开创作者名称：
                         </p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {creator.variants.map((variant) => (
@@ -759,31 +760,31 @@ export default function AdminCreatorsPage() {
                     <div className="mt-5 flex flex-wrap gap-2">
                       <ActionButton onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}>
                         <Edit3 className="h-4 w-4" />
-                        Edit lead title
+                        编辑代表作品
                       </ActionButton>
                       <ActionButton onClick={() => handleOpenSeriesLibraryByCreator(creator.name)}>
                         <Search className="h-4 w-4" />
-                        Search series library
+                        在作品库中搜索
                       </ActionButton>
                       <ActionButton onClick={() => handleCopyCreatorName(creator)}>
                         <Copy className="h-4 w-4" />
                         {copyFeedback.slug === creator.slug && copyFeedback.type === "success"
-                          ? "Copied"
-                          : "Copy canonical name"}
+                          ? "已复制"
+                          : "复制规范名称"}
                       </ActionButton>
                       <ActionButton onClick={() => handleOpenCreator(creator.path)}>
                         <Eye className="h-4 w-4" />
-                        Open live creator page
+                        打开前台创作者页
                       </ActionButton>
                       {creator.spotlightSeries?.id ? (
                         <ActionButton onClick={() => handleOpenStorefrontSeries(creator.spotlightSeries.id)}>
                           <ArrowUpRight className="h-4 w-4" />
-                          View live lead title
+                          查看前台代表作品
                         </ActionButton>
                       ) : null}
                       <ActionButton onClick={() => handleToggleCreatorExpanded(creator.slug)}>
                         {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        {isExpanded ? "Hide related titles" : `Show related titles (${creator.titleCount})`}
+                        {isExpanded ? "收起关联作品" : `查看关联作品（${creator.titleCount}）`}
                       </ActionButton>
                     </div>
 
@@ -791,14 +792,13 @@ export default function AdminCreatorsPage() {
                       <div className="mt-4 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.62)] p-4">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                           <div>
-                            <p className="text-sm font-semibold text-slate-950">Related titles</p>
+                            <p className="text-sm font-semibold text-slate-950">关联作品</p>
                             <p className="mt-1 text-sm leading-6 text-slate-600">
-                              Use this list to clean title-level credit fields and double-check the live series
-                              pages.
+                              用这份清单继续清理作品级署名字段，并复核前台作品页是否已经跟上。
                             </p>
                           </div>
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            {creator.series.length} titles
+                            共 {creator.series.length} 部
                           </p>
                         </div>
 
@@ -813,31 +813,29 @@ export default function AdminCreatorsPage() {
                                   <p className="text-base font-semibold text-slate-950">{series.title}</p>
                                   <StatusPill tone="slate">{series.id}</StatusPill>
                                   <StatusPill tone={series.isPublished ? "emerald" : "amber"}>
-                                    {series.isPublished ? "Live" : "Draft"}
+                                    {series.isPublished ? "已发布" : "草稿"}
                                   </StatusPill>
                                 </div>
                                 <p className="text-sm leading-6 text-slate-600">
-                                  {series.type === "novel" ? "Novel" : "Comic"} |{" "}
-                                  {formatSeriesStatusLabel(series.status)} | Updated{" "}
+                                  {series.type === "novel" ? "小说" : "漫画"} |{" "}
+                                  {formatSeriesStatusLabel(series.status)} | 更新于{" "}
                                   {formatDateLabel(series.updatedAt)}
                                 </p>
                                 <p className="text-sm leading-6 text-slate-600">
-                                  Current raw author field:{" "}
-                                  <span className={series.author ? "text-slate-950" : "font-medium text-amber-700"}>
-                                    {series.author || "Not filled yet"}
-                                  </span>
+                                  资料状态：{" "}
+                                  <span className="text-slate-950">{getSeriesMetadataSummary(series)}</span>
                                 </p>
                               </div>
 
                               <div className="flex flex-wrap gap-2">
                                 <ActionButton onClick={() => handleOpenSeries(series.id)}>
                                   <Edit3 className="h-4 w-4" />
-                                  Edit title
+                                  编辑作品
                                 </ActionButton>
                                 {series.isPublished ? (
                                   <ActionButton onClick={() => handleOpenStorefrontSeries(series.id)}>
                                     <ArrowUpRight className="h-4 w-4" />
-                                    View live page
+                                    查看前台页
                                   </ActionButton>
                                 ) : null}
                               </div>
@@ -854,8 +852,8 @@ export default function AdminCreatorsPage() {
 
           {audit.creators.length === 0 && audit.missingAuthorSeries.length === 0 ? (
             <EmptyState
-              title="No creator data yet"
-              description="Add creator credit on series detail pages first so the admin and public creator layers can start to form."
+              title="当前还没有创作者数据"
+              description="先到作品详情页补创作者署名，后台和前台的创作者层才能开始成形。"
             />
           ) : null}
         </SurfacePanel>
@@ -864,23 +862,21 @@ export default function AdminCreatorsPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                Recommended order
+                建议处理顺序
               </p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                Start with missing creator credits, then merge naming variants, then spot-check the live
-                creator pages. That order produces the fastest public improvement with the least editorial
-                churn.
+                先补缺失署名，再合并命名变体，最后抽查前台创作者页。这条顺序最容易用最小编辑成本换来最快的前台提升。
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
               <StatusPill tone="emerald">
                 <CheckCircle2 className="mr-2 h-4 w-4" />
-                Fill missing credits first
+                先补缺失署名
               </StatusPill>
               <StatusPill tone="amber">
                 <BookOpen className="mr-2 h-4 w-4" />
-                Then standardize naming
+                再统一命名
               </StatusPill>
             </div>
           </div>

@@ -9,10 +9,10 @@ import AdminBrandingPage from '../../../components/admin/AdminBrandingPage';
 export default function BrandingPage() {
   return (
     <AdminLayout
-      title="Branding"
-      subtitle="Adjust the shared product assets, logos, and artwork that shape the reader-facing brand."
+      title="品牌配置"
+      subtitle="统一调整会影响前台观感的共享素材、Logo 和主视觉资源。"
     >
-      <Suspense fallback={<div className="text-sm text-slate-500">Loading branding settings...</div>}>
+      <Suspense fallback={<div className="text-sm text-slate-500">正在加载品牌配置...</div>}>
         <AdminBrandingPage />
       </Suspense>
     </AdminLayout>

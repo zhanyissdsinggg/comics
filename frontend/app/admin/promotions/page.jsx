@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,19 +36,19 @@ const sortFields = [
 ];
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created time' },
-  { value: 'title', label: 'Title' },
-  { value: 'active', label: 'Status' },
+  { value: 'createdAt', label: '创建时间' },
+  { value: 'title', label: '标题' },
+  { value: 'active', label: '状态' },
 ];
 
 function formatDate(value) {
   if (!value) {
-    return 'Not available';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Not available';
+    return '暂无';
   }
 
   return new Intl.DateTimeFormat('zh-CN', {
@@ -59,7 +59,7 @@ function formatDate(value) {
 }
 
 function getStatusLabel(isActive) {
-  return isActive ? 'Active' : 'Paused';
+  return isActive ? '进行中' : '已暂停';
 }
 
 function getStatusTone(isActive) {
@@ -104,11 +104,11 @@ export default function AdminPromotionsPage() {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: 'The selected promotions were removed.' });
+      setFeedback({ type: 'success', message: '已删除所选活动。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Could not remove the selected promotions: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `删除所选活动失败：${mutationError.message}` });
     },
   });
 
@@ -120,7 +120,7 @@ export default function AdminPromotionsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Could not update the promotion status.'));
+        throw new Error(await readAdminResponseMessage(response, '更新活动状态失败。'));
       }
 
       return response.json();
@@ -128,37 +128,37 @@ export default function AdminPromotionsPage() {
     onSuccess: (_data, variables) => {
       setFeedback({
         type: 'success',
-        message: variables.currentStatus ? 'The promotion was paused.' : 'The promotion is now active.',
+        message: variables.currentStatus ? '活动已暂停。' : '活动已启用。',
       });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `Could not update the promotion status: ${mutationError.message}` });
+      setFeedback({ type: 'error', message: `更新活动状态失败：${mutationError.message}` });
     },
   });
 
   return (
     <AdminShell
-      title="Promotions"
-      subtitle="Keep promotions understandable: what is live, what is paused, and what readers might still feel across the storefront."
+      title="活动运营"
+      subtitle="先看清哪些活动还在线、哪些已暂停，以及读者当前在前台还会感知到什么。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <AdminMetricCard
-            label="Promotions in view"
+            label="当前活动"
             value={String(pagination.total)}
-            detail="The current list after search and sorting."
+            detail="当前搜索和排序条件下的活动数量。"
             tone="accent"
           />
           <AdminMetricCard
-            label="Active"
+            label="进行中"
             value={String(activeCount)}
-            detail="Promotions that are still marked live in this result set."
+            detail="在当前结果里仍标记为在线的活动。"
           />
           <AdminMetricCard
-            label="Paused"
+            label="已暂停"
             value={String(Math.max(promotions.length - activeCount, 0))}
-            detail="Campaigns that are saved but not actively running."
+            detail="已保留但当前没有继续运行的活动。"
           />
         </div>
 
@@ -168,13 +168,13 @@ export default function AdminPromotionsPage() {
         />
 
         <AdminPageSection
-          title="Promotion list"
-          description="Use a simple status view first. The page should tell you what the campaign is, whether it is live, and what action comes next."
+          title="活动列表"
+          description="先用一个简单状态视图看清活动是什么、现在是否在线，以及接下来应该做什么。"
         >
           <AdminListToolbar
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
-            searchPlaceholder="Search promotion ID or title"
+            searchPlaceholder="搜索活动 ID 或标题"
             onOpenFilters={() => setIsSortModalOpen(true)}
             sortOrder={sortOrder}
             onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -188,17 +188,17 @@ export default function AdminPromotionsPage() {
               onClick={() => setIsDeleteConfirmOpen(true)}
               disabled={bulkDeleteMutation.isPending}
             >
-              {bulkDeleteMutation.isPending ? 'Removing...' : 'Delete promotions'}
+              {bulkDeleteMutation.isPending ? '正在删除...' : '删除活动'}
             </Button>
           </AdminSelectionBar>
 
           <AdminTableShell
             isError={isError}
-            errorMessage={error?.message || 'Promotions could not be loaded.'}
+            errorMessage={error?.message || '活动列表加载失败。'}
             onRetry={refetch}
             isLoading={isLoading}
             hasItems={promotions.length > 0}
-            emptyMessage="No promotions match this view yet."
+            emptyMessage="当前视图下还没有匹配的活动。"
             pagination={pagination}
             page={page}
             pageSize={pageSize}
@@ -221,13 +221,13 @@ export default function AdminPromotionsPage() {
                         clearSelection();
                       }}
                       className="rounded"
-                      aria-label="Select all promotions"
+                      aria-label="选择全部活动"
                     />
                   </th>
-                  <th className="px-4 py-3">Promotion</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Created</th>
-                  <th className="px-4 py-3">Actions</th>
+                  <th className="px-4 py-3">活动</th>
+                  <th className="px-4 py-3">状态</th>
+                  <th className="px-4 py-3">创建时间</th>
+                  <th className="px-4 py-3">操作</th>
                 </tr>
               </AdminTableHeader>
               <tbody>
@@ -245,11 +245,11 @@ export default function AdminPromotionsPage() {
                           checked={selectedIdsSet.has(promotion.id)}
                           onChange={() => toggleSelect(promotion.id)}
                           className="rounded"
-                          aria-label={`Select promotion ${promotion.id}`}
+                          aria-label={`选择活动 ${promotion.id}`}
                         />
                       </td>
                       <td className="px-4 py-4">
-                        <div className="font-medium text-slate-950">{promotion.title || 'Untitled promotion'}</div>
+                        <div className="font-medium text-slate-950">{promotion.title || '未命名活动'}</div>
                         <div className="mt-1 text-xs text-slate-500">{promotion.id}</div>
                       </td>
                       <td className="px-4 py-4">
@@ -269,7 +269,7 @@ export default function AdminPromotionsPage() {
                           }
                           disabled={isUpdating}
                         >
-                          {isUpdating ? 'Updating...' : isActive ? 'Pause' : 'Activate'}
+                          {isUpdating ? '正在更新...' : isActive ? '暂停' : '启用'}
                         </Button>
                       </td>
                     </AdminTableRow>
@@ -286,17 +286,17 @@ export default function AdminPromotionsPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="Sort promotions"
-          label="Sort by"
-          actionLabel="Apply"
+          title="排序活动"
+          label="排序方式"
+          actionLabel="应用"
         />
 
         <ConfirmDialog
           isOpen={isDeleteConfirmOpen}
-          title="Delete promotions"
-          message={`Delete ${selectedIds.length} selected promotion${selectedIds.length === 1 ? '' : 's'}?`}
-          confirmText="Delete"
-          cancelText="Cancel"
+          title="删除活动"
+          message={`确定删除所选 ${selectedIds.length} 个活动吗？`}
+          confirmText="删除"
+          cancelText="取消"
           isDangerous={true}
           isLoading={bulkDeleteMutation.isPending}
           onConfirm={() => bulkDeleteMutation.mutate(selectedIds)}
@@ -306,4 +306,3 @@ export default function AdminPromotionsPage() {
     </AdminShell>
   );
 }
-

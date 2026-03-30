@@ -33,8 +33,8 @@ export default function AdminPage() {
 
   return (
     <AdminShell
-      title="Dashboard"
-      subtitle="A quieter overview of publishing work, discovery readiness, and the operational signals that matter today."
+      title="仪表盘"
+      subtitle="用更克制的方式查看今天最需要处理的出版、发现和运营信号。"
     >
       <AdminDashboardNew />
     </AdminShell>

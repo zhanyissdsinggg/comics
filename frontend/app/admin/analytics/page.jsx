@@ -22,16 +22,16 @@ import { Button } from '@/components/ui/button';
 import { adminFetchJson } from '@/lib/adminApiClient';
 
 const VIEW_TABS = [
-  { value: 'stats', label: 'Overview' },
-  { value: 'segments', label: 'Audience segments' },
-  { value: 'user-detail', label: 'User detail' },
+  { value: 'stats', label: '总览' },
+  { value: 'segments', label: '读者分群' },
+  { value: 'user-detail', label: '用户详情' },
 ];
 
 const SEGMENT_FILTERS = [
-  { key: 'all', label: 'All readers' },
+  { key: 'all', label: '全部读者' },
   { key: 'vip', label: 'VIP' },
-  { key: 'high-value', label: 'High value' },
-  { key: 'at-risk', label: 'At risk' },
+  { key: 'high-value', label: '高价值用户' },
+  { key: 'at-risk', label: '流失风险用户' },
 ];
 
 function getErrorMessage(error, fallbackMessage) {
@@ -62,12 +62,12 @@ function formatPercent(value) {
 
 function formatDate(value) {
   if (!value) {
-    return 'Never';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Not available';
+    return '暂无';
   }
 
   return new Intl.DateTimeFormat('zh-CN', {
@@ -83,19 +83,19 @@ function formatNumber(value) {
 }
 
 function getSegmentLabel(segment) {
-  return SEGMENT_FILTERS.find((item) => item.key === segment)?.label || 'Custom segment';
+  return SEGMENT_FILTERS.find((item) => item.key === segment)?.label || '自定义分群';
 }
 
 function formatChurnRiskLabel(churnRisk) {
   switch (String(churnRisk || '').toLowerCase()) {
     case 'low':
-      return 'Low';
+      return '低';
     case 'medium':
-      return 'Medium';
+      return '中';
     case 'high':
-      return 'High';
+      return '高';
     default:
-      return 'Unknown';
+      return '未知';
   }
 }
 
@@ -116,7 +116,7 @@ async function fetchAdminPayload(path) {
   const { response, data } = await adminFetchJson(path, { cache: 'no-store' });
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || `Request failed with status ${response.status}.`);
+    throw new Error(data?.message || data?.error || `请求失败，状态码 ${response.status}。`);
   }
 
   return data || {};
@@ -201,62 +201,62 @@ export default function AdminUserAnalyticsPage() {
 
   const statsCards = [
     {
-      label: 'Total readers',
+      label: '读者总数',
       value: formatNumber(stats?.totalUsers),
-      detail: 'All registered reader accounts.',
+      detail: '当前已注册的读者账号总量。',
       tone: 'accent',
     },
     {
-      label: 'Active readers',
+      label: '活跃读者',
       value: formatNumber(stats?.activeUsers),
-      detail: 'Accounts active in the current analysis window.',
+      detail: '当前分析窗口内仍有活跃行为的账号。',
     },
     {
-      label: 'Active rate',
+      label: '活跃率',
       value: formatPercent(stats?.activeRate),
-      detail: 'The share of all readers who were recently active.',
+      detail: '最近仍有活跃行为的读者占比。',
     },
     {
-      label: 'High-value readers',
+      label: '高价值读者',
       value: formatNumber(stats?.highValueUsers),
-      detail: 'Accounts that have crossed the LTV threshold.',
+      detail: '已经跨过 LTV 阈值的账号数量。',
     },
     {
-      label: 'At-risk readers',
+      label: '流失风险读者',
       value: formatNumber(stats?.atRiskUsers),
-      detail: 'Readers who may need a retention touch soon.',
+      detail: '近期可能需要留存干预的读者。',
     },
     {
-      label: 'Tracked revenue',
+      label: '已归因收入',
       value: formatCurrency(stats?.totalRevenue),
-      detail: 'Observed spend attributed to the tracked reader base.',
+      detail: '当前已追踪读者样本对应的收入。',
     },
   ];
 
   return (
     <AdminShell
-      title="Dashboard"
-      subtitle="Review the audience picture without turning the page into a loud KPI wall. Start with the overall pulse, then move into segments or a single account when needed."
+      title="用户分析"
+      subtitle="先看整体读者状态，再下钻到分群或单个账号，不把页面做成吵闹的 KPI 墙。"
     >
       <div className="space-y-6">
         <AdminTabs items={VIEW_TABS} value={viewMode} onChange={setViewMode} />
 
         {viewMode === 'stats' ? (
           <AdminPageSection
-            title="Audience overview"
-            description="Track reader scale, activity, value, and retention risk in one calm editorial workspace."
+            title="读者总览"
+            description="在一个克制、清楚的工作区里查看读者规模、活跃情况、价值和流失风险。"
           >
             {statsQuery.isError ? (
               <AdminDataState
                 isLoading={false}
                 hasData={false}
-                emptyMessage={getErrorMessage(statsQuery.error, 'Analytics could not be loaded.')}
+                emptyMessage={getErrorMessage(statsQuery.error, '分析数据加载失败。')}
               />
             ) : (
               <AdminDataState
                 isLoading={statsQuery.isLoading}
                 hasData={Boolean(stats)}
-                emptyMessage="Analytics data is not available yet."
+                emptyMessage="当前还没有可用的分析数据。"
                 wrap={false}
               >
                 {() => (
@@ -269,27 +269,27 @@ export default function AdminUserAnalyticsPage() {
 
                     <div className="grid gap-4 lg:grid-cols-3">
                       <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
-                        <p className="text-sm font-semibold text-slate-950">Retention watch</p>
+                        <p className="text-sm font-semibold text-slate-950">留存观察</p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                           {Number(stats?.atRiskUsers || 0) > 0
-                            ? `${formatNumber(stats?.atRiskUsers)} readers currently look like they need retention attention.`
-                            : 'No high-risk churn signal is active in the latest snapshot.'}
+                            ? `当前有 ${formatNumber(stats?.atRiskUsers)} 位读者看起来需要尽快做留存处理。`
+                            : '当前最新快照里还没有明显的高风险流失信号。'}
                         </p>
                       </div>
                       <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
-                        <p className="text-sm font-semibold text-slate-950">Revenue density</p>
+                        <p className="text-sm font-semibold text-slate-950">收入密度</p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                           {Number(stats?.highValueUsers || 0) > 0
-                            ? `Average spend across high-value readers is ${formatCurrency((Number(stats?.totalRevenue || 0)) / Number(stats?.highValueUsers || 1))}.`
-                            : 'This note will update once high-value readers are available in the current sample.'}
+                            ? `高价值读者的人均消费约为 ${formatCurrency((Number(stats?.totalRevenue || 0)) / Number(stats?.highValueUsers || 1))}。`
+                            : '等当前数据里出现高价值读者后，这里会自动更新。'}
                         </p>
                       </div>
                       <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
-                        <p className="text-sm font-semibold text-slate-950">Activity pulse</p>
+                        <p className="text-sm font-semibold text-slate-950">活跃脉搏</p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                           {Number(stats?.activeUsers || 0) > 0
-                            ? `${formatNumber(stats?.activeUsers)} readers generated recent activity in the current window.`
-                            : 'No recent activity has been recorded in the latest sample.'}
+                            ? `当前窗口内有 ${formatNumber(stats?.activeUsers)} 位读者产生了近期活跃行为。`
+                            : '最新快照里还没有记录到近期活跃行为。'}
                         </p>
                       </div>
                     </div>
@@ -302,8 +302,8 @@ export default function AdminUserAnalyticsPage() {
 
         {viewMode === 'segments' ? (
           <AdminPageSection
-            title="Audience segments"
-            description="Start with a reader group, then open one account only when you need the deeper story."
+            title="读者分群"
+            description="先从一个读者分群看起，只有在需要更深细节时再打开单个账号。"
           >
             <div className="mb-6 flex flex-wrap gap-2">
               {SEGMENT_FILTERS.map((segment) => (
@@ -327,11 +327,11 @@ export default function AdminUserAnalyticsPage() {
 
             <AdminTableShell
               isError={segmentsQuery.isError}
-              errorMessage={getErrorMessage(segmentsQuery.error, 'Audience segments could not be loaded.')}
+              errorMessage={getErrorMessage(segmentsQuery.error, '读者分群加载失败。')}
               onRetry={() => segmentsQuery.refetch()}
               isLoading={segmentsQuery.isLoading}
               hasItems={users.length > 0}
-              emptyMessage="No users match this segment yet."
+              emptyMessage="当前分群下还没有匹配的用户。"
               pagination={pagination}
               page={page}
               pageSize={pageSize}
@@ -345,13 +345,13 @@ export default function AdminUserAnalyticsPage() {
                 <table className="w-full min-w-[920px]">
                   <AdminTableHeader>
                     <tr>
-                      <th className="px-4 py-4">Reader</th>
-                      <th className="px-4 py-4">Wallet</th>
+                      <th className="px-4 py-4">读者</th>
+                      <th className="px-4 py-4">钱包</th>
                       <th className="px-4 py-4">LTV</th>
-                      <th className="px-4 py-4">Stories viewed</th>
-                      <th className="px-4 py-4">Churn risk</th>
-                      <th className="px-4 py-4">Joined</th>
-                      <th className="px-4 py-4">Actions</th>
+                      <th className="px-4 py-4">浏览作品数</th>
+                      <th className="px-4 py-4">流失风险</th>
+                      <th className="px-4 py-4">加入时间</th>
+                      <th className="px-4 py-4">操作</th>
                     </tr>
                   </AdminTableHeader>
                   <tbody>
@@ -364,7 +364,7 @@ export default function AdminUserAnalyticsPage() {
                           <td className="px-4 py-4">
                             <div className="space-y-1">
                               <p className="font-semibold text-slate-950">
-                                {segmentUser.email || 'Unknown email'}
+                                {segmentUser.email || '未填写邮箱'}
                               </p>
                               <p className="text-xs text-slate-500">{segmentUser.id}</p>
                             </div>
@@ -392,7 +392,7 @@ export default function AdminUserAnalyticsPage() {
                                 setViewMode('user-detail');
                               }}
                             >
-                              Open user
+                              打开用户
                             </Button>
                           </td>
                         </AdminTableRow>
@@ -407,11 +407,11 @@ export default function AdminUserAnalyticsPage() {
 
         {viewMode === 'user-detail' ? (
           <AdminPageSection
-            title="User detail"
-            description={`Review the account behind the current ${getSegmentLabel(selectedSegment)} segment selection.`}
+            title="用户详情"
+            description={`查看当前“${getSegmentLabel(selectedSegment)}”分群里这个账号的具体情况。`}
             action={
               <Button type="button" variant="outline" onClick={() => setViewMode('segments')}>
-                Back to segments
+                返回分群
               </Button>
             }
           >
@@ -419,7 +419,7 @@ export default function AdminUserAnalyticsPage() {
               <AdminDataState
                 isLoading={false}
                 hasData={false}
-                emptyMessage={getErrorMessage(userDetailQuery.error, 'User detail could not be loaded.')}
+                emptyMessage={getErrorMessage(userDetailQuery.error, '用户详情加载失败。')}
               />
             ) : (
               <AdminDataState
@@ -427,8 +427,8 @@ export default function AdminUserAnalyticsPage() {
                 hasData={Boolean(analytics && user)}
                 emptyMessage={
                   selectedUserId
-                    ? 'That user record could not be found.'
-                    : 'Select a reader from the segment table to open the deeper view.'
+                    ? '没有找到这条用户记录。'
+                    : '先从上面的分群表格里选择一个读者，再打开深度视图。'
                 }
                 wrap={false}
               >
@@ -437,64 +437,64 @@ export default function AdminUserAnalyticsPage() {
                     <div className="space-y-6">
                       <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                          Reader profile
+                          用户画像
                         </p>
                         <h3 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-                          {user?.email || 'Unknown email'}
+                          {user?.email || '未填写邮箱'}
                         </h3>
                         <p className="mt-2 text-sm text-slate-500">{user?.id}</p>
 
                         <div className="mt-5 grid gap-4 md:grid-cols-2">
                           <AdminMetricCard
-                            label="Lifetime value"
+                            label="生命周期价值"
                             value={formatCurrency(ltv?.ltv)}
-                            detail={`Average order value: ${formatCurrency(ltv?.avgOrderValue)}`}
+                            detail={`平均订单金额：${formatCurrency(ltv?.avgOrderValue)}`}
                             tone="accent"
                           />
                           <AdminMetricCard
-                            label="Total spend"
+                            label="累计消费"
                             value={formatCurrency(ltv?.totalSpent)}
-                            detail={`${formatNumber(ltv?.totalOrders)} recorded orders`}
+                            detail={`共记录 ${formatNumber(ltv?.totalOrders)} 笔订单`}
                           />
                           <AdminMetricCard
-                            label="Wallet"
+                            label="钱包余额"
                             value={formatNumber(user?.wallet?.coins)}
-                            detail="Current point balance."
+                            detail="当前点数余额。"
                           />
                           <AdminMetricCard
-                            label="Activity score"
+                            label="活跃评分"
                             value={formatNumber(userBehavior?.activityScore)}
-                            detail="Derived from reading and interaction signals."
+                            detail="根据阅读和互动信号计算。"
                           />
                         </div>
                       </div>
 
                       <div className="grid gap-4 lg:grid-cols-2">
                         <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
-                          <p className="text-sm font-semibold text-slate-950">Spend history</p>
+                          <p className="text-sm font-semibold text-slate-950">消费记录</p>
                           <AdminKeyValueList
                             className="mt-4"
                             items={[
-                              { label: 'First order', value: formatDate(ltv?.firstOrderDate) },
-                              { label: 'Latest order', value: formatDate(ltv?.lastOrderDate) },
-                              { label: 'Order count', value: formatNumber(ltv?.totalOrders) },
-                              { label: 'Current segment', value: getSegmentLabel(selectedSegment) },
+                              { label: '首单时间', value: formatDate(ltv?.firstOrderDate) },
+                              { label: '最近订单', value: formatDate(ltv?.lastOrderDate) },
+                              { label: '订单数', value: formatNumber(ltv?.totalOrders) },
+                              { label: '当前分群', value: getSegmentLabel(selectedSegment) },
                             ]}
                           />
                         </div>
                         <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
-                          <p className="text-sm font-semibold text-slate-950">Reading behavior</p>
+                          <p className="text-sm font-semibold text-slate-950">阅读行为</p>
                           <AdminKeyValueList
                             className="mt-4"
                             items={[
-                              { label: 'Stories viewed', value: formatNumber(userBehavior?.seriesViewed) },
+                              { label: '浏览作品数', value: formatNumber(userBehavior?.seriesViewed) },
                               {
-                                label: 'Reading time',
-                                value: `${formatNumber(Math.round(Number(userBehavior?.readingTime || 0) / 60))} min`,
+                                label: '阅读时长',
+                                value: `${formatNumber(Math.round(Number(userBehavior?.readingTime || 0) / 60))} 分钟`,
                               },
-                              { label: 'Comments', value: formatNumber(userBehavior?.commentsCount) },
-                              { label: 'Ratings', value: formatNumber(userBehavior?.ratingsCount) },
-                              { label: 'Bookmarks', value: formatNumber(userBehavior?.bookmarksCount) },
+                              { label: '评论数', value: formatNumber(userBehavior?.commentsCount) },
+                              { label: '评分数', value: formatNumber(userBehavior?.ratingsCount) },
+                              { label: '书签数', value: formatNumber(userBehavior?.bookmarksCount) },
                             ]}
                           />
                         </div>
@@ -505,9 +505,9 @@ export default function AdminUserAnalyticsPage() {
                       <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-sm font-semibold text-slate-950">Retention status</p>
+                            <p className="text-sm font-semibold text-slate-950">留存状态</p>
                             <p className="mt-2 text-sm leading-6 text-slate-600">
-                              Keep this note direct so operators can understand the risk level at a glance.
+                              保持描述直接，让运营一眼就能看出风险程度。
                             </p>
                           </div>
                           <AdminBadge tone={getChurnTone(analytics?.churnRisk)}>
@@ -516,22 +516,22 @@ export default function AdminUserAnalyticsPage() {
                         </div>
                         <p className="mt-4 text-sm leading-7 text-slate-600">
                           {String(analytics?.churnRisk || '').toLowerCase() === 'high'
-                            ? 'This account shows a strong churn signal and likely needs a re-engagement touch soon.'
+                            ? '这个账号已经出现明显流失信号，近期很可能需要重新唤回。'
                             : String(analytics?.churnRisk || '').toLowerCase() === 'medium'
-                              ? 'Activity is softening, so targeted discovery or a lighter promotional touch may help.'
-                              : 'Recent engagement still looks healthy relative to the current retention model.'}
+                              ? '活跃度正在走软，适合补一点更有针对性的发现流或轻量触达。'
+                              : '按当前留存模型看，近期互动还算健康。'}
                         </p>
                       </div>
 
                       <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
-                        <p className="text-sm font-semibold text-slate-950">Quick facts</p>
+                        <p className="text-sm font-semibold text-slate-950">快速信息</p>
                         <AdminKeyValueList
                           className="mt-4"
                           items={[
-                            { label: 'Joined', value: formatDate(user?.createdAt) },
-                            { label: 'Wallet', value: formatNumber(user?.wallet?.coins) },
-                            { label: 'Bonus balance', value: formatNumber(user?.wallet?.bonusCoins) },
-                            { label: 'Last active', value: formatDate(userBehavior?.lastActiveAt) },
+                            { label: '加入时间', value: formatDate(user?.createdAt) },
+                            { label: '钱包余额', value: formatNumber(user?.wallet?.coins) },
+                            { label: '赠送余额', value: formatNumber(user?.wallet?.bonusCoins) },
+                            { label: '最近活跃', value: formatDate(userBehavior?.lastActiveAt) },
                           ]}
                         />
                       </div>

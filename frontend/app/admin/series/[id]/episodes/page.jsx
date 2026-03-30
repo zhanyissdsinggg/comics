@@ -13,7 +13,6 @@ import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { Modal } from '@/components/admin/common/Modal';
 import {
-  AdminBadge,
   AdminDataTable,
   AdminFormField,
   AdminMetricCard,
@@ -30,29 +29,27 @@ const EMPTY_FEEDBACK = { type: '', message: '' };
 const EMPTY_NEW_EPISODE = {
   number: '',
   title: '',
-  pricePts: '0',
   previewFreePages: '0',
+  pricePts: '0',
   ttfEligible: false,
 };
 const EMPTY_BULK_FORM = {
-  pricePts: '',
   previewFreePages: '',
+  pricePts: '',
   ttfEligible: 'unchanged',
 };
 const QUICK_FILTERS = [
-  { id: 'all', label: 'All episodes', filters: { priceType: 'all', previewStatus: 'all', ttfEligible: 'all' } },
-  { id: 'paid', label: 'Paid', filters: { priceType: 'paid', previewStatus: 'all', ttfEligible: 'all' } },
-  { id: 'free', label: 'Free', filters: { priceType: 'free', previewStatus: 'all', ttfEligible: 'all' } },
-  { id: 'preview', label: 'Has preview', filters: { priceType: 'all', previewStatus: 'enabled', ttfEligible: 'all' } },
-  { id: 'ttf', label: 'Free-pass on', filters: { priceType: 'all', previewStatus: 'all', ttfEligible: 'true' } },
+  { id: 'all', label: '全部章节', filters: { priceType: 'all', previewStatus: 'all', ttfEligible: 'all' } },
+  { id: 'preview', label: '含试看页', filters: { priceType: 'all', previewStatus: 'enabled', ttfEligible: 'all' } },
+  { id: 'free', label: '免费章节', filters: { priceType: 'free', previewStatus: 'all', ttfEligible: 'all' } },
+  { id: 'paid', label: '付费章节', filters: { priceType: 'paid', previewStatus: 'all', ttfEligible: 'all' } },
 ];
 const SORT_OPTIONS = [
-  { value: 'number', label: 'Episode number' },
-  { value: 'updatedAt', label: 'Updated time' },
-  { value: 'title', label: 'Title' },
-  { value: 'pricePts', label: 'Price' },
-  { value: 'previewFreePages', label: 'Preview pages' },
-  { value: 'releasedAt', label: 'Release time' },
+  { value: 'number', label: '章节号' },
+  { value: 'updatedAt', label: '更新时间' },
+  { value: 'releasedAt', label: '发布时间' },
+  { value: 'title', label: '标题' },
+  { value: 'previewFreePages', label: '试看页数' },
 ];
 
 function normalizeParam(value) {
@@ -79,12 +76,12 @@ function isNonNegativeIntegerString(value, { allowEmpty = false } = {}) {
 
 function formatDateTime(value) {
   if (!value) {
-    return 'Not available';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Not available';
+    return '暂无';
   }
 
   return new Intl.DateTimeFormat('zh-CN', {
@@ -102,6 +99,20 @@ function getErrorMessage(error, fallbackMessage) {
   }
 
   return fallbackMessage;
+}
+
+function getDateValue(value) {
+  const parsed = Date.parse(value || '');
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function isRecentlyUpdated(value, days = 30) {
+  const dateValue = getDateValue(value);
+  if (!dateValue) {
+    return false;
+  }
+
+  return dateValue >= Date.now() - days * 24 * 60 * 60 * 1000;
 }
 
 function buildEpisodesQuery({
@@ -142,7 +153,7 @@ async function fetchSeriesDetail(seriesId) {
     return null;
   }
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || 'Series details could not be loaded.');
+    throw new Error(data?.message || data?.error || '作品详情加载失败。');
   }
 
   return data?.series || null;
@@ -153,7 +164,7 @@ async function fetchEpisodes(seriesId, options) {
   const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}/episodes?${query}`, { cache: 'no-store' });
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || 'Episode list could not be loaded.');
+    throw new Error(data?.message || data?.error || '章节列表加载失败。');
   }
 
   return {
@@ -196,6 +207,8 @@ export default function AdminEpisodesPage() {
   const [newEpisode, setNewEpisode] = useState(EMPTY_NEW_EPISODE);
   const [bulkForm, setBulkForm] = useState(EMPTY_BULK_FORM);
   const [episodeDrafts, setEpisodeDrafts] = useState({});
+  const [showCreateCommercialFields, setShowCreateCommercialFields] = useState(false);
+  const [showBulkCommercialFields, setShowBulkCommercialFields] = useState(false);
 
   const seriesQuery = useQuery({
     queryKey: ['admin', 'series', seriesId, 'detail'],
@@ -259,7 +272,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Could not create the episode.'));
+        throw new Error(await readAdminResponseMessage(response, '创建章节失败。'));
       }
 
       return response.json();
@@ -267,11 +280,12 @@ export default function AdminEpisodesPage() {
     onSuccess: async () => {
       setIsAddModalOpen(false);
       setNewEpisode(EMPTY_NEW_EPISODE);
-      setFeedback({ type: 'success', message: 'The episode was created.' });
+      setShowCreateCommercialFields(false);
+      setFeedback({ type: 'success', message: '章节已创建。' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not create the episode.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '创建章节失败。') });
     },
   });
 
@@ -284,7 +298,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Could not update the episode.'));
+        throw new Error(await readAdminResponseMessage(response, '更新章节失败。'));
       }
 
       return response.json();
@@ -295,11 +309,11 @@ export default function AdminEpisodesPage() {
         delete next[variables.episodeId];
         return next;
       });
-      setFeedback({ type: 'success', message: 'Episode changes were saved.' });
+      setFeedback({ type: 'success', message: '章节修改已保存。' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not update the episode.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '更新章节失败。') });
     },
   });
 
@@ -312,7 +326,7 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Could not update the selected episodes.'));
+        throw new Error(await readAdminResponseMessage(response, '批量更新章节失败。'));
       }
 
       return response.json();
@@ -320,12 +334,13 @@ export default function AdminEpisodesPage() {
     onSuccess: async () => {
       setIsBulkModalOpen(false);
       setBulkForm(EMPTY_BULK_FORM);
+      setShowBulkCommercialFields(false);
       setSelectedIds([]);
-      setFeedback({ type: 'success', message: 'The selected episodes were updated.' });
+      setFeedback({ type: 'success', message: '已更新所选章节。' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not update the selected episodes.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '批量更新章节失败。') });
     },
   });
 
@@ -337,7 +352,7 @@ export default function AdminEpisodesPage() {
         });
 
         if (!response.ok) {
-          throw new Error(await readAdminResponseMessage(response, 'Could not delete the episode.'));
+          throw new Error(await readAdminResponseMessage(response, '删除章节失败。'));
         }
       }
     },
@@ -345,11 +360,11 @@ export default function AdminEpisodesPage() {
       setIsDeleteConfirmOpen(false);
       setPendingDeleteIds([]);
       setSelectedIds([]);
-      setFeedback({ type: 'success', message: 'The selected episodes were deleted.' });
+      setFeedback({ type: 'success', message: '已删除所选章节。' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not delete the episode.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '删除章节失败。') });
     },
   });
 
@@ -362,17 +377,17 @@ export default function AdminEpisodesPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, 'Could not update episode order.'));
+        throw new Error(await readAdminResponseMessage(response, '更新章节顺序失败。'));
       }
 
       return response.json();
     },
     onSuccess: async () => {
-      setFeedback({ type: 'success', message: 'Episode order was updated.' });
+      setFeedback({ type: 'success', message: '章节顺序已更新。' });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'Could not update episode order.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '更新章节顺序失败。') });
     },
   });
 
@@ -417,7 +432,7 @@ export default function AdminEpisodesPage() {
 
     if (type === 'number') {
       if (!isNonNegativeIntegerString(draftValue, { allowEmpty: true })) {
-        setFeedback({ type: 'error', message: 'Please enter a valid non-negative integer.' });
+        setFeedback({ type: 'error', message: '请输入有效的非负整数。' });
         return;
       }
 
@@ -438,7 +453,7 @@ export default function AdminEpisodesPage() {
     const nextValue = String(draftValue ?? '').trim();
     const currentValue = String(episode[field] ?? '').trim();
     if (!nextValue) {
-      setFeedback({ type: 'error', message: 'Episode titles cannot be empty.' });
+      setFeedback({ type: 'error', message: '章节标题不能为空。' });
       return;
     }
     if (nextValue === currentValue) {
@@ -454,19 +469,23 @@ export default function AdminEpisodesPage() {
 
   const handleCreateEpisode = () => {
     if (!isNonNegativeIntegerString(newEpisode.number) || !String(newEpisode.title || '').trim()) {
-      setFeedback({ type: 'error', message: 'Episode number and title are required.' });
+      setFeedback({ type: 'error', message: '章节号和标题不能为空。' });
       return;
     }
-    if (!isNonNegativeIntegerString(newEpisode.pricePts, { allowEmpty: true }) || !isNonNegativeIntegerString(newEpisode.previewFreePages, { allowEmpty: true })) {
-      setFeedback({ type: 'error', message: 'Price and preview pages must be non-negative integers.' });
+
+    if (
+      !isNonNegativeIntegerString(newEpisode.previewFreePages, { allowEmpty: true }) ||
+      !isNonNegativeIntegerString(newEpisode.pricePts, { allowEmpty: true })
+    ) {
+      setFeedback({ type: 'error', message: '试看页数和次级发行设置必须是非负整数。' });
       return;
     }
 
     createEpisodeMutation.mutate({
       number: toInteger(newEpisode.number, 1),
       title: newEpisode.title.trim(),
-      pricePts: toInteger(newEpisode.pricePts, 0),
       previewFreePages: toInteger(newEpisode.previewFreePages, 0),
+      pricePts: toInteger(newEpisode.pricePts, 0),
       ttfEligible: Boolean(newEpisode.ttfEligible),
     });
   };
@@ -474,30 +493,32 @@ export default function AdminEpisodesPage() {
   const handleBulkUpdate = () => {
     const updates = {};
 
-    if (bulkForm.pricePts !== '') {
-      if (!isNonNegativeIntegerString(bulkForm.pricePts)) {
-        setFeedback({ type: 'error', message: 'Bulk price must be a non-negative integer.' });
-        return;
-      }
-      updates.pricePts = toInteger(bulkForm.pricePts, 0);
-    }
-
     if (bulkForm.previewFreePages !== '') {
       if (!isNonNegativeIntegerString(bulkForm.previewFreePages)) {
-        setFeedback({ type: 'error', message: 'Bulk preview pages must be a non-negative integer.' });
+        setFeedback({ type: 'error', message: '批量试看页数必须是非负整数。' });
         return;
       }
       updates.previewFreePages = toInteger(bulkForm.previewFreePages, 0);
     }
 
-    if (bulkForm.ttfEligible === 'true') {
-      updates.ttfEligible = true;
-    } else if (bulkForm.ttfEligible === 'false') {
-      updates.ttfEligible = false;
+    if (showBulkCommercialFields && bulkForm.pricePts !== '') {
+      if (!isNonNegativeIntegerString(bulkForm.pricePts)) {
+        setFeedback({ type: 'error', message: '批量点数价格必须是非负整数。' });
+        return;
+      }
+      updates.pricePts = toInteger(bulkForm.pricePts, 0);
+    }
+
+    if (showBulkCommercialFields) {
+      if (bulkForm.ttfEligible === 'true') {
+        updates.ttfEligible = true;
+      } else if (bulkForm.ttfEligible === 'false') {
+        updates.ttfEligible = false;
+      }
     }
 
     if (Object.keys(updates).length === 0) {
-      setFeedback({ type: 'error', message: 'Choose at least one field to update.' });
+      setFeedback({ type: 'error', message: '至少选择一项要更新的内容。' });
       return;
     }
 
@@ -554,12 +575,15 @@ export default function AdminEpisodesPage() {
   };
 
   const pageStats = useMemo(() => {
-    const paidCount = episodes.filter((episode) => Number(episode.pricePts) > 0).length;
-    const previewCount = episodes.filter((episode) => Number(episode.previewFreePages) > 0).length;
-    const ttfCount = episodes.filter((episode) => Boolean(episode.ttfEligible)).length;
+    const previewCount = episodes.filter((episode) => toInteger(episode.previewFreePages, 0) > 0).length;
+    const recentUpdateCount = episodes.filter((episode) => isRecentlyUpdated(episode.updatedAt || episode.releasedAt, 30)).length;
 
-    return { paidCount, previewCount, ttfCount };
-  }, [episodes]);
+    return {
+      previewCount,
+      recentUpdateCount,
+      selectedCount: selectedIds.length,
+    };
+  }, [episodes, selectedIds.length]);
 
   const quickFilterId = useMemo(() => {
     const matched = QUICK_FILTERS.find(
@@ -574,9 +598,9 @@ export default function AdminEpisodesPage() {
 
   if (seriesQuery.isLoading || (episodesQuery.isLoading && !episodesQuery.data)) {
     return (
-      <AdminShell title="Episodes" subtitle="Loading the episode workspace...">
+      <AdminShell title="章节管理" subtitle="正在加载章节工作台...">
         <AdminDataTable className="p-6">
-          <p className="text-sm text-slate-600">Loading episodes...</p>
+          <p className="text-sm text-slate-600">正在加载章节列表...</p>
         </AdminDataTable>
       </AdminShell>
     );
@@ -584,65 +608,65 @@ export default function AdminEpisodesPage() {
 
   if (seriesQuery.isError) {
     return (
-      <AdminShell title="Episodes" subtitle="The episode workspace could not be loaded.">
-        <AdminPageSection title="Load error" description={getErrorMessage(seriesQuery.error, 'Series details could not be loaded.')} />
+      <AdminShell title="章节管理" subtitle="章节工作台加载失败。">
+        <AdminPageSection title="加载失败" description={getErrorMessage(seriesQuery.error, '作品详情加载失败。')} />
       </AdminShell>
     );
   }
 
   if (!series) {
     return (
-      <AdminShell title="Episodes" subtitle="The requested title could not be found.">
-        <AdminPageSection title="Missing series" description="This series record does not exist." />
+      <AdminShell title="章节管理" subtitle="没有找到对应作品。">
+        <AdminPageSection title="作品不存在" description="这条作品记录不存在。" />
       </AdminShell>
     );
   }
 
   return (
     <AdminShell
-      title={series.title || 'Episodes'}
-      subtitle="Manage numbering, release timing, preview access, and batch updates without crowding the table."
+      title={series.title || '章节管理'}
+      subtitle="按内容优先方式维护章节号、标题、试看页数和发布时间；旧商业设置保留在次级入口。"
       actions={
         <>
           <Button type="button" variant="outline" onClick={() => router.push(`/admin/series/${seriesId}`)}>
             <ArrowLeft className="size-4" />
-            Series detail
+            返回作品详情
           </Button>
-          <Button type="button" variant="outline" onClick={() => window.open(`/series/${seriesId}`, '_blank')}>
+          <Button type="button" variant="outline" onClick={() => window.open(`/series/${seriesId}`, '_blank', 'noopener,noreferrer')}>
             <ArrowUpRight className="size-4" />
-            View live page
+            查看前台页
           </Button>
           <Button type="button" variant="outline" onClick={() => setIsUploadModalOpen(true)}>
             <Upload className="size-4" />
-            Bulk upload
+            批量上传
           </Button>
           <Button type="button" onClick={() => setIsAddModalOpen(true)}>
             <Plus className="size-4" />
-            Add episode
+            新增章节
           </Button>
         </>
       }
     >
       <div className="space-y-6">
         <div className="grid gap-4 xl:grid-cols-4">
-          <AdminMetricCard label="Total episodes" value={String(pagination.total)} detail="The current result set after filters." tone="accent" />
-          <AdminMetricCard label="Paid episodes" value={String(pageStats.paidCount)} detail="Episodes with a point price above zero." />
-          <AdminMetricCard label="Preview enabled" value={String(pageStats.previewCount)} detail="Episodes with preview pages configured." />
-          <AdminMetricCard label="Free-pass enabled" value={String(pageStats.ttfCount)} detail="Episodes currently eligible for free-pass." />
+          <AdminMetricCard label="当前章节数" value={String(pagination.total)} detail="当前筛选条件下的章节总数。" tone="accent" />
+          <AdminMetricCard label="已开试看" value={String(pageStats.previewCount)} detail="已经配置试看页数的章节。" />
+          <AdminMetricCard label="近期更新" value={String(pageStats.recentUpdateCount)} detail="近 30 天内更新或发布的章节。" />
+          <AdminMetricCard label="已选章节" value={String(pageStats.selectedCount)} detail="当前勾选、可用于批量操作的章节数。" />
         </div>
 
         <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
 
         <AdminPageSection
-          title="Episode workspace"
-          description="Search by title, trim the view with quick filters, then make small edits directly in the table."
+          title="章节工作台"
+          description="先按标题搜索，再用轻量筛选收窄范围，最后直接在表格里完成标题、试看页数和章节顺序调整。"
           action={
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" onClick={() => setIsBulkModalOpen(true)} disabled={selectedIds.length === 0}>
-                Bulk edit
+                批量修改
               </Button>
               <Button type="button" variant="outline" onClick={handleAutoRenumber} disabled={reorderEpisodesMutation.isPending}>
-                Auto-renumber
+                自动重排章节号
               </Button>
             </div>
           }
@@ -651,7 +675,7 @@ export default function AdminEpisodesPage() {
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search by episode title or ID..."
+              placeholder="搜索章节标题或章节 ID..."
               className={adminInputClassName}
             />
             <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} className={adminSelectClassName}>
@@ -662,7 +686,7 @@ export default function AdminEpisodesPage() {
               ))}
             </select>
             <Button type="button" variant="outline" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
-              {sortOrder === 'asc' ? 'Oldest first' : 'Newest first'}
+              {sortOrder === 'asc' ? '当前升序' : '当前降序'}
             </Button>
             <Button
               type="button"
@@ -670,7 +694,7 @@ export default function AdminEpisodesPage() {
               onClick={() => openDeleteConfirm(selectedIds)}
               disabled={selectedIds.length === 0}
             >
-              Delete selected
+              删除所选章节
             </Button>
           </div>
 
@@ -692,9 +716,9 @@ export default function AdminEpisodesPage() {
           </div>
 
           {episodesQuery.isError ? (
-            <AdminPageSection title="Load error" description={getErrorMessage(episodesQuery.error, 'Episode list could not be loaded.')} />
+            <AdminPageSection title="加载失败" description={getErrorMessage(episodesQuery.error, '章节列表加载失败。')} />
           ) : episodes.length === 0 ? (
-            <AdminPageSection title="No episodes in this view" description="Try a different filter or add the first episode to get started." />
+            <AdminPageSection title="当前视图下还没有章节" description="换一个筛选条件，或者先新增第一章开始处理。" />
           ) : (
             <div className="overflow-hidden rounded-[28px] border border-black/8 bg-white/92 shadow-[var(--gush-shadow-soft)]">
               <div className="overflow-x-auto">
@@ -707,16 +731,14 @@ export default function AdminEpisodesPage() {
                           checked={allCurrentPageSelected}
                           onChange={handleSelectAllCurrentPage}
                           className="h-4 w-4 rounded border-black/20 bg-transparent"
-                          aria-label="Select the current page"
+                          aria-label="选择当前页全部章节"
                         />
                       </th>
-                      <th className="px-4 py-4">Number</th>
-                      <th className="px-4 py-4">Title</th>
-                      <th className="px-4 py-4">Price</th>
-                      <th className="px-4 py-4">Preview</th>
-                      <th className="px-4 py-4">Free-pass</th>
-                      <th className="px-4 py-4">Updated</th>
-                      <th className="px-4 py-4">Actions</th>
+                      <th className="px-4 py-4">章节号</th>
+                      <th className="px-4 py-4">标题</th>
+                      <th className="px-4 py-4">试看页数</th>
+                      <th className="px-4 py-4">更新时间</th>
+                      <th className="px-4 py-4">操作</th>
                     </tr>
                   </AdminTableHeader>
                   <tbody>
@@ -728,7 +750,7 @@ export default function AdminEpisodesPage() {
                             checked={selectedSet.has(episode.id)}
                             onChange={() => handleToggleSelect(episode.id)}
                             className="h-4 w-4 rounded border-black/20 bg-transparent"
-                            aria-label={`Select episode ${episode.number}`}
+                            aria-label={`选择章节 ${episode.number}`}
                           />
                         </td>
                         <td className="px-4 py-4">
@@ -765,22 +787,7 @@ export default function AdminEpisodesPage() {
                           <input
                             type="number"
                             min="0"
-                            value={getEpisodeDraftValue(episode, 'pricePts')}
-                            onChange={(event) => setEpisodeDraftValue(episode.id, 'pricePts', event.target.value)}
-                            onBlur={() => commitEpisodeField(episode, 'pricePts', { type: 'number' })}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter') {
-                                event.currentTarget.blur();
-                              }
-                            }}
-                            className={`${adminInputClassName} w-28`}
-                            aria-label={`Episode ${episode.number} price`}
-                          />
-                        </td>
-                        <td className="px-4 py-4">
-                          <input
-                            type="number"
-                            min="0"
+                            id={`preview-free-pages-${episode.id}`}
                             value={getEpisodeDraftValue(episode, 'previewFreePages')}
                             onChange={(event) => setEpisodeDraftValue(episode.id, 'previewFreePages', event.target.value)}
                             onBlur={() => commitEpisodeField(episode, 'previewFreePages', { type: 'number' })}
@@ -789,40 +796,24 @@ export default function AdminEpisodesPage() {
                                 event.currentTarget.blur();
                               }
                             }}
-                            className={`${adminInputClassName} w-28`}
-                            aria-label={`Episode ${episode.number} preview pages`}
+                            className={`${adminInputClassName} w-32`}
+                            aria-label={`章节 ${episode.number} 试看页数`}
                           />
                         </td>
                         <td className="px-4 py-4">
-                          <label className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-3 py-2 text-sm text-slate-700">
-                            <input
-                              type="checkbox"
-                              checked={Boolean(episode.ttfEligible)}
-                              onChange={(event) =>
-                                updateEpisodeMutation.mutate({
-                                  episodeId: episode.id,
-                                  payload: { ttfEligible: event.target.checked },
-                                })
-                              }
-                              className="h-4 w-4 rounded border-black/20 bg-transparent"
-                            />
-                            <span>{episode.ttfEligible ? 'On' : 'Off'}</span>
-                          </label>
-                        </td>
-                        <td className="px-4 py-4">
                           <div className="space-y-1 text-sm text-slate-600">
-                            <p>{formatDateTime(episode.updatedAt)}</p>
-                            <p className="text-xs text-slate-500">Released: {formatDateTime(episode.releasedAt)}</p>
+                            <p>更新于：{formatDateTime(episode.updatedAt)}</p>
+                            <p className="text-xs text-slate-500">发布于：{formatDateTime(episode.releasedAt)}</p>
                           </div>
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex flex-col gap-2">
-                            <Button type="button" variant="outline" size="sm" onClick={() => window.open(`/read/${seriesId}/${episode.id}`, '_blank')}>
+                            <Button type="button" variant="outline" size="sm" onClick={() => window.open(`/read/${seriesId}/${episode.id}`, '_blank', 'noopener,noreferrer')}>
                               <BookOpen className="size-4" />
-                              Read page
+                              阅读页
                             </Button>
                             <Button type="button" variant="destructive" size="sm" onClick={() => openDeleteConfirm([episode.id])}>
-                              Delete
+                              删除
                             </Button>
                           </div>
                         </td>
@@ -834,13 +825,13 @@ export default function AdminEpisodesPage() {
 
               <div className="flex flex-col gap-4 border-t border-black/6 bg-[rgba(250,247,241,0.72)] px-5 py-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  Page <span className="font-medium text-slate-950">{pagination.page}</span> of {pagination.totalPages} ·{' '}
-                  <span className="font-medium text-slate-950">{pagination.total}</span> total episodes
+                  第 <span className="font-medium text-slate-950">{pagination.page}</span> 页，共 {pagination.totalPages} 页，
+                  当前共 <span className="font-medium text-slate-950">{pagination.total}</span> 章
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
                   <label className="flex items-center gap-2">
-                    <span>Per page</span>
+                    <span>每页</span>
                     <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} className="h-10 rounded-full border border-black/8 bg-white px-3 text-sm text-slate-700 outline-none">
                       {[20, 50, 100].map((size) => (
                         <option key={size} value={size}>
@@ -852,10 +843,10 @@ export default function AdminEpisodesPage() {
 
                   <div className="flex items-center gap-2">
                     <Button type="button" variant="outline" size="sm" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={!pagination.hasPrevPage}>
-                      Previous
+                      上一页
                     </Button>
                     <Button type="button" variant="outline" size="sm" onClick={() => setPage((current) => current + 1)} disabled={!pagination.hasNextPage}>
-                      Next
+                      下一页
                     </Button>
                   </div>
                 </div>
@@ -865,61 +856,89 @@ export default function AdminEpisodesPage() {
         </AdminPageSection>
       </div>
 
-      <Modal isOpen={isAddModalOpen} title="New episode" subtitle="Create the episode shell first, then keep editing in the table." onClose={() => setIsAddModalOpen(false)} size="lg">
+      <Modal isOpen={isAddModalOpen} title="新增章节" subtitle="先把章节号、标题和试看入口补好，次级发行设置默认收起。" onClose={() => setIsAddModalOpen(false)} size="lg">
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <AdminFormField label="Episode number">
-              <input type="number" min="1" value={newEpisode.number} onChange={(event) => setNewEpisode((current) => ({ ...current, number: event.target.value }))} className={adminInputClassName} />
+            <AdminFormField label="章节号">
+              <input id="new-episode-number" type="number" min="1" value={newEpisode.number} onChange={(event) => setNewEpisode((current) => ({ ...current, number: event.target.value }))} className={adminInputClassName} />
             </AdminFormField>
-            <AdminFormField label="Title">
-              <input type="text" value={newEpisode.title} onChange={(event) => setNewEpisode((current) => ({ ...current, title: event.target.value }))} className={adminInputClassName} />
+            <AdminFormField label="标题">
+              <input id="new-episode-title" type="text" value={newEpisode.title} onChange={(event) => setNewEpisode((current) => ({ ...current, title: event.target.value }))} className={adminInputClassName} />
             </AdminFormField>
-            <AdminFormField label="Price">
-              <input type="number" min="0" value={newEpisode.pricePts} onChange={(event) => setNewEpisode((current) => ({ ...current, pricePts: event.target.value }))} className={adminInputClassName} />
-            </AdminFormField>
-            <AdminFormField label="Preview pages">
-              <input type="number" min="0" value={newEpisode.previewFreePages} onChange={(event) => setNewEpisode((current) => ({ ...current, previewFreePages: event.target.value }))} className={adminInputClassName} />
+            <AdminFormField label="试看页数">
+              <input id="new-episode-preview-free-pages" type="number" min="0" value={newEpisode.previewFreePages} onChange={(event) => setNewEpisode((current) => ({ ...current, previewFreePages: event.target.value }))} className={adminInputClassName} />
             </AdminFormField>
           </div>
-          <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-4 text-sm text-slate-700">
-            <span>Enable free-pass immediately</span>
-            <input type="checkbox" checked={newEpisode.ttfEligible} onChange={(event) => setNewEpisode((current) => ({ ...current, ttfEligible: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-transparent" />
-          </label>
+
+          <button
+            type="button"
+            onClick={() => setShowCreateCommercialFields((current) => !current)}
+            className="rounded-full border border-black/8 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"
+          >
+            {showCreateCommercialFields ? '收起次级发行设置' : '显示次级发行设置'}
+          </button>
+
+          {showCreateCommercialFields ? (
+            <div className="grid gap-4 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.72)] p-4 md:grid-cols-2">
+              <AdminFormField label="点数价格">
+                <input id="new-episode-price-pts" type="number" min="0" value={newEpisode.pricePts} onChange={(event) => setNewEpisode((current) => ({ ...current, pricePts: event.target.value }))} className={adminInputClassName} />
+              </AdminFormField>
+              <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-white px-4 py-4 text-sm text-slate-700">
+                <span>启用免费券</span>
+                <input id="new-episode-ttf-eligible" type="checkbox" checked={newEpisode.ttfEligible} onChange={(event) => setNewEpisode((current) => ({ ...current, ttfEligible: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-transparent" />
+              </label>
+            </div>
+          ) : null}
+
           <Button type="button" onClick={handleCreateEpisode} disabled={createEpisodeMutation.isPending}>
-            {createEpisodeMutation.isPending ? 'Creating...' : 'Create episode'}
+            {createEpisodeMutation.isPending ? '创建中...' : '创建章节'}
           </Button>
         </div>
       </Modal>
 
-      <Modal isOpen={isBulkModalOpen} title="Bulk edit episodes" subtitle={`Apply the same change to ${selectedIds.length} selected episode${selectedIds.length === 1 ? '' : 's'}.`} onClose={() => setIsBulkModalOpen(false)} size="lg">
+      <Modal isOpen={isBulkModalOpen} title="批量修改章节" subtitle={`把统一内容修改应用到 ${selectedIds.length} 个已选章节。`} onClose={() => setIsBulkModalOpen(false)} size="lg">
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <AdminFormField label="Bulk price">
-              <input type="number" min="0" value={bulkForm.pricePts} onChange={(event) => setBulkForm((current) => ({ ...current, pricePts: event.target.value }))} className={adminInputClassName} />
-            </AdminFormField>
-            <AdminFormField label="Bulk preview pages">
-              <input type="number" min="0" value={bulkForm.previewFreePages} onChange={(event) => setBulkForm((current) => ({ ...current, previewFreePages: event.target.value }))} className={adminInputClassName} />
+            <AdminFormField label="批量试看页数">
+              <input id="bulk-preview-free-pages" type="number" min="0" value={bulkForm.previewFreePages} onChange={(event) => setBulkForm((current) => ({ ...current, previewFreePages: event.target.value }))} className={adminInputClassName} />
             </AdminFormField>
           </div>
-          <AdminFormField label="Bulk free-pass">
-            <select value={bulkForm.ttfEligible} onChange={(event) => setBulkForm((current) => ({ ...current, ttfEligible: event.target.value }))} className={adminSelectClassName}>
-              <option value="unchanged">Keep current value</option>
-              <option value="true">Turn on</option>
-              <option value="false">Turn off</option>
-            </select>
-          </AdminFormField>
+
+          <button
+            type="button"
+            onClick={() => setShowBulkCommercialFields((current) => !current)}
+            className="rounded-full border border-black/8 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"
+          >
+            {showBulkCommercialFields ? '收起次级发行设置' : '显示次级发行设置'}
+          </button>
+
+          {showBulkCommercialFields ? (
+            <div className="grid gap-4 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.72)] p-4 md:grid-cols-2">
+              <AdminFormField label="批量点数价格">
+                <input id="bulk-price-pts" type="number" min="0" value={bulkForm.pricePts} onChange={(event) => setBulkForm((current) => ({ ...current, pricePts: event.target.value }))} className={adminInputClassName} />
+              </AdminFormField>
+              <AdminFormField label="批量免费券">
+                <select id="bulk-ttf-eligible" value={bulkForm.ttfEligible} onChange={(event) => setBulkForm((current) => ({ ...current, ttfEligible: event.target.value }))} className={adminSelectClassName}>
+                  <option value="unchanged">保持当前值</option>
+                  <option value="true">统一开启</option>
+                  <option value="false">统一关闭</option>
+                </select>
+              </AdminFormField>
+            </div>
+          ) : null}
+
           <Button type="button" onClick={handleBulkUpdate} disabled={bulkUpdateMutation.isPending}>
-            {bulkUpdateMutation.isPending ? 'Applying...' : 'Apply bulk update'}
+            {bulkUpdateMutation.isPending ? '应用中...' : '应用批量修改'}
           </Button>
         </div>
       </Modal>
 
       <ConfirmDialog
         isOpen={isDeleteConfirmOpen}
-        title="Delete episodes"
-        message={`Delete ${pendingDeleteIds.length} episode${pendingDeleteIds.length === 1 ? '' : 's'}? This action cannot be undone.`}
-        confirmText={deleteEpisodesMutation.isPending ? 'Deleting...' : 'Delete episodes'}
-        cancelText="Cancel"
+        title="删除章节"
+        message={`确定删除 ${pendingDeleteIds.length} 个章节吗？此操作无法撤销。`}
+        confirmText={deleteEpisodesMutation.isPending ? '删除中...' : '删除章节'}
+        cancelText="取消"
         isDangerous={true}
         isLoading={deleteEpisodesMutation.isPending}
         onConfirm={() => deleteEpisodesMutation.mutate(pendingDeleteIds)}
@@ -931,7 +950,7 @@ export default function AdminEpisodesPage() {
         seriesId={seriesId}
         onClose={() => setIsUploadModalOpen(false)}
         onSuccess={async () => {
-          setFeedback({ type: 'success', message: 'Bulk upload finished and the episode list was refreshed.' });
+          setFeedback({ type: 'success', message: '批量上传已完成，章节列表已刷新。' });
           await invalidateEpisodeData();
         }}
       />

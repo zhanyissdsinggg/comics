@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 export default function EmailSettingsPage() {
   return (
     <AdminLayout
-      title="Email Settings"
-      subtitle="Manage sender identity, delivery defaults, and the email settings that support reader communication."
+      title="邮件设置"
+      subtitle="统一管理发件身份、默认投递方式，以及支撑读者沟通的邮件配置。"
     >
       <AdminEmailSettingsPage />
     </AdminLayout>

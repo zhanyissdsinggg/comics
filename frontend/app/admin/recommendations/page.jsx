@@ -29,35 +29,39 @@ import {
 } from '@/lib/storefrontSlots';
 
 const VIEW_TABS = [
-  { value: 'slots', label: 'Slots' },
-  { value: 'rankings', label: 'Rankings' },
-  { value: 'analytics', label: 'Analytics' },
+  { value: 'slots', label: '推荐位' },
+  { value: 'rankings', label: '榜单规则' },
+  { value: 'analytics', label: '表现分析' },
 ];
 
 const RANKING_TYPE_OPTIONS = [
-  { value: 'views', label: 'Views' },
-  { value: 'rating', label: 'Rating' },
-  { value: 'trending', label: 'Trending' },
-  { value: 'ratingCount', label: 'Rating count' },
+  { value: 'trending', label: '趋势排序' },
+  { value: 'new', label: '新作优先' },
 ];
 
+const LEGACY_RANKING_TYPE_LABELS = {
+  views: '历史阅读量（旧规则）',
+  rating: '历史评分（旧规则）',
+  ratingCount: '历史评分人数（旧规则）',
+};
+
 const TIME_RANGE_OPTIONS = [
-  { value: 'day', label: 'Day' },
-  { value: 'week', label: 'Week' },
-  { value: 'month', label: 'Month' },
-  { value: 'all', label: 'All time' },
+  { value: 'day', label: '日' },
+  { value: 'week', label: '周' },
+  { value: 'month', label: '月' },
+  { value: 'all', label: '全部时间' },
 ];
 
 const SERIES_TYPE_OPTIONS = [
-  { value: 'all', label: 'All titles' },
-  { value: 'comic', label: 'Comics' },
-  { value: 'novel', label: 'Novels' },
-  { value: 'manga', label: 'Manga' },
-  { value: 'manhwa', label: 'Manhwa' },
+  { value: 'all', label: '全部作品' },
+  { value: 'comic', label: '漫画' },
+  { value: 'novel', label: '小说' },
+  { value: 'manga', label: '日漫' },
+  { value: 'manhwa', label: '韩漫' },
 ];
 
 const ANALYTICS_SLOT_FILTER_OPTIONS = [
-  { value: 'all', label: 'All slots' },
+  { value: 'all', label: '全部推荐位' },
   ...STOREFRONT_SLOT_PRESETS.filter((item) => item.token !== 'custom').map((item) => ({
     value: item.token,
     label: item.label,
@@ -74,7 +78,7 @@ const INITIAL_SLOT_FORM = {
 
 const INITIAL_RANKING_FORM = {
   name: '',
-  rankingType: 'views',
+  rankingType: 'trending',
   timeRange: 'day',
   seriesType: 'all',
   maxItems: '20',
@@ -110,7 +114,7 @@ function buildSlotPayload(form) {
 function buildRankingPayload(form) {
   return {
     name: String(form.name || '').trim(),
-    rankingType: String(form.rankingType || 'views').trim(),
+    rankingType: String(form.rankingType || 'trending').trim(),
     timeRange: String(form.timeRange || 'day').trim(),
     seriesType: String(form.seriesType || 'all').trim(),
     maxItems: Number.parseInt(String(form.maxItems || '20'), 10),
@@ -120,25 +124,29 @@ function buildRankingPayload(form) {
 }
 
 function formatRankingTypeLabel(value) {
-  return RANKING_TYPE_OPTIONS.find((option) => option.value === value)?.label || 'Unknown';
+  return (
+    RANKING_TYPE_OPTIONS.find((option) => option.value === value)?.label ||
+    LEGACY_RANKING_TYPE_LABELS[value] ||
+    '未知类型'
+  );
 }
 
 function formatTimeRangeLabel(value) {
-  return TIME_RANGE_OPTIONS.find((option) => option.value === value)?.label || 'Unknown';
+  return TIME_RANGE_OPTIONS.find((option) => option.value === value)?.label || '未知范围';
 }
 
 function formatSeriesTypeLabel(value) {
-  return SERIES_TYPE_OPTIONS.find((option) => option.value === value)?.label || 'Unknown';
+  return SERIES_TYPE_OPTIONS.find((option) => option.value === value)?.label || '未知类型';
 }
 
 function formatDateTime(value) {
   if (!value) {
-    return 'Not available';
+    return '暂无';
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return 'Not available';
+    return '暂无';
   }
 
   return new Intl.DateTimeFormat('zh-CN', {
@@ -230,7 +238,7 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson('/api/admin/recommendations/slots?limit=100');
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Recommendation slots could not be loaded.');
+        throw new Error(data?.message || data?.error || '推荐位加载失败。');
       }
 
       return {
@@ -248,7 +256,7 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson('/api/admin/recommendations/rankings?limit=100');
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Ranking settings could not be loaded.');
+        throw new Error(data?.message || data?.error || '榜单规则加载失败。');
       }
 
       return {
@@ -272,7 +280,7 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson(`/api/admin/recommendations/analytics?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Recommendation analytics could not be loaded.');
+        throw new Error(data?.message || data?.error || '推荐位分析加载失败。');
       }
 
       return {
@@ -287,7 +295,7 @@ export default function AdminRecommendationsPage() {
       const payload = buildSlotPayload(slotForm);
 
       if (!payload.slot) {
-        throw new Error('A slot token is required.');
+        throw new Error('推荐位标识不能为空。');
       }
 
       const { response, data } = await adminFetchJson('/api/admin/recommendations/slots', {
@@ -297,7 +305,7 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'The slot could not be created.');
+        throw new Error(data?.message || data?.error || '创建推荐位失败。');
       }
 
       return data?.slot || null;
@@ -305,11 +313,11 @@ export default function AdminRecommendationsPage() {
     onSuccess: async () => {
       setCreateTarget(null);
       setSlotForm(INITIAL_SLOT_FORM);
-      setFeedback({ type: 'success', message: 'The recommendation slot was created.' });
+      setFeedback({ type: 'success', message: '推荐位已创建。' });
       await slotsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'The slot could not be created.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '创建推荐位失败。') });
     },
   });
 
@@ -318,11 +326,11 @@ export default function AdminRecommendationsPage() {
       const payload = buildRankingPayload(rankingForm);
 
       if (!payload.name) {
-        throw new Error('A ranking name is required.');
+        throw new Error('榜单名称不能为空。');
       }
 
       if (!Number.isInteger(payload.maxItems) || payload.maxItems < 1 || payload.maxItems > 200) {
-        throw new Error('Max items must stay between 1 and 200.');
+        throw new Error('最大作品数必须在 1 到 200 之间。');
       }
 
       const { response, data } = await adminFetchJson('/api/admin/recommendations/rankings', {
@@ -332,7 +340,7 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'The ranking could not be created.');
+        throw new Error(data?.message || data?.error || '创建榜单规则失败。');
       }
 
       return data?.config || null;
@@ -340,11 +348,11 @@ export default function AdminRecommendationsPage() {
     onSuccess: async () => {
       setCreateTarget(null);
       setRankingForm(INITIAL_RANKING_FORM);
-      setFeedback({ type: 'success', message: 'The ranking configuration was created.' });
+      setFeedback({ type: 'success', message: '榜单规则已创建。' });
       await rankingsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'The ranking could not be created.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '创建榜单规则失败。') });
     },
   });
 
@@ -355,18 +363,18 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'The slot could not be removed.');
+        throw new Error(data?.message || data?.error || '删除推荐位失败。');
       }
 
       return data;
     },
     onSuccess: async () => {
       setDeleteTarget(null);
-      setFeedback({ type: 'success', message: 'The recommendation slot was removed.' });
+      setFeedback({ type: 'success', message: '推荐位已删除。' });
       await slotsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'The slot could not be removed.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '删除推荐位失败。') });
     },
   });
 
@@ -377,18 +385,18 @@ export default function AdminRecommendationsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'The ranking could not be removed.');
+        throw new Error(data?.message || data?.error || '删除榜单规则失败。');
       }
 
       return data;
     },
     onSuccess: async () => {
       setDeleteTarget(null);
-      setFeedback({ type: 'success', message: 'The ranking configuration was removed.' });
+      setFeedback({ type: 'success', message: '榜单规则已删除。' });
       await rankingsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, 'The ranking could not be removed.') });
+      setFeedback({ type: 'error', message: getErrorMessage(error, '删除榜单规则失败。') });
     },
   });
 
@@ -472,27 +480,27 @@ export default function AdminRecommendationsPage() {
 
   const statCards = [
     {
-      label: 'Slots',
+      label: '推荐位',
       value: formatNumber(slotsQuery.data?.total || 0),
-      detail: 'Current recommendation placements under editorial control.',
+      detail: '当前由编辑后台直接维护的推荐位数量。',
       tone: 'accent',
     },
     {
-      label: 'Rankings',
-      value: loadedTabs.rankings ? formatNumber(rankingsQuery.data?.total || 0) : 'Open tab',
-      detail: loadedTabs.rankings ? 'Configured ranking views.' : 'Loaded only when the rankings tab is opened.',
+      label: '榜单规则',
+      value: loadedTabs.rankings ? formatNumber(rankingsQuery.data?.total || 0) : '打开标签后加载',
+      detail: loadedTabs.rankings ? '当前已配置的榜单规则数量。' : '只有打开“榜单规则”标签后才会加载。',
     },
     {
-      label: 'Analytics rows',
-      value: loadedTabs.analytics ? formatNumber(analyticsQuery.data?.total || 0) : 'Open tab',
-      detail: loadedTabs.analytics ? 'Recent recommendation performance rows.' : 'Loaded only when the analytics tab is opened.',
+      label: '分析记录',
+      value: loadedTabs.analytics ? formatNumber(analyticsQuery.data?.total || 0) : '打开标签后加载',
+      detail: loadedTabs.analytics ? '当前已加载的推荐位表现记录数。' : '只有打开“表现分析”标签后才会加载。',
     },
   ];
 
   return (
     <AdminShell
-      title="Search & Discovery"
-      subtitle="Treat discovery like editorial work. Manage recommendation slots, ranking rules, and slot performance without slipping into a noisy growth dashboard."
+      title="搜索与发现"
+      subtitle="把发现页当成编辑工作来管理：推荐位、榜单规则和表现数据都要真实、克制、可解释。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
@@ -504,26 +512,26 @@ export default function AdminRecommendationsPage() {
         <AdminFeedbackBanner
           feedback={feedback}
           onDismiss={() => setFeedback(EMPTY_FEEDBACK)}
-          dismissAriaLabel="Dismiss feedback"
+          dismissAriaLabel="关闭提示"
         />
 
         <AdminTabs items={VIEW_TABS} value={activeTab} onChange={handleTabChange} />
 
         {activeTab === 'slots' ? (
           <AdminPageSection
-            title="Recommendation slots"
-            description="Slots are the stable editorial entry points that feed the storefront. Keep the machine token predictable and the title mix intentional."
+            title="推荐位"
+            description="推荐位是前台稳定的编辑入口。标识要稳定，作品组合要有明确意图，不要临时拼凑。"
             action={
               <Button type="button" onClick={() => openCreateModal('slot')}>
                 <Plus className="size-4" />
-                New slot
+                新建推荐位
               </Button>
             }
           >
             <AdminDataState
               isLoading={slotsQuery.isLoading}
               hasData={slots.length > 0}
-              emptyMessage={slotsQuery.isError ? getErrorMessage(slotsQuery.error, 'Recommendation slots could not be loaded.') : 'No recommendation slots exist yet.'}
+              emptyMessage={slotsQuery.isError ? getErrorMessage(slotsQuery.error, '推荐位加载失败。') : '当前还没有推荐位。'}
               wrap={false}
             >
               <div className="grid gap-4 xl:grid-cols-2">
@@ -536,15 +544,15 @@ export default function AdminRecommendationsPage() {
                       key={slot.id}
                       title={slotMeta.label}
                       description={slotMeta.hint}
-                      meta={<AdminBadge tone="accent">{seriesIds.length} title{seriesIds.length === 1 ? '' : 's'}</AdminBadge>}
+                      meta={<AdminBadge tone="accent">{seriesIds.length} 部作品</AdminBadge>}
                       footer={
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <p className="text-xs text-slate-500">
-                            Updated {formatDateTime(slot.updatedAt)}
+                            更新于 {formatDateTime(slot.updatedAt)}
                           </p>
                           <Button type="button" variant="destructive" size="sm" onClick={() => openDeleteModal('slot', slot)}>
                             <Trash2 className="size-4" />
-                            Delete
+                            删除
                           </Button>
                         </div>
                       }
@@ -561,7 +569,7 @@ export default function AdminRecommendationsPage() {
                             </span>
                           ))
                         ) : (
-                          <span className="text-sm text-slate-500">No titles are assigned yet.</span>
+                          <span className="text-sm text-slate-500">还没有分配作品。</span>
                         )}
                       </div>
                     </RecommendationCard>
@@ -573,54 +581,54 @@ export default function AdminRecommendationsPage() {
         ) : null}
 
         {activeTab === 'rankings' ? (
-          <AdminPageSection
-            title="Ranking rules"
-            description="Keep ranking logic explicit. The page shows which rule runs, which titles it covers, and whether it is active."
+            <AdminPageSection
+              title="榜单规则"
+            description="榜单规则要写清楚：用什么编辑策略、覆盖哪些作品、当前是否启用，别再把旧热度排序当成默认入口。"
             action={
               <Button type="button" onClick={() => openCreateModal('ranking')}>
                 <Plus className="size-4" />
-                New ranking
+                新建榜单规则
               </Button>
             }
           >
             <AdminDataState
               isLoading={rankingsQuery.isLoading}
               hasData={rankings.length > 0}
-              emptyMessage={rankingsQuery.isError ? getErrorMessage(rankingsQuery.error, 'Ranking settings could not be loaded.') : 'No ranking configurations exist yet.'}
+              emptyMessage={rankingsQuery.isError ? getErrorMessage(rankingsQuery.error, '榜单规则加载失败。') : '当前还没有榜单规则。'}
               wrap={false}
             >
               <div className="grid gap-4 xl:grid-cols-2">
                 {rankings.map((ranking) => (
                   <RecommendationCard
                     key={ranking.id}
-                    title={ranking.name || 'Untitled ranking'}
-                    description={`${formatRankingTypeLabel(ranking.rankingType)} 路 ${formatTimeRangeLabel(ranking.timeRange)} 路 ${formatSeriesTypeLabel(ranking.seriesType)}`}
+                    title={ranking.name || '未命名榜单规则'}
+                    description={`${formatRankingTypeLabel(ranking.rankingType)} · ${formatTimeRangeLabel(ranking.timeRange)} · ${formatSeriesTypeLabel(ranking.seriesType)}`}
                     meta={
                       <AdminBadge tone={ranking.active ? 'success' : 'default'}>
-                        {ranking.active ? 'Active' : 'Paused'}
+                        {ranking.active ? '启用中' : '已暂停'}
                       </AdminBadge>
                     }
                     footer={
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="text-xs text-slate-500">
-                          Updated {formatDateTime(ranking.updatedAt)}
+                          更新于 {formatDateTime(ranking.updatedAt)}
                         </p>
                         <Button type="button" variant="destructive" size="sm" onClick={() => openDeleteModal('ranking', ranking)}>
                           <Trash2 className="size-4" />
-                          Delete
+                          删除
                         </Button>
                       </div>
                     }
                   >
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.82)] p-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Max items</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">最大作品数</p>
                         <p className="mt-2 text-lg font-semibold text-slate-950">{ranking.maxItems || 0}</p>
                       </div>
                       <div className="rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.82)] p-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Audience</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">适用范围</p>
                         <p className="mt-2 text-lg font-semibold text-slate-950">
-                          {ranking.adult ? 'Adult allowed' : 'General audience'}
+                          {ranking.adult ? '允许 18+ 内容' : '普通内容'}
                         </p>
                       </div>
                     </div>
@@ -633,18 +641,18 @@ export default function AdminRecommendationsPage() {
 
         {activeTab === 'analytics' ? (
           <AdminPageSection
-            title="Slot analytics"
-            description="Filter by slot first, then compare impression, click, and conversion behavior without mixing unrelated storefront entries together."
+            title="推荐位表现分析"
+            description="先按推荐位筛选，再比较曝光、点击和转化，不把不相关的入口混成一锅。"
           >
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <AdminMetricCard label="Impressions" value={formatNumber(analyticsSummary.impressions)} detail="Loaded analytics rows." tone="accent" />
-                <AdminMetricCard label="Views" value={formatNumber(analyticsSummary.views)} detail="Story detail visits." />
-                <AdminMetricCard label="Clicks" value={formatNumber(analyticsSummary.clicks)} detail="Slot click volume." />
-                <AdminMetricCard label="Conversions" value={formatNumber(analyticsSummary.conversions)} detail="Tracked downstream actions." />
+                <AdminMetricCard label="曝光" value={formatNumber(analyticsSummary.impressions)} detail="当前已加载的分析记录。" tone="accent" />
+                <AdminMetricCard label="详情访问" value={formatNumber(analyticsSummary.views)} detail="进入作品详情页的次数。" />
+                <AdminMetricCard label="点击" value={formatNumber(analyticsSummary.clicks)} detail="推荐位点击量。" />
+                <AdminMetricCard label="转化" value={formatNumber(analyticsSummary.conversions)} detail="被跟踪到的下游动作。" />
               </div>
               <div className="rounded-[26px] border border-black/8 bg-white/88 p-5 shadow-[var(--gush-shadow-soft)]">
-                <AdminFormField label="Slot filter">
+                <AdminFormField label="推荐位筛选">
                   <select
                     id="analytics-slot-filter"
                     value={analyticsSlotFilter}
@@ -664,22 +672,22 @@ export default function AdminRecommendationsPage() {
                   </div>
                 ) : (
                   <p className="mt-4 text-sm leading-6 text-slate-600">
-                    Choose a single slot to focus the analytics table on one reader entry point.
+                    先选定一个推荐位，再把分析表聚焦到单一读者入口上。
                   </p>
                 )}
               </div>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <AdminMetricCard label="Average CTR" value={formatPercent(averageCtr)} detail="Clicks divided by impressions." />
-              <AdminMetricCard label="Average conversion rate" value={formatPercent(averageConversionRate)} detail="Conversions divided by clicks." />
+              <AdminMetricCard label="平均点击率" value={formatPercent(averageCtr)} detail="点击数 / 曝光数。" />
+              <AdminMetricCard label="平均转化率" value={formatPercent(averageConversionRate)} detail="转化数 / 点击数。" />
             </div>
 
             <div className="mt-6">
               <AdminDataState
                 isLoading={analyticsQuery.isLoading}
                 hasData={analytics.length > 0}
-                emptyMessage={analyticsQuery.isError ? getErrorMessage(analyticsQuery.error, 'Recommendation analytics could not be loaded.') : 'No analytics rows are available for this filter.'}
+                emptyMessage={analyticsQuery.isError ? getErrorMessage(analyticsQuery.error, '推荐位分析加载失败。') : '当前筛选条件下没有分析记录。'}
                 wrap={false}
               >
                 <div className="overflow-hidden rounded-[28px] border border-black/8 bg-white/92 shadow-[var(--gush-shadow-soft)]">
@@ -687,15 +695,15 @@ export default function AdminRecommendationsPage() {
                     <table className="min-w-full">
                       <thead className="bg-[rgba(250,247,241,0.9)] text-left text-[11px] uppercase tracking-[0.18em] text-slate-500">
                         <tr>
-                          <th className="px-4 py-4">Date</th>
-                          <th className="px-4 py-4">Slot</th>
-                          <th className="px-4 py-4">Series</th>
-                          <th className="px-4 py-4">Impressions</th>
-                          <th className="px-4 py-4">Views</th>
-                          <th className="px-4 py-4">Clicks</th>
-                          <th className="px-4 py-4">Conversions</th>
+                          <th className="px-4 py-4">日期</th>
+                          <th className="px-4 py-4">推荐位</th>
+                          <th className="px-4 py-4">作品</th>
+                          <th className="px-4 py-4">曝光</th>
+                          <th className="px-4 py-4">详情访问</th>
+                          <th className="px-4 py-4">点击</th>
+                          <th className="px-4 py-4">转化</th>
                           <th className="px-4 py-4">CTR</th>
-                          <th className="px-4 py-4">Conversion rate</th>
+                          <th className="px-4 py-4">转化率</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -713,7 +721,7 @@ export default function AdminRecommendationsPage() {
                                   <p className="text-xs text-slate-500">{slotMeta.token}</p>
                                 </div>
                               </td>
-                              <td className="px-4 py-4 font-mono text-xs text-slate-600">{item.seriesId || 'Unknown'}</td>
+                              <td className="px-4 py-4 font-mono text-xs text-slate-600">{item.seriesId || '未知作品'}</td>
                               <td className="px-4 py-4">{formatNumber(item.impressions)}</td>
                               <td className="px-4 py-4">{formatNumber(item.views)}</td>
                               <td className="px-4 py-4">{formatNumber(item.clicks)}</td>
@@ -735,8 +743,8 @@ export default function AdminRecommendationsPage() {
 
       <Modal
         isOpen={createTarget === 'slot'}
-        title="New recommendation slot"
-        subtitle="Slots should stay stable and readable so storefront wiring remains predictable."
+        title="新建推荐位"
+        subtitle="推荐位标识必须稳定、清楚，不要让前台接线和运营判断跟着一起发散。"
         onClose={() => {
           if (!createSlotMutation.isPending) {
             setCreateTarget(null);
@@ -750,7 +758,7 @@ export default function AdminRecommendationsPage() {
             createSlotMutation.mutate();
           }}
         >
-          <AdminFormField label="Slot preset" helperText={selectedSlotMeta.hint || 'Start from a known storefront slot pattern to reduce wiring mistakes.'}>
+          <AdminFormField label="推荐位预设" helperText={selectedSlotMeta.hint || '先从已有推荐位预设开始，减少接线和命名错误。'}>
             <select
               id="slot-preset"
               value={slotForm.preset}
@@ -766,11 +774,11 @@ export default function AdminRecommendationsPage() {
           </AdminFormField>
 
           <AdminFormField
-            label="Machine token"
+            label="系统标识"
             helperText={
               slotForm.preset === 'custom'
-                ? 'Use lowercase letters, numbers, and hyphens only.'
-                : 'This token is filled from the preset automatically.'
+                ? '只使用小写字母、数字和短横线。'
+                : '这个标识会根据预设自动填入。'
             }
           >
             <input
@@ -779,12 +787,12 @@ export default function AdminRecommendationsPage() {
               value={slotForm.slotToken}
               readOnly={slotForm.preset !== 'custom'}
               onChange={(event) => setSlotForm((current) => ({ ...current, slotToken: event.target.value }))}
-              placeholder="for example: library-return"
+              placeholder="例如：library-return"
               className={adminInputClassName}
             />
           </AdminFormField>
 
-          <AdminFormField label="Series IDs" helperText="Use commas or line breaks between series IDs.">
+          <AdminFormField label="作品 ID" helperText="多个作品 ID 可用逗号或换行分隔。">
             <textarea
               id="slot-series-ids"
               rows={5}
@@ -796,15 +804,15 @@ export default function AdminRecommendationsPage() {
           </AdminFormField>
 
           <Button type="submit" disabled={createSlotMutation.isPending}>
-            {createSlotMutation.isPending ? 'Creating...' : 'Create slot'}
+            {createSlotMutation.isPending ? '创建中...' : '创建推荐位'}
           </Button>
         </form>
       </Modal>
 
       <Modal
         isOpen={createTarget === 'ranking'}
-        title="New ranking"
-        subtitle="Keep ranking rules explicit so discovery remains truthful and maintainable."
+        title="新建榜单规则"
+        subtitle="榜单规则必须显式可见，这样发现页才能保持真实且可维护。"
         onClose={() => {
           if (!createRankingMutation.isPending) {
             setCreateTarget(null);
@@ -820,17 +828,17 @@ export default function AdminRecommendationsPage() {
           }}
         >
           <div className="grid gap-4 md:grid-cols-2">
-            <AdminFormField label="Ranking name">
+            <AdminFormField label="榜单名称">
               <input
                 id="ranking-name"
                 type="text"
                 value={rankingForm.name}
                 onChange={(event) => setRankingForm((current) => ({ ...current, name: event.target.value }))}
-                placeholder="for example: weekly-trending"
+                placeholder="例如：weekly-trending"
                 className={adminInputClassName}
               />
             </AdminFormField>
-            <AdminFormField label="Ranking type">
+            <AdminFormField label="榜单类型" helperText="这里只保留当前仍建议新建的榜单策略；旧规则只会作为历史配置显示。">
               <select
                 id="ranking-type"
                 value={rankingForm.rankingType}
@@ -844,7 +852,7 @@ export default function AdminRecommendationsPage() {
                 ))}
               </select>
             </AdminFormField>
-            <AdminFormField label="Time range">
+            <AdminFormField label="时间范围">
               <select
                 id="ranking-range"
                 value={rankingForm.timeRange}
@@ -858,7 +866,7 @@ export default function AdminRecommendationsPage() {
                 ))}
               </select>
             </AdminFormField>
-            <AdminFormField label="Series type">
+            <AdminFormField label="作品类型">
               <select
                 id="ranking-series-type"
                 value={rankingForm.seriesType}
@@ -872,7 +880,7 @@ export default function AdminRecommendationsPage() {
                 ))}
               </select>
             </AdminFormField>
-            <AdminFormField label="Max items">
+            <AdminFormField label="最大作品数">
               <input
                 id="ranking-max-items"
                 type="number"
@@ -885,7 +893,7 @@ export default function AdminRecommendationsPage() {
             </AdminFormField>
             <div className="grid gap-3">
               <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3 text-sm text-slate-700">
-                <span>Adult content allowed</span>
+                <span>允许 18+ 内容</span>
                 <input
                   type="checkbox"
                   checked={rankingForm.adult}
@@ -894,7 +902,7 @@ export default function AdminRecommendationsPage() {
                 />
               </label>
               <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3 text-sm text-slate-700">
-                <span>Rule is active</span>
+                <span>规则启用中</span>
                 <input
                   type="checkbox"
                   checked={rankingForm.active}
@@ -905,15 +913,15 @@ export default function AdminRecommendationsPage() {
             </div>
           </div>
           <Button type="submit" disabled={createRankingMutation.isPending}>
-            {createRankingMutation.isPending ? 'Creating...' : 'Create ranking'}
+            {createRankingMutation.isPending ? '创建中...' : '创建榜单规则'}
           </Button>
         </form>
       </Modal>
 
       <Modal
         isOpen={Boolean(deleteTarget)}
-        title="Delete item"
-        subtitle="This will remove the selected discovery record immediately."
+        title="删除项目"
+        subtitle="这会立即删除当前选中的发现页配置记录。"
         onClose={() => {
           if (!deleteBusy) {
             setDeleteTarget(null);
@@ -924,15 +932,15 @@ export default function AdminRecommendationsPage() {
         <div className="space-y-4">
           <p className="text-sm leading-6 text-slate-600">
             {deleteTarget?.kind === 'slot'
-              ? `Delete slot "${deleteTarget?.item?.name || deleteTarget?.item?.slot || 'Unknown'}"?`
-              : `Delete ranking "${deleteTarget?.item?.name || deleteTarget?.item?.ranking || 'Unknown'}"?`}
+              ? `确定删除推荐位“${deleteTarget?.item?.name || deleteTarget?.item?.slot || '未知'}”吗？`
+              : `确定删除榜单规则“${deleteTarget?.item?.name || deleteTarget?.item?.ranking || '未知'}”吗？`}
           </p>
           <div className="flex gap-3">
             <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleteBusy}>
-              Cancel
+              取消
             </Button>
             <Button type="button" variant="destructive" onClick={handleDeleteConfirm} disabled={deleteBusy}>
-              {deleteBusy ? 'Deleting...' : 'Delete'}
+              {deleteBusy ? '删除中...' : '删除'}
             </Button>
           </div>
         </div>

@@ -27,7 +27,7 @@ const defaultDraft = {
 };
 
 const providerOptions = [
-  { value: "console", label: "Console" },
+  { value: "console", label: "控制台" },
   { value: "webhook", label: "Webhook" },
   { value: "resend", label: "Resend" },
   { value: "sendgrid", label: "SendGrid" },
@@ -36,17 +36,17 @@ const providerOptions = [
 const secretFields = [
   {
     key: "resendApiKey",
-    label: "Resend API key",
+    label: "Resend API 密钥",
     placeholder: "re_...",
   },
   {
     key: "sendgridApiKey",
-    label: "SendGrid API key",
+    label: "SendGrid API 密钥",
     placeholder: "SG...",
   },
   {
     key: "smsWebhookUrl",
-    label: "SMS webhook URL",
+    label: "短信 Webhook 地址",
     placeholder: "https://sms.example.com/webhook",
   },
 ];
@@ -91,7 +91,7 @@ export default function AdminEmailSettingsPage() {
     } else if (!response.ok) {
       setFeedback({
         type: "error",
-        message: response.error || response.message || "Email settings could not be loaded.",
+        message: response.error || response.message || "邮件配置加载失败。",
       });
     }
     setLoading(false);
@@ -126,7 +126,7 @@ export default function AdminEmailSettingsPage() {
       } else {
         setFeedback({
           type: "error",
-          message: response.error || response.message || "Email settings could not be saved.",
+          message: response.error || response.message || "邮件配置保存失败。",
         });
       }
 
@@ -137,11 +137,11 @@ export default function AdminEmailSettingsPage() {
   );
 
   const handleSave = async () => {
-    await persist(draft, "Email settings saved.");
+    await persist(draft, "邮件配置已保存。");
   };
 
   const handleClearSecret = async (field) => {
-    await persist({ ...draft, [field]: "" }, "Secret cleared.");
+    await persist({ ...draft, [field]: "" }, "密钥已清空。");
   };
 
   const hasUnsavedChanges = useMemo(
@@ -160,7 +160,7 @@ export default function AdminEmailSettingsPage() {
 
     let savedBeforeTest = false;
     if (hasUnsavedChanges) {
-      const saveResponse = await persist(draft, "Email settings saved.");
+      const saveResponse = await persist(draft, "邮件配置已保存。");
       if (!saveResponse.ok) {
         setTesting(false);
         return;
@@ -173,13 +173,13 @@ export default function AdminEmailSettingsPage() {
       setFeedback({
         type: "success",
         message: savedBeforeTest
-          ? "Email settings saved, then the test email was sent."
-          : "Test email sent.",
+          ? "邮件配置已保存，并已发送测试邮件。"
+          : "测试邮件已发送。",
       });
     } else {
       setFeedback({
         type: "error",
-        message: response.error || response.message || "The test email could not be sent.",
+        message: response.error || response.message || "测试邮件发送失败。",
       });
     }
 
@@ -188,24 +188,24 @@ export default function AdminEmailSettingsPage() {
 
   const testButtonLabel = testing
     ? hasUnsavedChanges
-      ? "Saving and sending..."
-      : "Sending..."
+      ? "保存并发送中..."
+      : "发送中..."
     : hasUnsavedChanges
-      ? "Save and send test"
-      : "Send test";
+      ? "保存并发送测试"
+      : "发送测试";
 
   if (!isAuthenticated) {
     return (
-      <AdminPageSection title="Email delivery" description="Admin access is required before delivery settings can be edited.">
-        <p className="text-sm text-slate-500">Sign in as an admin to manage sender and delivery settings.</p>
+      <AdminPageSection title="邮件投递" description="需要管理员权限后，才能编辑邮件发送配置。">
+        <p className="text-sm text-slate-500">请先以管理员身份登录，再管理发件人与投递配置。</p>
       </AdminPageSection>
     );
   }
 
   if (loading) {
     return (
-      <AdminPageSection title="Email delivery" description="Loading the saved sender and provider configuration.">
-        <p className="text-sm text-slate-500">Loading email settings...</p>
+      <AdminPageSection title="邮件投递" description="正在加载已保存的发件人与投递通道配置。">
+        <p className="text-sm text-slate-500">正在加载邮件配置...</p>
       </AdminPageSection>
     );
   }
@@ -218,11 +218,11 @@ export default function AdminEmailSettingsPage() {
       />
 
       <AdminPageSection
-        title="Delivery defaults"
-        description="Set the provider, sender address, and internal alert inbox the rest of the admin workspace depends on."
+        title="基础投递设置"
+        description="在这里设置投递通道、默认发件地址，以及后台使用的内部告警邮箱。"
         action={
           <div className="flex flex-wrap items-center gap-2">
-            {hasUnsavedChanges ? <AdminBadge tone="warning">Unsaved changes</AdminBadge> : null}
+            {hasUnsavedChanges ? <AdminBadge tone="warning">有未保存更改</AdminBadge> : null}
             <Button
               type="button"
               variant="outline"
@@ -232,13 +232,13 @@ export default function AdminEmailSettingsPage() {
               {testButtonLabel}
             </Button>
             <Button type="button" onClick={handleSave} disabled={saving || !hasUnsavedChanges}>
-              {saving ? "Saving..." : "Save settings"}
+              {saving ? "保存中..." : "保存设置"}
             </Button>
           </div>
         }
       >
         <div className="grid gap-4 lg:grid-cols-3">
-          <AdminFormField label="Provider" helperText="Choose the delivery path used for operational email.">
+          <AdminFormField label="投递通道" helperText="选择后台运营邮件当前使用的发送方式。">
             <select
               value={draft.provider}
               onChange={(event) => handleChange("provider", event.target.value)}
@@ -252,7 +252,7 @@ export default function AdminEmailSettingsPage() {
             </select>
           </AdminFormField>
 
-          <AdminFormField label="From address" helperText="The default sender readers will see.">
+          <AdminFormField label="默认发件地址" helperText="读者最终会看到这个发件地址。">
             <input
               value={draft.from}
               onChange={(event) => handleChange("from", event.target.value)}
@@ -261,7 +261,7 @@ export default function AdminEmailSettingsPage() {
             />
           </AdminFormField>
 
-          <AdminFormField label="Admin alert inbox" helperText="Operational notices and delivery problems are routed here.">
+          <AdminFormField label="后台告警邮箱" helperText="投递异常和运营提醒都会发到这里。">
             <input
               value={draft.adminNotifyEmail}
               onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
@@ -273,11 +273,11 @@ export default function AdminEmailSettingsPage() {
       </AdminPageSection>
 
       <AdminPageSection
-        title="Provider secrets"
-        description="Keep sensitive provider credentials separate from the main content workflow, but still easy to review when email behavior changes."
+        title="通道密钥"
+        description="把敏感密钥和内容工作流分开，但仍保持在邮件异常时能快速复核。"
       >
         <div className="space-y-4">
-          <AdminFormField label="Default webhook URL" helperText="Used when webhook delivery is the active provider path.">
+          <AdminFormField label="默认 Webhook 地址" helperText="当 Webhook 是当前启用通道时，会使用这里的地址。">
             <input
               value={draft.webhookUrl}
               onChange={(event) => handleChange("webhookUrl", event.target.value)}
@@ -294,7 +294,7 @@ export default function AdminEmailSettingsPage() {
               >
                 <AdminFormField
                   label={field.label}
-                  helperText="Keep masked values in place if the existing secret should remain active."
+                  helperText="如果要继续沿用当前密钥，保留已有遮罩值即可。"
                 >
                   <input
                     value={draft[field.key]}
@@ -311,7 +311,7 @@ export default function AdminEmailSettingsPage() {
                     onClick={() => handleClearSecret(field.key)}
                     disabled={saving || testing}
                   >
-                    Clear
+                    清空
                   </Button>
                 </div>
               </div>
@@ -321,16 +321,16 @@ export default function AdminEmailSettingsPage() {
       </AdminPageSection>
 
       <AdminPageSection
-        title="Test email"
-        description="Send a real test message from the current draft so operators can verify delivery without digging through provider dashboards."
+        title="测试邮件"
+        description="直接用当前草稿发一封真实测试邮件，方便运营确认投递是否正常。"
       >
         <div className="grid gap-4">
           <AdminFormField
-            label="Test recipient"
+            label="测试收件人"
             helperText={
               hasUnsavedChanges
-                ? "The latest draft will be saved before the test email is sent."
-                : "The saved configuration will be used for the next test email."
+                ? "发送前会先保存当前草稿，再发测试邮件。"
+                : "下一封测试邮件会直接使用当前已保存配置。"
             }
           >
             <input
@@ -341,7 +341,7 @@ export default function AdminEmailSettingsPage() {
             />
           </AdminFormField>
           <p className="text-sm leading-6 text-slate-500">
-            Use the action row above to send the test message once the recipient is ready.
+            收件人准备好后，直接用上方操作区发送测试邮件。
           </p>
         </div>
       </AdminPageSection>

@@ -92,7 +92,7 @@ function buildPayload(countryCodes, lengthRules) {
 function getRegionValidationError(countryCodes) {
   const duplicates = findDuplicateCountryCodes(countryCodes);
   if (duplicates.length > 0) {
-    return `Country calling codes must be unique: ${duplicates.join(", ")}.`;
+    return `国际区号不能重复：${duplicates.join(", ")}。`;
   }
 
   return "";
@@ -127,7 +127,7 @@ export default function AdminRegionsPage() {
     } else {
       setFeedback({
         type: "error",
-        message: response.error || response.message || "Region settings could not be loaded.",
+        message: response.error || response.message || "区域设置加载失败。",
       });
     }
 
@@ -224,11 +224,11 @@ export default function AdminRegionsPage() {
       const nextPayload = buildPayload(response.data?.config?.countryCodes, response.data?.config?.lengthRules);
       setCountryCodes(nextPayload.countryCodes);
       setLengthRules(nextPayload.lengthRules);
-      setFeedback({ type: "success", message: "Region settings saved." });
+      setFeedback({ type: "success", message: "区域设置已保存。" });
     } else {
       setFeedback({
         type: "error",
-        message: response.error || response.message || "Region settings could not be saved.",
+        message: response.error || response.message || "区域设置保存失败。",
       });
     }
 
@@ -268,10 +268,10 @@ export default function AdminRegionsPage() {
       setLengthRules(payload.lengthRules);
       setFeedback({
         type: "success",
-        message: "Region settings imported. Save changes to apply them.",
+        message: "区域设置已导入，保存后生效。",
       });
     } catch {
-      setFeedback({ type: "error", message: "Import failed. Upload a valid JSON file." });
+      setFeedback({ type: "error", message: "导入失败，请上传有效的 JSON 文件。" });
     } finally {
       event.target.value = "";
     }
@@ -279,16 +279,16 @@ export default function AdminRegionsPage() {
 
   if (isLoading || loading) {
     return (
-      <AdminPageSection title="Region settings" description="Loading saved region rules for sign-in and account recovery flows.">
-        <p className="text-sm text-slate-500">Loading region settings...</p>
+      <AdminPageSection title="区域设置" description="正在加载登录与账号找回流程使用的地区规则。">
+        <p className="text-sm text-slate-500">正在加载区域设置...</p>
       </AdminPageSection>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <AdminPageSection title="Region settings" description="Admin access is required before locale and phone rules can be edited.">
-        <p className="text-sm text-slate-500">Sign in as an admin to manage region settings.</p>
+      <AdminPageSection title="区域设置" description="需要先以管理员身份登录，才能编辑地区和手机号规则。">
+        <p className="text-sm text-slate-500">请先登录后台后再管理区域设置。</p>
       </AdminPageSection>
     );
   }
@@ -301,8 +301,8 @@ export default function AdminRegionsPage() {
       />
 
       <AdminPageSection
-        title="Phone region coverage"
-        description="Manage the country calling codes and local number-length rules used in OTP and account-recovery flows."
+        title="手机号地区规则"
+        description="维护 OTP 和账号找回流程所使用的国际区号与本地号码长度规则。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <input
@@ -313,13 +313,13 @@ export default function AdminRegionsPage() {
               className="hidden"
             />
             <Button type="button" variant="outline" onClick={() => importInputRef.current?.click()}>
-              Import JSON
+              导入 JSON
             </Button>
             <Button type="button" variant="outline" onClick={handleExport}>
-              Export JSON
+              导出 JSON
             </Button>
             <Button type="button" onClick={handleSave} disabled={saving}>
-              {saving ? "Saving..." : "Save changes"}
+              {saving ? "正在保存..." : "保存更改"}
             </Button>
           </div>
         }
@@ -328,19 +328,19 @@ export default function AdminRegionsPage() {
           <div className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-semibold text-slate-950">Country calling codes</h3>
+                <h3 className="text-base font-semibold text-slate-950">国际区号</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Keep the list short and readable. Each entry pairs a dial code with the reader-facing region label.
+                  保持列表简短、易读。每一条都由区号和读者可见的地区名称组成。
                 </p>
               </div>
               <Button type="button" variant="outline" onClick={addCode}>
-                Add entry
+                新增条目
               </Button>
             </div>
 
             {countryCodes.length === 0 ? (
               <div className="mt-6 rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.82)] p-6 text-sm text-slate-500">
-                No country calling codes have been added yet.
+                还没有添加任何国际区号。
               </div>
             ) : (
               <div className="mt-6 space-y-3">
@@ -349,7 +349,7 @@ export default function AdminRegionsPage() {
                     key={`${item.code || "new"}-${index}`}
                     className="grid gap-3 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.52)] p-4 md:grid-cols-[130px_minmax(0,1fr)_auto] md:items-end"
                   >
-                    <AdminFormField label="Code">
+                    <AdminFormField label="区号">
                       <input
                         value={item.code}
                         onChange={(event) => updateCode(index, "code", event.target.value)}
@@ -358,17 +358,17 @@ export default function AdminRegionsPage() {
                       />
                     </AdminFormField>
 
-                    <AdminFormField label="Label">
+                    <AdminFormField label="地区名称">
                       <input
                         value={item.label}
                         onChange={(event) => updateCode(index, "label", event.target.value)}
                         className={adminInputClassName}
-                        placeholder="United States"
+                        placeholder="美国"
                       />
                     </AdminFormField>
 
                     <Button type="button" variant="outline" onClick={() => removeCode(index)}>
-                      Remove
+                      删除
                     </Button>
                   </div>
                 ))}
@@ -378,15 +378,15 @@ export default function AdminRegionsPage() {
 
           <div className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
             <div>
-              <h3 className="text-base font-semibold text-slate-950">Local number lengths</h3>
+              <h3 className="text-base font-semibold text-slate-950">本地号码长度</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Enter comma-separated values such as <code>10</code> or <code>9,10,11</code> for each saved dial code.
+                为每个已保存的国际区号填写号码长度，多个值用逗号分隔，例如 <code>10</code> 或 <code>9,10,11</code>。
               </p>
             </div>
 
             {countryCodes.filter((item) => normalizeDialCode(item.code)).length === 0 ? (
               <div className="mt-6 rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.82)] p-6 text-sm text-slate-500">
-                Add at least one country calling code before editing length rules.
+                请先添加至少一个国际区号，再编辑号码长度规则。
               </div>
             ) : (
               <div className="mt-6 space-y-3">
