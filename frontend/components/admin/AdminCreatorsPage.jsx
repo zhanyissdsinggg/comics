@@ -23,7 +23,23 @@ import AdminShell from "./AdminShell";
 import { useAdminAuth } from "./AuthContext";
 import Skeleton from "../common/Skeleton";
 import { adminFetchJson } from "../../lib/adminApiClient";
-import { buildAdminCreatorAudit } from "../../lib/adminCreatorAudit";
+
+const EMPTY_AUDIT = {
+  creators: [],
+  missingAuthorSeries: [],
+  legacyAuthorOnlySeries: [],
+  namingRiskCreators: [],
+  stats: {
+    totalSeries: 0,
+    creatorCount: 0,
+    attributedSeriesCount: 0,
+    structuredCreatorSeriesCount: 0,
+    legacyAuthorOnlySeriesCount: 0,
+    missingAuthorSeriesCount: 0,
+    namingRiskCreatorCount: 0,
+    unpublishedSeriesCount: 0,
+  },
+};
 
 function formatPercent(value) {
   const parsed = Number(value);
@@ -194,7 +210,7 @@ function LoadingView() {
 export default function AdminCreatorsPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAdminAuth();
-  const [seriesList, setSeriesList] = useState([]);
+  const [audit, setAudit] = useState(EMPTY_AUDIT);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -217,7 +233,7 @@ export default function AdminCreatorsPage() {
         setLoading(true);
         setError("");
 
-        const { response, data } = await adminFetchJson("/api/admin/series", {
+        const { response, data } = await adminFetchJson("/api/admin/creators/audit", {
           cache: "no-store",
         });
 
@@ -226,20 +242,20 @@ export default function AdminCreatorsPage() {
         }
 
         if (!response.ok) {
-          setSeriesList([]);
+          setAudit(EMPTY_AUDIT);
           setError(getErrorMessage(data, response));
           setLoading(false);
           return;
         }
 
-        setSeriesList(Array.isArray(data?.series) ? data.series.filter(Boolean) : []);
+        setAudit(data?.audit && typeof data.audit === "object" ? data.audit : EMPTY_AUDIT);
         setLoading(false);
       } catch (loadError) {
         if (cancelled) {
           return;
         }
 
-        setSeriesList([]);
+        setAudit(EMPTY_AUDIT);
         setError(loadError instanceof Error ? loadError.message : "创作者巡检数据加载失败。");
         setLoading(false);
       }
@@ -263,7 +279,6 @@ export default function AdminCreatorsPage() {
     return () => window.clearTimeout(timeoutId);
   }, [copyFeedback.message]);
 
-  const audit = useMemo(() => buildAdminCreatorAudit(seriesList), [seriesList]);
   const coverageRate = useMemo(() => {
     if (!audit.stats.totalSeries) {
       return 0;
@@ -311,6 +326,10 @@ export default function AdminCreatorsPage() {
   const missingCreatorPreview = useMemo(
     () => audit.missingAuthorSeries.slice(0, 8),
     [audit.missingAuthorSeries],
+  );
+  const legacyAuthorPreview = useMemo(
+    () => (Array.isArray(audit.legacyAuthorOnlySeries) ? audit.legacyAuthorOnlySeries.slice(0, 8) : []),
+    [audit.legacyAuthorOnlySeries],
   );
 
   const handleOpenSeries = (seriesId) => {
@@ -450,6 +469,9 @@ export default function AdminCreatorsPage() {
                 <StatusPill tone="amber">
                   仍有 {audit.stats.missingAuthorSeriesCount} 部作品缺少创作者署名
                 </StatusPill>
+                <StatusPill tone={audit.stats.legacyAuthorOnlySeriesCount > 0 ? "amber" : "emerald"}>
+                  {audit.stats.legacyAuthorOnlySeriesCount} 部作品仍停留在旧 author 兼容层
+                </StatusPill>
                 <StatusPill tone={audit.stats.namingRiskCreatorCount > 0 ? "rose" : "emerald"}>
                   {audit.stats.namingRiskCreatorCount} 处命名风险
                 </StatusPill>
@@ -464,8 +486,8 @@ export default function AdminCreatorsPage() {
                 {coverageRate}%
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {audit.stats.totalSeries} 部作品里，已有 {audit.stats.attributedSeriesCount} 部具备可进入前台
-                创作者页和作品头部的公开创作者身份。
+                {audit.stats.totalSeries} 部作品里，已有 {audit.stats.attributedSeriesCount} 部通过真实 credits
+                接入前台创作者层；另外 {audit.stats.legacyAuthorOnlySeriesCount} 部还停留在旧 author 兼容层。
               </p>
             </div>
           </div>
@@ -475,25 +497,25 @@ export default function AdminCreatorsPage() {
           <MetricCard
             title="创作者条目"
             value={audit.stats.creatorCount.toLocaleString()}
-            hint="目前已经足够稳定、可以被聚合展示的创作者或团队条目。"
+            hint="已经进入真实 Creator / SeriesCredit 模型、可以稳定聚合展示的创作者或团队条目。"
             tone="blue"
           />
           <MetricCard
-            title="已挂署名作品"
-            value={audit.stats.attributedSeriesCount.toLocaleString()}
-            hint="已经接入公开创作者身份的作品数量。"
+            title="真实 credits 已接入"
+            value={audit.stats.structuredCreatorSeriesCount.toLocaleString()}
+            hint="这部分作品已经能稳定进入前台创作者目录和作品页署名区。"
             tone="emerald"
           />
           <MetricCard
-            title="待补署名"
-            value={audit.stats.missingAuthorSeriesCount.toLocaleString()}
-            hint="这些作品暂时还无法进入创作者导向的发现流。"
+            title="旧 author 兼容层"
+            value={audit.stats.legacyAuthorOnlySeriesCount.toLocaleString()}
+            hint="这些作品还没真正迁到 Creator / SeriesCredit，只是暂时靠旧 author 字段兜底。"
             tone="amber"
           />
           <MetricCard
-            title="命名清理"
-            value={audit.stats.namingRiskCreatorCount.toLocaleString()}
-            hint="同一创作者出现多种拼写，会把前台目录拆散。"
+            title="缺少公开署名"
+            value={audit.stats.missingAuthorSeriesCount.toLocaleString()}
+            hint="这些作品目前既没有真实 credits，也没有可接受的公开署名。"
             tone="rose"
           />
         </div>
@@ -654,6 +676,53 @@ export default function AdminCreatorsPage() {
             )}
           </SurfacePanel>
         </div>
+
+        <SurfacePanel appearance="light" accent="amber" className="space-y-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                仍在旧 author 兼容层的作品
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                这些作品已经有可读署名，但还没真正迁进 Creator / SeriesCredit。先把它们迁完，后台和前台才算一条真链路。
+              </p>
+            </div>
+            <BookOpen className="mt-1 h-5 w-5 text-amber-500" />
+          </div>
+
+          {legacyAuthorPreview.length === 0 ? (
+            <EmptyState
+              title="当前没有旧 author 兼容项"
+              description="现有可读署名已经不再依赖旧 author 字段兜底。"
+            />
+          ) : (
+            <div className="space-y-3">
+              {legacyAuthorPreview.map((series) => (
+                <div
+                  key={`legacy-author-${series.id}`}
+                  className="flex flex-col gap-3 rounded-[24px] border border-amber-200 bg-amber-50/70 px-5 py-5 lg:flex-row lg:items-center lg:justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-base font-semibold text-slate-950">{series.title}</p>
+                      <StatusPill tone="slate">{series.id}</StatusPill>
+                      <StatusPill tone="amber">旧 author 兼容层</StatusPill>
+                    </div>
+                    <p className="text-sm leading-6 text-slate-600">
+                      当前署名：<span className="font-medium text-slate-950">{series.author || "未填写"}</span> |{" "}
+                      {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)}
+                    </p>
+                  </div>
+
+                  <ActionButton onClick={() => handleOpenSeries(series.id)}>
+                    <Edit3 className="h-4 w-4" />
+                    迁到真实 credits
+                  </ActionButton>
+                </div>
+              ))}
+            </div>
+          )}
+        </SurfacePanel>
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -850,7 +919,9 @@ export default function AdminCreatorsPage() {
             </div>
           )}
 
-          {audit.creators.length === 0 && audit.missingAuthorSeries.length === 0 ? (
+          {audit.creators.length === 0 &&
+          audit.missingAuthorSeries.length === 0 &&
+          legacyAuthorPreview.length === 0 ? (
             <EmptyState
               title="当前还没有创作者数据"
               description="先到作品详情页补创作者署名，后台和前台的创作者层才能开始成形。"

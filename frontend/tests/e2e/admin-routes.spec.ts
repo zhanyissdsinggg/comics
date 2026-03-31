@@ -146,6 +146,7 @@ async function installAdminApiMocks(
   page: Page,
   options: {
     dashboardStatsBody?: unknown;
+    creatorsAuditBody?: unknown;
     supportBody?: unknown;
     usersBody?: unknown;
     seriesBody?: unknown;
@@ -210,6 +211,28 @@ async function installAdminApiMocks(
         revenue: { total: 0, change: 0, trend: "up" },
         views: { total: 0, change: 0, trend: "up" },
         comments: { total: 0, change: 0, trend: "up" },
+      });
+      return;
+    }
+
+    if (pathname.endsWith("/api/admin/creators/audit")) {
+      await fulfillJson(route, options.creatorsAuditBody ?? {
+        audit: {
+          creators: [],
+          missingAuthorSeries: [],
+          legacyAuthorOnlySeries: [],
+          namingRiskCreators: [],
+          stats: {
+            totalSeries: 0,
+            creatorCount: 0,
+            attributedSeriesCount: 0,
+            structuredCreatorSeriesCount: 0,
+            legacyAuthorOnlySeriesCount: 0,
+            missingAuthorSeriesCount: 0,
+            namingRiskCreatorCount: 0,
+            unpublishedSeriesCount: 0,
+          },
+        },
       });
       return;
     }
@@ -609,7 +632,81 @@ test.describe("Admin route regression", () => {
   test("should render creators workspace with editorial admin copy", async ({ page }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
-      seriesBody: MERCH_SERIES_BODY,
+      creatorsAuditBody: {
+        audit: {
+          creators: [
+            {
+              slug: "studio-orion",
+              name: "Studio Orion",
+              path: "/creators/studio-orion",
+              type: "studio",
+              titleCount: 1,
+              publishedCount: 1,
+              unpublishedCount: 0,
+              completedCount: 1,
+              adultCount: 0,
+              coverReadyCount: 1,
+              descriptionReadyCount: 1,
+              genreReadyCount: 1,
+              episodicCount: 1,
+              latestUpdatedAt: "2026-03-12T08:00:00.000Z",
+              spotlightSeries: {
+                id: "series-hero-001",
+                title: "Midnight Signal",
+                type: "comic",
+                status: "Completed",
+                adult: false,
+                isPublished: true,
+                coverUrl: "https://cdn.example.com/series-hero-001-cover.jpg",
+                description: "A binge-ready romance thriller built for homepage rotation.",
+                genres: ["Romance", "Thriller"],
+                updatedAt: "2026-03-12T08:00:00.000Z",
+                episodeCount: 48,
+                author: "",
+                creatorCredits: [],
+                creatorSource: "normalized",
+              },
+              topGenres: ["Romance", "Thriller"],
+              variants: [],
+              series: [],
+              structuredSeriesCount: 1,
+              legacyAuthorOnlyCount: 0,
+              hasNamingRisk: false,
+              metadataCoverageRate: 100,
+            },
+          ],
+          missingAuthorSeries: [],
+          legacyAuthorOnlySeries: [
+            {
+              id: "series-hero-002",
+              title: "Neon Contract",
+              type: "comic",
+              status: "Ongoing",
+              adult: false,
+              isPublished: true,
+              coverUrl: "https://cdn.example.com/series-hero-002-cover.jpg",
+              description: "Fast-start fantasy with strong click appeal.",
+              genres: ["Fantasy", "Action"],
+              updatedAt: "2026-03-10T08:00:00.000Z",
+              episodeCount: 21,
+              author: "Blue Harbor",
+              creatorCredits: [],
+              creatorSource: "legacy_author",
+            },
+          ],
+          namingRiskCreators: [],
+          stats: {
+            totalSeries: 2,
+            creatorCount: 1,
+            attributedSeriesCount: 2,
+            structuredCreatorSeriesCount: 1,
+            legacyAuthorOnlySeriesCount: 1,
+            missingAuthorSeriesCount: 0,
+            namingRiskCreatorCount: 0,
+            unpublishedSeriesCount: 0,
+          },
+        },
+      },
     });
     const runtimeIssues = collectRuntimeIssues(page);
 

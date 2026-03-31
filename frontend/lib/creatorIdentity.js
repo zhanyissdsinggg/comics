@@ -9,9 +9,28 @@ import {
 const TEAM_TOKENS = ["team", "works", "lab", "labs", "collective", "house", "project"];
 const STUDIO_TOKENS = ["studio"];
 const PUBLIC_CREATOR_TYPES = new Set(["person", "team", "studio"]);
+const GENERIC_CREATOR_PLACEHOLDER_PATTERNS = [
+  /^story team$/i,
+  /^creator details coming soon$/i,
+  /^the team behind\b/i,
+  /^team behind\b/i,
+  /^the creators behind\b/i,
+  /^unknown$/i,
+  /^not listed$/i,
+  /^n\/a$/i,
+];
 
 export const CREATOR_FALLBACK_LABEL = "Creator details coming soon";
 export const CREATOR_FALLBACK_DETAIL = "Public creator names have not been listed on this title yet.";
+
+export function isGenericCreatorPlaceholder(name) {
+  const normalized = normalizeCreatorName(name);
+  if (!normalized) {
+    return true;
+  }
+
+  return GENERIC_CREATOR_PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(normalized));
+}
 
 export function inferCreatorCreditType(name) {
   const normalized = normalizeCreatorName(name).toLowerCase();
@@ -49,7 +68,12 @@ function createCreatorIdentity(source) {
   const rawSlug = hasObjectSource ? String(source?.slug || "").trim() : "";
   const isFallbackSource = Boolean(hasObjectSource && source?.isFallback);
 
-  if (!normalizedName || isFallbackSource || normalizedName === CREATOR_FALLBACK_LABEL) {
+  if (
+    !normalizedName ||
+    isFallbackSource ||
+    normalizedName === CREATOR_FALLBACK_LABEL ||
+    isGenericCreatorPlaceholder(normalizedName)
+  ) {
     return {
       hasPublicCredit: false,
       name: "",
@@ -116,7 +140,7 @@ function extractPrimarySeriesCreator(series) {
   }
 
   const authorName = normalizeCreatorName(series?.author);
-  if (!authorName) {
+  if (!authorName || isGenericCreatorPlaceholder(authorName)) {
     return null;
   }
 

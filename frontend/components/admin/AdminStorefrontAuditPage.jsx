@@ -20,7 +20,10 @@ import { useAdminAuth } from "./AuthContext";
 import Skeleton from "../common/Skeleton";
 import { adminFetchJson } from "../../lib/adminApiClient";
 import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
-import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
+import {
+  resolveSeriesCreatorIdentity,
+  resolveSeriesCreatorName,
+} from "../../lib/creatorIdentity";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -90,12 +93,7 @@ function formatLifecycleLabel(series) {
 }
 
 function getCreatorLabel(series) {
-  const identity = resolveSeriesCreatorIdentity(series);
-  if (identity.hasPublicCredit && identity.displayName) {
-    return identity.displayName;
-  }
-
-  return normalizeText(series.author);
+  return resolveSeriesCreatorName(series);
 }
 
 function getContentFootprint(series) {

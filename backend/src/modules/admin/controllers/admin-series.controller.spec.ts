@@ -3,12 +3,14 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { CreatorCreditsService } from "../../../common/creators/creator-credits.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { AdminCreatorsService } from "../admin-content/services/admin-creators.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { AdminSeriesController } from "./admin-series.controller";
 
 describe("AdminSeriesController", () => {
   let controller: AdminSeriesController;
   let prisma: PrismaService;
+  let adminCreatorsService: AdminCreatorsService;
 
   beforeEach(async () => {
     const builder = Test.createTestingModule({
@@ -50,9 +52,22 @@ describe("AdminSeriesController", () => {
         {
           provide: CreatorCreditsService,
           useValue: {
+            getCreditsMap: jest.fn().mockResolvedValue(new Map()),
+            buildIdentity: jest.fn().mockReturnValue({
+              label: "Creator details coming soon",
+              type: "fallback",
+              isFallback: true,
+            }),
             syncPrimaryCreditFromAuthorField: jest
               .fn()
               .mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: AdminCreatorsService,
+          useValue: {
+            getSeriesCredits: jest.fn(),
+            updateSeriesCredits: jest.fn(),
           },
         },
       ],
@@ -63,6 +78,7 @@ describe("AdminSeriesController", () => {
     const module: TestingModule = await builder.compile();
     controller = module.get<AdminSeriesController>(AdminSeriesController);
     prisma = module.get<PrismaService>(PrismaService);
+    adminCreatorsService = module.get<AdminCreatorsService>(AdminCreatorsService);
   });
 
   it("is defined", () => {
@@ -299,5 +315,90 @@ describe("AdminSeriesController", () => {
     await expect(
       controller.remove({ params: { id: "missing" } } as never),
     ).rejects.toThrow(NotFoundException);
+  });
+
+  it("returns series credits from the dedicated admin creators service", async () => {
+    jest.spyOn(prisma.series, "findUnique").mockResolvedValue({ id: "series-1" } as never);
+    jest.spyOn(adminCreatorsService, "getSeriesCredits").mockResolvedValue({
+      credits: [
+        {
+          id: "credit-1",
+          creatorId: "creator-1",
+          slug: "studio-north",
+          name: "Studio North",
+          normalizedName: "studio north",
+          type: "studio",
+          role: "studio",
+          source: "admin_credit_editor",
+          sortOrder: 0,
+          isPrimary: true,
+          isPublic: true,
+        },
+      ],
+      creator: {
+        label: "Studio North",
+        slug: "studio-north",
+        type: "studio",
+        isFallback: false,
+      },
+      author: "Studio North",
+    } as never);
+
+    await expect(
+      controller.detailCredits({ params: { id: "series-1" } } as never),
+    ).resolves.toEqual(
+      expect.objectContaining({
+        credits: [expect.objectContaining({ name: "Studio North" })],
+        author: "Studio North",
+      }),
+    );
+    expect(adminCreatorsService.getSeriesCredits).toHaveBeenCalledWith("series-1");
+  });
+
+  it("updates series credits through the admin creators service", async () => {
+    jest.spyOn(prisma.series, "findUnique").mockResolvedValue({ id: "series-1" } as never);
+    jest.spyOn(adminCreatorsService, "updateSeriesCredits").mockResolvedValue({
+      credits: [],
+      publicCredits: [],
+      creator: {
+        label: "Creator details coming soon",
+        type: "fallback",
+        isFallback: true,
+      },
+      author: "",
+    } as never);
+
+    await expect(
+      controller.updateCredits(
+        {
+          credits: [
+            {
+              name: "Studio North",
+              role: "STUDIO",
+              type: "studio",
+              sortOrder: 0,
+              isPrimary: true,
+              isPublic: true,
+            },
+          ],
+        },
+        { params: { id: "series-1" } } as never,
+      ),
+    ).resolves.toEqual(
+      expect.objectContaining({
+        credits: [],
+        publicCredits: [],
+      }),
+    );
+
+    expect(adminCreatorsService.updateSeriesCredits).toHaveBeenCalledWith("series-1", [
+      expect.objectContaining({
+        name: "Studio North",
+        role: "STUDIO",
+        type: "studio",
+        isPrimary: true,
+        isPublic: true,
+      }),
+    ]);
   });
 });

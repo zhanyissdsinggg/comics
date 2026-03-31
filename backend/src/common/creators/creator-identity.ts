@@ -18,12 +18,34 @@ export type PublicCreatorIdentity = {
   isFallback: boolean;
 };
 
+const GENERIC_CREATOR_PLACEHOLDER_PATTERNS = [
+  /^story team$/i,
+  /^creator details coming soon$/i,
+  /^the team behind\b/i,
+  /^team behind\b/i,
+  /^the creators behind\b/i,
+  /^unknown$/i,
+  /^not listed$/i,
+  /^n\/a$/i,
+] as const;
+
 function normalizeText(value: unknown): string {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
 
 export function normalizeCreatorName(value: unknown): string {
   return normalizeText(value);
+}
+
+export function isGenericCreatorPlaceholder(value: unknown): boolean {
+  const normalized = normalizeCreatorName(value);
+  if (!normalized) {
+    return true;
+  }
+
+  return GENERIC_CREATOR_PLACEHOLDER_PATTERNS.some((pattern) =>
+    pattern.test(normalized),
+  );
 }
 
 export function slugifyCreatorName(value: unknown): string {
@@ -81,6 +103,9 @@ export function buildPublicCreatorCredits(
     .filter((credit) => credit?.isPublic !== false && credit?.creator?.isPublic !== false)
     .map((credit) => {
       const name = normalizeCreatorName(credit?.creator?.name);
+      if (isGenericCreatorPlaceholder(name)) {
+        return null;
+      }
       return {
         creatorId: String(credit?.creator?.id || credit?.creatorId || "").trim(),
         slug: String(credit?.creator?.slug || "").trim(),
@@ -91,7 +116,7 @@ export function buildPublicCreatorCredits(
         sortOrder: Number(credit?.sortOrder || 0),
       };
     })
-    .filter((credit) => credit.name)
+    .filter((credit): credit is PublicCreatorCredit => Boolean(credit?.name))
     .sort((left, right) => {
       if (left.isPrimary !== right.isPrimary) {
         return left.isPrimary ? -1 : 1;
@@ -107,8 +132,12 @@ export function buildCreatorIdentityFromCredits(
   credits: PublicCreatorCredit[],
   legacyAuthor?: unknown,
 ): PublicCreatorIdentity {
-  if (credits.length > 0) {
-    const [primary, ...rest] = credits;
+  const normalizedCredits = credits.filter(
+    (credit) => !isGenericCreatorPlaceholder(credit?.name),
+  );
+
+  if (normalizedCredits.length > 0) {
+    const [primary, ...rest] = normalizedCredits;
     const label =
       rest.length === 0
         ? primary.name
@@ -126,7 +155,7 @@ export function buildCreatorIdentityFromCredits(
   }
 
   const normalizedLegacyAuthor = normalizeCreatorName(legacyAuthor);
-  if (normalizedLegacyAuthor) {
+  if (normalizedLegacyAuthor && !isGenericCreatorPlaceholder(normalizedLegacyAuthor)) {
     return {
       label: normalizedLegacyAuthor,
       type: inferCreatorTypeFromName(normalizedLegacyAuthor),

@@ -17,6 +17,7 @@ import { ContentCacheInvalidationService } from "../../../common/cache/content-c
 import { logger } from "../../../common/logger/winston.init";
 import { CreatorCreditsService } from "../../../common/creators/creator-credits.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { AdminCreatorsService } from "../admin-content/services/admin-creators.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import {
   enrichSeriesWithStorefrontFields,
@@ -30,6 +31,7 @@ export class AdminSeriesController {
     private readonly prisma: PrismaService,
     private readonly contentCacheInvalidation: ContentCacheInvalidationService,
     private readonly creatorCreditsService: CreatorCreditsService,
+    private readonly adminCreatorsService: AdminCreatorsService,
   ) {}
 
   private async invalidateReadCaches(seriesId?: string) {
@@ -57,10 +59,11 @@ export class AdminSeriesController {
   }
 
   private async enrichSeriesSummaryList(series: any[]) {
-    return enrichSeriesWithStorefrontFields(
+    const enrichedSeries = await enrichSeriesWithStorefrontFields(
       this.prisma,
       series.map((item) => this.mapSeriesSummary(item)),
     );
+    return this.attachCreatorFields(enrichedSeries);
   }
 
   private async enrichSeriesSummary(series: any) {
@@ -71,7 +74,26 @@ export class AdminSeriesController {
     const [nextSeries] = await enrichSeriesWithStorefrontFields(this.prisma, [
       this.mapSeriesSummary(series),
     ]);
-    return nextSeries || this.mapSeriesSummary(series);
+    const [nextSummary] = await this.attachCreatorFields([
+      nextSeries || this.mapSeriesSummary(series),
+    ]);
+    return nextSummary || nextSeries || this.mapSeriesSummary(series);
+  }
+
+  private async attachCreatorFields(seriesList: any[]) {
+    const seriesIds = (Array.isArray(seriesList) ? seriesList : [])
+      .map((item) => String(item?.id || "").trim())
+      .filter(Boolean);
+    const creditsMap = await this.creatorCreditsService.getCreditsMap(seriesIds);
+
+    return (Array.isArray(seriesList) ? seriesList : []).map((series) => {
+      const credits = creditsMap.get(String(series?.id || "")) || [];
+      return {
+        ...series,
+        creatorCredits: credits,
+        creator: this.creatorCreditsService.buildIdentity(credits, series?.author),
+      };
+    });
   }
 
   private toSeriesPayload(input: any, existing?: any) {
@@ -282,6 +304,20 @@ export class AdminSeriesController {
     return { series: await this.enrichSeriesSummary(series) };
   }
 
+  @Get(":id/credits")
+  async detailCredits(@Req() req: Request) {
+    const seriesId = String(req.params.id || "");
+    const existing = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+      select: { id: true },
+    });
+    if (!existing) {
+      throw new NotFoundException("Series not found.");
+    }
+
+    return await this.adminCreatorsService.getSeriesCredits(seriesId);
+  }
+
   @Patch(":id")
   async update(@Body() body: Record<string, any>, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
@@ -310,6 +346,21 @@ export class AdminSeriesController {
     });
     await this.invalidateReadCaches(seriesId);
     return { series: await this.enrichSeriesSummary(nextSeries || updated) };
+  }
+
+  @Patch(":id/credits")
+  async updateCredits(@Body() body: Record<string, any>, @Req() req: Request) {
+    const seriesId = String(req.params.id || "");
+    const existing = await this.prisma.series.findUnique({
+      where: { id: seriesId },
+      select: { id: true },
+    });
+    if (!existing) {
+      throw new NotFoundException("Series not found.");
+    }
+
+    const credits = Array.isArray(body?.credits) ? body.credits : [];
+    return await this.adminCreatorsService.updateSeriesCredits(seriesId, credits);
   }
 
   @Delete(":id")

@@ -16,7 +16,10 @@ import SurfacePanel from "@/components/common/SurfacePanel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { apiGet } from "../../lib/apiClient";
-import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
+import {
+  resolveSeriesCreatorIdentity,
+  resolveSeriesCreatorName,
+} from "../../lib/creatorIdentity";
 
 const number = new Intl.NumberFormat("zh-CN");
 const usd = new Intl.NumberFormat("zh-CN", {
@@ -786,7 +789,7 @@ export default function AdminDashboardNew() {
                     title={safeText(series.title) || "未命名作品"}
                     detail={`${formatSeriesType(series.type)} · ${formatSeriesState(series)}${missingFlags.length ? ` · ${missingFlags.join(" / ")}` : ""}`}
                     meta={`${formatDate(series.updatedAt)} · ${relativeTime(series.updatedAt)}`}
-                    badge={safeText(series.author) || (creatorReady ? "署名已补" : "待补署名")}
+                    badge={resolveSeriesCreatorName(series) || (creatorReady ? "署名已补" : "待补署名")}
                   />
                 );
               })

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
+  BarChart3,
   Bell,
   BookOpen,
   Clock,
@@ -16,6 +17,7 @@ import {
   PenSquare,
   Radar,
   Receipt,
+  ScrollText,
   Search,
   Settings,
   Sparkles,
@@ -32,6 +34,13 @@ const SEARCH_ITEMS = [
     href: "/admin",
     icon: BookOpen,
     keywords: ["dashboard", "overview", "workspace", "home", "仪表盘", "概览", "工作区"],
+  },
+  {
+    id: "analytics",
+    label: "数据分析",
+    href: "/admin/analytics",
+    icon: BarChart3,
+    keywords: ["analytics", "insights", "report", "dashboard", "数据分析", "分析", "报表", "数据"],
   },
   {
     id: "series",
@@ -55,6 +64,13 @@ const SEARCH_ITEMS = [
     keywords: ["collections", "home", "curation", "featured", "编排", "推荐", "合集", "首页"],
   },
   {
+    id: "recommendations",
+    label: "推荐位",
+    href: "/admin/recommendations",
+    icon: Sparkles,
+    keywords: ["recommendation", "slot", "placement", "featured", "推荐位", "推荐", "排位", "卡槽"],
+  },
+  {
     id: "users",
     label: "用户",
     href: "/admin/users",
@@ -76,6 +92,13 @@ const SEARCH_ITEMS = [
     keywords: ["promotions", "marketing", "campaigns", "活动", "营销", "促销"],
   },
   {
+    id: "marketing",
+    label: "营销",
+    href: "/admin/marketing",
+    icon: Megaphone,
+    keywords: ["marketing", "campaigns", "segment", "渠道", "营销", "活动", "投放", "细分"],
+  },
+  {
     id: "comments",
     label: "评论",
     href: "/admin/comments",
@@ -90,6 +113,13 @@ const SEARCH_ITEMS = [
     keywords: ["billing", "pricing", "wallet", "commercial", "计费", "钱包", "商业"],
   },
   {
+    id: "revenue",
+    label: "收入",
+    href: "/admin/revenue",
+    icon: CreditCard,
+    keywords: ["revenue", "gross", "income", "finance", "收入", "营收", "流水", "财务"],
+  },
+  {
     id: "notifications",
     label: "通知",
     href: "/admin/notifications",
@@ -102,6 +132,13 @@ const SEARCH_ITEMS = [
     href: "/admin/support",
     icon: LifeBuoy,
     keywords: ["support", "tickets", "help", "客服", "工单", "支持"],
+  },
+  {
+    id: "logs",
+    label: "审计日志",
+    href: "/admin/logs",
+    icon: ScrollText,
+    keywords: ["logs", "audit", "history", "trace", "日志", "审计", "记录", "操作历史"],
   },
   {
     id: "creators",

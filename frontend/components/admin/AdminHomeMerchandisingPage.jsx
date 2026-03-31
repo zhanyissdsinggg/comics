@@ -20,6 +20,7 @@ import {
   getReaderProof,
 } from "../../lib/homeMerchandising";
 import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
+import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { getStorefrontSlotDisplayMeta, normalizeStorefrontSlotToken } from "../../lib/storefrontSlots";
 
 function toNumber(value) {
@@ -1311,7 +1312,10 @@ export default function AdminHomeMerchandisingPage() {
                       </span>
                     </div>
                     <p className="mt-3 text-sm leading-6 text-slate-600">
-                      {series.author ? `署名：${series.author}` : "署名待补"} |{" "}
+                      {resolveSeriesCreatorName(series)
+                        ? `署名：${resolveSeriesCreatorName(series)}`
+                        : "署名待补"}{" "}
+                      |{" "}
                       {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)} |
                       {" "}更新于 {formatDateLabel(series.updatedAt)}
                     </p>

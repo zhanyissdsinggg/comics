@@ -23,6 +23,7 @@ import {
   PenSquare,
   Radar,
   Receipt,
+  ScrollText,
   Search,
   Settings,
   Sparkles,
@@ -36,6 +37,12 @@ const NAV_GROUPS = [
     label: "工作区",
     items: [
       { label: "仪表盘", href: "/admin", icon: BarChart3, match: ["/admin"], exact: true },
+      {
+        label: "数据分析",
+        href: "/admin/analytics",
+        icon: BarChart3,
+        match: ["/admin/analytics"],
+      },
       {
         label: "作品",
         href: "/admin/series",
@@ -71,6 +78,12 @@ const NAV_GROUPS = [
         match: ["/admin/merchandising"],
       },
       {
+        label: "推荐位",
+        href: "/admin/recommendations",
+        icon: Sparkles,
+        match: ["/admin/recommendations"],
+      },
+      {
         label: "评论",
         href: "/admin/comments",
         icon: MessageSquare,
@@ -89,6 +102,12 @@ const NAV_GROUPS = [
         icon: Bell,
         match: ["/admin/notifications"],
       },
+      {
+        label: "审计日志",
+        href: "/admin/logs",
+        icon: ScrollText,
+        match: ["/admin/logs"],
+      },
     ],
   },
   {
@@ -100,7 +119,14 @@ const NAV_GROUPS = [
         icon: Megaphone,
         match: ["/admin/promotions"],
       },
+      {
+        label: "营销",
+        href: "/admin/marketing",
+        icon: Megaphone,
+        match: ["/admin/marketing"],
+      },
       { label: "订单", href: "/admin/orders", icon: Receipt, match: ["/admin/orders"] },
+      { label: "收入", href: "/admin/revenue", icon: CreditCard, match: ["/admin/revenue"] },
       { label: "计费", href: "/admin/billing", icon: CreditCard, match: ["/admin/billing"] },
     ],
   },
@@ -149,15 +175,20 @@ const NAV_GROUPS = [
 
 const BREADCRUMB_MAP = [
   { match: "/admin", label: "仪表盘", exact: true },
+  { match: "/admin/analytics", label: "数据分析" },
   { match: "/admin/series", label: "作品" },
   { match: "/admin/creators", label: "创作者" },
   { match: "/admin/storefront", label: "前台巡检" },
   { match: "/admin/merchandising", label: "内容编排" },
+  { match: "/admin/recommendations", label: "推荐位" },
   { match: "/admin/comments", label: "评论" },
   { match: "/admin/promotions", label: "活动" },
+  { match: "/admin/marketing", label: "营销" },
   { match: "/admin/orders", label: "订单" },
+  { match: "/admin/revenue", label: "收入" },
   { match: "/admin/billing", label: "计费" },
   { match: "/admin/notifications", label: "通知" },
+  { match: "/admin/logs", label: "审计日志" },
   { match: "/admin/users", label: "用户" },
   { match: "/admin/support", label: "客服支持" },
   { match: "/admin/branding", label: "品牌素材" },

@@ -225,7 +225,7 @@ function SeriesCard(props) {
   } = props;
   const isList = viewMode === "list";
   const readiness = getAdminSeriesReadiness(series);
-  const creatorLine = series.creatorLabel || series.author || "创作者信息待补充";
+  const creatorLine = series.creatorLabel || "创作者信息待补充";
   return (
     <article
       className={`rounded-[28px] border bg-white/92 p-4 shadow-[var(--gush-shadow-soft)] transition ${
@@ -315,7 +315,7 @@ function SeriesCard(props) {
                 创作者：{" "}
                 <span
                   className={
-                    series.creatorLabel || series.author ? "font-medium text-slate-950" : "text-amber-700"
+                    series.creatorLabel ? "font-medium text-slate-950" : "text-amber-700"
                   }
                 >
                   {creatorLine}
@@ -334,7 +334,7 @@ function SeriesCard(props) {
                 <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2.5 py-1 text-slate-600">
                   {series.episodeCount > 0 ? `${series.episodeCount} 章` : "还没有章节"}
                 </span>
-                {!series.creatorLabel && !series.author ? (
+                {!series.creatorLabel ? (
                   <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700">
                     缺少创作者署名
                   </span>
@@ -530,7 +530,7 @@ export default function AdminSeriesPageNew() {
       const matchesQuick =
         quickFilter === "all" ||
         (quickFilter === "needsMetadata" && readiness.missingCount > 0) ||
-        (quickFilter === "noAuthor" && !series.creatorLabel.trim() && !series.author.trim()) ||
+        (quickFilter === "noAuthor" && !series.creatorLabel.trim()) ||
         (quickFilter === "needsEpisodes" && series.episodeCount === 0) ||
         (quickFilter === "noCover" && !series.coverUrl) ||
         (quickFilter === "draft" && !series.isPublished) ||
@@ -545,7 +545,7 @@ export default function AdminSeriesPageNew() {
     const comics = seriesList.filter((item) => item.type === "comic").length;
     const novels = seriesList.filter((item) => item.type === "novel").length;
     const readyCount = seriesList.filter((item) => getAdminSeriesReadiness(item).missingCount === 0).length;
-    const noAuthor = seriesList.filter((item) => !item.creatorLabel.trim() && !item.author.trim()).length;
+    const noAuthor = seriesList.filter((item) => !item.creatorLabel.trim()).length;
     const drafts = seriesList.filter((item) => !item.isPublished).length;
     const noEpisodes = seriesList.filter((item) => item.episodeCount === 0).length;
     const noCover = seriesList.filter((item) => !item.coverUrl).length;

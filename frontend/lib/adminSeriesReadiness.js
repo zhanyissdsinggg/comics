@@ -1,4 +1,7 @@
-import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
+import {
+  resolveSeriesCreatorIdentity,
+  resolveSeriesCreatorName,
+} from "./creatorIdentity";
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -24,11 +27,8 @@ function normalizeGenres(value) {
 
 export function getAdminSeriesReadiness(series) {
   const creatorIdentity = resolveSeriesCreatorIdentity(series);
-  const fallbackAuthor = normalizeText(series?.author);
-  const hasCreatorCredit = creatorIdentity.hasPublicCredit || Boolean(fallbackAuthor);
-  const creatorLabel = creatorIdentity.hasPublicCredit
-    ? creatorIdentity.displayName
-    : fallbackAuthor;
+  const creatorLabel = resolveSeriesCreatorName(series);
+  const hasCreatorCredit = Boolean(creatorLabel);
   const coverUrl = normalizeText(series?.coverUrl || series?.coverImage);
   const description = normalizeText(series?.description);
   const genres = normalizeGenres(series?.genres);

@@ -174,6 +174,14 @@ test.describe("Admin detail page regressions", () => {
       });
     });
 
+    await page.route("**/api/admin/series/series-qa-001/credits", async (route) => {
+      await fulfillJson(route, {
+        credits: [],
+        creator: null,
+        author: "Studio North",
+      });
+    });
+
     const runtimeIssues = collectRuntimeIssues(page);
     const response = await page.goto("/admin/series/series-qa-001", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
@@ -204,6 +212,105 @@ test.describe("Admin detail page regressions", () => {
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/series/series-qa-001", runtimeIssues);
+  });
+
+  test("series detail updates normalized creator credits through the dedicated credits endpoint", async ({ page }) => {
+    await primeAdminSession(page);
+    await installAdminBaseMocks(page);
+
+    let creditsPatchBody: Record<string, unknown> | null = null;
+
+    await page.route("**/api/admin/series/series-qa-001", async (route) => {
+      await fulfillJson(route, {
+        series: {
+          id: "series-qa-001",
+          title: "Regression Test Series",
+          type: "comic",
+          status: "Ongoing",
+          adult: false,
+          isPublished: true,
+          description: "A fixture series for creator credit validation in the admin detail page.",
+          author: "",
+          genres: ["Action", "Drama"],
+          coverUrl: "https://example.com/cover.jpg",
+          coverTone: "moody",
+          createdAt: "2026-03-01T10:00:00.000Z",
+          updatedAt: "2026-03-10T10:00:00.000Z",
+          creatorCredits: [],
+          creator: null,
+        },
+      });
+    });
+
+    await page.route("**/api/admin/series/series-qa-001/credits", async (route) => {
+      if (route.request().method() === "PATCH") {
+        creditsPatchBody = JSON.parse(route.request().postData() || "{}") as Record<string, unknown>;
+        await fulfillJson(route, {
+          credits: [
+            {
+              id: "credit-1",
+              creatorId: "creator-1",
+              slug: "studio-north",
+              name: "Studio North",
+              type: "studio",
+              role: "studio",
+              sortOrder: 0,
+              isPrimary: true,
+              isPublic: true,
+            },
+          ],
+          publicCredits: [
+            {
+              creatorId: "creator-1",
+              slug: "studio-north",
+              name: "Studio North",
+              type: "studio",
+              role: "studio",
+              sortOrder: 0,
+              isPrimary: true,
+            },
+          ],
+          creator: {
+            label: "Studio North",
+            slug: "studio-north",
+            type: "studio",
+            isFallback: false,
+          },
+          author: "Studio North",
+        });
+        return;
+      }
+
+      await fulfillJson(route, {
+        credits: [],
+        creator: null,
+        author: "",
+      });
+    });
+
+    const runtimeIssues = collectRuntimeIssues(page);
+    const response = await page.goto("/admin/series/series-qa-001#creator", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByText("当前前台署名", { exact: true })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await page.getByRole("button", { name: /添加 credit/i }).click();
+    await page.getByLabel("公开署名").first().fill("Studio North");
+    await page.getByRole("button", { name: /保存署名|Save credits/ }).click();
+
+    await expect(page.getByText("创作者署名已保存。", { exact: true })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    expect(creditsPatchBody).not.toBeNull();
+    expect(JSON.stringify(creditsPatchBody)).toContain("Studio North");
+    expect(JSON.stringify(creditsPatchBody)).not.toContain("Story team");
+    expect(JSON.stringify(creditsPatchBody)).not.toContain("Creator details coming soon");
+
+    await page.waitForTimeout(300);
+    await expectNoRuntimeIssues("/admin/series/series-qa-001#creator", runtimeIssues);
   });
 
   test("episodes workspace supports content-first bulk edits and reorder actions", async ({ page }) => {
