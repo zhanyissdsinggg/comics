@@ -295,13 +295,13 @@ export default function LibraryPage({ initialSignedIn = false }) {
             seriesId: entry.seriesId,
             episodeId: entry.episodeId,
             title: series.title,
-            subtitle: formatEpisodeSubtitle("Last read", entry.episodeId),
+            subtitle: formatRelativeLibraryTime(entry.createdAt),
             coverTone: series.coverTone,
             coverUrl: series.coverUrl,
             genres: Array.isArray(series?.genres) ? series.genres : [],
             seriesType: series?.type || "",
             progressPercent,
-            statusLabel: formatRelativeLibraryTime(entry.createdAt),
+            statusLabel: formatEpisodeSubtitle("Last read", entry.episodeId),
             badge: readingState.badge,
             isAdult: Boolean(series.adult),
             updatedAt: toTimestamp(entry.createdAt),
@@ -488,6 +488,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
           toTimestamp(latestBookmark?.createdAt),
         );
         const detailItems = [];
+        if (readingState.label) {
+          detailItems.push(readingState.label);
+        }
         if (progress?.lastEpisodeId) {
           detailItems.push(
             formatEpisodeSubtitle(
@@ -581,6 +584,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
     }
     return "";
   }, [recommendedItems, viewerSignedIn]);
+  const hasCuratedLibraryEntry = useMemo(
+    () => recommendedItems.some((item) => Boolean(item.sourceSlot)),
+    [recommendedItems],
+  );
   const showLibraryStale = showStale || showHomepageSlotsStale;
   const hasLibrarySignals =
     continueRailItems.length > 0 || historyRail.length > 0 || visibleLibraryItems.length > 0;
@@ -820,8 +827,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
         <EditorialHero
           eyebrow="Library"
           title={
-            viewerSignedIn && resumeSpotlightReadHref
-              ? "Pick up where you left off."
+            viewerSignedIn || hasCuratedLibraryEntry
+              ? "Your next read should be obvious."
               : "Your reading shelf."
           }
           description={
@@ -936,7 +943,15 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       ) : null}
 
                       <div className="mt-6 flex flex-wrap gap-2">
-                        {!resumeSpotlightReadHref && visibleLibraryItems.length > 0 ? (
+                        {resumeSpotlightReadHref ? (
+                          <button
+                            type="button"
+                            onClick={() => router.push(resumeSpotlightReadHref)}
+                            className={primaryButtonClass}
+                          >
+                            Resume now
+                          </button>
+                        ) : visibleLibraryItems.length > 0 ? (
                           <button
                             type="button"
                             onClick={() => scrollToSection("saved-series")}
@@ -1160,13 +1175,14 @@ export default function LibraryPage({ initialSignedIn = false }) {
               {recommendedItems.length > 0 ? (
                 <Rail
                   eyebrow={viewerSignedIn ? "Next" : "Recommended"}
-                  title={viewerSignedIn ? "Next Reads" : "Recommended"}
+                  title={viewerSignedIn || hasCuratedLibraryEntry ? "Recommended for You" : "Recommended"}
                   railName="recommended"
                   items={recommendedItems}
                   reason={recommendedRailReason}
                   appearance="light"
                   showActionLabel={false}
                   coverFallbackVariant="minimal-card"
+                  interactionMode="button"
                   onItemClick={(item) =>
                     router.push(
                       buildLibrarySeriesHref(

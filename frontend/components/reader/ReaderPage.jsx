@@ -14,13 +14,11 @@ import { useRewardsStore } from "../../store/useRewardsStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { useCouponStore } from "../../store/useCouponStore";
-import AdultGateBlockingPanel from "../series/AdultGateBlockingPanel";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
 import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useAutoSaveProgress } from "../../hooks/useAutoSaveProgress";
-import NetworkFallback from "../common/NetworkFallback";
 import {
   buildPathWithAttribution,
   loadPersistedPaymentAttribution,
@@ -31,14 +29,12 @@ import {
 import { focusInteractiveTarget } from "../../lib/focusTarget";
 import { mergeSeriesCommerceEpisodes } from "../../lib/seriesCommerce";
 import { buildSupportPath } from "../../lib/supportRouting";
-import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { buildDiscoveryContext } from "../../lib/discoveryContext";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
-import ReaderChapterNavBar from "./ReaderChapterNavBar";
 
 const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
   ssr: false,
@@ -59,6 +55,18 @@ const AdultLoginModal = dynamic(() => import("../series/AdultLoginModal"), {
   ssr: false,
 });
 const AdultAgeModal = dynamic(() => import("../series/AdultAgeModal"), {
+  ssr: false,
+});
+const AdultGateBlockingPanel = dynamic(() => import("../series/AdultGateBlockingPanel"), {
+  ssr: false,
+});
+const NetworkFallback = dynamic(() => import("../common/NetworkFallback"), {
+  ssr: false,
+});
+const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"), {
+  ssr: false,
+});
+const ReaderChapterNavBar = dynamic(() => import("./ReaderChapterNavBar"), {
   ssr: false,
 });
 

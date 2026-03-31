@@ -32,6 +32,7 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
+import { buildDiscoveryContext } from "../../lib/discoveryContext";
 import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
 import { mergeSeriesCommerceAccess } from "../../lib/seriesCommerce";
@@ -184,6 +185,10 @@ export default function SeriesPage({
   );
 
   const series = data?.series || {};
+  const discoveryContext = useMemo(
+    () => buildDiscoveryContext(series, routeAttribution),
+    [routeAttribution, series],
+  );
   const episodes = useMemo(
     () => (Array.isArray(data?.episodes) ? data.episodes : []),
     [data?.episodes]
@@ -572,6 +577,25 @@ export default function SeriesPage({
       ),
     );
   }, [router, seriesId]);
+  const handleReturnToDiscovery = useCallback(() => {
+    if (!discoveryContext?.sourcePath) {
+      return;
+    }
+
+    trackEvent("series_return_to_source", {
+      seriesId,
+      entryPoint: routeAttribution?.entryPoint,
+      campaignId: routeAttribution?.campaignId,
+      sourcePath: discoveryContext.sourcePath,
+    });
+    router.push(discoveryContext.sourcePath);
+  }, [
+    discoveryContext?.sourcePath,
+    routeAttribution?.campaignId,
+    routeAttribution?.entryPoint,
+    router,
+    seriesId,
+  ]);
   const creatorHref = useMemo(() => {
     if (!creatorPresentation.hasPublicCredit || !creatorPresentation.href) {
       return "";
@@ -873,6 +897,31 @@ export default function SeriesPage({
               onDismiss={() => setCommerceNotice(null)}
               className="mb-6"
             />
+          </div>
+        ) : null}
+
+        {discoveryContext ? (
+          <div className="mb-6 rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:px-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
+                  {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
+                </p>
+                <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2.15rem]">
+                  {discoveryContext.title}
+                </h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
+                  {discoveryContext.returnHint}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleReturnToDiscovery}
+                className="shrink-0 rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                {discoveryContext.returnLabel}
+              </button>
+            </div>
           </div>
         ) : null}
 

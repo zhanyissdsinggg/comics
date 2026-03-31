@@ -3,6 +3,7 @@ import StructuredDataScript from "../../../components/common/StructuredDataScrip
 import { CouponProvider } from "../../../store/useCouponStore";
 import { EntitlementProvider } from "../../../store/useEntitlementStore";
 import { RewardsProvider } from "../../../store/useRewardsStore";
+import { WalletProvider } from "../../../store/useWalletStore";
 import { createPageMetadata } from "../../../lib/seo";
 import { resolveSeriesCreatorName } from "../../../lib/creatorIdentity";
 import { siteConfig } from "../../../lib/siteConfig";
@@ -58,18 +59,20 @@ export default async function SeriesRoutePage({ params }) {
   return (
     <>
       <StructuredDataScript id={`series-jsonld-${resolvedParams.id}`} data={structuredData} />
-      <RewardsProvider>
-        <EntitlementProvider>
-          <CouponProvider>
-            <SeriesPage
-              seriesId={resolvedParams.id}
-              initialSeriesPayload={routePayload?.payload || null}
-              initialSeriesState={routePayload?.state || "unavailable"}
-              initialGateStatus={routePayload?.gateReason || "OK"}
-            />
-          </CouponProvider>
-        </EntitlementProvider>
-      </RewardsProvider>
+      <WalletProvider>
+        <RewardsProvider>
+          <EntitlementProvider>
+            <CouponProvider>
+              <SeriesPage
+                seriesId={resolvedParams.id}
+                initialSeriesPayload={routePayload?.payload || null}
+                initialSeriesState={routePayload?.state || "unavailable"}
+                initialGateStatus={routePayload?.gateReason || "OK"}
+              />
+            </CouponProvider>
+          </EntitlementProvider>
+        </RewardsProvider>
+      </WalletProvider>
     </>
   );
 }

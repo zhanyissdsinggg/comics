@@ -269,7 +269,7 @@ export function getEpisodeAccessState({
     const claimRequired = Boolean(hasTtf && isTtfReady);
     return buildEpisodeAccessState("free", {
       kind: "free",
-      actionLabel: "Read",
+      actionLabel: "Start Reading",
       actionKind: claimRequired ? "claim" : "read",
       claimRequired,
       pricing,
@@ -288,7 +288,7 @@ export function getEpisodeAccessState({
   if (hasPreview) {
     return buildEpisodeAccessState("preview", {
       kind: "preview",
-      actionLabel: "Preview Episode",
+      actionLabel: "Start Reading",
       actionKind: "preview",
       claimRequired: false,
       pricing,

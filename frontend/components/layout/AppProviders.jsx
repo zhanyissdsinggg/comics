@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import ErrorBoundary from "../common/ErrorBoundary";
 import ThemeProvider from "../common/ThemeProvider";
 import { AuthProvider } from "../../store/useAuthStore";
-import { WalletProvider } from "../../store/useWalletStore";
 import { AdultGateProvider } from "../../store/useAdultGateStore";
 import { ProgressProvider } from "../../store/useProgressStore";
 import { FollowProvider } from "../../store/useFollowStore";
@@ -16,13 +15,8 @@ import { BrandingProvider, useBrandingStore } from "../../store/useBrandingStore
 import { RegionProvider } from "../../store/useRegionStore";
 import { HistoryProvider } from "../../store/useHistoryStore";
 import { ToastProvider } from "../common/ToastContext";
-import ToastContainer from "../common/ToastContainer";
 import { ApiBootGuard } from "../common/ApiBootGuard";
-import AuthRequiredModal from "../common/AuthRequiredModal";
-import PWAInstallPrompt from "../common/PWAInstallPrompt";
 import { useAuthOpenListener } from "../../hooks/useAuthOpenListener";
-import OfflineNotice from "../common/OfflineNotice";
-import TrackingInjector from "../tracking/TrackingInjector";
 
 const GlobalErrorToast = dynamic(() => import("../common/GlobalErrorToast"), {
   ssr: false,
@@ -34,6 +28,21 @@ const PerfMonitorBadge = dynamic(() => import("../common/PerfMonitorBadge"), {
   ssr: false,
 });
 const SiteFooter = dynamic(() => import("./SiteFooter"));
+const ToastContainer = dynamic(() => import("../common/ToastContainer"), {
+  ssr: false,
+});
+const AuthRequiredModal = dynamic(() => import("../common/AuthRequiredModal"), {
+  ssr: false,
+});
+const PWAInstallPrompt = dynamic(() => import("../common/PWAInstallPrompt"), {
+  ssr: false,
+});
+const OfflineNotice = dynamic(() => import("../common/OfflineNotice"), {
+  ssr: false,
+});
+const TrackingInjector = dynamic(() => import("../tracking/TrackingInjector"), {
+  ssr: false,
+});
 
 const FULL_FOOTER_PATHS = [];
 
@@ -100,37 +109,35 @@ export default function AppProviders({ children }) {
       <ThemeProvider>
         <ToastProvider>
           <AuthProvider>
-            <WalletProvider>
-              <AdultGateProvider>
-                <BrandingProvider>
-                  <RegionProvider>
-                    <OfflineNotice />
-                    <GlobalErrorToast />
-                    <BackendMetaBadge />
-                    <PerfMonitorBadge />
-                    <TrackingInjector />
-                    <BrandingHeadSync />
-                    <ToastContainer />
-                    {!isAdminRoute ? <AuthRequiredModal /> : null}
-                    <ApiBootGuard>
-                      <ProgressProvider>
-                        <FollowProvider>
-                          <NotificationsProvider>
-                            <BehaviorProvider>
-                              <HistoryProvider>
-                                {children}
-                                {shouldShowFooter ? <SiteFooter tone={footerTone} variant={footerVariant} pathname={pathname || ""} /> : null}
-                                <PWAInstallPrompt />
-                              </HistoryProvider>
-                            </BehaviorProvider>
-                          </NotificationsProvider>
-                        </FollowProvider>
-                      </ProgressProvider>
-                    </ApiBootGuard>
-                  </RegionProvider>
-                </BrandingProvider>
-              </AdultGateProvider>
-            </WalletProvider>
+            <AdultGateProvider>
+              <BrandingProvider>
+                <RegionProvider>
+                  <OfflineNotice />
+                  <GlobalErrorToast />
+                  <BackendMetaBadge />
+                  <PerfMonitorBadge />
+                  <TrackingInjector />
+                  <BrandingHeadSync />
+                  <ToastContainer />
+                  {!isAdminRoute ? <AuthRequiredModal /> : null}
+                  <ApiBootGuard>
+                    <ProgressProvider>
+                      <FollowProvider>
+                        <NotificationsProvider>
+                          <BehaviorProvider>
+                            <HistoryProvider>
+                              {children}
+                              {shouldShowFooter ? <SiteFooter tone={footerTone} variant={footerVariant} pathname={pathname || ""} /> : null}
+                              <PWAInstallPrompt />
+                            </HistoryProvider>
+                          </BehaviorProvider>
+                        </NotificationsProvider>
+                      </FollowProvider>
+                    </ProgressProvider>
+                  </ApiBootGuard>
+                </RegionProvider>
+              </BrandingProvider>
+            </AdultGateProvider>
           </AuthProvider>
         </ToastProvider>
       </ThemeProvider>

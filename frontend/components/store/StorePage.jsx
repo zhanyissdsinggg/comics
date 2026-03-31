@@ -464,11 +464,11 @@ export default function StorePage({
       <main className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow="Point packs"
-          title={purchaseActionsEnabled ? "Point packs for one-time unlocks." : "Point packs."}
+          title={purchaseActionsEnabled ? "Point packs for one-time unlocks." : "Checkout opens later."}
           description={
             purchaseActionsEnabled
               ? "One-time unlocks for readers who buy as needed."
-              : "Review packs now. Checkout opens later."
+              : "Pricing is visible now. No charge today."
           }
           secondary={purchaseActionsEnabled ? regionConfig.label : ""}
           stats={storeHeroStats}
@@ -565,7 +565,7 @@ export default function StorePage({
               },
               {
                 label: "Purchases",
-                detail: "Orders and receipts appear in Purchases after launch.",
+                detail: "Receipts appear after launch in Purchases.",
               },
               {
                 label: "Help",

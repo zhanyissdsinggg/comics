@@ -1,6 +1,10 @@
 "use client";
 
-import ShareButton from "../common/ShareButton";
+import dynamic from "next/dynamic";
+
+const ShareButton = dynamic(() => import("../common/ShareButton"), {
+  ssr: false,
+});
 
 export default function ReaderTopBar({
   title,
@@ -128,6 +132,7 @@ export default function ReaderTopBar({
           <button
             type="button"
             onClick={onPrev}
+            aria-label="Previous episode"
             disabled={!hasPrev}
             className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
               hasPrev
@@ -140,6 +145,7 @@ export default function ReaderTopBar({
           <button
             type="button"
             onClick={onNext}
+            aria-label={!hasNext ? "End of chapter" : nextLocked ? "Locked upcoming episode" : "Forward episode"}
             disabled={!hasNext}
             className={`shrink-0 rounded-full px-3 py-1 text-xs ${
               !hasNext
@@ -149,7 +155,7 @@ export default function ReaderTopBar({
                 : "border border-neutral-800 text-neutral-200"
             }`}
           >
-            {!hasNext ? "End" : nextLocked ? "Next locked" : "Next"}
+            {!hasNext ? "End" : nextLocked ? "Locked ahead" : "Forward"}
           </button>
         </div>
       </div>

@@ -101,8 +101,8 @@ function getLaneReason({ entryPoint, campaignId, series }) {
     if (campaignId.includes("breakout") || campaignId.includes("editorial") || isNewOrHot) {
       return {
         sourceLabel: "Search",
-        laneValue: "Featured pick",
-        title: `${series?.title || "This title"} is featured in search right now.`,
+        laneValue: "Trending pick",
+        title: `${series?.title || "This title"} is trending in search right now.`,
         description: "Search should surface strong next picks without leaning on popularity claims.",
       };
     }

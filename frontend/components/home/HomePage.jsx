@@ -10,16 +10,9 @@ import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   BookOpen,
-  BookOpenText,
   Gift,
-  CircleHelp,
   Sparkles,
-  Users,
 } from "lucide-react";
-import Cover from "../common/Cover";
-import SiteHeader from "../layout/SiteHeader";
-import SiteFooter from "../layout/SiteFooter";
-import PortraitCard from "./PortraitCard";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useProgressStore } from "../../store/useProgressStore";
@@ -41,10 +34,41 @@ import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getSearchParam } from "../../lib/pageSearchParams";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), { ssr: false });
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
+const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
+  ssr: false,
+  loading: () => (
+    <div className="sticky top-0 z-40 border-b border-transparent bg-[rgba(251,247,240,0.72)] backdrop-blur-xl">
+      <div className="mx-auto flex min-h-[58px] max-w-[1320px] items-center justify-between gap-3 px-3 py-2 sm:min-h-[64px] sm:px-6 sm:py-2.5 lg:px-8">
+        <div className="h-10 w-28 rounded-full bg-white/80 shadow-[0_10px_24px_rgba(15,23,42,0.04)]" />
+        <div className="hidden h-10 flex-1 rounded-full bg-white/70 md:block" />
+        <div className="h-10 w-24 rounded-full bg-white/80 shadow-[0_10px_24px_rgba(15,23,42,0.04)]" />
+      </div>
+    </div>
+  ),
+});
+const SiteFooter = dynamic(() => import("../layout/SiteFooter"), {
+  ssr: false,
+  loading: () => <div className="h-24" aria-hidden="true" />,
+});
+const HomeContentSections = dynamic(() => import("./HomeContentSections"), {
+  ssr: false,
+  loading: () => (
+    <div className="space-y-8 md:space-y-10">
+      <div className="h-56 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.05)]" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={`home-section-skeleton-${index}`}
+            className="h-72 rounded-[26px] bg-white/78 shadow-[0_18px_40px_rgba(15,23,42,0.05)]"
+          />
+        ))}
+      </div>
+    </div>
+  ),
+});
 
 function toTimestamp(value) {
   const parsed = typeof value === "number" ? value : Date.parse(value || "");
@@ -110,6 +134,28 @@ function formatDisplayLabel(value) {
     .join(" ");
 }
 
+function buildHeroCoverAltText(series) {
+  const title = String(series?.title || "").replace(/\s+/g, " ").trim();
+  const seriesType = String(series?.type || series?.seriesType || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+
+  if (title && (seriesType === "comic" || seriesType === "novel")) {
+    return `${seriesType.charAt(0).toUpperCase()}${seriesType.slice(1)} cover image for ${title}`;
+  }
+
+  if (title) {
+    return `Cover image for ${title}`;
+  }
+
+  if (seriesType === "comic" || seriesType === "novel") {
+    return `${seriesType.charAt(0).toUpperCase()}${seriesType.slice(1)} cover image`;
+  }
+
+  return "Series cover image";
+}
+
 function buildSeriesMetaLabel(series, creatorName) {
   return [creatorName, formatDisplayLabel(series?.type || series?.seriesType || ""), getReadingState(series)]
     .filter(Boolean)
@@ -142,145 +188,38 @@ function buildHomeShelfItem(series) {
   };
 }
 
-function HomeSectionHeader({
-  icon: Icon,
-  eyebrow,
-  title,
-  description = "",
-  ctaLabel,
-  onCtaClick,
-  className,
-}) {
+function HeroCoverPreview({ series, eyebrow }) {
+  const coverUrl = String(series?.coverUrl || "").trim();
+  const badgeLabel = eyebrow || "Featured";
+  const coverAltText = buildHeroCoverAltText(series);
+
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-4 border-b border-black/6 pb-5 sm:flex-row sm:items-end sm:justify-between",
-        className,
+    <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-black/6 bg-neutral-900">
+      {coverUrl ? (
+        <img
+          src={coverUrl}
+          alt={coverAltText}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div
+          className="absolute inset-0 bg-[linear-gradient(135deg,rgba(17,24,39,0.92),rgba(49,87,214,0.38),rgba(245,158,11,0.18))]"
+          role="img"
+          aria-label={coverAltText}
+        />
       )}
-    >
-      <div className="max-w-2xl">
-        {eyebrow ? (
-          <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-            {Icon ? <Icon className="size-3.5" /> : null}
-            {eyebrow}
-          </p>
-        ) : null}
-        <h2 className="mt-3 font-display text-[1.72rem] font-semibold tracking-tight text-slate-950 sm:text-[2.1rem]">
-          {title}
-        </h2>
-        {description ? (
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{description}</p>
-        ) : null}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,15,28,0.16),rgba(10,15,28,0.62))]" />
+      <div className="absolute left-3 top-3 rounded-full border border-white/16 bg-[rgba(12,18,30,0.46)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/90 backdrop-blur-sm">
+        {badgeLabel}
       </div>
-
-      {ctaLabel && typeof onCtaClick === "function" ? (
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onCtaClick}
-          className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-slate-600 hover:bg-transparent hover:text-slate-950"
-        >
-          {ctaLabel}
-          <ArrowRight className="size-4" />
-        </Button>
-      ) : null}
+      <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+        <p className="line-clamp-2 font-display text-lg font-semibold tracking-tight">
+          {series?.title || "Story"}
+        </p>
+      </div>
     </div>
-  );
-}
-
-function FallbackDiscoveryCard({ eyebrow, title, description, label, onClick }) {
-  return (
-    <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,243,236,0.95))] py-0 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
-      <CardContent className="p-6 sm:p-7">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-          {eyebrow}
-        </p>
-        <h2 className="mt-3 font-display text-[1.75rem] font-semibold tracking-tight text-slate-950">
-          {title}
-        </h2>
-        <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600">{description}</p>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onClick}
-          className="mt-5 h-auto rounded-full px-0 py-0 text-sm font-semibold text-slate-700 hover:bg-transparent hover:text-slate-950"
-        >
-          {label}
-          <ArrowRight className="size-4" />
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-function HomeShelfSection({
-  icon: Icon,
-  eyebrow,
-  title,
-  description = "",
-  ctaLabel,
-  onCtaClick,
-  items,
-  onItemClick,
-  actionLabel = "View Series",
-}) {
-  if (!Array.isArray(items) || items.length === 0) {
-    return null;
-  }
-
-  return (
-    <section className="space-y-6 md:space-y-7">
-      <HomeSectionHeader
-        icon={Icon}
-        eyebrow={eyebrow}
-        title={title}
-        description={description}
-        ctaLabel={ctaLabel}
-        onCtaClick={onCtaClick}
-      />
-
-      <div className="grid grid-cols-2 gap-4 sm:gap-5 xl:grid-cols-4">
-        {items.map((item) => (
-          <div key={item.id}>
-            <PortraitCard
-              item={item}
-              tone={item.coverTone}
-              appearance="light"
-              actionLabel={actionLabel}
-              onClick={() => onItemClick?.(item)}
-            />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function HomeGuideCard({ icon: Icon, eyebrow, title, description, ctaLabel, onClick }) {
-  return (
-    <Card className="h-full overflow-hidden rounded-[28px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,244,238,0.94))] py-0 shadow-[0_14px_30px_rgba(15,23,42,0.045)]">
-      <CardContent className="flex h-full flex-col p-5 sm:p-6">
-        <div className="flex size-11 items-center justify-center rounded-[18px] border border-black/6 bg-white/90 text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
-          <Icon className="size-5" />
-        </div>
-        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-          {eyebrow}
-        </p>
-        <h3 className="mt-2 font-display text-[1.3rem] font-semibold tracking-tight text-slate-950">
-          {title}
-        </h3>
-        <p className="mt-3 flex-1 text-sm leading-7 text-slate-600">{description}</p>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onClick}
-          className="mt-5 h-auto justify-start rounded-full px-0 py-0 text-sm font-semibold text-slate-700 hover:bg-transparent hover:text-slate-950"
-        >
-          {ctaLabel}
-          <ArrowRight className="size-4" />
-        </Button>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -557,44 +496,6 @@ function HomeContent({ initialSearchParams = {} }) {
   const heroCardLabel = resumeSeries ? "Pick up where you left off" : "Featured right now";
   const heroPrimaryCtaLabel = resumeSeries ? "Continue Reading" : "Start Reading";
   const heroCardCtaLabel = resumeSeries ? "Continue Reading" : "View Series";
-  const homeGuideCards = [
-    {
-      id: "guide-comics",
-      icon: BookOpenText,
-      eyebrow: "Format",
-      title: "Comics",
-      description: "Panel-led stories with a crisp reading rhythm and strong visual pacing.",
-      ctaLabel: "Browse Comics",
-      onClick: () => router.push("/comics"),
-    },
-    {
-      id: "guide-novels",
-      icon: BookOpen,
-      eyebrow: "Format",
-      title: "Novels",
-      description: "Serialized prose built for quieter sessions and chapter-by-chapter momentum.",
-      ctaLabel: "Browse Novels",
-      onClick: () => router.push("/novels"),
-    },
-    {
-      id: "guide-creators",
-      icon: Users,
-      eyebrow: "Creators",
-      title: "Meet the creators",
-      description: "Explore the writers, artists, teams, and studios shaping each story world.",
-      ctaLabel: "View Creators",
-      onClick: () => router.push("/creators"),
-    },
-    {
-      id: "guide-help",
-      icon: CircleHelp,
-      eyebrow: "Help",
-      title: "Need help?",
-      description: "Find support for reading, accounts, and content settings without digging around.",
-      ctaLabel: "Get Help",
-      onClick: () => router.push("/support"),
-    },
-  ];
   return (
     <div className="gush-page-shell overflow-hidden">
       <div className="gush-page-ambient h-[clamp(21rem,42vw,34rem)]" />
@@ -620,10 +521,10 @@ function HomeContent({ initialSearchParams = {} }) {
                     Original comics and serialized fiction
                   </p>
                   <h1 className="mt-4 max-w-3xl font-display text-[2.4rem] font-semibold leading-[0.98] tracking-[-0.04em] text-slate-950 sm:text-[3.3rem] xl:text-[4.2rem]">
-                    Stories worth settling into.
+                    Read original comics and novels in one place.
                   </h1>
                   <p className="mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                    Original comics and serialized novels, curated for calmer reading.
+                    Curated stories, cleaner shelves, and a calmer way to keep reading.
                   </p>
 
                   <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -662,15 +563,9 @@ function HomeContent({ initialSearchParams = {} }) {
                   <div className="rounded-[30px] border border-black/8 bg-[rgba(255,255,255,0.86)] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.055)] backdrop-blur-[10px] sm:p-5">
                     <div className="grid grid-cols-[110px_1fr] gap-4 sm:grid-cols-[148px_1fr] sm:items-start">
                       <div className="overflow-hidden rounded-[24px] border border-black/6 bg-neutral-900 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
-                        <Cover
-                          tone={heroSeries.coverTone}
-                          coverUrl={heroSeries.coverUrl}
-                          label={heroSeries.title}
-                          genres={heroSeries.genres}
-                          seriesType={heroSeries.type}
+                        <HeroCoverPreview
+                          series={heroSeries}
                           eyebrow={resumeSeries ? "Continue Reading" : "Featured"}
-                          badge=""
-                          className="aspect-[3/4] w-full"
                         />
                       </div>
 
@@ -753,71 +648,21 @@ function HomeContent({ initialSearchParams = {} }) {
           </div>
         ) : null}
 
-        <div className="space-y-12 md:space-y-16">
-          {showCatalogFallback ? (
-            <section className="grid gap-5 md:grid-cols-2">
-              {homepageFallbackCards.map((card) => (
-                <FallbackDiscoveryCard
-                  key={card.id}
-                  eyebrow={card.eyebrow}
-                  title={card.title}
-                  description={card.description}
-                  label={card.label}
-                  onClick={() => router.push(card.href)}
-                />
-              ))}
-            </section>
-          ) : (
-            <>
-              <HomeShelfSection
-                eyebrow="Editorial picks for right now"
-                title="Featured series"
-                description="A tighter shelf of current standouts, selected for strong starts and lasting momentum."
-                ctaLabel="Browse all series"
-                onCtaClick={() => router.push("/search")}
-                items={featuredSeriesItems}
-                actionLabel="View Series"
-                onItemClick={(item) =>
-                  openHomeSeries(item.id, "HOME_FEATURED_SERIES", `home_featured_series_${item.id}`)
-                }
-              />
-
-              <HomeShelfSection
-                icon={BookOpenText}
-                eyebrow="A quieter first step"
-                title="Start here"
-                description="Reader-friendly picks when you want a confident entry point instead of a crowded catalog."
-                items={startHereItems}
-                actionLabel="Read Chapter 1"
-                onItemClick={(item) =>
-                  openHomeSeries(item.id, "HOME_START_HERE", `home_start_here_${item.id}`)
-                }
-              />
-            </>
-          )}
-
-          <section className="space-y-6 md:space-y-7">
-            <HomeSectionHeader
-              eyebrow="Choose your reading pace"
-              title="Browse by format"
-              description="Move from formats to creators and support without breaking the calm of the page."
-            />
-
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {homeGuideCards.map((card) => (
-                <HomeGuideCard
-                  key={card.id}
-                  icon={card.icon}
-                  eyebrow={card.eyebrow}
-                  title={card.title}
-                  description={card.description}
-                  ctaLabel={card.ctaLabel}
-                  onClick={card.onClick}
-                />
-              ))}
-            </div>
-          </section>
-        </div>
+        <HomeContentSections
+          showCatalogFallback={showCatalogFallback}
+          homepageFallbackCards={homepageFallbackCards}
+          featuredSeriesItems={featuredSeriesItems}
+          startHereItems={startHereItems}
+          onFallbackClick={(href) => router.push(href)}
+          onBrowseAllSeries={() => router.push("/search")}
+          onFeaturedItemClick={(item) =>
+            openHomeSeries(item.id, "HOME_FEATURED_SERIES", `home_featured_series_${item.id}`)
+          }
+          onStartHereItemClick={(item) =>
+            openHomeSeries(item.id, "HOME_START_HERE", `home_start_here_${item.id}`)
+          }
+          onGuideClick={(href) => router.push(href)}
+        />
 
         <LoginPrompt
           isOpen={showLoginPrompt}

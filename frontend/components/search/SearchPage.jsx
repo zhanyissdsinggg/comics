@@ -9,9 +9,7 @@ import Cover from "../common/Cover";
 import { SkeletonCard } from "../common/Skeleton";
 import SearchBar from "../common/SearchBar";
 import SurfacePanel from "../common/SurfacePanel";
-import NetworkFallback from "../common/NetworkFallback";
 import SiteHeader from "../layout/SiteHeader";
-import SearchCreatorMatchesPanel from "./SearchCreatorMatchesPanel";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { parallelRequests2 } from "../../lib/parallelRequests";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -36,6 +34,12 @@ import {
 
 const SearchHistoryPanel = dynamic(() => import("./SearchHistoryPanel"));
 const AdvancedFilterPanel = dynamic(() => import("./AdvancedFilterPanel"), {
+  ssr: false,
+});
+const NetworkFallback = dynamic(() => import("../common/NetworkFallback"), {
+  ssr: false,
+});
+const SearchCreatorMatchesPanel = dynamic(() => import("./SearchCreatorMatchesPanel"), {
   ssr: false,
 });
 const PortraitCard = dynamic(() => import("../home/PortraitCard"));
@@ -1188,7 +1192,7 @@ export default function SearchPage() {
                 No exact match
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Try a broader search.
+                Try a wider search.
               </h2>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">

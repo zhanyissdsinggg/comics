@@ -420,8 +420,11 @@ export default function SupportPage() {
                     Send a request
                   </p>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    What can we help with?
+                    Send a request without leaving the site.
                   </h2>
+                  <p className="text-sm leading-6 text-slate-500">
+                    We usually reply within 1 to 2 business days.
+                  </p>
                 </div>
 
                 {feedback.text ? (

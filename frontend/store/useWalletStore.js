@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { apiDelete, apiGet, apiPost } from "../lib/apiClient";
 import {
   clearPersistedPaymentAttribution,
@@ -13,6 +13,7 @@ import { trackEvent } from "../lib/trackEvent";
 import { useAuthStore } from "./useAuthStore";
 
 const WalletContext = createContext(null);
+const WALLET_SYNC_EVENT = "mn-wallet-sync";
 
 const defaultWallet = {
   paidPts: 0,
@@ -86,8 +87,56 @@ function openAuthModal() {
 
 export function WalletProvider({ children }) {
   const { isSignedIn } = useAuthStore();
-  const [wallet, setWallet] = useState(defaultWallet);
+  const [wallet, setWalletState] = useState(defaultWallet);
   const inflightRef = useRef(new Map());
+  const providerIdRef = useRef(
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `wallet_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`,
+  );
+
+  const setWallet = useCallback((nextWallet) => {
+    setWalletState((currentWallet) => {
+      const resolvedWallet =
+        typeof nextWallet === "function" ? nextWallet(currentWallet) : nextWallet;
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent(WALLET_SYNC_EVENT, {
+            detail: {
+              sourceId: providerIdRef.current,
+              wallet: resolvedWallet,
+            },
+          }),
+        );
+      }
+
+      return resolvedWallet;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const handleSync = (event) => {
+      const sourceId = event?.detail?.sourceId;
+      if (!sourceId || sourceId === providerIdRef.current) {
+        return;
+      }
+
+      const nextWallet = event?.detail?.wallet;
+      if (!nextWallet || typeof nextWallet !== "object") {
+        return;
+      }
+
+      setWalletState(nextWallet);
+    };
+
+    window.addEventListener(WALLET_SYNC_EVENT, handleSync);
+    return () => window.removeEventListener(WALLET_SYNC_EVENT, handleSync);
+  }, []);
 
   const loadWallet = useCallback(async () => {
     if (!isSignedIn) {
@@ -98,7 +147,7 @@ export function WalletProvider({ children }) {
       setWallet(response.data.wallet);
     }
     return response;
-  }, [isSignedIn]);
+  }, [isSignedIn, setWallet]);
 
   const subscribe = useCallback(
     async (planId, options = null) => {
@@ -143,7 +192,7 @@ export function WalletProvider({ children }) {
       });
       return response;
     },
-    [isSignedIn, loadWallet]
+    [isSignedIn, loadWallet, setWallet]
   );
 
   const cancelSubscription = useCallback(async () => {
@@ -153,7 +202,7 @@ export function WalletProvider({ children }) {
       trackEvent("subscribe_cancel", {});
     }
     return response;
-  }, []);
+  }, [setWallet]);
 
   const topup = useCallback(
     async (packageId, options = null) => {
@@ -268,12 +317,12 @@ export function WalletProvider({ children }) {
         inflightRef.current.delete(key);
       }
     },
-    [isSignedIn]
+    [isSignedIn, setWallet]
   );
 
   const value = useMemo(
     () => ({ ...wallet, loadWallet, topup, subscribe, cancelSubscription, setWallet }),
-    [loadWallet, topup, subscribe, cancelSubscription, wallet]
+    [cancelSubscription, loadWallet, setWallet, subscribe, topup, wallet]
   );
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;

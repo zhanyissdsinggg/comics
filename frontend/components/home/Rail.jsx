@@ -95,6 +95,7 @@ export default function Rail({
   creatorLabel = "More from these creators",
   showActionLabel = true,
   coverFallbackVariant = "default",
+  interactionMode = "link",
 }) {
   const router = useRouter();
   const safeItems = ensureArray(items);
@@ -205,6 +206,7 @@ export default function Rail({
                     appearance={appearance}
                     showActionLabel={showActionLabel}
                     coverFallbackVariant={coverFallbackVariant}
+                    interactionMode={interactionMode}
                     onClick={() => onItemClick?.(item, railName || title)}
                   />
                 </div>

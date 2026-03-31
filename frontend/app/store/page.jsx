@@ -1,7 +1,8 @@
 import { CouponProvider } from "../../store/useCouponStore";
 import { createPageMetadata } from "../../lib/seo";
-import StorePage from "../../components/store/StorePage";
 import { loadSubscriptionPlansSeoPayload, loadTopupCatalogSeoPayload } from "../../lib/storefrontSeo";
+import { WalletProvider } from "../../store/useWalletStore";
+import StorePageShell from "./StorePageShell";
 
 export const metadata = createPageMetadata({
   title: "Store",
@@ -17,13 +18,15 @@ export default async function Page({ searchParams }) {
   ]);
 
   return (
-    <CouponProvider>
-      <StorePage
-        initialSearchParams={initialSearchParams}
-        initialTopupCatalog={topupPayload?.packages || []}
-        initialBillingAvailability={topupPayload?.billing || null}
-        initialPlanCatalog={subscriptionPayload?.planCatalog || null}
-      />
-    </CouponProvider>
+    <WalletProvider>
+      <CouponProvider>
+        <StorePageShell
+          initialSearchParams={initialSearchParams}
+          initialTopupCatalog={topupPayload?.packages || []}
+          initialBillingAvailability={topupPayload?.billing || null}
+          initialPlanCatalog={subscriptionPayload?.planCatalog || null}
+        />
+      </CouponProvider>
+    </WalletProvider>
   );
 }

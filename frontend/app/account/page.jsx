@@ -2,6 +2,7 @@ import AccountPageClient from "./AccountPageClient";
 import { createPageMetadata } from "../../lib/seo";
 import { cookies } from "next/headers";
 import { BookmarkProvider } from "../../store/useBookmarkStore";
+import { WalletProvider } from "../../store/useWalletStore";
 
 export const metadata = createPageMetadata({
   title: "Account",
@@ -18,8 +19,10 @@ export default async function Page() {
   const initialSignedIn = cookieStore.get("mn_is_signed_in")?.value === "1";
 
   return (
-    <BookmarkProvider>
-      <AccountPageClient initialSignedIn={initialSignedIn} />
-    </BookmarkProvider>
+    <WalletProvider>
+      <BookmarkProvider>
+        <AccountPageClient initialSignedIn={initialSignedIn} />
+      </BookmarkProvider>
+    </WalletProvider>
   );
 }

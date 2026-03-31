@@ -23,7 +23,7 @@ import { getSearchParam } from "../../lib/pageSearchParams";
 const VIEWS = [
   {
     id: "featured",
-    label: "Featured",
+    label: "Popular",
     description: "A curated mix from across the catalog.",
   },
   {
@@ -225,15 +225,26 @@ export default function RankingsPage({
       setLoading(true);
     }
     const adultFlag = isAdultMode ? "1" : "0";
-    apiGet(`/api/series?adult=${adultFlag}`).then((response) => {
+    apiGet(`/api/rankings?adult=${adultFlag}&view=${activeView.id}`).then((response) => {
       if (response.ok) {
-        setSeriesList(Array.isArray(response.data?.series) ? response.data.series : []);
-      } else {
-        setSeriesList([]);
+        const rankings = Array.isArray(response.data?.rankings) ? response.data.rankings : [];
+        if (rankings.length > 0) {
+          setSeriesList(rankings);
+          setLoading(false);
+          return;
+        }
       }
-      setLoading(false);
+
+      apiGet(`/api/series?adult=${adultFlag}`).then((fallbackResponse) => {
+        if (fallbackResponse.ok) {
+          setSeriesList(Array.isArray(fallbackResponse.data?.series) ? fallbackResponse.data.series : []);
+        } else {
+          setSeriesList([]);
+        }
+        setLoading(false);
+      });
     });
-  }, [hasInitialSeries, isAdultMode]);
+  }, [activeView.id, hasInitialSeries, isAdultMode]);
 
   useEffect(() => {
     setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/rankings")));
@@ -300,7 +311,7 @@ export default function RankingsPage({
       <div className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow="Featured Series"
-          title="Editor’s picks and reader-friendly starting points."
+          title="What readers are opening now."
           description={activeView.description}
           appearance="light"
         />

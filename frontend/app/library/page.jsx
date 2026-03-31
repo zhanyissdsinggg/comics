@@ -3,6 +3,7 @@ import { BookmarkProvider } from "../../store/useBookmarkStore";
 import { RewardsProvider } from "../../store/useRewardsStore";
 import { createPageMetadata } from "../../lib/seo";
 import { cookies } from "next/headers";
+import { WalletProvider } from "../../store/useWalletStore";
 
 export const metadata = createPageMetadata({
   title: "Library",
@@ -19,10 +20,12 @@ export default async function Page() {
   const initialSignedIn = cookieStore.get("mn_is_signed_in")?.value === "1";
 
   return (
-    <RewardsProvider>
-      <BookmarkProvider>
-        <LibraryPage initialSignedIn={initialSignedIn} />
-      </BookmarkProvider>
-    </RewardsProvider>
+    <WalletProvider>
+      <RewardsProvider>
+        <BookmarkProvider>
+          <LibraryPage initialSignedIn={initialSignedIn} />
+        </BookmarkProvider>
+      </RewardsProvider>
+    </WalletProvider>
   );
 }

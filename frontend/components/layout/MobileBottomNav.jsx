@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Bookmark, House, Search, User } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -44,11 +44,42 @@ const TAB_ITEMS = [
 
 export default function MobileBottomNav() {
   const pathname = usePathname() || "/";
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      setIsMobileViewport(false);
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const syncViewport = (event) => {
+      setIsMobileViewport(event.matches);
+    };
+
+    syncViewport(mediaQuery);
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncViewport);
+      return () => mediaQuery.removeEventListener("change", syncViewport);
+    }
+
+    mediaQuery.addListener(syncViewport);
+    return () => mediaQuery.removeListener(syncViewport);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileViewport) {
+      document.body.classList.remove("has-mobile-bottom-nav");
+      return undefined;
+    }
+
     document.body.classList.add("has-mobile-bottom-nav");
     return () => document.body.classList.remove("has-mobile-bottom-nav");
-  }, []);
+  }, [isMobileViewport]);
+
+  if (!isMobileViewport) {
+    return null;
+  }
 
   return (
     <nav

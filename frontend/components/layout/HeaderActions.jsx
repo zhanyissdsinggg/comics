@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
+import ThemeToggle from "../common/ThemeToggle";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -45,6 +46,8 @@ export default function HeaderActions({
 
   return (
     <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+      <ThemeToggle variant={isLight ? "light" : "default"} />
+
       {showWallet ? (
         <Button
           type="button"

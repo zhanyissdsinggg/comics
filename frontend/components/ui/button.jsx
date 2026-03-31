@@ -1,6 +1,6 @@
 "use client"
 
-import { Button as ButtonPrimitive } from "@base-ui/react/button"
+import * as React from "react"
 import { cva } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -40,18 +40,25 @@ const buttonVariants = cva(
   }
 )
 
-function Button({
-  className,
-  variant = "default",
-  size = "default",
-  ...props
-}) {
+const Button = React.forwardRef(function Button(
+  {
+    className,
+    variant = "default",
+    size = "default",
+    type = "button",
+    ...props
+  },
+  ref,
+) {
   return (
-    <ButtonPrimitive
+    <button
+      ref={ref}
+      type={type}
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
-      {...props} />
+      {...props}
+    />
   );
-}
+})
 
 export { Button, buttonVariants }

@@ -303,11 +303,11 @@ export default function SubscribePage({
           appearance="light"
           accent="blue"
           eyebrow="Membership"
-          title={subscriptionActionsEnabled ? "Choose a membership plan." : "Membership plans."}
+          title={subscriptionActionsEnabled ? "Choose a membership plan." : "Membership opens later."}
           description={
             subscriptionActionsEnabled
               ? "Monthly plans for readers who come back often."
-              : "Review plans and perks now. Membership opens later."
+              : "Pricing and plan perks are visible now. No monthly charge today."
           }
           secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
           stats={subscriptionHeroStats}
@@ -359,7 +359,7 @@ export default function SubscribePage({
                 body: "Billing starts when membership opens.",
               },
               {
-                title: "Purchases",
+                title: "Purchases & help",
                 body: "Receipts and renewals appear in Purchases.",
               },
               {

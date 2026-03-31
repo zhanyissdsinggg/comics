@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "dev:all": "npm run dev",
-    "build": "next build",
+    "clean:next": "node scripts/clean-next-artifacts.mjs",
+    "build": "npm run clean:next && next build",
     "start": "next start",
     "init-db": "npm --prefix ../backend run seed",
     "health-check": "npm run lint && npm run build",
@@ -19,9 +20,9 @@
     "test:e2e:library": "playwright test tests/e2e/library-reading-state-smoke.spec.ts tests/e2e/library-reading-state-regression.spec.ts",
     "test:e2e:library:smoke": "playwright test tests/e2e/library-reading-state-smoke.spec.ts",
     "test:e2e:library:regression": "playwright test tests/e2e/library-reading-state-regression.spec.ts",
-    "analyze": "cross-env ANALYZE=true next build",
-    "analyze:server": "cross-env ANALYZE=true BUNDLE_ANALYZE=server next build",
-    "analyze:browser": "cross-env ANALYZE=true BUNDLE_ANALYZE=browser next build",
+    "analyze": "npm run clean:next && cross-env ANALYZE=true next build",
+    "analyze:server": "npm run clean:next && cross-env ANALYZE=true BUNDLE_ANALYZE=server next build",
+    "analyze:browser": "npm run clean:next && cross-env ANALYZE=true BUNDLE_ANALYZE=browser next build",
     "lint:fix": "eslint . --fix --cache --cache-location .next/cache/eslint/.eslintcache"
   },
   "dependencies": {

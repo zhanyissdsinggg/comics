@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -9,9 +10,18 @@ import { getCookie } from "../../lib/cookies";
 import { trackEvent } from "../../lib/trackEvent";
 import HeaderLogo from "./HeaderLogo";
 import HeaderNav from "./HeaderNav";
-import HeaderActions from "./HeaderActions";
 import HeaderSearch from "./HeaderSearch";
-import MobileBottomNav from "./MobileBottomNav";
+
+const HeaderActions = dynamic(() => import("./HeaderActionsRuntime"), {
+  ssr: false,
+  loading: () => <div className="hidden h-10 w-[10.5rem] sm:block" aria-hidden="true" />,
+});
+const HeaderModals = dynamic(() => import("./HeaderModalsRuntime"), {
+  ssr: false,
+});
+const MobileBottomNav = dynamic(() => import("./MobileBottomNav"), {
+  ssr: false,
+});
 
 export default function SiteHeader({ onSearch, variant = "default" }) {
   const router = useRouter();
@@ -21,7 +31,6 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
   const [authError, setAuthError] = useState("");
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [HeaderModalsComponent, setHeaderModalsComponent] = useState(null);
   const isLight = variant === "home" || variant === "light";
 
   useEffect(() => {
@@ -78,24 +87,6 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
     setActiveModal("login");
     setAuthError("");
   }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    if (activeModal && !HeaderModalsComponent) {
-      import("./HeaderModals")
-        .then((mod) => {
-          if (!cancelled) {
-            setHeaderModalsComponent(() => mod.default);
-          }
-        })
-        .catch(() => {});
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, [activeModal, HeaderModalsComponent]);
 
   const handleAdultToggle = () => {
     trackEvent("adult_toggle_attempt", { isAdultMode });
@@ -194,8 +185,8 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         </div>
       </header>
 
-      {activeModal && HeaderModalsComponent ? (
-        <HeaderModalsComponent
+      {activeModal ? (
+        <HeaderModals
           activeModal={activeModal}
           onModalClose={handleModalClose}
           authError={authError}

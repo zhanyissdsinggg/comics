@@ -2,12 +2,30 @@
 
 export const dynamic = "force-dynamic";
 
+import dynamicImport from "next/dynamic";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "../../components/admin/AuthContext";
 import AdminShell from "../../components/admin/AdminShell";
-import AdminDashboardNew from "../../components/admin/AdminDashboardNew";
 import Skeleton from "../../components/common/Skeleton";
+
+const AdminDashboardNew = dynamicImport(
+  () => import("../../components/admin/AdminDashboardNew"),
+  {
+    loading: () => (
+      <div className="space-y-6">
+        <Skeleton className="h-48 rounded-[32px]" />
+        <div className="grid gap-4 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={`admin-dashboard-card-${index}`} className="h-32 rounded-[28px]" />
+          ))}
+        </div>
+        <Skeleton className="h-80 rounded-[28px]" />
+        <Skeleton className="h-[28rem] rounded-[28px]" />
+      </div>
+    ),
+  },
+);
 
 export default function AdminPage() {
   const router = useRouter();
@@ -34,7 +52,7 @@ export default function AdminPage() {
   return (
     <AdminShell
       title="仪表盘"
-      subtitle="上来先看待处理事项，再看作品、读者、订单和评论这些真实后台数据。"
+      subtitle="先看待处理事项，再看作品、读者、订单和评论这些真实后台数据。"
     >
       <AdminDashboardNew />
     </AdminShell>
