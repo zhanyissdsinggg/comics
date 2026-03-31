@@ -28,7 +28,7 @@ const defaultDraft = {
 
 const providerOptions = [
   { value: "console", label: "控制台" },
-  { value: "webhook", label: "Webhook" },
+  { value: "webhook", label: "回调地址" },
   { value: "resend", label: "Resend" },
   { value: "sendgrid", label: "SendGrid" },
 ];
@@ -36,17 +36,17 @@ const providerOptions = [
 const secretFields = [
   {
     key: "resendApiKey",
-    label: "Resend API 密钥",
+    label: "Resend 密钥",
     placeholder: "re_...",
   },
   {
     key: "sendgridApiKey",
-    label: "SendGrid API 密钥",
+    label: "SendGrid 密钥",
     placeholder: "SG...",
   },
   {
     key: "smsWebhookUrl",
-    label: "短信 Webhook 地址",
+    label: "短信回调地址",
     placeholder: "https://sms.example.com/webhook",
   },
 ];
@@ -277,7 +277,7 @@ export default function AdminEmailSettingsPage() {
         description="把敏感密钥和内容工作流分开，但仍保持在邮件异常时能快速复核。"
       >
         <div className="space-y-4">
-          <AdminFormField label="默认 Webhook 地址" helperText="当 Webhook 是当前启用通道时，会使用这里的地址。">
+          <AdminFormField label="默认回调地址" helperText="当当前启用的是回调通道时，会使用这里的地址。">
             <input
               value={draft.webhookUrl}
               onChange={(event) => handleChange("webhookUrl", event.target.value)}

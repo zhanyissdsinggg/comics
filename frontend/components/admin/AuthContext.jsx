@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getApiBaseUrl } from "../../lib/apiClient";
+import { buildAdminSession } from "../../lib/adminAccess";
 
 const AUTH_SNAPSHOT_KEY = "admin_auth_snapshot";
 const AUTH_INVALIDATED_EVENT = "admin-auth-invalidated";
@@ -52,13 +53,14 @@ function readAuthSnapshot() {
     return {
       isAuthenticated: Boolean(parsed.isAuthenticated),
       verifiedAt: Number(parsed.verifiedAt || 0),
+      session: buildAdminSession(parsed.session),
     };
   } catch {
     return null;
   }
 }
 
-function writeAuthSnapshot(isAuthenticated) {
+function writeAuthSnapshot(isAuthenticated, session = null) {
   const storage = getSnapshotStorage();
   if (!storage) {
     return;
@@ -70,6 +72,7 @@ function writeAuthSnapshot(isAuthenticated) {
       JSON.stringify({
         isAuthenticated: Boolean(isAuthenticated),
         verifiedAt: Date.now(),
+        session: buildAdminSession(session),
       }),
     );
   } catch {
@@ -100,12 +103,14 @@ function hasFreshVerifiedSnapshot(snapshot) {
 
 export function AdminAuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [session, setSession] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   const markSessionInvalid = useCallback(() => {
     clearAuthSnapshot();
     setIsAuthenticated(false);
+    setSession(null);
   }, []);
 
   const verifySession = useCallback(
@@ -126,10 +131,12 @@ export function AdminAuthProvider({ children }) {
           const raw = await response.json().catch(() => ({}));
           const data = unwrapPayload(raw);
           const valid = Boolean(data.valid);
+          const nextSession = buildAdminSession(data.session);
 
           if (valid) {
-            writeAuthSnapshot(true);
+            writeAuthSnapshot(true, nextSession);
             setIsAuthenticated(true);
+            setSession(nextSession);
             return true;
           }
 
@@ -138,6 +145,9 @@ export function AdminAuthProvider({ children }) {
         } catch {
           if (!silent) {
             setIsAuthenticated(Boolean(fallbackAuthenticated));
+          }
+          if (!fallbackAuthenticated) {
+            setSession(null);
           }
           return Boolean(fallbackAuthenticated);
         } finally {
@@ -194,6 +204,7 @@ export function AdminAuthProvider({ children }) {
       if (hasFreshVerifiedSnapshot(snapshot)) {
         if (!cancelled) {
           setIsAuthenticated(true);
+          setSession(snapshot?.session || null);
           setIsLoading(false);
         }
 
@@ -243,14 +254,16 @@ export function AdminAuthProvider({ children }) {
           return;
         }
 
-        writeAuthSnapshot(true);
+        const nextSession = buildAdminSession(data.session) || session;
+        writeAuthSnapshot(true, nextSession);
+        setSession(nextSession);
       } catch (error) {
         console.error("admin session refresh failed:", error);
       }
     }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(timer);
-  }, [isAuthenticated, logout]);
+  }, [isAuthenticated, logout, session]);
 
   const login = useCallback(async (adminKey, totpCode = "") => {
     try {
@@ -276,6 +289,13 @@ export function AdminAuthProvider({ children }) {
         return { success: false, error: data?.message || "后台密钥无效。" };
       }
 
+      const nextSession = buildAdminSession(data.session);
+      if (nextSession) {
+        writeAuthSnapshot(true, nextSession);
+        setIsAuthenticated(true);
+        setSession(nextSession);
+      }
+
       const valid = await verifySession({ fallbackAuthenticated: true });
       if (!valid) {
         return {
@@ -295,6 +315,11 @@ export function AdminAuthProvider({ children }) {
   const value = {
     isAuthenticated,
     isLoading,
+    session,
+    adminRole: session?.adminRole || null,
+    permissions: session?.permissions || [],
+    routePatterns: session?.routePatterns || [],
+    homePath: session?.homePath || "/admin",
     login,
     logout,
   };

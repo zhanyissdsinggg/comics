@@ -4,7 +4,9 @@ import type { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { encryptString, isEncrypted } from "../../../../common/utils/crypto";
 import { parseStoredJson, stringifyStoredJson } from "../../../../common/utils/stored-json";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 import {
   DEFAULT_EMAIL_CONFIG,
   EmailConfigInput,
@@ -57,6 +59,7 @@ function resolveStoredSecret(currentValue: string, input: SecretFieldInput): str
 
 @Controller("admin/email")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.EMAIL_READ)
 export class AdminEmailController {
   constructor(
     private readonly prisma: PrismaService,
@@ -72,6 +75,7 @@ export class AdminEmailController {
 
   @Post()
   @ApiBody({ type: UpdateEmailConfigDto, required: false })
+  @RequireAdminPermissions(AdminPermission.EMAIL_UPDATE)
   async save(@Body() body: EmailConfigRequestBody, @Req() req: Request) {
     const existing = await this.prisma.emailConfig.findUnique({ where: { key: "default" } });
     const current = normalizeEmailConfig(parseStoredJson(existing?.payload, DEFAULT_EMAIL_CONFIG));
@@ -126,6 +130,7 @@ export class AdminEmailController {
 
   @Post("test")
   @ApiBody({ type: TestEmailDto, required: true })
+  @RequireAdminPermissions(AdminPermission.EMAIL_UPDATE)
   async test(@Body() body: TestEmailRequestBody) {
     const input = extractTestEmailInput(body);
     const to = String(input.to || "").trim();

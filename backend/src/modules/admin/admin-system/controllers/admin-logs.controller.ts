@@ -11,10 +11,13 @@
 } from "@nestjs/common";
 import type { Request } from "express";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 
 @Controller("admin/logs")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.SYSTEM_LOGS)
 export class AdminLogsController {
   constructor(private readonly adminLogService: AdminLogService) {}
 
@@ -49,6 +52,7 @@ export class AdminLogsController {
   }
 
   @Delete(":id")
+  @RequireAdminPermissions(AdminPermission.SYSTEM_LOGS)
   async remove(@Param("id") id: string, @Req() req: Request) {
     if (!id) {
       throw new BadRequestException("Missing log ID");

@@ -35,7 +35,7 @@ import {
   adminTextareaClassName,
 } from '@/components/admin/common/AdminWorkspacePrimitives';
 import { Button } from '@/components/ui/button';
-import { adminFetchJson, adminUpload } from '@/lib/adminApiClient';
+import { adminFetchJson, adminUpload, normalizeAdminErrorMessage } from '@/lib/adminApiClient';
 import { getAdminSeriesReadiness } from '@/lib/adminSeriesReadiness';
 import { cn } from '@/lib/utils';
 
@@ -240,11 +240,7 @@ function formatDateTime(value) {
 }
 
 function getErrorMessage(error, fallbackMessage) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallbackMessage;
+  return normalizeAdminErrorMessage(error, fallbackMessage);
 }
 
 async function fetchSeriesDetail(seriesId) {

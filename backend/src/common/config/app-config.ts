@@ -66,6 +66,22 @@ function normalizeInteger(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function normalizeIndexedAssignments(value: string | undefined): Record<number, string> {
+  return String(value || "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .reduce<Record<number, string>>((accumulator, entry) => {
+      const [rawIndex, rawValue] = entry.split(/[:=]/, 2).map((part) => String(part || "").trim());
+      const index = Number.parseInt(rawIndex, 10);
+      if (!Number.isFinite(index) || index <= 0 || !rawValue) {
+        return accumulator;
+      }
+      accumulator[index] = rawValue;
+      return accumulator;
+    }, {});
+}
+
 function withTestDefaults(rawEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   if (!isTestLikeRuntime(rawEnv)) {
     return rawEnv;
@@ -111,6 +127,7 @@ const appConfigSchema = z
     ADMIN_TOTP_DIGITS: z.coerce.number().int().min(6).max(8).default(6),
     ADMIN_TOTP_PERIOD_SECONDS: z.coerce.number().int().min(15).max(300).default(30),
     ADMIN_TOTP_WINDOW: z.coerce.number().int().min(0).max(5).default(1),
+    ADMIN_ROLE_ASSIGNMENTS: z.string().optional().default(""),
     COOKIE_DOMAIN: z.string().optional().default(""),
     COOKIE_SAMESITE: z.enum(["lax", "strict", "none"]).optional(),
     COOKIE_SECURE: z.string().optional().default(""),
@@ -169,6 +186,7 @@ const appConfigSchema = z
         totpDigits: env.ADMIN_TOTP_DIGITS,
         totpPeriodSeconds: env.ADMIN_TOTP_PERIOD_SECONDS,
         totpWindow: env.ADMIN_TOTP_WINDOW,
+        roleAssignments: normalizeIndexedAssignments(env.ADMIN_ROLE_ASSIGNMENTS),
         cookieSecure: normalizeOptional(env.ADMIN_COOKIE_SECURE),
         tokenFallbackEnabled: normalizeBoolean(env.ADMIN_TOKEN_FALLBACK_ENABLED, false),
         legacyBearerEnabled: normalizeBoolean(env.ADMIN_LEGACY_BEARER_ENABLED, false),

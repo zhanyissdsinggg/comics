@@ -14,7 +14,9 @@ import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../../../common/utils/pagination";
 import { AdminAudit } from "../../decorators/admin-audit.decorator";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 import { BlockUserDto } from "../dtos/admin-system.dto";
 
 function readBooleanFlag(value: unknown, fallback: boolean): boolean {
@@ -38,6 +40,7 @@ function readBooleanFlag(value: unknown, fallback: boolean): boolean {
 
 @Controller("admin/users")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.USER_READ)
 export class AdminUsersController {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -80,6 +83,7 @@ export class AdminUsersController {
 
   @Patch("block")
   @AdminAudit("update", "user")
+  @RequireAdminPermissions(AdminPermission.USER_BAN)
   async block(@Body() body: BlockUserDto) {
     const userId = body?.userId;
     if (!userId) {
@@ -94,6 +98,7 @@ export class AdminUsersController {
 
   @Patch(":id/block")
   @AdminAudit("update", "user")
+  @RequireAdminPermissions(AdminPermission.USER_BAN)
   async blockByPath(@Param("id") userId: string, @Body() body: { blocked?: boolean | string }) {
     if (!userId) {
       throw new BadRequestException("缺少userId参数");
@@ -107,6 +112,7 @@ export class AdminUsersController {
 
   @Delete(":id")
   @AdminAudit("delete", "user")
+  @RequireAdminPermissions(AdminPermission.USER_DELETE)
   async deactivate(@Param("id") userId: string) {
     if (!userId) {
       throw new BadRequestException("缺少userId参数");

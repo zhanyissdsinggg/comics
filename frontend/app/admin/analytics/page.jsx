@@ -19,7 +19,7 @@ import {
   AdminTabs,
 } from '@/components/admin/common/AdminWorkspacePrimitives';
 import { Button } from '@/components/ui/button';
-import { adminFetchJson } from '@/lib/adminApiClient';
+import { adminFetchJson, normalizeAdminErrorMessage } from '@/lib/adminApiClient';
 
 const VIEW_TABS = [
   { value: 'stats', label: '总览' },
@@ -35,11 +35,7 @@ const SEGMENT_FILTERS = [
 ];
 
 function getErrorMessage(error, fallbackMessage) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallbackMessage;
+  return normalizeAdminErrorMessage(error, fallbackMessage);
 }
 
 function formatCurrency(value) {

@@ -24,6 +24,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { canAccessAdminRoute } from "../../lib/adminAccess";
 
 const RECENT_SEARCH_STORAGE_KEY = "admin_recent_searches";
 
@@ -69,6 +70,13 @@ const SEARCH_ITEMS = [
     href: "/admin/recommendations",
     icon: Sparkles,
     keywords: ["recommendation", "slot", "placement", "featured", "推荐位", "推荐", "排位", "卡槽"],
+  },
+  {
+    id: "content-generator",
+    label: "内容生成器",
+    href: "/admin/content-generator",
+    icon: Sparkles,
+    keywords: ["generator", "seed", "fixture", "mock content", "内容生成器", "测试内容", "生成", "种子"],
   },
   {
     id: "users",
@@ -217,7 +225,7 @@ function writeRecentSearchIds(ids) {
   window.localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(ids));
 }
 
-export default function GlobalSearch({ isOpen, onClose }) {
+export default function GlobalSearch({ isOpen, onClose, routePatterns = [], homePath = "/admin" }) {
   const router = useRouter();
   const inputRef = useRef(null);
   const [query, setQuery] = useState("");
@@ -231,17 +239,23 @@ export default function GlobalSearch({ isOpen, onClose }) {
     }
 
     return SEARCH_ITEMS.filter((item) => {
+      if (!canAccessAdminRoute(item.href, routePatterns)) {
+        return false;
+      }
       if (item.label.toLowerCase().includes(trimmedQuery)) {
         return true;
       }
 
       return item.keywords.some((keyword) => keyword.toLowerCase().includes(trimmedQuery));
     });
-  }, [query]);
+  }, [query, routePatterns]);
 
   const recentItems = useMemo(
-    () => recentSearchIds.map((id) => getSearchItemById(id)).filter(Boolean),
-    [recentSearchIds],
+    () =>
+      recentSearchIds
+        .map((id) => getSearchItemById(id))
+        .filter((item) => item && canAccessAdminRoute(item.href, routePatterns)),
+    [recentSearchIds, routePatterns],
   );
 
   useEffect(() => {
@@ -264,6 +278,11 @@ export default function GlobalSearch({ isOpen, onClose }) {
   }, [query]);
 
   const handleNavigate = (item) => {
+    if (!item || !canAccessAdminRoute(item.href, routePatterns)) {
+      onClose();
+      router.push(homePath || "/admin");
+      return;
+    }
     const nextRecentIds = [item.id, ...recentSearchIds.filter((id) => id !== item.id)].slice(
       0,
       5,

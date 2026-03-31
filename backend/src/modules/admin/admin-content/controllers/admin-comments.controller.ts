@@ -10,12 +10,15 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 import { UpdateCommentDto } from "../dtos/admin-content.dto";
 import { logger } from "../../../../common/logger/winston.init";
 
 @Controller("admin/comments")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.COMMENT_READ)
 export class AdminCommentsController {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -58,6 +61,7 @@ export class AdminCommentsController {
   }
 
   @Patch("hide")
+  @RequireAdminPermissions(AdminPermission.COMMENT_UPDATE)
   async hide(@Body() body: UpdateCommentDto) {
     const seriesId = body?.seriesId;
     const commentId = body?.commentId;
@@ -73,6 +77,7 @@ export class AdminCommentsController {
   }
 
   @Patch("recalc-rating")
+  @RequireAdminPermissions(AdminPermission.COMMENT_UPDATE)
   async recalc(@Body() body: UpdateCommentDto) {
     const seriesId = body?.seriesId;
     if (!seriesId) {
@@ -93,6 +98,7 @@ export class AdminCommentsController {
   }
 
   @Delete(":id")
+  @RequireAdminPermissions(AdminPermission.COMMENT_DELETE)
   async remove(@Param("id") id: string) {
     if (!id) {
       throw new BadRequestException("缺少评论ID参数");

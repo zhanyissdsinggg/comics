@@ -18,7 +18,9 @@ import { extname, join } from "path";
 import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { buildPublicAssetUrl } from "../../../common/utils/public-asset-url";
+import { RequireAdminPermissions } from "../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
+import { AdminPermission } from "../permissions/admin-permissions";
 import { readIntLike } from "../utils/param-parsing";
 
 const episodeUploadsDir = join(process.cwd(), "public", "uploads", "episodes");
@@ -71,6 +73,7 @@ function createEpisodeAssetPath(
 
 @Controller("admin/series/:id/episodes")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.EPISODE_UPDATE)
 export class AdminEpisodesUploadController {
   private readonly logger = new Logger(AdminEpisodesUploadController.name);
 
@@ -105,6 +108,7 @@ export class AdminEpisodesUploadController {
   }
 
   @Post("upload")
+  @RequireAdminPermissions(AdminPermission.EPISODE_UPDATE)
   @UseInterceptors(
     FilesInterceptor("files", 50, {
       storage: memoryStorage(),

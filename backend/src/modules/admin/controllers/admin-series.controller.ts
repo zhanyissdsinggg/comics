@@ -18,7 +18,9 @@ import { logger } from "../../../common/logger/winston.init";
 import { CreatorCreditsService } from "../../../common/creators/creator-credits.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminCreatorsService } from "../admin-content/services/admin-creators.service";
+import { RequireAdminPermissions } from "../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
+import { AdminPermission } from "../permissions/admin-permissions";
 import {
   enrichSeriesWithStorefrontFields,
   syncSeriesAuthorField,
@@ -26,6 +28,7 @@ import {
 
 @Controller("admin/series")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.SERIES_READ)
 export class AdminSeriesController {
   constructor(
     private readonly prisma: PrismaService,
@@ -253,6 +256,7 @@ export class AdminSeriesController {
   }
 
   @Post()
+  @RequireAdminPermissions(AdminPermission.SERIES_CREATE)
   async create(@Body() body: Record<string, any>) {
     const series = body?.series;
     if (!series?.id) {
@@ -305,6 +309,7 @@ export class AdminSeriesController {
   }
 
   @Get(":id/credits")
+  @RequireAdminPermissions(AdminPermission.CREATOR_READ)
   async detailCredits(@Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const existing = await this.prisma.series.findUnique({
@@ -319,6 +324,7 @@ export class AdminSeriesController {
   }
 
   @Patch(":id")
+  @RequireAdminPermissions(AdminPermission.SERIES_UPDATE)
   async update(@Body() body: Record<string, any>, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const series = body?.series || {};
@@ -349,6 +355,7 @@ export class AdminSeriesController {
   }
 
   @Patch(":id/credits")
+  @RequireAdminPermissions(AdminPermission.CREATOR_UPDATE)
   async updateCredits(@Body() body: Record<string, any>, @Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const existing = await this.prisma.series.findUnique({
@@ -364,6 +371,7 @@ export class AdminSeriesController {
   }
 
   @Delete(":id")
+  @RequireAdminPermissions(AdminPermission.SERIES_DELETE)
   async remove(@Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const existing = await this.prisma.series.findUnique({

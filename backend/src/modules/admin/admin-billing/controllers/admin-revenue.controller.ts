@@ -5,7 +5,9 @@ import {
   readPaymentAttributionFromPayload,
   type PaymentAttribution,
 } from "../../../../common/utils/payment-attribution";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 
 interface DateRange {
   gte?: Date;
@@ -91,6 +93,7 @@ function parseBoundaryDate(value?: string, isEnd: boolean = false): Date | undef
 
 @Controller("admin/revenue")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.REVENUE_READ)
 export class AdminRevenueController {
   constructor(private readonly prisma: PrismaService) {}
 

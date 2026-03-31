@@ -15,7 +15,9 @@ import { ContentCacheInvalidationService } from "../../../../common/cache/conten
 import { isAdminContentGeneratorEnabledConfig } from "../../../../common/config/app-config";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { buildPublicAssetUrl } from "../../../../common/utils/public-asset-url";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 
 type GeneratorContentType = "comic" | "novel";
 
@@ -485,6 +487,7 @@ function buildNovelParagraphs(
 
 @Controller("admin/generate-content")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.CONTENT_GENERATE)
 export class AdminContentGeneratorController {
   constructor(
     private readonly prisma: PrismaService,
@@ -492,6 +495,7 @@ export class AdminContentGeneratorController {
   ) {}
 
   @Post()
+  @RequireAdminPermissions(AdminPermission.CONTENT_GENERATE)
   async generate(
     @Body() body: GeneratorRequestBody | unknown = {},
     @Req() req?: Request,

@@ -13,7 +13,9 @@ import type { Request } from "express";
 import { memoryStorage } from "multer";
 import { extname, join } from "path";
 import { buildPublicAssetUrl } from "../../../../common/utils/public-asset-url";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 
 type ImageKind = "jpeg" | "png" | "gif" | "webp";
 
@@ -122,8 +124,10 @@ function validateUploadedImage(file: UploadedImageFile): ImageKind {
 
 @Controller("admin/upload")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.UPLOAD_ASSET)
 export class AdminUploadController {
   @Post("image")
+  @RequireAdminPermissions(AdminPermission.UPLOAD_ASSET)
   @UseInterceptors(
     FileInterceptor("file", {
       storage: memoryStorage(),

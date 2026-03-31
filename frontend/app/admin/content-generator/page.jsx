@@ -15,7 +15,7 @@ import {
   AdminPageSection,
   adminInputClassName,
 } from "@/components/admin/common/AdminWorkspacePrimitives";
-import { adminPost } from "../../../lib/adminApiClient";
+import { adminPost, normalizeAdminErrorMessage } from "../../../lib/adminApiClient";
 
 const DEFAULT_FORM = {
   seed: "",
@@ -81,10 +81,7 @@ function validateForm(form) {
 }
 
 function readErrorMessage(error) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  return "内容生成失败。";
+  return normalizeAdminErrorMessage(error, "内容生成失败。");
 }
 
 export default function ContentGeneratorPage() {

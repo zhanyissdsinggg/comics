@@ -15,7 +15,9 @@ import type { Episode, Prisma } from "@prisma/client";
 import type { Request } from "express";
 import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { RequireAdminPermissions } from "../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
+import { AdminPermission } from "../permissions/admin-permissions";
 import {
   readBooleanLike,
   readDateLike,
@@ -242,6 +244,7 @@ function toEpisodeUpdateData(
 
 @Controller("admin/series/:id/episodes")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.EPISODE_READ)
 export class AdminEpisodesController {
   private readonly logger = new Logger(AdminEpisodesController.name);
 
@@ -367,6 +370,7 @@ export class AdminEpisodesController {
   }
 
   @Post()
+  @RequireAdminPermissions(AdminPermission.EPISODE_CREATE)
   async createEpisode(
     @Body() body: Record<string, unknown>,
     @Req() req: Request,
@@ -461,6 +465,7 @@ export class AdminEpisodesController {
   }
 
   @Post("bulk")
+  @RequireAdminPermissions(AdminPermission.EPISODE_UPDATE)
   async bulkUpdateEpisodes(
     @Body() body: Record<string, unknown>,
     @Req() req: Request,
@@ -517,6 +522,7 @@ export class AdminEpisodesController {
   }
 
   @Post("reorder")
+  @RequireAdminPermissions(AdminPermission.EPISODE_UPDATE)
   async reorderEpisodes(
     @Body() body: Record<string, unknown>,
     @Req() req: Request,
@@ -640,6 +646,7 @@ export class AdminEpisodesController {
   }
 
   @Patch(":episodeId")
+  @RequireAdminPermissions(AdminPermission.EPISODE_UPDATE)
   async updateEpisode(
     @Body() body: Record<string, unknown>,
     @Req() req: Request,
@@ -676,6 +683,7 @@ export class AdminEpisodesController {
   }
 
   @Delete(":episodeId")
+  @RequireAdminPermissions(AdminPermission.EPISODE_DELETE)
   async removeEpisode(@Req() req: Request) {
     const seriesId = String(req.params.id || "");
     const episodeId = String(req.params.episodeId || "");

@@ -31,6 +31,8 @@ import {
 } from "lucide-react";
 
 import GlobalSearch from "./GlobalSearch";
+import { useAdminAuth } from "./AuthContext";
+import { canAccessAdminRoute, getAdminRoleLabel } from "../../lib/adminAccess";
 
 const NAV_GROUPS = [
   {
@@ -228,14 +230,32 @@ export default function AdminShell({ title, subtitle, children, actions }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const breadcrumb = getBreadcrumb(pathname);
+  const { adminRole, permissions, routePatterns, homePath } = useAdminAuth();
+  const roleLabel = getAdminRoleLabel(adminRole);
+  const effectiveHomePath = homePath || "/admin";
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState(new Set(["/admin/series"]));
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const visibleNavGroups = useMemo(
+    () =>
+      NAV_GROUPS.map((group) => ({
+        ...group,
+        items: group.items
+          .map((item) => ({
+            ...item,
+            children: Array.isArray(item.children)
+              ? item.children.filter((child) => canAccessAdminRoute(child.href, routePatterns))
+              : item.children,
+          }))
+          .filter((item) => canAccessAdminRoute(item.href, routePatterns)),
+      })).filter((group) => group.items.length > 0),
+    [routePatterns],
+  );
 
   const activeGroupLabel = useMemo(() => {
-    const group = NAV_GROUPS.find((item) =>
+    const group = visibleNavGroups.find((item) =>
       item.items.some((navItem) =>
         navItem.exact
           ? pathname === navItem.href
@@ -244,7 +264,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
     );
 
     return group?.label || "工作区";
-  }, [pathname]);
+  }, [pathname, visibleNavGroups]);
 
   const toggleMenu = (href) => {
     setExpandedMenus((current) => {
@@ -301,7 +321,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
           <div className="flex h-full flex-col">
             <div className="border-b border-black/6 px-4 py-5">
               <div className="flex items-start justify-between gap-3">
-                <Link href="/admin" className="flex items-center gap-3">
+                <Link href={effectiveHomePath} className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.08)] text-sm font-semibold text-[var(--gush-accent,#2f58c6)]">
                     TT
                   </div>
@@ -349,7 +369,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   isCollapsed ? "justify-center px-0" : "",
                 )}
               >
-                    <Search size={17} className="shrink-0 text-slate-500" />
+                <Search size={17} className="shrink-0 text-slate-500" />
                 {!isCollapsed ? (
                   <>
                     <span className="flex-1">搜索后台页面</span>
@@ -362,7 +382,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
             </div>
 
             <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-6">
-              {NAV_GROUPS.map((group) => (
+              {visibleNavGroups.map((group) => (
                 <div key={group.label}>
                   {!isCollapsed ? (
                     <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
@@ -478,11 +498,17 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                     会话
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-950">
-                    后台权限已生效
-                  </p>
+                  <p className="mt-2 text-sm font-semibold text-slate-950">{roleLabel}</p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
+                    <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-2.5 py-1">
+                      {visibleNavGroups.length} 个工作分区
+                    </span>
+                    <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-2.5 py-1">
+                      {permissions.length} 项权限
+                    </span>
+                  </div>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    在这里处理作品更新、创作者署名和前台展示，不需要再看一堆没用的噪音指标。
+                    当前菜单和搜索结果已经按角色收口。运营拿到什么权限，就只看到对应的工作区。
                   </p>
                 </div>
               </div>
@@ -554,7 +580,12 @@ export default function AdminShell({ title, subtitle, children, actions }) {
         </div>
       </div>
 
-      <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <GlobalSearch
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        routePatterns={routePatterns}
+        homePath={effectiveHomePath}
+      />
     </div>
   );
 }

@@ -258,6 +258,20 @@ function formatSeriesState(series) {
     return "草稿";
   }
 
+  const normalized = safeText(series?.status).toLowerCase();
+  if (normalized === "ongoing") {
+    return "连载中";
+  }
+  if (normalized === "completed") {
+    return "已完结";
+  }
+  if (normalized === "hiatus") {
+    return "休更中";
+  }
+  if (normalized === "cancelled") {
+    return "已下线";
+  }
+
   return safeText(series?.status) || "已发布";
 }
 

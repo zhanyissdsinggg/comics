@@ -19,7 +19,9 @@ import {
   calculateOffset,
   parsePaginationParams,
 } from "../../../../common/utils/pagination";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 
 const SUPPORT_SORT_FIELDS = new Set(["createdAt", "updatedAt", "status"]);
 
@@ -37,6 +39,7 @@ function parseSupportOrderBy(sortBy: unknown, sortOrder: Prisma.SortOrder): Pris
 
 @Controller("admin/support")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.SUPPORT_READ)
 export class AdminSupportController {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -105,6 +108,7 @@ export class AdminSupportController {
   }
 
   @Post(":id/reply")
+  @RequireAdminPermissions(AdminPermission.SUPPORT_UPDATE)
   async reply(@Param("id") id: string, @Body() body: { message?: string }) {
     const message = String(body?.message || "").trim();
     if (!message) {
@@ -133,6 +137,7 @@ export class AdminSupportController {
   }
 
   @Patch(":id/close")
+  @RequireAdminPermissions(AdminPermission.SUPPORT_UPDATE)
   async close(@Param("id") id: string) {
     const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
     if (!ticket) {
@@ -148,6 +153,7 @@ export class AdminSupportController {
   }
 
   @Delete(":id")
+  @RequireAdminPermissions(AdminPermission.SUPPORT_DELETE)
   async remove(@Param("id") id: string) {
     const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
     if (!ticket) {

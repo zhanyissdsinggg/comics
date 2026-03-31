@@ -1,68 +1,86 @@
-/**
- * 老王说：管理员权限定义
- * 这个SB文件定义了所有管理员的权限
- */
-
 export enum AdminRole {
-  SUPER_ADMIN = 'super_admin', // 超级管理员，拥有所有权限
-  CONTENT_ADMIN = 'content_admin', // 内容管理员，只能管理系列和章节
-  USER_ADMIN = 'user_admin', // 用户管理员，只能管理用户
-  FINANCE_ADMIN = 'finance_admin', // 财务管理员，只能查看订单和收入
-  SUPPORT_ADMIN = 'support_admin', // 客服管理员，只能处理客服工单
+  SUPER_ADMIN = "super_admin",
+  CONTENT_ADMIN = "content_admin",
+  USER_ADMIN = "user_admin",
+  FINANCE_ADMIN = "finance_admin",
+  SUPPORT_ADMIN = "support_admin",
+  MARKETING_ADMIN = "marketing_admin",
+  OPS_ADMIN = "ops_admin",
 }
 
 export enum AdminPermission {
-  // 系列管理权限
-  SERIES_CREATE = 'series:create',
-  SERIES_READ = 'series:read',
-  SERIES_UPDATE = 'series:update',
-  SERIES_DELETE = 'series:delete',
+  DASHBOARD_READ = "dashboard:read",
+  ANALYTICS_READ = "analytics:read",
 
-  // 章节管理权限
-  EPISODE_CREATE = 'episode:create',
-  EPISODE_READ = 'episode:read',
-  EPISODE_UPDATE = 'episode:update',
-  EPISODE_DELETE = 'episode:delete',
+  SERIES_CREATE = "series:create",
+  SERIES_READ = "series:read",
+  SERIES_UPDATE = "series:update",
+  SERIES_DELETE = "series:delete",
 
-  // 用户管理权限
-  USER_READ = 'user:read',
-  USER_UPDATE = 'user:update',
-  USER_DELETE = 'user:delete',
-  USER_BAN = 'user:ban',
+  EPISODE_CREATE = "episode:create",
+  EPISODE_READ = "episode:read",
+  EPISODE_UPDATE = "episode:update",
+  EPISODE_DELETE = "episode:delete",
 
-  // 订单管理权限
-  ORDER_READ = 'order:read',
-  ORDER_REFUND = 'order:refund',
+  CREATOR_READ = "creator:read",
+  CREATOR_UPDATE = "creator:update",
 
-  // 评论管理权限
-  COMMENT_READ = 'comment:read',
-  COMMENT_DELETE = 'comment:delete',
+  COMMENT_READ = "comment:read",
+  COMMENT_UPDATE = "comment:update",
+  COMMENT_DELETE = "comment:delete",
 
-  // 促销管理权限
-  PROMOTION_CREATE = 'promotion:create',
-  PROMOTION_READ = 'promotion:read',
-  PROMOTION_UPDATE = 'promotion:update',
-  PROMOTION_DELETE = 'promotion:delete',
+  RECOMMENDATION_READ = "recommendation:read",
+  RECOMMENDATION_UPDATE = "recommendation:update",
 
-  // 数据分析权限
-  ANALYTICS_READ = 'analytics:read',
+  PROMOTION_CREATE = "promotion:create",
+  PROMOTION_READ = "promotion:read",
+  PROMOTION_UPDATE = "promotion:update",
+  PROMOTION_DELETE = "promotion:delete",
 
-  // 系统管理权限
-  SYSTEM_CONFIG = 'system:config',
-  SYSTEM_LOGS = 'system:logs',
+  MARKETING_READ = "marketing:read",
+  MARKETING_UPDATE = "marketing:update",
+
+  USER_READ = "user:read",
+  USER_UPDATE = "user:update",
+  USER_DELETE = "user:delete",
+  USER_BAN = "user:ban",
+
+  ORDER_READ = "order:read",
+  ORDER_REFUND = "order:refund",
+  ORDER_UPDATE = "order:update",
+  ORDER_DELETE = "order:delete",
+
+  BILLING_READ = "billing:read",
+  BILLING_UPDATE = "billing:update",
+  REVENUE_READ = "revenue:read",
+
+  SUPPORT_READ = "support:read",
+  SUPPORT_UPDATE = "support:update",
+  SUPPORT_DELETE = "support:delete",
+
+  NOTIFICATION_READ = "notification:read",
+  NOTIFICATION_UPDATE = "notification:update",
+  NOTIFICATION_DELETE = "notification:delete",
+
+  SYSTEM_CONFIG = "system:config",
+  SYSTEM_LOGS = "system:logs",
+  TRACKING_CONFIG = "tracking:config",
+  REGION_CONFIG = "region:config",
+  EMAIL_READ = "email:read",
+  EMAIL_UPDATE = "email:update",
+  EMAIL_JOB_READ = "email-job:read",
+  EMAIL_JOB_UPDATE = "email-job:update",
+  UPLOAD_ASSET = "upload:asset",
+  CONTENT_GENERATE = "content:generate",
 }
 
-/**
- * 老王说：角色权限映射表
- * 定义每个角色拥有哪些权限
- */
+const ALL_PERMISSIONS = Object.values(AdminPermission);
+
 export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
-  [AdminRole.SUPER_ADMIN]: [
-    // 超级管理员拥有所有权限
-    ...Object.values(AdminPermission),
-  ],
+  [AdminRole.SUPER_ADMIN]: ALL_PERMISSIONS,
   [AdminRole.CONTENT_ADMIN]: [
-    // 内容管理员
+    AdminPermission.DASHBOARD_READ,
+    AdminPermission.ANALYTICS_READ,
     AdminPermission.SERIES_CREATE,
     AdminPermission.SERIES_READ,
     AdminPermission.SERIES_UPDATE,
@@ -71,57 +89,207 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     AdminPermission.EPISODE_READ,
     AdminPermission.EPISODE_UPDATE,
     AdminPermission.EPISODE_DELETE,
+    AdminPermission.CREATOR_READ,
+    AdminPermission.CREATOR_UPDATE,
     AdminPermission.COMMENT_READ,
+    AdminPermission.COMMENT_UPDATE,
     AdminPermission.COMMENT_DELETE,
+    AdminPermission.RECOMMENDATION_READ,
+    AdminPermission.RECOMMENDATION_UPDATE,
+    AdminPermission.PROMOTION_CREATE,
+    AdminPermission.PROMOTION_READ,
+    AdminPermission.PROMOTION_UPDATE,
+    AdminPermission.PROMOTION_DELETE,
+    AdminPermission.UPLOAD_ASSET,
+    AdminPermission.CONTENT_GENERATE,
   ],
   [AdminRole.USER_ADMIN]: [
-    // 用户管理员
+    AdminPermission.DASHBOARD_READ,
+    AdminPermission.ANALYTICS_READ,
     AdminPermission.USER_READ,
     AdminPermission.USER_UPDATE,
     AdminPermission.USER_DELETE,
     AdminPermission.USER_BAN,
   ],
   [AdminRole.FINANCE_ADMIN]: [
-    // 财务管理员
+    AdminPermission.DASHBOARD_READ,
+    AdminPermission.ANALYTICS_READ,
     AdminPermission.ORDER_READ,
     AdminPermission.ORDER_REFUND,
-    AdminPermission.ANALYTICS_READ,
+    AdminPermission.ORDER_UPDATE,
+    AdminPermission.ORDER_DELETE,
+    AdminPermission.BILLING_READ,
+    AdminPermission.BILLING_UPDATE,
+    AdminPermission.REVENUE_READ,
   ],
   [AdminRole.SUPPORT_ADMIN]: [
-    // 客服管理员
+    AdminPermission.DASHBOARD_READ,
     AdminPermission.USER_READ,
     AdminPermission.COMMENT_READ,
+    AdminPermission.COMMENT_UPDATE,
     AdminPermission.COMMENT_DELETE,
+    AdminPermission.SUPPORT_READ,
+    AdminPermission.SUPPORT_UPDATE,
+    AdminPermission.SUPPORT_DELETE,
+    AdminPermission.NOTIFICATION_READ,
+    AdminPermission.NOTIFICATION_UPDATE,
+    AdminPermission.NOTIFICATION_DELETE,
+  ],
+  [AdminRole.MARKETING_ADMIN]: [
+    AdminPermission.DASHBOARD_READ,
+    AdminPermission.ANALYTICS_READ,
+    AdminPermission.RECOMMENDATION_READ,
+    AdminPermission.RECOMMENDATION_UPDATE,
+    AdminPermission.PROMOTION_CREATE,
+    AdminPermission.PROMOTION_READ,
+    AdminPermission.PROMOTION_UPDATE,
+    AdminPermission.PROMOTION_DELETE,
+    AdminPermission.MARKETING_READ,
+    AdminPermission.MARKETING_UPDATE,
+  ],
+  [AdminRole.OPS_ADMIN]: [
+    AdminPermission.DASHBOARD_READ,
+    AdminPermission.SYSTEM_CONFIG,
+    AdminPermission.SYSTEM_LOGS,
+    AdminPermission.TRACKING_CONFIG,
+    AdminPermission.REGION_CONFIG,
+    AdminPermission.EMAIL_READ,
+    AdminPermission.EMAIL_UPDATE,
+    AdminPermission.EMAIL_JOB_READ,
+    AdminPermission.EMAIL_JOB_UPDATE,
+    AdminPermission.UPLOAD_ASSET,
   ],
 };
 
-/**
- * 老王说：检查用户是否拥有某个权限
- * @param role 用户角色
- * @param permission 要检查的权限
- * @returns 是否拥有权限
- */
-export function hasPermission(role: AdminRole, permission: AdminPermission): boolean {
-  const permissions = ROLE_PERMISSIONS[role];
-  return permissions ? permissions.includes(permission) : false;
+const ROLE_ROUTE_PATTERNS: Record<AdminRole, string[]> = {
+  [AdminRole.SUPER_ADMIN]: ["*"],
+  [AdminRole.CONTENT_ADMIN]: [
+    "/admin",
+    "/admin/analytics",
+    "/admin/series",
+    "/admin/creators",
+    "/admin/storefront",
+    "/admin/merchandising",
+    "/admin/recommendations",
+    "/admin/comments",
+    "/admin/promotions",
+    "/admin/content-generator",
+  ],
+  [AdminRole.USER_ADMIN]: [
+    "/admin",
+    "/admin/analytics",
+    "/admin/users",
+  ],
+  [AdminRole.FINANCE_ADMIN]: [
+    "/admin",
+    "/admin/analytics",
+    "/admin/orders",
+    "/admin/revenue",
+    "/admin/billing",
+  ],
+  [AdminRole.SUPPORT_ADMIN]: [
+    "/admin",
+    "/admin/users",
+    "/admin/support",
+    "/admin/notifications",
+    "/admin/comments",
+  ],
+  [AdminRole.MARKETING_ADMIN]: [
+    "/admin",
+    "/admin/analytics",
+    "/admin/storefront",
+    "/admin/merchandising",
+    "/admin/recommendations",
+    "/admin/promotions",
+    "/admin/marketing",
+  ],
+  [AdminRole.OPS_ADMIN]: [
+    "/admin",
+    "/admin/branding",
+    "/admin/email-settings",
+    "/admin/email-jobs",
+    "/admin/tracking",
+    "/admin/regions",
+    "/admin/settings",
+    "/admin/logs",
+  ],
+};
+
+const ROLE_HOME_PATH: Record<AdminRole, string> = {
+  [AdminRole.SUPER_ADMIN]: "/admin",
+  [AdminRole.CONTENT_ADMIN]: "/admin/series",
+  [AdminRole.USER_ADMIN]: "/admin/users",
+  [AdminRole.FINANCE_ADMIN]: "/admin/revenue",
+  [AdminRole.SUPPORT_ADMIN]: "/admin/support",
+  [AdminRole.MARKETING_ADMIN]: "/admin/marketing",
+  [AdminRole.OPS_ADMIN]: "/admin/settings",
+};
+
+function normalizePath(pathname: string): string {
+  const path = String(pathname || "").split("?")[0].trim();
+  return path || "/admin";
 }
 
-/**
- * 老王说：检查用户是否拥有多个权限中的任意一个
- * @param role 用户角色
- * @param permissions 要检查的权限列表
- * @returns 是否拥有任意一个权限
- */
+function matchesRoutePattern(pathname: string, pattern: string): boolean {
+  if (pattern === "*") {
+    return true;
+  }
+
+  const normalizedPath = normalizePath(pathname);
+  if (pattern === "/admin") {
+    return normalizedPath === "/admin";
+  }
+
+  return normalizedPath === pattern || normalizedPath.startsWith(`${pattern}/`);
+}
+
+export function isAdminRole(value: unknown): value is AdminRole {
+  return Object.values(AdminRole).includes(value as AdminRole);
+}
+
+export function normalizeAdminRole(
+  value: unknown,
+  fallback: AdminRole = AdminRole.SUPER_ADMIN,
+): AdminRole {
+  const normalized = String(value || "").trim().toLowerCase();
+  return isAdminRole(normalized) ? normalized : fallback;
+}
+
+export function getRolePermissions(role: AdminRole): AdminPermission[] {
+  return [...(ROLE_PERMISSIONS[normalizeAdminRole(role)] || ROLE_PERMISSIONS[AdminRole.SUPER_ADMIN])];
+}
+
+export function getAdminRoutePatterns(role: AdminRole): string[] {
+  return [...(ROLE_ROUTE_PATTERNS[normalizeAdminRole(role)] || ROLE_ROUTE_PATTERNS[AdminRole.SUPER_ADMIN])];
+}
+
+export function resolveAdminHomePath(role: AdminRole): string {
+  return ROLE_HOME_PATH[normalizeAdminRole(role)] || ROLE_HOME_PATH[AdminRole.SUPER_ADMIN];
+}
+
+export function hasPermission(role: AdminRole, permission: AdminPermission): boolean {
+  return getRolePermissions(role).includes(permission);
+}
+
 export function hasAnyPermission(role: AdminRole, permissions: AdminPermission[]): boolean {
   return permissions.some((permission) => hasPermission(role, permission));
 }
 
-/**
- * 老王说：检查用户是否拥有所有权限
- * @param role 用户角色
- * @param permissions 要检查的权限列表
- * @returns 是否拥有所有权限
- */
 export function hasAllPermissions(role: AdminRole, permissions: AdminPermission[]): boolean {
   return permissions.every((permission) => hasPermission(role, permission));
+}
+
+export function canAccessAdminRoute(role: AdminRole, pathname: string): boolean {
+  return getAdminRoutePatterns(role).some((pattern) => matchesRoutePattern(pathname, pattern));
+}
+
+export function buildAdminSessionProfile(adminId: string, adminRole: AdminRole) {
+  const normalizedRole = normalizeAdminRole(adminRole);
+  return {
+    adminId,
+    adminRole: normalizedRole,
+    permissions: getRolePermissions(normalizedRole),
+    routePatterns: getAdminRoutePatterns(normalizedRole),
+    homePath: resolveAdminHomePath(normalizedRole),
+  };
 }

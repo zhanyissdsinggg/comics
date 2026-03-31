@@ -25,7 +25,7 @@ import {
   adminTextareaClassName,
 } from '@/components/admin/common/AdminWorkspacePrimitives';
 import { Button } from '@/components/ui/button';
-import { adminFetchJson } from '@/lib/adminApiClient';
+import { adminFetchJson, normalizeAdminErrorMessage } from '@/lib/adminApiClient';
 
 const MARKETING_TABS = [
   { value: 'campaigns', label: '活动目录' },
@@ -74,8 +74,7 @@ function formatSegmentLabel(value) {
 }
 
 function getErrorMessage(error, fallback) {
-  if (error instanceof Error && error.message) return error.message;
-  return fallback;
+  return normalizeAdminErrorMessage(error, fallback);
 }
 
 function formatCurrency(value) {

@@ -5,6 +5,7 @@ import { AdminLogService } from "../../../../common/services/admin-log.service";
 import {
   getAdminIdentityFromKey,
   getAdminKeysFromEnv,
+  getAdminRoleFromKey,
   isAdminTotpEnabled,
   verifyAdminTotpCode,
 } from "../../../../common/utils/admin-security";
@@ -27,6 +28,7 @@ jest.mock("../../../../common/redis/client", () => ({
 jest.mock("../../../../common/utils/admin-security", () => ({
   getAdminIdentityFromKey: jest.fn(),
   getAdminKeysFromEnv: jest.fn(),
+  getAdminRoleFromKey: jest.fn(),
   validateAdminKeyFormat: jest.fn(() => true),
   isAdminTotpEnabled: jest.fn(),
   verifyAdminTotpCode: jest.fn(),
@@ -50,9 +52,20 @@ describe("AdminAuthController", () => {
             ),
             verify: jest.fn((token: string) => {
               if (token === "valid-refresh-token" || token === "mock-refresh-token") {
-                return { role: "admin", adminId: "admin-1-test", type: "refresh", jti: "refresh-jti" };
+                return {
+                  role: "admin",
+                  adminRole: "content_admin",
+                  adminId: "admin-1-test",
+                  type: "refresh",
+                  jti: "refresh-jti",
+                };
               }
-              return { role: "admin", adminId: "admin-1-test", jti: "access-jti" };
+              return {
+                role: "admin",
+                adminRole: "content_admin",
+                adminId: "admin-1-test",
+                jti: "access-jti",
+              };
             }),
           },
         },
@@ -78,6 +91,7 @@ describe("AdminAuthController", () => {
 
     (getAdminKeysFromEnv as jest.Mock).mockReturnValue(["test-admin-key"]);
     (getAdminIdentityFromKey as jest.Mock).mockReturnValue("admin-1-test");
+    (getAdminRoleFromKey as jest.Mock).mockReturnValue("content_admin");
     (isAdminTotpEnabled as jest.Mock).mockReturnValue(false);
     (verifyAdminTotpCode as jest.Mock).mockReturnValue(true);
     delete process.env.ADMIN_TOKEN_FALLBACK_ENABLED;
@@ -105,6 +119,11 @@ describe("AdminAuthController", () => {
           success: true,
           expiresIn: 86400,
           sessionTransport: "cookie",
+          session: expect.objectContaining({
+            adminId: "admin-1-test",
+            adminRole: "content_admin",
+            homePath: "/admin/series",
+          }),
         }),
       );
       expect(result).not.toHaveProperty("accessToken");
@@ -172,6 +191,10 @@ describe("AdminAuthController", () => {
           success: true,
           expiresIn: 86400,
           sessionTransport: "cookie",
+          session: expect.objectContaining({
+            adminRole: "content_admin",
+            homePath: "/admin/series",
+          }),
         }),
       );
       expect(result).not.toHaveProperty("accessToken");
@@ -241,6 +264,10 @@ describe("AdminAuthController", () => {
         expect.objectContaining({
           success: true,
           valid: true,
+          session: expect.objectContaining({
+            adminRole: "content_admin",
+            homePath: "/admin/series",
+          }),
         }),
       );
     });

@@ -165,6 +165,34 @@ function extractAdminMessage(payload: unknown): string {
   return typeof candidate === "string" ? candidate.trim() : "";
 }
 
+export function normalizeAdminErrorMessage(
+  error: unknown,
+  fallbackMessage: string
+): string {
+  const rawMessage =
+    error instanceof Error
+      ? String(error.message || "").trim()
+      : typeof error === "string"
+        ? error.trim()
+        : "";
+
+  if (!rawMessage) {
+    return fallbackMessage;
+  }
+
+  const normalized = rawMessage.toLowerCase();
+  if (
+    normalized === "fetch failed"
+    || normalized.includes("failed to fetch")
+    || normalized.includes("networkerror when attempting to fetch resource")
+    || normalized.includes("load failed")
+  ) {
+    return fallbackMessage;
+  }
+
+  return rawMessage;
+}
+
 export async function readAdminResponseMessage(
   response: Response,
   fallbackMessage: string

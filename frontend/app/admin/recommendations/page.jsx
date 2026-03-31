@@ -21,7 +21,7 @@ import {
   adminTextareaClassName,
 } from '@/components/admin/common/AdminWorkspacePrimitives';
 import { Button } from '@/components/ui/button';
-import { adminFetchJson } from '@/lib/adminApiClient';
+import { adminFetchJson, normalizeAdminErrorMessage } from '@/lib/adminApiClient';
 import {
   STOREFRONT_SLOT_PRESETS,
   getStorefrontSlotDisplayMeta,
@@ -87,11 +87,7 @@ const INITIAL_RANKING_FORM = {
 };
 
 function getErrorMessage(error, fallbackMessage) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallbackMessage;
+  return normalizeAdminErrorMessage(error, fallbackMessage);
 }
 
 function parseSeriesIds(value) {

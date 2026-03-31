@@ -14,7 +14,9 @@ import { getPlanCatalog } from "../../../../common/config/plans";
 import { listTopupPackages } from "../../../../common/config/topup";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { normalizeUsStorefrontCurrencyCode } from "../../../../common/utils/currency";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 import { CreateTopupDto, UpdateTopupDto } from "../dtos/admin-billing.dto";
 
 function getErrorCode(error: unknown): string | null {
@@ -28,6 +30,7 @@ function getErrorCode(error: unknown): string | null {
 
 @Controller("admin/billing")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.BILLING_READ)
 export class AdminBillingController {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -49,6 +52,7 @@ export class AdminBillingController {
   }
 
   @Post("topups")
+  @RequireAdminPermissions(AdminPermission.BILLING_UPDATE)
   async createTopup(@Body() body: CreateTopupDto) {
     const id = body.packageId || body.id;
     if (!id) {
@@ -78,6 +82,7 @@ export class AdminBillingController {
   }
 
   @Patch("topups/:id")
+  @RequireAdminPermissions(AdminPermission.BILLING_UPDATE)
   async updateTopup(@Param("id") id: string, @Body() body: UpdateTopupDto) {
     if (!id) {
       throw new BadRequestException("Package ID is required.");
@@ -100,6 +105,7 @@ export class AdminBillingController {
   }
 
   @Delete(":id")
+  @RequireAdminPermissions(AdminPermission.BILLING_UPDATE)
   async removeTopup(@Param("id") id: string) {
     if (!id) {
       throw new BadRequestException("Package ID is required.");
@@ -131,11 +137,13 @@ export class AdminBillingController {
   }
 
   @Post("plans")
+  @RequireAdminPermissions(AdminPermission.BILLING_UPDATE)
   async createPlan(@Body() _body: CreateTopupDto) {
     throw new BadRequestException("This endpoint is no longer available");
   }
 
   @Patch("plans/:id")
+  @RequireAdminPermissions(AdminPermission.BILLING_UPDATE)
   async updatePlan(@Param("id") _id: string, @Body() _body: CreateTopupDto) {
     throw new BadRequestException("This endpoint is no longer available");
   }

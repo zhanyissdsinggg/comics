@@ -12,10 +12,13 @@ import {
 } from '../admin-content/dtos/admin-recommendation.dto';
 import { AdminRecommendationService } from '../admin-content/services/admin-recommendation.service';
 import { AdminAudit } from '../decorators/admin-audit.decorator';
+import { RequireAdminPermissions } from '../decorators/admin-permissions.decorator';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
+import { AdminPermission } from '../permissions/admin-permissions';
 
 @Controller('admin/recommendations')
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.RECOMMENDATION_READ)
 export class AdminRecommendationController {
   constructor(private readonly recommendationService: AdminRecommendationService) {}
 
@@ -28,6 +31,7 @@ export class AdminRecommendationController {
 
   @Post('slots')
   @AdminAudit('create', 'recommendation_slot')
+  @RequireAdminPermissions(AdminPermission.RECOMMENDATION_UPDATE)
   async createSlot(@Body() body: CreateRecommendationSlotDto) {
     const slot = await this.recommendationService.createRecommendationSlot(body);
     return { slot };
@@ -35,6 +39,7 @@ export class AdminRecommendationController {
 
   @Patch('slots/:id')
   @AdminAudit('update', 'recommendation_slot')
+  @RequireAdminPermissions(AdminPermission.RECOMMENDATION_UPDATE)
   async updateSlot(@Param('id') id: string, @Body() body: UpdateRecommendationSlotDto) {
     const slot = await this.recommendationService.updateRecommendationSlot(id, body);
     return { slot };
@@ -42,6 +47,7 @@ export class AdminRecommendationController {
 
   @Delete('slots/:id')
   @AdminAudit('delete', 'recommendation_slot')
+  @RequireAdminPermissions(AdminPermission.RECOMMENDATION_UPDATE)
   async deleteSlot(@Param('id') id: string) {
     await this.recommendationService.deleteRecommendationSlot(id);
     return { success: true };
@@ -56,6 +62,7 @@ export class AdminRecommendationController {
 
   @Post('rankings')
   @AdminAudit('create', 'ranking_config')
+  @RequireAdminPermissions(AdminPermission.RECOMMENDATION_UPDATE)
   async createRanking(@Body() body: CreateRankingConfigDto) {
     const config = await this.recommendationService.createRankingConfig(body);
     return { config };
@@ -63,6 +70,7 @@ export class AdminRecommendationController {
 
   @Patch('rankings/:id')
   @AdminAudit('update', 'ranking_config')
+  @RequireAdminPermissions(AdminPermission.RECOMMENDATION_UPDATE)
   async updateRanking(@Param('id') id: string, @Body() body: UpdateRankingConfigDto) {
     const config = await this.recommendationService.updateRankingConfig(id, body);
     return { config };
@@ -70,6 +78,7 @@ export class AdminRecommendationController {
 
   @Delete('rankings/:id')
   @AdminAudit('delete', 'ranking_config')
+  @RequireAdminPermissions(AdminPermission.RECOMMENDATION_UPDATE)
   async deleteRanking(@Param('id') id: string) {
     await this.recommendationService.deleteRankingConfig(id);
     return { success: true };
@@ -84,6 +93,7 @@ export class AdminRecommendationController {
 
   @Post('analytics')
   @AdminAudit('create', 'recommendation_analytics')
+  @RequireAdminPermissions(AdminPermission.RECOMMENDATION_UPDATE)
   async saveAnalytics(@Body() body: SaveRecommendationAnalyticsBodyDto) {
     const result = await this.recommendationService.saveRecommendationAnalytics(
       body.slotId,

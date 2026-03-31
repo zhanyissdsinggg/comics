@@ -18,7 +18,9 @@ import {
   calculateOffset,
   parsePaginationParams,
 } from "../../../../common/utils/pagination";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 import {
   CreateNotificationDto,
   NotificationPayloadInput,
@@ -32,6 +34,7 @@ function extractNotificationPayload(body: NotificationRequestBody): Notification
 
 @Controller("admin/notifications")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.NOTIFICATION_READ)
 export class AdminNotificationsController {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -54,6 +57,7 @@ export class AdminNotificationsController {
 
   @Post()
   @ApiBody({ type: CreateNotificationDto, required: false })
+  @RequireAdminPermissions(AdminPermission.NOTIFICATION_UPDATE)
   async create(@Body() body: NotificationRequestBody) {
     const payload = extractNotificationPayload(body);
     if (!payload.title) {
@@ -120,6 +124,7 @@ export class AdminNotificationsController {
   }
 
   @Delete(":id")
+  @RequireAdminPermissions(AdminPermission.NOTIFICATION_DELETE)
   async remove(@Param("id") id: string) {
     if (!id) {
       throw new BadRequestException("Missing notification id");

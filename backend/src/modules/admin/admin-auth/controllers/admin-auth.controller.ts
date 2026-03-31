@@ -19,9 +19,15 @@ import { ValidationPipe } from "../../../../common/pipes/validation.pipe";
 import {
   getAdminIdentityFromKey,
   getAdminKeysFromEnv,
+  getAdminRoleFromKey,
   isAdminTotpEnabled,
   verifyAdminTotpCode,
 } from "../../../../common/utils/admin-security";
+import {
+  AdminRole,
+  buildAdminSessionProfile,
+  normalizeAdminRole,
+} from "../../permissions/admin-permissions";
 import {
   isAdminTokenJtiRevoked,
   revokeAdminTokenJti,
@@ -61,6 +67,7 @@ type RequestLike = {
 type LoginFailureReason = "invalid_admin_key" | "invalid_two_factor_code";
 type SessionTokenPayload = {
   role?: string;
+  adminRole?: string;
   type?: string;
   jti?: string;
   adminId?: string;
@@ -135,17 +142,18 @@ export class AdminAuthController {
     }
 
     const adminId = getAdminIdentityFromKey(adminKey) || "admin";
+    const adminRole = getAdminRoleFromKey(adminKey);
     this.assignRequestIdentity(req, adminId, "login");
 
     const accessJti = randomUUID();
     const accessToken = this.jwtService.sign(
-      { role: "admin", adminId, timestamp: Date.now(), jti: accessJti },
+      { role: "admin", adminRole, adminId, timestamp: Date.now(), jti: accessJti },
       { expiresIn: `${ACCESS_TOKEN_EXPIRES_SECONDS}s` },
     );
 
     const refreshJti = randomUUID();
     const refreshToken = this.jwtService.sign(
-      { role: "admin", adminId, type: "refresh", timestamp: Date.now(), jti: refreshJti },
+      { role: "admin", adminRole, adminId, type: "refresh", timestamp: Date.now(), jti: refreshJti },
       { expiresIn: `${REFRESH_TOKEN_EXPIRES_SECONDS}s` },
     );
 
@@ -162,6 +170,7 @@ export class AdminAuthController {
       success: true,
       expiresIn: ACCESS_TOKEN_EXPIRES_SECONDS,
       sessionTransport: "cookie",
+      session: buildAdminSessionProfile(adminId, adminRole),
     };
   }
   @Post("refresh")
@@ -186,9 +195,10 @@ export class AdminAuthController {
       }
 
       const adminId = payload.adminId || "admin";
+      const adminRole = normalizeAdminRole(payload.adminRole, AdminRole.SUPER_ADMIN);
       const accessJti = randomUUID();
       const newAccessToken = this.jwtService.sign(
-        { role: "admin", adminId, timestamp: Date.now(), jti: accessJti },
+        { role: "admin", adminRole, adminId, timestamp: Date.now(), jti: accessJti },
         { expiresIn: `${ACCESS_TOKEN_EXPIRES_SECONDS}s` },
       );
 
@@ -198,6 +208,7 @@ export class AdminAuthController {
         success: true,
         expiresIn: ACCESS_TOKEN_EXPIRES_SECONDS,
         sessionTransport: "cookie",
+        session: buildAdminSessionProfile(adminId, adminRole),
       };
     } catch (error) {
       if (error instanceof HttpException) {
@@ -239,10 +250,14 @@ export class AdminAuthController {
         };
       }
 
+      const adminId = String(payload.adminId || "admin");
+      const adminRole = normalizeAdminRole(payload.adminRole, AdminRole.SUPER_ADMIN);
+
       return {
         success: true,
         valid: true,
         payload,
+        session: buildAdminSessionProfile(adminId, adminRole),
       };
     } catch {
       return {

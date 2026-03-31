@@ -3,7 +3,9 @@ import { ApiBody } from "@nestjs/swagger";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { parseStoredJson, stringifyStoredJson } from "../../../../common/utils/stored-json";
 import { regionConfigCache } from "../../../regions/region-config.cache";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 import { CreateRegionDto, PhoneLengthRules, RegionConfigInput, RegionCodeInput } from "../dtos/admin-system.dto";
 
 type SavedRegionConfig = {
@@ -88,6 +90,7 @@ function extractRegionPayload(body: CreateRegionDto & RegionConfigInput): Region
 
 @Controller("admin/regions")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.REGION_CONFIG)
 export class AdminRegionsController {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -103,6 +106,7 @@ export class AdminRegionsController {
 
   @Post()
   @ApiBody({ type: CreateRegionDto, required: false })
+  @RequireAdminPermissions(AdminPermission.REGION_CONFIG)
   async save(@Body() body: CreateRegionDto & RegionConfigInput) {
     const source = extractRegionPayload(body);
     const countryCodes = buildCountryCodes(Array.isArray(source.countryCodes) ? source.countryCodes : []);

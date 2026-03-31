@@ -271,7 +271,7 @@ export default function AdminRegionsPage() {
         message: "区域设置已导入，保存后生效。",
       });
     } catch {
-      setFeedback({ type: "error", message: "导入失败，请上传有效的 JSON 文件。" });
+      setFeedback({ type: "error", message: "导入失败，请上传有效的配置文件。" });
     } finally {
       event.target.value = "";
     }
@@ -313,10 +313,10 @@ export default function AdminRegionsPage() {
               className="hidden"
             />
             <Button type="button" variant="outline" onClick={() => importInputRef.current?.click()}>
-              导入 JSON
+              导入配置
             </Button>
             <Button type="button" variant="outline" onClick={handleExport}>
-              导出 JSON
+              导出配置
             </Button>
             <Button type="button" onClick={handleSave} disabled={saving}>
               {saving ? "正在保存..." : "保存更改"}

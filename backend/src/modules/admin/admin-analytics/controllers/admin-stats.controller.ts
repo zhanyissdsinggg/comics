@@ -1,9 +1,12 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { StatsService } from "../../../../common/services/stats.service";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 
 @Controller("admin/stats")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.ANALYTICS_READ)
 export class AdminStatsController {
   constructor(private readonly statsService: StatsService) {}
 

@@ -1,5 +1,6 @@
 import { createHash, createHmac, timingSafeEqual } from "crypto";
 import { getAdminTotpConfig, getAppConfig } from "../config/app-config";
+import { AdminRole, normalizeAdminRole } from "../../modules/admin/permissions/admin-permissions";
 
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const DEFAULT_TOTP_DIGITS = 6;
@@ -67,6 +68,15 @@ function buildAdminIdentity(adminKey: string, index: number): string {
   return `admin-${index + 1}-${digest}`;
 }
 
+function getAdminKeyIndex(adminKey: string): number {
+  const normalized = String(adminKey || "").trim();
+  if (!normalized) {
+    return -1;
+  }
+
+  return getAdminKeysFromEnv().findIndex((candidate) => candidate === normalized);
+}
+
 export function validateAdminKeyFormat(key: string): boolean {
   const normalized = String(key || "");
   if (normalized.length < 16) {
@@ -84,18 +94,22 @@ export function getAdminKeysFromEnv(): string[] {
 }
 
 export function getAdminIdentityFromKey(adminKey: string): string | null {
-  const normalized = String(adminKey || "").trim();
-  if (!normalized) {
-    return null;
-  }
-
-  const keys = getAdminKeysFromEnv();
-  const index = keys.findIndex((candidate) => candidate === normalized);
+  const index = getAdminKeyIndex(adminKey);
   if (index < 0) {
     return null;
   }
 
-  return buildAdminIdentity(keys[index], index);
+  return buildAdminIdentity(getAdminKeysFromEnv()[index], index);
+}
+
+export function getAdminRoleFromKey(adminKey: string): AdminRole {
+  const index = getAdminKeyIndex(adminKey);
+  if (index < 0) {
+    return AdminRole.SUPER_ADMIN;
+  }
+
+  const configuredRole = getAppConfig().admin.roleAssignments[index + 1];
+  return normalizeAdminRole(configuredRole, AdminRole.SUPER_ADMIN);
 }
 
 export function isAdminTotpEnabled(): boolean {

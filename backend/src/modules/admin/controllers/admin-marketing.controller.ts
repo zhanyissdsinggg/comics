@@ -13,10 +13,13 @@ import {
 } from '../admin-system/dtos/admin-marketing.dto';
 import { AdminMarketingService } from '../admin-system/services/admin-marketing.service';
 import { AdminAudit } from '../decorators/admin-audit.decorator';
+import { RequireAdminPermissions } from '../decorators/admin-permissions.decorator';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
+import { AdminPermission } from '../permissions/admin-permissions';
 
 @Controller('admin/marketing')
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.MARKETING_READ)
 export class AdminMarketingController {
   constructor(private readonly marketingService: AdminMarketingService) {}
 
@@ -29,6 +32,7 @@ export class AdminMarketingController {
 
   @Post('campaigns')
   @AdminAudit('create', 'marketing_campaign')
+  @RequireAdminPermissions(AdminPermission.MARKETING_UPDATE)
   async createCampaign(@Body() body: CreateMarketingCampaignDto) {
     const campaign = await this.marketingService.createCampaign(body);
     return { campaign };
@@ -42,6 +46,7 @@ export class AdminMarketingController {
 
   @Patch('campaigns/:id')
   @AdminAudit('update', 'marketing_campaign')
+  @RequireAdminPermissions(AdminPermission.MARKETING_UPDATE)
   async updateCampaign(@Param('id') id: string, @Body() body: UpdateMarketingCampaignDto) {
     const campaign = await this.marketingService.updateCampaign(id, body);
     return { campaign };
@@ -49,6 +54,7 @@ export class AdminMarketingController {
 
   @Delete('campaigns/:id')
   @AdminAudit('delete', 'marketing_campaign')
+  @RequireAdminPermissions(AdminPermission.MARKETING_UPDATE)
   async deleteCampaign(@Param('id') id: string) {
     await this.marketingService.deleteCampaign(id);
     return { success: true };
@@ -62,6 +68,7 @@ export class AdminMarketingController {
 
   @Post('campaigns/:id/analytics')
   @AdminAudit('create', 'marketing_analytics')
+  @RequireAdminPermissions(AdminPermission.MARKETING_UPDATE)
   async saveMarketingAnalytics(@Param('id') id: string, @Body() body: SaveMarketingAnalyticsBodyDto) {
     const result = await this.marketingService.saveMarketingAnalytics(id, body.dateKey, body.data);
     return { result };
@@ -75,6 +82,7 @@ export class AdminMarketingController {
 
   @Post('campaigns/:id/targets')
   @AdminAudit('create', 'marketing_targets')
+  @RequireAdminPermissions(AdminPermission.MARKETING_UPDATE)
   async addTargetUsers(@Param('id') id: string, @Body() body: AddMarketingTargetUsersDto) {
     const result = await this.marketingService.addTargetUsers(id, body.userIds);
     return { result };
@@ -82,6 +90,7 @@ export class AdminMarketingController {
 
   @Patch('campaigns/:campaignId/targets/:userId')
   @AdminAudit('update', 'marketing_target')
+  @RequireAdminPermissions(AdminPermission.MARKETING_UPDATE)
   async updateTargetUserStatus(
     @Param('campaignId') campaignId: string,
     @Param('userId') userId: string,
@@ -100,6 +109,7 @@ export class AdminMarketingController {
 
   @Patch('campaigns/:id/budget')
   @AdminAudit('update', 'marketing_budget')
+  @RequireAdminPermissions(AdminPermission.MARKETING_UPDATE)
   async updateCampaignBudget(@Param('id') id: string, @Body() body: UpdateMarketingBudgetDto) {
     const budget = await this.marketingService.updateCampaignBudget(id, body);
     return { budget };

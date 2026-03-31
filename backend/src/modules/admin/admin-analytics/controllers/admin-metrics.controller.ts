@@ -2,10 +2,13 @@ import { Controller, Get, Req, Res, UseGuards } from "@nestjs/common";
 import { Request, Response } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { ORDER_STATUS } from "../../../../common/utils/order-status";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 
 @Controller("admin/metrics")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.ANALYTICS_READ)
 export class AdminMetricsController {
   constructor(private readonly prisma: PrismaService) {}
 

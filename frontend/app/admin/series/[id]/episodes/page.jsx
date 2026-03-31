@@ -23,7 +23,12 @@ import {
   adminSelectClassName,
 } from '@/components/admin/common/AdminWorkspacePrimitives';
 import { Button } from '@/components/ui/button';
-import { adminFetch, adminFetchJson, readAdminResponseMessage } from '@/lib/adminApiClient';
+import {
+  adminFetch,
+  adminFetchJson,
+  normalizeAdminErrorMessage,
+  readAdminResponseMessage,
+} from '@/lib/adminApiClient';
 
 const EMPTY_FEEDBACK = { type: '', message: '' };
 const EMPTY_NEW_EPISODE = {
@@ -94,11 +99,7 @@ function formatDateTime(value) {
 }
 
 function getErrorMessage(error, fallbackMessage) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallbackMessage;
+  return normalizeAdminErrorMessage(error, fallbackMessage);
 }
 
 function getDateValue(value) {

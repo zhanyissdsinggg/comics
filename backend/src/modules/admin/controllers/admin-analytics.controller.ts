@@ -6,10 +6,13 @@ import type {
 } from '../admin-analytics/dtos/admin-analytics.dto';
 import { AdminAnalyticsService } from '../admin-analytics/services/admin-analytics.service';
 import { AdminAudit } from '../decorators/admin-audit.decorator';
+import { RequireAdminPermissions } from '../decorators/admin-permissions.decorator';
 import { AdminAuthGuard } from '../guards/admin-auth.guard';
+import { AdminPermission } from '../permissions/admin-permissions';
 
 @Controller('admin/analytics')
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.ANALYTICS_READ)
 export class AdminAnalyticsController {
   constructor(private readonly analyticsService: AdminAnalyticsService) {}
 
@@ -49,6 +52,7 @@ export class AdminAnalyticsController {
 
   @Patch('users/:userId/tags')
   @AdminAudit('update', 'user_tags')
+  @RequireAdminPermissions(AdminPermission.USER_UPDATE)
   async updateUserTags(@Param('userId') userId: string, @Body() body: UpdateUserTagsBody) {
     const tags = await this.analyticsService.updateUserTags(userId, body.tags);
     return { tags };
@@ -56,6 +60,7 @@ export class AdminAnalyticsController {
 
   @Patch('users/:userId/metrics')
   @AdminAudit('update', 'user_metrics')
+  @RequireAdminPermissions(AdminPermission.USER_UPDATE)
   async updateUserMetrics(@Param('userId') userId: string, @Body() body: UpdateUserMetricsInput) {
     const metrics = await this.analyticsService.updateUserMetrics(userId, body);
     return { metrics };
@@ -63,6 +68,7 @@ export class AdminAnalyticsController {
 
   @Post('users/:userId/calculate-ltv')
   @AdminAudit('calculate', 'user_ltv')
+  @RequireAdminPermissions(AdminPermission.USER_UPDATE)
   async calculateLTV(@Param('userId') userId: string) {
     const ltv = await this.analyticsService.calculateUserLTV(userId);
     return { ltv };
@@ -70,6 +76,7 @@ export class AdminAnalyticsController {
 
   @Post('users/:userId/assess-churn')
   @AdminAudit('assess', 'churn_risk')
+  @RequireAdminPermissions(AdminPermission.USER_UPDATE)
   async assessChurn(@Param('userId') userId: string) {
     const churnRisk = await this.analyticsService.assessChurnRisk(userId);
     return { churnRisk };

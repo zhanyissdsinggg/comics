@@ -16,7 +16,12 @@ import {
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 import { useAdminAuth } from "./AuthContext";
 import { useBrandingStore } from "../../store/useBrandingStore";
-import { adminGet, adminPost, adminUpload } from "../../lib/adminApiClient";
+import {
+  adminGet,
+  adminPost,
+  adminUpload,
+  normalizeAdminErrorMessage,
+} from "../../lib/adminApiClient";
 
 const defaultDraft = {
   siteLogoUrl: "",
@@ -30,11 +35,11 @@ const ASSET_FIELDS = [
   {
     field: "siteLogoUrl",
     keyName: "logo",
-    label: "站点 Logo",
+    label: "站点标识",
     helperText: "优先使用透明 PNG 或 SVG，让页头和页脚里的品牌标识保持干净。",
     placeholder: "https://.../logo.png",
-    emptyText: "还没有上传站点 Logo。",
-    buttonLabel: "上传 Logo",
+    emptyText: "还没有上传站点标识。",
+    buttonLabel: "上传站点标识",
     previewClassName: "h-10 w-auto object-contain",
   },
   {
@@ -143,7 +148,7 @@ export default function AdminBrandingPage() {
       setFeedback({ type: "success", message: `${label}已上传。` });
     },
     onError: (error) => {
-      setFeedback({ type: "error", message: error.message || "上传失败。" });
+      setFeedback({ type: "error", message: normalizeAdminErrorMessage(error, "上传失败。") });
     },
   });
 
@@ -163,7 +168,10 @@ export default function AdminBrandingPage() {
       setFeedback({ type: "success", message: "品牌配置已保存。" });
     },
     onError: (error) => {
-      setFeedback({ type: "error", message: error.message || "品牌配置保存失败。" });
+      setFeedback({
+        type: "error",
+        message: normalizeAdminErrorMessage(error, "品牌配置保存失败。"),
+      });
     },
   });
 
@@ -235,7 +243,7 @@ export default function AdminBrandingPage() {
             type: "error",
             message:
               brandingQuery.error instanceof Error
-                ? brandingQuery.error.message
+                ? normalizeAdminErrorMessage(brandingQuery.error, "品牌配置加载失败。")
                 : "品牌配置加载失败。",
           }}
           onDismiss={() => undefined}
@@ -251,7 +259,7 @@ export default function AdminBrandingPage() {
         <AdminMetricCard
           label="已配置素材"
           value={`${configuredAssetCount}/3`}
-          detail="Logo、网站图标和首页横幅统一归在这一套品牌素材里。"
+          detail="站点标识、网站图标和首页横幅统一归在这一套品牌素材里。"
           tone="accent"
         />
         <AdminMetricCard
@@ -273,7 +281,7 @@ export default function AdminBrandingPage() {
 
       <AdminPageSection
         title="品牌素材"
-        description="把共享 Logo、网站图标和首页横幅收在一个安静的工作区里统一维护。"
+        description="把共享站点标识、网站图标和首页横幅收在一个安静的工作区里统一维护。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge tone={configuredAssetCount === 3 ? "success" : "accent"}>

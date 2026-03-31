@@ -2,9 +2,10 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AdminAuthGuard } from "./admin-auth.guard";
 import { JwtService } from "@nestjs/jwt";
 import { ExecutionContext, ForbiddenException, UnauthorizedException } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
 import { getRedisClient } from "../../../common/redis/client";
 import { isAdminAuthorized } from "../../../common/utils/admin";
-import { getAdminIdentityFromKey } from "../../../common/utils/admin-security";
+import { getAdminIdentityFromKey, getAdminRoleFromKey } from "../../../common/utils/admin-security";
 
 jest.mock("../../../common/redis/client", () => ({
   getRedisClient: jest.fn(),
@@ -16,6 +17,7 @@ jest.mock("../../../common/utils/admin", () => ({
 
 jest.mock("../../../common/utils/admin-security", () => ({
   getAdminIdentityFromKey: jest.fn(),
+  getAdminRoleFromKey: jest.fn(),
 }));
 
 describe("AdminAuthGuard", () => {
@@ -24,6 +26,10 @@ describe("AdminAuthGuard", () => {
   const mockGetRedisClient = getRedisClient as jest.MockedFunction<typeof getRedisClient>;
   const mockIsAdminAuthorized = isAdminAuthorized as jest.MockedFunction<typeof isAdminAuthorized>;
   const mockGetAdminIdentityFromKey = getAdminIdentityFromKey as jest.MockedFunction<typeof getAdminIdentityFromKey>;
+  const mockGetAdminRoleFromKey = getAdminRoleFromKey as jest.MockedFunction<typeof getAdminRoleFromKey>;
+  const mockReflector = {
+    getAllAndOverride: jest.fn().mockReturnValue([]),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,6 +41,10 @@ describe("AdminAuthGuard", () => {
             verify: jest.fn(),
           },
         },
+        {
+          provide: Reflector,
+          useValue: mockReflector,
+        },
       ],
     }).compile();
 
@@ -42,6 +52,7 @@ describe("AdminAuthGuard", () => {
     jwtService = module.get<JwtService>(JwtService);
     mockIsAdminAuthorized.mockReturnValue(false);
     mockGetAdminIdentityFromKey.mockReturnValue("legacy-admin");
+    mockGetAdminRoleFromKey.mockReturnValue("support_admin" as any);
     delete process.env.ADMIN_TOKEN_FALLBACK_ENABLED;
     delete process.env.ADMIN_LEGACY_BEARER_ENABLED;
   });
@@ -61,6 +72,7 @@ describe("AdminAuthGuard", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      mockReflector.getAllAndOverride.mockReturnValue([]);
       mockRequest = {
         headers: {},
         cookies: {},
@@ -72,7 +84,9 @@ describe("AdminAuthGuard", () => {
           getRequest: () => mockRequest,
           getResponse: () => ({}),
         }),
-      } as ExecutionContext;
+        getHandler: () => jest.fn(),
+        getClass: () => class AdminTestContext {},
+      } as unknown as ExecutionContext;
     });
 
     it("should allow access with a valid admin cookie", async () => {
@@ -88,6 +102,8 @@ describe("AdminAuthGuard", () => {
       expect(mockRequest.user).toEqual({
         userId: "admin-cookie",
         role: "admin",
+        adminRole: "super_admin",
+        permissions: expect.any(Array),
         jti: undefined,
         authSource: "cookie",
       });
@@ -123,6 +139,8 @@ describe("AdminAuthGuard", () => {
       expect(mockRequest.user).toEqual({
         userId: "admin-bearer",
         role: "admin",
+        adminRole: "super_admin",
+        permissions: expect.any(Array),
         jti: "jti-1",
         authSource: "bearer",
       });
@@ -149,6 +167,8 @@ describe("AdminAuthGuard", () => {
       expect(mockRequest.user).toEqual({
         userId: "cookie-admin",
         role: "admin",
+        adminRole: "super_admin",
+        permissions: expect.any(Array),
         jti: "cookie-jti",
         authSource: "cookie",
       });
@@ -179,8 +199,22 @@ describe("AdminAuthGuard", () => {
       expect(mockRequest.user).toEqual({
         userId: "legacy-admin",
         role: "admin",
+        adminRole: "support_admin",
+        permissions: expect.any(Array),
         authSource: "legacy_admin_key",
       });
+    });
+
+    it("should reject access when the role lacks required permissions", async () => {
+      mockRequest.cookies.admin_access_token = "valid-cookie-token";
+      jest.spyOn(jwtService, "verify").mockReturnValue({
+        role: "admin",
+        adminRole: "support_admin",
+        adminId: "admin-cookie",
+      });
+      mockReflector.getAllAndOverride.mockReturnValueOnce(["series:update"]);
+
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
     });
   });
 });

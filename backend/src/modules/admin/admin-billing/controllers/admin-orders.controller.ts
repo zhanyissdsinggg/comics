@@ -26,7 +26,9 @@ import {
   calculateOffset,
   parsePaginationParams,
 } from "../../../../common/utils/pagination";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 import { CreateOrderDto } from "../dtos/admin-billing.dto";
 
 type RawOrderRow = Record<string, unknown> & {
@@ -87,6 +89,7 @@ function buildAdjustIdempotencyKey(key: string): string {
 
 @Controller("admin/orders")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.ORDER_READ)
 export class AdminOrdersController {
   constructor(
     private readonly prisma: PrismaService,
@@ -130,6 +133,7 @@ export class AdminOrdersController {
   }
 
   @Post("refund")
+  @RequireAdminPermissions(AdminPermission.ORDER_REFUND)
   async refund(@Body() body: CreateOrderDto, @Req() req: Request) {
     if (!isDemoBillingEnabled()) {
       throw new ConflictException(
@@ -248,6 +252,7 @@ export class AdminOrdersController {
   }
 
   @Post("refund/:id")
+  @RequireAdminPermissions(AdminPermission.ORDER_REFUND)
   async refundByPath(
     @Param("id") orderId: string,
     @Body() body: CreateOrderDto,
@@ -263,6 +268,7 @@ export class AdminOrdersController {
   }
 
   @Post("adjust")
+  @RequireAdminPermissions(AdminPermission.ORDER_UPDATE)
   async adjust(@Body() body: CreateOrderDto, @Req() req: Request) {
     const userId = body?.userId;
     if (!userId) {
@@ -335,6 +341,7 @@ export class AdminOrdersController {
   }
 
   @Delete(":id")
+  @RequireAdminPermissions(AdminPermission.ORDER_DELETE)
   async remove(@Param("id") id: string) {
     if (!id) {
       throw new BadRequestException("Missing orderId parameter.");

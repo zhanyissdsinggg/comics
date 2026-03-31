@@ -6,9 +6,18 @@
   ForbiddenException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { Reflector } from "@nestjs/core";
 import { logger } from "../../../common/logger/winston.init";
 import { isAdminAuthorized } from "../../../common/utils/admin";
-import { getAdminIdentityFromKey } from "../../../common/utils/admin-security";
+import { getAdminIdentityFromKey, getAdminRoleFromKey } from "../../../common/utils/admin-security";
+import { ADMIN_PERMISSIONS_KEY } from "../decorators/admin-permissions.decorator";
+import {
+  AdminPermission,
+  AdminRole,
+  getRolePermissions,
+  hasAllPermissions,
+  normalizeAdminRole,
+} from "../permissions/admin-permissions";
 import { isAdminTokenJtiRevoked } from "../utils/admin-token-revocation";
 import {
   isAdminLegacyAdminKeyFallbackEnabled,
@@ -21,6 +30,7 @@ type TokenSource = "bearer" | "cookie";
 
 interface JwtPayload {
   role?: string;
+  adminRole?: string;
   type?: string;
   jti?: string;
   adminId?: string;
@@ -28,7 +38,10 @@ interface JwtPayload {
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly reflector: Reflector,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -53,9 +66,13 @@ export class AdminAuthGuard implements CanActivate {
         }
 
         const adminId = String(payload.adminId || "admin");
+        const adminRole = normalizeAdminRole(payload.adminRole, AdminRole.SUPER_ADMIN);
+        this.assertPermissions(context, adminRole);
         request.user = {
           userId: adminId,
           role: payload.role,
+          adminRole,
+          permissions: getRolePermissions(adminRole),
           jti: payload.jti,
           authSource: candidate.source,
         };
@@ -71,9 +88,13 @@ export class AdminAuthGuard implements CanActivate {
 
     if (isAdminLegacyAdminKeyFallbackEnabled() && isAdminAuthorized(request, request.body)) {
       const adminId = getAdminIdentityFromKey(bearerToken || "") || "admin";
+      const adminRole = getAdminRoleFromKey(bearerToken || "");
+      this.assertPermissions(context, adminRole);
       request.user = {
         userId: adminId,
         role: "admin",
+        adminRole,
+        permissions: getRolePermissions(adminRole),
         authSource: "legacy_admin_key",
       };
       request.userId = adminId;
@@ -85,6 +106,22 @@ export class AdminAuthGuard implements CanActivate {
     }
 
     throw new ForbiddenException("Authentication failed");
+  }
+
+  private assertPermissions(context: ExecutionContext, adminRole: AdminRole): void {
+    const requiredPermissions =
+      this.reflector.getAllAndOverride<AdminPermission[]>(ADMIN_PERMISSIONS_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) || [];
+
+    if (requiredPermissions.length === 0) {
+      return;
+    }
+
+    if (!hasAllPermissions(adminRole, requiredPermissions)) {
+      throw new ForbiddenException("Insufficient admin permissions");
+    }
   }
 
   private getBearerToken(request: any): string | null {

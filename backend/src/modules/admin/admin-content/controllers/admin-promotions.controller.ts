@@ -14,7 +14,9 @@ import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { parseStoredJson, stringifyStoredJson } from "../../../../common/utils/stored-json";
 import { AdminAudit } from "../../decorators/admin-audit.decorator";
+import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
+import { AdminPermission } from "../../permissions/admin-permissions";
 import { CreatePromotionDto, UpdatePromotionDto } from "../dtos/admin-content.dto";
 
 type PromotionInput = Record<string, unknown>;
@@ -92,6 +94,7 @@ function readOptionalDate(value: unknown): Date | null | undefined {
 
 @Controller("admin/promotions")
 @UseGuards(AdminAuthGuard)
+@RequireAdminPermissions(AdminPermission.PROMOTION_READ)
 export class AdminPromotionsController {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -113,6 +116,7 @@ export class AdminPromotionsController {
 
   @Patch("defaults")
   @AdminAudit("update", "promotion_defaults")
+  @RequireAdminPermissions(AdminPermission.PROMOTION_UPDATE)
   async updateDefaults(@Body() body: UpdatePromotionDto) {
     const payload = asRecord(body?.defaults);
     const serialized = stringifyStoredJson(payload);
@@ -126,6 +130,7 @@ export class AdminPromotionsController {
 
   @Post()
   @AdminAudit("create", "promotion")
+  @RequireAdminPermissions(AdminPermission.PROMOTION_CREATE)
   async create(@Body() body: CreatePromotionDto) {
     const promo = asRecord(body?.promotion);
     const promoId = readString(promo.id).trim();
@@ -156,6 +161,7 @@ export class AdminPromotionsController {
 
   @Patch(":id")
   @AdminAudit("update", "promotion")
+  @RequireAdminPermissions(AdminPermission.PROMOTION_UPDATE)
   async update(@Body() body: UpdatePromotionDto, @Req() req: Request) {
     const promoId = String(req.params.id || "");
     const promo = asRecord(body?.promotion);
@@ -186,6 +192,7 @@ export class AdminPromotionsController {
 
   @Delete(":id")
   @AdminAudit("delete", "promotion")
+  @RequireAdminPermissions(AdminPermission.PROMOTION_DELETE)
   async remove(@Req() req: Request) {
     const promoId = String(req.params.id || "");
     const existing = await this.prisma.promotion.findUnique({ where: { id: promoId } });
