@@ -6,6 +6,7 @@ import { AdminLogService } from "../../../common/services/admin-log.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { AdminAuditInterceptor } from "../interceptors/admin-audit.interceptor";
+import { AdminMembersService } from "../admin-system/services/admin-members.service";
 
 const TEST_JWT_SECRET = "gush-jwt-test-secret";
 
@@ -30,7 +31,13 @@ function resolveJwtSecret(): string {
     }),
   ],
   controllers: [AdminAuthController],
-  providers: [AdminLogService, PrismaService, AdminAuthGuard, AdminAuditInterceptor],
+  providers: [
+    AdminLogService,
+    PrismaService,
+    AdminMembersService,
+    AdminAuthGuard,
+    AdminAuditInterceptor,
+  ],
   exports: [AdminAuthGuard, JwtModule, AdminLogService, AdminAuditInterceptor],
 })
 export class AdminAuthModule {}

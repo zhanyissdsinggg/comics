@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
             登录内容管理后台
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            使用后台密钥进入管理台，处理作品、创作者署名和前台编排。
+            使用后台密钥进入运营面板。成员身份、角色和二次验证配置会从后台成员目录里读取。
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function AdminLoginPage() {
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">动态验证码</span>
+            <span className="text-sm font-medium text-slate-700">6 位验证码</span>
             <input
               id="totpCode"
               type="text"
@@ -99,7 +99,7 @@ export default function AdminLoginPage() {
               }}
               autoComplete="one-time-code"
               className="h-12 w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
-              placeholder="可选的 6 位验证码"
+              placeholder="如果启用了 2FA，请输入验证码"
               disabled={isLoading}
             />
           </label>
@@ -116,7 +116,7 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="mt-6 rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-          后台会话会通过安全 Cookie 保存。如果启用了双重验证，请继续前填入当前动态验证码。
+          后台会话会通过安全 Cookie 保存。如果当前成员启用了二次验证，请继续输入最新的 6 位验证码。
         </div>
       </div>
     </div>

@@ -3,15 +3,14 @@ import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import {
-  getAdminIdentityFromKey,
   getAdminKeysFromEnv,
-  getAdminRoleFromKey,
   isAdminTotpEnabled,
   verifyAdminTotpCode,
 } from "../../../../common/utils/admin-security";
 import { getRedisClient } from "../../../../common/redis/client";
 import { AdminAuthController } from "./admin-auth.controller";
 import { resetAdminTokenRevocationStore } from "../../utils/admin-token-revocation";
+import { AdminMembersService } from "../../admin-system/services/admin-members.service";
 
 const mockRedis = {
   get: jest.fn(),
@@ -26,9 +25,7 @@ jest.mock("../../../../common/redis/client", () => ({
 }));
 
 jest.mock("../../../../common/utils/admin-security", () => ({
-  getAdminIdentityFromKey: jest.fn(),
   getAdminKeysFromEnv: jest.fn(),
-  getAdminRoleFromKey: jest.fn(),
   validateAdminKeyFormat: jest.fn(() => true),
   isAdminTotpEnabled: jest.fn(),
   verifyAdminTotpCode: jest.fn(),
@@ -38,6 +35,13 @@ describe("AdminAuthController", () => {
   let controller: AdminAuthController;
   let jwtService: { sign: jest.Mock; verify: jest.Mock };
   let adminLogService: { log: jest.Mock };
+  let adminMembersService: {
+    resolveLoginMember: jest.Mock;
+    touchLastLogin: jest.Mock;
+    resolveSessionProfile: jest.Mock;
+    isMemberTotpEnabled: jest.Mock;
+    verifyMemberTotp: jest.Mock;
+  };
   const mockGetRedisClient = getRedisClient as jest.MockedFunction<typeof getRedisClient>;
 
   beforeEach(async () => {
@@ -75,12 +79,23 @@ describe("AdminAuthController", () => {
             log: jest.fn().mockResolvedValue(undefined),
           },
         },
+        {
+          provide: AdminMembersService,
+          useValue: {
+            resolveLoginMember: jest.fn(),
+            touchLastLogin: jest.fn().mockResolvedValue(undefined),
+            resolveSessionProfile: jest.fn(),
+            isMemberTotpEnabled: jest.fn(() => false),
+            verifyMemberTotp: jest.fn(() => true),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<AdminAuthController>(AdminAuthController);
     jwtService = module.get(JwtService);
     adminLogService = module.get(AdminLogService);
+    adminMembersService = module.get(AdminMembersService);
 
     mockRedis.get.mockResolvedValue(null);
     mockRedis.incr.mockResolvedValue(1);
@@ -90,10 +105,45 @@ describe("AdminAuthController", () => {
     mockGetRedisClient.mockReturnValue(mockRedis as any);
 
     (getAdminKeysFromEnv as jest.Mock).mockReturnValue(["test-admin-key"]);
-    (getAdminIdentityFromKey as jest.Mock).mockReturnValue("admin-1-test");
-    (getAdminRoleFromKey as jest.Mock).mockReturnValue("content_admin");
     (isAdminTotpEnabled as jest.Mock).mockReturnValue(false);
     (verifyAdminTotpCode as jest.Mock).mockReturnValue(true);
+    adminMembersService.resolveLoginMember.mockResolvedValue({
+      adminId: "admin-1-test",
+      adminRole: "content_admin",
+      member: {
+        id: "admin-1-test",
+        name: "内容运营",
+        role: "content_admin",
+        status: "active",
+        keySlot: 1,
+        totpEnabled: false,
+        totpSecret: null,
+      },
+      session: {
+        adminId: "admin-1-test",
+        adminRole: "content_admin",
+        permissions: [],
+        routePatterns: ["/admin/series"],
+        homePath: "/admin/series",
+        adminName: "内容运营",
+        adminEmail: null,
+        memberStatus: "active",
+        authMode: "env_admin_key",
+        keySlot: 1,
+        totpEnabled: false,
+      },
+    });
+    adminMembersService.resolveSessionProfile.mockImplementation(async (adminId: string) => ({
+      adminRole: "content_admin",
+      member: null,
+      session: {
+        adminId,
+        adminRole: "content_admin",
+        permissions: [],
+        routePatterns: ["/admin/series"],
+        homePath: "/admin/series",
+      },
+    }));
     delete process.env.ADMIN_TOKEN_FALLBACK_ENABLED;
   });
 
@@ -142,6 +192,7 @@ describe("AdminAuthController", () => {
         expect.objectContaining({ adminId: "admin-1-test" }),
         expect.anything(),
       );
+      expect(adminMembersService.touchLastLogin).toHaveBeenCalledWith("admin-1-test");
     });
 
     it("should reject invalid admin key", async () => {
@@ -158,8 +209,8 @@ describe("AdminAuthController", () => {
     });
 
     it("should enforce TOTP when enabled", async () => {
-      (isAdminTotpEnabled as jest.Mock).mockReturnValue(true);
-      (verifyAdminTotpCode as jest.Mock).mockReturnValue(false);
+      adminMembersService.isMemberTotpEnabled.mockReturnValue(true);
+      adminMembersService.verifyMemberTotp.mockReturnValue(false);
 
       const req = {
         ip: "127.0.0.1",
@@ -173,6 +224,9 @@ describe("AdminAuthController", () => {
       ).rejects.toMatchObject({
         status: HttpStatus.UNAUTHORIZED,
       });
+
+      adminMembersService.isMemberTotpEnabled.mockReturnValue(false);
+      adminMembersService.verifyMemberTotp.mockReturnValue(true);
     });
   });
 

@@ -32,6 +32,17 @@ export type BrandingPayloadInput = Partial<
   Pick<BrandingConfig, "siteLogoUrl" | "faviconUrl" | "homeBannerUrl">
 >;
 
+export type AdminMemberInput = {
+  name?: string;
+  email?: string | null;
+  role?: string;
+  status?: string;
+  keySlot?: number | null;
+  notes?: string | null;
+  source?: string;
+  totpEnabled?: boolean;
+};
+
 export class BlockUserDto {
   @IsString()
   userId!: string;
@@ -86,4 +97,16 @@ export class UpdateBrandingDto {
   @IsOptional()
   @IsObject()
   branding?: BrandingPayloadInput;
+}
+
+export class CreateAdminMemberDto {
+  @IsOptional()
+  @IsObject()
+  member?: AdminMemberInput;
+}
+
+export class UpdateAdminMemberDto {
+  @IsOptional()
+  @IsObject()
+  member?: AdminMemberInput;
 }

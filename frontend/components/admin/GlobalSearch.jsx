@@ -20,6 +20,7 @@ import {
   ScrollText,
   Search,
   Settings,
+  ShieldCheck,
   Sparkles,
   Users,
   X,
@@ -34,7 +35,7 @@ const SEARCH_ITEMS = [
     label: "仪表盘",
     href: "/admin",
     icon: BookOpen,
-    keywords: ["dashboard", "overview", "workspace", "home", "仪表盘", "概览", "工作区"],
+    keywords: ["dashboard", "overview", "workspace", "home", "仪表盘", "总览", "工作区"],
   },
   {
     id: "analytics",
@@ -52,10 +53,10 @@ const SEARCH_ITEMS = [
   },
   {
     id: "storefront",
-    label: "前台巡检",
+    label: "前台体检",
     href: "/admin/storefront",
     icon: Search,
-    keywords: ["storefront", "audit", "readiness", "public page", "前台", "巡检", "上线", "读者页面"],
+    keywords: ["storefront", "audit", "readiness", "public page", "前台", "体检", "上线", "读者页面"],
   },
   {
     id: "merchandising",
@@ -79,6 +80,20 @@ const SEARCH_ITEMS = [
     keywords: ["generator", "seed", "fixture", "mock content", "内容生成器", "测试内容", "生成", "种子"],
   },
   {
+    id: "creators",
+    label: "创作者",
+    href: "/admin/creators",
+    icon: PenSquare,
+    keywords: ["creators", "author", "artist", "studio", "credits", "创作者", "作者", "画师", "团队", "署名"],
+  },
+  {
+    id: "comments",
+    label: "评论",
+    href: "/admin/comments",
+    icon: MessageSquare,
+    keywords: ["comments", "feedback", "community", "评论", "反馈"],
+  },
+  {
     id: "users",
     label: "用户",
     href: "/admin/users",
@@ -86,32 +101,32 @@ const SEARCH_ITEMS = [
     keywords: ["users", "accounts", "reader", "customer", "用户", "账号", "读者"],
   },
   {
+    id: "members",
+    label: "后台成员",
+    href: "/admin/members",
+    icon: ShieldCheck,
+    keywords: ["admin members", "staff", "rbac", "2fa", "后台成员", "管理员", "角色权限", "二次验证"],
+  },
+  {
+    id: "support",
+    label: "客服支持",
+    href: "/admin/support",
+    icon: LifeBuoy,
+    keywords: ["support", "tickets", "help", "客服", "工单", "支持"],
+  },
+  {
+    id: "notifications",
+    label: "通知",
+    href: "/admin/notifications",
+    icon: Bell,
+    keywords: ["notifications", "messages", "alerts", "通知", "消息", "提醒"],
+  },
+  {
     id: "orders",
     label: "订单",
     href: "/admin/orders",
     icon: Receipt,
     keywords: ["orders", "payments", "transactions", "订单", "支付", "交易"],
-  },
-  {
-    id: "promotions",
-    label: "活动",
-    href: "/admin/promotions",
-    icon: Megaphone,
-    keywords: ["promotions", "marketing", "campaigns", "活动", "营销", "促销"],
-  },
-  {
-    id: "marketing",
-    label: "营销",
-    href: "/admin/marketing",
-    icon: Megaphone,
-    keywords: ["marketing", "campaigns", "segment", "渠道", "营销", "活动", "投放", "细分"],
-  },
-  {
-    id: "comments",
-    label: "评论",
-    href: "/admin/comments",
-    icon: MessageSquare,
-    keywords: ["comments", "reviews", "feedback", "评论", "反馈"],
   },
   {
     id: "billing",
@@ -128,18 +143,18 @@ const SEARCH_ITEMS = [
     keywords: ["revenue", "gross", "income", "finance", "收入", "营收", "流水", "财务"],
   },
   {
-    id: "notifications",
-    label: "通知",
-    href: "/admin/notifications",
-    icon: Bell,
-    keywords: ["notifications", "messages", "alerts", "通知", "消息", "提醒"],
+    id: "promotions",
+    label: "活动",
+    href: "/admin/promotions",
+    icon: Megaphone,
+    keywords: ["promotions", "marketing", "campaigns", "活动", "营销", "促销"],
   },
   {
-    id: "support",
-    label: "客服支持",
-    href: "/admin/support",
-    icon: LifeBuoy,
-    keywords: ["support", "tickets", "help", "客服", "工单", "支持"],
+    id: "marketing",
+    label: "营销",
+    href: "/admin/marketing",
+    icon: Megaphone,
+    keywords: ["marketing", "campaigns", "segment", "渠道", "营销", "活动", "投放", "细分"],
   },
   {
     id: "logs",
@@ -147,13 +162,6 @@ const SEARCH_ITEMS = [
     href: "/admin/logs",
     icon: ScrollText,
     keywords: ["logs", "audit", "history", "trace", "日志", "审计", "记录", "操作历史"],
-  },
-  {
-    id: "creators",
-    label: "创作者",
-    href: "/admin/creators",
-    icon: PenSquare,
-    keywords: ["creators", "author", "artist", "studio", "credits", "创作者", "作者", "画师", "工作室", "署名"],
   },
   {
     id: "branding",
@@ -283,10 +291,8 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
       router.push(homePath || "/admin");
       return;
     }
-    const nextRecentIds = [item.id, ...recentSearchIds.filter((id) => id !== item.id)].slice(
-      0,
-      5,
-    );
+
+    const nextRecentIds = [item.id, ...recentSearchIds.filter((id) => id !== item.id)].slice(0, 5);
     setRecentSearchIds(nextRecentIds);
     writeRecentSearchIds(nextRecentIds);
     setQuery("");
@@ -401,9 +407,7 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                 </div>
               </div>
               <p className="text-sm font-semibold text-slate-900">没有匹配的后台页面</p>
-              <p className="mt-1 text-xs text-slate-500">
-                换个关键词或页面名称再试试。
-              </p>
+              <p className="mt-1 text-xs text-slate-500">换个关键词或页面名称再试试。</p>
             </div>
           ) : recentItems.length > 0 ? (
             <div className="space-y-1">
@@ -448,9 +452,7 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                 </div>
               </div>
               <p className="text-sm font-semibold text-slate-900">输入内容即可搜索后台</p>
-              <p className="mt-1 text-xs text-slate-500">
-                可以按页面名、任务或对象类型搜索。
-              </p>
+              <p className="mt-1 text-xs text-slate-500">可以按页面名、任务或对象类型来搜索。</p>
             </div>
           )}
         </div>

@@ -23,6 +23,7 @@ import {
   isAdminLegacyAdminKeyFallbackEnabled,
   isAdminTokenFallbackEnabled,
 } from "../utils/admin-auth-transport";
+import { AdminMembersService } from "../admin-system/services/admin-members.service";
 
 const ADMIN_ACCESS_COOKIE_NAME = "admin_access_token";
 
@@ -41,6 +42,7 @@ export class AdminAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
+    private readonly adminMembersService: AdminMembersService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -66,7 +68,11 @@ export class AdminAuthGuard implements CanActivate {
         }
 
         const adminId = String(payload.adminId || "admin");
-        const adminRole = normalizeAdminRole(payload.adminRole, AdminRole.SUPER_ADMIN);
+        const resolvedSession = await this.adminMembersService.resolveSessionProfile(
+          adminId,
+          normalizeAdminRole(payload.adminRole, AdminRole.SUPER_ADMIN),
+        );
+        const adminRole = resolvedSession.adminRole;
         this.assertPermissions(context, adminRole);
         request.user = {
           userId: adminId,

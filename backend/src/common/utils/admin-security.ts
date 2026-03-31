@@ -1,4 +1,4 @@
-import { createHash, createHmac, timingSafeEqual } from "crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { getAdminTotpConfig, getAppConfig } from "../config/app-config";
 import { AdminRole, normalizeAdminRole } from "../../modules/admin/permissions/admin-permissions";
 
@@ -10,6 +10,33 @@ const DEFAULT_TOTP_WINDOW = 1;
 function toPositiveInt(value: unknown, fallback: number): number {
   const parsed = Number.parseInt(String(value || ""), 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function toNonNegativeInt(value: unknown, fallback: number): number {
+  const parsed = Number.parseInt(String(value || ""), 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+function encodeBase32(buffer: Buffer): string {
+  let bits = 0;
+  let bitLength = 0;
+  let output = "";
+
+  for (const byte of buffer) {
+    bits = (bits << 8) | byte;
+    bitLength += 8;
+
+    while (bitLength >= 5) {
+      output += BASE32_ALPHABET[(bits >>> (bitLength - 5)) & 0x1f];
+      bitLength -= 5;
+    }
+  }
+
+  if (bitLength > 0) {
+    output += BASE32_ALPHABET[(bits << (5 - bitLength)) & 0x1f];
+  }
+
+  return output;
 }
 
 function decodeBase32(input: string): Buffer {
@@ -102,6 +129,11 @@ export function getAdminIdentityFromKey(adminKey: string): string | null {
   return buildAdminIdentity(getAdminKeysFromEnv()[index], index);
 }
 
+export function getAdminKeySlot(adminKey: string): number | null {
+  const index = getAdminKeyIndex(adminKey);
+  return index < 0 ? null : index + 1;
+}
+
 export function getAdminRoleFromKey(adminKey: string): AdminRole {
   const index = getAdminKeyIndex(adminKey);
   if (index < 0) {
@@ -116,25 +148,44 @@ export function isAdminTotpEnabled(): boolean {
   return Boolean(getAdminTotpConfig().secret);
 }
 
-export function verifyAdminTotpCode(code: string): boolean {
+export function generateTotpSecret(byteLength = 20): string {
+  return encodeBase32(randomBytes(Math.max(10, byteLength)));
+}
+
+export function buildTotpProvisioningUri(input: {
+  secret: string;
+  label: string;
+  issuer?: string;
+}): string {
+  const issuer = String(input.issuer || "Tappytoon Admin").trim() || "Tappytoon Admin";
+  const label = String(input.label || "admin").trim() || "admin";
+  const accountLabel = encodeURIComponent(`${issuer}:${label}`);
+  return `otpauth://totp/${accountLabel}?secret=${encodeURIComponent(input.secret)}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=${DEFAULT_TOTP_DIGITS}&period=${DEFAULT_TOTP_PERIOD_SECONDS}`;
+}
+
+export function verifyTotpCodeWithSecret(
+  secret: string,
+  code: string,
+  config?: {
+    digits?: number;
+    periodSeconds?: number;
+    window?: number;
+  },
+): boolean {
+  const digits = toPositiveInt(config?.digits, DEFAULT_TOTP_DIGITS);
   const normalizedCode = String(code || "").trim();
-  if (!/^\d{6}$/.test(normalizedCode)) {
+  const pattern = new RegExp(`^\\d{${digits}}$`);
+  if (!pattern.test(normalizedCode)) {
     return false;
   }
 
-  const totpConfig = getAdminTotpConfig();
-  if (!totpConfig.secret) {
-    return true;
-  }
-
-  const decodedSecret = decodeBase32(totpConfig.secret);
+  const decodedSecret = decodeBase32(secret);
   if (!decodedSecret.length) {
     return false;
   }
 
-  const digits = toPositiveInt(totpConfig.digits, DEFAULT_TOTP_DIGITS);
-  const periodSeconds = toPositiveInt(totpConfig.periodSeconds, DEFAULT_TOTP_PERIOD_SECONDS);
-  const windowSize = toPositiveInt(totpConfig.window, DEFAULT_TOTP_WINDOW);
+  const periodSeconds = toPositiveInt(config?.periodSeconds, DEFAULT_TOTP_PERIOD_SECONDS);
+  const windowSize = toNonNegativeInt(config?.window, DEFAULT_TOTP_WINDOW);
   const currentCounter = Math.floor(Date.now() / 1000 / periodSeconds);
 
   for (let offset = -windowSize; offset <= windowSize; offset += 1) {
@@ -145,4 +196,17 @@ export function verifyAdminTotpCode(code: string): boolean {
   }
 
   return false;
+}
+
+export function verifyAdminTotpCode(code: string): boolean {
+  const totpConfig = getAdminTotpConfig();
+  if (!totpConfig.secret) {
+    return true;
+  }
+
+  return verifyTotpCodeWithSecret(totpConfig.secret, code, {
+    digits: totpConfig.digits,
+    periodSeconds: totpConfig.periodSeconds,
+    window: totpConfig.window,
+  });
 }

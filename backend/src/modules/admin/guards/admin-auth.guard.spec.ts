@@ -6,6 +6,7 @@ import { Reflector } from "@nestjs/core";
 import { getRedisClient } from "../../../common/redis/client";
 import { isAdminAuthorized } from "../../../common/utils/admin";
 import { getAdminIdentityFromKey, getAdminRoleFromKey } from "../../../common/utils/admin-security";
+import { AdminMembersService } from "../admin-system/services/admin-members.service";
 
 jest.mock("../../../common/redis/client", () => ({
   getRedisClient: jest.fn(),
@@ -30,6 +31,9 @@ describe("AdminAuthGuard", () => {
   const mockReflector = {
     getAllAndOverride: jest.fn().mockReturnValue([]),
   };
+  const mockAdminMembersService = {
+    resolveSessionProfile: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,6 +49,10 @@ describe("AdminAuthGuard", () => {
           provide: Reflector,
           useValue: mockReflector,
         },
+        {
+          provide: AdminMembersService,
+          useValue: mockAdminMembersService,
+        },
       ],
     }).compile();
 
@@ -53,6 +61,11 @@ describe("AdminAuthGuard", () => {
     mockIsAdminAuthorized.mockReturnValue(false);
     mockGetAdminIdentityFromKey.mockReturnValue("legacy-admin");
     mockGetAdminRoleFromKey.mockReturnValue("support_admin" as any);
+    mockAdminMembersService.resolveSessionProfile.mockImplementation(async (adminId: string, fallbackRole: string) => ({
+      adminRole: fallbackRole || "super_admin",
+      member: null,
+      session: null,
+    }));
     delete process.env.ADMIN_TOKEN_FALLBACK_ENABLED;
     delete process.env.ADMIN_LEGACY_BEARER_ENABLED;
   });

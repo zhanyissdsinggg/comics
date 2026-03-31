@@ -65,5 +65,17 @@ export function buildAdminSession(session) {
     permissions,
     routePatterns,
     homePath: normalizeAdminRoutePath(session.homePath || "/admin"),
+    adminName: String(session.adminName || "").trim() || null,
+    adminEmail: String(session.adminEmail || "").trim() || null,
+    memberStatus: String(session.memberStatus || "").trim().toLowerCase() || null,
+    authMode: String(session.authMode || "").trim() || null,
+    keySlot:
+      session.keySlot !== null
+      && session.keySlot !== undefined
+      && session.keySlot !== ""
+      && Number.isFinite(Number(session.keySlot))
+        ? Number(session.keySlot)
+        : null,
+    totpEnabled: Boolean(session.totpEnabled),
   };
 }

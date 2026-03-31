@@ -154,7 +154,7 @@ const TEXT_MAP = new Map([
   ["Upload limit", "上传限制"],
   ["Reader-facing surfaces", "读者可见位置"],
   ["Logo, favicon, and homepage banner stay in one shared brand set.", "Logo、favicon 和首页横幅共用同一套品牌素材。"],
-  ["Large artwork is allowed, but the upload guard keeps files practical for review.", "允许较大的素材文件，但上传限制会保证审核仍然轻量。"],
+  ["Large artwork is allowed, but the upload guard keeps files practical for review.", "允许较大的素材文件，但上传限制会保证处理流程仍然轻量。"],
   ["These assets shape the live storefront, so changes should stay editorial and restrained.", "这些素材会直接影响线上前台，调整时应保持克制。"],
   ["Ready for review", "可进入复核"],
   ["Needs asset coverage", "素材仍未补齐"],

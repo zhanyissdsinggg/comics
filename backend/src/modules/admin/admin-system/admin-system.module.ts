@@ -14,7 +14,9 @@ import { AdminUploadController } from "./controllers/admin-upload.controller";
 import { AdminEmailController } from "./controllers/admin-email.controller";
 import { AdminEmailJobsController } from "./controllers/admin-email-jobs.controller";
 import { AdminSupportController } from "./controllers/admin-support.controller";
+import { AdminMembersController } from "./controllers/admin-members.controller";
 import { ConfigService } from "../services/config.service";
+import { AdminMembersService } from "./services/admin-members.service";
 
 @Module({
   imports: [AdminAuthModule, EmailModule],
@@ -29,8 +31,9 @@ import { ConfigService } from "../services/config.service";
     AdminEmailController,
     AdminEmailJobsController,
     AdminSupportController,
+    AdminMembersController,
   ],
-  providers: [AdminMarketingService, PrismaService, AdminLogService, ConfigService],
-  exports: [AdminMarketingService, AdminLogService, ConfigService],
+  providers: [AdminMarketingService, AdminMembersService, PrismaService, AdminLogService, ConfigService],
+  exports: [AdminMarketingService, AdminMembersService, AdminLogService, ConfigService],
 })
 export class AdminSystemModule {}

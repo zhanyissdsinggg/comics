@@ -17,9 +17,7 @@ import { getRedisClient } from "../../../../common/redis/client";
 import { logger } from "../../../../common/logger/winston.init";
 import { ValidationPipe } from "../../../../common/pipes/validation.pipe";
 import {
-  getAdminIdentityFromKey,
   getAdminKeysFromEnv,
-  getAdminRoleFromKey,
   isAdminTotpEnabled,
   verifyAdminTotpCode,
 } from "../../../../common/utils/admin-security";
@@ -34,6 +32,7 @@ import {
 } from "../../utils/admin-token-revocation";
 import { isAdminTokenFallbackEnabled } from "../../utils/admin-auth-transport";
 import { AdminLoginDto, AdminRefreshTokenDto } from "../../dtos/admin-auth.dto";
+import { AdminMembersService } from "../../admin-system/services/admin-members.service";
 
 const ADMIN_ACCESS_COOKIE_NAME = "admin_access_token";
 const ADMIN_REFRESH_COOKIE_NAME = "admin_refresh_token";
@@ -78,6 +77,7 @@ export class AdminAuthController {
   constructor(
     private readonly jwtService: JwtService,
     private readonly adminLogService: AdminLogService,
+    private readonly adminMembersService: AdminMembersService,
   ) {}
 
   @Post("login")
@@ -112,8 +112,22 @@ export class AdminAuthController {
     }
 
     const isKeyValid = adminKeys.includes(adminKey);
-    const requiresTotp = isAdminTotpEnabled();
-    const isTotpValid = !requiresTotp || verifyAdminTotpCode(totpCode || "");
+    const loginMember = isKeyValid
+      ? await this.adminMembersService.resolveLoginMember(adminKey)
+      : null;
+    const requiresTotp = loginMember?.member
+      ? this.adminMembersService.isMemberTotpEnabled(loginMember.member) || isAdminTotpEnabled()
+      : isAdminTotpEnabled();
+    const isTotpValid = !requiresTotp
+      || (
+        loginMember?.member
+          ? (
+            this.adminMembersService.isMemberTotpEnabled(loginMember.member)
+              ? this.adminMembersService.verifyMemberTotp(loginMember.member, totpCode || "")
+              : verifyAdminTotpCode(totpCode || "")
+          )
+          : verifyAdminTotpCode(totpCode || "")
+      );
 
     if (!isKeyValid || !isTotpValid) {
       const reason: LoginFailureReason = !isKeyValid
@@ -141,9 +155,10 @@ export class AdminAuthController {
       );
     }
 
-    const adminId = getAdminIdentityFromKey(adminKey) || "admin";
-    const adminRole = getAdminRoleFromKey(adminKey);
+    const adminId = loginMember?.adminId || "admin";
+    const adminRole = loginMember?.adminRole || AdminRole.SUPER_ADMIN;
     this.assignRequestIdentity(req, adminId, "login");
+    await this.adminMembersService.touchLastLogin(adminId);
 
     const accessJti = randomUUID();
     const accessToken = this.jwtService.sign(
@@ -170,7 +185,7 @@ export class AdminAuthController {
       success: true,
       expiresIn: ACCESS_TOKEN_EXPIRES_SECONDS,
       sessionTransport: "cookie",
-      session: buildAdminSessionProfile(adminId, adminRole),
+      session: loginMember?.session || buildAdminSessionProfile(adminId, adminRole),
     };
   }
   @Post("refresh")
@@ -195,7 +210,11 @@ export class AdminAuthController {
       }
 
       const adminId = payload.adminId || "admin";
-      const adminRole = normalizeAdminRole(payload.adminRole, AdminRole.SUPER_ADMIN);
+      const resolvedSession = await this.adminMembersService.resolveSessionProfile(
+        adminId,
+        normalizeAdminRole(payload.adminRole, AdminRole.SUPER_ADMIN),
+      );
+      const adminRole = resolvedSession.adminRole;
       const accessJti = randomUUID();
       const newAccessToken = this.jwtService.sign(
         { role: "admin", adminRole, adminId, timestamp: Date.now(), jti: accessJti },
@@ -208,7 +227,7 @@ export class AdminAuthController {
         success: true,
         expiresIn: ACCESS_TOKEN_EXPIRES_SECONDS,
         sessionTransport: "cookie",
-        session: buildAdminSessionProfile(adminId, adminRole),
+        session: resolvedSession.session,
       };
     } catch (error) {
       if (error instanceof HttpException) {
@@ -251,13 +270,16 @@ export class AdminAuthController {
       }
 
       const adminId = String(payload.adminId || "admin");
-      const adminRole = normalizeAdminRole(payload.adminRole, AdminRole.SUPER_ADMIN);
+      const resolvedSession = await this.adminMembersService.resolveSessionProfile(
+        adminId,
+        normalizeAdminRole(payload.adminRole, AdminRole.SUPER_ADMIN),
+      );
 
       return {
         success: true,
         valid: true,
         payload,
-        session: buildAdminSessionProfile(adminId, adminRole),
+        session: resolvedSession.session,
       };
     } catch {
       return {

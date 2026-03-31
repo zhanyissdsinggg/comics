@@ -26,6 +26,7 @@ import {
   ScrollText,
   Search,
   Settings,
+  ShieldCheck,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -39,12 +40,7 @@ const NAV_GROUPS = [
     label: "工作区",
     items: [
       { label: "仪表盘", href: "/admin", icon: BarChart3, match: ["/admin"], exact: true },
-      {
-        label: "数据分析",
-        href: "/admin/analytics",
-        icon: BarChart3,
-        match: ["/admin/analytics"],
-      },
+      { label: "数据分析", href: "/admin/analytics", icon: BarChart3, match: ["/admin/analytics"] },
       {
         label: "作品",
         href: "/admin/series",
@@ -56,41 +52,16 @@ const NAV_GROUPS = [
           { label: "小说", href: "/admin/series?type=novel" },
         ],
       },
-      {
-        label: "创作者",
-        href: "/admin/creators",
-        icon: PenSquare,
-        match: ["/admin/creators"],
-      },
+      { label: "创作者", href: "/admin/creators", icon: PenSquare, match: ["/admin/creators"] },
     ],
   },
   {
     label: "发现与前台",
     items: [
-      {
-        label: "前台巡检",
-        href: "/admin/storefront",
-        icon: Search,
-        match: ["/admin/storefront"],
-      },
-      {
-        label: "内容编排",
-        href: "/admin/merchandising",
-        icon: Sparkles,
-        match: ["/admin/merchandising"],
-      },
-      {
-        label: "推荐位",
-        href: "/admin/recommendations",
-        icon: Sparkles,
-        match: ["/admin/recommendations"],
-      },
-      {
-        label: "评论",
-        href: "/admin/comments",
-        icon: MessageSquare,
-        match: ["/admin/comments"],
-      },
+      { label: "前台体检", href: "/admin/storefront", icon: Search, match: ["/admin/storefront"] },
+      { label: "内容编排", href: "/admin/merchandising", icon: Sparkles, match: ["/admin/merchandising"] },
+      { label: "推荐位", href: "/admin/recommendations", icon: Sparkles, match: ["/admin/recommendations"] },
+      { label: "评论", href: "/admin/comments", icon: MessageSquare, match: ["/admin/comments"] },
     ],
   },
   {
@@ -98,35 +69,15 @@ const NAV_GROUPS = [
     items: [
       { label: "用户", href: "/admin/users", icon: Users, match: ["/admin/users"] },
       { label: "客服支持", href: "/admin/support", icon: LifeBuoy, match: ["/admin/support"] },
-      {
-        label: "通知",
-        href: "/admin/notifications",
-        icon: Bell,
-        match: ["/admin/notifications"],
-      },
-      {
-        label: "审计日志",
-        href: "/admin/logs",
-        icon: ScrollText,
-        match: ["/admin/logs"],
-      },
+      { label: "通知", href: "/admin/notifications", icon: Bell, match: ["/admin/notifications"] },
+      { label: "审计日志", href: "/admin/logs", icon: ScrollText, match: ["/admin/logs"] },
     ],
   },
   {
     label: "商业",
     items: [
-      {
-        label: "活动",
-        href: "/admin/promotions",
-        icon: Megaphone,
-        match: ["/admin/promotions"],
-      },
-      {
-        label: "营销",
-        href: "/admin/marketing",
-        icon: Megaphone,
-        match: ["/admin/marketing"],
-      },
+      { label: "活动", href: "/admin/promotions", icon: Megaphone, match: ["/admin/promotions"] },
+      { label: "营销", href: "/admin/marketing", icon: Megaphone, match: ["/admin/marketing"] },
       { label: "订单", href: "/admin/orders", icon: Receipt, match: ["/admin/orders"] },
       { label: "收入", href: "/admin/revenue", icon: CreditCard, match: ["/admin/revenue"] },
       { label: "计费", href: "/admin/billing", icon: CreditCard, match: ["/admin/billing"] },
@@ -135,42 +86,13 @@ const NAV_GROUPS = [
   {
     label: "设置",
     items: [
-      {
-        label: "品牌素材",
-        href: "/admin/branding",
-        icon: Image,
-        match: ["/admin/branding"],
-      },
-      {
-        label: "邮件设置",
-        href: "/admin/email-settings",
-        icon: Mail,
-        match: ["/admin/email-settings"],
-      },
-      {
-        label: "邮件任务",
-        href: "/admin/email-jobs",
-        icon: MailCheck,
-        match: ["/admin/email-jobs"],
-      },
-      {
-        label: "跟踪设置",
-        href: "/admin/tracking",
-        icon: Radar,
-        match: ["/admin/tracking"],
-      },
-      {
-        label: "地区",
-        href: "/admin/regions",
-        icon: Globe,
-        match: ["/admin/regions"],
-      },
-      {
-        label: "系统设置",
-        href: "/admin/settings",
-        icon: Settings,
-        match: ["/admin/settings"],
-      },
+      { label: "品牌素材", href: "/admin/branding", icon: Image, match: ["/admin/branding"] },
+      { label: "邮件设置", href: "/admin/email-settings", icon: Mail, match: ["/admin/email-settings"] },
+      { label: "邮件任务", href: "/admin/email-jobs", icon: MailCheck, match: ["/admin/email-jobs"] },
+      { label: "跟踪设置", href: "/admin/tracking", icon: Radar, match: ["/admin/tracking"] },
+      { label: "后台成员", href: "/admin/members", icon: ShieldCheck, match: ["/admin/members"] },
+      { label: "地区", href: "/admin/regions", icon: Globe, match: ["/admin/regions"] },
+      { label: "系统设置", href: "/admin/settings", icon: Settings, match: ["/admin/settings"] },
     ],
   },
 ];
@@ -180,7 +102,7 @@ const BREADCRUMB_MAP = [
   { match: "/admin/analytics", label: "数据分析" },
   { match: "/admin/series", label: "作品" },
   { match: "/admin/creators", label: "创作者" },
-  { match: "/admin/storefront", label: "前台巡检" },
+  { match: "/admin/storefront", label: "前台体检" },
   { match: "/admin/merchandising", label: "内容编排" },
   { match: "/admin/recommendations", label: "推荐位" },
   { match: "/admin/comments", label: "评论" },
@@ -197,6 +119,7 @@ const BREADCRUMB_MAP = [
   { match: "/admin/email-settings", label: "邮件设置" },
   { match: "/admin/email-jobs", label: "邮件任务" },
   { match: "/admin/tracking", label: "跟踪设置" },
+  { match: "/admin/members", label: "后台成员" },
   { match: "/admin/regions", label: "地区" },
   { match: "/admin/settings", label: "系统设置" },
 ];
@@ -230,7 +153,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const breadcrumb = getBreadcrumb(pathname);
-  const { adminRole, permissions, routePatterns, homePath } = useAdminAuth();
+  const { adminRole, permissions, routePatterns, homePath, session } = useAdminAuth();
   const roleLabel = getAdminRoleLabel(adminRole);
   const effectiveHomePath = homePath || "/admin";
 
@@ -238,6 +161,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState(new Set(["/admin/series"]));
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   const visibleNavGroups = useMemo(
     () =>
       NAV_GROUPS.map((group) => ({
@@ -354,7 +278,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   </p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{activeGroupLabel}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    用更安静的方式处理作品、署名和前台编排。
+                    用更安静的方式处理作品、署名、前台编排和日常运营动作。
                   </p>
                 </div>
               ) : null}
@@ -458,11 +382,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                           {hasChildren && isExpanded && !isCollapsed ? (
                             <div className="mt-1 ml-6 space-y-1 border-l border-black/6 pl-3">
                               {item.children.map((child) => {
-                                const childIsActive = isChildLinkActive(
-                                  pathname,
-                                  searchParams,
-                                  child.href,
-                                );
+                                const childIsActive = isChildLinkActive(pathname, searchParams, child.href);
 
                                 return (
                                   <Link
@@ -498,7 +418,12 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                     会话
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-950">{roleLabel}</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-950">
+                    {session?.adminName || roleLabel}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {session?.adminEmail || roleLabel}
+                  </p>
                   <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
                     <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-2.5 py-1">
                       {visibleNavGroups.length} 个工作分区
@@ -506,9 +431,14 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                     <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-2.5 py-1">
                       {permissions.length} 项权限
                     </span>
+                    {session?.keySlot ? (
+                      <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-2.5 py-1">
+                        密钥槽位 {session.keySlot}
+                      </span>
+                    ) : null}
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    当前菜单和搜索结果已经按角色收口。运营拿到什么权限，就只看到对应的工作区。
+                    当前菜单和搜索结果已经按角色收口。拿到什么权限，就只看到对应的工作区。
                   </p>
                 </div>
               </div>

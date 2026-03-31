@@ -107,7 +107,10 @@ export default function AdminCommentsPage() {
 
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const ratedCount = useMemo(
-    () => comments.filter((comment) => comment.rating !== null && comment.rating !== undefined && comment.rating !== '').length,
+    () =>
+      comments.filter(
+        (comment) => comment.rating !== null && comment.rating !== undefined && comment.rating !== '',
+      ).length,
     [comments],
   );
   const uniqueReaders = useMemo(
@@ -129,15 +132,15 @@ export default function AdminCommentsPage() {
 
   return (
     <AdminShell
-      title="评论审核"
-      subtitle="把读者反馈放进一个安静、好读的审核队列里，再处理那些不该继续留在线上的内容。"
+      title="评论管理"
+      subtitle="把读者反馈收进一个安静、好读的目录里，先判断内容本身，再处理不该继续留在线上的评论。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <AdminMetricCard
             label="当前评论"
             value={String(pagination.total)}
-            detail="当前搜索和排序条件下的审核列表。"
+            detail="按当前搜索和排序条件统计。"
             tone="accent"
           />
           <AdminMetricCard
@@ -148,7 +151,7 @@ export default function AdminCommentsPage() {
           <AdminMetricCard
             label="当前读者数"
             value={String(uniqueReaders)}
-            detail="当前队列里涉及到的唯一读者数。"
+            detail="当前视图里涉及到的唯一读者数量。"
           />
         </div>
 
@@ -158,7 +161,7 @@ export default function AdminCommentsPage() {
         />
 
         <AdminPageSection
-          title="审核队列"
+          title="评论列表"
           description="让表格先回答最关键的事：谁写的、写了什么、现在要不要处理。"
         >
           <AdminListToolbar
@@ -168,6 +171,9 @@ export default function AdminCommentsPage() {
             onOpenFilters={() => setIsSortModalOpen(true)}
             sortOrder={sortOrder}
             onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            filtersLabel="排序"
+            ascendingLabel="更早优先"
+            descendingLabel="最新优先"
           />
 
           <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
@@ -178,7 +184,7 @@ export default function AdminCommentsPage() {
               onClick={() => setIsDeleteConfirmOpen(true)}
               disabled={bulkDeleteMutation.isPending}
             >
-              {bulkDeleteMutation.isPending ? '正在删除...' : '删除评论'}
+              {bulkDeleteMutation.isPending ? '删除中...' : '删除评论'}
             </Button>
           </AdminSelectionBar>
 
@@ -233,17 +239,23 @@ export default function AdminCommentsPage() {
                       />
                     </td>
                     <td className="max-w-[34rem] px-4 py-4">
-                      <div className="font-medium text-slate-950">{getContentPreview(comment.content || comment.text)}</div>
+                      <div className="font-medium text-slate-950">
+                        {getContentPreview(comment.content || comment.text)}
+                      </div>
                       <div className="mt-1 text-xs text-slate-500">{comment.id}</div>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="font-medium text-slate-950">{comment.userEmail || comment.userId || '未知读者'}</div>
+                      <div className="font-medium text-slate-950">
+                        {comment.userEmail || comment.userId || '未知读者'}
+                      </div>
                       {comment.userEmail && comment.userId ? (
                         <div className="mt-1 text-xs text-slate-500">{comment.userId}</div>
                       ) : null}
                     </td>
                     <td className="px-4 py-4">
-                      <AdminBadge tone={comment.rating ? 'warning' : 'default'}>{formatRating(comment.rating)}</AdminBadge>
+                      <AdminBadge tone={comment.rating ? 'warning' : 'default'}>
+                        {formatRating(comment.rating)}
+                      </AdminBadge>
                     </td>
                     <td className="px-4 py-4 text-slate-600">{formatDate(comment.createdAt)}</td>
                   </AdminTableRow>

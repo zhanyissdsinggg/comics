@@ -72,6 +72,9 @@ export enum AdminPermission {
   EMAIL_JOB_UPDATE = "email-job:update",
   UPLOAD_ASSET = "upload:asset",
   CONTENT_GENERATE = "content:generate",
+  ADMIN_MEMBER_READ = "admin-member:read",
+  ADMIN_MEMBER_CREATE = "admin-member:create",
+  ADMIN_MEMBER_UPDATE = "admin-member:update",
 }
 
 const ALL_PERMISSIONS = Object.values(AdminPermission);
@@ -283,7 +286,18 @@ export function canAccessAdminRoute(role: AdminRole, pathname: string): boolean 
   return getAdminRoutePatterns(role).some((pattern) => matchesRoutePattern(pathname, pattern));
 }
 
-export function buildAdminSessionProfile(adminId: string, adminRole: AdminRole) {
+export function buildAdminSessionProfile(
+  adminId: string,
+  adminRole: AdminRole,
+  extras?: Partial<{
+    adminName: string | null;
+    adminEmail: string | null;
+    memberStatus: string | null;
+    authMode: string | null;
+    keySlot: number | null;
+    totpEnabled: boolean;
+  }>,
+) {
   const normalizedRole = normalizeAdminRole(adminRole);
   return {
     adminId,
@@ -291,5 +305,11 @@ export function buildAdminSessionProfile(adminId: string, adminRole: AdminRole) 
     permissions: getRolePermissions(normalizedRole),
     routePatterns: getAdminRoutePatterns(normalizedRole),
     homePath: resolveAdminHomePath(normalizedRole),
+    adminName: typeof extras?.adminName === "string" ? extras.adminName : null,
+    adminEmail: typeof extras?.adminEmail === "string" ? extras.adminEmail : null,
+    memberStatus: typeof extras?.memberStatus === "string" ? extras.memberStatus : null,
+    authMode: typeof extras?.authMode === "string" ? extras.authMode : null,
+    keySlot: typeof extras?.keySlot === "number" ? extras.keySlot : null,
+    totpEnabled: Boolean(extras?.totpEnabled),
   };
 }
