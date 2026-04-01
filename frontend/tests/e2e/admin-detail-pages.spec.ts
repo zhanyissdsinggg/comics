@@ -3,6 +3,18 @@ import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const ADMIN_UI_TIMEOUT_MS = 15000;
 
+const MOCK_ADMIN_SESSION = {
+  adminId: "admin-e2e",
+  adminRole: "super_admin",
+  permissions: [],
+  routePatterns: ["*"],
+  homePath: "/admin",
+  adminName: "E2E Admin",
+  memberStatus: "active",
+  authMode: "cookie",
+  totpEnabled: false,
+};
+
 async function fulfillJson(route: Route, body: unknown): Promise<void> {
   await route.fulfill({
     status: 200,
@@ -24,13 +36,14 @@ async function installAdminBaseMocks(page: Page): Promise<void> {
     const pathname = new URL(route.request().url()).pathname;
 
     if (pathname.endsWith("/api/admin/auth/verify")) {
-      await fulfillJson(route, { success: true, valid: true });
+      await fulfillJson(route, { success: true, valid: true, session: MOCK_ADMIN_SESSION });
       return;
     }
 
     if (pathname.endsWith("/api/admin/auth/refresh")) {
       await fulfillJson(route, {
         success: true,
+        session: MOCK_ADMIN_SESSION,
       });
       return;
     }

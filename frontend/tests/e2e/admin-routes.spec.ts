@@ -11,6 +11,18 @@ const EMPTY_PAGINATION = {
   hasPrevPage: false,
 };
 
+const MOCK_ADMIN_SESSION = {
+  adminId: "admin-e2e",
+  adminRole: "super_admin",
+  permissions: [],
+  routePatterns: ["*"],
+  homePath: "/admin",
+  adminName: "E2E Admin",
+  memberStatus: "active",
+  authMode: "cookie",
+  totpEnabled: false,
+};
+
 const ADMIN_ROUTE_CASES = [
   {
     route: "/admin/users",
@@ -192,13 +204,14 @@ async function installAdminApiMocks(
     const method = route.request().method();
 
     if (pathname.endsWith("/api/admin/auth/verify")) {
-      await fulfillJson(route, { success: true, valid: true });
+      await fulfillJson(route, { success: true, valid: true, session: MOCK_ADMIN_SESSION });
       return;
     }
 
     if (pathname.endsWith("/api/admin/auth/refresh")) {
       await fulfillJson(route, {
         success: true,
+        session: MOCK_ADMIN_SESSION,
       });
       return;
     }

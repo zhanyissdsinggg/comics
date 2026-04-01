@@ -3,6 +3,18 @@ import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const ADMIN_UI_TIMEOUT_MS = 15000;
 
+const MOCK_ADMIN_SESSION = {
+  adminId: "admin-e2e",
+  adminRole: "super_admin",
+  permissions: [],
+  routePatterns: ["*"],
+  homePath: "/admin",
+  adminName: "E2E Admin",
+  memberStatus: "active",
+  authMode: "cookie",
+  totpEnabled: false,
+};
+
 type AdminRouteHandler = (route: Route, url: URL) => Promise<boolean>;
 
 async function fulfillJson(route: Route, body: unknown, status = 200): Promise<void> {
@@ -27,12 +39,12 @@ async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Pro
     const pathname = url.pathname;
 
     if (pathname.endsWith("/api/admin/auth/verify")) {
-      await fulfillJson(route, { success: true, valid: true });
+      await fulfillJson(route, { success: true, valid: true, session: MOCK_ADMIN_SESSION });
       return;
     }
 
     if (pathname.endsWith("/api/admin/auth/refresh")) {
-      await fulfillJson(route, { success: true });
+      await fulfillJson(route, { success: true, session: MOCK_ADMIN_SESSION });
       return;
     }
 
@@ -56,13 +68,17 @@ test.describe("Admin system page regressions", () => {
     await expect(page.getByRole("heading", { name: /系统设置|System Settings/ })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("heading", { name: /后台访问|Admin access/ })).toBeVisible({
+    await expect(page.getByText(/后台访问|Admin access/).first()).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("heading", { name: /指标说明|Metric notes/ })).toBeVisible({
+    await expect(page.getByRole("heading", { name: /成员会话与登录凭证|Member session/ })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText(/HttpOnly/i)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: /后台成员体系|Admin members/ })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText(/ADMIN_KEYS/i).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText(/安全 Cookie|secure cookie/i)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await page.waitForTimeout(1200);
     await expect(page.getByText("We use cookies", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Install Gush App", { exact: true })).toHaveCount(0);

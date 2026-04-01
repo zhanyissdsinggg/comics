@@ -296,7 +296,7 @@ export function AdminAuthProvider({ children }) {
         setSession(nextSession);
       }
 
-      const valid = await verifySession({ fallbackAuthenticated: true });
+      const valid = await verifySession();
       if (!valid) {
         return {
           success: false,
