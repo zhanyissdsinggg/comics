@@ -1524,10 +1524,6 @@ export default function ReaderPage({ seriesId, episodeId }) {
         onNext={handleGoNextChapter}
         nextLocked={nextEpisode ? !nextUnlocked : false}
       />
-      <div className="mx-auto hidden max-w-5xl px-4 pt-3 text-[11px] text-neutral-500 md:block">
-        Shortcuts: N = night mode, T = contents, B = bookmark, Left/Right = prev/next, A = auto scroll
-      </div>
-
       {commerceNotice && !showPaywall ? (
         <div className="mx-auto max-w-5xl px-4 pt-4">
           <CommerceSuccessBanner

@@ -91,7 +91,6 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <div>
             <h2 className="text-lg font-semibold text-white">Reader Settings</h2>
-            <p className="mt-1 text-xs text-neutral-400">Only live controls are shown here.</p>
           </div>
           <button
             type="button"
