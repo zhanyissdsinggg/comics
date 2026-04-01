@@ -32,17 +32,18 @@ const STATUS_OPTIONS = [
 const SORT_OPTIONS = [
   { value: "relevance", label: "Best Match" },
   { value: "popular", label: "Most Popular" },
-  { value: "rating", label: "Highest Rated" },
   { value: "latest", label: "Latest Updates" },
   { value: "alphabetical", label: "A-Z" },
 ];
+
+const VALID_SORT_OPTIONS = new Set(SORT_OPTIONS.map((option) => option.value));
 
 function buildFilters(initialFilters = {}) {
   return {
     types: initialFilters.types || [],
     tags: initialFilters.tags || [],
     status: initialFilters.status || "all",
-    sortBy: initialFilters.sortBy || "relevance",
+    sortBy: VALID_SORT_OPTIONS.has(initialFilters.sortBy) ? initialFilters.sortBy : "relevance",
   };
 }
 
@@ -108,10 +109,8 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
       <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-4 pb-8 pt-6 shadow-[0_28px_90px_rgba(15,23,42,0.16)] md:left-auto md:right-0 md:top-0 md:max-h-none md:w-full md:max-w-md md:rounded-l-3xl md:rounded-tr-none md:border-l md:border-t-0 md:px-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-950 md:text-xl">Advanced Filters</h2>
-            <p className="mt-1 text-xs text-slate-500 md:text-sm">
-              Refine the catalog with real filters that map to search results.
-            </p>
+            <h2 className="text-lg font-bold text-slate-950 md:text-xl">Filters</h2>
+            <p className="mt-1 text-xs text-slate-500 md:text-sm">Refine the catalog.</p>
           </div>
           <button
             type="button"

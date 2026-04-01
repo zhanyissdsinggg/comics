@@ -196,18 +196,13 @@ function formatTitleCountLabel(count) {
 function buildCreatorWorksSummary(creator) {
   const leadSeries = getCreatorLeadSeries(creator);
   const genres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
-  const formatLabel = formatSeriesTypeLabel(leadSeries?.type).toLowerCase();
-
-  if (genres.length > 0 && leadSeries?.title) {
-    return `${genres.join(" / ")} ${formatLabel}${Number(creator?.titleCount || 0) > 1 ? "s" : ""} led by ${leadSeries.title}.`;
-  }
 
   if (leadSeries?.title) {
-    return `Best known here for ${leadSeries.title}.`;
+    return `Known for ${leadSeries.title}.`;
   }
 
   if (genres.length > 0) {
-    return `${genres.join(" / ")} stories in the catalog.`;
+    return `Works across ${genres.join(" / ")}.`;
   }
 
   return "Published work in the catalog.";
@@ -840,7 +835,7 @@ export default function CreatorsHubPage({
           accent="blue"
           eyebrow="Creators"
           title="Meet the Creators"
-          description="Explore the writers, artists, and studios behind the stories."
+          description="Writers, artists, and studios behind the stories."
           actions={
             <>
               <button
@@ -874,7 +869,7 @@ export default function CreatorsHubPage({
                 Featured Creators
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                See who they are, what they make, and where to start.
+                A quick look at who is behind the shelf.
               </p>
             </div>
 
@@ -955,7 +950,7 @@ export default function CreatorsHubPage({
                 Start with These Stories
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                A few strong places to begin.
+                A few good starting points.
               </p>
             </div>
 
@@ -1073,7 +1068,7 @@ export default function CreatorsHubPage({
               Browse by Genre
             </h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">
-              See which creators and studios are shaping each genre lane.
+              Jump to a genre lane.
             </p>
           </div>
 
@@ -1102,7 +1097,7 @@ export default function CreatorsHubPage({
                 All Creators
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Browse the credited names currently attached to public titles.
+                Public credits on live titles.
               </p>
             </div>
             {query || activeGenre !== "All" || creditFilter !== "all" ? (

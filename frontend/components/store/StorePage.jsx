@@ -64,10 +64,10 @@ function getReturnLabel(returnTo, sourceEntry) {
 }
 
 const PACKAGE_FIT_GUIDE = {
-  starter: "Trying the site or unlocking a few chapters.",
-  medium: "Following one or two series each week.",
-  value: "Regular weekly reading with a better bonus.",
-  mega: "Heavy unlocking across multiple series.",
+  starter: "A few chapters.",
+  medium: "One or two series a week.",
+  value: "Regular weekly reading.",
+  mega: "Heavy reading across the shelf.",
 };
 
 function formatPriceLabel(amount, currency = "USD") {
@@ -464,11 +464,11 @@ export default function StorePage({
       <main className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow="Point packs"
-          title={purchaseActionsEnabled ? "Point packs for one-time unlocks." : "Checkout opens later."}
+          title={purchaseActionsEnabled ? "Point packs." : "Point packs open soon."}
           description={
             purchaseActionsEnabled
-              ? "One-time unlocks for readers who buy as needed."
-              : "Pricing is visible now. No charge today."
+              ? "Buy once, unlock what you want."
+              : "Prices are visible. Checkout is not live yet."
           }
           secondary={purchaseActionsEnabled ? regionConfig.label : ""}
           stats={storeHeroStats}
@@ -553,7 +553,7 @@ export default function StorePage({
                 What to know
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Before checkout.
+                What to know.
               </h2>
             </div>
           </div>
@@ -561,15 +561,15 @@ export default function StorePage({
             {[
               {
                 label: "Today",
-                detail: "No charge today.",
+                detail: "No charge yet.",
               },
               {
                 label: "Purchases",
-                detail: "Receipts appear after launch in Purchases.",
+                detail: "Receipts show up in Purchases after launch.",
               },
               {
                 label: "Help",
-                detail: "Billing help stays available.",
+                detail: "Billing help stays open.",
               },
             ].map((item) => (
               <div
@@ -662,14 +662,14 @@ export default function StorePage({
                   Point packs or membership.
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
-                  One-time unlocks or a monthly plan.
+                  Buy as needed or save with a plan.
                 </p>
               </div>
               <div className="grid gap-3">
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
                   <p className="text-sm font-semibold text-slate-950">Point packs</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Use them for one-off unlocks.
+                    Buy once and unlock as you go.
                   </p>
                 </div>
                 <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
@@ -677,7 +677,7 @@ export default function StorePage({
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {subscriptionStats
                       ? `Starts around ${membershipStartingPrice || "the current plan price"} a month and can save up to ${subscriptionStats.maxDiscount}%.`
-                      : "Membership is worth a look if you top up often."}
+                      : "Worth a look if you top up often."}
                   </p>
                 </div>
               </div>
@@ -759,7 +759,7 @@ export default function StorePage({
                   Promo codes
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Save promo or creator codes.
+                    Promo codes.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -793,7 +793,7 @@ export default function StorePage({
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {purchaseActionsEnabled
                     ? "Choose a point pack, then unlock chapters as you go."
-                    : "Compare point packs."}
+                    : "Point packs."}
                 </h2>
               </div>
               <p className="text-xs text-slate-500">

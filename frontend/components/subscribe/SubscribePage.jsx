@@ -45,15 +45,15 @@ function scrollToSection(id) {
 const PLAN_FIT_GUIDE = {
   basic: {
     title: "Light readers",
-    description: "Good for readers who unlock a few chapters each week and want a lighter monthly spend.",
+    description: "A lighter monthly plan.",
   },
   pro: {
     title: "Weekly regulars",
-    description: "Best for readers following multiple series who want stronger savings and more free reads.",
+    description: "Stronger savings for regular reading.",
   },
   vip: {
     title: "Daily binge readers",
-    description: "Built for readers who use Gush constantly and want the fullest set of monthly benefits.",
+    description: "The fullest monthly setup.",
   },
 };
 
@@ -303,11 +303,11 @@ export default function SubscribePage({
           appearance="light"
           accent="blue"
           eyebrow="Membership"
-          title={subscriptionActionsEnabled ? "Choose a membership plan." : "Membership opens later."}
+          title={subscriptionActionsEnabled ? "Membership plans." : "Membership opens soon."}
           description={
             subscriptionActionsEnabled
-              ? "Monthly plans for readers who come back often."
-              : "Pricing and plan perks are visible now. No monthly charge today."
+              ? "Monthly plans for regular reading."
+              : "Plans are visible. Billing is not live yet."
           }
           secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
           stats={subscriptionHeroStats}
@@ -343,7 +343,7 @@ export default function SubscribePage({
                   What to know
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Before membership.
+                  What to know.
                 </h2>
             </div>
           </div>
@@ -352,19 +352,19 @@ export default function SubscribePage({
             {[
               {
                 title: "Today",
-                body: "No monthly charge today.",
+                body: "No monthly charge yet.",
               },
               {
                 title: "Billing",
-                body: "Billing starts when membership opens.",
+                body: "Billing starts when membership goes live.",
               },
               {
-                title: "Purchases & help",
-                body: "Receipts and renewals appear in Purchases.",
+                title: "Receipts",
+                body: "Receipts and renewals show up in Purchases.",
               },
               {
                 title: "Help",
-                body: "Billing help stays available.",
+                body: "Billing help stays open.",
               },
             ].map((item) => (
               <div
@@ -440,7 +440,7 @@ export default function SubscribePage({
                 Plans
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Three tiers. Three reading habits.
+                Choose a plan.
               </h2>
             </div>
             <p className="text-xs text-slate-500">

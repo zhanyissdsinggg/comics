@@ -23,8 +23,8 @@ import { getSearchParam } from "../../lib/pageSearchParams";
 const VIEWS = [
   {
     id: "featured",
-    label: "Popular",
-    description: "A curated mix from across the catalog.",
+    label: "Featured",
+    description: "Editorial picks across the catalog.",
   },
   {
     id: "start-here",
@@ -311,7 +311,7 @@ export default function RankingsPage({
       <div className="gush-page-main gush-section-stack">
         <EditorialHero
           eyebrow="Featured Series"
-          title="What readers are opening now."
+          title="Featured stories."
           description={activeView.description}
           appearance="light"
         />
@@ -351,7 +351,7 @@ export default function RankingsPage({
                   Nothing is featured here yet.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Browse the catalog directly or switch to another editorial view.
+                  Browse the catalog or switch views.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -381,7 +381,7 @@ export default function RankingsPage({
                   Meet the Creators
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Browse the writers, artists, and studios behind the stories.
+                  Browse the people and teams behind the stories.
                 </p>
               </div>
               <button

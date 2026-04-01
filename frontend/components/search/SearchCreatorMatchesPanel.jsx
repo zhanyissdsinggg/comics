@@ -193,10 +193,10 @@ export default function SearchCreatorMatchesPanel({
   const leadCreatorMatch = matchedCreators[0] || null;
   const creatorPanelTitle =
     resultsLength === 0
-      ? "A creator page fits here."
+      ? "Creator match."
       : resultsLength > 0 && resultsLength < 4
-        ? "A creator page may fit better."
-        : "A creator shelf is close.";
+        ? "Try the creator page."
+        : "Creator shelf.";
 
   return (
     <SurfacePanel className="space-y-4" appearance="light" accent="blue">
@@ -241,13 +241,11 @@ export default function SearchCreatorMatchesPanel({
 
               {creator.spotlightSeries?.title ? (
                 <p className="text-sm leading-6 text-slate-600">
-                  <span className="font-medium text-slate-950">
-                    {highlight(creator.spotlightSeries.title, query)}
-                  </span>
-                  {" "}is a strong place to start.
+                  Start with{" "}
+                  <span className="font-medium text-slate-950">{highlight(creator.spotlightSeries.title, query)}</span>.
                 </p>
               ) : (
-                <p className="text-sm leading-6 text-slate-600">Open the creator shelf to keep related work together.</p>
+                <p className="text-sm leading-6 text-slate-600">Open the full creator shelf.</p>
               )}
 
               <div className="flex flex-wrap gap-3 text-xs text-slate-500">

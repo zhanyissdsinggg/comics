@@ -13,6 +13,15 @@ import { emitAuthRequired } from "../lib/authBus";
 
 const FollowContext = createContext(null);
 
+function openAuthPrompt() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("auth:open"));
+    return;
+  }
+
+  emitAuthRequired({ source: "follow" });
+}
+
 // 閼颁胶甯囧▔銊╁櫞閿涙岸绮拋銈嗘暪閽樺繐銇?
 const DEFAULT_COLLECTIONS = [
   { id: "default", name: "Default", seriesIds: [] },
@@ -64,7 +73,7 @@ export function FollowProvider({ children }) {
       return response;
     }
     if (response.status === 401) {
-      emitAuthRequired({ source: "event" });
+      openAuthPrompt();
     }
     return response;
   }, []);

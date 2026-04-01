@@ -50,13 +50,17 @@ const StorefrontPathwaysGrid = dynamic(() => import("../common/StorefrontPathway
 const SORT_OPTIONS = [
   { id: "relevance", label: "Relevance" },
   { id: "popular", label: "Popular" },
-  { id: "rating", label: "Rating" },
   { id: "latest", label: "Latest" },
   { id: "alphabetical", label: "A-Z" },
 ];
 
 const PAGE_SIZE = 12;
 const MAX_HISTORY_ITEMS = 8;
+const VALID_SORT_IDS = new Set(SORT_OPTIONS.map((option) => option.id));
+
+function normalizeSortParam(value) {
+  return VALID_SORT_IDS.has(value) ? value : "relevance";
+}
 
 function highlight(text, query) {
   if (!query) {
@@ -218,7 +222,7 @@ export default function SearchPage() {
   const type = searchParams.get("type") || "";
   const status = searchParams.get("status") || "";
   const genre = searchParams.get("genre") || "";
-  const sort = searchParams.get("sort") || "relevance";
+  const sort = normalizeSortParam(searchParams.get("sort") || "relevance");
   const page = Math.max(1, Number(searchParams.get("page") || 1));
   const adultFlag = isAdultMode ? "1" : "0";
   const searchPath = useMemo(() => {
@@ -658,7 +662,7 @@ export default function SearchPage() {
   const heroSecondary = "";
   const loadingResultLabel = "Updating";
   const recoPanelTitle = !query
-    ? "Popular now"
+    ? "More to browse."
     : results.length === 0
       ? "No exact match. Try one of these."
       : "A few more ways in.";

@@ -335,7 +335,7 @@ export default function LoginGateModal({
       ) : null}
 
       <p className="mt-4 text-[11px] text-slate-400">
-        If sign in fails due to email not verified, please verify from the email link.
+        If your email is not verified yet, use the link in your inbox first.
       </p>
 
         <div className="mt-6 flex justify-end gap-3">

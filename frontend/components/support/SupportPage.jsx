@@ -302,7 +302,7 @@ export default function SupportPage() {
         <EditorialHero
           eyebrow="Support"
           title="Get help."
-          description="Choose the issue, add a reply email, and tell us what happened."
+          description="Pick the issue and tell us what happened."
           appearance="light"
         />
 
@@ -319,7 +319,7 @@ export default function SupportPage() {
               Quick start
             </p>
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Pick a topic.
+              Choose the issue.
             </h2>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -420,10 +420,10 @@ export default function SupportPage() {
                     Send a request
                   </p>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Send a request without leaving the site.
+                    Send a request.
                   </h2>
                   <p className="text-sm leading-6 text-slate-500">
-                    We usually reply within 1 to 2 business days.
+                    We usually reply in 1 to 2 business days.
                   </p>
                 </div>
 
@@ -565,12 +565,12 @@ export default function SupportPage() {
                   Before you send
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Keep it specific.
+                  Include the useful details.
                 </h2>
               </div>
               <ul className="space-y-3 text-sm leading-6 text-slate-600">
                 <li>Add the order ID for charges, receipts, points, or renewals.</li>
-                <li>Include the title name, episode number, or page URL if something looks broken.</li>
+                <li>Include the title, episode number, or page URL if something looks broken.</li>
               </ul>
             </SurfacePanel>
 
@@ -580,7 +580,7 @@ export default function SupportPage() {
                   Fast links
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Try these first if the answer is already there.
+                  Check these first.
                 </h2>
               </div>
               <div className="flex flex-wrap gap-3">

@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useId, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpRight, Loader2, Search, Trash2, X } from "lucide-react";
 import { useSearchShortcutLabel } from "../../hooks/useSearchShortcutLabel";
 import {
@@ -77,6 +77,8 @@ const SearchBar = memo(function SearchBar({
   initialValue = "",
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const listboxId = useId();
   const [value, setValue] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
@@ -146,9 +148,17 @@ const SearchBar = memo(function SearchBar({
   const handleClear = useCallback(() => {
     setValue("");
     onSearch?.("");
-    closeSuggestions();
+    setShowSuggestions(true);
+    if (pathname === "/search") {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("q");
+      params.delete("query");
+      params.delete("page");
+      const nextPath = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+      router.replace(nextPath);
+    }
     inputRef.current?.focus();
-  }, [closeSuggestions, onSearch]);
+  }, [onSearch, pathname, router, searchParams]);
 
   const handleHistoryClick = useCallback(
     (query) => {
