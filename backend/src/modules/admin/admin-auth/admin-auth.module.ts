@@ -38,6 +38,12 @@ function resolveJwtSecret(): string {
     AdminAuthGuard,
     AdminAuditInterceptor,
   ],
-  exports: [AdminAuthGuard, JwtModule, AdminLogService, AdminAuditInterceptor],
+  exports: [
+    AdminAuthGuard,
+    JwtModule,
+    AdminLogService,
+    AdminAuditInterceptor,
+    AdminMembersService,
+  ],
 })
 export class AdminAuthModule {}
