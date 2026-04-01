@@ -48,6 +48,7 @@ function formatUpdateLabel(value) {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: "UTC",
   })}`;
 }
 
