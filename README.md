@@ -1,0 +1,150 @@
+# Gush Monorepo
+
+Production monorepo for the Gush comics-and-novels platform.
+
+This repository is organized around two live apps:
+
+- `frontend/`: public reading site built with Next.js
+- `backend/`: NestJS + Prisma API, admin runtime, and operational tooling
+
+The repo has already been cleaned up to remove stale landing-page experiments, orphaned scripts, and generated artifacts. Keep it that way: do not commit build output, temporary import files, test result folders, or one-off local reports.
+
+## Repository layout
+
+```text
+.
+|-- frontend/              Public storefront and reading experience
+|-- backend/               API, admin runtime, Prisma schema, seed/import scripts
+|-- docs/                  Operational runbooks and reference notes
+|-- ops/                   Alerting and operations assets
+|-- scripts/               Cross-repo automation, audits, and deployment checks
+|-- security/              Security policies and supporting material
+|-- vercel.json            Frontend deployment configuration
+```
+
+## Common commands
+
+Run these from the repository root unless noted otherwise.
+
+### Daily development
+
+```bash
+npm run dev
+```
+
+Starts the frontend dev server from `frontend/`.
+
+```bash
+npm run init-db
+```
+
+Runs the backend seed flow.
+
+### Validation
+
+```bash
+npm run lint
+```
+
+Runs frontend and backend lint checks.
+
+```bash
+npm run build
+```
+
+Builds the frontend first, then the backend.
+
+```bash
+npm run check:all
+```
+
+Runs the full repository verification pass:
+
+- frontend lint/build/perf/smoke checks
+- backend lint/typecheck/build/tests
+- shared security and hygiene checks
+
+## Frontend workspace
+
+Main path: [`frontend/`](./frontend)
+
+Useful commands:
+
+```bash
+cd frontend
+npm run dev
+npm run lint
+npm run build
+npm run smoke:routes
+```
+
+The storefront is the public product surface. Keep UI experiments inside the existing component system instead of creating parallel one-off components.
+
+## Backend workspace
+
+Main path: [`backend/`](./backend)
+
+Useful commands:
+
+```bash
+cd backend
+npm run start:dev
+npm run lint
+npm run typecheck
+npm run build
+npm run prisma:generate
+npm run prisma:migrate:deploy
+```
+
+Migration policy:
+
+- `prisma db push` is local-only via `npm run prisma:push:local`
+- audited deploys must use `npm run prisma:migrate:deploy`
+
+Backend runtime details, creator import flow, and cache invalidation notes live in [`backend/README.md`](./backend/README.md).
+
+## Deployment configuration
+
+These files are live infrastructure inputs and should not be deleted as "unused":
+
+- [`vercel.json`](./vercel.json): frontend deployment behavior
+- [`backend/railway.json`](./backend/railway.json): backend Railway configuration
+- [`frontend/railway.json`](./frontend/railway.json): frontend Railway configuration
+- [`backend/nixpacks.toml`](./backend/nixpacks.toml): backend build/runtime settings
+
+## Docs index
+
+Operational docs live in [`docs/operations/`](./docs/operations):
+
+- `admin-route-inventory.md`: admin route reference
+- `deploy-gate-automation.md`: deployment gate automation notes
+- `staging-environment-blueprint.md`: staging environment layout
+- `staging-admin-write-regression-checklist.md`: admin regression checklist
+- `rollback-playbook.md`: rollback steps
+- `oncall-playbook.md`: incident handling notes
+- `slo-and-alerts.md`: service targets and alert expectations
+- `chaos-and-security-drill.md`: resilience/security drill guidance
+
+Additional reference docs:
+
+- [`docs/README.md`](./docs/README.md): repository documentation index
+- [`backend/contracts/README.md`](./backend/contracts/README.md): API contract snapshot workflow
+- [`docs/demo-cover-sources.md`](./docs/demo-cover-sources.md): demo cover asset provenance
+- [`ops/README.md`](./ops/README.md): operations asset index
+- [`security/README.md`](./security/README.md): security allowlist index
+
+## Repository hygiene rules
+
+- Do not commit `.next/`, local report folders, or temporary smoke-test output
+- Do not commit real creator import data; use the tracked templates under `backend/data/`
+- Prefer updating the shared scripts under `scripts/` instead of creating ad hoc local helpers
+- If a file is not imported by code, check deployment, contracts, docs, and seed workflows before deleting it
+
+## Suggested maintenance workflow
+
+When cleaning the repo in future passes:
+
+1. Verify whether a file is referenced by code, scripts, deployment config, or docs.
+2. Remove only true orphaned files, not infrastructure inputs.
+3. Re-run `npm run lint` and `npm run build`.
+4. Keep the root README current when commands, folder roles, or deployment flows change.
