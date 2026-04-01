@@ -190,4 +190,26 @@ test.describe("Reader layout", () => {
     });
     await expectNoRuntimeIssues("/read/series-001/series-001e1#chapter-navigation", runtimeIssues);
   });
+
+  test("contents drawer should show the current chapter as reading instead of locked", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockReaderRoutes(page);
+
+    const response = await page.goto("/read/series-001/series-001e1", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await page.getByText("Episode 1").first().waitFor({ state: "visible" });
+    await page.getByRole("button", { name: "Chapters" }).click();
+
+    const currentChapterButton = page.getByRole("button", {
+      name: /Ep 1 Episode 1 Now reading/i,
+    });
+
+    await expect(currentChapterButton).toBeVisible();
+    await expect(currentChapterButton).toContainText("Reading");
+    await expect(currentChapterButton).not.toContainText("Locked");
+    await expectNoRuntimeIssues("/read/series-001/series-001e1#contents", runtimeIssues);
+  });
 });

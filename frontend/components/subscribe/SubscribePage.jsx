@@ -7,7 +7,7 @@ import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import { SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
-import { getPlanCatalog, setPlanCatalog } from "../../lib/subscriptions";
+import { getPlanCatalog, resolvePlanCatalog, setPlanCatalog } from "../../lib/subscriptions";
 import { apiGet } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -77,7 +77,7 @@ export default function SubscribePage({
   const { isSignedIn } = useAuthStore();
   const [workingId, setWorkingId] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [planCatalog, setPlanCatalogState] = useState(initialPlanCatalog || getPlanCatalog());
+  const [planCatalog, setPlanCatalogState] = useState(() => resolvePlanCatalog(initialPlanCatalog || getPlanCatalog()));
   const [billingAvailability, setBillingAvailability] = useState(initialBillingAvailability);
   const isActive = Boolean(subscription?.active);
   const returnTo = getSearchParam(initialSearchParams, "returnTo", "/account");
@@ -127,7 +127,7 @@ export default function SubscribePage({
           }
         });
         setPlanCatalog(catalog);
-        setPlanCatalogState(catalog);
+        setPlanCatalogState(resolvePlanCatalog(catalog));
         setBillingAvailability(response.data?.billing || null);
       }
     });

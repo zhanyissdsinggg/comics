@@ -143,7 +143,7 @@ function CoverThumb({ title, coverUrl, coverTone }) {
 
 function LibraryRow({ item, mode, onOpenSeries, onResume }) {
   const actionLabel = mode === "continue" ? "Resume" : item.resumeEpisodeId ? "Resume" : "View Series";
-  const metaLine = [item.summary, item.updatedLabel].filter(Boolean).join(" • ");
+  const metaLine = [item.summary, item.updatedLabel].filter(Boolean).join(" | ");
 
   return (
     <article className="rounded-[26px] border border-black/8 bg-white/88 p-4 shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition-colors hover:border-black/12 hover:bg-white">
@@ -617,3 +617,4 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
     </SurfacePanel>
   );
 }
+

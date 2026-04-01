@@ -53,9 +53,18 @@ function normalizePlanCatalog(plans) {
   }, {});
 }
 
+function hasPlanEntries(plans) {
+  return Boolean(plans && typeof plans === "object" && Object.keys(plans).length > 0);
+}
+
+export function resolvePlanCatalog(plans) {
+  const normalizedPlans = normalizePlanCatalog(plans);
+  return hasPlanEntries(normalizedPlans) ? normalizedPlans : SUBSCRIPTION_PLANS;
+}
+
 export function setPlanCatalog(plans) {
   const normalizedPlans = normalizePlanCatalog(plans);
-  if (!normalizedPlans) {
+  if (!hasPlanEntries(normalizedPlans)) {
     return;
   }
   dynamicCatalog = normalizedPlans;
@@ -78,7 +87,7 @@ export function getPlanCatalog() {
       if (raw) {
         const parsed = JSON.parse(raw);
         const normalizedPlans = normalizePlanCatalog(parsed);
-        if (normalizedPlans) {
+        if (hasPlanEntries(normalizedPlans)) {
           dynamicCatalog = normalizedPlans;
           return dynamicCatalog;
         }

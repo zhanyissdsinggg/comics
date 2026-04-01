@@ -352,7 +352,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           eyebrow: "Account",
           title: "Sign in and keep everything on one account.",
           description:
-            "Library progress, purchases, mature-content settings, and recovery details make more sense once they stop living on one device only.",
+            "Keep purchases, progress, 18+ settings, and recovery off this device-only setup.",
           cta: "Sign in",
           onClick: openAuthPrompt,
           accentClass:
@@ -363,7 +363,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           eyebrow: "Recovery",
           title: "Lost access? Reset your password.",
           description:
-            "Use reset if you signed up with email and password. If billing or sign-in still looks wrong, support is the faster backup path.",
+            "Use reset for email/password accounts. If sign-in still looks wrong, support is faster.",
           cta: "Reset password",
           onClick: () => router.push("/auth/reset"),
           accentClass:
@@ -374,7 +374,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           eyebrow: "Membership",
           title: "View monthly plans before you start.",
           description:
-            "Membership is the recurring option for regular readers. View the tiers first, then sign in when you are ready to start one.",
+            "Membership is the recurring option. Review the plans first, then start when ready.",
           cta: "View Plans",
           onClick: () =>
             router.push(
@@ -390,9 +390,9 @@ export default function AccountPage({ initialSignedIn = false }) {
         {
           id: "store",
           eyebrow: "Point packs",
-          title: "See one-time packs and current pricing.",
+          title: "See one-time packs and pricing.",
           description:
-            "Store is for point packs, not membership. Use it when you want flexible one-off unlocking instead of a monthly plan.",
+            "Use point packs when you want one-off unlocks instead of a monthly plan.",
           cta: "View point packs",
           onClick: () => router.push("/store"),
           accentClass:
@@ -496,16 +496,16 @@ export default function AccountPage({ initialSignedIn = false }) {
           appearance="light"
           accent="blue"
           eyebrow="Account"
-          title={viewerSignedIn ? "Your account, purchases, and reading setup." : "Sign in for receipts and recovery. Keep local reading setup here now."}
+          title={viewerSignedIn ? "Your account, purchases, and reading setup." : "Sign in for receipts. Keep device settings here."}
           description={
             viewerSignedIn
               ? "Use account for membership, purchases, mature-content controls, and account basics without digging through menus."
-              : "Signed-out readers can still save device settings here. Sign in when you want purchases, progress, and recovery tied to one account."
+              : "Device settings still save here. Sign in when you want purchases, progress, and recovery on one account."
           }
           secondary={
             viewerSignedIn
               ? "Use the task cards first, then save the settings that matter and get back to reading."
-              : "Local settings save to this browser. Purchases, library, and billing history start making sense after sign-in."
+              : "Local settings save in this browser. Purchases and billing history live on your account."
           }
           stats={accountHeroStats}
           actions={
@@ -558,10 +558,10 @@ export default function AccountPage({ initialSignedIn = false }) {
             <div>
               <p className={sectionEyebrowClass}>Signed out</p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Sign in to keep purchases, library, and mature-content settings on one account.
+                Sign in to keep purchases and reading on one account.
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                You can still adjust local settings here, but sign-in is what keeps purchases, progress, and account recovery attached to you.
+                Local settings still work here. Sign in when you want purchases, progress, and recovery tied to you.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -949,22 +949,21 @@ export default function AccountPage({ initialSignedIn = false }) {
                     <p className={sectionEyebrowClass}>Signed-out account</p>
                     <h2 className={sectionTitleClass}>Use local settings now. Add sign-in when you want sync.</h2>
                     <p className={mutedCopyClass}>
-                      This page should not dump a wall of half-dead controls on signed-out readers. Local reading
-                      setup still works now, and sign-in adds purchases, recovery, membership history, and synced
-                      progress later.
+                      Local reading setup still works here. Sign in later for purchases, recovery, membership history,
+                      and synced progress.
                     </p>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
-                      <p className="text-sm font-semibold text-slate-950">Works on this device right now</p>
+                      <p className="text-sm font-semibold text-slate-950">Works here now</p>
                       <p className="mt-2 text-sm leading-6 text-slate-600">
-                        Region, language, 18+ history, display name, and alerts save here as soon as you hit save.
+                        Region, language, 18+ history, display name, and alerts save as soon as you hit save.
                       </p>
                     </div>
                     <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
-                      <p className="text-sm font-semibold text-slate-950">Starts making sense after sign-in</p>
+                      <p className="text-sm font-semibold text-slate-950">Better after sign-in</p>
                       <p className="mt-2 text-sm leading-6 text-slate-600">
-                        Purchases, library progress, membership renewals, password recovery, and billing help all stay attached to one account.
+                        Purchases, progress, renewals, recovery, and billing help all stay attached to one account.
                       </p>
                     </div>
                   </div>
@@ -989,7 +988,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <div>
                     <p className={sectionEyebrowClass}>Save changes</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Save these choices to this device now. Sign in later if you want them tied to your account too.
+                      Save these choices to this device now. Sign in later if you want them synced too.
                     </p>
                   </div>
                   <button

@@ -24,7 +24,7 @@ import {
   mergePaymentAttribution,
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
-import { SUBSCRIPTION_PLANS } from "../../lib/subscriptions";
+import { resolvePlanCatalog } from "../../lib/subscriptions";
 import { persistCommerceSuccess } from "../../lib/commerceSuccess";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
@@ -109,6 +109,7 @@ export default function StorePage({
   const [billingAvailability, setBillingAvailability] = useState(initialBillingAvailability);
   const [isNewPayer, setIsNewPayer] = useState(true);
   const routeSearchParams = useMemo(() => toURLSearchParams(initialSearchParams), [initialSearchParams]);
+  const planCatalog = useMemo(() => resolvePlanCatalog(initialPlanCatalog), [initialPlanCatalog]);
 
   const returnTo = getSearchParam(initialSearchParams, "returnTo", "/");
   const focus = getSearchParam(initialSearchParams, "focus");
@@ -121,7 +122,7 @@ export default function StorePage({
   const sourceEntry = routeAttribution?.entryPoint || "STORE_ENTRY";
   const sourceSeriesId = routeAttribution?.sourceSeriesId || "";
   const sourceEpisodeId = routeAttribution?.sourceEpisodeId || "";
-  const sourcePath = routeAttribution?.sourcePath || returnTo || "/store";
+  const sourcePath = routeAttribution?.sourcePath || "/store";
   const isSubscriber = Boolean(subscription?.active);
   const returnLabel = getReturnLabel(returnTo, sourceEntry);
   const launchAccessLabel = isSignedIn ? "Open account" : "Sign in";
@@ -196,7 +197,7 @@ export default function StorePage({
   }, []);
 
   const subscriptionStats = useMemo(() => {
-    const plans = Object.values(initialPlanCatalog || SUBSCRIPTION_PLANS || {});
+    const plans = Object.values(planCatalog);
     if (!plans.length) {
       return null;
     }
@@ -209,12 +210,10 @@ export default function StorePage({
         1,
       ),
     };
-  }, []);
+  }, [planCatalog]);
 
   const membershipStartingPrice = useMemo(() => {
-    const plans = Object.values(initialPlanCatalog || SUBSCRIPTION_PLANS || {}).filter(
-      (plan) => plan && typeof plan === "object",
-    );
+    const plans = Object.values(planCatalog).filter((plan) => plan && typeof plan === "object");
     if (plans.length > 0) {
       const cheapestPlan = [...plans].sort(
         (left, right) => Number(left?.price || Infinity) - Number(right?.price || Infinity),
@@ -224,7 +223,7 @@ export default function StorePage({
       }
     }
     return SUBSCRIPTION_OFFERS[0]?.price?.replace("/mo", "") || "";
-  }, []);
+  }, [planCatalog]);
 
   const focusId = useMemo(() => {
     if (focus && focus !== "auto") {

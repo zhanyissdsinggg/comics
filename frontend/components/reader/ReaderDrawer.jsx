@@ -92,13 +92,14 @@ export default function ReaderDrawer({
           {tab === "toc" ? (
             <div className="space-y-2 pb-6">
             {episodes.map((episode) => {
+              const isCurrentEpisode = episode.id === currentEpisodeId;
               const unlocked = unlockedIds.includes(episode.id);
               return (
                 <button
                   key={episode.id}
                   type="button"
                   onClick={() => {
-                    if (unlocked || episode.id === currentEpisodeId) {
+                    if (unlocked || isCurrentEpisode) {
                       onSelectEpisode(episode.id);
                     }
                   }}
@@ -110,10 +111,10 @@ export default function ReaderDrawer({
                         Ep {episode.number} {episode.title}
                       </div>
                       <div className="text-xs text-neutral-400">
-                        {episode.id === currentEpisodeId ? "Now reading" : "Tap to open"}
+                        {isCurrentEpisode ? "Now reading" : "Tap to open"}
                       </div>
                     </div>
-                    {unlocked ? <Pill>Unlocked</Pill> : <Pill>Locked</Pill>}
+                    {isCurrentEpisode ? <Pill>Reading</Pill> : unlocked ? <Pill>Unlocked</Pill> : <Pill>Locked</Pill>}
                   </div>
                 </button>
               );
