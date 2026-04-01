@@ -513,16 +513,16 @@ export default function AccountPage({ initialSignedIn = false }) {
           appearance="light"
           accent="blue"
           eyebrow="Account"
-          title={viewerSignedIn ? "Your account, purchases, and reading setup." : "Sign in for receipts. Keep device settings here."}
+          title={viewerSignedIn ? "Account and reading settings." : "Sign in for receipts. Save device settings here."}
           description={
             viewerSignedIn
-              ? "Use account for membership, purchases, mature-content controls, and account basics without digging through menus."
-              : "Device settings still save here. Sign in when you want purchases, progress, and recovery on one account."
+              ? "Save what matters, then get back to reading."
+              : "Local settings save here. Sign in when you want purchases and progress on one account."
           }
           secondary={
             viewerSignedIn
-              ? "Use the task cards first, then save the settings that matter and get back to reading."
-              : "Local settings save in this browser. Purchases and billing history live on your account."
+              ? ""
+              : "Local settings stay on this browser. Purchases live on your account."
           }
           stats={accountHeroStats}
           actions={
@@ -575,10 +575,10 @@ export default function AccountPage({ initialSignedIn = false }) {
             <div>
               <p className={sectionEyebrowClass}>Signed out</p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Sign in to keep purchases and reading on one account.
+                Sign in to keep everything on one account.
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Local settings still work here. Sign in when you want purchases, progress, and recovery tied to you.
+                Local settings still work here. Sign in when you want purchases and progress tied to you.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -624,11 +624,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="space-y-2">
             <p className={sectionEyebrowClass}>What do you need to do?</p>
-            <h2 className={sectionTitleClass}>Start with the task, not the settings.</h2>
-            <p className={mutedCopyClass}>
-              Account should make the next step obvious whether you are here for billing, membership, reading progress,
-              or recovery.
-            </p>
+            <h2 className={sectionTitleClass}>Start with the task.</h2>
           </div>
           <StorefrontPathwaysGrid cards={accountActionCards} columnsClassName="md:grid-cols-2 xl:grid-cols-4" appearance="light" />
         </SurfacePanel>
@@ -639,53 +635,11 @@ export default function AccountPage({ initialSignedIn = false }) {
 
         <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
-            {viewerSignedIn ? (
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-                <div className="space-y-2">
-                  <p className={sectionEyebrowClass}>Sync and device settings</p>
-                  <h2 className={sectionTitleClass}>What stays on this device, and what follows your account.</h2>
-                  <p className={mutedCopyClass}>
-                    The page should make this obvious instead of leaving you to guess.
-                  </p>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
-                    <p className="text-sm font-semibold text-slate-950">Saved here right away</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Region, language, 18+ history visibility, display name, and alert choices apply to this browser as soon as you save.
-                    </p>
-                  </div>
-                  <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
-                    <p className="text-sm font-semibold text-slate-950">Also saved to your account after sign-in</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Once you are signed in, we also save these preferences to your account, along with purchases, library, progress, and recovery details.
-                    </p>
-                  </div>
-                </div>
-              </SurfacePanel>
-            ) : (
+            {viewerSignedIn ? null : (
               <SurfacePanel className="space-y-5" appearance="light" accent="blue">
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Local reading setup</p>
-                  <h2 className={sectionTitleClass}>Save device settings now, then add sync later.</h2>
-                  <p className={mutedCopyClass}>
-                    Signed-out readers should still get useful controls here. These choices save to this browser now and become account-level once you sign in.
-                  </p>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
-                    <p className="text-sm font-semibold text-slate-950">Saved here right away</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Region, language, 18+ history visibility, display name, and alerts apply to this browser as soon as you save.
-                    </p>
-                  </div>
-                  <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
-                    <p className="text-sm font-semibold text-slate-950">Starts syncing after sign-in</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Purchases, library progress, membership history, recovery, and these preferences make more sense once they live on one account.
-                    </p>
-                  </div>
+                  <h2 className={sectionTitleClass}>Save device settings now.</h2>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -856,9 +810,6 @@ export default function AccountPage({ initialSignedIn = false }) {
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Reading setup</p>
                   <h2 className={sectionTitleClass}>Region, language, and 18+ history</h2>
-                  <p className={mutedCopyClass}>
-                    Keep these defaults consistent so mature-content access and language feel predictable. They save to this browser immediately and sync to your account after sign-in.
-                  </p>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -921,11 +872,6 @@ export default function AccountPage({ initialSignedIn = false }) {
                 <h2 className={sectionTitleClass}>
                   {viewerSignedIn ? "Only keep the alerts that matter" : "Keep only the alerts you want on this device"}
                 </h2>
-                <p className={mutedCopyClass}>
-                  {viewerSignedIn
-                    ? "New chapters, free unlocks, and promos should help you come back, not fill space. These choices save here first and sync to your account when available."
-                    : "New chapters, free unlocks, and promos should help you come back, not turn this page into a settings wall. These choices save locally until you sign in."}
-                </p>
               </div>
 
               <label className={checkboxCardClass}>
@@ -961,51 +907,11 @@ export default function AccountPage({ initialSignedIn = false }) {
           <div className="space-y-6">
             {!viewerSignedIn ? (
               <>
-                <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-                  <div className="space-y-2">
-                    <p className={sectionEyebrowClass}>Signed-out account</p>
-                    <h2 className={sectionTitleClass}>Use local settings now. Add sign-in when you want sync.</h2>
-                    <p className={mutedCopyClass}>
-                      Local reading setup still works here. Sign in later for purchases, recovery, membership history,
-                      and synced progress.
-                    </p>
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
-                      <p className="text-sm font-semibold text-slate-950">Works here now</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        Region, language, 18+ history, display name, and alerts save as soon as you hit save.
-                      </p>
-                    </div>
-                    <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
-                      <p className="text-sm font-semibold text-slate-950">Better after sign-in</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        Purchases, progress, renewals, recovery, and billing help all stay attached to one account.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button type="button" onClick={openAuthPrompt} className={primaryButtonClass}>
-                      Sign in
-                    </button>
-                    <button type="button" onClick={() => router.push("/auth/reset")} className={secondaryButtonClass}>
-                      Reset password
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => router.push(buildSupportPath({ topic: "account", context: "Signed-out account or billing help" }))}
-                      className={secondaryButtonClass}
-                    >
-                      Get help
-                    </button>
-                  </div>
-                </SurfacePanel>
-
                 <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" appearance="light" accent="blue">
                   <div>
                     <p className={sectionEyebrowClass}>Save changes</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Save these choices to this device now. Sign in later if you want them synced too.
+                      Save these choices to this device.
                     </p>
                   </div>
                   <button
@@ -1242,7 +1148,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <div>
                     <p className={sectionEyebrowClass}>Save changes</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Save these choices to this device now and to your signed-in account.
+                      Save these choices to this device and your account.
                     </p>
                   </div>
                   <button

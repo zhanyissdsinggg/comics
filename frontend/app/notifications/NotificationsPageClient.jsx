@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import EditorialHero from "../../components/common/EditorialHero";
-import StorefrontEventHub from "../../components/common/StorefrontEventHub";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import NotificationList from "../../components/notifications/NotificationList";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
@@ -177,91 +176,6 @@ export default function NotificationsPage() {
       },
     ];
   }, [isAdultMode, loading, notifications, unreadCount]);
-
-  const notificationEventCards = useMemo(() => {
-    const unreadEpisode = notifications.find(
-      (item) => !item.read && (item.type === "NEW_EPISODE" || item.type === "TTF_READY"),
-    );
-    const unreadOffer = notifications.find(
-      (item) => !item.read && (item.type === "PROMO" || item.type === "SUB_VOUCHER"),
-    );
-    const unreadCount = notifications.filter((item) => !item.read).length;
-    const episodeCount = notifications.filter(
-      (item) => item.type === "NEW_EPISODE" || item.type === "TTF_READY",
-    ).length;
-    const offerCount = notifications.filter(
-      (item) => item.type === "PROMO" || item.type === "SUB_VOUCHER",
-    ).length;
-
-    return [
-      unreadEpisode
-        ? {
-            id: "episode-return",
-            eyebrow: "Read next",
-            title: `${unreadEpisode.title} is ready when you want to jump back in.`,
-            description:
-              "The best inbox makes the next chapter obvious instead of burying it in a stack of messages.",
-            signalLabel: "Unread",
-            signalValue: unreadCount.toLocaleString(),
-            signalHint: "Messages still waiting",
-            ctaLabel: unreadEpisode.ctaLabel || "Open episode",
-            onClick: () => handleNavigate(unreadEpisode),
-            accentClass:
-              "group border-emerald-100 bg-emerald-50/80 text-slate-900 hover:border-emerald-200 hover:bg-emerald-50",
-          }
-        : {
-            id: "library-return",
-            eyebrow: "Back to reading",
-            title: "Nothing urgent? Go back to your library.",
-            description:
-              "When the inbox is quiet, your saved and unfinished titles should be the next obvious stop.",
-            signalLabel: "Episode alerts",
-            signalValue: episodeCount.toLocaleString(),
-            signalHint: "Episode updates loaded",
-            ctaLabel: "Open library",
-            onClick: () => router.push("/library"),
-            accentClass:
-              "group border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-          },
-      {
-        id: "offer-return",
-        eyebrow: "Offers",
-        title: unreadOffer
-          ? `${unreadOffer.title} is the easiest offer to open next.`
-          : "If offers are all that's left, keep the next top-up easy to reach.",
-        description: unreadOffer
-          ? "Offers only work when they send readers to the right plan or point pack without extra hunting."
-          : "Even an offer-heavy inbox needs one clear next step so it does not feel like random mail.",
-        signalLabel: "Offers",
-        signalValue: offerCount.toLocaleString(),
-        signalHint: "Offer messages loaded",
-        ctaLabel: unreadOffer?.ctaLabel || "See point packs",
-        onClick: () => {
-          if (unreadOffer) {
-            handleNavigate(unreadOffer);
-            return;
-          }
-          router.push(buildPathWithAttribution("/store", { entryPoint: "NOTIFICATION_EVENT_HUB", sourcePath: "/notifications", returnTo: "/notifications" }, { focus: "auto" }));
-        },
-        accentClass:
-          "group border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: "chart-backup",
-        eyebrow: "Keep browsing",
-        title: "If the inbox is light, go straight to Top Series.",
-        description:
-          "Notifications should help readers return, but Top Series should stay close when the inbox is quiet.",
-        signalLabel: "Discovery",
-        signalValue: "Top Series",
-        signalHint: "Fresh leaderboards stay close",
-        ctaLabel: "Open Top Series",
-        onClick: () => router.push("/rankings?type=popular&window=week"),
-        accentClass:
-          "group border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-    ];
-  }, [handleNavigate, notifications, router]);
   return (
     <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
@@ -271,9 +185,9 @@ export default function NotificationsPage() {
           appearance="light"
           accent="blue"
           eyebrow="Notifications"
-          title="Only the updates that matter."
-          description="New chapters, offers, and unlocks without the clutter."
-          secondary="Use this page to jump back into a title fast, then clear what you don't need."
+          title="Updates that matter."
+          description="New chapters, offers, and free unlocks in one place."
+          secondary=""
           stats={notificationStats}
           actions={
             <>
@@ -286,13 +200,6 @@ export default function NotificationsPage() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/rankings")}
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
-                Top Series
-              </button>
-              <button
-                type="button"
                 onClick={handleMarkAllRead}
                 disabled={loading || unreadCount === 0 || workingId === "__all__"}
                 className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50"
@@ -302,16 +209,6 @@ export default function NotificationsPage() {
             </>
           }
         />
-
-        {!loading && !error ? (
-          <StorefrontEventHub
-            eyebrow="From your inbox"
-            title="A quick way back in."
-            description="Use the inbox to jump to the next chapter, catch an offer, or move on."
-            events={notificationEventCards}
-            appearance="light"
-          />
-        ) : null}
 
         {loading ? (
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
@@ -338,7 +235,7 @@ export default function NotificationsPage() {
                 </div>
               ))}
             </div>
-            <p className="text-sm text-slate-500">Your inbox is getting ready.</p>
+            <p className="text-sm text-slate-500">Loading your inbox.</p>
           </SurfacePanel>
         ) : error ? (
           <SurfacePanel className="border border-red-200 bg-red-50 text-red-600" appearance="light" tone="danger" accent="rose">

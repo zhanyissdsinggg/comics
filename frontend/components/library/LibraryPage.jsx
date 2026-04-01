@@ -704,7 +704,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
               ]
                 .filter(Boolean)
                 .join(" • ") || "Ready to resume"
-            : "Your next chapter stays here",
+            : "Your next read stays here",
         onClick: () =>
           continueRailItems.length > 0
             ? scrollToSection("continue-reading")
@@ -717,7 +717,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         description:
           historyRail.length > 0
             ? historyRail[0]?.statusLabel || historyRail[0]?.subtitle || "Opened recently"
-            : "Recent opens stay close",
+            : "Recent reads stay close",
         onClick: () =>
           historyRail.length > 0 ? scrollToSection("recent-activity") : router.push("/search"),
       },
@@ -730,7 +730,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             ? bookmarkCountTotal > 0
               ? `${formatBookmarkCountLabel(bookmarkCountTotal)} across your shelf`
               : visibleLibraryItems[0]?.statusLabel || "Saved to your shelf"
-            : "Titles you keep stay here",
+            : "Saved titles stay here",
         onClick: () =>
           visibleLibraryItems.length > 0
             ? scrollToSection("saved-series")
@@ -769,7 +769,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         id: "sync",
         eyebrow: "Sign In",
         title: "Keep your shelf.",
-        description: "Progress, recent reads, and saves.",
+        description: "Progress and recent reads.",
         cta: "Sign In",
         onClick: () => openAuthPrompt(),
         accentClass: commonAccentClass,
@@ -786,10 +786,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const signedInHeroDescription = viewerSignedIn
     ? hasLibrarySignals
       ? resumeSpotlightReadHref
-        ? "Continue where you left off, keep recent reads close, and save what matters."
-        : "Recent opens, saved series, and your next read stay together here."
-      : "Your next chapter, recent opens, and saved series will stay here."
-    : "Sign in to keep your shelf, progress, and recent reads in one place.";
+        ? "Continue where you left off and keep recent reads close."
+        : "Recent reads and saved series stay together here."
+      : "Your next read and saved series stay here."
+    : "Sign in to keep your shelf and progress in one place.";
   const readingSnapshotCardsPanel =
     viewerSignedIn && readingSnapshotCards.length > 0 ? (
       <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -828,7 +828,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           eyebrow="Library"
           title={
             viewerSignedIn || hasCuratedLibraryEntry
-              ? "Your next read should be obvious."
+              ? "Your next read."
               : "Your reading shelf."
           }
           description={
@@ -900,7 +900,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
         {showLibraryStale ? (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-            Showing saved data while we reconnect.
+            Reconnecting. Showing saved data.
           </div>
         ) : null}
 
@@ -1003,7 +1003,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         Your shelf is ready.
                       </h2>
                       <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
-                        The next chapter, recent opens, and saved series will stay here.
+                        The next read and saved series will stay here.
                       </p>
                       <div className="mt-6 flex flex-wrap gap-2">
                         <button

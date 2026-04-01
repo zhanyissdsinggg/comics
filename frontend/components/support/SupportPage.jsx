@@ -370,10 +370,10 @@ export default function SupportPage() {
           </div>
         </SurfacePanel>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-6">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             {successState ? (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <div className="rounded-[28px] border border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
                     Request received
@@ -382,31 +382,8 @@ export default function SupportPage() {
                     We have your request.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span> within 1 to 2 business days. For billing or membership questions, keep the order ID and affected page handy.
+                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span> in 1 to 2 business days.
                   </p>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      Routed as
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-slate-900">{successState.topicLabel}</p>
-                  </div>
-                  <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      Reply path
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-slate-900">
-                      {successState.signedInReader ? "Account + email context" : "Email reply"}
-                    </p>
-                  </div>
-                  <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                      Next step
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-slate-900">Watch your inbox</p>
-                  </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
@@ -415,7 +392,7 @@ export default function SupportPage() {
                     onClick={resetForAnotherRequest}
                     className={primaryButtonClass}
                   >
-                    Send Request
+                    Send another request
                   </button>
                   <button
                     type="button"
@@ -443,7 +420,7 @@ export default function SupportPage() {
                     Send a request.
                   </h2>
                   <p className="text-sm leading-6 text-slate-500">
-                    We usually reply in 1 to 2 business days.
+                    Replies usually take 1 to 2 business days.
                   </p>
                 </div>
 
@@ -574,61 +551,11 @@ export default function SupportPage() {
                     </button>
                   ) : null}
                 </div>
+
+                <p className="text-xs text-slate-500">Support email: {siteConfig.supportEmail}</p>
               </form>
             )}
           </SurfacePanel>
-
-          <div className="space-y-4">
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Before you send
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Include the useful details.
-                </h2>
-              </div>
-              <ul className="space-y-3 text-sm leading-6 text-slate-600">
-                <li>Add the order ID for charges, receipts, points, or renewals.</li>
-                <li>Include the title, episode number, or page URL if something looks broken.</li>
-              </ul>
-            </SurfacePanel>
-
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Fast links
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Check these first.
-                </h2>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => router.push("/faq")}
-                  className={primaryButtonClass}
-                >
-                  FAQ
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/orders")}
-                  className={secondaryButtonClass}
-                >
-                  View purchases
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/how-it-works")}
-                  className={secondaryButtonClass}
-                >
-                  How it works
-                </button>
-              </div>
-              <p className="text-xs text-slate-500">Backup email: {siteConfig.supportEmail}</p>
-            </SurfacePanel>
-          </div>
         </div>
       </main>
     </div>
