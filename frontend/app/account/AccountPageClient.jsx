@@ -117,6 +117,32 @@ export default function AccountPage({ initialSignedIn = false }) {
     loadWallet();
   }, [hydrated, isSignedIn, loadWallet]);
 
+  const syncPreferencesFromAccount = useCallback((prefs = {}) => {
+    applyPreferencesToStorage(prefs);
+
+    if (typeof prefs.region === "string" && prefs.region) {
+      setRegion(prefs.region);
+    }
+    if (typeof prefs.language === "string" && prefs.language) {
+      setLanguage(prefs.language);
+    }
+    if (typeof prefs.hideAdultHistory === "boolean") {
+      setHideAdultHistory(prefs.hideAdultHistory);
+    }
+    if (typeof prefs.displayName === "string") {
+      setDisplayName(prefs.displayName);
+    }
+    if (typeof prefs.notifyNewEpisode === "boolean") {
+      setNotifyNew(prefs.notifyNewEpisode);
+    }
+    if (typeof prefs.notifyTtfReady === "boolean") {
+      setNotifyTtf(prefs.notifyTtfReady);
+    }
+    if (typeof prefs.notifyPromo === "boolean") {
+      setNotifyPromo(prefs.notifyPromo);
+    }
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
@@ -141,16 +167,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         return;
       }
       if (response.ok && response.data?.preferences) {
-        const prefs = response.data.preferences;
-        if (typeof prefs.notifyNewEpisode === "boolean") {
-          setNotifyNew(prefs.notifyNewEpisode);
-        }
-        if (typeof prefs.notifyTtfReady === "boolean") {
-          setNotifyTtf(prefs.notifyTtfReady);
-        }
-        if (typeof prefs.notifyPromo === "boolean") {
-          setNotifyPromo(prefs.notifyPromo);
-        }
+        syncPreferencesFromAccount(response.data.preferences);
       }
     });
     apiGet("/api/orders", { suppressAuthModal: true }).then((response) => {
@@ -165,7 +182,7 @@ export default function AccountPage({ initialSignedIn = false }) {
     return () => {
       mounted = false;
     };
-  }, [hydrated, isSignedIn]);
+  }, [hydrated, isSignedIn, syncPreferencesFromAccount]);
 
   const loadAuthProviders = useCallback(async () => {
     if (!hydrated) {
@@ -238,7 +255,7 @@ export default function AccountPage({ initialSignedIn = false }) {
       };
       apiPost("/api/preferences", { preferences: payload }).then((response) => {
         if (response.ok) {
-          applyPreferencesToStorage(payload);
+          syncPreferencesFromAccount(response.data?.preferences || payload);
           setMessage("Changes saved.");
         } else {
           setMessage(response.error || "Save failed.");
