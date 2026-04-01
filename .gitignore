@@ -1,29 +1,28 @@
-# 依赖
+# Dependencies
 node_modules/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# 构建输出
+# Build output
 .next/
 dist/
 build/
 out/
 
-# 环境变量
+# Environment files
 .env
 .env.local
 .env.*.local
 
-# IDE
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.DS_Store
 
-# 日志
+# Logs
 .logs/
 logs/
 *.log
@@ -31,12 +30,16 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# 测试和调试
+# Test and tooling state
 .playwright-mcp/
 .spec-workflow/
+.codex-logs/
 coverage/
+test-results/
+frontend/test-results/
+frontend/playwright-report/
 
-# 临时文件
+# Temporary files
 tmp/
 temp/
 *.tmp
@@ -47,15 +50,14 @@ check-*.png
 .outdated-*.json
 .lighthouse-*.json
 
-# OS
+# OS files
 Thumbs.db
 .DS_Store
 
-# 嵌入的git仓库（submodule应该用git submodule管理）
-tappytoon/.git/
+# Local tool workdirs
 .ace-tool/
 
-# 项目审计与测试产物
+# Project audit and import artifacts
 .audit-root.json
 .outdated-root.json
 backend/.audit-backend.json
@@ -67,8 +69,5 @@ frontend/.audit-frontend.json
 frontend/.outdated-frontend.json
 frontend/.lighthouse-*.json
 frontend/artifacts/
-test-results/
-frontend/test-results/
-frontend/playwright-report/
 ops-watchdog-report.json
 ops-watchdog-report.md
