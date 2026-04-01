@@ -96,11 +96,11 @@ function VisaIcon() {
         x="8"
         y="16"
         fill="currentColor"
-        fontFamily="Arial, sans-serif"
         fontSize="11"
         fontStyle="italic"
         fontWeight="700"
         letterSpacing=".16em"
+        className="font-sans"
       >
         VISA
       </text>
@@ -117,10 +117,10 @@ function MastercardIcon() {
         x="40"
         y="15"
         fill="currentColor"
-        fontFamily="Arial, sans-serif"
         fontSize="5.5"
         fontWeight="700"
         textAnchor="middle"
+        className="font-sans"
       >
         MC
       </text>

@@ -6,8 +6,8 @@
 
 :root {
   color-scheme: light;
-  --font-body: "Manrope", "Segoe UI", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-body: var(--font-ui-body), "SF Pro Text", "Segoe UI", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+  --font-display: var(--font-ui-display), var(--font-body);
   --gush-accent: #3657b7;
   --gush-accent-strong: #24439a;
   --gush-page-bg: #f5f0e8;
@@ -75,7 +75,8 @@ body {
   font-family: var(--font-body);
   font-size: var(--gush-text-body);
   line-height: var(--gush-leading-copy);
-  letter-spacing: -0.012em;
+  letter-spacing: -0.01em;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation;
@@ -122,9 +123,10 @@ h5,
 h6 {
   color: var(--gush-ink-strong);
   font-family: var(--font-display), var(--font-body);
-  letter-spacing: -0.04em;
-  line-height: 1.04;
-  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  font-weight: 650;
+  font-optical-sizing: auto;
   text-wrap: balance;
 }
 
@@ -277,6 +279,7 @@ textarea {
 }
 
 .gush-eyebrow {
+  font-family: var(--font-body);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.18em;
