@@ -1,0 +1,27 @@
+[
+  {
+    "id": "series-001",
+    "title": "The Last Kingdom",
+    "credits": [
+      {
+        "name": "Jane Doe",
+        "role": "WRITER",
+        "type": "PERSON",
+        "isPrimary": true,
+        "isPublic": true,
+        "source": "catalog_import",
+        "sortOrder": 0,
+        "bio": "Optional short public-facing bio."
+      },
+      {
+        "name": "North Harbor Studio",
+        "role": "STUDIO",
+        "type": "STUDIO",
+        "isPrimary": false,
+        "isPublic": true,
+        "source": "catalog_import",
+        "sortOrder": 1
+      }
+    ]
+  }
+]

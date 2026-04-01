@@ -35,7 +35,6 @@ import {
 import { buildDiscoveryContext } from "../../lib/discoveryContext";
 import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
-import { mergeSeriesCommerceAccess } from "../../lib/seriesCommerce";
 
 function EpisodeListSkeleton() {
   return (
@@ -244,7 +243,6 @@ export default function SeriesPage({
 
       const adultFlag = isAdultMode ? "1" : "0";
       const detailPath = `/api/series/${seriesId}?adult=${adultFlag}`;
-      const commercePath = `/api/series/${seriesId}/commerce?adult=${adultFlag}`;
       const isCurrentRequest = () => requestRef.current === requestId;
       const applyFailure = (response) => {
         if (!isCurrentRequest()) {
@@ -290,10 +288,10 @@ export default function SeriesPage({
         return true;
       };
 
-      const [response, commerceResponse] = await Promise.all([
-        apiGet(detailPath, bust ? { bust: true, dedupeMs: 0 } : undefined),
-        apiGet(commercePath, bust ? { bust: true, dedupeMs: 0 } : undefined),
-      ]);
+      const response = await apiGet(
+        detailPath,
+        bust ? { bust: true, dedupeMs: 0 } : undefined,
+      );
       if (!isCurrentRequest()) {
         return;
       }
@@ -315,28 +313,17 @@ export default function SeriesPage({
         return;
       }
 
-      setData(
-        mergeSeriesCommerceAccess(
-          response.data,
-          commerceResponse?.ok ? commerceResponse.data : null,
-        ),
-      );
+      setData(response.data);
       setGateStatus("OK");
       if (showLoading) {
         setLoading(false);
       }
 
       if (!bust && response.stale) {
-        Promise.all([
-          apiGet(detailPath, {
-            bust: true,
-            dedupeMs: 0,
-          }),
-          apiGet(commercePath, {
-            bust: true,
-            dedupeMs: 0,
-          }),
-        ]).then(([freshResponse, freshCommerceResponse]) => {
+        apiGet(detailPath, {
+          bust: true,
+          dedupeMs: 0,
+        }).then((freshResponse) => {
           if (!isCurrentRequest()) {
             return;
           }
@@ -355,12 +342,7 @@ export default function SeriesPage({
             });
             return;
           }
-          setData(
-            mergeSeriesCommerceAccess(
-              freshResponse.data,
-              freshCommerceResponse?.ok ? freshCommerceResponse.data : null,
-            ),
-          );
+          setData(freshResponse.data);
           setGateStatus("OK");
         });
       }

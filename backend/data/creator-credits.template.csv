@@ -1,0 +1,3 @@
+seriesId,seriesTitle,creatorName,role,type,isPrimary,isPublic,sortOrder,source,bio
+series-001,The Last Kingdom,Jane Doe,WRITER,PERSON,true,true,0,catalog_import,Optional short public-facing bio.
+series-001,The Last Kingdom,North Harbor Studio,STUDIO,STUDIO,false,true,1,catalog_import,

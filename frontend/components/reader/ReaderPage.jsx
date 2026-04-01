@@ -27,7 +27,6 @@ import {
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
 import { focusInteractiveTarget } from "../../lib/focusTarget";
-import { mergeSeriesCommerceEpisodes } from "../../lib/seriesCommerce";
 import { buildSupportPath } from "../../lib/supportRouting";
 import {
   consumeCommerceSuccessForPath,
@@ -547,7 +546,6 @@ export default function ReaderPage({ seriesId, episodeId }) {
       const adultFlag = isAdultMode ? "1" : "0";
       const episodePath = `/api/episode?seriesId=${seriesId}&episodeId=${episodeId}`;
       const seriesPath = `/api/series/${seriesId}?adult=${adultFlag}`;
-      const commercePath = `/api/series/${seriesId}/commerce?adult=${adultFlag}`;
       const isCurrentRequest = () => requestRef.current === requestId;
       const applyFailure = (response, fallbackError) => {
         if (!isCurrentRequest()) {
@@ -584,19 +582,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
         return true;
       };
 
-      const [episodeResponse, seriesResponse, commerceResponse] = await Promise.all([
+      const [episodeResponse, seriesResponse] = await Promise.all([
         apiGet(episodePath, bustSeries ? { dedupeMs: 0 } : undefined),
         apiGet(
           seriesPath,
-          bustSeries
-            ? {
-                bust: true,
-                dedupeMs: 0,
-              }
-            : undefined,
-        ),
-        apiGet(
-          commercePath,
           bustSeries
             ? {
                 bust: true,
@@ -635,41 +624,18 @@ export default function ReaderPage({ seriesId, episodeId }) {
         return;
       }
 
-      const mergedSeriesData = mergeSeriesCommerceEpisodes(
-        seriesResponse.data,
-        commerceResponse?.ok ? commerceResponse.data : null,
-      );
-      const currentEpisodeCommerce = Array.isArray(mergedSeriesData?.episodes)
-        ? mergedSeriesData.episodes.find((item) => item?.id === episodeId)
-        : null;
-
-      setEpisodeData({
-        ...(episodeResponse.data?.episode || {}),
-        ...(currentEpisodeCommerce
-          ? {
-              pricePts: currentEpisodeCommerce.pricePts,
-              ttfEligible: currentEpisodeCommerce.ttfEligible,
-              ttfReadyAt: currentEpisodeCommerce.ttfReadyAt,
-            }
-          : {}),
-      });
-      setSeriesData(mergedSeriesData);
+      setEpisodeData(episodeResponse.data?.episode || null);
+      setSeriesData(seriesResponse.data);
       setGateStatus("OK");
       if (showLoading) {
         setLoading(false);
       }
 
       if (!bustSeries && seriesResponse.stale) {
-        Promise.all([
-          apiGet(seriesPath, {
-            bust: true,
-            dedupeMs: 0,
-          }),
-          apiGet(commercePath, {
-            bust: true,
-            dedupeMs: 0,
-          }),
-        ]).then(([freshResponse, freshCommerceResponse]) => {
+        apiGet(seriesPath, {
+          bust: true,
+          dedupeMs: 0,
+        }).then((freshResponse) => {
           if (!isCurrentRequest()) {
             return;
           }
@@ -691,25 +657,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             );
             return;
           }
-          const mergedFreshSeriesData = mergeSeriesCommerceEpisodes(
-            freshResponse.data,
-            freshCommerceResponse?.ok ? freshCommerceResponse.data : null,
-          );
-          const freshEpisodeCommerce = Array.isArray(mergedFreshSeriesData?.episodes)
-            ? mergedFreshSeriesData.episodes.find((item) => item?.id === episodeId)
-            : null;
-
-          setSeriesData(mergedFreshSeriesData);
-          setEpisodeData((current) => ({
-            ...(current || {}),
-            ...(freshEpisodeCommerce
-              ? {
-                  pricePts: freshEpisodeCommerce.pricePts,
-                  ttfEligible: freshEpisodeCommerce.ttfEligible,
-                  ttfReadyAt: freshEpisodeCommerce.ttfReadyAt,
-                }
-              : {}),
-          }));
+          setSeriesData(freshResponse.data);
           setGateStatus("OK");
         });
       }

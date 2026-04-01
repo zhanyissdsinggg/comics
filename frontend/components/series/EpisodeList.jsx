@@ -9,6 +9,7 @@ import {
   buildEpisodeAccessStateMap,
   getEpisodeAvailabilitySummary,
 } from "../../lib/episodeAccessState";
+import { getEpisodeCommerceAccess } from "../../lib/seriesCommerce";
 
 function sortEpisodes(episodes, sortOrder) {
   const sorted = [...episodes];
@@ -195,7 +196,7 @@ export default function EpisodeList({
             const key = episode?.id || `${series.id || "series"}-${index}`;
             const unlocked = unlockedEpisodeIds.includes(episode?.id);
             const progress = series?.id ? getProgress(series.id) : null;
-            const episodeAccess = episode?.access || {};
+            const episodeAccess = getEpisodeCommerceAccess(episode);
             const ttfEligible = Boolean(episodeAccess?.ttfEligible);
             const ttfStatus = {
               eligible: ttfEligible,

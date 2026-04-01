@@ -61,6 +61,8 @@ tappytoon/.git/
 backend/.audit-backend.json
 backend/.outdated-backend.json
 backend/logs/.*-audit.json
+backend/data/creator-credits.import.json
+backend/data/creator-credits.import.csv
 frontend/.audit-frontend.json
 frontend/.outdated-frontend.json
 frontend/.lighthouse-*.json

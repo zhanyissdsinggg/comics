@@ -13,6 +13,22 @@ function buildCommerceEpisodeMap(commercePayload) {
   );
 }
 
+export function getEpisodeCommerceAccess(episode) {
+  if (episode?.access && typeof episode.access === "object") {
+    return {
+      pricePts: Number(episode.access?.pricePts || 0),
+      ttfEligible: Boolean(episode.access?.ttfEligible),
+      ttfReadyAt: episode.access?.ttfReadyAt || null,
+    };
+  }
+
+  return {
+    pricePts: Number(episode?.pricePts || 0),
+    ttfEligible: Boolean(episode?.ttfEligible),
+    ttfReadyAt: episode?.ttfReadyAt || null,
+  };
+}
+
 export function mergeSeriesCommerceAccess(detailPayload, commercePayload) {
   if (!detailPayload?.series) {
     return detailPayload;
