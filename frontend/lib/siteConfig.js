@@ -27,7 +27,7 @@ export const siteConfig = {
     "Comics and novels, without the platform clutter.",
   aboutSummary:
     clean(process.env.NEXT_PUBLIC_ABOUT_SUMMARY) ||
-    "Gush is built for readers who want comics and novels in one place, clear pricing before checkout, and account, support, and mature-content settings that are easy to understand.",
+    "Gush brings comics and novels together with cleaner reading, clearer pricing, and simpler account controls.",
   supportEmail: clean(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) || "support@gushcomics.com",
   privacyEmail:
     clean(process.env.NEXT_PUBLIC_PRIVACY_EMAIL) ||

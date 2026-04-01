@@ -32,7 +32,7 @@ export default function AboutPage() {
             eyebrow="About Gush"
             title="Stories first. Everything else stays out of the way."
             description={siteConfig.aboutSummary}
-            secondary="Browse, buy, and read without the site turning into work."
+            secondary="Browse, buy, and read without the clutter."
             actions={
               <>
                 <Link
@@ -63,13 +63,10 @@ export default function AboutPage() {
               </div>
               <div className="space-y-4 text-sm leading-7 text-slate-600">
                 <p>
-                  {siteConfig.companyName} is for people who want to find something good, open a chapter, and stay in the story.
+                  {siteConfig.companyName} is for readers who want to open a chapter and stay in the story.
                 </p>
                 <p>
-                  We keep discovery, purchases, and account flows simple so the site does not feel like homework.
-                </p>
-                <p>
-                  It also means help should be easy to reach, policies should be readable, and the reading experience should feel steady on desktop and mobile.
+                  Discovery, purchases, and account flows stay simple so the site does not feel like work.
                 </p>
               </div>
             </SurfacePanel>
@@ -129,7 +126,7 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <p className="max-w-3xl text-sm leading-7 text-slate-600">
-                If a charge looks wrong, a page breaks, or you just need an answer, start with Support. If you want the fine print, Privacy and Terms are right here.
+                If a charge looks wrong, a page breaks, or you need an answer, start with Support.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link

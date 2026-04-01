@@ -13,7 +13,7 @@ import { siteConfig } from "../../lib/siteConfig";
 export const metadata = createPageMetadata({
   title: "Mature Content",
   description:
-    "Learn how mature-content access works on Gush, when age checks are required, what settings you control, and what to do if 18+ titles stay hidden.",
+    "See how 18+ access, age checks, and visibility controls work on Gush.",
   path: "/mature-content",
 });
 
@@ -21,27 +21,27 @@ const FAQ_ITEMS = [
   {
     question: "What counts as mature content on Gush?",
     answer:
-      "Mature content means series or episodes that require age-restricted access on this site. Those titles stay hidden until mature-content access is turned on and the required age check is completed.",
+      "Mature content means titles that stay hidden until 18+ access is turned on and the required age check is complete.",
   },
   {
     question: "Who needs to complete an age check?",
     answer:
-      "Readers who want to open the 18+ catalog may need to sign in first and confirm the required age for the current region setting.",
+      "Readers who want the 18+ catalog may need to sign in and confirm age for the current region.",
   },
   {
     question: "What does Hide 18+ history do?",
     answer:
-      "That setting hides mature titles from the visible reading history on the account or device where the setting is turned on.",
+      "It hides mature titles from visible reading history on the account or device where it is turned on.",
   },
   {
     question: "Can region settings change what I see?",
     answer:
-      "Yes. Mature-content rules can depend on your current region setting, including the age threshold shown during the age check.",
+      "Yes. Mature-content rules and age thresholds can depend on your region setting.",
   },
   {
     question: "What if age check fails or 18+ titles still look hidden?",
     answer:
-      "Try the age check again from the mature-content gate, confirm your region setting in Account, and contact Support if access still looks wrong.",
+      "Try the age check again, confirm your region in Account, and contact Support if access still looks wrong.",
   },
 ];
 
@@ -49,22 +49,22 @@ const CONTROL_CARDS = [
   {
     title: "Turn mature content on or off",
     body:
-      "Use the 18+ toggle in the site header when you want access to mature titles, or turn it off again when you want the standard catalog only.",
+      "Use the 18+ toggle in the site header when you want access, then turn it off again when you do not.",
   },
   {
     title: "Confirm age for your region",
     body:
-      "The site can ask for a one-time age confirmation based on the region tied to your current settings.",
+      "The site can ask for a one-time age confirmation based on your current region settings.",
   },
   {
     title: "Hide 18+ history",
     body:
-      "Use the account setting if you do not want mature reading history visible in the normal account view on that device.",
+      "Use the account setting if you do not want mature history visible in the normal account view on that device.",
   },
   {
     title: "Get help when access looks wrong",
     body:
-      "If the mature catalog stays hidden after sign-in and age confirmation, Support can help you sort out the access problem.",
+      "If the mature catalog stays hidden after sign-in and age confirmation, Support can help.",
   },
 ];
 
@@ -78,7 +78,7 @@ export default function MatureContentPage() {
       path: "/mature-content",
       name: `Mature Content | ${siteConfig.siteName}`,
       description:
-        "Learn how mature-content access, region checks, and 18+ history controls work on Gush.",
+        "See how 18+ access, region checks, and 18+ history controls work on Gush.",
       items: FAQ_ITEMS,
     }),
   ].filter(Boolean);
@@ -95,8 +95,8 @@ export default function MatureContentPage() {
             accent="blue"
             eyebrow="Mature content"
             title="How 18+ access works on Gush."
-            description="Mature titles stay private by default. Turn them on only when you want them, complete the required age check, and use account controls to manage visibility."
-            secondary="This page explains what mature content means here, how region and age checks work, and what to do if access still looks wrong."
+            description="Mature titles stay hidden by default. Turn them on when you want them, complete the age check, and use account controls to manage visibility."
+            secondary="Age check, region rules, and visibility controls."
             stats={[
               {
                 label: "Default",
@@ -106,17 +106,17 @@ export default function MatureContentPage() {
               {
                 label: "Age check",
                 value: "One-time",
-                hint: "You may need to confirm age for the current region.",
+                hint: "Age checks can depend on the current region.",
               },
               {
                 label: "Privacy",
                 value: "18+ history",
-                hint: "You can hide mature history in account settings.",
+                hint: "Hide mature history in account settings.",
               },
               {
                 label: "Help",
                 value: "Support",
-                hint: `Use ${siteConfig.supportEmail} if mature access still looks wrong.`,
+                hint: `Need help? Use ${siteConfig.supportEmail}.`,
               },
             ]}
             actions={
@@ -159,11 +159,11 @@ export default function MatureContentPage() {
                 </h2>
               </div>
               <ul className="space-y-3 text-sm leading-7 text-slate-600">
-                <li>Make sure you are signed in if the gate asks for account access.</li>
-                <li>Confirm the age check shown for your current region setting.</li>
-                <li>Review the region setting in Account if the age threshold looks unexpected.</li>
+                <li>Sign in if the gate asks for account access.</li>
+                <li>Confirm the age check for your current region.</li>
+                <li>Review the region setting in Account if the threshold looks wrong.</li>
                 <li>Check whether Hide 18+ history is changing what appears in your account view.</li>
-                <li>If access still looks wrong, contact Support and describe the page or title you expected to see.</li>
+                <li>If access still looks wrong, contact Support and name the page or title.</li>
               </ul>
             </SurfacePanel>
 
@@ -173,7 +173,7 @@ export default function MatureContentPage() {
                   Related pages
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  The fastest places to manage access.
+                  Start here.
                 </h2>
               </div>
               <div className="space-y-3">
@@ -181,12 +181,12 @@ export default function MatureContentPage() {
                   {
                     href: "/account",
                     title: "Account settings",
-                    body: "Check region, language, and Hide 18+ history.",
+                    body: "Check region, language, and 18+ history settings.",
                   },
                   {
                     href: "/faq",
                     title: "FAQ",
-                    body: "Quick answers for age checks, purchases, and account access.",
+                    body: "Quick answers on age checks and account access.",
                   },
                   {
                     href: "/support",
@@ -213,7 +213,7 @@ export default function MatureContentPage() {
                 Quick answers
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Common 18+ access questions.
+                Common questions.
               </h2>
             </div>
             <div className="grid gap-3 lg:grid-cols-2">

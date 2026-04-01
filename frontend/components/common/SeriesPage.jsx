@@ -442,7 +442,7 @@ export default function SeriesPage({
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
-  const showEditorialHero = !isNovelPage;
+  const showEditorialHero = true;
   const showEntrySpotlight = Boolean(entrySpotlight) && !isComicPage && (!isNovelPage || !hasActiveFilters);
   const showCatalogCount = !isComicPage;
 
