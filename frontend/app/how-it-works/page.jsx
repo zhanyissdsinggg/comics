@@ -13,28 +13,28 @@ import { siteConfig } from "../../lib/siteConfig";
 export const metadata = createPageMetadata({
   title: "How Gush Works",
   description:
-    "Learn what is free, how points work, how membership works, and where to get billing help on Gush.",
+    "See what is free, how points work, and where membership fits on Gush.",
   path: "/how-it-works",
 });
 
 const HOW_IT_WORKS_STEPS = [
   {
     eyebrow: "1. Browse",
-    title: "Start with free chapters when they are available.",
+    title: "Start free where a title allows it.",
     body:
-      "Browse comics and novels, then look for free chapters or preview access before you spend anything.",
+      "Some titles open with free chapters or previews before you spend anything.",
   },
   {
     eyebrow: "2. Unlock",
     title: "Use points to unlock more episodes.",
     body:
-      "When a chapter is not free, you can use points to unlock it on your account. Point packs are one-time purchases.",
+      "Locked chapters use points. Point packs are one-time purchases.",
   },
   {
     eyebrow: "3. Keep reading",
-    title: "Save progress, purchases, and settings on your account.",
+    title: "Keep progress and purchases on your account.",
     body:
-      "Your library, purchases, reading progress, mature-content settings, and support history are easier to manage once you are signed in.",
+      "Signing in keeps your library, progress, purchases, and settings in one place.",
   },
 ];
 
@@ -42,32 +42,32 @@ const FAQ_ITEMS = [
   {
     question: "What can I read for free on Gush?",
     answer:
-      "Some series offer free first chapters or preview access. Free availability depends on the title and can change over time.",
+      "Some series open with free chapters or previews. Free access depends on the title.",
   },
   {
     question: "How do points work?",
     answer:
-      "Points are used to unlock locked episodes. You can buy point packs from the Store, and eligible purchases appear in Purchases.",
+      "Points unlock locked episodes. Point packs live in the Store, and purchases show up in Purchases.",
   },
   {
     question: "What does membership change?",
     answer:
-      "Membership can add discounts, daily free reads, shorter wait timers, or monthly point benefits depending on the plan shown on the Membership page.",
+      "Plans can add discounts, daily free reads, shorter waits, or monthly points, depending on the plan.",
   },
   {
     question: "Is membership recurring?",
     answer:
-      "Yes. Membership plans are monthly unless the plan details say otherwise, and renewal timing appears in your account when a plan is active.",
+      "Yes. Plans renew monthly unless the plan says otherwise.",
   },
   {
     question: "How do I cancel membership?",
     answer:
-      "Open Account, review your current plan, and end the membership there. If anything looks wrong, contact Support.",
+      "Open Account, review your plan, and end it there. Contact Support if anything looks wrong.",
   },
   {
     question: "Where do I find receipts and order IDs?",
     answer:
-      "Open Purchases to review point packs, memberships, charge status, and the order ID you may need for billing help.",
+      "Open Purchases to review packs, memberships, charges, and the order ID you may need.",
   },
 ];
 
@@ -81,7 +81,7 @@ export default function HowItWorksPage() {
       path: "/how-it-works",
       name: `How Gush Works | ${siteConfig.siteName}`,
       description:
-        "Learn what is free, how points work, how membership works, and where to get billing help on Gush.",
+        "See what is free, how points work, and where membership fits on Gush.",
       items: FAQ_ITEMS,
     }),
   ].filter(Boolean);
@@ -97,29 +97,29 @@ export default function HowItWorksPage() {
             appearance="light"
             accent="blue"
             eyebrow="How it works"
-            title="How Gush works."
-            description="Read free where it is available, unlock more with points, or choose membership."
-            secondary="Free chapters, point packs, membership, receipts, and billing help."
+            title="How reading works."
+            description="Start free where available, unlock more with points, or choose membership."
+            secondary="Free reads, point packs, plans, and billing help."
             stats={[
               {
                 label: "Free access",
                 value: "Title-based",
-                hint: "Free chapters depend on the series.",
+                hint: "Free access depends on the title.",
               },
               {
                 label: "Unlocks",
                 value: "Points",
-                hint: "Locked episodes are unlocked with points on your account.",
+                hint: "Locked episodes use points.",
               },
               {
                 label: "Membership",
                 value: "Monthly",
-                hint: "Renewal timing appears in your account when active.",
+                hint: "Plans renew monthly when active.",
               },
               {
                 label: "Billing help",
                 value: "Support",
-                hint: `You can contact ${siteConfig.supportEmail} if billing needs a person.`,
+                hint: `Need a person? Contact ${siteConfig.supportEmail}.`,
               },
             ]}
             actions={
@@ -161,21 +161,18 @@ export default function HowItWorksPage() {
                   Pricing basics
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  What is free, what costs points, and what membership changes.
+                  The basics.
                 </h2>
               </div>
               <div className="space-y-4 text-sm leading-7 text-slate-600">
                 <p>
-                  Free access depends on the title. Some series offer free first chapters, preview pages, or timed free access.
+                  Free access depends on the title. Some series open with free chapters or previews.
                 </p>
                 <p>
-                  Locked episodes use points. Point packs are one-time purchases, and your purchase history appears in Purchases once the order is recorded.
+                  Locked episodes use points. Point packs are one-time purchases, and Purchases keeps the record.
                 </p>
                 <p>
-                  Membership is a separate monthly plan for readers who want better value over time. Plan benefits can include lower unlock prices, daily free reads, shorter wait timers, or monthly points, depending on the plan you choose.
-                </p>
-                <p>
-                  Membership benefits only apply while the plan is active. Account, purchase, and receipt history stay tied to your signed-in account.
+                  Membership is a separate monthly plan. Benefits depend on the plan while it is active.
                 </p>
               </div>
             </SurfacePanel>
@@ -186,14 +183,14 @@ export default function HowItWorksPage() {
                   Billing and receipts
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Where to check charges, cancellation, and billing help.
+                  Where to check charges.
                 </h2>
               </div>
               <ul className="space-y-3 text-sm leading-7 text-slate-600">
-                <li>Purchases is where you can review point packs, memberships, and order IDs.</li>
-                <li>Account is where you can review your active membership and end it when that option is available.</li>
-                <li>If a charge looks wrong, contact Support and include the order ID so the team can find it faster.</li>
-                <li>Refund handling depends on the purchase status and whether the purchase still qualifies.</li>
+                <li>Open Purchases for point packs, memberships, and order IDs.</li>
+                <li>Open Account to review or end an active plan.</li>
+                <li>If a charge looks wrong, contact Support and include the order ID.</li>
+                <li>Refunds depend on the purchase status.</li>
               </ul>
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -218,7 +215,7 @@ export default function HowItWorksPage() {
                 Quick answers
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                The questions readers usually ask first.
+                Start here.
               </h2>
             </div>
             <div className="grid gap-3 lg:grid-cols-2">

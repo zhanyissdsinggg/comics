@@ -31,26 +31,26 @@ function getMaxPreviewPages(episodes) {
 
 function getStatusAnswer(seriesTitle, statusLabel) {
   if (String(statusLabel).toLowerCase() === "completed") {
-    return `${seriesTitle} is currently completed. That means you can read the full run now instead of waiting for weekly updates.`;
+    return `${seriesTitle} is completed, so the full run is available now.`;
   }
 
-  return `${seriesTitle} is currently ${statusLabel.toLowerCase()}. New episodes may still arrive, and saving it to your library makes it easier to come back later.`;
+  return `${seriesTitle} is ${statusLabel.toLowerCase()}, so new episodes may still arrive.`;
 }
 
 function getFreeAccessAnswer(seriesTitle, freeEpisodeCount, maxPreviewPages) {
   if (freeEpisodeCount > 0 && maxPreviewPages > 0) {
-    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} and previews up to ${maxPreviewPages} pages on eligible chapters, so new readers can get a real feel for it before spending.`;
+    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} and previews up to ${maxPreviewPages} pages on eligible chapters.`;
   }
 
   if (freeEpisodeCount > 0) {
-    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"}, which makes it easy to test the hook before you spend anything.`;
+    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"}.`;
   }
 
   if (maxPreviewPages > 0) {
-    return `${seriesTitle} currently offers previews up to ${maxPreviewPages} pages on eligible chapters, so readers can get a feel for the pacing and art first.`;
+    return `${seriesTitle} currently offers previews up to ${maxPreviewPages} pages on eligible chapters.`;
   }
 
-  return `${seriesTitle} does not currently offer a free start, but you can still check the episode list, pricing, and membership options before you buy.`;
+  return `${seriesTitle} does not currently offer a free start. Check the episode list and current unlock options before you buy.`;
 }
 
 export function getSiteFaqItems() {
@@ -59,13 +59,13 @@ export function getSiteFaqItems() {
       id: "unlock-episodes",
       question: "How do I unlock episodes?",
       answer:
-        "Use points to unlock an episode. Some series also offer free unlocks, and membership may lower the price on selected titles.",
+        "Use points to unlock an episode. Some series also offer free access.",
     },
     {
       id: "cancel-membership",
       question: "How do I cancel my membership?",
       answer:
-        "Open Account, find your membership, and cancel it there. You can come back later without losing the rest of your account.",
+        "Open Account, find your membership, and cancel it there.",
     },
     {
       id: "view-orders",
@@ -77,12 +77,12 @@ export function getSiteFaqItems() {
       id: "adult-access",
       question: "Why is 18+ locked for me?",
       answer:
-        "Turn on mature content and complete the age check for your current region. The catalog updates once access is confirmed.",
+        "Turn on mature content and complete the age check for your region.",
     },
     {
       id: "contact-support",
       question: "How do I reach a real person?",
-      answer: `Use the contact page or email ${siteConfig.supportEmail} if a charge, sign-in problem, or reading bug needs a person.`,
+      answer: `Use the contact page or email ${siteConfig.supportEmail}.`,
     },
   ];
 }
@@ -116,21 +116,21 @@ export function getSeriesFaqItems({ series, episodes }) {
       question: `Who created ${seriesTitle}?`,
       answer:
         creatorIdentity.hasPublicCredit
-          ? `${seriesTitle} is credited to ${creatorIdentity.displayName}. The series page and creator page use the same public-facing credit.`
-          : `${CREATOR_FALLBACK_DETAIL} The title page will surface public creator names here once they are attached upstream.`,
+          ? `${seriesTitle} is credited to ${creatorIdentity.displayName}.`
+          : `${CREATOR_FALLBACK_DETAIL} Public creator names will appear here once they are attached upstream.`,
     },
     {
       id: "series-episodes",
       question: `How much content is already available for ${seriesTitle}?`,
       answer:
         episodeCount > 0
-          ? `${seriesTitle} currently shows ${episodeCount} episode${episodeCount === 1 ? "" : "s"}${leadGenre ? `, and the strongest genre fit right now is ${leadGenre}` : ""}.`
-          : `${seriesTitle} is live on the site, and the episode list will show the currently available chapters as new ones are published.`,
+          ? `${seriesTitle} currently shows ${episodeCount} episode${episodeCount === 1 ? "" : "s"}${leadGenre ? `, with ${leadGenre} as the lead genre` : ""}.`
+          : `${seriesTitle} is live on the site, and the episode list shows what is currently available.`,
     },
     {
       id: "series-support",
       question: `Where do I go if I hit a billing or access issue with ${seriesTitle}?`,
-      answer: `Check Purchases first for the order details, then use Contact or email ${siteConfig.supportEmail} if you still need help.`,
+      answer: `Check Purchases for the order details, then use Contact or email ${siteConfig.supportEmail}.`,
     },
   ];
 }

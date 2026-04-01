@@ -41,6 +41,19 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
 
+function isAutofilledSupportMessage(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) {
+    return true;
+  }
+
+  if (trimmed.startsWith("Context:")) {
+    return true;
+  }
+
+  return SUPPORT_TOPICS.some((preset) => String(preset?.draft || "").trim() === trimmed);
+}
+
 export default function SupportPage() {
   const router = useRouter();
   const { hydrated, isSignedIn, user } = useAuthStore();
@@ -114,7 +127,12 @@ export default function SupportPage() {
       return preset.subject || "";
     });
     if (!preserveMessage) {
-      setMessage((current) => current || preset.draft || "");
+      setMessage((current) => {
+        if (!isAutofilledSupportMessage(current)) {
+          return current;
+        }
+        return preset.draft || "";
+      });
     }
   };
 
@@ -333,7 +351,9 @@ export default function SupportPage() {
                     const preset = getSupportTopicPreset(item.topic);
                     applyTopicPreset(preset, { preserveMessage: true, forceSubject: true });
                     setSubject(item.subject);
-                    setMessage((current) => current || `Context: ${item.context}`);
+                    setMessage((current) =>
+                      isAutofilledSupportMessage(current) ? `Context: ${item.context}` : current,
+                    );
                     setFeedback({ type: "", text: "", mode: "inline" });
                     setSuccessState(null);
                   }}

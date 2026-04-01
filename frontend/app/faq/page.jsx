@@ -10,7 +10,7 @@ import { getSiteFaqItems } from "../../lib/storefrontFaq";
 
 export const metadata = createPageMetadata({
   title: "Help & FAQ",
-  description: "Fast answers about charges, account access, memberships, and 18+ settings.",
+  description: "Quick answers on billing, access, membership, and 18+ settings.",
   path: "/faq",
 });
 
@@ -22,19 +22,19 @@ const FAQ = getSiteFaqItems().map((item) => ({
 const QUICK_LINKS = [
   {
     title: "Get help",
-    description: "Message us about a charge, a broken page, or an access problem.",
+    description: "Send a request about billing, access, or a broken page.",
     href: "/support",
     label: "Send Request",
   },
   {
     title: "How it works",
-    description: "See what is free, how points work, and where membership fits in.",
+    description: "See what is free, how points work, and where membership fits.",
     href: "/how-it-works",
     label: "Read how it works",
   },
   {
     title: "Mature content",
-    description: "Understand age checks, region settings, and Hide 18+ history.",
+    description: "Check age verification, region settings, and 18+ history controls.",
     href: "/mature-content",
     label: "Review 18+ access",
   },
@@ -49,7 +49,7 @@ export default function FAQPage() {
     buildFaqStructuredData({
       path: "/faq",
       name: `Help & FAQ | ${siteConfig.siteName}`,
-      description: "Fast answers about charges, account access, memberships, and 18+ settings.",
+      description: "Quick answers on billing, access, membership, and 18+ settings.",
       items: FAQ,
     }),
   ].filter(Boolean);
@@ -65,9 +65,9 @@ export default function FAQPage() {
             appearance="light"
             accent="blue"
             eyebrow="Help"
-            title="Answers that get you back to reading."
-            description="Charges, unlocks, account access, memberships, and 18+ settings."
-            secondary="If the FAQ does not solve it, you can contact us in one step."
+            title="Quick answers before support."
+            description="Billing, account access, membership, and 18+ settings."
+            secondary="Still stuck? Contact us in one step."
             actions={
               <>
                 <Link
@@ -88,22 +88,22 @@ export default function FAQPage() {
               {
                 label: "Answers",
                 value: String(FAQ.length),
-                hint: "Short answers to the issues readers hit most.",
+                hint: "The issues readers hit most.",
               },
               {
                 label: "Contact",
                 value: "Email + form",
-                hint: "If the FAQ is not enough, a person is one click away.",
+                hint: "A person is one click away.",
               },
               {
                 label: "How it works",
                 value: "Points + plans",
-                hint: "See what is free, what costs points, and where membership fits in.",
+                hint: "Free reads, points, and plans.",
               },
               {
                 label: "18+ access",
                 value: "Age + region",
-                hint: "Availability depends on your age check and region settings.",
+                hint: "Access depends on age and region.",
               },
             ]}
           />
@@ -115,7 +115,7 @@ export default function FAQPage() {
                   Common questions
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Answers before you message us.
+                  Start here.
                 </h2>
               </div>
               <div className="space-y-3">
