@@ -6,6 +6,10 @@ test.describe("Support page", () => {
     const runtimeIssues = collectRuntimeIssues(page);
     let submittedPayload: Record<string, unknown> | null = null;
 
+    await page.addInitScript(() => {
+      window.localStorage.setItem("cookie_consent", "accepted");
+    });
+
     await page.route("**/api/support", async (route) => {
       submittedPayload = route.request().postDataJSON() as Record<string, unknown>;
       await route.fulfill({
@@ -18,11 +22,11 @@ test.describe("Support page", () => {
     const response = await page.goto("/support", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Send a request without leaving the site." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Send a request." })).toBeVisible();
     await expect(page.locator("#support-topic")).toBeVisible();
     await expect(page.locator("#support-email")).toBeVisible();
     await expect(page.locator("#support-order-id")).toBeVisible();
-    await expect(page.getByText("We usually reply within 1 to 2 business days.")).toBeVisible();
+    await expect(page.getByText("We usually reply in 1 to 2 business days.")).toBeVisible();
 
     await page.selectOption("#support-topic", "billing");
     await page.fill("#support-email", "reader@example.com");

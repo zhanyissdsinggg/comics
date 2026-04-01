@@ -54,11 +54,11 @@ test.describe("Header search", () => {
 
     await searchInput.focus();
     await expect(searchInput).toBeFocused();
-    await searchInput.press("Tab");
+    await page.keyboard.press("Tab");
     await expect(featuredLane).toBeFocused();
     await expectVisibleFocusIndicator(featuredLane, "Search discovery Featured Series lane");
 
-    await featuredLane.press("Tab");
+    await page.keyboard.press("Tab");
     await expect(completedLane).toBeFocused();
     await expectVisibleFocusIndicator(completedLane, "Search discovery Completed Series lane");
 

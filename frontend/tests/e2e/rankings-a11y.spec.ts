@@ -113,7 +113,7 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 test.describe("Rankings accessibility", () => {
-  test("rankings should expose typed cover alt text and visible keyboard focus on chart filters", async ({ page }) => {
+  test("rankings should expose typed cover alt text and visible keyboard focus on editorial filters", async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem("cookie_consent", "accepted");
     });
@@ -182,7 +182,7 @@ test.describe("Rankings accessibility", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "What readers are opening now." })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Featured stories." })).toBeVisible({
       timeout: RANKINGS_UI_TIMEOUT_MS,
     });
     await expect(page.getByRole("img", { name: "Comic cover image for Crimson Orbit" })).toBeVisible({
@@ -198,10 +198,10 @@ test.describe("Rankings accessibility", () => {
       timeout: RANKINGS_UI_TIMEOUT_MS,
     });
 
-    const popularFilter = page.getByRole("button", { name: "Popular", exact: true });
-    await expect(popularFilter).toBeVisible({ timeout: RANKINGS_UI_TIMEOUT_MS });
-    await tabToAndExpectVisibleFocus(page, popularFilter, {
-      label: "Rankings Popular filter",
+    const featuredFilter = page.getByRole("button", { name: "Featured", exact: true });
+    await expect(featuredFilter).toBeVisible({ timeout: RANKINGS_UI_TIMEOUT_MS });
+    await tabToAndExpectVisibleFocus(page, featuredFilter, {
+      label: "Rankings Featured filter",
     });
 
     await page.waitForTimeout(300);
