@@ -515,16 +515,6 @@ export default function CreatorPage({
           }
         : null,
       {
-        id: "search-creator",
-        eyebrow: "Search",
-        title: `Search ${creatorName}.`,
-        description: "Open the wider catalog around this name.",
-        cta: "Search",
-        onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=latest`),
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
         id: "genre",
         eyebrow: "Genres",
         title: topGenres[0] ? `Explore ${topGenres[0]}.` : "Explore similar reads.",
@@ -547,7 +537,7 @@ export default function CreatorPage({
           "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
     ].filter(Boolean),
-    [creatorName, handleBrowseGenre, handleOpenTitle, handleReturn, originSeries, router, spotlightSeries, topGenres],
+    [handleBrowseGenre, handleOpenTitle, handleReturn, originSeries, spotlightSeries, topGenres],
   );
   const emptyCreatorPathways = useMemo(
     () => [
@@ -719,11 +709,11 @@ export default function CreatorPage({
       <SiteHeader variant="light" />
 
       <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <EditorialHero
-          appearance="light"
-          accent="blue"
-          eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
-          title={heroCopy.title}
+          <EditorialHero
+            appearance="light"
+            accent="blue"
+            eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
+            title={heroCopy.title}
           description={heroCopy.description}
           secondary={
             originSeries
@@ -731,26 +721,29 @@ export default function CreatorPage({
               : ""
           }
           stats={creatorStats}
-          actions={
-            <>
-              <button
-                type="button"
-                onClick={() => router.push("/rankings?view=featured")}
-                className={primaryButtonClass}
-              >
-                Browse Series
-              </button>
-              <button
-                type="button"
-                onClick={handleBrowseGenre}
-                className={secondaryButtonClass}
-              >
-                {topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads"}
-              </button>
-              <button
-                type="button"
-                onClick={handleReturn}
-                className={secondaryButtonClass}
+            actions={
+              <>
+                {spotlightSeries ? (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenTitle(spotlightSeries)}
+                    className={primaryButtonClass}
+                  >
+                    View Series
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => router.push("/rankings?view=featured")}
+                    className={primaryButtonClass}
+                  >
+                    Browse Series
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleReturn}
+                  className={secondaryButtonClass}
               >
                 {originSeries ? `Back to ${originSeries.title}` : "Go back"}
               </button>
@@ -835,37 +828,11 @@ export default function CreatorPage({
                   >
                     {topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleReturn}
-                    className={secondaryButtonClass}
-                  >
-                    {originSeries ? `Back to ${originSeries.title}` : "Go back"}
-                  </button>
                 </div>
               </div>
             </div>
           </SurfacePanel>
         ) : null}
-
-        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
-              More to explore
-            </p>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Keep browsing.
-            </h2>
-            <p className="text-sm leading-7 text-slate-600">
-              View the series, browse by genre, search the name, or go back.
-            </p>
-          </div>
-          <StorefrontPathwaysGrid
-            cards={creatorPathways}
-            columnsClassName="md:grid-cols-2 xl:grid-cols-4"
-            appearance="light"
-          />
-        </SurfacePanel>
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
