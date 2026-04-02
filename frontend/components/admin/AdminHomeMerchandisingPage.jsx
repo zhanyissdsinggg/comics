@@ -172,7 +172,7 @@ function ActionButton({ children, className = "", ...props }) {
     <button
       type="button"
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition",
+        "inline-flex items-center justify-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition",
         "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
         className,
       )}
@@ -860,7 +860,7 @@ export default function AdminHomeMerchandisingPage() {
   return (
     <AdminShell
       title="首页编排"
-      subtitle="把首页主视觉、起步推荐和回访入口当成同一套内容编排工作来维护。"
+      subtitle="把首页主视觉、起步推荐和回访入口放进同一套编排工作流。"
       actions={
         <div className="flex flex-wrap gap-2">
           <ActionButton
@@ -873,7 +873,10 @@ export default function AdminHomeMerchandisingPage() {
             <ArrowUpRight className="h-4 w-4" />
             查看线上首页
           </ActionButton>
-          <ActionButton onClick={() => router.push("/admin/recommendations")}>
+          <ActionButton
+            onClick={() => router.push("/admin/recommendations")}
+            className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+          >
             <Sparkles className="h-4 w-4" />
             打开发现配置
           </ActionButton>
@@ -923,10 +926,13 @@ export default function AdminHomeMerchandisingPage() {
                 先收紧真正决定首页观感的几个入口。
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                首页要像经过编辑，而不是像乱摆出来的广告位。先保证主视觉、起步推荐、追更回访和短链路入口都能接住真实可读内容。
+                先保证主视觉、起步推荐和回访入口都挂上真正能打的作品。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
-                <ActionButton onClick={() => void handleRefreshSlots()}>
+                <ActionButton
+                  onClick={() => void handleRefreshSlots()}
+                  className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                >
                   <RefreshCw className={cn("h-4 w-4", refreshing ? "animate-spin" : "")} />
                   {refreshing ? "刷新中..." : "刷新推荐位"}
                 </ActionButton>
@@ -945,12 +951,12 @@ export default function AdminHomeMerchandisingPage() {
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                推荐位状态
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                先把最影响首页观感的几个入口看清楚，再去处理次级主题位。
-              </p>
+                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                  推荐位状态
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  先看关键入口，再处理次级位置。
+                </p>
             </div>
           </div>
 
@@ -1008,7 +1014,7 @@ export default function AdminHomeMerchandisingPage() {
                   </div>
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-5 grid gap-2 sm:grid-cols-2">
                   <ActionButton
                     onClick={() => void handleApplyRecommendation(slot)}
                     className={cn(
@@ -1034,12 +1040,12 @@ export default function AdminHomeMerchandisingPage() {
         <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
           <SurfacePanel appearance="light" accent="cyan" className="space-y-5">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                重点入口推荐
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                这些入口要让编辑和读者都一眼看懂，不要靠花哨标签硬撑。
-              </p>
+                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                  重点入口推荐
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  这些入口要让编辑和读者都一眼看懂。
+                </p>
             </div>
 
             <div className="grid gap-4">
@@ -1077,12 +1083,12 @@ export default function AdminHomeMerchandisingPage() {
           <SurfacePanel appearance="light" accent="amber" className="space-y-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
                   搜索关注点
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                  用真实搜索关注点判断“近期亮点”和“从这里开始”这些入口是不是跟上了读者需求。
-              </p>
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  用真实搜索关注点辅助判断入口方向。
+                </p>
               </div>
               <Search className="mt-1 h-5 w-5 text-amber-500" />
             </div>
@@ -1090,7 +1096,7 @@ export default function AdminHomeMerchandisingPage() {
             {hotSignals.length === 0 ? (
               <EmptyState
                 title="当前没有搜索关注点"
-                description="热搜数据恢复后，这里会继续作为首页编排的辅助参考。"
+                description="当前没有可用热搜数据。"
               />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -1108,12 +1114,12 @@ export default function AdminHomeMerchandisingPage() {
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                推荐位表现
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                看关键入口是否真正拿到曝光、点击和后续阅读承接，而不是只看表面配置。
-              </p>
+                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                  推荐位表现
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  看入口有没有真正拿到曝光、点击和承接。
+                </p>
             </div>
             <div className="flex flex-wrap gap-2">
               {PERFORMANCE_WINDOWS.map((window) => (
@@ -1137,7 +1143,7 @@ export default function AdminHomeMerchandisingPage() {
           {trackedCurrentSlots.length === 0 ? (
             <EmptyState
               title="先完成推荐位配置"
-              description="关键入口上线后，这里才会有曝光、点击和承接质量的真实数据。"
+              description="关键入口上线后，这里才会出现真实数据。"
             />
           ) : performanceLoading ? (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -1195,12 +1201,12 @@ export default function AdminHomeMerchandisingPage() {
         <SurfacePanel appearance="light" accent="emerald" className="space-y-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                待优化队列
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                把推荐位配置、作品完整度和最近表现放在一起看，避免修错顺序。
-              </p>
+                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                  待优化队列
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  把配置、完整度和表现放在一起看。
+                </p>
             </div>
             <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
               {urgentOptimizationCount} 个高优先级项
@@ -1244,7 +1250,7 @@ export default function AdminHomeMerchandisingPage() {
                   </div>
                 ) : null}
 
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-5 grid gap-2 sm:grid-cols-2">
                   {slot.plan.actionType === "apply" ? (
                     <ActionButton
                       onClick={() => void handleApplyRecommendation(slot)}
@@ -1278,21 +1284,21 @@ export default function AdminHomeMerchandisingPage() {
         <SurfacePanel appearance="light" accent="amber" className="space-y-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                主视觉候选作品
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                这些作品最接近能稳稳接住首页强曝光，但别把主视觉位浪费在半成品上。
-              </p>
+                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                  主视觉候选作品
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  这些作品最接近能接住首页最强曝光。
+                </p>
             </div>
             <Star className="mt-1 h-5 w-5 text-amber-500" />
           </div>
 
           {heroCandidates.length === 0 ? (
-            <EmptyState
-              title="当前还没有足够稳的主视觉候选"
-              description="先把封面、署名、简介和章节补稳，再考虑把作品推到首页最强入口。"
-            />
+              <EmptyState
+                title="当前还没有足够稳的主视觉候选"
+                description="先把封面、署名、简介和章节补稳。"
+              />
           ) : (
             <div className="grid gap-4 xl:grid-cols-2">
               {heroCandidates.map(({ series, score, reasons }) => {
@@ -1336,7 +1342,7 @@ export default function AdminHomeMerchandisingPage() {
                       <MiniMetric label="内容基础" value={formatCompactNumber(getReaderProof(series))} />
                       <MiniMetric label="就绪分" value={readiness.score} />
                     </div>
-                    <div className="mt-5 flex flex-wrap gap-2">
+                    <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                       <ActionButton onClick={() => router.push(`/admin/series/${series.id}`)}>
                         <BookOpen className="h-4 w-4" />
                         编辑作品

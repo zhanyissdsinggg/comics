@@ -39,25 +39,25 @@ const QUICK_ACTIONS = [
   {
     href: "/admin/series",
     label: "去作品管理",
-    description: "补封面、补简介、改状态，都先在这里收口。",
+    description: "封面、简介和状态都在这里处理。",
     icon: BookOpen,
   },
   {
     href: "/admin/creators",
     label: "去创作者页",
-    description: "集中处理公开署名和创作者归属。",
+    description: "补署名，查归属，收命名。",
     icon: PenSquare,
   },
   {
     href: "/admin/support",
     label: "去客服队列",
-    description: "先看最近有回复压力的工单。",
+    description: "先处理最靠前的工单。",
     icon: LifeBuoy,
   },
   {
     href: "/admin/merchandising",
     label: "去内容编排",
-    description: "首页和发现页的展示位在这里调整。",
+    description: "首页和发现位都从这里改。",
     icon: Sparkles,
   },
 ];
@@ -665,7 +665,7 @@ export default function AdminDashboardNew() {
               上来先看待处理，再看趋势。
             </h2>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-              上半部分是所选时间范围内的真实总量；下面的待处理事项、最近更新、客服、评论和订单，始终反映当前后台真实列表。
+              先处理会卡前台质量和运营节奏的内容，再看真实数据波动。
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -740,18 +740,18 @@ export default function AdminDashboardNew() {
             <CompactMetricCard
               label="当前最该先看"
               value={number.format(seriesInsights.drafts + seriesInsights.missingCredits + seriesInsights.missingCovers)}
-              detail="草稿、缺署名和缺封面的作品加在一起，是今天最容易卡住前台质量的地方。"
+              detail="草稿、缺署名和缺封面是当前最先要清掉的入口。"
               tone="accent"
             />
             <CompactMetricCard
               label="最近工单"
               value={number.format(workspace.support.length)}
-              detail={workspace.support.length > 0 ? "客服队列已经有真实工单，别让读者等太久。" : "当前没有拿到新的客服工单。"}
+              detail={workspace.support.length > 0 ? "客服队列里已经有真实工单。" : "当前没有新工单。"}
             />
             <CompactMetricCard
               label="最新评论"
               value={number.format(workspace.comments.length)}
-              detail={workspace.comments.length > 0 ? "最近评论已经进后台，适合顺手看一眼反馈。" : "当前没有拿到新的评论列表。"}
+              detail={workspace.comments.length > 0 ? "最近评论已经进后台。" : "当前没有新评论。"}
             />
           </div>
         </div>
@@ -772,7 +772,7 @@ export default function AdminDashboardNew() {
       <SurfacePanel appearance="light" tone="default" accent="blue">
         <SectionHeading
           title="待处理事项"
-          description="这块只放真正会影响前台体验和后台工作效率的内容状态。"
+          description="只保留会影响前台质量和日常运营的项目。"
         />
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {taskCards.map((card) => (
@@ -784,8 +784,8 @@ export default function AdminDashboardNew() {
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <SurfacePanel appearance="light" tone="default" accent="blue">
           <SectionHeading
-            title="最近更新的作品"
-            description="优先看最近真的有变动的作品，方便顺着处理封面、署名和章节。"
+            title="最近变动的作品"
+            description="顺着处理封面、署名和章节。"
           />
           <div className="mt-5 space-y-3">
             {seriesInsights.latestUpdated.length > 0 ? (
@@ -810,7 +810,7 @@ export default function AdminDashboardNew() {
             ) : (
               <EmptyListState
                 title="还没有作品目录数据"
-                description="当前没有拿到作品列表，所以这里不会再摆样板作品。"
+                description="当前没有作品列表。"
               />
             )}
           </div>
@@ -819,9 +819,9 @@ export default function AdminDashboardNew() {
         <SurfacePanel appearance="light" tone="default" accent="amber">
           <SectionHeading
             title="快捷入口"
-            description="不堆一堆没必要的导航，只保留后台首页最常用的几个入口。"
+            description="只留最常用的四个入口。"
           />
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {QUICK_ACTIONS.map((item) => {
               const Icon = item.icon;
 
@@ -829,7 +829,7 @@ export default function AdminDashboardNew() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="group flex items-start gap-4 rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.76)] px-4 py-4 transition hover:border-black/10 hover:bg-white/88"
+                  className="group flex min-h-[112px] items-start gap-4 rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.76)] px-4 py-4 transition hover:border-black/10 hover:bg-white/88"
                 >
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-black/6 bg-white/92 text-[var(--gush-accent,#2f58c6)]">
                     <Icon className="size-4.5" />
@@ -850,7 +850,7 @@ export default function AdminDashboardNew() {
         <SurfacePanel appearance="light" tone="default" accent="cyan">
           <SectionHeading
             title="客服队列"
-            description="看最近有更新的工单，不要把读者消息压太久。"
+            description="优先看最近有更新的工单。"
             action={
               <GhostLinkButton href="/admin/support">查看全部</GhostLinkButton>
             }
@@ -869,7 +869,7 @@ export default function AdminDashboardNew() {
             ) : (
               <EmptyListState
                 title="当前没有客服队列"
-                description="没有拿到工单列表时，这里就保持空白，不再伪造客服压力。"
+                description="当前没有工单。"
               />
             )}
           </div>
@@ -878,7 +878,7 @@ export default function AdminDashboardNew() {
         <SurfacePanel appearance="light" tone="default" accent="rose">
           <SectionHeading
             title="最近订单"
-            description="只看最近几笔真实订单，方便判断支付链路是不是正常。"
+            description="只看真实订单。"
             action={
               <GhostLinkButton href="/admin/orders">查看全部</GhostLinkButton>
             }
@@ -897,7 +897,7 @@ export default function AdminDashboardNew() {
             ) : (
               <EmptyListState
                 title="当前没有订单记录"
-                description="没有真实订单时，这里就不摆样板流水。"
+                description="当前没有真实订单。"
               />
             )}
           </div>
@@ -906,7 +906,7 @@ export default function AdminDashboardNew() {
         <SurfacePanel appearance="light" tone="default" accent="emerald">
           <SectionHeading
             title="最新评论"
-            description="最近几条读者评论放在这里，方便顺手看反馈。"
+            description="最近反馈一眼看完。"
             action={
               <GhostLinkButton href="/admin/comments">查看全部</GhostLinkButton>
             }
@@ -925,7 +925,7 @@ export default function AdminDashboardNew() {
             ) : (
               <EmptyListState
                 title="当前没有评论列表"
-                description="接口没有返回评论时，这里不会再摆样板反馈。"
+                description="当前没有评论。"
               />
             )}
           </div>

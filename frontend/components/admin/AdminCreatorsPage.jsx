@@ -102,7 +102,7 @@ function ActionButton({ children, className = "", ...props }) {
     <button
       type="button"
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition",
+        "inline-flex items-center justify-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition",
         "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
         className,
       )}
@@ -420,10 +420,15 @@ export default function AdminCreatorsPage() {
   return (
     <AdminShell
       title="创作者"
-      subtitle="把命名、团队署名和作品归属补扎实，后台和前台的创作者层才会可信。"
+      subtitle="集中处理署名、命名和作品归属。"
       actions={
         <div className="flex flex-wrap gap-2">
-          <ActionButton onClick={() => router.push("/admin/series")}>打开作品列表</ActionButton>
+          <ActionButton
+            onClick={() => router.push("/admin/series")}
+            className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+          >
+            打开作品列表
+          </ActionButton>
           <ActionButton onClick={() => handleOpenCreator("/creators")}>
             <Eye className="h-4 w-4" />
             查看前台创作者页
@@ -461,19 +466,18 @@ export default function AdminCreatorsPage() {
                 先补齐署名，再收命名。
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                这个页面把公开创作者署名变成可执行的后台工作台。先处理还没有公开署名的作品，
-                再合并重复拼写，前台创作者层才会清楚、稳定、可信。
+                先清缺失署名，再处理命名冲突，最后回看前台是否对齐。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <StatusPill tone="blue">内容优先后台</StatusPill>
                 <StatusPill tone="amber">
-                  仍有 {audit.stats.missingAuthorSeriesCount} 部作品缺少创作者署名
+                  缺署名 {audit.stats.missingAuthorSeriesCount}
                 </StatusPill>
                 <StatusPill tone={audit.stats.legacyAuthorOnlySeriesCount > 0 ? "amber" : "emerald"}>
-                  {audit.stats.legacyAuthorOnlySeriesCount} 部作品仍停留在旧 author 兼容层
+                  旧 author {audit.stats.legacyAuthorOnlySeriesCount}
                 </StatusPill>
                 <StatusPill tone={audit.stats.namingRiskCreatorCount > 0 ? "rose" : "emerald"}>
-                  {audit.stats.namingRiskCreatorCount} 处命名风险
+                  命名风险 {audit.stats.namingRiskCreatorCount}
                 </StatusPill>
               </div>
             </div>
@@ -486,8 +490,8 @@ export default function AdminCreatorsPage() {
                 {coverageRate}%
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {audit.stats.totalSeries} 部作品里，已有 {audit.stats.attributedSeriesCount} 部通过真实 credits
-                接入前台创作者层；另外 {audit.stats.legacyAuthorOnlySeriesCount} 部还停留在旧 author 兼容层。
+                {audit.stats.attributedSeriesCount} / {audit.stats.totalSeries} 部作品已接入真实 credits，
+                兼容层还剩 {audit.stats.legacyAuthorOnlySeriesCount} 部。
               </p>
             </div>
           </div>
@@ -497,25 +501,25 @@ export default function AdminCreatorsPage() {
           <MetricCard
             title="创作者条目"
             value={audit.stats.creatorCount.toLocaleString()}
-            hint="已经进入真实 Creator / SeriesCredit 模型、可以稳定聚合展示的创作者或团队条目。"
+            hint="已进入真实 Creator / SeriesCredit 模型。"
             tone="blue"
           />
           <MetricCard
             title="真实 credits 已接入"
             value={audit.stats.structuredCreatorSeriesCount.toLocaleString()}
-            hint="这部分作品已经能稳定进入前台创作者目录和作品页署名区。"
+            hint="前台作品页和创作者目录已可直接使用。"
             tone="emerald"
           />
           <MetricCard
             title="旧 author 兼容层"
             value={audit.stats.legacyAuthorOnlySeriesCount.toLocaleString()}
-            hint="这些作品还没真正迁到 Creator / SeriesCredit，只是暂时靠旧 author 字段兜底。"
+            hint="还没迁进真实 credits 的作品。"
             tone="amber"
           />
           <MetricCard
             title="缺少公开署名"
             value={audit.stats.missingAuthorSeriesCount.toLocaleString()}
-            hint="这些作品目前既没有真实 credits，也没有可接受的公开署名。"
+            hint="前台暂时还拿不到可展示的创作者身份。"
             tone="rose"
           />
         </div>
@@ -527,7 +531,7 @@ export default function AdminCreatorsPage() {
                 筛选创作者目录
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                可以按创作者名、作品标题或题材搜索，优先处理风险最高的署名问题。
+                按创作者名、作品标题或题材快速定位。
               </p>
             </div>
             <p className="text-sm text-slate-500">
@@ -571,7 +575,7 @@ export default function AdminCreatorsPage() {
                   命名清理
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  先处理这里，避免前台创作者目录把同一人拆成多个公开条目。
+                  先处理这里，避免前台把同一人拆成多个条目。
                 </p>
               </div>
               <AlertTriangle className="mt-1 h-5 w-5 text-amber-500" />
@@ -580,7 +584,7 @@ export default function AdminCreatorsPage() {
             {namingRiskPreview.length === 0 ? (
               <EmptyState
                 title="当前没有命名冲突"
-                description="现有创作者命名已经足够稳定，前台目录不会被拆散。"
+                description="当前命名稳定。"
               />
             ) : (
               <div className="space-y-3">
@@ -608,8 +612,11 @@ export default function AdminCreatorsPage() {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2">
-                        <ActionButton onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}>
+                      <div className="grid w-full gap-2 sm:grid-cols-2">
+                        <ActionButton
+                          onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
+                          className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                        >
                           <Edit3 className="h-4 w-4" />
                           编辑代表作品
                         </ActionButton>
@@ -634,7 +641,7 @@ export default function AdminCreatorsPage() {
                   缺少创作者署名的作品
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  这些作品还没有可用于前台作品页和创作者发现层的公开创作者身份。
+                  这些作品还没有可公开展示的创作者身份。
                 </p>
               </div>
               <Users className="mt-1 h-5 w-5 text-cyan-500" />
@@ -643,7 +650,7 @@ export default function AdminCreatorsPage() {
             {missingCreatorPreview.length === 0 ? (
               <EmptyState
                 title="当前没有缺失署名"
-                description="现有作品集在创作者覆盖上已经能支撑前台展示。"
+                description="当前作品都已有可用署名。"
               />
             ) : (
               <div className="space-y-3">
@@ -666,7 +673,10 @@ export default function AdminCreatorsPage() {
                       </p>
                     </div>
 
-                    <ActionButton onClick={() => handleOpenSeries(series.id)}>
+                    <ActionButton
+                      onClick={() => handleOpenSeries(series.id)}
+                      className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                    >
                       <Edit3 className="h-4 w-4" />
                       补创作者署名
                     </ActionButton>
@@ -680,21 +690,21 @@ export default function AdminCreatorsPage() {
         <SurfacePanel appearance="light" accent="amber" className="space-y-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                仍在旧 author 兼容层的作品
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                这些作品已经有可读署名，但还没真正迁进 Creator / SeriesCredit。先把它们迁完，后台和前台才算一条真链路。
-              </p>
+                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                  旧 author 兼容项
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  这些作品还能读，但还没真正迁进 Creator / SeriesCredit。
+                </p>
             </div>
             <BookOpen className="mt-1 h-5 w-5 text-amber-500" />
           </div>
 
           {legacyAuthorPreview.length === 0 ? (
-            <EmptyState
-              title="当前没有旧 author 兼容项"
-              description="现有可读署名已经不再依赖旧 author 字段兜底。"
-            />
+              <EmptyState
+                title="当前没有兼容项"
+                description="署名已不再依赖旧 author 字段。"
+              />
           ) : (
             <div className="space-y-3">
               {legacyAuthorPreview.map((series) => (
@@ -714,7 +724,10 @@ export default function AdminCreatorsPage() {
                     </p>
                   </div>
 
-                  <ActionButton onClick={() => handleOpenSeries(series.id)}>
+                  <ActionButton
+                    onClick={() => handleOpenSeries(series.id)}
+                    className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                  >
                     <Edit3 className="h-4 w-4" />
                     迁到真实 credits
                   </ActionButton>
@@ -731,7 +744,7 @@ export default function AdminCreatorsPage() {
                 创作者目录
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                把公开创作者条目的覆盖率、命名状态、发布情况和前台路径放在一个地方统一核对。
+                在一个地方核对覆盖率、命名状态和前台路径。
               </p>
             </div>
             <p className="text-sm text-slate-500">
@@ -826,8 +839,11 @@ export default function AdminCreatorsPage() {
                       </div>
                     ) : null}
 
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      <ActionButton onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}>
+                    <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                      <ActionButton
+                        onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
+                        className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                      >
                         <Edit3 className="h-4 w-4" />
                         编辑代表作品
                       </ActionButton>
@@ -896,8 +912,11 @@ export default function AdminCreatorsPage() {
                                 </p>
                               </div>
 
-                              <div className="flex flex-wrap gap-2">
-                                <ActionButton onClick={() => handleOpenSeries(series.id)}>
+                              <div className="grid w-full gap-2 sm:grid-cols-2">
+                                <ActionButton
+                                  onClick={() => handleOpenSeries(series.id)}
+                                  className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                                >
                                   <Edit3 className="h-4 w-4" />
                                   编辑作品
                                 </ActionButton>
@@ -924,7 +943,7 @@ export default function AdminCreatorsPage() {
           legacyAuthorPreview.length === 0 ? (
             <EmptyState
               title="当前还没有创作者数据"
-              description="先到作品详情页补创作者署名，后台和前台的创作者层才能开始成形。"
+              description="先到作品详情页补署名。"
             />
           ) : null}
         </SurfacePanel>
@@ -936,7 +955,7 @@ export default function AdminCreatorsPage() {
                 建议处理顺序
               </p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                先补缺失署名，再合并命名变体，最后抽查前台创作者页。这条顺序最容易用最小编辑成本换来最快的前台提升。
+                先补缺失署名，再清命名变体，最后抽查前台页。
               </p>
             </div>
 
