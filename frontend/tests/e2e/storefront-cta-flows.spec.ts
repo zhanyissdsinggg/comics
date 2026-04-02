@@ -188,6 +188,12 @@ test.describe("Storefront CTA flows", () => {
     await expect(page.getByRole("heading", { name: 'Results for "kingdom"' })).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(page.getByText("1 match.")).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("heading", { name: "Mira Dane", exact: true })).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
 
     const creatorCta = page.getByRole("button", { name: "View Creator", exact: true }).first();
     await expect(creatorCta).toBeVisible({ timeout: UI_TIMEOUT_MS });

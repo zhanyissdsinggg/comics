@@ -1,6 +1,5 @@
 import CreatorPage from "../../../components/creators/CreatorPage";
 import StructuredDataScript from "../../../components/common/StructuredDataScript";
-import { redirect } from "next/navigation";
 import { createPageMetadata } from "../../../lib/seo";
 import {
   buildCreatorPathFromSlug,
@@ -36,14 +35,10 @@ export default async function CreatorRoutePage({ params }) {
   const creatorPayload = await loadCreatorSeoPayload(creatorSlug);
   const hasCreatorItems = Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
 
-  if (!hasCreatorItems) {
-    redirect("/creators");
-  }
-
   const structuredData = buildCreatorStructuredData({
     creatorName: creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug),
     creatorPath: buildCreatorPathFromSlug(creatorSlug),
-    items: creatorPayload?.items || [],
+    items: hasCreatorItems ? creatorPayload.items : [],
   });
 
   return (
@@ -52,7 +47,7 @@ export default async function CreatorRoutePage({ params }) {
       <CreatorPage
         creatorSlug={creatorSlug}
         initialCatalog={creatorPayload?.items || []}
-        hasInitialCatalog={Boolean(creatorPayload)}
+        hasInitialCatalog={hasCreatorItems}
       />
     </>
   );

@@ -222,7 +222,7 @@ test.describe("Library merchandising", () => {
       has: page.getByRole("heading", { name: "Recommended for You" }),
     });
 
-    await expect(page.getByRole("heading", { name: "Your next read should be obvious." })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Your next read." })).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(recommendedRail.getByRole("button", { name: /Midnight Ledger/i })).toBeVisible({

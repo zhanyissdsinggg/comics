@@ -26,7 +26,7 @@ test.describe("Support page", () => {
     await expect(page.locator("#support-topic")).toBeVisible();
     await expect(page.locator("#support-email")).toBeVisible();
     await expect(page.locator("#support-order-id")).toBeVisible();
-    await expect(page.getByText("We usually reply in 1 to 2 business days.")).toBeVisible();
+    await expect(page.getByText("Replies usually take 1 to 2 business days.")).toBeVisible();
 
     await page.selectOption("#support-topic", "billing");
     await page.fill("#support-email", "reader@example.com");
