@@ -1,7 +1,25 @@
 import { expect, test } from "@playwright/test";
 
-const ROUTES_TO_CHECK = ["/", "/faq", "/support", "/admin/tracking"];
-const MOJIBAKE_PATTERN = /[�]|鈥|闁|鑰佺|锛|鏈€|淇濆|杩/;
+const ROUTES_TO_CHECK = [
+  "/",
+  "/faq",
+  "/support",
+  "/library",
+  "/search",
+  "/creators",
+  "/rankings",
+  "/store",
+  "/subscribe",
+  "/admin/tracking",
+];
+
+const MOJIBAKE_PATTERNS = [
+  /Ã[\w€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ]/,
+  /â€™|â€œ|â€|â€“|â€”|â€¢/,
+  /鈥[^\s]?/,
+  /锟斤拷/,
+  /\uFFFD/,
+];
 
 test.describe("Copy integrity", () => {
   for (const route of ROUTES_TO_CHECK) {
@@ -13,7 +31,10 @@ test.describe("Copy integrity", () => {
       await expect(page.locator("body")).not.toBeEmpty();
 
       const bodyText = (await page.locator("body").innerText()).replace(/\s+/g, " ");
-      expect(bodyText).not.toMatch(MOJIBAKE_PATTERN);
+
+      for (const pattern of MOJIBAKE_PATTERNS) {
+        expect(bodyText).not.toMatch(pattern);
+      }
     });
   }
 });
