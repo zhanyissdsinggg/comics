@@ -106,8 +106,27 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function resolvePublicCreatorLabel(series) {
+  const directCreator = String(series?.creator?.label || "").trim();
+  if (directCreator) {
+    return directCreator;
+  }
+
+  if (Array.isArray(series?.creatorCredits)) {
+    const credits = series.creatorCredits
+      .map((entry) => String(entry?.name || "").trim())
+      .filter(Boolean);
+
+    if (credits.length > 0) {
+      return credits.join(", ");
+    }
+  }
+
+  return String(series?.author || "").trim();
+}
+
 function hasPublicCreatorCredit(series) {
-  return Boolean(String(series?.author || "").trim());
+  return Boolean(resolvePublicCreatorLabel(series));
 }
 
 function getSeriesById(seriesList, seriesId) {
@@ -125,11 +144,10 @@ function buildFrontendAuditSpecs(seriesCatalog) {
       route: "/",
       required: [
         "Read original comics and novels in one place.",
-        "Featured Series",
+        "Start Reading",
         "Browse Comics",
         "Browse Novels",
-        "Meet the Creators",
-        "Need Help?",
+        "Featured",
       ],
       forbidden: LEGACY_TERMS,
     },
@@ -137,17 +155,16 @@ function buildFrontendAuditSpecs(seriesCatalog) {
       route: "/rankings",
       required: [
         "Featured Series",
-        "Editor's picks and reader-friendly starting points.",
-        "Browse Comics",
-        "Browse Novels",
+        "Featured stories. Editorial picks across the catalog.",
+        "Meet the Creators",
       ],
       forbidden: [...LEGACY_TERMS, "Rank #", "All time", "Weekly", "Monthly"],
     },
     hasRealCreators
       ? {
           route: "/creators",
-          required: ["Meet the Creators", "Featured Creators", "All Creators"],
-          forbidden: ["Story team", "The team behind"],
+          required: ["Meet the Creators", "Featured Creators", "Start with These Stories", "All Creators"],
+          forbidden: ["Story team", "The team behind", CREATOR_FALLBACK_LABEL, CREATOR_FALLBACK_DETAIL],
         }
       : {
           route: "/creators",
@@ -156,7 +173,7 @@ function buildFrontendAuditSpecs(seriesCatalog) {
         },
   ];
 
-  for (const seriesId of ["series-008", "series-012", "series-005"]) {
+  for (const seriesId of ["series-008", "series-010", "series-005"]) {
     const series = getSeriesById(seriesCatalog, seriesId);
     if (!series) {
       continue;
@@ -166,7 +183,7 @@ function buildFrontendAuditSpecs(seriesCatalog) {
       route: `/series/${seriesId}`,
       required: [
         String(series.title || "").trim(),
-        hasPublicCreatorCredit(series) ? String(series.author).trim() : CREATOR_FALLBACK_LABEL,
+        hasPublicCreatorCredit(series) ? resolvePublicCreatorLabel(series) : CREATOR_FALLBACK_LABEL,
       ].filter(Boolean),
       requiredAny: [["Read Chapter 1", "Start Reading", "Continue Reading"]],
       forbidden: hasPublicCreatorCredit(series)
