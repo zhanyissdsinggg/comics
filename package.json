@@ -19,6 +19,7 @@
     "ops:oncall-watchdog": "node scripts/ops/oncall-watchdog.mjs",
     "ops:chaos-drill": "node scripts/ops/chaos-drill.mjs",
     "ops:security-baseline": "node scripts/ops/security-baseline-check.mjs",
+    "ops:admin-schema-audit": "node scripts/ops/admin-schema-audit.mjs",
     "ops:post-deploy": "node scripts/ops/post-deploy-check.mjs",
     "ops:load-smoke": "node scripts/ops/load-smoke.mjs",
     "analyze": "npm --prefix frontend run analyze",
