@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import Cover from "../common/Cover";
 import SurfacePanel from "../common/SurfacePanel";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
@@ -62,7 +62,6 @@ export default function SearchCreatorMatchesPanel({
   resultsLength = 0,
   searchPath = "/search",
 }) {
-  const router = useRouter();
   const matchedCreators = useMemo(() => {
     const creatorDirectory = buildCreatorDirectory(catalog);
     const normalizedQuery = normalizeSearchValue(query);
@@ -156,6 +155,23 @@ export default function SearchCreatorMatchesPanel({
       .slice(0, resultsLength === 0 ? 3 : 2);
   }, [catalog, loading, query, resultsLength]);
 
+  const getCreatorHref = useCallback(
+    (creator, entryPoint = "SEARCH_CREATOR_MATCH", campaignId = "creator_match_panel") => {
+      if (!creator?.path) {
+        return "/creators";
+      }
+
+      return buildPathWithAttribution(creator.path, {
+        entryPoint,
+        campaignId,
+        sourcePath: searchPath,
+        sourceSeriesId: creator.spotlightSeries?.id || undefined,
+        returnTo: creator.path,
+      });
+    },
+    [searchPath],
+  );
+
   const handleCreatorClick = useCallback(
     (creator, entryPoint = "SEARCH_CREATOR_MATCH", campaignId = "creator_match_panel") => {
       if (!creator?.path) {
@@ -170,18 +186,8 @@ export default function SearchCreatorMatchesPanel({
         query: query || undefined,
         sourceSeriesId: creator.spotlightSeries?.id || undefined,
       });
-
-      router.push(
-        buildPathWithAttribution(creator.path, {
-          entryPoint,
-          campaignId,
-          sourcePath: searchPath,
-          sourceSeriesId: creator.spotlightSeries?.id || undefined,
-          returnTo: creator.path,
-        }),
-      );
     },
-    [query, router, searchPath],
+    [query],
   );
 
   const shouldShowPanel = Boolean(query) && !loading && resultsLength < 4;
@@ -208,13 +214,13 @@ export default function SearchCreatorMatchesPanel({
           </h2>
         </div>
         {leadCreatorMatch ? (
-          <button
-            type="button"
+          <Link
+            href={getCreatorHref(leadCreatorMatch)}
             onClick={() => handleCreatorClick(leadCreatorMatch)}
             className="rounded-full border border-black/8 bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
           >
             View Creator
-          </button>
+          </Link>
         ) : null}
       </div>
 
@@ -255,13 +261,13 @@ export default function SearchCreatorMatchesPanel({
               </div>
 
               <div className="pt-1">
-                <button
-                  type="button"
+                <Link
+                  href={getCreatorHref(creator)}
                   onClick={() => handleCreatorClick(creator)}
                   className="rounded-full border border-black/8 bg-white/84 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
                 >
                   View Creator
-                </button>
+                </Link>
               </div>
             </div>
           </article>

@@ -202,7 +202,7 @@ test.describe("Library attribution", () => {
     const response = await page.goto("/library", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Your next read should be obvious." })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Your next read." })).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(page.getByRole("button", { name: "Resume now" })).toBeVisible({

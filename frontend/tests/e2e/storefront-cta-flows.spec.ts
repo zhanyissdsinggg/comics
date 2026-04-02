@@ -195,7 +195,7 @@ test.describe("Storefront CTA flows", () => {
       timeout: UI_TIMEOUT_MS,
     });
 
-    const creatorCta = page.getByRole("button", { name: "View Creator", exact: true }).first();
+    const creatorCta = page.getByRole("link", { name: "View Creator", exact: true }).first();
     await expect(creatorCta).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
     await Promise.all([
