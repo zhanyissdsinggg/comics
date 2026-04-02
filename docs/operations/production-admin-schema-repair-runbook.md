@@ -1,11 +1,12 @@
 # Production Admin Schema Repair Runbook
 
-Use this runbook when the deployed backend is already on the latest code, but the production database is still missing admin/support schema pieces.
+Use this runbook when the deployed backend is already on the latest code, but the production database is still missing admin/support/order schema pieces.
 
 Current target repairs:
 
 - apply pending Prisma migration `20260331170000_add_admin_members`
 - apply pending Prisma migration `20260402033000_repair_support_tickets_optional_columns`
+- apply pending Prisma migration `20260402104500_repair_orders_snapshot_columns`
 
 This runbook is production-oriented. Do not use `prisma db push`.
 
@@ -28,7 +29,8 @@ npm run ops:admin-schema-audit
 Expected before repair on the currently observed production-like database:
 
 - `admin_members_exists=false`
-- `missing_support_ticket_optional_columns=replyEmail,orderId,topic`
+- `missing_support_ticket_columns=replyEmail,orderId,topic`
+- `missing_order_columns=priceSnapshot,idempotencyKey`
 
 Then confirm Prisma migration status:
 
@@ -40,6 +42,7 @@ Expected before repair:
 
 - pending `20260331170000_add_admin_members`
 - pending `20260402033000_repair_support_tickets_optional_columns`
+- pending `20260402104500_repair_orders_snapshot_columns`
 
 ## 3) Safe Execution Order
 
@@ -84,7 +87,8 @@ OPS_SCHEMA_REQUIRED=1 npm run ops:admin-schema-audit
 Expected:
 
 - `admin_members_exists=true`
-- `missing_support_ticket_optional_columns=(none)`
+- `missing_support_ticket_columns=(none)`
+- `missing_order_columns=(none)`
 - exit code `0`
 
 ## 6) Admin Runtime Acceptance
@@ -125,12 +129,14 @@ API checks worth confirming directly:
 - `GET /api/admin/members/meta`
 - `POST /api/admin/members`
 - `GET /api/admin/support?page=1&pageSize=1`
+- `GET /api/admin/orders?page=1&pageSize=1`
 
 Expected after repair:
 
 - admin members are backed by the real `admin_members` table
 - admin member write endpoints no longer return migration-related `503`
 - support list no longer depends on compatibility fallback for missing `replyEmail/orderId/topic`
+- admin orders no longer depend on fallback for missing `priceSnapshot/idempotencyKey`
 
 ## 8) Rollback Trigger Conditions
 
@@ -140,6 +146,7 @@ Pause and roll back if any of these happen:
 - admin login starts returning `500`
 - `/api/admin/members` returns `500`
 - `/api/admin/support` returns `500`
+- `/api/admin/orders` returns `500`
 - post-migration schema audit still reports missing columns
 
 Use the existing rollback guide if rollback is required:
@@ -148,16 +155,17 @@ Use the existing rollback guide if rollback is required:
 
 ## 9) Current Reality
 
-Before this repair, the codebase is already runtime-compatible with the older database:
+Before this repair, the codebase may still be partially compatible with the older database:
 
 - admin login falls back to env-only mode when `admin_members` is missing
-- admin support routes degrade cleanly when `support_tickets` optional columns are missing
 
-That compatibility is a safety net, not the target end state.
+That compatibility is a migration safety net, not the target end state.
 
 The target end state is:
 
 - database matches Prisma migration history
 - `admin_members` exists
 - `support_tickets.replyEmail/orderId/topic` exist
+- `orders.priceSnapshot/idempotencyKey` exist
+- support routes require the migrated `support_tickets` schema and no longer probe for missing columns at runtime
 - admin runtime no longer relies on those compatibility fallbacks during normal operation

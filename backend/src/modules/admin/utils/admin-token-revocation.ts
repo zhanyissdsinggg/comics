@@ -1,4 +1,4 @@
-import { getRedisClient } from "../../../common/redis/client";
+import { getRedisClient, isRedisConfigured } from "../../../common/redis/client";
 import { logger } from "../../../common/logger/winston.init";
 
 const IN_MEMORY_REVOKED_TOKENS = new Map<string, number>();
@@ -35,7 +35,9 @@ export async function revokeAdminTokenJti(
 
   const redis = getRedisClient();
   if (!redis) {
-    logger.warn(`[admin-auth] redis unavailable, using in-memory revocation for ${label}`);
+    if (isRedisConfigured()) {
+      logger.warn(`[admin-auth] redis unavailable, using in-memory revocation for ${label}`);
+    }
     return true;
   }
 

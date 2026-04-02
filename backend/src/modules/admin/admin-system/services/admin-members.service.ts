@@ -38,6 +38,7 @@ const ADMIN_MEMBER_SORT_FIELDS = new Set([
   "status",
   "keySlot",
 ]);
+const ADMIN_MEMBER_ENV_SYNC_TTL_MS = 5 * 60 * 1000;
 
 type AdminMembersStorageMode = "unknown" | "database" | "env_compat";
 
@@ -107,6 +108,8 @@ function normalizeSortOrder(value: unknown): Prisma.SortOrder {
 @Injectable()
 export class AdminMembersService {
   private storageMode: AdminMembersStorageMode = "unknown";
+  private lastEnvSyncAt = 0;
+  private envSyncPromise: Promise<{ created: number; totalSlots: number }> | null = null;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -116,57 +119,80 @@ export class AdminMembersService {
       return { created: 0, totalSlots: 0 };
     }
 
-    const existingMembers = await this.runWithMemberStoreFallback(
-      () => this.prisma.adminMember.findMany({
-        where: {
-          keySlot: { in: availableSlots },
-        },
-        select: {
-          id: true,
-          keySlot: true,
-        },
-      }),
-      () => [],
-    );
-    const existingSlots = new Set(
-      existingMembers
-        .map((member) => member.keySlot)
-        .filter((slot): slot is number => typeof slot === "number"),
-    );
-
-    let created = 0;
-    for (const slot of availableSlots) {
-      if (existingSlots.has(slot)) {
-        continue;
-      }
-
-      const createdMember = await this.runWithMemberStoreFallback(
-        () => this.prisma.adminMember.create({
-          data: {
-            name: `Admin key slot ${slot}`,
-            role: this.getConfiguredRoleForSlot(slot),
-            status: ADMIN_MEMBER_STATUS_ACTIVE,
-            keySlot: slot,
-            source: "env_seed",
-          },
-        }),
-        () => null,
-      );
-
-      if (!createdMember) {
-        return {
-          created,
-          totalSlots: availableSlots.length,
-        };
-      }
-
-      created += 1;
+    const now = Date.now();
+    if (
+      this.storageMode === "database"
+      && this.lastEnvSyncAt > 0
+      && now - this.lastEnvSyncAt < ADMIN_MEMBER_ENV_SYNC_TTL_MS
+    ) {
+      return { created: 0, totalSlots: availableSlots.length };
     }
 
-    return {
-      created,
-      totalSlots: availableSlots.length,
-    };
+    if (this.envSyncPromise) {
+      return this.envSyncPromise;
+    }
+
+    this.envSyncPromise = (async () => {
+      const existingMembers = await this.runWithMemberStoreFallback(
+        () => this.prisma.adminMember.findMany({
+          where: {
+            keySlot: { in: availableSlots },
+          },
+          select: {
+            id: true,
+            keySlot: true,
+          },
+        }),
+        () => [],
+      );
+      const existingSlots = new Set(
+        existingMembers
+          .map((member) => member.keySlot)
+          .filter((slot): slot is number => typeof slot === "number"),
+      );
+
+      let created = 0;
+      for (const slot of availableSlots) {
+        if (existingSlots.has(slot)) {
+          continue;
+        }
+
+        const createdMember = await this.runWithMemberStoreFallback(
+          () => this.prisma.adminMember.create({
+            data: {
+              name: `Admin key slot ${slot}`,
+              role: this.getConfiguredRoleForSlot(slot),
+              status: ADMIN_MEMBER_STATUS_ACTIVE,
+              keySlot: slot,
+              source: "env_seed",
+            },
+          }),
+          () => null,
+        );
+
+        if (!createdMember) {
+          this.lastEnvSyncAt = Date.now();
+          return {
+            created,
+            totalSlots: availableSlots.length,
+          };
+        }
+
+        created += 1;
+      }
+
+      this.lastEnvSyncAt = Date.now();
+      return {
+        created,
+        totalSlots: availableSlots.length,
+      };
+    })();
+
+    try {
+      return await this.envSyncPromise;
+    } finally {
+      this.envSyncPromise = null;
+    }
   }
 
   async listMembers(query: Record<string, unknown>) {
@@ -538,24 +564,12 @@ export class AdminMembersService {
   }
 
   async touchLastLogin(adminId: string): Promise<void> {
-    const member = await this.runWithMemberStoreFallback(
-      () => this.prisma.adminMember.findUnique({
-        where: { id: adminId },
-        select: { id: true },
-      }),
-      () => null,
-    );
-
-    if (!member) {
-      return;
-    }
-
     await this.runWithMemberStoreFallback(
-      () => this.prisma.adminMember.update({
+      () => this.prisma.adminMember.updateMany({
         where: { id: adminId },
         data: { lastLoginAt: new Date() },
       }),
-      () => null,
+      () => ({ count: 0 }),
     );
   }
 

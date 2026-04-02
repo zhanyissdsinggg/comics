@@ -22,11 +22,6 @@ import {
 import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { AdminPermission } from "../../permissions/admin-permissions";
-import {
-  getMissingSupportTicketOptionalColumn,
-  SUPPORT_TICKET_OPTIONAL_COLUMNS,
-  type SupportTicketOptionalColumn,
-} from "../../../support/support-ticket-compat";
 
 const SUPPORT_SORT_FIELDS = new Set(["createdAt", "updatedAt", "status"]);
 type SupportTicketListRow = {
@@ -70,62 +65,33 @@ export class AdminSupportController {
     const sortOrder = parseSortOrder(req.query.sortOrder);
     const orderBy = parseSupportOrderBy(req.query.sortBy, sortOrder);
 
-    const loadPage = async (supportedColumns: Set<SupportTicketOptionalColumn>) => {
-      const where = this.buildListWhere(search, status, supportedColumns);
-      const [tickets, total] = await Promise.all([
-        this.prisma.supportTicket.findMany({
-          where,
-          select: this.buildListSelect(supportedColumns),
-          orderBy,
-          take: pageSize,
-          skip: offset,
-        }),
-        this.prisma.supportTicket.count({ where }),
-      ]);
+    const where = this.buildListWhere(search, status);
+    const [tickets, total] = await Promise.all([
+      this.prisma.supportTicket.findMany({
+        where,
+        select: this.buildListSelect(),
+        orderBy,
+        take: pageSize,
+        skip: offset,
+      }),
+      this.prisma.supportTicket.count({ where }),
+    ]);
 
-      return {
-        tickets: tickets as SupportTicketListRow[],
-        total,
-        supportedColumns: new Set(supportedColumns),
-      };
-    };
-
-    const supportedColumns = new Set<SupportTicketOptionalColumn>(SUPPORT_TICKET_OPTIONAL_COLUMNS);
-    let result: {
-      tickets: SupportTicketListRow[];
-      total: number;
-      supportedColumns: Set<SupportTicketOptionalColumn>;
-    };
-    while (true) {
-      try {
-        result = await loadPage(supportedColumns);
-        break;
-      } catch (error) {
-        const missingColumn = getMissingSupportTicketOptionalColumn(error);
-        if (!missingColumn || !supportedColumns.has(missingColumn)) {
-          throw error;
-        }
-        supportedColumns.delete(missingColumn);
-      }
-    }
-
-    const normalized = result.tickets.map((ticket) => ({
+    const normalized = (tickets as SupportTicketListRow[]).map((ticket) => ({
       id: ticket.id,
       userId: ticket.userId,
-      replyEmail: result.supportedColumns.has("replyEmail") ? ticket.replyEmail || null : null,
-      orderId: result.supportedColumns.has("orderId") ? ticket.orderId || null : null,
-      topic: result.supportedColumns.has("topic") ? ticket.topic || null : null,
+      replyEmail: ticket.replyEmail || null,
+      orderId: ticket.orderId || null,
+      topic: ticket.topic || null,
       subject: ticket.subject,
       message: ticket.message,
       status: ticket.status,
-      userEmail:
-        ticket.user?.email ||
-        (result.supportedColumns.has("replyEmail") ? ticket.replyEmail || null : null),
+      userEmail: ticket.user?.email || ticket.replyEmail || null,
       createdAt: ticket.createdAt,
       updatedAt: ticket.updatedAt,
     }));
 
-    return buildPaginationResult(normalized, result.total, page, pageSize);
+    return buildPaginationResult(normalized, total, page, pageSize);
   }
 
   @Post(":id/reply")
@@ -187,7 +153,6 @@ export class AdminSupportController {
   private buildListWhere(
     search: string,
     status: string,
-    supportedColumns: Set<SupportTicketOptionalColumn>,
   ): Prisma.SupportTicketWhereInput {
     const where: Prisma.SupportTicketWhereInput = {};
 
@@ -195,15 +160,9 @@ export class AdminSupportController {
       where.OR = [
         { id: { contains: search, mode: "insensitive" } },
         { userId: { contains: search, mode: "insensitive" } },
-        ...(supportedColumns.has("replyEmail")
-          ? [{ replyEmail: { contains: search, mode: "insensitive" as Prisma.QueryMode } }]
-          : []),
-        ...(supportedColumns.has("orderId")
-          ? [{ orderId: { contains: search, mode: "insensitive" as Prisma.QueryMode } }]
-          : []),
-        ...(supportedColumns.has("topic")
-          ? [{ topic: { contains: search, mode: "insensitive" as Prisma.QueryMode } }]
-          : []),
+        { replyEmail: { contains: search, mode: "insensitive" as Prisma.QueryMode } },
+        { orderId: { contains: search, mode: "insensitive" as Prisma.QueryMode } },
+        { topic: { contains: search, mode: "insensitive" as Prisma.QueryMode } },
         { subject: { contains: search, mode: "insensitive" } },
         { message: { contains: search, mode: "insensitive" } },
         {
@@ -223,18 +182,18 @@ export class AdminSupportController {
     return where;
   }
 
-  private buildListSelect(supportedColumns: Set<SupportTicketOptionalColumn>): Prisma.SupportTicketSelect {
+  private buildListSelect(): Prisma.SupportTicketSelect {
     return {
       id: true,
       userId: true,
-      ...(supportedColumns.has("orderId") ? { orderId: true } : {}),
-      ...(supportedColumns.has("topic") ? { topic: true } : {}),
+      orderId: true,
+      topic: true,
       subject: true,
       message: true,
       status: true,
       createdAt: true,
       updatedAt: true,
-      ...(supportedColumns.has("replyEmail") ? { replyEmail: true } : {}),
+      replyEmail: true,
       user: {
         select: { email: true },
       },

@@ -14,7 +14,6 @@ import {
 import { Prisma } from "@prisma/client";
 import { Request } from "express";
 import { getTopupPackage } from "../../../../common/config/topup";
-import { logger } from "../../../../common/logger/winston.init";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
 import { getIdempotencyRecord, setIdempotencyRecord } from "../../../../common/storage/limits";
@@ -31,10 +30,16 @@ import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { AdminPermission } from "../../permissions/admin-permissions";
 import { CreateOrderDto } from "../dtos/admin-billing.dto";
 
-type RawOrderRow = Record<string, unknown> & {
+type OrderListRow = Record<string, unknown> & {
   id?: string;
   orderId?: string;
   order_id?: string;
+  userId?: string;
+  idempotencyKey?: string | null;
+  amount?: number;
+  currency?: string;
+  status?: string;
+  createdAt?: Date;
 };
 
 type AdjustResponse = {
@@ -46,19 +51,15 @@ type AdjustResponse = {
   };
 };
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
-function resolveOrderId(order: RawOrderRow): string {
-  if (typeof order.id === "string" && order.id) {
-    return order.id;
+function resolveOrderId(order: OrderListRow): string {
+  const explicitOrderId = typeof order.orderId === "string" ? order.orderId.trim() : "";
+  if (explicitOrderId) {
+    return explicitOrderId;
   }
-  if (typeof order.orderId === "string" && order.orderId) {
-    return order.orderId;
-  }
-  if (typeof order.order_id === "string" && order.order_id) {
-    return order.order_id;
+  const snakeCaseOrderId =
+    typeof order.order_id === "string" ? order.order_id.trim() : "";
+  if (snakeCaseOrderId) {
+    return snakeCaseOrderId;
   }
   return "";
 }
@@ -69,6 +70,10 @@ function normalizeOrderRecord<T extends Record<string, unknown>>(order: T): T & 
     currency: normalizeUsStorefrontCurrencyCode(order?.currency),
     orderId: resolveOrderId(order),
   };
+}
+
+function readSortOrder(value: unknown): "asc" | "desc" {
+  return String(value || "desc").trim().toLowerCase() === "asc" ? "asc" : "desc";
 }
 
 function readIdempotencyKey(body: CreateOrderDto, req: Request): string | null {
@@ -100,36 +105,54 @@ export class AdminOrdersController {
   async list(@Req() req: Request) {
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
+    const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+    const sortBy = typeof req.query.sortBy === "string" ? req.query.sortBy.trim() : "createdAt";
+    const sortOrder = readSortOrder(req.query.sortOrder);
+    const status = typeof req.query.status === "string" ? req.query.status.trim() : "";
+    const where = {
+      ...(status ? { status } : {}),
+      ...(search
+        ? {
+            OR: [
+              { id: { contains: search, mode: "insensitive" as const } },
+              { userId: { contains: search, mode: "insensitive" as const } },
+              { idempotencyKey: { contains: search, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    };
+    const orderBy =
+      sortBy === "amount"
+        ? { amount: sortOrder }
+        : sortBy === "status"
+          ? { status: sortOrder }
+          : { createdAt: sortOrder };
 
-    try {
-      const [orders, total] = await Promise.all([
-        this.prisma.order.findMany({
-          orderBy: { createdAt: "desc" },
-          take: pageSize,
-          skip: offset,
-        }),
-        this.prisma.order.count(),
-      ]);
+    const [orders, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where,
+        select: {
+          id: true,
+          userId: true,
+          idempotencyKey: true,
+          amount: true,
+          currency: true,
+          status: true,
+          createdAt: true,
+        },
+        orderBy,
+        take: pageSize,
+        skip: offset,
+      }),
+      this.prisma.order.count({ where }),
+    ]);
 
-      return buildPaginationResult(
-        orders.map((order) => normalizeOrderRecord(order)),
-        total,
-        page,
-        pageSize,
-      );
-    } catch (error: unknown) {
-      logger.warn("[admin-orders] prisma query failed, fallback to raw sql", {
-        message: getErrorMessage(error),
-      });
-
-      const [rawOrders, totalRows] = await Promise.all([
-        this.prisma.$queryRaw<RawOrderRow[]>`SELECT * FROM "orders" LIMIT ${pageSize} OFFSET ${offset}`,
-        this.prisma.$queryRaw<Array<{ count: number | bigint | string }>>`SELECT COUNT(*)::int AS count FROM "orders"`,
-      ]);
-      const total = Number(totalRows?.[0]?.count || 0);
-      const normalized = rawOrders.map((order) => normalizeOrderRecord(order));
-      return buildPaginationResult(normalized, total, page, pageSize);
-    }
+    return buildPaginationResult(
+      orders.map((order) => normalizeOrderRecord(order)),
+      total,
+      page,
+      pageSize,
+    );
   }
 
   @Post("refund")

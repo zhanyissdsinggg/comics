@@ -152,4 +152,63 @@ describe("AdminOrdersController", () => {
     );
     expect(adminLogService.log).toHaveBeenCalled();
   });
+
+  it("lists orders with search and sorting while keeping gateway order id truthful", async () => {
+    (prisma.order.findMany as jest.Mock).mockResolvedValueOnce([
+      {
+        id: "order-1",
+        userId: "user-1",
+        idempotencyKey: "idem-1",
+        amount: 25,
+        currency: "usd",
+        status: ORDER_STATUS.PAID,
+        createdAt: new Date("2026-04-01T00:00:00.000Z"),
+      },
+    ]);
+    (prisma.order.count as jest.Mock).mockResolvedValueOnce(1);
+
+    const result = await controller.list({
+      query: {
+        page: "1",
+        pageSize: "20",
+        search: "user-1",
+        sortBy: "amount",
+        sortOrder: "asc",
+      },
+    } as never);
+
+    expect(prisma.order.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { id: { contains: "user-1", mode: "insensitive" } },
+          { userId: { contains: "user-1", mode: "insensitive" } },
+          { idempotencyKey: { contains: "user-1", mode: "insensitive" } },
+        ],
+      },
+      select: {
+        id: true,
+        userId: true,
+        idempotencyKey: true,
+        amount: true,
+        currency: true,
+        status: true,
+        createdAt: true,
+      },
+      orderBy: { amount: "asc" },
+      take: 20,
+      skip: 0,
+    });
+    expect(result).toEqual({
+      data: [
+        expect.objectContaining({
+          id: "order-1",
+          currency: "USD",
+          orderId: "",
+        }),
+      ],
+      pagination: expect.objectContaining({
+        total: 1,
+      }),
+    });
+  });
 });

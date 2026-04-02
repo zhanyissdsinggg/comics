@@ -22,9 +22,51 @@ import { RequireAdminPermissions } from "../decorators/admin-permissions.decorat
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { AdminPermission } from "../permissions/admin-permissions";
 import {
-  enrichSeriesWithStorefrontFields,
   syncSeriesAuthorField,
 } from "../../../common/utils/series-storefront-fields";
+import {
+  buildPaginationResult,
+  calculateOffset,
+  parsePaginationParams,
+} from "../../../common/utils/pagination";
+
+const ADMIN_SERIES_SORT_FIELDS = new Set([
+  "createdAt",
+  "updatedAt",
+  "title",
+  "rating",
+  "ratingCount",
+  "status",
+]);
+
+const ADMIN_SERIES_LIST_SELECT = {
+  id: true,
+  title: true,
+  author: true,
+  type: true,
+  description: true,
+  coverUrl: true,
+  coverTone: true,
+  badge: true,
+  badges: true,
+  adult: true,
+  isPublished: true,
+  latestEpisodeId: true,
+  genres: true,
+  status: true,
+  rating: true,
+  ratingCount: true,
+  episodePrice: true,
+  ttfEnabled: true,
+  ttfIntervalHours: true,
+  createdAt: true,
+  updatedAt: true,
+  _count: {
+    select: {
+      episodes: true,
+    },
+  },
+} as const;
 
 @Controller("admin/series")
 @UseGuards(AdminAuthGuard)
@@ -62,11 +104,9 @@ export class AdminSeriesController {
   }
 
   private async enrichSeriesSummaryList(series: any[]) {
-    const enrichedSeries = await enrichSeriesWithStorefrontFields(
-      this.prisma,
+    return this.attachCreatorFields(
       series.map((item) => this.mapSeriesSummary(item)),
     );
-    return this.attachCreatorFields(enrichedSeries);
   }
 
   private async enrichSeriesSummary(series: any) {
@@ -74,13 +114,10 @@ export class AdminSeriesController {
       return null;
     }
 
-    const [nextSeries] = await enrichSeriesWithStorefrontFields(this.prisma, [
+    const [nextSummary] = await this.attachCreatorFields([
       this.mapSeriesSummary(series),
     ]);
-    const [nextSummary] = await this.attachCreatorFields([
-      nextSeries || this.mapSeriesSummary(series),
-    ]);
-    return nextSummary || nextSeries || this.mapSeriesSummary(series);
+    return nextSummary || this.mapSeriesSummary(series);
   }
 
   private async attachCreatorFields(seriesList: any[]) {
@@ -142,6 +179,72 @@ export class AdminSeriesController {
     };
   }
 
+  private buildListWhere(query: Record<string, unknown>) {
+    const search = String(query?.search || "").trim();
+    const type = String(query?.type || "").trim();
+    const status = String(query?.status || "").trim();
+    const adult = String(query?.adult || "").trim();
+    const publishStatus = String(query?.publishStatus || "").trim();
+    const where: Record<string, unknown> = {};
+
+    if (search) {
+      where.OR = [
+        { id: { contains: search, mode: "insensitive" } },
+        { title: { contains: search, mode: "insensitive" } },
+        { author: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    if (type && type !== "all") {
+      where.type = type;
+    }
+
+    if (status && status !== "all") {
+      where.status = status;
+    }
+
+    if (adult === "true") {
+      where.adult = true;
+    } else if (adult === "false") {
+      where.adult = false;
+    }
+
+    if (publishStatus === "published") {
+      where.isPublished = true;
+    } else if (publishStatus === "unpublished") {
+      where.isPublished = false;
+    }
+
+    return where;
+  }
+
+  private buildListOrderBy(query: Record<string, unknown>) {
+    const sortBy = String(query?.sortBy || "title_asc").trim();
+    const [sortFieldRaw, sortDirectionRaw] = sortBy.split("_");
+    const sortField = ADMIN_SERIES_SORT_FIELDS.has(sortFieldRaw)
+      ? sortFieldRaw
+      : "title";
+    const sortDirection: "asc" | "desc" =
+      sortDirectionRaw === "desc" ? "desc" : "asc";
+
+    return {
+      [sortField]: sortDirection,
+    } as Record<string, "asc" | "desc">;
+  }
+
+  private hasPaginatedListIntent(query: Record<string, unknown>) {
+    return [
+      "page",
+      "pageSize",
+      "search",
+      "sortBy",
+      "type",
+      "status",
+      "adult",
+      "publishStatus",
+    ].some((key) => Object.prototype.hasOwnProperty.call(query, key));
+  }
+
   private async applyStorefrontMetadata(seriesId: string, input: any) {
     if (!input || !Object.prototype.hasOwnProperty.call(input, "author")) {
       return;
@@ -157,16 +260,35 @@ export class AdminSeriesController {
   }
 
   @Get()
-  async list() {
+  async list(@Req() req?: Request) {
+    const query = (req?.query || {}) as Record<string, unknown>;
+    const where = this.buildListWhere(query);
+    const orderBy = this.buildListOrderBy(query);
+
+    if (this.hasPaginatedListIntent(query)) {
+      const { page, pageSize } = parsePaginationParams(query);
+      const offset = calculateOffset(page, pageSize);
+      const [series, total] = await Promise.all([
+        this.prisma.series.findMany({
+          where,
+          orderBy,
+          take: pageSize,
+          skip: offset,
+          select: ADMIN_SERIES_LIST_SELECT,
+        }),
+        this.prisma.series.count({ where }),
+      ]);
+
+      return {
+        series: await this.enrichSeriesSummaryList(series),
+        pagination: buildPaginationResult([], total, page, pageSize).pagination,
+      };
+    }
+
     const series = await this.prisma.series.findMany({
-      orderBy: { title: "asc" },
-      include: {
-        _count: {
-          select: {
-            episodes: true,
-          },
-        },
-      },
+      where,
+      orderBy,
+      select: ADMIN_SERIES_LIST_SELECT,
     });
     return { series: await this.enrichSeriesSummaryList(series) };
   }
@@ -233,13 +355,7 @@ export class AdminSeriesController {
         orderBy: { [finalSortField]: finalSortDirection },
         skip: (page - 1) * limit,
         take: limit,
-        include: {
-          _count: {
-            select: {
-              episodes: true,
-            },
-          },
-        },
+        select: ADMIN_SERIES_LIST_SELECT,
       }),
       this.prisma.series.count({ where }),
     ]);
@@ -270,13 +386,7 @@ export class AdminSeriesController {
       await this.applyStorefrontMetadata(created.id, series);
       const nextSeries = await this.prisma.series.findUnique({
         where: { id: created.id },
-        include: {
-          _count: {
-            select: {
-              episodes: true,
-            },
-          },
-        },
+        select: ADMIN_SERIES_LIST_SELECT,
       });
       await this.invalidateReadCaches(created.id);
       return { series: await this.enrichSeriesSummary(nextSeries || created) };
@@ -294,13 +404,7 @@ export class AdminSeriesController {
     const seriesId = String(req.params.id || "");
     const series = await this.prisma.series.findUnique({
       where: { id: seriesId },
-      include: {
-        _count: {
-          select: {
-            episodes: true,
-          },
-        },
-      },
+      select: ADMIN_SERIES_LIST_SELECT,
     });
     if (!series) {
       throw new NotFoundException("Series not found.");
@@ -342,13 +446,7 @@ export class AdminSeriesController {
     await this.applyStorefrontMetadata(seriesId, series);
     const nextSeries = await this.prisma.series.findUnique({
       where: { id: seriesId },
-      include: {
-        _count: {
-          select: {
-            episodes: true,
-          },
-        },
-      },
+      select: ADMIN_SERIES_LIST_SELECT,
     });
     await this.invalidateReadCaches(seriesId);
     return { series: await this.enrichSeriesSummary(nextSeries || updated) };

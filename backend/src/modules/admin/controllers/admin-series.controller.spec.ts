@@ -113,14 +113,73 @@ describe("AdminSeriesController", () => {
     });
     expect(prisma.series.findMany).toHaveBeenCalledWith({
       orderBy: { title: "asc" },
-      include: {
+      where: {},
+      select: {
         _count: {
           select: {
             episodes: true,
           },
         },
+        adult: true,
+        author: true,
+        badge: true,
+        badges: true,
+        coverTone: true,
+        coverUrl: true,
+        createdAt: true,
+        description: true,
+        episodePrice: true,
+        genres: true,
+        id: true,
+        isPublished: true,
+        latestEpisodeId: true,
+        rating: true,
+        ratingCount: true,
+        status: true,
+        title: true,
+        ttfEnabled: true,
+        ttfIntervalHours: true,
+        type: true,
+        updatedAt: true,
       },
     });
+  });
+
+  it("supports paginated list requests without loading the full catalog", async () => {
+    jest.spyOn(prisma.series, "findMany").mockResolvedValue([
+      { id: "series-1", title: "Paged Title", _count: { episodes: 2 } },
+    ] as never);
+    jest.spyOn(prisma.series, "count").mockResolvedValue(25 as never);
+
+    const result = await controller.list({
+      query: {
+        page: "2",
+        pageSize: "10",
+      },
+    } as never);
+
+    expect(result).toEqual({
+      series: [
+        expect.objectContaining({
+          id: "series-1",
+          title: "Paged Title",
+          episodeCount: 2,
+        }),
+      ],
+      pagination: expect.objectContaining({
+        page: 2,
+        pageSize: 10,
+        total: 25,
+        totalPages: 3,
+      }),
+    });
+    expect(prisma.series.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 10,
+        skip: 10,
+      }),
+    );
+    expect(prisma.series.count).toHaveBeenCalledWith({ where: {} });
   });
 
   it("creates a series and persists publish state", async () => {
@@ -203,12 +262,33 @@ describe("AdminSeriesController", () => {
     expect(prisma.series.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({ isPublished: true }),
-        include: {
+        select: {
           _count: {
             select: {
               episodes: true,
             },
           },
+          adult: true,
+          author: true,
+          badge: true,
+          badges: true,
+          coverTone: true,
+          coverUrl: true,
+          createdAt: true,
+          description: true,
+          episodePrice: true,
+          genres: true,
+          id: true,
+          isPublished: true,
+          latestEpisodeId: true,
+          rating: true,
+          ratingCount: true,
+          status: true,
+          title: true,
+          ttfEnabled: true,
+          ttfIntervalHours: true,
+          type: true,
+          updatedAt: true,
         },
       }),
     );

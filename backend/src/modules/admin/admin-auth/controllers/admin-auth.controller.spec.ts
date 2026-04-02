@@ -7,7 +7,7 @@ import {
   isAdminTotpEnabled,
   verifyAdminTotpCode,
 } from "../../../../common/utils/admin-security";
-import { getRedisClient } from "../../../../common/redis/client";
+import { getRedisClient, isRedisConfigured } from "../../../../common/redis/client";
 import { AdminAuthController } from "./admin-auth.controller";
 import { resetAdminTokenRevocationStore } from "../../utils/admin-token-revocation";
 import { AdminMembersService } from "../../admin-system/services/admin-members.service";
@@ -22,6 +22,7 @@ const mockRedis = {
 
 jest.mock("../../../../common/redis/client", () => ({
   getRedisClient: jest.fn(() => mockRedis),
+  isRedisConfigured: jest.fn(() => true),
 }));
 
 jest.mock("../../../../common/utils/admin-security", () => ({
@@ -43,6 +44,7 @@ describe("AdminAuthController", () => {
     verifyMemberTotp: jest.Mock;
   };
   const mockGetRedisClient = getRedisClient as jest.MockedFunction<typeof getRedisClient>;
+  const mockIsRedisConfigured = isRedisConfigured as jest.MockedFunction<typeof isRedisConfigured>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -103,6 +105,7 @@ describe("AdminAuthController", () => {
     mockRedis.del.mockResolvedValue(1);
     mockRedis.setex.mockResolvedValue("OK");
     mockGetRedisClient.mockReturnValue(mockRedis as any);
+    mockIsRedisConfigured.mockReturnValue(true);
 
     (getAdminKeysFromEnv as jest.Mock).mockReturnValue(["test-admin-key"]);
     (isAdminTotpEnabled as jest.Mock).mockReturnValue(false);
@@ -265,6 +268,7 @@ describe("AdminAuthController", () => {
 
     it("should reject a revoked refresh token", async () => {
       mockGetRedisClient.mockReturnValue(null);
+      mockIsRedisConfigured.mockReturnValue(false);
 
       await controller.logout(
         {},
@@ -328,6 +332,7 @@ describe("AdminAuthController", () => {
 
     it("should return invalid after logout revokes the access token", async () => {
       mockGetRedisClient.mockReturnValue(null);
+      mockIsRedisConfigured.mockReturnValue(false);
 
       await controller.logout(
         {},

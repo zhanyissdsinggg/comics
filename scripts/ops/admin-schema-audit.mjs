@@ -6,10 +6,14 @@ import { createRequire } from "node:module";
 const requireFromBackend = createRequire(path.join(process.cwd(), "backend/package.json"));
 const { Client } = requireFromBackend("pg");
 
-const REQUIRED_SUPPORT_TICKET_OPTIONAL_COLUMNS = [
+const REQUIRED_SUPPORT_TICKET_COLUMNS = [
   "replyEmail",
   "orderId",
   "topic",
+];
+const REQUIRED_ORDER_COLUMNS = [
+  "priceSnapshot",
+  "idempotencyKey",
 ];
 
 function parseEnvFile(filePath) {
@@ -60,31 +64,41 @@ async function readSchemaState(databaseUrl) {
   await client.connect();
 
   try {
-    const [adminMembersResult, supportColumnsResult] = await Promise.all([
-      client.query(`
-        select exists (
-          select 1
-          from information_schema.tables
-          where table_schema = 'public' and table_name = 'admin_members'
-        ) as exists;
-      `),
-      client.query(`
-        select column_name
-        from information_schema.columns
-        where table_schema = 'public' and table_name = 'support_tickets'
-        order by ordinal_position;
-      `),
-    ]);
+    const adminMembersResult = await client.query(`
+      select exists (
+        select 1
+        from information_schema.tables
+        where table_schema = 'public' and table_name = 'admin_members'
+      ) as exists;
+    `);
+    const supportColumnsResult = await client.query(`
+      select column_name
+      from information_schema.columns
+      where table_schema = 'public' and table_name = 'support_tickets'
+      order by ordinal_position;
+    `);
+    const orderColumnsResult = await client.query(`
+      select column_name
+      from information_schema.columns
+      where table_schema = 'public' and table_name = 'orders'
+      order by ordinal_position;
+    `);
 
     const supportTicketColumns = supportColumnsResult.rows.map((row) => row.column_name);
-    const missingSupportOptionalColumns = REQUIRED_SUPPORT_TICKET_OPTIONAL_COLUMNS.filter(
+    const orderColumns = orderColumnsResult.rows.map((row) => row.column_name);
+    const missingSupportColumns = REQUIRED_SUPPORT_TICKET_COLUMNS.filter(
       (column) => !supportTicketColumns.includes(column),
+    );
+    const missingOrderColumns = REQUIRED_ORDER_COLUMNS.filter(
+      (column) => !orderColumns.includes(column),
     );
 
     return {
       adminMembersExists: Boolean(adminMembersResult.rows[0]?.exists),
       supportTicketColumns,
-      missingSupportOptionalColumns,
+      missingSupportColumns,
+      orderColumns,
+      missingOrderColumns,
     };
   } finally {
     await client.end();
@@ -98,8 +112,16 @@ function printSummary(summary) {
     summary.supportTicketColumns.join(",") || "(none)",
   );
   console.log(
-    "[ops-admin-schema] missing_support_ticket_optional_columns=",
-    summary.missingSupportOptionalColumns.join(",") || "(none)",
+    "[ops-admin-schema] missing_support_ticket_columns=",
+    summary.missingSupportColumns.join(",") || "(none)",
+  );
+  console.log(
+    "[ops-admin-schema] orders_columns=",
+    summary.orderColumns.join(",") || "(none)",
+  );
+  console.log(
+    "[ops-admin-schema] missing_order_columns=",
+    summary.missingOrderColumns.join(",") || "(none)",
   );
   console.log(JSON.stringify(summary, null, 2));
 }
@@ -114,7 +136,11 @@ async function run() {
   printSummary(summary);
 
   if (process.env.OPS_SCHEMA_REQUIRED === "1") {
-    if (!summary.adminMembersExists || summary.missingSupportOptionalColumns.length > 0) {
+    if (
+      !summary.adminMembersExists
+      || summary.missingSupportColumns.length > 0
+      || summary.missingOrderColumns.length > 0
+    ) {
       process.exitCode = 1;
     }
   }

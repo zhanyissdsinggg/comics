@@ -63,6 +63,7 @@ model User {
   rewardStates   RewardState[]  @relation("UserRewardStates")
   preferences    UserPreference? @relation("UserPreferences")
 
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -103,6 +104,9 @@ model Series {
   viewStats        SeriesViewStat[]  @relation("SeriesViewStats")
   recommendationAnalytics RecommendationAnalytics[] @relation("SeriesRecommendationAnalytics")
 
+  @@index([title])
+  @@index([createdAt])
+  @@index([updatedAt])
   @@map("series")
 }
 
@@ -494,6 +498,7 @@ model UserBehavior {
   createdAt      DateTime  @default(now())
   user           User      @relation("UserBehavior", fields: [userId], references: [id])
 
+  @@index([lastActiveAt])
   @@map("user_behaviors")
 }
 
@@ -508,6 +513,8 @@ model UserMetrics {
   updatedAt DateTime @updatedAt
   user      User     @relation("UserMetrics", fields: [userId], references: [id])
 
+  @@index([ltv])
+  @@index([churnRisk])
   @@map("user_metrics")
 }
 
@@ -582,6 +589,10 @@ model SupportTicket {
 
   @@index([userId])
   @@index([replyEmail])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([status, createdAt])
+  @@index([status, updatedAt])
   @@map("support_tickets")
 }
 
@@ -779,6 +790,10 @@ model Order {
   @@unique([userId, idempotencyKey])
   @@index([userId])
   @@index([packageId])
+  @@index([createdAt])
+  @@index([status])
+  @@index([status, createdAt])
+  @@index([amount])
   @@map("orders")
 }
 
@@ -820,6 +835,7 @@ model PaymentRetry {
 
   @@index([userId])
   @@index([orderId])
+  @@index([status])
   @@map("payment_retries")
 }
 

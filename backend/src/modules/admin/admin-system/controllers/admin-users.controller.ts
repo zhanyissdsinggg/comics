@@ -12,7 +12,11 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
-import { parsePaginationParams, calculateOffset, buildPaginationResult } from "../../../../common/utils/pagination";
+import {
+  buildPaginationResult,
+  calculateOffset,
+  parsePaginationParams,
+} from "../../../../common/utils/pagination";
 import { AdminAudit } from "../../decorators/admin-audit.decorator";
 import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
@@ -38,6 +42,10 @@ function readBooleanFlag(value: unknown, fallback: boolean): boolean {
   throw new BadRequestException("blocked must be a boolean.");
 }
 
+function readSortOrder(value: unknown): "asc" | "desc" {
+  return String(value || "desc").trim().toLowerCase() === "asc" ? "asc" : "desc";
+}
+
 @Controller("admin/users")
 @UseGuards(AdminAuthGuard)
 @RequireAdminPermissions(AdminPermission.USER_READ)
@@ -46,18 +54,42 @@ export class AdminUsersController {
 
   @Get()
   async list(@Req() req: Request) {
-    // 添加分页参数
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
+    const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+    const sortBy =
+      typeof req.query.sortBy === "string" ? req.query.sortBy.trim() : "createdAt";
+    const sortOrder = readSortOrder(req.query.sortOrder);
+    const where = search
+      ? {
+          OR: [
+            { id: { contains: search, mode: "insensitive" as const } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {};
+    const orderBy = sortBy === "email" ? { email: sortOrder } : { createdAt: sortOrder };
 
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
-        include: { wallet: true },
-        orderBy: { createdAt: "desc" },
+        where,
+        select: {
+          id: true,
+          email: true,
+          isBlocked: true,
+          createdAt: true,
+          wallet: {
+            select: {
+              paidPts: true,
+              bonusPts: true,
+            },
+          },
+        },
+        orderBy,
         take: pageSize,
         skip: offset,
       }),
-      this.prisma.user.count(),
+      this.prisma.user.count({ where }),
     ]);
 
     return buildPaginationResult(users, total, page, pageSize);
@@ -65,7 +97,6 @@ export class AdminUsersController {
 
   @Get("support")
   async tickets(@Req() req: Request) {
-    // 添加分页参数
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
 
@@ -87,7 +118,7 @@ export class AdminUsersController {
   async block(@Body() body: BlockUserDto) {
     const userId = body?.userId;
     if (!userId) {
-      throw new BadRequestException("缺少userId参数");
+      throw new BadRequestException("userId is required.");
     }
     const user = await this.prisma.user.update({
       where: { id: userId },
@@ -101,7 +132,7 @@ export class AdminUsersController {
   @RequireAdminPermissions(AdminPermission.USER_BAN)
   async blockByPath(@Param("id") userId: string, @Body() body: { blocked?: boolean | string }) {
     if (!userId) {
-      throw new BadRequestException("缺少userId参数");
+      throw new BadRequestException("userId is required.");
     }
     const user = await this.prisma.user.update({
       where: { id: userId },
@@ -115,11 +146,11 @@ export class AdminUsersController {
   @RequireAdminPermissions(AdminPermission.USER_DELETE)
   async deactivate(@Param("id") userId: string) {
     if (!userId) {
-      throw new BadRequestException("缺少userId参数");
+      throw new BadRequestException("userId is required.");
     }
     const existing = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!existing) {
-      throw new NotFoundException("用户不存在");
+      throw new NotFoundException("User not found.");
     }
     const user = await this.prisma.user.update({
       where: { id: userId },
