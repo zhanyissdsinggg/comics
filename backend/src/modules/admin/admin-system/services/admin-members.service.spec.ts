@@ -100,4 +100,86 @@ describe("AdminMembersService", () => {
       }),
     ).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
+
+  it("normalizes legacy slot names from database-backed members in list and meta responses", async () => {
+    const now = new Date("2026-04-02T00:00:00.000Z");
+    const prisma = {
+      adminMember: {
+        findMany: jest
+          .fn()
+          .mockResolvedValueOnce([{ id: "member-1", keySlot: 1 }])
+          .mockResolvedValueOnce([
+            {
+              id: "member-1",
+              name: "Admin key slot 1",
+              email: null,
+              role: "super_admin",
+              status: "active",
+              keySlot: 1,
+              source: "env_seed",
+              totpEnabled: false,
+              totpSecret: null,
+              notes: null,
+              lastLoginAt: null,
+              createdAt: now,
+              updatedAt: now,
+            },
+          ])
+          .mockResolvedValueOnce([
+            {
+              id: "member-1",
+              name: "Admin key slot 1",
+              keySlot: 1,
+            },
+          ]),
+        count: jest.fn().mockResolvedValue(1),
+        create: jest.fn(),
+      },
+    };
+
+    const service = new AdminMembersService(prisma as any);
+    const result = await service.listMembers({});
+
+    expect(result.data[0]).toEqual(
+      expect.objectContaining({
+        id: "member-1",
+        name: "后台密钥槽位 1",
+      }),
+    );
+    expect(result.meta.keySlots).toEqual([
+      expect.objectContaining({
+        slot: 1,
+        assignedMemberName: "后台密钥槽位 1",
+      }),
+    ]);
+  });
+
+  it("normalizes legacy slot names in the admin session payload", async () => {
+    const prisma = {
+      adminMember: {
+        findMany: jest.fn().mockResolvedValue([{ id: "member-1", keySlot: 1 }]),
+        create: jest.fn(),
+        findFirst: jest.fn().mockResolvedValue({
+          id: "member-1",
+          name: "Admin key slot 1",
+          email: null,
+          role: "super_admin",
+          status: "active",
+          keySlot: 1,
+          source: "env_seed",
+          totpEnabled: false,
+          totpSecret: null,
+          notes: null,
+          lastLoginAt: null,
+          createdAt: new Date("2026-04-02T00:00:00.000Z"),
+          updatedAt: new Date("2026-04-02T00:00:00.000Z"),
+        }),
+      },
+    };
+
+    const service = new AdminMembersService(prisma as any);
+    const result = await service.resolveLoginMember("TestAdminKey123!Secure");
+
+    expect(result.session?.adminName).toBe("后台密钥槽位 1");
+  });
 });

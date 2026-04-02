@@ -105,6 +105,20 @@ function normalizeSortOrder(value: unknown): Prisma.SortOrder {
   return sanitizeText(value).toLowerCase() === "asc" ? "asc" : "desc";
 }
 
+function normalizeLegacySlotMemberName(name: unknown, keySlot: number | null | undefined): string {
+  const normalizedName = sanitizeText(name);
+  if (!normalizedName) {
+    return keySlot ? `后台密钥槽位 ${keySlot}` : "";
+  }
+
+  const legacyMatch = normalizedName.match(/^Admin key slot\s+(\d+)$/i);
+  if (legacyMatch) {
+    return `后台密钥槽位 ${legacyMatch[1]}`;
+  }
+
+  return normalizedName;
+}
+
 @Injectable()
 export class AdminMembersService {
   private storageMode: AdminMembersStorageMode = "unknown";
@@ -283,7 +297,10 @@ export class AdminMembersService {
     const memberBySlot = new Map<number, { id: string; name: string }>();
     for (const member of members) {
       if (typeof member.keySlot === "number") {
-        memberBySlot.set(member.keySlot, { id: member.id, name: member.name });
+        memberBySlot.set(member.keySlot, {
+          id: member.id,
+          name: normalizeLegacySlotMemberName(member.name, member.keySlot),
+        });
       }
     }
 
@@ -456,7 +473,7 @@ export class AdminMembersService {
       () => null,
     );
     if (!existing) {
-      throw new NotFoundException("Admin member not found");
+      throw new NotFoundException("未找到对应的后台成员。");
     }
 
     const member = await this.runWithMemberStoreFallback(
@@ -764,7 +781,7 @@ export class AdminMembersService {
 
     return {
       id: member.id,
-      name: member.name,
+      name: normalizeLegacySlotMemberName(member.name, keySlot),
       email: member.email,
       role: normalizeAdminRole(member.role, AdminRole.SUPER_ADMIN),
       status: normalizeMemberStatus(member.status),
@@ -782,7 +799,7 @@ export class AdminMembersService {
 
   private buildMemberSession(member: AdminMember, fallbackRole: AdminRole) {
     return buildAdminSessionProfile(member.id, normalizeAdminRole(member.role, fallbackRole), {
-      adminName: member.name,
+      adminName: normalizeLegacySlotMemberName(member.name, member.keySlot),
       adminEmail: member.email,
       memberStatus: normalizeMemberStatus(member.status),
       authMode: member.keySlot ? "env_admin_key" : "admin_member",
