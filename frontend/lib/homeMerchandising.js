@@ -432,16 +432,16 @@ export function getHomeHeroCandidates(seriesList, options = {}) {
       const episodeCount = getEpisodeCount(series);
 
       if (isCompletedSeries(series)) {
-        reasons.push("Completed run");
+        reasons.push("已完结");
       }
       if (isRecentlyUpdated(series, 14)) {
-        reasons.push("Recently updated");
+        reasons.push("近期更新");
       }
       if (episodeCount > 0 && episodeCount <= 24) {
-        reasons.push("Easy place to start");
+        reasons.push("适合从这里开始");
       }
       if (Array.isArray(series?.creatorCredits) && series.creatorCredits.length > 0) {
-        reasons.push("Credited creator");
+        reasons.push("署名已齐");
       }
 
       return {
