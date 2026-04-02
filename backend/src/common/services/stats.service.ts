@@ -1,5 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import {
+  buildAdminVisibleCommentWhere,
+  buildAdminVisibleOrderWhere,
+  buildAdminVisibleUserWhere,
+} from "../utils/admin-visible-data";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 function getDateKey(date = new Date()) {
   return date.toISOString().slice(0, 10);
@@ -9,27 +16,42 @@ function parseDateKey(value?: string | null) {
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return null;
   }
+
   const date = new Date(`${value}T00:00:00Z`);
   if (Number.isNaN(date.getTime())) {
     return null;
   }
+
   return date;
 }
 
 function buildDateRange(from?: string | null, to?: string | null) {
   const toDate = parseDateKey(to) || new Date();
-  const fromDate =
-    parseDateKey(from) ||
-    new Date(toDate.getTime() - 13 * 24 * 60 * 60 * 1000);
+  const fromDate = parseDateKey(from) || new Date(toDate.getTime() - 13 * DAY_MS);
   const start = new Date(Math.min(fromDate.getTime(), toDate.getTime()));
   const end = new Date(Math.max(fromDate.getTime(), toDate.getTime()));
   const result: string[] = [];
   const cursor = new Date(start.getTime());
+
   while (cursor <= end) {
     result.push(cursor.toISOString().slice(0, 10));
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
+
   return result;
+}
+
+function buildCreatedAtRange(fromDate?: Date | null, toDate?: Date | null) {
+  if (!fromDate || !toDate) {
+    return {};
+  }
+
+  return {
+    createdAt: {
+      gte: fromDate,
+      lte: toDate,
+    },
+  };
 }
 
 @Injectable()
@@ -40,6 +62,7 @@ export class StatsService {
     if (!userId || userId === "guest") {
       return;
     }
+
     const dateKey = getDateKey();
     const date = new Date();
     await this.prisma.dailyActive.upsert({
@@ -68,6 +91,7 @@ export class StatsService {
       update: { views: { increment: 1 } },
       create: { dateKey, date, views: 1, registrations: 0, paidOrders: 0 },
     });
+
     if (userId) {
       await this.recordDailyActive(userId);
     }
@@ -77,6 +101,7 @@ export class StatsService {
     if (!seriesId) {
       return;
     }
+
     const dateKey = getDateKey();
     const date = new Date();
     await this.prisma.seriesViewStat.upsert({
@@ -89,6 +114,7 @@ export class StatsService {
       update: { views: { increment: 1 } },
       create: { dateKey, date, views: 1, registrations: 0, paidOrders: 0 },
     });
+
     if (userId) {
       await this.recordDailyActive(userId);
     }
@@ -114,10 +140,9 @@ export class StatsService {
       _count: { dateKey: true },
       where: { dateKey: { in: keys } },
     });
-    const activeMap = new Map(
-      activeCounts.map((row) => [row.dateKey, row._count.dateKey])
-    );
+    const activeMap = new Map(activeCounts.map((row) => [row.dateKey, row._count.dateKey]));
     const statMap = new Map(stats.map((item) => [item.dateKey, item]));
+
     return keys.map((dateKey) => {
       const row = statMap.get(dateKey);
       return {
@@ -153,6 +178,7 @@ export class StatsService {
         if (type && type !== "all" && item.type !== type) {
           return null;
         }
+
         return {
           seriesId: row.seriesId,
           title: item.title,
@@ -160,30 +186,32 @@ export class StatsService {
           views: row._sum.views || 0,
         };
       })
-      .filter(Boolean) as any[];
+      .filter(Boolean) as Array<{
+      seriesId: string;
+      title: string;
+      type: string;
+      views: number;
+    }>;
+
     return list.slice(0, Math.max(1, limit));
   }
 
-  /**
-   * 老王修改：获取Dashboard总体统计数据，支持日期范围筛选
-   * @param from 开始日期 (YYYY-MM-DD)
-   * @param to 结束日期 (YYYY-MM-DD)
-   * 返回总用户数、作品数、订单数、总收入、总浏览量、评论数
-   */
   async getDashboardStats(from?: string | null, to?: string | null) {
-    // 老王注释：解析日期范围，如果没有提供则使用全部数据
     const fromDate = from ? new Date(`${from}T00:00:00Z`) : null;
     const toDate = to ? new Date(`${to}T23:59:59Z`) : null;
+    const dateFilter = buildCreatedAtRange(fromDate, toDate);
 
-    // 老王注释：构建日期过滤条件
-    const dateFilter = fromDate && toDate ? {
+    const now = new Date();
+    const last7Start = new Date(now.getTime() - 7 * DAY_MS);
+    const prev7Start = new Date(now.getTime() - 14 * DAY_MS);
+    const currentWindow = buildCreatedAtRange(last7Start, now);
+    const previousWindow = {
       createdAt: {
-        gte: fromDate,
-        lte: toDate,
+        gte: prev7Start,
+        lt: last7Start,
       },
-    } : {};
+    };
 
-    // 并行查询所有统计数据（老王注释：提高性能）
     const [
       totalUsers,
       totalSeries,
@@ -191,28 +219,31 @@ export class StatsService {
       totalRevenue,
       totalViews,
       totalComments,
+      last7Users,
+      prev7Users,
+      last7Orders,
+      prev7Orders,
+      last7Comments,
+      prev7Comments,
       last30DaysStats,
     ] = await Promise.all([
-      // 总用户数（按日期筛选）
-      this.prisma.user.count({ where: dateFilter }),
-      // 作品数量（老王修复：Series没有createdAt字段，不使用日期过滤）
+      this.prisma.user.count({
+        where: buildAdminVisibleUserWhere(dateFilter),
+      }),
       this.prisma.series.count(),
-      // 订单数量（按日期筛选）
       this.prisma.order.count({
-        where: {
+        where: buildAdminVisibleOrderWhere({
           status: "paid",
           ...dateFilter,
-        }
+        }),
       }),
-      // 总收入（按日期筛选的已支付订单金额总和）
       this.prisma.order.aggregate({
         _sum: { amount: true },
-        where: {
+        where: buildAdminVisibleOrderWhere({
           status: "paid",
           ...dateFilter,
-        },
+        }),
       }),
-      // 总浏览量（按日期范围筛选）
       fromDate && toDate
         ? this.prisma.dailyStat.aggregate({
             _sum: { views: true },
@@ -226,35 +257,50 @@ export class StatsService {
         : this.prisma.dailyStat.aggregate({
             _sum: { views: true },
           }),
-      // 评论数量（按日期筛选）
-      this.prisma.comment.count({ where: dateFilter }),
-      // 最近30天的统计数据（用于计算变化趋势）
+      this.prisma.comment.count({
+        where: buildAdminVisibleCommentWhere(dateFilter),
+      }),
+      this.prisma.user.count({
+        where: buildAdminVisibleUserWhere(currentWindow),
+      }),
+      this.prisma.user.count({
+        where: buildAdminVisibleUserWhere(previousWindow),
+      }),
+      this.prisma.order.count({
+        where: buildAdminVisibleOrderWhere({
+          status: "paid",
+          ...currentWindow,
+        }),
+      }),
+      this.prisma.order.count({
+        where: buildAdminVisibleOrderWhere({
+          status: "paid",
+          ...previousWindow,
+        }),
+      }),
+      this.prisma.comment.count({
+        where: buildAdminVisibleCommentWhere(currentWindow),
+      }),
+      this.prisma.comment.count({
+        where: buildAdminVisibleCommentWhere(previousWindow),
+      }),
       this.getDailyStats(
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-        new Date().toISOString().slice(0, 10)
+        new Date(Date.now() - 30 * DAY_MS).toISOString().slice(0, 10),
+        now.toISOString().slice(0, 10),
       ),
     ]);
 
-    // 老王注释：计算最近7天和前7天的对比，得出变化趋势
     const last7Days = last30DaysStats.slice(-7);
     const prev7Days = last30DaysStats.slice(-14, -7);
-
-    const last7DaysRegistrations = last7Days.reduce((sum, day) => sum + day.registrations, 0);
-    const prev7DaysRegistrations = prev7Days.reduce((sum, day) => sum + day.registrations, 0);
-    const usersChange = prev7DaysRegistrations > 0
-      ? ((last7DaysRegistrations - prev7DaysRegistrations) / prev7DaysRegistrations) * 100
-      : 0;
-
-    const last7DaysOrders = last7Days.reduce((sum, day) => sum + day.paidOrders, 0);
-    const prev7DaysOrders = prev7Days.reduce((sum, day) => sum + day.paidOrders, 0);
-    const ordersChange = prev7DaysOrders > 0
-      ? ((last7DaysOrders - prev7DaysOrders) / prev7DaysOrders) * 100
-      : 0;
-
+    const usersChange = prev7Users > 0 ? ((last7Users - prev7Users) / prev7Users) * 100 : 0;
+    const ordersChange = prev7Orders > 0 ? ((last7Orders - prev7Orders) / prev7Orders) * 100 : 0;
     const last7DaysViews = last7Days.reduce((sum, day) => sum + day.views, 0);
     const prev7DaysViews = prev7Days.reduce((sum, day) => sum + day.views, 0);
     const viewsChange = prev7DaysViews > 0
       ? ((last7DaysViews - prev7DaysViews) / prev7DaysViews) * 100
+      : 0;
+    const commentsChange = prev7Comments > 0
+      ? ((last7Comments - prev7Comments) / prev7Comments) * 100
       : 0;
 
     return {
@@ -265,7 +311,7 @@ export class StatsService {
       },
       series: {
         total: totalSeries,
-        change: 0, // 老王注释：作品数量变化不大，暂时设为0
+        change: 0,
         trend: "up",
       },
       orders: {
@@ -275,7 +321,7 @@ export class StatsService {
       },
       revenue: {
         total: totalRevenue._sum.amount || 0,
-        change: Number(ordersChange.toFixed(1)), // 老王注释：收入变化和订单变化相关
+        change: Number(ordersChange.toFixed(1)),
         trend: ordersChange >= 0 ? "up" : "down",
       },
       views: {
@@ -285,8 +331,8 @@ export class StatsService {
       },
       comments: {
         total: totalComments,
-        change: 0, // 老王注释：评论数量变化暂时设为0
-        trend: "up",
+        change: Number(commentsChange.toFixed(1)),
+        trend: commentsChange >= 0 ? "up" : "down",
       },
     };
   }

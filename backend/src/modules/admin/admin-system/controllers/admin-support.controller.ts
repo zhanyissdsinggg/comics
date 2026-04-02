@@ -15,6 +15,10 @@ import { Prisma } from "@prisma/client";
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import {
+  buildAdminVisibleSupportTicketWhere,
+  readIncludeTestDataFlag,
+} from "../../../../common/utils/admin-visible-data";
+import {
   buildPaginationResult,
   calculateOffset,
   parsePaginationParams,
@@ -62,10 +66,14 @@ export class AdminSupportController {
     const offset = calculateOffset(page, pageSize);
     const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
     const status = typeof req.query.status === "string" ? req.query.status.trim() : "";
+    const includeTestData = readIncludeTestDataFlag(req.query.includeTestData);
     const sortOrder = parseSortOrder(req.query.sortOrder);
     const orderBy = parseSupportOrderBy(req.query.sortBy, sortOrder);
 
-    const where = this.buildListWhere(search, status);
+    const where = buildAdminVisibleSupportTicketWhere(
+      this.buildListWhere(search, status),
+      includeTestData,
+    );
     const [tickets, total] = await Promise.all([
       this.prisma.supportTicket.findMany({
         where,

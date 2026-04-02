@@ -13,6 +13,11 @@ import {
 import { Request } from "express";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import {
+  buildAdminVisibleSupportTicketWhere,
+  buildAdminVisibleUserWhere,
+  readIncludeTestDataFlag,
+} from "../../../../common/utils/admin-visible-data";
+import {
   buildPaginationResult,
   calculateOffset,
   parsePaginationParams,
@@ -57,10 +62,11 @@ export class AdminUsersController {
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
     const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+    const includeTestData = readIncludeTestDataFlag(req.query.includeTestData);
     const sortBy =
       typeof req.query.sortBy === "string" ? req.query.sortBy.trim() : "createdAt";
     const sortOrder = readSortOrder(req.query.sortOrder);
-    const where = search
+    const baseWhere = search
       ? {
           OR: [
             { id: { contains: search, mode: "insensitive" as const } },
@@ -68,6 +74,7 @@ export class AdminUsersController {
           ],
         }
       : {};
+    const where = buildAdminVisibleUserWhere(baseWhere, includeTestData);
     const orderBy = sortBy === "email" ? { email: sortOrder } : { createdAt: sortOrder };
 
     const [users, total] = await Promise.all([
@@ -99,14 +106,17 @@ export class AdminUsersController {
   async tickets(@Req() req: Request) {
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
+    const includeTestData = readIncludeTestDataFlag(req.query.includeTestData);
+    const where = buildAdminVisibleSupportTicketWhere({}, includeTestData);
 
     const [tickets, total] = await Promise.all([
       this.prisma.supportTicket.findMany({
+        where,
         orderBy: { createdAt: "desc" },
         take: pageSize,
         skip: offset,
       }),
-      this.prisma.supportTicket.count(),
+      this.prisma.supportTicket.count({ where }),
     ]);
 
     return buildPaginationResult(tickets, total, page, pageSize);

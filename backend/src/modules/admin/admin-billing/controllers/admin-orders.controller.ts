@@ -16,6 +16,10 @@ import { Request } from "express";
 import { getTopupPackage } from "../../../../common/config/topup";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
+import {
+  buildAdminVisibleOrderWhere,
+  readIncludeTestDataFlag,
+} from "../../../../common/utils/admin-visible-data";
 import { getIdempotencyRecord, setIdempotencyRecord } from "../../../../common/storage/limits";
 import { normalizeUsStorefrontCurrencyCode } from "../../../../common/utils/currency";
 import { isDemoBillingEnabled } from "../../../../common/utils/billing-mode";
@@ -106,10 +110,11 @@ export class AdminOrdersController {
     const { page, pageSize } = parsePaginationParams(req.query);
     const offset = calculateOffset(page, pageSize);
     const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+    const includeTestData = readIncludeTestDataFlag(req.query.includeTestData);
     const sortBy = typeof req.query.sortBy === "string" ? req.query.sortBy.trim() : "createdAt";
     const sortOrder = readSortOrder(req.query.sortOrder);
     const status = typeof req.query.status === "string" ? req.query.status.trim() : "";
-    const where = {
+    const baseWhere = {
       ...(status ? { status } : {}),
       ...(search
         ? {
@@ -121,6 +126,7 @@ export class AdminOrdersController {
           }
         : {}),
     };
+    const where = buildAdminVisibleOrderWhere(baseWhere, includeTestData);
     const orderBy =
       sortBy === "amount"
         ? { amount: sortOrder }

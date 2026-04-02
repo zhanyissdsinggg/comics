@@ -12,6 +12,10 @@ import {
 } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
+import {
+  buildAdminVisibleCommentWhere,
+  readIncludeTestDataFlag,
+} from "../../../../common/utils/admin-visible-data";
 import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { AdminPermission } from "../../permissions/admin-permissions";
@@ -134,12 +138,16 @@ export class AdminCommentsController {
     @Query("search") searchParam?: string,
     @Query("sortBy") sortByParam?: string,
     @Query("sortOrder") sortOrderParam?: string,
+    @Query("includeTestData") includeTestDataParam?: string,
   ) {
     const page = toPositiveInt(pageParam, DEFAULT_PAGE);
     const pageSize = normalizePageSize(pageSizeParam);
     const sortBy = normalizeSortField(sortByParam);
     const sortOrder = normalizeSortOrder(sortOrderParam);
-    const where = buildCommentWhere(searchParam);
+    const where = buildAdminVisibleCommentWhere(
+      buildCommentWhere(searchParam),
+      readIncludeTestDataFlag(includeTestDataParam),
+    );
 
     const [comments, total] = await Promise.all([
       this.prisma.comment.findMany({
