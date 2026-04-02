@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards, BadRequestException, Req } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { Request } from "express";
 import { listEmailJobs, listFailedEmailJobs } from "../../../../common/storage/mock-store";
 import { EmailService } from "../../../email/email.service";
@@ -14,7 +14,7 @@ import { RetryEmailJobDto } from "../dtos/admin-system.dto";
 export class AdminEmailJobsController {
   constructor(
     private readonly emailService: EmailService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
   @Get()
@@ -32,9 +32,11 @@ export class AdminEmailJobsController {
   async retry(@Body() body: RetryEmailJobDto, @Req() req: Request) {
     const jobId = body?.jobId;
     if (!jobId) {
-      throw new BadRequestException("缺少jobId参数");
+      throw new BadRequestException("Missing jobId");
     }
+
     const result = await this.emailService.retryJobById(String(jobId));
+
     try {
       await this.prisma.auditLog.create({
         data: {
@@ -49,9 +51,11 @@ export class AdminEmailJobsController {
     } catch {
       // ignore audit errors
     }
+
     if (!result.ok) {
-      throw new BadRequestException("重试失败");
+      throw new BadRequestException("Retry failed");
     }
+
     return { ok: true };
   }
 }

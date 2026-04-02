@@ -57,7 +57,10 @@ describe("AdminSupportController", () => {
 
     expect(prisma.supportTicket.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        include: { user: { select: { email: true } } },
+        select: expect.objectContaining({
+          user: { select: { email: true } },
+          replyEmail: true,
+        }),
         orderBy: { updatedAt: "asc" },
         skip: 10,
         take: 10,
@@ -189,6 +192,127 @@ describe("AdminSupportController", () => {
             replyEmail: "guest@example.com",
             orderId: "ord_guest_1",
             topic: "technical",
+          }),
+        ],
+      }),
+    );
+  });
+
+  it("falls back cleanly when the replyEmail column is unavailable", async () => {
+    prisma.supportTicket.findMany
+      .mockRejectedValueOnce({
+        code: "P2022",
+        meta: { column: "support_tickets.replyEmail" },
+        message: "The column `support_tickets.replyEmail` does not exist in the current database.",
+      })
+      .mockResolvedValueOnce([
+        {
+          id: "ticket-compat-1",
+          userId: "user-1",
+          orderId: null,
+          topic: "billing",
+          subject: "Need help",
+          message: "Invoice missing",
+          status: "open",
+          createdAt: new Date("2026-03-10T08:00:00.000Z"),
+          updatedAt: new Date("2026-03-11T08:00:00.000Z"),
+          user: { email: "reader@example.com" },
+        },
+      ]);
+    prisma.supportTicket.count
+      .mockRejectedValueOnce({
+        code: "P2022",
+        meta: { column: "support_tickets.replyEmail" },
+        message: "The column `support_tickets.replyEmail` does not exist in the current database.",
+      })
+      .mockResolvedValueOnce(1);
+
+    const result = await controller.list({
+      query: {
+        search: "reader@example.com",
+      },
+    } as never);
+
+    expect(prisma.supportTicket.findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        select: expect.not.objectContaining({
+          replyEmail: true,
+        }),
+        where: {
+          OR: expect.not.arrayContaining([
+            {
+              replyEmail: { contains: "reader@example.com", mode: "insensitive" },
+            },
+          ]),
+        },
+      }),
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({
+            id: "ticket-compat-1",
+            replyEmail: null,
+            userEmail: "reader@example.com",
+          }),
+        ],
+      }),
+    );
+  });
+
+  it("falls back cleanly when orderId is unavailable in the database", async () => {
+    prisma.supportTicket.findMany
+      .mockRejectedValueOnce({
+        code: "P2022",
+        meta: { column: "support_tickets.orderId" },
+        message: "The column `support_tickets.orderId` does not exist in the current database.",
+      })
+      .mockResolvedValueOnce([
+        {
+          id: "ticket-compat-2",
+          userId: "user-2",
+          topic: "billing",
+          subject: "Missing invoice",
+          message: "Please resend it.",
+          status: "open",
+          createdAt: new Date("2026-03-12T08:00:00.000Z"),
+          updatedAt: new Date("2026-03-12T08:00:00.000Z"),
+          user: { email: "reader2@example.com" },
+          replyEmail: "reader2@example.com",
+        },
+      ]);
+    prisma.supportTicket.count
+      .mockRejectedValueOnce({
+        code: "P2022",
+        meta: { column: "support_tickets.orderId" },
+        message: "The column `support_tickets.orderId` does not exist in the current database.",
+      })
+      .mockResolvedValueOnce(1);
+
+    const result = await controller.list({
+      query: {
+        search: "reader2@example.com",
+      },
+    } as never);
+
+    expect(prisma.supportTicket.findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        select: expect.not.objectContaining({
+          orderId: true,
+        }),
+      }),
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({
+            id: "ticket-compat-2",
+            orderId: null,
+            replyEmail: "reader2@example.com",
           }),
         ],
       }),

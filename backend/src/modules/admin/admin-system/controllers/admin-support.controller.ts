@@ -22,8 +22,26 @@ import {
 import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { AdminPermission } from "../../permissions/admin-permissions";
+import {
+  getMissingSupportTicketOptionalColumn,
+  SUPPORT_TICKET_OPTIONAL_COLUMNS,
+  type SupportTicketOptionalColumn,
+} from "../../../support/support-ticket-compat";
 
 const SUPPORT_SORT_FIELDS = new Set(["createdAt", "updatedAt", "status"]);
+type SupportTicketListRow = {
+  id: string;
+  userId: string | null;
+  orderId?: string | null;
+  topic?: string | null;
+  subject: string;
+  message: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: { email: string | null } | null;
+  replyEmail?: string | null;
+};
 
 function parseSortOrder(value: unknown): Prisma.SortOrder {
   return String(value || "desc").toLowerCase() === "asc" ? "asc" : "desc";
@@ -52,59 +70,62 @@ export class AdminSupportController {
     const sortOrder = parseSortOrder(req.query.sortOrder);
     const orderBy = parseSupportOrderBy(req.query.sortBy, sortOrder);
 
-    const where: Prisma.SupportTicketWhereInput = {};
-    if (search) {
-      where.OR = [
-        { id: { contains: search, mode: "insensitive" } },
-        { userId: { contains: search, mode: "insensitive" } },
-        { replyEmail: { contains: search, mode: "insensitive" } },
-        { orderId: { contains: search, mode: "insensitive" } },
-        { topic: { contains: search, mode: "insensitive" } },
-        { subject: { contains: search, mode: "insensitive" } },
-        { message: { contains: search, mode: "insensitive" } },
-        {
-          user: {
-            is: {
-              email: { contains: search, mode: "insensitive" },
-            },
-          },
-        },
-      ];
-    }
-    if (status) {
-      where.status = status;
+    const loadPage = async (supportedColumns: Set<SupportTicketOptionalColumn>) => {
+      const where = this.buildListWhere(search, status, supportedColumns);
+      const [tickets, total] = await Promise.all([
+        this.prisma.supportTicket.findMany({
+          where,
+          select: this.buildListSelect(supportedColumns),
+          orderBy,
+          take: pageSize,
+          skip: offset,
+        }),
+        this.prisma.supportTicket.count({ where }),
+      ]);
+
+      return {
+        tickets: tickets as SupportTicketListRow[],
+        total,
+        supportedColumns: new Set(supportedColumns),
+      };
+    };
+
+    const supportedColumns = new Set<SupportTicketOptionalColumn>(SUPPORT_TICKET_OPTIONAL_COLUMNS);
+    let result: {
+      tickets: SupportTicketListRow[];
+      total: number;
+      supportedColumns: Set<SupportTicketOptionalColumn>;
+    };
+    while (true) {
+      try {
+        result = await loadPage(supportedColumns);
+        break;
+      } catch (error) {
+        const missingColumn = getMissingSupportTicketOptionalColumn(error);
+        if (!missingColumn || !supportedColumns.has(missingColumn)) {
+          throw error;
+        }
+        supportedColumns.delete(missingColumn);
+      }
     }
 
-    const [tickets, total] = await Promise.all([
-      this.prisma.supportTicket.findMany({
-        where,
-        include: {
-          user: {
-            select: { email: true },
-          },
-        },
-        orderBy,
-        take: pageSize,
-        skip: offset,
-      }),
-      this.prisma.supportTicket.count({ where }),
-    ]);
-
-    const normalized = tickets.map((ticket: (typeof tickets)[number]) => ({
+    const normalized = result.tickets.map((ticket) => ({
       id: ticket.id,
       userId: ticket.userId,
-      replyEmail: ticket.replyEmail,
-      orderId: ticket.orderId,
-      topic: ticket.topic,
+      replyEmail: result.supportedColumns.has("replyEmail") ? ticket.replyEmail || null : null,
+      orderId: result.supportedColumns.has("orderId") ? ticket.orderId || null : null,
+      topic: result.supportedColumns.has("topic") ? ticket.topic || null : null,
       subject: ticket.subject,
       message: ticket.message,
       status: ticket.status,
-      userEmail: ticket.user?.email || ticket.replyEmail || null,
+      userEmail:
+        ticket.user?.email ||
+        (result.supportedColumns.has("replyEmail") ? ticket.replyEmail || null : null),
       createdAt: ticket.createdAt,
       updatedAt: ticket.updatedAt,
     }));
 
-    return buildPaginationResult(normalized, total, page, pageSize);
+    return buildPaginationResult(normalized, result.total, page, pageSize);
   }
 
   @Post(":id/reply")
@@ -115,7 +136,7 @@ export class AdminSupportController {
       throw new BadRequestException("Missing reply message.");
     }
 
-    const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
+    const ticket = await this.findTicketSummary(id);
     if (!ticket) {
       throw new NotFoundException("Support ticket not found.");
     }
@@ -139,7 +160,7 @@ export class AdminSupportController {
   @Patch(":id/close")
   @RequireAdminPermissions(AdminPermission.SUPPORT_UPDATE)
   async close(@Param("id") id: string) {
-    const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
+    const ticket = await this.findTicketSummary(id);
     if (!ticket) {
       throw new NotFoundException("Support ticket not found.");
     }
@@ -155,11 +176,78 @@ export class AdminSupportController {
   @Delete(":id")
   @RequireAdminPermissions(AdminPermission.SUPPORT_DELETE)
   async remove(@Param("id") id: string) {
-    const ticket = await this.prisma.supportTicket.findUnique({ where: { id } });
+    const ticket = await this.findTicketSummary(id);
     if (!ticket) {
       throw new NotFoundException("Support ticket not found.");
     }
     await this.prisma.supportTicket.delete({ where: { id } });
     return { ok: true };
+  }
+
+  private buildListWhere(
+    search: string,
+    status: string,
+    supportedColumns: Set<SupportTicketOptionalColumn>,
+  ): Prisma.SupportTicketWhereInput {
+    const where: Prisma.SupportTicketWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        { id: { contains: search, mode: "insensitive" } },
+        { userId: { contains: search, mode: "insensitive" } },
+        ...(supportedColumns.has("replyEmail")
+          ? [{ replyEmail: { contains: search, mode: "insensitive" as Prisma.QueryMode } }]
+          : []),
+        ...(supportedColumns.has("orderId")
+          ? [{ orderId: { contains: search, mode: "insensitive" as Prisma.QueryMode } }]
+          : []),
+        ...(supportedColumns.has("topic")
+          ? [{ topic: { contains: search, mode: "insensitive" as Prisma.QueryMode } }]
+          : []),
+        { subject: { contains: search, mode: "insensitive" } },
+        { message: { contains: search, mode: "insensitive" } },
+        {
+          user: {
+            is: {
+              email: { contains: search, mode: "insensitive" },
+            },
+          },
+        },
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    return where;
+  }
+
+  private buildListSelect(supportedColumns: Set<SupportTicketOptionalColumn>): Prisma.SupportTicketSelect {
+    return {
+      id: true,
+      userId: true,
+      ...(supportedColumns.has("orderId") ? { orderId: true } : {}),
+      ...(supportedColumns.has("topic") ? { topic: true } : {}),
+      subject: true,
+      message: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      ...(supportedColumns.has("replyEmail") ? { replyEmail: true } : {}),
+      user: {
+        select: { email: true },
+      },
+    };
+  }
+
+  private async findTicketSummary(id: string) {
+    return this.prisma.supportTicket.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        status: true,
+      },
+    });
   }
 }

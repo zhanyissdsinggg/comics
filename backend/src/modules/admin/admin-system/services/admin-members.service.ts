@@ -3,10 +3,12 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
 import type { AdminMember, Prisma } from "@prisma/client";
 import { getAppConfig } from "../../../../common/config/app-config";
+import { logger } from "../../../../common/logger/winston.init";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { buildPaginationResult, calculateOffset, parsePaginationParams } from "../../../../common/utils/pagination";
 import {
@@ -36,6 +38,8 @@ const ADMIN_MEMBER_SORT_FIELDS = new Set([
   "status",
   "keySlot",
 ]);
+
+type AdminMembersStorageMode = "unknown" | "database" | "env_compat";
 
 export type AdminMemberRecord = {
   id: string;
@@ -102,6 +106,8 @@ function normalizeSortOrder(value: unknown): Prisma.SortOrder {
 
 @Injectable()
 export class AdminMembersService {
+  private storageMode: AdminMembersStorageMode = "unknown";
+
   constructor(private readonly prisma: PrismaService) {}
 
   async syncMembersFromEnv(): Promise<{ created: number; totalSlots: number }> {
@@ -110,15 +116,18 @@ export class AdminMembersService {
       return { created: 0, totalSlots: 0 };
     }
 
-    const existingMembers = await this.prisma.adminMember.findMany({
-      where: {
-        keySlot: { in: availableSlots },
-      },
-      select: {
-        id: true,
-        keySlot: true,
-      },
-    });
+    const existingMembers = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findMany({
+        where: {
+          keySlot: { in: availableSlots },
+        },
+        select: {
+          id: true,
+          keySlot: true,
+        },
+      }),
+      () => [],
+    );
     const existingSlots = new Set(
       existingMembers
         .map((member) => member.keySlot)
@@ -131,15 +140,26 @@ export class AdminMembersService {
         continue;
       }
 
-      await this.prisma.adminMember.create({
-        data: {
-          name: `后台成员 ${slot}`,
-          role: this.getConfiguredRoleForSlot(slot),
-          status: ADMIN_MEMBER_STATUS_ACTIVE,
-          keySlot: slot,
-          source: "env_seed",
-        },
-      });
+      const createdMember = await this.runWithMemberStoreFallback(
+        () => this.prisma.adminMember.create({
+          data: {
+            name: `Admin key slot ${slot}`,
+            role: this.getConfiguredRoleForSlot(slot),
+            status: ADMIN_MEMBER_STATUS_ACTIVE,
+            keySlot: slot,
+            source: "env_seed",
+          },
+        }),
+        () => null,
+      );
+
+      if (!createdMember) {
+        return {
+          created,
+          totalSlots: availableSlots.length,
+        };
+      }
+
       created += 1;
     }
 
@@ -178,36 +198,61 @@ export class AdminMembersService {
       where.role = normalizeAdminRole(role, AdminRole.SUPER_ADMIN);
     }
 
-    const [members, total, meta] = await Promise.all([
-      this.prisma.adminMember.findMany({
-        where,
-        orderBy: { [sortBy]: sortOrder },
-        skip: offset,
-        take: pageSize,
-      }),
-      this.prisma.adminMember.count({ where }),
-      this.getMeta(),
-    ]);
+    const membersResult = await this.runWithMemberStoreFallback(
+      async () => {
+        const [members, total, meta] = await Promise.all([
+          this.prisma.adminMember.findMany({
+            where,
+            orderBy: { [sortBy]: sortOrder },
+            skip: offset,
+            take: pageSize,
+          }),
+          this.prisma.adminMember.count({ where }),
+          this.getMeta(),
+        ]);
+
+        return {
+          items: members.map((member) => this.mapMember(member)),
+          total,
+          meta,
+        };
+      },
+      async () => {
+        const envMembers = this.filterEnvCompatMembers(query);
+        return {
+          items: envMembers.items,
+          total: envMembers.total,
+          meta: await this.getMeta(),
+        };
+      },
+    );
 
     return {
-      ...buildPaginationResult(members.map((member) => this.mapMember(member)), total, page, pageSize),
-      meta,
+      ...buildPaginationResult(membersResult.items, membersResult.total, page, pageSize),
+      meta: membersResult.meta,
     };
   }
 
   async getMeta(): Promise<AdminMemberMeta> {
     await this.syncMembersFromEnv();
 
-    const members = await this.prisma.adminMember.findMany({
-      where: {
-        keySlot: { not: null },
-      },
-      select: {
-        id: true,
-        name: true,
-        keySlot: true,
-      },
-    });
+    const members = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findMany({
+        where: {
+          keySlot: { not: null },
+        },
+        select: {
+          id: true,
+          name: true,
+          keySlot: true,
+        },
+      }),
+      () => this.buildEnvCompatMembers().map((member) => ({
+        id: member.id,
+        name: member.name,
+        keySlot: member.keySlot,
+      })),
+    );
 
     const memberBySlot = new Map<number, { id: string; name: string }>();
     for (const member of members) {
@@ -229,6 +274,8 @@ export class AdminMembersService {
   }
 
   async createMember(input: Record<string, unknown>) {
+    this.assertMemberStoreWritable();
+
     const name = sanitizeText(input.name);
     if (!name) {
       throw new BadRequestException("name is required");
@@ -240,25 +287,35 @@ export class AdminMembersService {
     await this.assertKeySlotAvailable(keySlot);
 
     const totpEnabled = readBooleanFlag(input.totpEnabled, false);
-    const member = await this.prisma.adminMember.create({
-      data: {
-        name,
-        email,
-        role: normalizeAdminRole(input.role, AdminRole.SUPER_ADMIN),
-        status: normalizeMemberStatus(input.status),
-        keySlot,
-        source: sanitizeOptionalText(input.source) || "manual",
-        notes: sanitizeOptionalText(input.notes),
-        totpEnabled,
-        totpSecret: totpEnabled ? generateTotpSecret() : null,
+    const member = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.create({
+        data: {
+          name,
+          email,
+          role: normalizeAdminRole(input.role, AdminRole.SUPER_ADMIN),
+          status: normalizeMemberStatus(input.status),
+          keySlot,
+          source: sanitizeOptionalText(input.source) || "manual",
+          notes: sanitizeOptionalText(input.notes),
+          totpEnabled,
+          totpSecret: totpEnabled ? generateTotpSecret() : null,
+        },
+      }),
+      () => {
+        throw this.buildMemberStoreUnavailableError();
       },
-    });
+    );
 
     return this.mapMember(member);
   }
 
   async updateMember(id: string, input: Record<string, unknown>) {
-    const existing = await this.prisma.adminMember.findUnique({ where: { id } });
+    this.assertMemberStoreWritable();
+
+    const existing = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findUnique({ where: { id } }),
+      () => null,
+    );
     if (!existing) {
       throw new NotFoundException("Admin member not found");
     }
@@ -276,44 +333,64 @@ export class AdminMembersService {
       throw new BadRequestException("Generate a 2FA secret before enabling member-specific TOTP.");
     }
 
-    const member = await this.prisma.adminMember.update({
-      where: { id },
-      data: {
-        name: input.name !== undefined ? sanitizeText(input.name) || existing.name : undefined,
-        email: nextEmail,
-        role: input.role !== undefined
-          ? normalizeAdminRole(input.role, AdminRole.SUPER_ADMIN)
-          : undefined,
-        status: input.status !== undefined
-          ? normalizeMemberStatus(input.status)
-          : undefined,
-        keySlot: nextKeySlot,
-        notes: input.notes !== undefined ? sanitizeOptionalText(input.notes) : undefined,
-        totpEnabled: input.totpEnabled !== undefined ? nextTotpEnabled : undefined,
+    const member = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.update({
+        where: { id },
+        data: {
+          name: input.name !== undefined ? sanitizeText(input.name) || existing.name : undefined,
+          email: nextEmail,
+          role: input.role !== undefined
+            ? normalizeAdminRole(input.role, AdminRole.SUPER_ADMIN)
+            : undefined,
+          status: input.status !== undefined
+            ? normalizeMemberStatus(input.status)
+            : undefined,
+          keySlot: nextKeySlot,
+          notes: input.notes !== undefined ? sanitizeOptionalText(input.notes) : undefined,
+          totpEnabled: input.totpEnabled !== undefined ? nextTotpEnabled : undefined,
+        },
+      }),
+      () => {
+        throw this.buildMemberStoreUnavailableError();
       },
-    });
+    );
 
     return this.mapMember(member);
   }
 
   async setMemberStatus(id: string, status: string) {
-    const existing = await this.prisma.adminMember.findUnique({ where: { id } });
+    this.assertMemberStoreWritable();
+
+    const existing = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findUnique({ where: { id } }),
+      () => null,
+    );
     if (!existing) {
       throw new NotFoundException("Admin member not found");
     }
 
-    const member = await this.prisma.adminMember.update({
-      where: { id },
-      data: {
-        status: normalizeMemberStatus(status),
+    const member = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.update({
+        where: { id },
+        data: {
+          status: normalizeMemberStatus(status),
+        },
+      }),
+      () => {
+        throw this.buildMemberStoreUnavailableError();
       },
-    });
+    );
 
     return this.mapMember(member);
   }
 
   async regenerateMemberTotp(id: string) {
-    const existing = await this.prisma.adminMember.findUnique({ where: { id } });
+    this.assertMemberStoreWritable();
+
+    const existing = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findUnique({ where: { id } }),
+      () => null,
+    );
     if (!existing) {
       throw new NotFoundException("Admin member not found");
     }
@@ -321,13 +398,18 @@ export class AdminMembersService {
     const secret = generateTotpSecret();
     const issuer = "Tappytoon Admin";
     const label = existing.email || existing.name || existing.id;
-    const member = await this.prisma.adminMember.update({
-      where: { id },
-      data: {
-        totpSecret: secret,
-        totpEnabled: true,
+    const member = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.update({
+        where: { id },
+        data: {
+          totpSecret: secret,
+          totpEnabled: true,
+        },
+      }),
+      () => {
+        throw this.buildMemberStoreUnavailableError();
       },
-    });
+    );
 
     return {
       member: this.mapMember(member),
@@ -341,18 +423,28 @@ export class AdminMembersService {
   }
 
   async clearMemberTotp(id: string) {
-    const existing = await this.prisma.adminMember.findUnique({ where: { id } });
+    this.assertMemberStoreWritable();
+
+    const existing = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findUnique({ where: { id } }),
+      () => null,
+    );
     if (!existing) {
       throw new NotFoundException("Admin member not found");
     }
 
-    const member = await this.prisma.adminMember.update({
-      where: { id },
-      data: {
-        totpSecret: null,
-        totpEnabled: false,
+    const member = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.update({
+        where: { id },
+        data: {
+          totpSecret: null,
+          totpEnabled: false,
+        },
+      }),
+      () => {
+        throw this.buildMemberStoreUnavailableError();
       },
-    });
+    );
 
     return this.mapMember(member);
   }
@@ -375,9 +467,12 @@ export class AdminMembersService {
     }
 
     await this.syncMembersFromEnv();
-    const member = await this.prisma.adminMember.findFirst({
-      where: { keySlot },
-    });
+    const member = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findFirst({
+        where: { keySlot },
+      }),
+      () => null,
+    );
 
     if (member && normalizeMemberStatus(member.status) !== ADMIN_MEMBER_STATUS_ACTIVE) {
       throw new UnauthorizedException("This admin member has been disabled.");
@@ -398,7 +493,7 @@ export class AdminMembersService {
       adminId,
       adminRole: fallbackRole,
       session: buildAdminSessionProfile(adminId, fallbackRole, {
-        authMode: "legacy_env_admin_key",
+        authMode: this.storageMode === "env_compat" ? "env_admin_key_compat" : "legacy_env_admin_key",
         keySlot,
       }),
     };
@@ -411,7 +506,7 @@ export class AdminMembersService {
         member: null as AdminMember | null,
         adminRole: fallbackRole,
         session: buildAdminSessionProfile(adminId, fallbackRole, {
-          authMode: "legacy_env_admin_key",
+          authMode: this.storageMode === "env_compat" ? "env_admin_key_compat" : "legacy_env_admin_key",
         }),
       };
     }
@@ -424,9 +519,12 @@ export class AdminMembersService {
   }
 
   async ensureActiveMember(adminId: string): Promise<AdminMember | null> {
-    const member = await this.prisma.adminMember.findUnique({
-      where: { id: adminId },
-    });
+    const member = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findUnique({
+        where: { id: adminId },
+      }),
+      () => null,
+    );
 
     if (!member) {
       return null;
@@ -440,19 +538,25 @@ export class AdminMembersService {
   }
 
   async touchLastLogin(adminId: string): Promise<void> {
-    const member = await this.prisma.adminMember.findUnique({
-      where: { id: adminId },
-      select: { id: true },
-    });
+    const member = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findUnique({
+        where: { id: adminId },
+        select: { id: true },
+      }),
+      () => null,
+    );
 
     if (!member) {
       return;
     }
 
-    await this.prisma.adminMember.update({
-      where: { id: adminId },
-      data: { lastLoginAt: new Date() },
-    });
+    await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.update({
+        where: { id: adminId },
+        data: { lastLoginAt: new Date() },
+      }),
+      () => null,
+    );
   }
 
   isMemberTotpEnabled(member: AdminMember | null | undefined): boolean {
@@ -471,9 +575,168 @@ export class AdminMembersService {
     return Array.from({ length: getAdminKeysFromEnv().length }, (_, index) => index + 1);
   }
 
+  private async runWithMemberStoreFallback<T>(
+    operation: () => Promise<T>,
+    fallback: () => Promise<T> | T,
+  ): Promise<T> {
+    if (this.storageMode === "env_compat") {
+      return await fallback();
+    }
+
+    try {
+      const result = await operation();
+      this.storageMode = "database";
+      return result;
+    } catch (error) {
+      if (this.isAdminMembersTableUnavailable(error)) {
+        this.markEnvCompatMode(error);
+        return await fallback();
+      }
+      throw error;
+    }
+  }
+
+  private isAdminMembersTableUnavailable(error: unknown): boolean {
+    if (!error || typeof error !== "object") {
+      return false;
+    }
+
+    const candidate = error as {
+      code?: unknown;
+      message?: unknown;
+      meta?: Record<string, unknown>;
+    };
+    const code = String(candidate.code || "").trim();
+    const tableName = String(candidate.meta?.table || candidate.meta?.modelName || "").trim().toLowerCase();
+    const message = String(candidate.message || "").toLowerCase();
+    const tableReferenced = tableName.includes("admin_members") || message.includes("admin_members");
+
+    if (!tableReferenced) {
+      return false;
+    }
+
+    return code === "P2021" || code === "P2022" || message.includes("does not exist");
+  }
+
+  private markEnvCompatMode(error: unknown): void {
+    if (this.storageMode === "env_compat") {
+      return;
+    }
+
+    this.storageMode = "env_compat";
+    const message = error instanceof Error ? error.message : String(error || "unknown error");
+    logger.warn("[admin-members] admin_members table is unavailable; falling back to env-only admin member mode", {
+      message,
+    });
+  }
+
+  private assertMemberStoreWritable(): void {
+    if (this.storageMode === "env_compat") {
+      throw this.buildMemberStoreUnavailableError();
+    }
+  }
+
+  private buildMemberStoreUnavailableError(): ServiceUnavailableException {
+    return new ServiceUnavailableException(
+      "Admin member storage is unavailable until the admin_members migration is applied.",
+    );
+  }
+
   private getConfiguredRoleForSlot(slot: number): AdminRole {
     const configuredRole = getAppConfig().admin.roleAssignments[slot];
     return normalizeAdminRole(configuredRole, AdminRole.SUPER_ADMIN);
+  }
+
+  private buildEnvCompatMembers(): AdminMemberRecord[] {
+    const adminKeys = getAdminKeysFromEnv();
+    const baseDate = new Date(0);
+
+    return adminKeys.map((adminKey, index) => {
+      const slot = index + 1;
+      const adminId = getAdminIdentityFromKey(adminKey) || `env-admin-${slot}`;
+
+      return {
+        id: adminId,
+        name: `Admin key slot ${slot}`,
+        email: null,
+        role: this.getConfiguredRoleForSlot(slot),
+        status: ADMIN_MEMBER_STATUS_ACTIVE,
+        keySlot: slot,
+        keySlotStatus: "assigned",
+        source: "env_compat",
+        totpEnabled: false,
+        hasTotpSecret: false,
+        notes: "Apply the admin_members migration to manage admin members in the database.",
+        lastLoginAt: null,
+        createdAt: baseDate,
+        updatedAt: baseDate,
+      };
+    });
+  }
+
+  private filterEnvCompatMembers(query: Record<string, unknown>): {
+    items: AdminMemberRecord[];
+    total: number;
+  } {
+    const { page, pageSize } = parsePaginationParams(query);
+    const offset = calculateOffset(page, pageSize);
+    const search = sanitizeText(query.search).toLowerCase();
+    const status = sanitizeOptionalText(query.status);
+    const role = sanitizeOptionalText(query.role);
+    const sortBy = ADMIN_MEMBER_SORT_FIELDS.has(sanitizeText(query.sortBy))
+      ? sanitizeText(query.sortBy)
+      : "createdAt";
+    const sortOrder = normalizeSortOrder(query.sortOrder);
+
+    const filtered = this.buildEnvCompatMembers().filter((member) => {
+      if (search) {
+        const haystack = [
+          member.id,
+          member.name,
+          member.email || "",
+          member.role,
+          member.notes || "",
+        ].join(" ").toLowerCase();
+        if (!haystack.includes(search)) {
+          return false;
+        }
+      }
+
+      if (status && normalizeMemberStatus(status, status) !== member.status) {
+        return false;
+      }
+
+      if (role && normalizeAdminRole(role, member.role) !== member.role) {
+        return false;
+      }
+
+      return true;
+    });
+
+    filtered.sort((left, right) => {
+      const leftValue = left[sortBy as keyof AdminMemberRecord];
+      const rightValue = right[sortBy as keyof AdminMemberRecord];
+
+      if (leftValue instanceof Date || rightValue instanceof Date) {
+        const leftTime = leftValue instanceof Date ? leftValue.getTime() : 0;
+        const rightTime = rightValue instanceof Date ? rightValue.getTime() : 0;
+        return sortOrder === "asc" ? leftTime - rightTime : rightTime - leftTime;
+      }
+
+      if (typeof leftValue === "number" || typeof rightValue === "number") {
+        const leftNumber = typeof leftValue === "number" ? leftValue : Number(leftValue || 0);
+        const rightNumber = typeof rightValue === "number" ? rightValue : Number(rightValue || 0);
+        return sortOrder === "asc" ? leftNumber - rightNumber : rightNumber - leftNumber;
+      }
+
+      const comparison = String(leftValue || "").localeCompare(String(rightValue || ""));
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    return {
+      items: filtered.slice(offset, offset + pageSize),
+      total: filtered.length,
+    };
   }
 
   private mapMember(member: AdminMember): AdminMemberRecord {
@@ -551,10 +814,16 @@ export class AdminMembersService {
       return;
     }
 
-    const existing = await this.prisma.adminMember.findUnique({
-      where: { email },
-      select: { id: true },
-    });
+    const existing = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findUnique({
+        where: { email },
+        select: { id: true },
+      }),
+      () => {
+        throw this.buildMemberStoreUnavailableError();
+      },
+    );
+
     if (existing && existing.id !== currentId) {
       throw new ConflictException("Admin email already exists.");
     }
@@ -565,10 +834,15 @@ export class AdminMembersService {
       return;
     }
 
-    const existing = await this.prisma.adminMember.findFirst({
-      where: { keySlot },
-      select: { id: true },
-    });
+    const existing = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findFirst({
+        where: { keySlot },
+        select: { id: true },
+      }),
+      () => {
+        throw this.buildMemberStoreUnavailableError();
+      },
+    );
 
     if (existing && existing.id !== currentId) {
       throw new ConflictException("This admin key slot is already assigned.");

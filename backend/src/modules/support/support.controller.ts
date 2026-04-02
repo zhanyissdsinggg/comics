@@ -3,6 +3,11 @@ import { Request, Response } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { getUserIdFromRequest } from "../../common/utils/auth";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import {
+  getMissingSupportTicketOptionalColumn,
+  SUPPORT_TICKET_OPTIONAL_COLUMNS,
+  type SupportTicketOptionalColumn,
+} from "./support-ticket-compat";
 
 function readTrimmedString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -49,17 +54,38 @@ export class SupportController {
       });
     }
 
-    await this.prisma.supportTicket.create({
-      data: {
-        userId,
-        replyEmail,
-        orderId,
-        topic,
-        subject,
-        message,
-        status: "open",
-      },
-    });
+    const supportedColumns = new Set<SupportTicketOptionalColumn>(SUPPORT_TICKET_OPTIONAL_COLUMNS);
+
+    while (true) {
+      try {
+        await this.prisma.supportTicket.create({
+          data: {
+            userId,
+            ...(supportedColumns.has("replyEmail") ? { replyEmail } : {}),
+            ...(supportedColumns.has("orderId") ? { orderId } : {}),
+            ...(supportedColumns.has("topic") ? { topic } : {}),
+            subject,
+            message,
+            status: "open",
+          },
+        });
+        break;
+      } catch (error) {
+        const missingColumn = getMissingSupportTicketOptionalColumn(error);
+        if (!missingColumn || !supportedColumns.has(missingColumn)) {
+          throw error;
+        }
+
+        if (missingColumn === "replyEmail" && !userId) {
+          res.status(503);
+          return buildError(ERROR_CODES.INTERNAL, {
+            message: "Guest support requests are temporarily unavailable until the support email field is migrated.",
+          });
+        }
+
+        supportedColumns.delete(missingColumn);
+      }
+    }
 
     return { ok: true };
   }
