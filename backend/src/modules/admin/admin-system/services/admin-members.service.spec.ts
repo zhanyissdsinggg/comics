@@ -67,13 +67,13 @@ describe("AdminMembersService", () => {
       expect.objectContaining({
         keySlot: 1,
         source: "env_compat",
-        name: "Admin key slot 1",
+        name: "后台密钥槽位 1",
       }),
     );
     expect(result.meta.keySlots).toEqual([
       expect.objectContaining({
         slot: 1,
-        assignedMemberName: "Admin key slot 1",
+        assignedMemberName: "后台密钥槽位 1",
       }),
     ]);
   });

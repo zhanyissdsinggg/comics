@@ -160,7 +160,7 @@ export class AdminMembersService {
         const createdMember = await this.runWithMemberStoreFallback(
           () => this.prisma.adminMember.create({
             data: {
-              name: `Admin key slot ${slot}`,
+              name: `后台密钥槽位 ${slot}`,
               role: this.getConfiguredRoleForSlot(slot),
               status: ADMIN_MEMBER_STATUS_ACTIVE,
               keySlot: slot,
@@ -304,7 +304,7 @@ export class AdminMembersService {
 
     const name = sanitizeText(input.name);
     if (!name) {
-      throw new BadRequestException("name is required");
+      throw new BadRequestException("成员名称不能为空。");
     }
 
     const email = this.normalizeEmail(input.email);
@@ -343,7 +343,7 @@ export class AdminMembersService {
       () => null,
     );
     if (!existing) {
-      throw new NotFoundException("Admin member not found");
+      throw new NotFoundException("未找到对应的后台成员。");
     }
 
     const nextEmail = input.email !== undefined ? this.normalizeEmail(input.email) : undefined;
@@ -356,7 +356,7 @@ export class AdminMembersService {
       : existing.totpEnabled;
 
     if (nextTotpEnabled && !existing.totpSecret && input.totpEnabled !== undefined) {
-      throw new BadRequestException("Generate a 2FA secret before enabling member-specific TOTP.");
+      throw new BadRequestException("请先生成 2FA 密钥，再启用成员专属验证。");
     }
 
     const member = await this.runWithMemberStoreFallback(
@@ -392,7 +392,7 @@ export class AdminMembersService {
       () => null,
     );
     if (!existing) {
-      throw new NotFoundException("Admin member not found");
+      throw new NotFoundException("未找到对应的后台成员。");
     }
 
     const member = await this.runWithMemberStoreFallback(
@@ -418,7 +418,7 @@ export class AdminMembersService {
       () => null,
     );
     if (!existing) {
-      throw new NotFoundException("Admin member not found");
+      throw new NotFoundException("未找到对应的后台成员。");
     }
 
     const secret = generateTotpSecret();
@@ -501,7 +501,7 @@ export class AdminMembersService {
     );
 
     if (member && normalizeMemberStatus(member.status) !== ADMIN_MEMBER_STATUS_ACTIVE) {
-      throw new UnauthorizedException("This admin member has been disabled.");
+      throw new UnauthorizedException("这个后台成员已被停用。");
     }
 
     if (member) {
@@ -557,7 +557,7 @@ export class AdminMembersService {
     }
 
     if (normalizeMemberStatus(member.status) !== ADMIN_MEMBER_STATUS_ACTIVE) {
-      throw new UnauthorizedException("This admin member has been disabled.");
+      throw new UnauthorizedException("这个后台成员已被停用。");
     }
 
     return member;
@@ -652,7 +652,7 @@ export class AdminMembersService {
 
   private buildMemberStoreUnavailableError(): ServiceUnavailableException {
     return new ServiceUnavailableException(
-      "Admin member storage is unavailable until the admin_members migration is applied.",
+      "后台成员存储暂不可用，请先应用 admin_members 迁移。",
     );
   }
 
@@ -671,7 +671,7 @@ export class AdminMembersService {
 
       return {
         id: adminId,
-        name: `Admin key slot ${slot}`,
+        name: `后台密钥槽位 ${slot}`,
         email: null,
         role: this.getConfiguredRoleForSlot(slot),
         status: ADMIN_MEMBER_STATUS_ACTIVE,
@@ -680,7 +680,7 @@ export class AdminMembersService {
         source: "env_compat",
         totpEnabled: false,
         hasTotpSecret: false,
-        notes: "Apply the admin_members migration to manage admin members in the database.",
+        notes: "请先应用 admin_members 迁移，然后再在数据库里管理后台成员。",
         lastLoginAt: null,
         createdAt: baseDate,
         updatedAt: baseDate,
@@ -799,7 +799,7 @@ export class AdminMembersService {
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      throw new BadRequestException("Invalid admin email.");
+      throw new BadRequestException("后台邮箱格式无效。");
     }
 
     return email;
@@ -812,12 +812,12 @@ export class AdminMembersService {
 
     const parsed = Number.parseInt(String(value), 10);
     if (!Number.isFinite(parsed) || parsed < 1) {
-      throw new BadRequestException("keySlot must be a positive integer.");
+      throw new BadRequestException("密钥槽位必须是大于 0 的整数。");
     }
 
     const availableSlots = this.getAvailableSlots();
     if (!availableSlots.includes(parsed)) {
-      throw new BadRequestException("keySlot must match a configured ADMIN_KEYS slot.");
+      throw new BadRequestException("密钥槽位必须对应已配置的 ADMIN_KEYS 槽位。");
     }
 
     return parsed;
@@ -839,7 +839,7 @@ export class AdminMembersService {
     );
 
     if (existing && existing.id !== currentId) {
-      throw new ConflictException("Admin email already exists.");
+      throw new ConflictException("后台邮箱已存在。");
     }
   }
 
@@ -859,7 +859,7 @@ export class AdminMembersService {
     );
 
     if (existing && existing.id !== currentId) {
-      throw new ConflictException("This admin key slot is already assigned.");
+      throw new ConflictException("这个后台密钥槽位已经分配给其他成员。");
     }
   }
 }
