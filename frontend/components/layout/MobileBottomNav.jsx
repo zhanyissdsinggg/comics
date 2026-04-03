@@ -84,7 +84,8 @@ export default function MobileBottomNav() {
   return (
     <nav
       aria-label="Mobile bottom navigation"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-[color:var(--gush-border)] bg-[rgba(252,248,242,0.82)] shadow-[0_-10px_30px_rgba(32,25,18,0.06)] backdrop-blur-2xl md:hidden"
+      data-mobile-bottom-nav="1"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-[color:var(--gush-border)] bg-[rgba(252,248,242,0.82)] shadow-[0_-10px_30px_rgba(32,25,18,0.06)] backdrop-blur-2xl dark:bg-[rgba(11,16,24,0.9)] dark:shadow-[0_-14px_36px_rgba(0,0,0,0.28)] md:hidden"
     >
       <div className="mx-auto grid max-w-[1320px] grid-cols-4 gap-1.5 px-2 pb-[calc(0.55rem+env(safe-area-inset-bottom,0px))] pt-2">
         {TAB_ITEMS.map((item) => {
@@ -99,14 +100,14 @@ export default function MobileBottomNav() {
               className={cn(
                 "relative flex min-h-[60px] flex-col items-center justify-center gap-1 rounded-[1.35rem] px-2 py-2 text-center transition-all duration-200",
                 isActive
-                  ? "border border-[rgba(36,30,20,0.08)] bg-[rgba(255,255,255,0.84)] text-[color:var(--gush-ink-strong)] shadow-[0_10px_22px_rgba(32,25,18,0.06)]"
-                  : "text-[color:var(--gush-ink-faint)] hover:bg-white/60 hover:text-[color:var(--gush-ink)]",
+                  ? "border border-[rgba(36,30,20,0.08)] bg-[rgba(255,255,255,0.84)] text-[color:var(--gush-ink-strong)] shadow-[0_10px_22px_rgba(32,25,18,0.06)] dark:border-white/8 dark:bg-white/[0.08] dark:text-white dark:shadow-[0_12px_28px_rgba(0,0,0,0.26)]"
+                  : "text-[color:var(--gush-ink-faint)] hover:bg-white/60 hover:text-[color:var(--gush-ink)] dark:hover:bg-white/[0.05]",
               )}
             >
               <span
                 className={cn(
                   "absolute left-1/2 top-1.5 h-1 w-8 -translate-x-1/2 rounded-full transition-all duration-200",
-                  isActive ? "bg-[rgba(54,87,183,0.22)]" : "bg-transparent",
+                  isActive ? "bg-[rgba(54,87,183,0.22)] dark:bg-[rgba(137,167,255,0.45)]" : "bg-transparent",
                 )}
               />
               <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.95} />

@@ -45,8 +45,8 @@ export default function HeaderActions({
   const iconButtonClass = isHome
     ? "relative h-10 w-10 rounded-full border border-white/10 bg-white/[0.04] text-white/74 shadow-[0_12px_28px_rgba(0,0,0,0.18)] hover:border-white/18 hover:bg-white/[0.08] hover:text-white"
     : isLight
-      ? "relative h-10 w-10 rounded-full border border-black/8 bg-white text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.04)] hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-900"
-    : ICON_BUTTON_CLASS;
+      ? "relative h-10 w-10 rounded-full border border-black/8 bg-white text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.04)] hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-900 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:shadow-[0_14px_30px_rgba(0,0,0,0.22)] dark:hover:border-white/18 dark:hover:bg-white/[0.1] dark:hover:text-white"
+      : ICON_BUTTON_CLASS;
 
   return (
     <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
@@ -62,14 +62,14 @@ export default function HeaderActions({
             isHome
               ? "border-white/10 bg-white/[0.04] text-white hover:border-white/18 hover:bg-white/[0.08]"
               : isLight
-                ? "border-black/8 bg-white text-slate-800 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
-              : "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]"
+                ? "border-black/8 bg-white text-slate-800 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:border-white/18 dark:hover:bg-white/[0.1]"
+                : "border-white/10 bg-white/[0.04] text-neutral-100 hover:border-white/20 hover:bg-white/[0.08]"
           }`}
           aria-label={`View your wallet${walletTotal > 0 ? ` with ${walletTotal.toLocaleString()} points` : ""}`}
         >
           <Wallet className="size-4" strokeWidth={2} />
           <span className="text-sm font-semibold">Wallet</span>
-          <span className={`text-xs tabular-nums ${isHome ? "text-white/52" : isLight ? "text-slate-500" : "text-neutral-400"}`}>{walletTotal.toLocaleString()}</span>
+          <span className={`text-xs tabular-nums ${isHome ? "text-white/52" : isLight ? "text-slate-500 dark:text-neutral-400" : "text-neutral-400"}`}>{walletTotal.toLocaleString()}</span>
         </Button>
       ) : null}
 
@@ -100,26 +100,43 @@ export default function HeaderActions({
         size="sm"
         variant="outline"
         onClick={onAdultToggleClick}
-          className={cn(
-            "h-10 min-w-[3rem] rounded-full px-3 text-xs font-semibold sm:px-3.5",
+        className={cn(
+          "h-10 min-w-[4.5rem] rounded-full px-3 text-xs font-semibold sm:min-w-[5.5rem] sm:px-3.5",
             isHome
               ? isAdultMode
                 ? "border-red-400/25 bg-red-500/[0.16] text-red-100 hover:border-red-300/40 hover:bg-red-500/[0.22]"
                 : "border-white/10 bg-white/[0.04] text-white/72 hover:border-red-400/30 hover:bg-red-500/[0.1] hover:text-white"
               : isLight
                 ? isAdultMode
-                  ? "border-red-300/30 bg-red-500/[0.08] text-red-600 hover:border-red-400/40 hover:bg-red-500/[0.12]"
-                : "border-black/8 bg-white text-slate-600 hover:border-red-300/35 hover:bg-red-500/[0.05] hover:text-red-600"
+                  ? "border-red-300/30 bg-red-500/[0.08] text-red-600 hover:border-red-400/40 hover:bg-red-500/[0.12] dark:border-red-300/35 dark:bg-red-500/[0.14] dark:text-red-200 dark:hover:border-red-300/45 dark:hover:bg-red-500/[0.2]"
+                : "border-black/8 bg-white text-slate-600 hover:border-red-300/35 hover:bg-red-500/[0.05] hover:text-red-600 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:hover:border-red-300/35 dark:hover:bg-red-500/[0.12] dark:hover:text-white"
               : isAdultMode
                 ? "border-red-400/30 bg-red-500/[0.12] text-red-200 hover:border-red-300/45 hover:bg-red-500/[0.18]"
                 : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-white",
         )}
-        aria-label="Adult content"
+        aria-label={`Switch ${isAdultMode ? "to standard mode" : `to ${legalAge}+ mode`}`}
         aria-pressed={isAdultMode}
-        title={`Adult content ${legalAge}+ ${isAdultMode ? "on" : "off"}`}
+        title={`Switch between standard mode and ${legalAge}+ mode. Current: ${isAdultMode ? `${legalAge}+ on` : "standard"}`}
         data-testid="adult-toggle-button"
       >
-        <span>{legalAge}+</span>
+        <span className="flex items-center gap-1.5">
+          <span
+            className={cn(
+              "inline-flex h-2 w-2 rounded-full",
+              isAdultMode
+                ? "bg-current opacity-90"
+                : isHome
+                  ? "bg-white/45"
+                  : isLight
+                    ? "bg-slate-400 dark:bg-neutral-500"
+                    : "bg-neutral-500",
+            )}
+          />
+          <span>{legalAge}+</span>
+        </span>
+        <span className={cn("text-[10px] font-medium uppercase tracking-[0.16em]", isAdultMode ? "opacity-85" : "opacity-55")}>
+          {isAdultMode ? "On" : "Off"}
+        </span>
       </Button>
 
       <Button
@@ -147,7 +164,7 @@ export default function HeaderActions({
             isHome
               ? "border-white/10 bg-white/[0.04] text-white hover:border-white/18 hover:bg-white/[0.08]"
               : isLight
-                ? "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
+                ? "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:border-white/18 dark:hover:bg-white/[0.1]"
               : "border-white/10 bg-white/[0.04] text-white hover:border-white/20 hover:bg-white/[0.08]"
             }`}
           >
@@ -165,7 +182,7 @@ export default function HeaderActions({
             isHome
               ? "bg-[var(--gush-home-accent)] text-slate-950 hover:bg-[#ffd6a0]"
               : isLight
-                ? "bg-slate-950 text-white hover:bg-slate-800"
+                ? "bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
                 : "bg-white text-neutral-950 hover:bg-neutral-200"
           }`}
         >

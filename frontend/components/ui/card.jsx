@@ -12,7 +12,7 @@ function Card({
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-4 overflow-hidden rounded-[24px] border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(252,248,242,0.94))] py-4 text-sm text-[color:var(--gush-ink-strong)] shadow-[var(--gush-shadow-card)] ring-1 ring-white/70 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[24px] *:[img:last-child]:rounded-b-[24px]",
+        "group/card flex flex-col gap-4 overflow-hidden rounded-[24px] border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,var(--gush-surface-strong),var(--gush-page-bg-elevated))] py-4 text-sm text-[color:var(--gush-ink-strong)] shadow-[var(--gush-shadow-card)] ring-1 ring-white/70 dark:ring-white/5 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[24px] *:[img:last-child]:rounded-b-[24px]",
         className
       )}
       {...props} />
@@ -96,7 +96,7 @@ function CardFooter({
     <div
       data-slot="card-footer"
       className={cn(
-        "flex items-center rounded-b-[24px] border-t border-[color:var(--gush-border)] bg-[rgba(247,242,234,0.8)] p-5 group-data-[size=sm]/card:p-4",
+        "flex items-center rounded-b-[24px] border-t border-[color:var(--gush-border)] bg-[color:var(--gush-surface-muted)] p-5 group-data-[size=sm]/card:p-4",
         className
       )}
       {...props} />

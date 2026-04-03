@@ -190,7 +190,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
       <footer
         className={`mt-16 border-t ${
           isHome
-            ? "border-black/8 bg-[rgba(246,243,237,0.82)] text-slate-900"
+            ? "border-black/8 bg-[rgba(246,243,237,0.82)] text-slate-900 dark:border-white/10 dark:bg-[rgba(10,14,21,0.92)] dark:text-white"
             : "border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))] text-white"
         }`}
       >
@@ -213,7 +213,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={isHome ? "text-slate-600 transition-colors hover:text-slate-950" : "text-neutral-300 transition-colors hover:text-white"}
+                className={isHome ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
                 >
                   {link.label}
                 </Link>
@@ -223,13 +223,13 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
 
           <div
             className={`mt-4 flex flex-col gap-3 border-t pt-3 text-sm lg:flex-row lg:items-center lg:justify-between ${
-              isHome ? "border-black/8 text-slate-400" : "border-white/10 text-neutral-500"
+              isHome ? "border-black/8 text-slate-400 dark:border-white/10 dark:text-neutral-500" : "border-white/10 text-neutral-500"
             }`}
           >
             <div className="flex flex-col gap-3">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-300 transition-colors hover:text-white"}
+                className={isHome ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
               >
                 {siteConfig.supportEmail}
               </a>
@@ -238,7 +238,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
+                    className={isHome ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white" : "text-neutral-400 transition-colors hover:text-white"}
                   >
                     {link.label}
                   </Link>
@@ -262,7 +262,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
     <footer
       className={`mt-16 border-t ${
         isHome
-          ? "border-black/8 bg-[rgba(246,243,237,0.86)] text-slate-900"
+          ? "border-black/8 bg-[rgba(246,243,237,0.86)] text-slate-900 dark:border-white/10 dark:bg-[rgba(10,14,21,0.94)] dark:text-white"
           : "border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))] text-white"
       }`}
       >
@@ -270,16 +270,16 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
           <div className="max-w-xl space-y-4">
             <div className="space-y-2">
-              <p className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400" : "text-emerald-300/75"}`}>
+              <p className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400 dark:text-neutral-500" : "text-emerald-300/75"}`}>
                 Stories
               </p>
               <Link
                 href="/"
-                className={`font-display text-3xl font-semibold tracking-tight ${isHome ? "text-slate-950" : "text-white"}`}
+                className={`font-display text-3xl font-semibold tracking-tight ${isHome ? "text-slate-950 dark:text-white" : "text-white"}`}
               >
                 {siteConfig.siteName}
               </Link>
-              <p className={`text-sm leading-6 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
+              <p className={`text-sm leading-6 ${isHome ? "text-slate-600 dark:text-neutral-300" : "text-neutral-300"}`}>
                 {footerTagline}
               </p>
             </div>
@@ -287,7 +287,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className={isHome ? "text-slate-600 transition-colors hover:text-slate-950" : "text-neutral-300 transition-colors hover:text-white"}
+                className={isHome ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
               >
                 {siteConfig.supportEmail}
               </a>
@@ -295,7 +295,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={isHome ? "text-slate-600 transition-colors hover:text-slate-950" : "text-neutral-300 transition-colors hover:text-white"}
+                  className={isHome ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
                 >
                   {item.label}
                 </Link>
@@ -306,7 +306,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
           <div className="grid gap-6 sm:grid-cols-3">
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-3">
-                <h4 className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400" : "text-neutral-400"}`}>
+                <h4 className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400 dark:text-neutral-500" : "text-neutral-400"}`}>
                   {section.title}
                 </h4>
                 <ul className="space-y-2.5">
@@ -314,7 +314,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className={`text-sm transition-colors ${isHome ? "text-slate-600 hover:text-slate-950" : "text-neutral-300 hover:text-white"}`}
+                        className={`text-sm transition-colors ${isHome ? "text-slate-600 hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 hover:text-white"}`}
                       >
                         {link.label}
                       </Link>
@@ -328,7 +328,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
 
         <div
           className={`mt-6 flex flex-col gap-3 border-t pt-4 text-sm lg:flex-row lg:items-center lg:justify-between ${
-            isHome ? "border-black/8 text-slate-400" : "border-white/10 text-neutral-500"
+            isHome ? "border-black/8 text-slate-400 dark:border-white/10 dark:text-neutral-500" : "border-white/10 text-neutral-500"
           }`}
         >
           <div className="flex flex-col gap-3">
@@ -337,7 +337,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
+                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white" : "text-neutral-400 transition-colors hover:text-white"}
                 >
                   {link.label}
                 </Link>
@@ -351,7 +351,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950" : "text-neutral-400 transition-colors hover:text-white"}
+                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white" : "text-neutral-400 transition-colors hover:text-white"}
                 >
                   {item.label}
                 </a>

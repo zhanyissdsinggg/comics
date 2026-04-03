@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { HomeProvider } from "../../store/useHomeStore";
@@ -25,6 +25,7 @@ const MobileBottomNav = dynamic(() => import("./MobileBottomNav"), {
 
 export default function SiteHeader({ onSearch, variant = "default" }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { isAdultMode, legalAge, requestAdultToggle } = useAdultGateStore();
   const { isSignedIn, hydrated } = useAuthStore();
   const [activeModal, setActiveModal] = useState(null);
@@ -90,6 +91,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
   }, []);
 
   const handleAdultToggle = () => {
+    const wasAdultMode = isAdultMode;
     trackEvent("adult_toggle_attempt", { isAdultMode });
     const cookieSignedIn = getCookie("mn_is_signed_in") === "1";
     const signedInForAdult = hydrated ? isSignedIn : isSignedIn || cookieSignedIn;
@@ -106,9 +108,14 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
       return;
     }
 
-    if (!isAdultMode) {
+    if (!wasAdultMode) {
       trackEvent("adult_gate_enabled", { source: "header" });
       router.push("/adult");
+    } else {
+      trackEvent("adult_gate_disabled", { source: "header" });
+      if (pathname?.startsWith("/adult")) {
+        router.push("/");
+      }
     }
 
     setActiveModal(null);
@@ -151,8 +158,8 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
               : "border-white/6 bg-[rgba(8,12,18,0.56)] backdrop-blur-xl"
             : isLight
               ? scrolled
-                ? "border-[color:var(--gush-border-strong)] bg-[rgba(251,247,240,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl"
-                : "border-transparent bg-[rgba(251,247,240,0.6)] backdrop-blur-xl"
+                ? "border-[color:var(--gush-border-strong)] bg-[rgba(251,247,240,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(14,18,27,0.88)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.32)]"
+                : "border-transparent bg-[rgba(251,247,240,0.6)] backdrop-blur-xl dark:border-transparent dark:bg-[rgba(14,18,27,0.6)]"
             : scrolled
               ? "border-white/10 bg-[rgba(17,16,15,0.92)] shadow-[0_20px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
               : "border-white/6 bg-[rgba(17,16,15,0.72)] backdrop-blur-xl"
@@ -166,7 +173,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
                 : ""
               : isLight
                 ? scrolled
-                  ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(36,30,20,0.12),transparent)] before:content-['']"
+                  ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(36,30,20,0.12),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)]"
                   : ""
               : scrolled
                 ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] before:content-['']"

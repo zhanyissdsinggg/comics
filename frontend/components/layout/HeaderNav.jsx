@@ -33,8 +33,8 @@ export default function HeaderNav({ variant = "default" }) {
           isHome
             ? "border border-white/10 bg-white/[0.04] shadow-[0_18px_34px_rgba(0,0,0,0.12)] backdrop-blur-md"
             : isLight
-              ? "border border-black/6 bg-white/55 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
-            : "border border-white/8 bg-white/[0.04]"
+              ? "border border-black/6 bg-white/55 shadow-[0_8px_18px_rgba(15,23,42,0.035)] dark:border-white/10 dark:bg-white/[0.04] dark:shadow-[0_18px_34px_rgba(0,0,0,0.2)]"
+              : "border border-white/8 bg-white/[0.04]"
         }`}
       >
         {navItems.map((item) => {
@@ -56,13 +56,13 @@ export default function HeaderNav({ variant = "default" }) {
                   ? isHome
                     ? "bg-white text-neutral-950 shadow-[0_12px_24px_rgba(255,255,255,0.12)]"
                     : isLight
-                      ? "bg-white text-slate-950 shadow-[0_10px_18px_rgba(15,23,42,0.05)]"
-                    : "bg-white text-neutral-950 shadow-[0_10px_30px_rgba(255,255,255,0.12)]"
+                      ? "bg-white text-slate-950 shadow-[0_10px_18px_rgba(15,23,42,0.05)] dark:bg-white/[0.1] dark:text-white dark:shadow-[0_12px_24px_rgba(0,0,0,0.22)]"
+                      : "bg-white text-neutral-950 shadow-[0_10px_30px_rgba(255,255,255,0.12)]"
                   : isHome
                     ? "text-white/64 hover:bg-white/[0.05] hover:text-white"
                     : isLight
-                      ? "text-slate-500 hover:bg-white/80 hover:text-slate-950"
-                    : "text-neutral-400 hover:bg-white/[0.05] hover:text-white"
+                      ? "text-slate-500 hover:bg-white/80 hover:text-slate-950 dark:text-neutral-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
+                      : "text-neutral-400 hover:bg-white/[0.05] hover:text-white"
               }`}
             >
               {item.label}

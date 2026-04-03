@@ -11,11 +11,11 @@ const toneClasses = {
     danger: "border-red-400/20 bg-[rgba(64,20,26,0.9)] text-white",
   },
   light: {
-    default: "border-black/8 bg-[rgba(255,255,255,0.9)] text-slate-900",
-    muted: "border-black/6 bg-[rgba(250,247,241,0.92)] text-slate-900",
-    highlight: "border-[rgba(47,88,198,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(250,247,241,0.94))] text-slate-900",
-    warning: "border-amber-200 bg-[rgba(255,251,235,0.94)] text-slate-900",
-    danger: "border-red-200 bg-[rgba(255,241,242,0.94)] text-slate-900",
+    default: "border-black/8 bg-[rgba(255,255,255,0.9)] text-slate-900 dark:border-white/8 dark:bg-[rgba(17,22,31,0.92)] dark:text-white",
+    muted: "border-black/6 bg-[rgba(250,247,241,0.92)] text-slate-900 dark:border-white/8 dark:bg-[rgba(20,26,37,0.9)] dark:text-white",
+    highlight: "border-[rgba(47,88,198,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(250,247,241,0.94))] text-slate-900 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,27,38,0.98),rgba(14,20,29,0.95))] dark:text-white",
+    warning: "border-amber-200 bg-[rgba(255,251,235,0.94)] text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
+    danger: "border-red-200 bg-[rgba(255,241,242,0.94)] text-slate-900 dark:border-red-300/20 dark:bg-[rgba(66,24,30,0.9)] dark:text-white",
   },
 };
 
@@ -88,7 +88,7 @@ export default function SurfacePanel({
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.18),transparent_36%)]"
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.18),transparent_36%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_34%)]"
             : "bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_34%)]",
         )}
       />
