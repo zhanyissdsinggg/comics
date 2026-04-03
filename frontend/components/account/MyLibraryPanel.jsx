@@ -441,17 +441,17 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       continue: {
         items: continueItems,
         emptyTitle: "Nothing in progress yet",
-        emptyDescription: "Start a series and your next chapter will land here with a quick resume path.",
+        emptyDescription: "Start a series and your next chapter will show up here.",
       },
       bookmarks: {
         items: bookmarkItems,
         emptyTitle: "No saved series yet",
-        emptyDescription: "Save a few titles to keep your shelf easy to revisit.",
+        emptyDescription: "Save a few titles and your shelf will stay close.",
       },
       unlocked: {
         items: unlockedItems,
         emptyTitle: "No unlocked series yet",
-        emptyDescription: "Unlocked chapters will collect here once you start opening paid episodes.",
+        emptyDescription: "Unlocked chapters will collect here once you open them.",
       },
     }),
     [bookmarkItems, continueItems, unlockedItems],
@@ -515,7 +515,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             Keep your next read closer than the settings.
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Continue reading, saved series, and unlocked chapters stay together here in a faster-scanning shelf.
+            Continue reading, saves, and unlocked chapters stay together here.
           </p>
         </div>
 
@@ -536,7 +536,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             <div>
               <p className="text-sm font-semibold text-slate-950">Sign in to unlock your shelf</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Bring Continue Reading, saved series, and unlocked chapters into one account dashboard.
+                Bring progress, saves, and unlocked chapters into one account.
               </p>
             </div>
             <button type="button" onClick={onOpenAuth} className={buttonBaseClass}>
@@ -600,13 +600,13 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
               </div>
             ) : (
               <div className="rounded-[26px] border border-dashed border-black/10 bg-[#f8f9fc] px-5 py-8 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[var(--gush-accent,#2f6bff)] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[var(--gush-accent,#2f6bff)] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
                   <BookMarked className="size-5" />
                 </div>
                 <p className="mt-4 text-base font-semibold text-slate-950">
                   {tabData[activeTab]?.emptyTitle}
                 </p>
-                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
+                <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-600">
                   {tabData[activeTab]?.emptyDescription}
                 </p>
               </div>

@@ -176,39 +176,90 @@ export default function NotificationsPage() {
       },
     ];
   }, [isAdultMode, loading, notifications, unreadCount]);
+
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
+  const inboxDeskTitle = loading
+    ? "Inbox is loading."
+    : unreadCount > 0
+      ? "Unread updates are waiting."
+      : "You're caught up.";
+  const inboxDeskCopy = loading
+    ? "Recent updates are loading now."
+    : unreadCount > 0
+      ? "Clear a few updates, then jump back in."
+      : "New chapters, offers, and free unlocks land here.";
+
   return (
-    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-      <SiteHeader variant="light" />
-      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <EditorialHero
-          appearance="light"
-          accent="blue"
-          eyebrow="Notifications"
-          title="Updates that matter."
-          description="New chapters, offers, and free unlocks in one place."
-          secondary=""
-          stats={notificationStats}
-          actions={
-            <>
+    <div className="gush-home-shell overflow-hidden">
+      <div className="gush-page-ambient" />
+      <SiteHeader variant="home" />
+      <main className="gush-page-main gush-section-stack">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EditorialHero
+            appearance="light"
+            accent="blue"
+            eyebrow="Notifications"
+            title="Reading updates."
+            description="Chapters, offers, and free unlocks stay in one inbox."
+            secondary=""
+            stats={notificationStats}
+            actions={
+              <>
+                <button
+                  type="button"
+                  onClick={() => router.push("/library")}
+                  className={primaryButtonClass}
+                >
+                  Open Library
+                </button>
+                <button
+                  type="button"
+                  onClick={handleMarkAllRead}
+                  disabled={loading || unreadCount === 0 || workingId === "__all__"}
+                  className={secondaryButtonClass}
+                >
+                  {workingId === "__all__" ? "Saving..." : "Mark all read"}
+                </button>
+              </>
+            }
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Inbox desk
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  {inboxDeskTitle}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  {inboxDeskCopy}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
               <button
                 type="button"
                 onClick={() => router.push("/library")}
-                className="rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800"
+                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
               >
-                Library
+                Open library
               </button>
               <button
                 type="button"
-                onClick={handleMarkAllRead}
-                disabled={loading || unreadCount === 0 || workingId === "__all__"}
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => router.push("/search")}
+                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
               >
-                {workingId === "__all__" ? "Saving..." : "Mark all read"}
+                Browse titles
               </button>
-            </>
-          }
-        />
+            </div>
+          </SurfacePanel>
+        </section>
 
         {loading ? (
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
@@ -242,7 +293,7 @@ export default function NotificationsPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold text-red-600">Couldn't load notifications.</p>
-                <p className="mt-1 text-sm text-red-500">Try again to refresh your inbox and recent reading alerts.</p>
+                <p className="mt-1 text-sm text-red-500">Try again to refresh your inbox.</p>
               </div>
               <button
                 type="button"
@@ -261,10 +312,10 @@ export default function NotificationsPage() {
                   Latest activity
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Your notifications
+                  Latest updates
                 </h2>
               </div>
-              <p className="text-xs text-slate-500">{notifications.length} messages loaded</p>
+              <p className="text-xs text-slate-500">{notifications.length} updates loaded</p>
             </div>
             <NotificationList
               notifications={notifications}
@@ -275,7 +326,7 @@ export default function NotificationsPage() {
             />
           </SurfacePanel>
         )}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

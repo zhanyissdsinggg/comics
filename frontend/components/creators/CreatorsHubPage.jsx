@@ -205,7 +205,7 @@ function buildCreatorWorksSummary(creator) {
     return `Works across ${genres.join(" / ")}.`;
   }
 
-  return "Published work in the catalog.";
+  return "Live work in the catalog.";
 }
 
 function buildCreatorStartLabel(creator) {
@@ -218,25 +218,37 @@ function buildCreatorStartLabel(creator) {
 
 function CreatorDirectorySkeleton() {
   return (
-    <main className="gush-page-shell">
+    <main className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
-        <SurfacePanel appearance="light" accent="blue" className="space-y-6">
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-center">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <SurfacePanel accent="blue" className="space-y-6">
             <div className="space-y-3">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
-              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-slate-200" />
-              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-200" />
+              <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
+              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-white/10" />
+              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/8" />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={`creators-hero-skeleton-${index}`}
-                  className="h-28 animate-pulse rounded-[24px] border border-black/6 bg-white/80"
-                />
-              ))}
-            </div>
+          </SurfacePanel>
+          <SurfacePanel tone="muted" accent="blue" className="space-y-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={`creators-hero-stat-${index}`}
+                className="h-24 animate-pulse rounded-[24px] border border-white/10 bg-white/[0.05]"
+              />
+            ))}
+          </SurfacePanel>
+        </div>
+
+        <SurfacePanel appearance="light" accent="blue" className="space-y-4">
+          <div className="h-3 w-28 animate-pulse rounded-full bg-slate-200" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={`creators-filter-skeleton-${index}`}
+                className="h-11 animate-pulse rounded-full border border-black/6 bg-white/84"
+              />
+            ))}
           </div>
         </SurfacePanel>
 
@@ -455,6 +467,34 @@ export default function CreatorsHubPage({
 
     return Array.from(bySlug.values()).slice(0, 6);
   }, [featuredTeams, featuredVoices, spotlightCreators]);
+  const collectiveCreatorCount = useMemo(
+    () => creators.filter((creator) => isCollectiveCreditType(creator?.creditType)).length,
+    [creators],
+  );
+  const creditedSeriesCount = useMemo(
+    () => creators.reduce((total, creator) => total + Math.max(0, Number(creator?.titleCount || 0)), 0),
+    [creators],
+  );
+  const creatorHeroStats = useMemo(
+    () => [
+      {
+        label: "Profiles",
+        value: creators.length.toLocaleString(),
+        hint: "Public creator, team, and studio pages on this screen.",
+      },
+      {
+        label: "Teams",
+        value: collectiveCreatorCount.toLocaleString(),
+        hint: "Studios and team-style credits available on live titles.",
+      },
+      {
+        label: "Credited titles",
+        value: creditedSeriesCount.toLocaleString(),
+        hint: "Stories already carrying live public-facing credits.",
+      },
+    ],
+    [collectiveCreatorCount, creators.length, creditedSeriesCount],
+  );
 
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
@@ -646,14 +686,14 @@ export default function CreatorsHubPage({
 
   if (error) {
     return (
-      <main className="gush-page-shell">
+      <main className="gush-home-shell overflow-hidden">
         <div className="gush-page-ambient" />
-        <SiteHeader variant="light" />
-        <div className="relative mx-auto max-w-[960px] px-4 py-12 sm:px-6">
+        <SiteHeader variant="home" />
+        <div className="gush-page-main">
           <NetworkFallback
             compact
-            title="Oops! The creator directory is taking a quick breather."
-            description="We're having trouble connecting. Your data is safe, and you can try again or jump into Search while the directory reconnects."
+            title="The creator directory is unavailable right now."
+            description="Try again or open Search."
             onRetry={retryCreatorsDirectory}
           >
             <button
@@ -671,35 +711,64 @@ export default function CreatorsHubPage({
 
   if (!creators.length) {
     return (
-      <main className="gush-page-shell">
+      <main className="gush-home-shell overflow-hidden">
         <div className="gush-page-ambient" />
-        <SiteHeader variant="light" />
-        <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-          <EditorialHero
-            appearance="light"
-            accent="blue"
-            eyebrow="Creator credits"
-            title="Behind the Stories"
-            description="Browse the stories and credited teams already visible in the public catalog."
-            actions={
-              <>
+        <SiteHeader variant="home" />
+        <div className="gush-page-main gush-section-stack">
+          <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <EditorialHero
+              accent="blue"
+              eyebrow="Creator credits"
+              title="Browse stories for now."
+              description="Current live titles do not yet expose enough public credits for a full creator directory."
+              secondary="So this page stays focused on titles, formats, and genres."
+              stats={[
+                {
+                  label: "Story picks",
+                  value: fallbackEntryTitles.length.toLocaleString(),
+                  hint: "Editorial entry points pulled from the live catalog.",
+                },
+                {
+                  label: "Genre lanes",
+                  value: fallbackGenrePicks.length.toLocaleString(),
+                  hint: "Browse by the genres already attached to live titles.",
+                },
+              ]}
+            />
+
+            <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+              <div className="space-y-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                  For now
+                </p>
+                <div>
+                  <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                    No live creator directory yet.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-neutral-300">
+                    Browse by title and genre until public credits arrive.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2.5">
                 <button
                   type="button"
                   onClick={() => router.push("/comics")}
-                  className={primaryButtonClass}
+                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
                 >
                   Browse Comics
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push("/novels")}
-                  className={secondaryButtonClass}
+                  onClick={() => router.push("/search")}
+                  className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
                 >
-                  Browse Novels
+                  Search
                 </button>
-              </>
-            }
-          />
+              </div>
+            </SurfacePanel>
+          </section>
 
           {commerceNotice ? (
             <CommerceSuccessBanner
@@ -714,7 +783,7 @@ export default function CreatorsHubPage({
                 Start with These Stories
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                A few strong entry points drawn from the live catalog.
+                A few strong starts from the live catalog.
               </p>
             </div>
 
@@ -761,9 +830,9 @@ export default function CreatorsHubPage({
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   Browse by Genre
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Browse the catalog by the genres already attached to live titles.
-                </p>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                Browse by genres already attached to live titles.
+              </p>
               </div>
 
               {fallbackGenrePicks.length > 0 ? (
@@ -791,7 +860,7 @@ export default function CreatorsHubPage({
                 How creator credits appear
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Public-facing creator names show up on title pages first. This directory stays quiet until live titles actually carry those credits.
+                Public creator names appear on title pages first. This directory stays quiet until live titles carry those credits.
               </p>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
@@ -803,7 +872,7 @@ export default function CreatorsHubPage({
                   No live public creator names are attached to the current catalog yet.
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
-                  Until that changes, the cleanest way to browse is by story, format, and genre instead of a fake creator directory.
+                  Until then, the cleanest way to browse is by story, format, and genre.
                 </p>
               </div>
               <div className="rounded-[22px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
@@ -814,7 +883,7 @@ export default function CreatorsHubPage({
                   Series pages use one consistent creator fallback when no public credit is available.
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
-                  When a title gains a public-facing creator or team credit upstream, it can graduate into the creator directory without changing the reading flow.
+                  When a title gains a public creator or team credit upstream, it can move into this directory cleanly.
                 </p>
               </div>
             </div>
@@ -825,36 +894,54 @@ export default function CreatorsHubPage({
   }
 
   return (
-    <main className="gush-page-shell">
+    <main className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
 
-      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <EditorialHero
-          appearance="light"
-          accent="blue"
-          eyebrow="Creators"
-          title="Meet the Creators"
-          description="Writers, artists, and studios behind the stories."
-          actions={
-            <>
+      <div className="gush-page-main gush-section-stack">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EditorialHero
+            accent="blue"
+            eyebrow="Creators"
+            title="Meet the credited creators."
+            description="Writers, artists, studios, and teams already attached to live titles."
+            secondary="Start with a strong title, then move deeper into the people and teams behind it."
+            stats={creatorHeroStats}
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Browse next
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  Move between people, teams, and titles.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  Start with a creator card, open a credited title, or narrow by genre below.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
               <button
                 type="button"
                 onClick={() => router.push("/comics")}
-                className={primaryButtonClass}
+                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
               >
                 Browse Comics
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/novels")}
-                className={secondaryButtonClass}
+                onClick={() => router.push("/rankings")}
+                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
               >
-                Browse Novels
+                Browse Stories
               </button>
-            </>
-          }
-        />
+            </div>
+          </SurfacePanel>
+        </section>
 
         {commerceNotice ? (
           <CommerceSuccessBanner
@@ -864,12 +951,87 @@ export default function CreatorsHubPage({
         ) : null}
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Search
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                Search creators and teams.
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                Search names, titles, and genres.
+              </p>
+            </div>
+            {query || activeGenre !== "All" || creditFilter !== "all" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setActiveGenre("All");
+                  setCreditFilter("all");
+                }}
+                className={secondaryButtonClass}
+              >
+                Clear filters
+              </button>
+            ) : null}
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search creators, studios, or titles"
+              className="rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.18)] focus:ring-4 focus:ring-[rgba(47,107,255,0.08)]"
+            />
+
+            <div className="flex flex-wrap gap-2.5">
+              {[
+                { id: "all", label: "All" },
+                { id: "creator", label: "Creators" },
+                { id: "team", label: "Studios & Teams" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setCreditFilter(item.id)}
+                  className={filterButtonClass(creditFilter === item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2.5">
+            <button
+              type="button"
+              onClick={() => setActiveGenre("All")}
+              className={filterButtonClass(activeGenre === "All")}
+            >
+              All genres
+            </button>
+            {genreOptions.map((genre) => (
+              <button
+                key={`genre-filter-${genre}`}
+                type="button"
+                onClick={() => setActiveGenre(genre)}
+                className={filterButtonClass(activeGenre === genre)}
+              >
+                {genre}
+              </button>
+            ))}
+          </div>
+        </SurfacePanel>
+
+        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Featured Creators
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                A quick look at who is behind the shelf.
+                Public creator pages from live titles.
               </p>
             </div>
 
@@ -950,7 +1112,7 @@ export default function CreatorsHubPage({
                 Start with These Stories
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                A few good starting points.
+                A few strong starting points.
               </p>
             </div>
 
@@ -1068,7 +1230,7 @@ export default function CreatorsHubPage({
               Browse by Genre
             </h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">
-              Jump to a genre lane.
+              Jump by genre.
             </p>
           </div>
 
@@ -1100,45 +1262,9 @@ export default function CreatorsHubPage({
                 Public credits on live titles.
               </p>
             </div>
-            {query || activeGenre !== "All" || creditFilter !== "all" ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery("");
-                  setActiveGenre("All");
-                  setCreditFilter("all");
-                }}
-                className={secondaryButtonClass}
-              >
-                Clear filters
-              </button>
-            ) : null}
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search creators, studios, or titles"
-              className="rounded-[20px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.18)] focus:ring-4 focus:ring-[rgba(47,107,255,0.08)]"
-            />
-
-            <div className="flex flex-wrap gap-2.5">
-              {[
-                { id: "all", label: "All" },
-                { id: "creator", label: "Creators" },
-                { id: "team", label: "Studios & Teams" },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setCreditFilter(item.id)}
-                  className={filterButtonClass(creditFilter === item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
+            <p className="text-sm text-slate-500">
+              {filteredCreators.length.toLocaleString()} match{filteredCreators.length === 1 ? "" : "es"}
+            </p>
           </div>
         </SurfacePanel>
 
@@ -1148,10 +1274,10 @@ export default function CreatorsHubPage({
               appearance="light"
               icon="search"
               eyebrow="No match"
-              title="Try a wider search."
-              description="Clear a filter or widen the search."
+              title="Try a broader search."
+              description="Clear a filter or search a broader term."
               action={{
-                label: "Show all creators",
+                label: "Show all",
                 onClick: () => {
                   setQuery("");
                   setActiveGenre("All");

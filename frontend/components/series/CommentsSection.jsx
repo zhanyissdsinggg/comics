@@ -238,15 +238,18 @@ export default function CommentsSection({
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
   const inputClass =
-    "flex-1 rounded-full border border-black/8 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
+    "flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
 
   return (
-    <section data-comments-section className="mt-8 rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+    <section data-comments-section className="mt-8 rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,240,232,0.94))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.06)] backdrop-blur-xl">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-slate-950">Comments</h3>
-          <p className="text-sm text-slate-500">
-            Share a reaction, a recommendation, or your take on the latest chapter.
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+            Reader notes
+          </p>
+          <h3 className="mt-2 text-lg font-semibold text-slate-950">Comments</h3>
+          <p className="mt-2 text-sm text-slate-500">
+            Share a quick take on the story or latest episode.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -315,52 +318,60 @@ export default function CommentsSection({
         ) : null}
       </div>
 
-      <div className="mt-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-          Conversation starters
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {promptSuggestions.map((prompt) => (
-            <button
-              key={prompt.id}
-              type="button"
-              onClick={() => focusComposer(prompt.text)}
-              className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-            >
-              {prompt.label}
-            </button>
-          ))}
+      <div className="mt-5 rounded-[26px] border border-black/6 bg-white/82 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Start the conversation
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Keep it short. Mention a favorite moment, a recent chapter, or who should read it.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {promptSuggestions.map((prompt) => (
+              <button
+                key={prompt.id}
+                type="button"
+                onClick={() => focusComposer(prompt.text)}
+                className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                {prompt.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="mt-6 flex gap-3">
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          placeholder={`Write a comment about ${seriesTitle || "this series"}...`}
-          className={inputClass}
-        />
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={working}
-          className={primaryButtonClass}
-        >
-          Post
-        </button>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder={`Write a comment about ${seriesTitle || "this series"}...`}
+            className={inputClass}
+          />
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={working}
+            className={`${primaryButtonClass} min-w-[110px]`}
+          >
+            Post
+          </button>
+        </div>
       </div>
 
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
-          <div className="rounded-2xl border border-black/6 bg-white/84 p-4 text-sm text-slate-500">
-            No comments yet. Start the conversation.
+          <div className="rounded-[24px] border border-black/6 bg-white/84 p-5">
+            <p className="text-sm font-semibold text-slate-950">No comments yet.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">Start the first note.</p>
           </div>
         ) : (
           sortedComments.map((comment) => (
             <div
               key={comment.id}
-              className="rounded-2xl border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+              className="rounded-[24px] border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
             >
               <div className="flex items-center justify-between text-xs text-slate-500">
                 <span>{getCommentAuthor(comment)}</span>
@@ -390,7 +401,7 @@ export default function CommentsSection({
                 </button>
               </div>
               {Array.isArray(comment.replies) && comment.replies.length > 0 ? (
-                <div className="mt-3 space-y-2 border-l border-black/6 pl-4 text-xs text-slate-600">
+                <div className="mt-3 space-y-2 rounded-[18px] border border-black/6 bg-[#f8f9fc] p-3 text-xs text-slate-600">
                   {comment.replies.map((reply) => (
                     <div key={reply.id}>
                       <div className="flex items-center justify-between text-[10px] text-slate-400">
@@ -434,7 +445,7 @@ export default function CommentsSection({
         onClose={() => setActiveModal(false)}
         allowRegister
         title="Sign in"
-        description="Sign in to post a comment."
+        description="Sign in to join the comments."
         onSubmit={async ({ email, password, mode }) => {
           const response = await signIn(email, password, mode);
           if (response?.status === 202) {

@@ -249,53 +249,74 @@ export default function AdultHubPage() {
     ],
     [completedItems.length, freeUnlockItems.length, isAdultMode, loading, seriesList.length],
   );
+  const adultModeActionLabel = isAdultMode ? "18+ mode is active." : "18+ mode stays off by default.";
 
   return (
-    <main className="min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-      <SiteHeader variant="light" />
-      <div className="mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <EditorialHero
-          eyebrow="18+ catalog"
-          title="The protected 18+ catalog, without the awkwardness."
-          description="Private by default. Turn on 18+ browsing only when you want it, then move through mature titles with the same clean discovery flow as the main catalog."
-          secondary={
-            isAdultMode
-              ? "Access is on. Start with the most-read titles, finished series, or the best free-unlock picks."
-              : "Nothing 18+ appears until you sign in and confirm access."
-          }
-          stats={adultStats}
-          appearance="light"
-          accent="blue"
-          actions={
-            isAdultMode ? (
-              <>
+    <main className="gush-home-shell overflow-hidden">
+      <div className="gush-page-ambient" />
+      <SiteHeader variant="home" />
+      <div className="gush-page-main gush-section-stack">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EditorialHero
+            eyebrow="18+ catalog"
+            title="The protected 18+ shelf."
+            description="Private by default. Turn on 18+ browsing only when you want it, then move through mature titles with the same calm discovery flow as the main catalog."
+            secondary={
+              isAdultMode
+                ? "Access is on. Start with the most-read titles, finished series, or the strongest free-unlock picks."
+                : "Nothing 18+ appears until you sign in and confirm access."
+            }
+            stats={adultStats}
+            accent="blue"
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Access
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  {adultModeActionLabel}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  {isAdultMode
+                    ? "Open the main shelf, finished stories, or free-unlock picks from here without changing the rest of the storefront."
+                    : "The gate is explicit on purpose. Nothing mature leaks into browsing until you choose it."}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {isAdultMode ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/rankings?type=popular&window=week")}
+                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  >
+                    Open 18+ Top Series
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/rankings?type=ttf&window=all")}
+                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  >
+                    See free unlocks
+                  </button>
+                </>
+              ) : (
                 <button
                   type="button"
-                  onClick={() => router.push("/rankings?type=popular&window=week")}
-                  className="rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800"
+                  onClick={handleGate}
+                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
                 >
-                  Open 18+ Top Series
+                  Unlock 18+ access
                 </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-                >
-                  See free unlocks
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={handleGate}
-                className="rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800"
-              >
-                Unlock 18+ access
-              </button>
-            )
-          }
-        />
+              )}
+            </div>
+          </SurfacePanel>
+        </section>
 
         {showStale ? (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">

@@ -9,7 +9,8 @@ const SearchBar = dynamic(() => import("../common/SearchBar"), {
 });
 
 export default function HeaderSearch({ onSearch, variant = "default" }) {
-  const isLight = variant === "home" || variant === "light";
+  const isHome = variant === "home";
+  const isLight = variant === "light";
   const placeholder = "Search series, creators...";
 
   return (
@@ -19,8 +20,10 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
           href="/search"
           aria-label="Open search"
           className={`inline-flex h-10 w-full items-center gap-2 rounded-full border px-3.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[rgba(49,87,214,0.16)] ${
-            isLight
-              ? "border-black/8 bg-white/90 text-slate-600 shadow-[0_10px_24px_rgba(15,23,42,0.05)] hover:border-black/12 hover:bg-white hover:text-slate-900"
+            isHome
+              ? "border-white/10 bg-white/[0.05] text-white/72 shadow-[0_12px_28px_rgba(0,0,0,0.18)] hover:border-white/18 hover:bg-white/[0.08] hover:text-white"
+              : isLight
+                ? "border-black/8 bg-white/90 text-slate-600 shadow-[0_10px_24px_rgba(15,23,42,0.05)] hover:border-black/12 hover:bg-white hover:text-slate-900"
               : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
           }`}
           title={placeholder}
@@ -34,8 +37,8 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
         <SearchBar
           onSearch={onSearch}
           placeholder={placeholder}
-          variant={isLight ? "light" : "default"}
-          showShortcut={!isLight}
+          variant={isHome ? "home" : isLight ? "light" : "default"}
+          showShortcut={!isHome && !isLight}
         />
       </div>
     </>

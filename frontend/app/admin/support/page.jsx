@@ -35,6 +35,7 @@ const searchFields = [
   { field: 'userId', type: 'string' },
   { field: 'userEmail', type: 'string' },
   { field: 'message', type: 'string' },
+  { field: 'adminReply', type: 'string' },
 ];
 
 const sortFields = [
@@ -225,7 +226,7 @@ export default function AdminSupportPage() {
 
   const openReplyModal = (ticket) => {
     setSelectedTicket(ticket);
-    setReplyContent('');
+    setReplyContent(ticket?.adminReply || '');
     setIsReplyModalOpen(true);
   };
 
@@ -285,7 +286,7 @@ export default function AdminSupportPage() {
               <input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="搜索工单 ID、用户、主题或消息内容..."
+                placeholder="搜索工单 ID、用户、主题、原消息或回复内容..."
                 className={adminInputClassName}
               />
             </label>
@@ -395,6 +396,15 @@ export default function AdminSupportPage() {
                           <p className="max-w-xl text-sm leading-6 text-slate-600">
                             {getMessagePreview(ticket.message)}
                           </p>
+                          {ticket.adminReply ? (
+                            <div className="rounded-2xl border border-emerald-200/70 bg-emerald-50/80 px-3 py-2 text-sm text-emerald-900">
+                              <p className="font-medium">最近回复</p>
+                              <p className="mt-1 leading-6">{getMessagePreview(ticket.adminReply, 160)}</p>
+                              <p className="mt-1 text-xs text-emerald-800/80">
+                                {ticket.adminRepliedAt ? formatDateTime(ticket.adminRepliedAt) : '刚刚更新'}
+                              </p>
+                            </div>
+                          ) : null}
                         </div>
                       </td>
                       <td className="px-4 py-4">
@@ -423,7 +433,7 @@ export default function AdminSupportPage() {
                             disabled={replyTicketMutation.isPending}
                           >
                             <MessageSquare className="size-4" />
-                            回复
+                            {ticket.adminReply ? '更新回复' : '回复'}
                           </Button>
 
                           {String(ticket.status || '').toLowerCase() !== 'closed' ? (
@@ -467,13 +477,30 @@ export default function AdminSupportPage() {
       >
         <div className="space-y-4">
           {selectedTicket ? (
-            <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.78)] px-4 py-4 text-sm text-slate-600">
-              <p className="font-semibold text-slate-950">原始消息</p>
-              <p className="mt-2 leading-6">{selectedTicket.message || '未附带消息内容。'}</p>
+            <div className="space-y-3">
+              <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.78)] px-4 py-4 text-sm text-slate-600">
+                <p className="font-semibold text-slate-950">原始消息</p>
+                <p className="mt-2 leading-6">{selectedTicket.message || '未附带消息内容。'}</p>
+              </div>
+
+              {selectedTicket.adminReply ? (
+                <div className="rounded-[24px] border border-emerald-200/70 bg-emerald-50/80 px-4 py-4 text-sm text-emerald-950">
+                  <p className="font-semibold">最近一次回复</p>
+                  <p className="mt-2 leading-6">{selectedTicket.adminReply}</p>
+                  <p className="mt-2 text-xs text-emerald-900/70">
+                    {selectedTicket.adminRepliedAt
+                      ? `发送时间：${formatDateTime(selectedTicket.adminRepliedAt)}`
+                      : '发送时间暂未记录'}
+                  </p>
+                </div>
+              ) : null}
             </div>
           ) : null}
 
-          <AdminFormField label="回复内容" helperText="回复保持直接、克制，并准确回应读者这次提出的问题。">
+          <AdminFormField
+            label={selectedTicket?.adminReply ? '更新回复内容' : '回复内容'}
+            helperText="回复保持直接、克制，并准确回应读者这次提出的问题。发送后会覆盖当前工单的最近一次回复。"
+          >
             <textarea
               value={replyContent}
               onChange={(event) => setReplyContent(event.target.value)}

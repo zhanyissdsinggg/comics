@@ -457,27 +457,46 @@ export default function StorePage({
   const packCountLabel = `${orderedPackages.length} ${orderedPackages.length === 1 ? "pack" : "packs"}`;
 
   return (
-    <div className="gush-page-shell">
+    <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
       <main className="gush-page-main gush-section-stack">
-        <EditorialHero
-          eyebrow="Point packs"
-          title={purchaseActionsEnabled ? "Point packs." : "Point packs open soon."}
-          description={
-            purchaseActionsEnabled
-              ? "Buy once, unlock what you want."
-              : "Prices are visible. Checkout is not live yet."
-          }
-          secondary={purchaseActionsEnabled ? regionConfig.label : ""}
-          stats={storeHeroStats}
-          appearance="light"
-          actions={
-            <>
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EditorialHero
+            eyebrow="Point packs"
+            title={purchaseActionsEnabled ? "Point packs." : "Point packs open soon."}
+            description={
+              purchaseActionsEnabled
+                ? "Buy once, unlock what you want."
+                : "Prices are visible. Checkout is not live yet."
+            }
+            secondary={purchaseActionsEnabled ? regionConfig.label : ""}
+            stats={storeHeroStats}
+            accent="blue"
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Checkout
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  {purchaseActionsEnabled ? "Buy only what fits." : "See the packs first."}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  {purchaseActionsEnabled
+                    ? "One purchase. Clear pricing. No monthly commitment."
+                    : "Compare packs now before checkout opens."}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
               <button
                 type="button"
                 onClick={purchaseActionsEnabled ? () => scrollToSection("point-packs") : handleLaunchAccess}
-                className={primaryButtonClass}
+                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
               >
                 {purchaseActionsEnabled ? "Buy point packs" : launchAccessLabel}
               </button>
@@ -497,7 +516,7 @@ export default function StorePage({
                       }),
                     )
                   }
-                  className={secondaryButtonClass}
+                  className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
                 >
                   {STOREFRONT_TERMS.compareMembership}
                 </button>
@@ -505,13 +524,13 @@ export default function StorePage({
               <button
                 type="button"
                 onClick={() => router.push(returnTo)}
-                className={secondaryButtonClass}
+                className="rounded-full border border-white/12 bg-transparent px-4 py-2.5 text-sm font-semibold text-white/72 transition hover:border-white/16 hover:bg-white/[0.05] hover:text-white"
               >
                 {returnLabel}
               </button>
-            </>
-          }
-        />
+            </div>
+          </SurfacePanel>
+        </section>
 
         {errorMessage ? (
           retryPackageId ? (
@@ -519,8 +538,8 @@ export default function StorePage({
               compact
               className="px-0 py-0"
               cardClassName="max-w-none rounded-[28px] px-5 py-5 sm:px-6 sm:py-6"
-              title="Oops! Point-pack checkout hit a network snag."
-              description={`${errorMessage} Your data is safe, and you can try the same pack again or ask billing for help.`}
+              title="Point-pack checkout hit a snag."
+              description={`${errorMessage} Try the same pack again or ask billing for help.`}
               onRetry={retryFailedPurchase}
             >
               <button
@@ -549,10 +568,10 @@ export default function StorePage({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                What to know
+                Before checkout
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                What to know.
+                What to expect.
               </h2>
             </div>
           </div>
@@ -622,7 +641,7 @@ export default function StorePage({
                   </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {purchaseActionsEnabled
-                    ? "Sign in before you buy or redeem a code."
+                    ? "Sign in before checkout."
                     : "Use one account."}
                 </h2>
               </div>
@@ -658,10 +677,10 @@ export default function StorePage({
                   Compare options
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Point packs or membership.
+                  Pick the model that fits.
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">
-                  Buy as needed or save with a plan.
+                  Buy once or go monthly.
                 </p>
               </div>
               <div className="grid gap-3">
@@ -791,8 +810,8 @@ export default function StorePage({
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {purchaseActionsEnabled
-                    ? "Choose a point pack, then unlock chapters as you go."
-                    : "Point packs."}
+                    ? "Choose a pack."
+                    : "Browse the packs."}
                 </h2>
               </div>
               <p className="text-xs text-slate-500">

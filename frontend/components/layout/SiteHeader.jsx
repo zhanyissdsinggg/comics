@@ -31,7 +31,8 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
   const [authError, setAuthError] = useState("");
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const isLight = variant === "home" || variant === "light";
+  const isHome = variant === "home";
+  const isLight = variant === "light";
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? window.localStorage.getItem("mn_region") : null;
@@ -144,10 +145,14 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         data-site-header="1"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
-          isLight
+          isHome
             ? scrolled
-              ? "border-[color:var(--gush-border-strong)] bg-[rgba(251,247,240,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl"
-              : "border-transparent bg-[rgba(251,247,240,0.6)] backdrop-blur-xl"
+              ? "border-white/10 bg-[rgba(8,12,18,0.88)] shadow-[0_20px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
+              : "border-white/6 bg-[rgba(8,12,18,0.56)] backdrop-blur-xl"
+            : isLight
+              ? scrolled
+                ? "border-[color:var(--gush-border-strong)] bg-[rgba(251,247,240,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl"
+                : "border-transparent bg-[rgba(251,247,240,0.6)] backdrop-blur-xl"
             : scrolled
               ? "border-white/10 bg-[rgba(17,16,15,0.92)] shadow-[0_20px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
               : "border-white/6 bg-[rgba(17,16,15,0.72)] backdrop-blur-xl"
@@ -155,10 +160,14 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
       >
         <div
           className={`relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8 ${
-            isLight
+            isHome
               ? scrolled
-                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(36,30,20,0.12),transparent)] before:content-['']"
+                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] before:content-['']"
                 : ""
+              : isLight
+                ? scrolled
+                  ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(36,30,20,0.12),transparent)] before:content-['']"
+                  : ""
               : scrolled
                 ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] before:content-['']"
                 : ""

@@ -1380,10 +1380,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
         <div className="mx-auto max-w-3xl px-4 py-10">
           <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.24)]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">Opening chapter</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Getting the reader ready.</h1>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Opening your chapter.</h1>
             <p className="mt-3 text-sm leading-7 text-neutral-400">
-              Reader access, saved progress, and locked-chapter checks all load here before you jump back in. If this
-              takes too long, go back to the title page or contact support without losing context.
+              Access, progress, and unlock checks are loading. If this takes too long, go back to the series page or ask support.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
@@ -1405,7 +1404,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 }
                 className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/[0.06]"
               >
-                Need help instead?
+                Get help
               </button>
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-3" aria-hidden="true">
@@ -1470,8 +1469,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
         <div className="mx-auto max-w-3xl px-4 py-10">
           <NetworkFallback
             compact
-            title="Oops! This episode is taking a quick breather."
-            description="We're having trouble connecting. Your data is safe, and we're ready to retry this episode."
+            title="This episode didn't load."
+            description="Connection looks shaky. Try this chapter again."
             onRetry={() => fetchEpisode({ bustSeries: true })}
           >
             <button
@@ -1617,8 +1616,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">Keep reading</h2>
             <p className="mt-2 text-sm leading-7 text-slate-600">
               {previewCount || previewParagraphs
-                ? "You're at the end of the free preview. Unlock this episode to keep going."
-                : "Unlock this episode to keep going."}
+                ? "Preview is over. Unlock this episode to continue."
+                : "Unlock this episode to continue."}
             </p>
             {previewCount ? (
               <p className="mt-2 text-xs text-slate-500">
@@ -1640,7 +1639,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 <p className="mt-1 text-xs text-slate-500">
                   {isSignedIn
                     ? "Points ready on this account."
-                    : "Unlocks, points, and progress stay on one account after sign-in."}
+                    : "Sign in to keep unlocks and progress on one account."}
                 </p>
               </div>
               <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
@@ -1726,10 +1725,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   : `Unlock for ${currentPricing.finalPrice} points`}
             </button>
             <div className="mt-4 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-left text-[11px] text-slate-600">
-              <div className="font-semibold text-slate-950">Worth knowing</div>
+              <div className="font-semibold text-slate-950">Quick notes</div>
               <div className="mt-2 space-y-1">
                 <div>- Unlocked episodes stay in your library.</div>
-                <div>- Packs usually cost less per chapter.</div>
+                <div>- Packs often cost less per chapter.</div>
                 <div>- Membership adds free reads and lower prices.</div>
               </div>
             </div>
@@ -2024,18 +2023,18 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 ]
               : []
           }
-          compareTitle="Single, pack, or membership"
+          compareTitle="Compare options"
           tips={
             modalState?.type === "SHORTFALL"
               ? [
                   "Unlocked episodes stay in your library.",
-                  "Packs usually cost less per chapter.",
-                  "Membership adds more free reads and shorter waits.",
-                  "Member pricing can lower unlock costs on eligible titles.",
+                  "Packs often cost less per chapter.",
+                  "Membership adds more free reads.",
+                  "Member pricing can lower unlock costs.",
                 ]
               : []
           }
-          tipsTitle="What each option gets you"
+          tipsTitle="Quick notes"
           actions={
             modalState?.type === "SHORTFALL"
               ? [

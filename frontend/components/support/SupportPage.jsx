@@ -306,23 +306,85 @@ export default function SupportPage() {
 
   const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const fieldClass =
-    "mt-2 w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
+    "mt-2 w-full rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
+  const supportHeroStats = [
+    {
+      label: "Topics",
+      value: SUPPORT_TOPICS.length.toLocaleString(),
+      hint: "Route your request to the right queue from the start.",
+    },
+    {
+      label: "Reply window",
+      value: "1-2 days",
+      hint: "Typical response time for standard support requests.",
+    },
+  ];
 
   return (
-    <div className="gush-page-shell">
+    <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
       <main className="gush-page-main gush-section-stack">
-        <EditorialHero
-          eyebrow="Support"
-          title="Get help."
-          description="Pick the issue and tell us what happened."
-          appearance="light"
-        />
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <EditorialHero
+            eyebrow="Support"
+            title="Get help without the runaround."
+            description="Choose the issue, add the details, and send one clean request to the right queue."
+            secondary="Pick the issue first. Then tell us what happened."
+            stats={supportHeroStats}
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="space-y-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Quick topics
+              </p>
+              <h2 className="mt-2 font-display text-[1.6rem] font-semibold tracking-tight text-white">
+                Pick the closest issue.
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-neutral-300">
+                Choose the closest topic so billing, login, content, and technical issues land in the right queue.
+              </p>
+            </div>
+
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              {quickIssueCards.map((item) => {
+                const isActive = activeTopic === item.topic;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      const preset = getSupportTopicPreset(item.topic);
+                      applyTopicPreset(preset, { preserveMessage: true, forceSubject: true });
+                      setSubject(item.subject);
+                      setMessage((current) =>
+                        isAutofilledSupportMessage(current) ? `Context: ${item.context}` : current,
+                      );
+                      setFeedback({ type: "", text: "", mode: "inline" });
+                      setSuccessState(null);
+                    }}
+                    className={[
+                      "rounded-[22px] border px-4 py-3 text-left transition",
+                      isActive
+                        ? "border-white/16 bg-white text-slate-950"
+                        : "border-white/10 bg-white/[0.04] text-white/86 hover:border-white/16 hover:bg-white/[0.08]",
+                    ].join(" ")}
+                  >
+                    <p className="text-sm font-semibold">{item.label}</p>
+                    <p className={`mt-1 text-xs leading-5 ${isActive ? "text-slate-600" : "text-white/58"}`}>
+                      {item.context}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </SurfacePanel>
+        </section>
 
         {commerceNotice ? (
           <CommerceSuccessBanner
@@ -331,46 +393,7 @@ export default function SupportPage() {
           />
         ) : null}
 
-        <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              Quick start
-            </p>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Choose the issue.
-            </h2>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {quickIssueCards.map((item) => {
-              const isActive = activeTopic === item.topic;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    const preset = getSupportTopicPreset(item.topic);
-                    applyTopicPreset(preset, { preserveMessage: true, forceSubject: true });
-                    setSubject(item.subject);
-                    setMessage((current) =>
-                      isAutofilledSupportMessage(current) ? `Context: ${item.context}` : current,
-                    );
-                    setFeedback({ type: "", text: "", mode: "inline" });
-                    setSuccessState(null);
-                  }}
-                  className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
-                    isActive
-                      ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
-                      : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-        </SurfacePanel>
-
-        <div className="grid gap-6">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             {successState ? (
               <div className="space-y-4">
@@ -379,10 +402,10 @@ export default function SupportPage() {
                     Request received
                   </p>
                   <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
-                    We have your request.
+                    Request sent.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span> in 1 to 2 business days.
+                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span> within 1 to 2 business days.
                   </p>
                 </div>
 
@@ -414,13 +437,13 @@ export default function SupportPage() {
               <form className="space-y-5" onSubmit={handleSubmit}>
                 <div className="space-y-2">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Send a request
+                    Request
                   </p>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Send a request.
+                    Tell us what happened.
                   </h2>
                   <p className="text-sm leading-6 text-slate-500">
-                    Replies usually take 1 to 2 business days.
+                    Most replies land within 1 to 2 business days.
                   </p>
                 </div>
 
@@ -431,7 +454,7 @@ export default function SupportPage() {
                       showIllustration={false}
                       className="px-0 py-0"
                       cardClassName="max-w-none rounded-[24px] px-4 py-4 sm:px-5 sm:py-5"
-                      title="Oops! Your support request hit a network snag."
+                      title="Support hit a network snag."
                       description={`${feedback.text} Your message is still here, so you can try again.`}
                       onRetry={retrySupportRequest}
                     />
@@ -552,9 +575,66 @@ export default function SupportPage() {
                   ) : null}
                 </div>
 
-                <p className="text-xs text-slate-500">Support email: {siteConfig.supportEmail}</p>
+                <p className="text-xs text-slate-500">Reply desk: {siteConfig.supportEmail}</p>
               </form>
             )}
+          </SurfacePanel>
+
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Helpful details
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Add what matters.
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                "Pick the closest issue before you start typing.",
+                "Add the page, title, episode number, or order ID when you have it.",
+                "Use the best reply email for follow-up.",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-[22px] border border-black/6 bg-white/82 px-4 py-3 text-sm leading-6 text-slate-600"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-[24px] border border-black/6 bg-[#f8f9fc] px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                Support desk
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Reply email: <span className="font-semibold text-slate-900">{siteConfig.supportEmail}</span>
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {signedInReader
+                  ? "You are signed in, so we can match this request to your account faster."
+                  : "Sign in first if you want us to match this request to your account faster."}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={() => router.push("/faq")}
+                className={secondaryButtonClass}
+              >
+                Browse FAQ
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/orders")}
+                className={secondaryButtonClass}
+              >
+                View purchases
+              </button>
+            </div>
           </SurfacePanel>
         </div>
       </main>

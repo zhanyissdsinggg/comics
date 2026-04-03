@@ -12,7 +12,6 @@ import PortraitCard from "../home/PortraitCard";
 import SkeletonCard from "../common/SkeletonCard";
 import FilterBar from "../common/FilterBar";
 import EmptyState from "../common/EmptyState";
-import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
@@ -438,29 +437,156 @@ export default function SeriesPage({
       count: null,
     }));
   }, [config.fallbackGenres, genreQuickPicks]);
+  const completedSeriesCount = useMemo(
+    () => series.filter((item) => normalizeStatus(item?.status) === "completed").length,
+    [series],
+  );
+  const heroStats = useMemo(
+    () => [
+      {
+        id: "titles",
+        label: "Titles",
+        value: Number(series.length || 0).toLocaleString(),
+      },
+      {
+        id: "genres",
+        label: "Genres",
+        value: Number(genres.length || 0).toLocaleString(),
+      },
+      {
+        id: "completed",
+        label: "Finished",
+        value: Number(completedSeriesCount || 0).toLocaleString(),
+      },
+    ],
+    [completedSeriesCount, genres.length, series.length],
+  );
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
-  const showEditorialHero = true;
   const showEntrySpotlight = Boolean(entrySpotlight) && !isComicPage && (!isNovelPage || !hasActiveFilters);
   const showCatalogCount = !isComicPage;
+  const oppositeFormatHref = type === "comic" ? "/novels" : "/comics";
+  const oppositeFormatLabel = type === "comic" ? "Browse Novels" : "Browse Comics";
 
   return (
-    <main className="gush-page-shell overflow-hidden">
+    <main className="gush-page-shell gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
 
       <div className="gush-page-main gush-section-stack">
-        {showEditorialHero ? (
-          <EditorialHero
-            eyebrow={config.eyebrow}
-            title={config.heroTitle}
-            description={config.description}
-            secondary={config.secondary}
-            appearance="light"
-          />
-        ) : null}
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.28fr)_minmax(320px,0.72fr)]">
+          <SurfacePanel
+            className="space-y-6 rounded-[38px] px-5 py-5 sm:px-7 sm:py-7"
+            tone="highlight"
+            accent="blue"
+          >
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
+                {config.eyebrow}
+              </p>
+              <h1 className="mt-4 font-display text-[2.4rem] font-semibold leading-[0.95] tracking-[-0.045em] text-white sm:text-[3rem] xl:text-[3.7rem]">
+                {config.heroTitle}
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-[0.98rem]">
+                {config.description}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2.5">
+              {fallbackGenrePicks.slice(0, 6).map((item) => (
+                <button
+                  key={`hero-genre-${item.genre}`}
+                  type="button"
+                  onClick={() => updateParams({ genre: item.genre })}
+                  className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/74 transition-colors hover:border-white/18 hover:bg-white/[0.09] hover:text-white"
+                >
+                  {item.genre}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => router.push("/search")}
+                className="rounded-full bg-[var(--gush-home-accent)] px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-[#ffd6a0]"
+              >
+                Search the catalog
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push(oppositeFormatHref)}
+                className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-white/74 transition hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
+              >
+                {oppositeFormatLabel}
+              </button>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              {heroStats.map((stat) => (
+                <div
+                  key={stat.id}
+                  className="rounded-[22px] border border-white/10 bg-white/[0.05] px-4 py-4"
+                >
+                  <p className="text-lg font-semibold tracking-tight text-white">{stat.value}</p>
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </SurfacePanel>
+
+          {showEntrySpotlight ? (
+            <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,26,0.95),rgba(12,17,26,0.88))] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-6">
+              <div className="grid grid-cols-[108px_minmax(0,1fr)] gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
+                <Cover
+                  tone={entrySpotlight.coverTone}
+                  coverUrl={entrySpotlight.coverUrl}
+                  label={entrySpotlight.title}
+                  eyebrow={type === "comic" ? "Editors' pick" : "Featured novel"}
+                  badge={getSeriesBadge(entrySpotlight)}
+                  genres={entrySpotlight.genres}
+                  seriesType={entrySpotlight.type}
+                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-white/10 bg-neutral-900 shadow-[0_18px_36px_rgba(0,0,0,0.24)]"
+                />
+
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/42">
+                    Featured title
+                  </p>
+                  <h2 className="mt-3 font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-white">
+                    {entrySpotlight.title}
+                  </h2>
+                  <p className="mt-3 text-sm leading-6 text-white/60">
+                    {getSeriesSubtitle(entrySpotlight)}
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {(Array.isArray(entrySpotlight?.genres) ? entrySpotlight.genres : []).slice(0, 2).map((genre) => (
+                      <span
+                        key={`spotlight-${entrySpotlight.id}-${genre}`}
+                        className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-medium text-white/72"
+                      >
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSeriesClick(entrySpotlight.id)}
+                    className="mt-5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                  >
+                    View Series
+                  </button>
+                </div>
+              </div>
+            </section>
+          ) : null}
+        </section>
 
         {loading ? (
           <div className="grid gap-4 xl:grid-cols-2">
@@ -530,55 +656,39 @@ export default function SeriesPage({
           </section>
         ) : null}
 
-        {!loading && showEntrySpotlight ? (
-          <section>
-            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-              <div className="grid gap-4 sm:grid-cols-[200px_minmax(0,1fr)] sm:items-start">
-                <Cover
-                  tone={entrySpotlight.coverTone}
-                  coverUrl={entrySpotlight.coverUrl}
-                  label={entrySpotlight.title}
-                  eyebrow={type === "comic" ? "Editors' pick" : "Novels"}
-                  badge={getSeriesBadge(entrySpotlight)}
-                  genres={entrySpotlight.genres}
-                  seriesType={entrySpotlight.type}
-                  className="mx-auto aspect-[3/4] w-full max-w-[210px] rounded-[24px] sm:mx-0"
-                />
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Featured
-                  </p>
-                  <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
-                    {entrySpotlight.title}
-                  </h2>
-                  <p className="mt-3 text-sm text-slate-500">{getSeriesSubtitle(entrySpotlight)}</p>
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={() => handleSeriesClick(entrySpotlight.id)}
-                      className={primaryButtonClass}
-                    >
-                      View Series
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </SurfacePanel>
-          </section>
-        ) : null}
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Browse shelf
+              </p>
+              <h2 className="mt-2 font-display text-[1.95rem] font-semibold tracking-tight text-slate-950">
+                {config.title}
+              </h2>
+              <p className="mt-2 text-sm leading-7 text-slate-600">
+                Filter by format, status, and genre without losing the shelf structure.
+              </p>
+            </div>
+            {showCatalogCount ? (
+              <p className="text-sm font-medium text-slate-500">
+                {formatTitleCount(filteredAndSortedSeries.length)}
+              </p>
+            ) : null}
+          </div>
 
-        <FilterBar
-          genres={genres}
-          selectedGenre={selectedGenre}
-          onGenreChange={(value) => updateParams({ genre: value })}
-          sortBy={sortBy}
-          onSortChange={(value) => updateParams({ sort: value })}
-          status={status}
-          onStatusChange={(value) => updateParams({ status: value })}
-          onReset={handleResetFilters}
-          appearance="light"
-          density={isComicPage ? "quiet" : "default"}
-        />
+          <FilterBar
+            genres={genres}
+            selectedGenre={selectedGenre}
+            onGenreChange={(value) => updateParams({ genre: value })}
+            sortBy={sortBy}
+            onSortChange={(value) => updateParams({ sort: value })}
+            status={status}
+            onStatusChange={(value) => updateParams({ status: value })}
+            onReset={handleResetFilters}
+            appearance="light"
+            density={isComicPage ? "quiet" : "default"}
+          />
+        </SurfacePanel>
 
         {loading ? (
           <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -616,25 +726,19 @@ export default function SeriesPage({
             </div>
           </SurfacePanel>
         ) : (
-          <div className={showCatalogCount ? "space-y-6" : "space-y-0"}>
-            {showCatalogCount ? (
-              <p className="text-sm text-slate-500">
-                {formatTitleCount(filteredAndSortedSeries.length)}
-              </p>
-            ) : null}
-            <div className={catalogGridClassName}>
+          <div className={catalogGridClassName}>
               {filteredAndSortedSeries.map((item) => (
                 <PortraitCard
                   key={item.id}
                   item={item}
                   tone={item.coverTone}
                   appearance="light"
-                  showActionLabel={!isComicPage}
+                  density="compact"
+                  showActionLabel={false}
                   coverFallbackVariant={isComicPage ? "minimal-card" : "default"}
                   onClick={() => handleSeriesClick(item.id)}
                 />
               ))}
-            </div>
           </div>
         )}
       </div>

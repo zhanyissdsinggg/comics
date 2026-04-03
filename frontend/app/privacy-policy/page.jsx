@@ -122,18 +122,18 @@ function ContactCard() {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-      <SiteHeader variant="light" />
-      <main className="relative px-4 py-8 pb-14 sm:py-10">
-        <div className="mx-auto max-w-6xl space-y-8">
+    <div className="gush-home-shell overflow-hidden">
+      <div className="gush-page-ambient" />
+      <SiteHeader variant="home" />
+      <main className="gush-page-main gush-section-stack">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
             accent="blue"
             eyebrow="Privacy"
-            title="Privacy, in plain English."
-            description={`Here is what data ${siteConfig.companyName} collects, why we need it, and what choices you have.`}
-            secondary="We organized this page to be scanned quickly, not buried in legal fog."
+            title="Privacy."
+            description={`What data ${siteConfig.companyName} collects, why we need it, and how to contact us about it.`}
+            secondary="Current policy and privacy contact."
             stats={[
               {
                 label: "Effective",
@@ -158,21 +158,52 @@ export default function PrivacyPolicyPage() {
             ]}
           />
 
-          <div className="grid gap-4 xl:grid-cols-2">
-            {PRIVACY_SECTIONS.map((section) => (
-              <LegalSection key={section.title} {...section} />
-            ))}
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Contact
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  Privacy requests stay easy to find.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  Use the privacy contact for data requests and support for account issues.
+                </p>
+              </div>
+            </div>
 
-            <LegalSection
-              title="Questions or requests"
-              className="xl:col-span-2"
-              paragraphs={[
-                "If you have a privacy question or want to make a data request, use the contact details below.",
-              ]}
-            >
-              <ContactCard />
-            </LegalSection>
-          </div>
+            <div className="flex flex-col gap-2.5">
+              <a
+                href={`mailto:${siteConfig.privacyEmail}`}
+                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+              >
+                Email privacy
+              </a>
+              <a
+                href={`mailto:${siteConfig.supportEmail}`}
+                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+              >
+                Open Support
+              </a>
+            </div>
+          </SurfacePanel>
+        </section>
+
+        <div className="grid gap-4 xl:grid-cols-2">
+          {PRIVACY_SECTIONS.map((section) => (
+            <LegalSection key={section.title} {...section} />
+          ))}
+
+          <LegalSection
+            title="Privacy requests"
+            className="xl:col-span-2"
+            paragraphs={[
+              "Use the contact details below for privacy questions and data requests.",
+            ]}
+          >
+            <ContactCard />
+          </LegalSection>
         </div>
       </main>
     </div>

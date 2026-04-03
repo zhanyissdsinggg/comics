@@ -87,19 +87,19 @@ export default function HowItWorksPage() {
   ].filter(Boolean);
 
   return (
-    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
+    <div className="gush-home-shell overflow-hidden">
+      <div className="gush-page-ambient" />
       <StructuredDataScript id="how-it-works-jsonld" data={structuredData} />
-      <SiteHeader variant="light" />
-      <main className="relative px-4 py-8 pb-14 sm:py-10">
-        <div className="mx-auto max-w-6xl space-y-8">
+      <SiteHeader variant="home" />
+      <main className="gush-page-main gush-section-stack">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
             accent="blue"
             eyebrow="How it works"
-            title="How reading works."
-            description="Start free where available, unlock more with points, or choose membership."
-            secondary="Free reads, point packs, plans, and billing help."
+            title="How it works."
+            description="Start free where available, unlock more with points, or choose a plan."
+            secondary="Free reads, point packs, and plans."
             stats={[
               {
                 label: "Free access",
@@ -119,7 +119,7 @@ export default function HowItWorksPage() {
               {
                 label: "Billing help",
                 value: "Support",
-                hint: `Need a person? Contact ${siteConfig.supportEmail}.`,
+                hint: `Need help? Contact ${siteConfig.supportEmail}.`,
               },
             ]}
             actions={
@@ -128,7 +128,7 @@ export default function HowItWorksPage() {
                   href="/store"
                   className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
-                  View point packs
+                  Open Store
                 </Link>
                 <Link
                   href="/subscribe"
@@ -140,97 +140,128 @@ export default function HowItWorksPage() {
             }
           />
 
-          <section className="grid gap-4 lg:grid-cols-3">
-            {HOW_IT_WORKS_STEPS.map((step) => (
-              <SurfacePanel key={step.title} appearance="light" accent="blue">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  {step.eyebrow}
-                </p>
-                <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {step.title}
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-slate-600">{step.body}</p>
-              </SurfacePanel>
-            ))}
-          </section>
-
-          <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Overview
+              </p>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Pricing basics
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  The basics.
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  Free reads first, then points or plans.
                 </h2>
-              </div>
-              <div className="space-y-4 text-sm leading-7 text-slate-600">
-                <p>
-                  Free access depends on the title. Some series open with free chapters or previews.
-                </p>
-                <p>
-                  Locked episodes use points. Point packs are one-time purchases, and Purchases keeps the record.
-                </p>
-                <p>
-                  Membership is a separate monthly plan. Benefits depend on the plan while it is active.
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  This page covers access, points, plans, and where to check billing.
                 </p>
               </div>
-            </SurfacePanel>
+            </div>
 
-            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Billing and receipts
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Where to check charges.
-                </h2>
-              </div>
-              <ul className="space-y-3 text-sm leading-7 text-slate-600">
-                <li>Open Purchases for point packs, memberships, and order IDs.</li>
-                <li>Open Account to review or end an active plan.</li>
-                <li>If a charge looks wrong, contact Support and include the order ID.</li>
-                <li>Refunds depend on the purchase status.</li>
-              </ul>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/orders"
-                  className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-                >
-                  View purchases
-                </Link>
-                <Link
-                  href="/support"
-                  className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-                >
-                  Contact support
-                </Link>
-              </div>
+            <div className="flex flex-col gap-2.5">
+              <Link
+                href="/orders"
+                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+              >
+                View Purchases
+              </Link>
+              <Link
+                href="/support"
+                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+              >
+                Open Support
+              </Link>
+            </div>
+          </SurfacePanel>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-3">
+          {HOW_IT_WORKS_STEPS.map((step) => (
+            <SurfacePanel key={step.title} appearance="light" accent="blue">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                {step.eyebrow}
+              </p>
+              <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                {step.title}
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-slate-600">{step.body}</p>
             </SurfacePanel>
-          </section>
+          ))}
+        </section>
+
+        <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Pricing basics
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Access basics.
+              </h2>
+            </div>
+            <div className="space-y-4 text-sm leading-7 text-slate-600">
+              <p>
+                Free access depends on the title. Some series open with free chapters or previews.
+              </p>
+              <p>
+                Locked episodes use points. Point packs are one-time purchases, and Purchases keeps the record.
+              </p>
+              <p>
+                Membership is a separate monthly plan. Benefits depend on the plan while it is active.
+              </p>
+            </div>
+          </SurfacePanel>
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Billing and receipts
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                Where to check charges.
+              </h2>
+            </div>
+            <ul className="space-y-3 text-sm leading-7 text-slate-600">
+              <li>Open Purchases for point packs, memberships, and order IDs.</li>
+              <li>Open Account to review or end an active plan.</li>
+              <li>If a charge looks wrong, contact Support and include the order ID.</li>
+              <li>Refunds depend on the purchase status.</li>
+            </ul>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/orders"
+                className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                View purchases
+              </Link>
+              <Link
+                href="/support"
+                className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                Contact support
+              </Link>
+            </div>
+          </SurfacePanel>
+        </section>
+
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Quick answers
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Start here.
+                Quick answers.
               </h2>
             </div>
-            <div className="grid gap-3 lg:grid-cols-2">
-              {FAQ_ITEMS.map((item) => (
-                <div
-                  key={item.question}
-                  className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-                >
-                  <h3 className="text-base font-semibold text-slate-950">{item.question}</h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{item.answer}</p>
-                </div>
-              ))}
-            </div>
-          </SurfacePanel>
-        </div>
+          <div className="grid gap-3 lg:grid-cols-2">
+            {FAQ_ITEMS.map((item) => (
+              <div
+                key={item.question}
+                className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+              >
+                <h3 className="text-base font-semibold text-slate-950">{item.question}</h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        </SurfacePanel>
       </main>
     </div>
   );

@@ -43,7 +43,7 @@ export function ApiBootGuard({ children }) {
             compact
             onRetry={retry}
             title="Oops! Our servers are taking a quick breather."
-            description="We're having trouble connecting. Your data is safe, and saved browsing can still work while live account features catch up."
+            description="Connection looks shaky. Saved browsing can still work while live account features reconnect."
           />
         </div>
       ) : null}

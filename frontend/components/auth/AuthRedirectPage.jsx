@@ -5,13 +5,23 @@ export default function AuthRedirectPage({
   description = "You'll be back to reading in a moment.",
 }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#f4f6fb] px-4">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-      <div className="relative w-full max-w-sm rounded-[28px] border border-black/8 bg-white px-8 py-7 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-[var(--gush-accent,#2f6bff)] border-t-transparent" />
-        <h1 className="text-base font-semibold text-slate-950">{title}</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-      </div>
+    <div className="gush-home-shell relative min-h-screen overflow-hidden">
+      <div className="gush-page-ambient" />
+      <main className="gush-page-main flex min-h-screen items-center justify-center">
+        <div className="relative w-full max-w-md rounded-[32px] border border-[rgba(47,88,198,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,245,239,0.96))] px-8 py-8 text-center shadow-[0_26px_72px_rgba(15,23,42,0.08)]">
+          <div className="mx-auto inline-flex rounded-full border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.06)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Redirecting
+          </div>
+          <div className="mx-auto mt-5 h-9 w-9 animate-spin rounded-full border-[3px] border-[var(--gush-accent,#2f6bff)] border-t-transparent" />
+          <h1 className="mt-5 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950">
+            {title}
+          </h1>
+          <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
+          <p className="mt-6 text-xs uppercase tracking-[0.2em] text-slate-400">
+            Getting things ready
+          </p>
+        </div>
+      </main>
     </div>
   );
 }

@@ -214,8 +214,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       {
         id: "signin",
         eyebrow: "Account",
-        title: "Sign in and keep every receipt on one account.",
-        description: "Receipts, membership charges, and order IDs land here after checkout.",
+        title: "Sign in and keep every receipt together.",
+        description: "Receipts, membership charges, and order IDs land here.",
         cta: "Sign in",
         onClick: () => router.push("/signin?returnTo=/orders"),
         accentClass:
@@ -225,7 +225,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "support",
         eyebrow: "Billing help",
         title: "Get help with a missing receipt or wrong charge.",
-        description: "Use Support when a charge or receipt needs review.",
+        description: "Use billing help when something looks off.",
         cta: "Get billing help",
         onClick: () => router.push(buildSupportHref("", "billing")),
         accentClass:
@@ -239,7 +239,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       {
         id: "packs",
         eyebrow: "Point packs",
-        title: "Buy a pack when you only need flexible unlocks.",
+        title: "Start with a point pack.",
         description: "Point packs are the one-time option.",
         cta: STOREFRONT_TERMS.viewPointPacks,
         onClick: () => router.push("/store"),
@@ -249,7 +249,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       {
         id: "membership",
         eyebrow: "Membership",
-        title: "View monthly plans before your first checkout.",
+        title: "See membership before your first checkout.",
         description: "Membership may fit better if you read often.",
         cta: STOREFRONT_TERMS.compareMembership,
         onClick: () =>
@@ -266,8 +266,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       {
         id: "support",
         eyebrow: "Billing help",
-        title: "Know where to go if the first charge looks wrong.",
-        description: "Billing help stays available right away.",
+        title: "Need billing help?",
+        description: "Billing help stays open before and after checkout.",
         cta: "Get billing help",
         onClick: () => router.push(buildSupportHref("", "billing")),
         accentClass:
@@ -303,7 +303,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "membership-charges",
         eyebrow: "Membership charges",
         title: latestMembershipOrder
-          ? "Membership charges stay in the same purchase history."
+          ? "Membership charges stay here too."
           : viewerSignedIn
             ? "Membership charges will show up here too."
             : "Membership charges land here after checkout.",
@@ -330,7 +330,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         id: "purchase-issue",
         eyebrow: "Missing points?",
         title: latestPaidOrder
-          ? "Report a wrong charge, refund issue, or missing points."
+          ? "Report a wrong charge or missing points."
           : "Need billing help before or after checkout?",
         description: refundActionsEnabled
           ? "Refund-eligible purchases can still be requested here."
@@ -357,68 +357,84 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
-  const heroPrimaryButtonClass =
-    "h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800";
-  const heroSecondaryButtonClass =
-    "h-11 rounded-full border border-black/8 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
 
   return (
-    <div className="gush-page-shell">
+    <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
       <main className="gush-page-main gush-section-stack">
-        <EditorialHero
-          appearance="light"
-          accent="blue"
-          eyebrow="Orders"
-          title={
-            viewerSignedIn
-              ? "Receipts and billing."
-              : "Billing history lives here after sign-in."
-          }
-          description={
-            viewerSignedIn
-              ? "Open receipts fast and fix charge issues from one place."
-              : "Sign in to see receipts and billing history."
-          }
-          actions={
-            viewerSignedIn ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => scrollToSection("purchase-history")}
-                  className={heroPrimaryButtonClass}
-                >
-                  View receipts
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
-                  className={heroSecondaryButtonClass}
-                >
-                  Get billing help
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={signInToOrders}
-                  className={heroPrimaryButtonClass}
-                >
-                  Sign in
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push(buildSupportHref("", "billing"))}
-                  className={heroSecondaryButtonClass}
-                >
-                  Get billing help
-                </button>
-              </>
-            )
-          }
-        />
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EditorialHero
+            accent="blue"
+            eyebrow="Orders"
+            title={
+              viewerSignedIn
+                ? "Receipts and billing."
+                : "Billing history lives here after sign-in."
+            }
+            description={
+              viewerSignedIn
+                ? "Open receipts fast and fix charge issues from one place."
+                : "Sign in to see receipts and billing history."
+            }
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Billing desk
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  {viewerSignedIn ? "Receipts stay on one account." : "Sign in to see your receipt history."}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  {viewerSignedIn
+                    ? "Refresh receipts or jump into billing help from here."
+                    : "Sign in and this becomes your billing history."}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {viewerSignedIn ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection("purchase-history")}
+                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  >
+                    View receipts
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
+                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  >
+                    Get billing help
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={signInToOrders}
+                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push(buildSupportHref("", "billing"))}
+                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  >
+                    Get billing help
+                  </button>
+                </>
+              )}
+            </div>
+          </SurfacePanel>
+        </section>
 
         {commerceNotice ? (
           <CommerceSuccessBanner
@@ -487,7 +503,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 Sign in to see receipts and billing history.
               </h2>
               <p className="text-sm leading-6 text-slate-600">
-                This page becomes your billing center after sign-in.
+                This page becomes your billing history after sign-in.
               </p>
             <StorefrontPathwaysGrid
               cards={signedOutActionCards}
@@ -522,7 +538,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 No purchases yet.
               </h2>
               <p className="text-sm leading-6 text-slate-600">
-                Purchases appear here after checkout.
+                Receipts appear here after checkout.
               </p>
             <StorefrontPathwaysGrid
               cards={emptyOrderActionCards}

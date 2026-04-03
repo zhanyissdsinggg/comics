@@ -199,7 +199,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
               Add points
             </h2>
             <p className="text-sm text-slate-500">
-              Current balance:{" "}
+              Balance:{" "}
               <span className="font-semibold text-[var(--gush-accent,#2f6bff)]">
                 {formatUSNumber(currentPoints)} points
               </span>
@@ -225,8 +225,8 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                 const isHighlighted = highlightedPackageId === packageId;
                 const packageSummary =
                   bonusPts > 0
-                    ? `${formatUSNumber(paidPts)} paid points - ${formatUSNumber(totalPts)} total`
-                    : `${formatUSNumber(paidPts)} paid points`;
+                    ? `${formatUSNumber(paidPts)} paid, ${formatUSNumber(totalPts)} total`
+                    : `${formatUSNumber(paidPts)} paid`;
 
                 return (
                   <button
@@ -275,7 +275,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                       <div className="text-right">
                         <div className="text-xl font-semibold text-slate-950">{formatPackagePrice(pkg)}</div>
                         <div className="text-xs text-slate-500">
-                          {purchaseActionsEnabled ? "Open in store" : "See in store"}
+                          {purchaseActionsEnabled ? "Continue" : "Open store"}
                         </div>
                       </div>
                     </div>
@@ -289,11 +289,11 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                 compact
                 className="px-0 py-0"
                 cardClassName="max-w-none rounded-[24px] px-4 py-5 sm:px-5 sm:py-6"
-                title="Oops! Point packs are taking a quick breather."
+                title="Point packs are unavailable right now."
                 description={
                   loadFailed
-                    ? "We're having trouble connecting. Your data is safe, and you can try again or open the points store."
-                    : "Open the points store to see the full pack list while this panel stays light."
+                    ? "Try again or open the store."
+                    : "Open the store to see the full pack list."
                 }
                 onRetry={retryPackages}
               >
@@ -302,7 +302,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                   onClick={() => handleSelectPackage({ id: "auto" })}
                   className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
-                  Open points store
+                  Open store
                 </button>
               </NetworkFallback>
             </div>
@@ -315,19 +315,19 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
               </div>
               <div>
                 <p className="mb-1 text-sm font-semibold text-slate-950">
-                  {purchaseActionsEnabled ? "Continue in the store" : "See the full store"}
+                  {purchaseActionsEnabled ? "Finish in store" : "Open the store"}
                 </p>
                 <p className="text-xs leading-6 text-slate-600">
                   {purchaseActionsEnabled
-                    ? "Pick a pack here and we'll open the same offer in the store."
-                    : "Browse the live pack lineup here. The full purchase step continues in the store."}
+                    ? "This selection opens the same offer in the store."
+                    : "See the full pack list in the store."}
                 </p>
               </div>
             </div>
           </div>
 
           <p className="mt-4 text-center text-xs text-slate-500">
-            Prices stay in sync with the store, so the pack you pick here is the one you see next.
+            Store pricing stays in sync.
           </p>
         </div>
       </div>

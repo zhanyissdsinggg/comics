@@ -122,16 +122,16 @@ function ContactCard() {
 
 export default function TermsOfServicePage() {
   return (
-    <div className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[26rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-      <SiteHeader variant="light" />
-      <main className="relative px-4 py-8 pb-14 sm:py-10">
-        <div className="mx-auto max-w-6xl space-y-8">
+    <div className="gush-home-shell overflow-hidden">
+      <div className="gush-page-ambient" />
+      <SiteHeader variant="home" />
+      <main className="gush-page-main gush-section-stack">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
             accent="blue"
             eyebrow="Terms"
-            title="Terms, in plain English."
+            title="Terms of service."
             description={
               <>
                 These terms cover using {siteConfig.siteName}, buying content, and keeping your account in good standing. By using the site, you agree to these Terms and our{" "}
@@ -141,7 +141,7 @@ export default function TermsOfServicePage() {
                 .
               </>
             }
-            secondary="We broke the legal stuff into short sections so it is readable."
+            secondary="Current terms and legal contact."
             stats={[
               {
                 label: "Effective",
@@ -166,21 +166,52 @@ export default function TermsOfServicePage() {
             ]}
           />
 
-          <div className="grid gap-4 xl:grid-cols-2">
-            {TERMS_SECTIONS.map((section) => (
-              <LegalSection key={section.title} {...section} />
-            ))}
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Legal
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  Use, purchases, and formal notices.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  Use this page for the rules that govern browsing, accounts, and purchases.
+                </p>
+              </div>
+            </div>
 
-            <LegalSection
-              title="Legal contact"
-              className="xl:col-span-2"
-              paragraphs={[
-                "If you have a legal question or need to send formal notice, use the contact details below.",
-              ]}
-            >
-              <ContactCard />
-            </LegalSection>
-          </div>
+            <div className="flex flex-col gap-2.5">
+              <a
+                href={`mailto:${siteConfig.legalEmail}`}
+                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+              >
+                Email legal
+              </a>
+              <Link
+                href="/privacy-policy"
+                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+              >
+                View privacy
+              </Link>
+            </div>
+          </SurfacePanel>
+        </section>
+
+        <div className="grid gap-4 xl:grid-cols-2">
+          {TERMS_SECTIONS.map((section) => (
+            <LegalSection key={section.title} {...section} />
+          ))}
+
+          <LegalSection
+            title="Legal contact"
+            className="xl:col-span-2"
+            paragraphs={[
+              "If you have a legal question or need to send formal notice, use the contact details below.",
+            ]}
+          >
+            <ContactCard />
+          </LegalSection>
         </div>
       </main>
     </div>

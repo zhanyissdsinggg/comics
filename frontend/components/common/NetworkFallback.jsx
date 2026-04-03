@@ -26,8 +26,8 @@ function MascotPlaceholder() {
 }
 
 export default function NetworkFallback({
-  title = "Oops! Our servers are taking a quick breather.",
-  description = "We're having trouble connecting. Your data is safe, let's try that again.",
+  title = "We couldn't load this right now.",
+  description = "Connection looks shaky. Your data is safe. Try again.",
   retryLabel = "Retry",
   onRetry,
   compact = false,
@@ -60,11 +60,15 @@ export default function NetworkFallback({
         <div className="relative flex flex-col items-center justify-center">
           {showIllustration ? illustration || <MascotPlaceholder /> : null}
 
-          <h2 className={cn("max-w-md text-balance font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]", showIllustration ? "mt-6" : "mt-0")}>
+          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Connection issue
+          </p>
+
+          <h2 className={cn("max-w-md text-balance font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]", showIllustration ? "mt-3" : "mt-0")}>
             {title}
           </h2>
 
-          <p className="mt-3 max-w-md text-sm leading-7 text-slate-500 sm:text-[15px]">
+          <p className="mt-3 max-w-md text-sm leading-6 text-slate-500 sm:text-[15px]">
             {description}
           </p>
 

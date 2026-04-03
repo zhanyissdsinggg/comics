@@ -6,7 +6,7 @@ import Skeleton from "../../components/common/Skeleton";
 const StorePage = dynamic(() => import("../../components/store/StorePage"), {
   ssr: false,
   loading: () => (
-    <div className="gush-page-shell">
+    <div className="gush-page-shell gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
       <main className="gush-page-main gush-section-stack">
         <Skeleton className="h-[22rem] rounded-[32px]" />

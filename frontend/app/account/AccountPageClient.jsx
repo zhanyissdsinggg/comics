@@ -367,9 +367,9 @@ export default function AccountPage({ initialSignedIn = false }) {
         {
           id: "signin",
           eyebrow: "Account",
-          title: "Sign in and keep everything on one account.",
+          title: "Sign in and keep everything together.",
           description:
-            "Keep purchases, progress, 18+ settings, and recovery off this device-only setup.",
+            "Move purchases, progress, and recovery off this device-only setup.",
           cta: "Sign in",
           onClick: openAuthPrompt,
           accentClass:
@@ -380,7 +380,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           eyebrow: "Recovery",
           title: "Lost access? Reset your password.",
           description:
-            "Use reset for email/password accounts. If sign-in still looks wrong, support is faster.",
+            "Use reset for email/password accounts. If sign-in still looks wrong, use support.",
           cta: "Reset password",
           onClick: () => router.push("/auth/reset"),
           accentClass:
@@ -389,9 +389,9 @@ export default function AccountPage({ initialSignedIn = false }) {
         {
           id: "membership",
           eyebrow: "Membership",
-          title: "View monthly plans before you start.",
+          title: "See monthly plans first.",
           description:
-            "Membership is the recurring option. Review the plans first, then start when ready.",
+            "Review the plans first, then start when ready.",
           cta: "View Plans",
           onClick: () =>
             router.push(
@@ -407,9 +407,9 @@ export default function AccountPage({ initialSignedIn = false }) {
         {
           id: "store",
           eyebrow: "Point packs",
-          title: "See one-time packs and pricing.",
+          title: "See point packs.",
           description:
-            "Use point packs when you want one-off unlocks instead of a monthly plan.",
+            "Use point packs when you want one-off unlocks.",
           cta: "View point packs",
           onClick: () => router.push("/store"),
           accentClass:
@@ -422,16 +422,16 @@ export default function AccountPage({ initialSignedIn = false }) {
       {
         id: "membership",
         eyebrow: "Membership",
-        title: subscription?.active ? "Manage renewal and plan details." : "View membership before your next purchase.",
+        title: subscription?.active ? "Manage renewal and plan." : "See membership before your next purchase.",
         description: subscription?.active
           ? subscription?.renewAt
             ? `Your plan renews on ${new Date(subscription.renewAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
-              })}. Cancellation and billing rules stay in one place.`
-            : "Open membership to review renewal timing, monthly perks, and cancellation."
-          : "If you keep topping up, membership may fit better before your next pack purchase.",
+              })}. Renewal and cancellation stay in one place.`
+            : "Open membership to review renewal timing and cancellation."
+          : "If you keep topping up, membership may fit better next time.",
         cta: subscription?.active ? "Manage membership" : "View Plans",
         onClick: () =>
           router.push(
@@ -447,10 +447,10 @@ export default function AccountPage({ initialSignedIn = false }) {
       {
         id: "purchases",
         eyebrow: "Purchases",
-        title: orders.length > 0 ? "Find receipts and order IDs fast." : "Keep receipts and charges easy to find.",
+        title: orders.length > 0 ? "Find receipts fast." : "Keep charges easy to find.",
         description: orders.length > 0
-          ? "Purchases is where your latest point packs, membership renewals, and billing records stay easy to review."
-          : "After checkout, this is still where pack receipts, membership charges, and order IDs show up.",
+          ? "Latest packs, renewals, and billing records stay here."
+          : "Pack receipts, membership charges, and order IDs show up here after checkout.",
         cta: "View purchases",
         onClick: () => router.push("/orders"),
         accentClass:
@@ -459,9 +459,9 @@ export default function AccountPage({ initialSignedIn = false }) {
       {
         id: "library",
         eyebrow: "Reading",
-        title: "Open your library and keep reading.",
+        title: "Open your library.",
         description:
-          "Library keeps saved titles, recent reading, and progress closer than a settings page ever should.",
+          "Saved titles, recent reading, and progress stay close.",
         cta: "Open library",
         onClick: () => router.push("/library"),
         accentClass:
@@ -470,9 +470,9 @@ export default function AccountPage({ initialSignedIn = false }) {
       {
         id: "support",
         eyebrow: "Support",
-        title: "Get account or billing help fast.",
+        title: "Get help fast.",
         description:
-          "Use Support for sign-in trouble, wrong charges, missing points, or mature-content access issues without hunting through legal pages.",
+          "Use Support for sign-in trouble, wrong charges, missing points, or 18+ access issues.",
         cta: "Get help",
         onClick: () => router.push(buildSupportPath({ topic: "account", context: "Account help from account page" })),
         accentClass:
@@ -503,65 +503,137 @@ export default function AccountPage({ initialSignedIn = false }) {
   const checkboxCardClass =
     "flex items-center gap-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-700";
   const messageIsError = /failed|couldn't|not found/i.test(message);
+  const accountDeskTitle = viewerSignedIn
+    ? "Reading, billing, and help stay together."
+    : "Start on this device. Sign in when you're ready.";
+  const accountDeskCopy = viewerSignedIn
+    ? orders.length > 0
+      ? "Jump straight to receipts, membership, or support without digging through settings."
+      : "Save preferences now. Purchases and recovery will stay close later."
+    : "Local reading preferences work here now. Sign in when you want purchases and progress on one account.";
 
   return (
-    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-      <SiteHeader variant="light" />
-      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <EditorialHero
-          appearance="light"
-          accent="blue"
-          eyebrow="Account"
-          title={viewerSignedIn ? "Account and reading settings." : "Sign in for receipts. Save device settings here."}
-          description={
-            viewerSignedIn
-              ? "Save what matters, then get back to reading."
-              : "Local settings save here. Sign in when you want purchases and progress on one account."
-          }
-          secondary={
-            viewerSignedIn
-              ? ""
-              : "Local settings stay on this browser. Purchases live on your account."
-          }
-          stats={accountHeroStats}
-          actions={
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!viewerSignedIn) {
-                    openAuthPrompt();
-                    return;
-                  }
-                  router.push("/orders");
-                }}
-                className={primaryButtonClass}
-              >
-                {viewerSignedIn ? "View purchases" : "Sign in"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!viewerSignedIn) {
-                    router.push("/auth/reset");
-                    return;
-                  }
-                  router.push(
-                    buildPathWithAttribution("/subscribe", {
-                      entryPoint: "ACCOUNT_SUBSCRIPTION",
-                      sourcePath: "/account",
-                      returnTo: "/account",
-                    }),
-                  );
-                }}
-                className={secondaryButtonClass}
-              >
-                {viewerSignedIn ? "Manage membership" : "Reset password"}
-              </button>
-            </>
-          }
-        />
+    <div className="gush-home-shell overflow-hidden">
+      <div className="gush-page-ambient" />
+      <SiteHeader variant="home" />
+      <main className="gush-page-main gush-section-stack">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EditorialHero
+            appearance="light"
+            accent="blue"
+            eyebrow="Account"
+            title={viewerSignedIn ? "Your account." : "Save this device now. Sign in later."}
+            description={
+              viewerSignedIn
+                ? "Keep reading, billing, and security easy to reach."
+                : "Local settings save here first. Sign in when you want purchases and progress on one account."
+            }
+            secondary={
+              viewerSignedIn
+                ? ""
+                : "Preferences stay on this browser until you connect an account."
+            }
+            stats={accountHeroStats}
+            actions={
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!viewerSignedIn) {
+                      openAuthPrompt();
+                      return;
+                    }
+                    router.push("/orders");
+                  }}
+                  className={primaryButtonClass}
+                >
+                  {viewerSignedIn ? "View purchases" : "Sign in"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!viewerSignedIn) {
+                      router.push("/auth/reset");
+                      return;
+                    }
+                    router.push(
+                      buildPathWithAttribution("/subscribe", {
+                        entryPoint: "ACCOUNT_SUBSCRIPTION",
+                        sourcePath: "/account",
+                        returnTo: "/account",
+                      }),
+                    );
+                  }}
+                  className={secondaryButtonClass}
+                >
+                  {viewerSignedIn ? "Manage membership" : "Reset password"}
+                </button>
+              </>
+            }
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Account desk
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  {accountDeskTitle}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  {accountDeskCopy}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {viewerSignedIn ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/library")}
+                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  >
+                    Open library
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push(buildSupportPath({ topic: "account", context: "Account help from account hero desk" }))}
+                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  >
+                    Get help
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={openAuthPrompt}
+                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        buildPathWithAttribution("/subscribe", {
+                          entryPoint: "ACCOUNT_SUBSCRIPTION",
+                          sourcePath: "/account",
+                          returnTo: "/account",
+                        }),
+                      )
+                    }
+                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  >
+                    View membership
+                  </button>
+                </>
+              )}
+            </div>
+          </SurfacePanel>
+        </section>
 
         {commerceNotice ? (
           <CommerceSuccessBanner
@@ -578,7 +650,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 Sign in to keep everything on one account.
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Local settings still work here. Sign in when you want purchases and progress tied to you.
+                Local settings still work here. Sign in when you want purchases and progress on one account.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -623,8 +695,8 @@ export default function AccountPage({ initialSignedIn = false }) {
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="space-y-2">
-            <p className={sectionEyebrowClass}>What do you need to do?</p>
-            <h2 className={sectionTitleClass}>Start with the task.</h2>
+            <p className={sectionEyebrowClass}>Start here</p>
+            <h2 className={sectionTitleClass}>Pick a task.</h2>
           </div>
           <StorefrontPathwaysGrid cards={accountActionCards} columnsClassName="md:grid-cols-2 xl:grid-cols-4" appearance="light" />
         </SurfacePanel>
@@ -710,7 +782,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <p className={sectionEyebrowClass}>Account basics</p>
                   <h2 className={sectionTitleClass}>Name, email, and quick help</h2>
                   <p className={mutedCopyClass}>
-                    Keep the basics easy to scan when you need them.
+                    Keep the basics easy to scan.
                   </p>
                 </div>
 
@@ -909,7 +981,7 @@ export default function AccountPage({ initialSignedIn = false }) {
               <>
                 <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" appearance="light" accent="blue">
                   <div>
-                    <p className={sectionEyebrowClass}>Save changes</p>
+                    <p className={sectionEyebrowClass}>Save</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
                       Save these choices to this device.
                     </p>
@@ -982,7 +1054,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     <p className={sectionEyebrowClass}>Security</p>
                     <h2 className={sectionTitleClass}>Sign-in methods and recovery</h2>
                     <p className={mutedCopyClass}>
-                      See which sign-in methods are connected and send a reset email without extra digging.
+                      See connected sign-in methods and send a reset email.
                     </p>
                   </div>
 
@@ -1073,7 +1145,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     <p className={sectionEyebrowClass}>Purchases</p>
                     <h2 className={sectionTitleClass}>Recent receipts and charges</h2>
                     <p className={mutedCopyClass}>
-                      Spot the latest pack or membership charge, then jump into billing help if something looks off.
+                      Check the latest charge, then jump into billing help if something looks off.
                     </p>
                   </div>
                   {!hydrated || ordersLoading ? (
@@ -1088,7 +1160,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     </div>
                   ) : orders.length === 0 ? (
                     <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">
-                      <p>No purchases yet. Point packs and membership charges will appear here after checkout, along with the order ID you may need later.</p>
+                      <p>No purchases yet. Charges show up here after checkout.</p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button
                           type="button"
@@ -1146,9 +1218,9 @@ export default function AccountPage({ initialSignedIn = false }) {
 
                 <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" appearance="light" accent="blue">
                   <div>
-                    <p className={sectionEyebrowClass}>Save changes</p>
+                    <p className={sectionEyebrowClass}>Save</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Save these choices to this device and your account.
+                      Save these choices to your device and account.
                     </p>
                   </div>
                   <button
@@ -1163,7 +1235,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             )}
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

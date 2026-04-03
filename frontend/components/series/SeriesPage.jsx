@@ -700,9 +700,9 @@ export default function SeriesPage({
 
   if (loading) {
     return (
-      <main className="gush-page-shell overflow-hidden">
+      <main className="gush-page-shell gush-home-shell overflow-hidden">
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
-        <SiteHeader variant="light" />
+        <SiteHeader variant="home" />
         <div className="gush-page-main">
           <section className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
@@ -755,19 +755,19 @@ export default function SeriesPage({
 
   if (error === "NOT_FOUND") {
     return (
-      <main className="gush-page-shell overflow-hidden">
+      <main className="gush-page-shell gush-home-shell overflow-hidden">
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
-        <SiteHeader variant="light" />
+        <SiteHeader variant="home" />
         <div className="gush-page-main max-w-[960px]">
           <div className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
               Series unavailable
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-              This title is not available in the public catalog.
+              This title is not in the public catalog.
             </h1>
             <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-[15px]">
-              Browse featured series, explore the catalog, or search for another title.
+              Browse another title or search the catalog.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
@@ -802,17 +802,17 @@ export default function SeriesPage({
     const isUnavailable = error === "UNAVAILABLE";
 
     return (
-      <main className="gush-page-shell overflow-hidden">
+      <main className="gush-page-shell gush-home-shell overflow-hidden">
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
-        <SiteHeader variant="light" />
+        <SiteHeader variant="home" />
         <div className="gush-page-main">
           <NetworkFallback
             compact
-            title={isUnavailable ? "Oops! This title is taking a quick breather." : "Oops! We couldn't load this title yet."}
+            title={isUnavailable ? "This title is unavailable right now." : "We couldn't load this title yet."}
             description={
               isUnavailable
-                ? "We're having trouble connecting. Your data is safe, and you can try again or browse another title while this catches up."
-                : "We're having trouble connecting. Your data is safe, and we're ready to retry the cover, episode list, and access details."
+                ? "Try again or browse another title."
+                : "Connection looks shaky. Try the page again."
             }
             onRetry={() => fetchSeries({ bust: true })}
           >
@@ -838,9 +838,9 @@ export default function SeriesPage({
 
   if ((series?.adult || error === "ADULT_GATED") && gateStatus !== "OK") {
     return (
-      <main className="gush-page-shell overflow-hidden">
+      <main className="gush-page-shell gush-home-shell overflow-hidden">
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
-        <SiteHeader variant="light" />
+        <SiteHeader variant="home" />
 
         <AdultGateBlockingPanel status={gateStatus} onOpenModal={openGateModal} />
         {activeModal === "login" ? (
@@ -868,10 +868,10 @@ export default function SeriesPage({
   }
 
   return (
-    <main className="gush-page-shell overflow-hidden">
+    <main className="gush-page-shell gush-home-shell overflow-hidden">
       <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
-      <SiteHeader variant="light" />
-      <div className="gush-page-main">
+      <SiteHeader variant="home" />
+      <div className="gush-page-main gush-section-stack">
         {commerceNotice ? (
           <div className="pt-6">
             <CommerceSuccessBanner

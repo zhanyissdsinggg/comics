@@ -40,11 +40,11 @@ const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBan
 const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
   ssr: false,
   loading: () => (
-    <div className="sticky top-0 z-40 border-b border-transparent bg-[rgba(251,247,240,0.72)] backdrop-blur-xl">
+    <div className="sticky top-0 z-40 border-b border-white/6 bg-[rgba(8,12,18,0.56)] backdrop-blur-xl">
       <div className="mx-auto flex min-h-[58px] max-w-[1320px] items-center justify-between gap-3 px-3 py-2 sm:min-h-[64px] sm:px-6 sm:py-2.5 lg:px-8">
-        <div className="h-10 w-28 rounded-full bg-white/80 shadow-[0_10px_24px_rgba(15,23,42,0.04)]" />
-        <div className="hidden h-10 flex-1 rounded-full bg-white/70 md:block" />
-        <div className="h-10 w-24 rounded-full bg-white/80 shadow-[0_10px_24px_rgba(15,23,42,0.04)]" />
+        <div className="h-10 w-28 rounded-full border border-white/10 bg-white/[0.05] shadow-[0_16px_32px_rgba(0,0,0,0.18)]" />
+        <div className="hidden h-10 flex-1 rounded-full border border-white/8 bg-white/[0.04] md:block" />
+        <div className="h-10 w-24 rounded-full border border-white/10 bg-white/[0.05] shadow-[0_16px_32px_rgba(0,0,0,0.18)]" />
       </div>
     </div>
   ),
@@ -220,6 +220,53 @@ function HeroCoverPreview({ series, eyebrow }) {
         </p>
       </div>
     </div>
+  );
+}
+
+function HomeQuickPickCard({ item, eyebrow, onClick }) {
+  const coverUrl = String(item?.coverUrl || "").trim();
+  const coverAltText = buildHeroCoverAltText(item);
+  const metaLine = item?.metaLabel || item?.author || item?.eyebrow || "";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex w-full items-center gap-3 rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-3 text-left transition-all duration-300 hover:border-white/16 hover:bg-[rgba(255,255,255,0.07)]"
+    >
+      <div className="relative aspect-[3/4] w-[72px] shrink-0 overflow-hidden rounded-[18px] border border-white/10 bg-neutral-900">
+        {coverUrl ? (
+          <img
+            src={coverUrl}
+            alt={coverAltText}
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div
+            className="absolute inset-0 bg-[linear-gradient(135deg,rgba(11,17,30,0.96),rgba(73,96,171,0.48),rgba(244,201,138,0.22))]"
+            role="img"
+            aria-label={coverAltText}
+          />
+        )}
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.04),rgba(8,12,18,0.54))]" />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/42">
+          {eyebrow}
+        </p>
+        <p className="mt-2 line-clamp-2 text-sm font-semibold leading-5 text-white">
+          {item?.title || "Story"}
+        </p>
+        {metaLine ? (
+          <p className="mt-1 line-clamp-1 text-xs text-white/56">{metaLine}</p>
+        ) : null}
+      </div>
+
+      <ArrowRight className="size-4 shrink-0 text-white/46 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white/82" />
+    </button>
   );
 }
 
@@ -408,6 +455,39 @@ function HomeContent({ initialSearchParams = {} }) {
     [editorialSnapshot, heroSeries?.id],
   );
 
+  const heroRailItems = useMemo(() => {
+    const seen = new Set();
+    return [...featuredSeriesItems, ...startHereItems].filter((item) => {
+      const itemId = String(item?.id || "").trim();
+      if (!itemId || itemId === String(heroSeries?.id || "").trim() || seen.has(itemId)) {
+        return false;
+      }
+      seen.add(itemId);
+      return true;
+    }).slice(0, 3);
+  }, [featuredSeriesItems, heroSeries?.id, startHereItems]);
+
+  const heroMetrics = useMemo(
+    () => [
+      {
+        id: "series",
+        label: "Series",
+        value: Number(editorialSnapshot?.seriesCount || 0).toLocaleString(),
+      },
+      {
+        id: "genres",
+        label: "Genres",
+        value: Number(editorialSnapshot?.genreCount || 0).toLocaleString(),
+      },
+      {
+        id: "completed",
+        label: "Finished",
+        value: Number(editorialSnapshot?.completedSeriesCount || 0).toLocaleString(),
+      },
+    ],
+    [editorialSnapshot?.completedSeriesCount, editorialSnapshot?.genreCount, editorialSnapshot?.seriesCount],
+  );
+
   const showCatalogFallback = !loading && !featuredSeries;
 
   const homepageFallbackCards = useMemo(
@@ -415,17 +495,17 @@ function HomeContent({ initialSearchParams = {} }) {
       {
         id: "featured-series",
         eyebrow: "Featured Series",
-        title: "Start with featured stories",
-        description: "A smaller editorial shelf when you want a confident place to begin.",
-        label: "Browse series",
+        title: "Open featured stories",
+        description: "Editorial picks to open first.",
+        label: "Browse Series",
         href: "/search",
       },
       {
         id: "browse-comics",
         eyebrow: "Browse by Format",
-        title: "Choose your format",
-        description: "Jump straight into comics or prose, depending on how you want to read today.",
-        label: "Browse comics",
+        title: "Pick a format",
+        description: "Comics or prose, depending on your mood.",
+        label: "Browse Comics",
         href: "/comics",
       },
     ],
@@ -493,149 +573,202 @@ function HomeContent({ initialSearchParams = {} }) {
     openHeroCardCta();
   };
 
-  const heroCardLabel = resumeSeries ? "Pick up where you left off" : "Featured right now";
-  const heroPrimaryCtaLabel = resumeSeries ? "Continue Reading" : "Start Reading";
-  const heroCardCtaLabel = resumeSeries ? "Continue Reading" : "View Series";
+  const heroEyebrow = resumeSeries ? "Continue Reading" : "Featured";
+  const heroSummary = resumeSeries
+    ? "Pick up where you left off."
+    : clampText(heroSeries?.description, 170) ||
+      "Original comics and serialized novels, arranged for calmer reading.";
+
   return (
-    <div className="gush-page-shell overflow-hidden">
+    <div className="gush-page-shell gush-home-shell overflow-hidden">
       <div className="gush-page-ambient h-[clamp(21rem,42vw,34rem)]" />
       <SiteHeader variant="home" />
 
       <main className="gush-page-main gush-page-main--wide">
-        <section className="pb-8 pt-2 md:pb-10">
+        <section className="pb-10 pt-2 md:pb-12">
           {loading ? (
             <div className="aspect-[5/6] w-full animate-pulse rounded-[36px] bg-white/80 shadow-[0_20px_44px_rgba(15,23,42,0.06)] sm:aspect-[21/11] lg:aspect-[21/8]" />
           ) : (
-            <Card className="relative overflow-hidden rounded-[36px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,243,236,0.95))] py-0 shadow-[0_28px_70px_rgba(15,23,42,0.08)]">
-              {featuredBannerUrl ? (
-                <div
-                  className="absolute inset-0 bg-cover bg-center opacity-[0.08]"
-                  style={{ backgroundImage: `url(${featuredBannerUrl})` }}
-                />
-              ) : null}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(49,87,214,0.1),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(27,36,64,0.06),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.82),rgba(247,243,236,0.96))]" />
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.46fr)_minmax(320px,0.64fr)] xl:items-stretch">
+              <Card className="relative min-h-[420px] overflow-hidden rounded-[38px] border border-white/10 bg-[linear-gradient(180deg,#111723,#0c1018)] py-0 text-white shadow-[0_32px_90px_rgba(0,0,0,0.3)] ring-0">
+                {featuredBannerUrl ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center opacity-[0.44]"
+                    style={{ backgroundImage: `url(${featuredBannerUrl})` }}
+                  />
+                ) : null}
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,13,20,0.92)_0%,rgba(9,13,20,0.84)_44%,rgba(9,13,20,0.54)_74%,rgba(9,13,20,0.24)_100%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(77,106,215,0.28),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(244,201,138,0.16),transparent_24%)]" />
 
-              <CardContent className="relative grid gap-8 p-5 sm:p-7 xl:grid-cols-[1.08fr_0.92fr] xl:items-end xl:p-10">
-                <div className="max-w-2xl pb-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                    Original comics and serialized fiction
-                  </p>
-                  <h1 className="mt-4 max-w-3xl font-display text-[2.4rem] font-semibold leading-[0.98] tracking-[-0.04em] text-slate-950 sm:text-[3.3rem] xl:text-[4.2rem]">
-                    Read original comics and novels in one place.
-                  </h1>
-                  <p className="mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                    Curated stories, cleaner shelves, and a calmer way to keep reading.
-                  </p>
+                <CardContent className="relative grid h-full gap-8 p-5 sm:p-7 xl:min-h-[520px] xl:grid-cols-[minmax(0,1.02fr)_220px] xl:p-10">
+                  <div className="flex flex-col justify-end">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">
+                      {heroEyebrow}
+                    </p>
+                    <h1 className="mt-4 max-w-3xl font-display text-[2.5rem] font-semibold leading-[0.94] tracking-[-0.045em] text-white sm:text-[3.2rem] xl:text-[4.45rem]">
+                      {heroSeries?.title || "Original comics and novels"}
+                    </h1>
 
-                  <div className="mt-7 flex flex-wrap items-center gap-3">
-                    <Button
-                      type="button"
-                      size="lg"
-                      onClick={openPrimaryHeroCta}
-                      className="h-12 rounded-full bg-slate-950 px-6 text-sm font-semibold text-white hover:bg-slate-800"
-                    >
-                      {heroPrimaryCtaLabel}
-                      <ArrowRight className="size-4" />
-                    </Button>
+                    {heroMetaLine ? (
+                      <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-white/56">
+                        {heroMetaLine}
+                      </p>
+                    ) : null}
+
+                    <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-[0.98rem]">
+                      {heroSummary}
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap gap-2.5">
+                      {heroGenrePills.map((genre) => (
+                        <span
+                          key={`hero-genre-${genre}`}
+                          className="inline-flex items-center whitespace-nowrap rounded-full border border-white/12 bg-white/[0.08] px-3 py-1 text-xs font-medium text-white/74 backdrop-blur-sm"
+                        >
+                          {genre}
+                        </span>
+                      ))}
+                      {heroSignals.slice(0, 2).map((signal) => (
+                        <span
+                          key={signal.id}
+                          className="rounded-full border border-white/10 bg-black/16 px-3 py-1 text-xs font-medium text-white/68"
+                        >
+                          {signal.content}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="mt-7 flex flex-wrap items-center gap-3">
+                      <Button
+                        type="button"
+                        size="lg"
+                        onClick={openPrimaryHeroCta}
+                        className="h-12 rounded-full bg-[var(--gush-home-accent)] px-6 text-sm font-semibold text-slate-950 shadow-[0_18px_34px_rgba(0,0,0,0.22)] hover:bg-[#ffd6a0]"
+                      >
+                        {resumeSeries ? "Continue Reading" : "Read Now"}
+                        <ArrowRight className="size-4" />
+                      </Button>
+                    </div>
+
                   </div>
 
-                  <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => router.push("/comics")}
-                      className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-slate-600 hover:bg-transparent hover:text-slate-950"
-                    >
-                      Browse Comics
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => router.push("/novels")}
-                      className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-slate-600 hover:bg-transparent hover:text-slate-950"
-                    >
-                      Browse Novels
-                    </Button>
-                  </div>
-                </div>
-
-                {heroSeries ? (
-                  <div className="rounded-[30px] border border-black/8 bg-[rgba(255,255,255,0.86)] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.055)] backdrop-blur-[10px] sm:p-5">
-                    <div className="grid grid-cols-[110px_1fr] gap-4 sm:grid-cols-[148px_1fr] sm:items-start">
-                      <div className="overflow-hidden rounded-[24px] border border-black/6 bg-neutral-900 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+                  {heroSeries ? (
+                    <div className="hidden xl:flex xl:items-end xl:justify-end">
+                      <div className="w-full max-w-[210px]">
                         <HeroCoverPreview
                           series={heroSeries}
                           eyebrow={resumeSeries ? "Continue Reading" : "Featured"}
                         />
                       </div>
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
 
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                          {heroCardLabel}
+              <div className="grid gap-4">
+                <Card className="overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,26,0.95),rgba(12,17,26,0.88))] py-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.22)] ring-0">
+                  <CardContent className="p-5 sm:p-6">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
+                          Overview
                         </p>
-                        <h2 className="mt-3 font-display text-[1.7rem] font-semibold tracking-tight text-slate-950 sm:text-[2rem]">
-                          {heroSeries.title}
+                        <h2 className="mt-3 font-display text-[1.55rem] font-semibold tracking-tight text-white">
+                          A calmer place to read.
                         </h2>
+                      </div>
+                      <span className="inline-flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-[var(--gush-home-accent)]">
+                        <Sparkles className="size-4" />
+                      </span>
+                    </div>
 
-                        {heroMetaLine ? (
-                          <p className="mt-3 text-[12px] font-medium tracking-[0.08em] text-slate-500">
-                            {heroMetaLine}
+                    <p className="mt-3 text-sm leading-7 text-white/62">Featured stories first. Cleaner shelves after that.</p>
+
+                    <div className="mt-5 grid grid-cols-3 gap-2.5">
+                      {heroMetrics.map((metric) => (
+                        <div
+                          key={metric.id}
+                          className="rounded-[20px] border border-white/10 bg-white/[0.05] px-3 py-3"
+                        >
+                          <p className="text-lg font-semibold tracking-tight text-white">
+                            {metric.value}
                           </p>
-                        ) : null}
+                          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-white/46">
+                            {metric.label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
 
-                        <p className="mt-3 text-sm leading-7 text-slate-600">
-                          {resumeSeries && resumeSpotlight?.episodeId
-                            ? `${formatEpisodeLabel(resumeSpotlight.episodeId)}${
-                                resumeSpotlight.progressPercent > 0
-                                  ? ` is ${formatPercent(
-                                      resumeSpotlight.progressPercent,
-                                    )} complete.`
-                                  : " is ready to reopen."
-                              }`
-                            : clampText(heroSeries.description, 110) || getReadingState(heroSeries)}
-                        </p>
+                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => router.push("/comics")}
+                        className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-white/62 hover:bg-transparent hover:text-white"
+                      >
+                        Browse Comics
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => router.push("/novels")}
+                        className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-white/62 hover:bg-transparent hover:text-white"
+                      >
+                        Browse Novels
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => router.push("/creators")}
+                        className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-white/62 hover:bg-transparent hover:text-white"
+                      >
+                        View Creators
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                        {heroGenrePills.length > 0 ? (
-                          <div className="mt-4 flex flex-wrap gap-2.5">
-                            {heroGenrePills.map((genre) => (
-                              <span
-                                key={`hero-genre-${genre}`}
-                                className="inline-flex items-center whitespace-nowrap rounded-full border border-black/6 bg-white/92 px-3 py-1 text-xs font-medium text-slate-600"
-                              >
-                                {genre}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-
-                        {heroSignals.length > 0 ? (
-                          <div className={`flex flex-wrap gap-2 ${heroGenrePills.length > 0 ? "mt-2" : "mt-4"}`}>
-                            {heroSignals.slice(0, 2).map((signal) => (
-                              <span
-                                key={signal.id}
-                                className="rounded-full border border-black/8 bg-[rgba(246,243,237,0.92)] px-3 py-1.5 text-xs font-medium text-slate-700"
-                              >
-                                {signal.content}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-
+                {heroRailItems.length > 0 ? (
+                  <Card className="overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,26,0.95),rgba(12,17,26,0.9))] py-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.22)] ring-0">
+                    <CardContent className="p-5 sm:p-6">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
+                            More to read
+                          </p>
+                          <h2 className="mt-2 font-display text-[1.35rem] font-semibold tracking-tight text-white">
+                            Open one next.
+                          </h2>
+                        </div>
                         <Button
                           type="button"
                           variant="ghost"
-                          onClick={openHeroCardCta}
-                          className="mt-5 h-auto justify-start rounded-full px-0 py-0 text-sm font-semibold text-[var(--gush-accent,#3157d6)] hover:bg-transparent hover:text-[var(--gush-accent-strong,#2444af)]"
+                          onClick={() => router.push("/search")}
+                          className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-white/56 hover:bg-transparent hover:text-white"
                         >
-                          {heroCardCtaLabel}
+                          Browse all
                           <ArrowRight className="size-4" />
                         </Button>
                       </div>
-                    </div>
-                  </div>
+
+                      <div className="mt-5 space-y-3">
+                        {heroRailItems.map((item, index) => (
+                          <HomeQuickPickCard
+                            key={`hero-rail-${item.id}`}
+                            item={item}
+                            eyebrow={index === 0 ? "Featured" : index === 1 ? "Continue" : "Next"}
+                            onClick={() =>
+                              openHomeSeries(item.id, "HOME_HERO_RAIL", `home_hero_rail_${item.id}`)
+                            }
+                          />
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
                 ) : null}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </section>
 
@@ -691,7 +824,7 @@ function HomeContent({ initialSearchParams = {} }) {
         tone="light"
         variant="compact"
         pathname="/"
-        taglineOverride="Browse original comics and serialized fiction without the clutter."
+        taglineOverride="Original comics and serialized fiction, arranged for calmer reading."
       />
     </div>
   );

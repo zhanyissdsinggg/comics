@@ -7,8 +7,8 @@ const primaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
   { label: "Creators", href: "/creators" },
-  { label: "Featured Series", href: "/rankings" },
-  { label: "Help", href: "/support" },
+  { label: "Featured", href: "/rankings" },
+  { label: "Support", href: "/support" },
 ];
 
 const fullFooterSections = [
@@ -18,12 +18,12 @@ const fullFooterSections = [
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
       { label: "Creators", href: "/creators" },
-      { label: "Featured Series", href: "/rankings" },
-      { label: "Help", href: "/support" },
+      { label: "Featured", href: "/rankings" },
+      { label: "Support", href: "/support" },
     ],
   },
   {
-    title: "Store & Account",
+    title: "Account",
     links: [
       { label: "Store", href: "/store" },
       { label: "Plans", href: "/subscribe" },
@@ -32,7 +32,7 @@ const fullFooterSections = [
     ],
   },
   {
-    title: "Help & Legal",
+    title: "Support",
     links: [
       { label: "Support", href: "/support" },
       { label: "FAQ", href: "/faq" },
@@ -52,11 +52,11 @@ const homePrimaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
   { label: "Creators", href: "/creators" },
-  { label: "Help", href: "/support" },
+  { label: "Support", href: "/support" },
 ];
 
 const homeCompactMetaFooterLinks = [
-  { label: "Help", href: "/support" },
+  { label: "Support", href: "/support" },
   { label: "Privacy", href: "/privacy-policy" },
   { label: "Terms", href: "/terms-of-service" },
 ];
@@ -271,7 +271,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
           <div className="max-w-xl space-y-4">
             <div className="space-y-2">
               <p className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400" : "text-emerald-300/75"}`}>
-                Read comics and novels
+                Stories
               </p>
               <Link
                 href="/"

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
+import SurfacePanel from "../common/SurfacePanel";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import LoginGateModal from "../layout/LoginGateModal";
@@ -85,62 +86,95 @@ export default function AdultGatePage() {
   }, [reason, returnTo]);
 
   return (
-    <div className="min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-      <SiteHeader variant="light" />
-      <main className="relative mx-auto flex min-h-[70vh] max-w-6xl items-center justify-center px-4 py-10">
-        <div className="w-full max-w-2xl rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.08)] sm:p-7">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
-            18+ access
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
-              Private by default
-            </span>
-            <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
-              One quick check
-            </span>
-            <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
-              Easy to turn off
-            </span>
-          </div>
-          <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950">
-            {titleMap[reason]}
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{descriptionMap[reason]}</p>
-
-          <div className="mt-5 rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4 text-left">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-              What happens next
+    <div className="gush-home-shell min-h-screen overflow-hidden text-slate-900">
+      <div className="gush-page-ambient" />
+      <SiteHeader variant="home" />
+      <main className="gush-page-main gush-section-stack">
+        <section className="grid gap-5 pt-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+          <section className="rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.08)] sm:p-7">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+              18+ access
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-700">
-              Sign in if needed, confirm your age once, then return to the page you came from.
-            </p>
-          </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
+                Private by default
+              </span>
+              <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
+                One quick check
+              </span>
+              <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
+                Easy to turn off
+              </span>
+            </div>
+            <h1 className="mt-5 font-display text-[2.1rem] font-semibold tracking-tight text-slate-950 sm:text-[2.6rem]">
+              {titleMap[reason]}
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{descriptionMap[reason]}</p>
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={handleOpen}
-              className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              {ADULT_GATE_ACTION_LABELS[reason] || "Continue"}
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-            >
-              Back to all titles
-            </button>
-          </div>
+            <div className="mt-5 rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4 text-left">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                What happens next
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-700">
+                Sign in if needed, confirm your age once, then return to the page you came from.
+              </p>
+            </div>
 
-          {isSignedIn && reason === "NEED_LOGIN" ? (
-            <p className="mt-4 text-xs text-slate-500">
-              You're already signed in on this device. Continue to finish the 18+ check.
-            </p>
-          ) : null}
-        </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleOpen}
+                className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                {ADULT_GATE_ACTION_LABELS[reason] || "Continue"}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              >
+                Back to all titles
+              </button>
+            </div>
+
+            {isSignedIn && reason === "NEED_LOGIN" ? (
+              <p className="mt-4 text-xs text-slate-500">
+                You're already signed in on this device. Continue to finish the 18+ check.
+              </p>
+            ) : null}
+          </section>
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Access desk
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  18+ titles stay separate until you ask for them.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  This gate keeps mature reading private by default. Sign in if needed, confirm age once, then return right back to the page you meant to open.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-sm text-neutral-300">
+              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/46">
+                  Return target
+                </p>
+                <p className="mt-2 break-all text-sm text-white/86">{returnTo}</p>
+              </div>
+              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/46">
+                  Current reason
+                </p>
+                <p className="mt-2 text-sm text-white/86">{reason.replaceAll("_", " ")}</p>
+              </div>
+            </div>
+          </SurfacePanel>
+        </section>
       </main>
 
       <LoginGateModal

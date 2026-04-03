@@ -568,12 +568,12 @@ export default function SearchPage() {
     if (reco.becauseYouReadRail.length > 0) {
       list.push({
         id: "because",
-        title: reco.becauseYouReadTitle || "Because you read",
+        title: reco.becauseYouReadTitle || "Based on your reading",
         items: reco.becauseYouReadRail,
       });
     }
     if (reco.trendingRail.length > 0) {
-      list.push({ id: "trending", title: "Trending", items: reco.trendingRail });
+      list.push({ id: "trending", title: "Popular now", items: reco.trendingRail });
     }
     return list;
   }, [reco.becauseYouReadRail, reco.becauseYouReadTitle, reco.trendingRail]);
@@ -653,19 +653,20 @@ export default function SearchPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasSparseResults = Boolean(query) && !loading && results.length > 0 && results.length < 4;
   const showResultSections = Boolean(query);
-  const heroTitle = query ? `Results for "${query}"` : "Search";
+  const heroTitle = query ? `Results for "${query}"` : "Search the catalog";
   const heroDescription = query
     ? loading
       ? "Updating results."
-      : `${total.toLocaleString()} match${total === 1 ? "" : "es"}.`
-    : "Find titles, genres, and creators.";
+      : `${total.toLocaleString()} match${total === 1 ? "" : "es"} across the catalog.`
+    : "Search titles, creators, and genres.";
   const heroSecondary = "";
   const loadingResultLabel = "Updating";
+  const mastheadLeadKeyword = hotKeywords[0] || keywords[0] || null;
   const recoPanelTitle = !query
-    ? "More to browse."
+    ? "More to read."
     : results.length === 0
-      ? "No exact match. Try one of these."
-      : "A few more ways in.";
+      ? "No direct match. Try one of these."
+      : "A few more picks.";
   const lightCardAccentClass = "border-black/6 bg-white/84 hover:border-black/10 hover:bg-white";
   const lightFeatureAccentClass =
     "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]";
@@ -689,8 +690,8 @@ export default function SearchPage() {
             title: `Start with ${freeStartPick.title}.`,
             description:
               startHereEpisodeCount > 0
-                ? `${freeStartPick.title} already has ${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} listed, so it is easy to size up quickly.`
-                : `${freeStartPick.title} is a clear place to begin.`,
+                ? `${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} already live.`
+                : "A clear place to begin.",
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_PATH_FREE_START", "search_path_free_start"),
             accentClass: lightFeatureAccentClass,
@@ -699,7 +700,7 @@ export default function SearchPage() {
             id: "free-unlock",
             eyebrow: "Start here",
             title: "Open a strong first pick.",
-            description: "When search feels thin, start with an editorially easy place to begin.",
+            description: "Start with an editorial pick.",
             ctaLabel: "Browse Start Here",
             onClick: () => router.push("/rankings?view=start-here"),
             accentClass: lightFeatureAccentClass,
@@ -708,9 +709,8 @@ export default function SearchPage() {
         ? {
             id: "completed-binge-slot",
             eyebrow: "Binge path",
-            title: `Binge ${completedPick.title} from start to finish.`,
-            description:
-              `${completedPick.title} is complete, so you can read straight through without waiting for updates.`,
+            title: `Read ${completedPick.title} straight through.`,
+            description: "Completed and ready in one run.",
             ctaLabel: `Open ${completedPick.title}`,
             onClick: () => handleSeriesClick(completedPick.id, "SEARCH_PATH_BINGE", "search_path_binge"),
             accentClass: lightCardAccentClass,
@@ -718,9 +718,9 @@ export default function SearchPage() {
         : {
             id: "completed-binge",
             eyebrow: "Binge path",
-            title: "Browse completed series for a full binge.",
-            description: "Finished stories work well when you want payoff without waiting.",
-            ctaLabel: "Browse completed",
+            title: "Browse completed series.",
+            description: "Finished stories for a full read.",
+            ctaLabel: "Browse Completed",
             onClick: () =>
               updateParams(
                 {
@@ -738,11 +738,11 @@ export default function SearchPage() {
         ? {
             id: "breakout-watch-slot",
             eyebrow: "Breakout watch",
-            title: `${breakoutPick.title} is trending right now.`,
+            title: `${breakoutPick.title} is picking up.`,
             description:
               leadHotKeyword?.label
-                ? `${breakoutPick.title} is getting attention alongside "${leadHotLabel}", so it is a strong place to jump in.`
-                : `${breakoutPick.title} is a fast-rising pick if you want something readers are finding right now.`,
+                ? `Showing up alongside "${leadHotLabel}".`
+                : "A fast-rising pick from the shelf.",
             ctaLabel: `Open ${breakoutPick.title}`,
             onClick: () => handleSeriesClick(breakoutPick.id, "SEARCH_PATH_BREAKOUT", "search_path_breakout"),
             accentClass: lightCardAccentClass,
@@ -750,8 +750,8 @@ export default function SearchPage() {
         : {
             id: "breakout-watch",
             eyebrow: "Breakout watch",
-            title: `Search "${leadHotLabel}" to see what is hot right now.`,
-            description: "A trending term can open the catalog quickly.",
+            title: `Search "${leadHotLabel}".`,
+            description: "A quick way into the shelf.",
             ctaLabel: `Search ${leadHotLabel}`,
             onClick: () =>
               updateParams(
@@ -770,8 +770,8 @@ export default function SearchPage() {
         ? {
             id: "adult-desk",
             eyebrow: "18+ page",
-            title: "Go straight to the 18+ section.",
-            description: "Head straight to 18+ when you want mature reads.",
+            title: "Open the 18+ shelf.",
+            description: "Go straight to mature reads.",
             ctaLabel: "Open 18+ page",
             onClick: () => router.push("/adult"),
             accentClass: lightCardAccentClass,
@@ -830,13 +830,13 @@ export default function SearchPage() {
                 ? "A short list, with a clear lead."
                 : "The clearest result in this search."
               : query
-                ? "No exact match yet, but this stays close."
+                ? "No direct match, but this stays close."
                 : "A strong pick from the catalog.",
             signalLabel: hasDirectMatch ? "Results" : "Featured",
             signalValue: hasDirectMatch
               ? (loading ? loadingResultLabel : total.toLocaleString())
               : breakoutPick
-                ? "Trending"
+                ? "Popular"
                 : "Editors' pick",
             signalHint: hasDirectMatch
               ? `Sorted by ${sortLabel}`
@@ -852,7 +852,7 @@ export default function SearchPage() {
           }
         : {
             id: "lead-trend",
-            eyebrow: "Trending search",
+            eyebrow: "Popular search",
             title: `${leadHotLabel} is trending right now.`,
             description: "A live search term can open into something popular fast.",
             signalLabel: "Hot keyword",
@@ -927,7 +927,7 @@ export default function SearchPage() {
             signalLabel: isAdultMode ? "Mode" : "Finished",
             signalValue: isAdultMode ? "18+" : "Runs",
             signalHint: isAdultMode ? "18+ titles are available" : "Ready for a longer read",
-            ctaLabel: isAdultMode ? "Open 18+ page" : "Browse completed",
+            ctaLabel: isAdultMode ? "Open 18+ shelf" : "Browse Completed",
             onClick: () =>
               isAdultMode
                 ? router.push("/adult")
@@ -967,57 +967,104 @@ export default function SearchPage() {
     updateParams,
   ]);
   return (
-    <main className="gush-page-shell overflow-hidden">
+    <main className="gush-page-shell gush-home-shell overflow-hidden">
       <div className="gush-page-ambient h-[clamp(20rem,40vw,32rem)]" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div className="max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              Search
-            </p>
-            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-              {heroTitle}
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
-              {heroDescription}
-            </p>
-            {heroSecondary ? (
-              <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
-            ) : null}
-          </div>
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.26fr)_minmax(320px,0.74fr)]">
+          <SurfacePanel className="space-y-6 rounded-[38px] px-5 py-5 sm:px-7 sm:py-7" tone="highlight" accent="blue">
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
+                Search
+              </p>
+              <h1 className="mt-4 font-display text-[2.35rem] font-semibold tracking-[-0.045em] text-white sm:text-[3rem] xl:text-[3.8rem]">
+                {heroTitle}
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-[0.98rem]">
+                {heroDescription}
+              </p>
+              {heroSecondary ? (
+                <p className="mt-2 text-sm text-white/54">{heroSecondary}</p>
+              ) : null}
+            </div>
 
-          <div className="rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-5">
-            <SearchBar
-              variant="light"
-              placeholder="Search titles, genres, or creators"
-              showShortcut={false}
-              initialValue={query}
-            />
-            {suggestions.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {suggestions.slice(0, 6).map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => updateParam("q", item)}
-                    className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]"
-                  >
-                    {item}
-                  </button>
-                ))}
+            <div className="rounded-[30px] border border-white/10 bg-white/[0.05] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.18)] sm:p-5">
+              <SearchBar
+                variant="home"
+                placeholder="Search titles, genres, or creators"
+                showShortcut={false}
+                initialValue={query}
+              />
+              {suggestions.length > 0 ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {suggestions.slice(0, 6).map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => updateParam("q", item)}
+                      className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white/74 transition-colors hover:border-white/16 hover:bg-white/[0.1] hover:text-white"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </SurfacePanel>
+
+          <div className="grid gap-4">
+            <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,26,0.95),rgba(12,17,26,0.88))] p-5 text-white shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/44">
+                Overview
+              </p>
+              <h2 className="mt-3 font-display text-[1.5rem] font-semibold tracking-tight text-white">
+                {query ? "Start with the closest result." : "Start with a clear route in."}
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-white/62">
+                {query
+                  ? "Use filters if you want to narrow the list."
+                  : mastheadLeadKeyword
+                    ? `"${mastheadLeadKeyword.label}" is active right now.`
+                    : "Browse titles, creators, and genres from one place."}
+              </p>
+
+              <div className="mt-5 grid grid-cols-3 gap-2.5">
+                <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-3 py-3">
+                  <p className="text-lg font-semibold tracking-tight text-white">
+                    {query ? total.toLocaleString() : catalog.length.toLocaleString()}
+                  </p>
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/42">
+                    {query ? "Matches" : "Titles"}
+                  </p>
+                </div>
+                <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-3 py-3">
+                  <p className="text-lg font-semibold tracking-tight text-white">
+                    {hotKeywords.length.toLocaleString()}
+                  </p>
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/42">
+                    Hot
+                  </p>
+                </div>
+                <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-3 py-3">
+                  <p className="text-lg font-semibold tracking-tight text-white">
+                    {page}
+                  </p>
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/42">
+                    Page
+                  </p>
+                </div>
               </div>
-            ) : null}
+            </div>
           </div>
+        </section>
 
-          {!query && (history.length > 0 || hotKeywords.length > 0 || keywords.length > 0) ? (
-            <SearchHistoryPanel
-              onSearch={(keyword) => updateParam("q", keyword)}
-              hotKeywords={hotKeywords}
-              quickKeywords={keywords}
-            />
-          ) : null}
-        </SurfacePanel>
+        {!query && (history.length > 0 || hotKeywords.length > 0 || keywords.length > 0) ? (
+          <SearchHistoryPanel
+            onSearch={(keyword) => updateParam("q", keyword)}
+            hotKeywords={hotKeywords}
+            quickKeywords={keywords}
+          />
+        ) : null}
 
         {commerceNotice ? (
           <CommerceSuccessBanner
@@ -1028,7 +1075,7 @@ export default function SearchPage() {
 
         {resultsStale || catalogStale || homepageSlotsStale ? (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-            Showing cached data. Reconnect to refresh the latest search results.
+            Showing saved results. Reconnect to refresh.
           </div>
         ) : null}
 
@@ -1120,7 +1167,21 @@ export default function SearchPage() {
 
         {showResultSections ? (
           <>
-            <div className="flex flex-wrap gap-2 rounded-[24px] border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Results
+                  </p>
+                  <h2 className="mt-2 font-display text-[1.95rem] font-semibold tracking-tight text-slate-950">
+                    {query ? `Results for "${query}"` : "Catalog search"}
+                  </h2>
+                </div>
+                <p className="text-sm font-medium text-slate-500">
+                  {total.toLocaleString()} match{total === 1 ? "" : "es"}
+                </p>
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -1166,19 +1227,19 @@ export default function SearchPage() {
                   </button>
                 ) : null}
               </div>
-            </div>
+            </SurfacePanel>
 
             {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
-              <SkeletonCard key={index} />
+              <SkeletonCard key={index} appearance="light" />
             ))}
           </div>
         ) : error ? (
           <NetworkFallback
             compact
-            title="Oops! Search hit a network snag."
-            description="We're having trouble connecting. Your data is safe, let's try that search again."
+            title="Search is unavailable right now."
+            description="Try that search again."
             onRetry={retrySearch}
           >
             <button
@@ -1186,17 +1247,17 @@ export default function SearchPage() {
               onClick={() => router.push("/")}
               className={secondaryButtonClass}
             >
-              Back to home
+              Back home
             </button>
           </NetworkFallback>
             ) : results.length === 0 ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                No exact match
+                No direct match
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Try a wider search.
+                Try a broader search.
               </h2>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
@@ -1261,7 +1322,7 @@ export default function SearchPage() {
                   }
                   className={secondaryButtonClass}
                 >
-                  Browse completed
+                  Browse Completed
                 </button>
               )}
               {freeStartPick ? (
@@ -1286,7 +1347,7 @@ export default function SearchPage() {
           </SurfacePanel>
             ) : (
           <div className="space-y-5">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
               {results.map((series) => (
                 <Link
                   key={series.id}
@@ -1305,10 +1366,10 @@ export default function SearchPage() {
                       query: query || undefined,
                     })
                   }
-                  className="group block rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
+                  className="group block rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,244,238,0.95))] p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.05)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
                   aria-label={`Open ${series.title}`}
                   >
-                    <div className="grid gap-4 sm:grid-cols-[112px_minmax(0,1fr)]">
+                    <div className="grid gap-4 sm:grid-cols-[126px_minmax(0,1fr)]">
                     <div className="overflow-hidden rounded-[20px] border border-black/6 bg-neutral-900 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                       <Cover
                         tone={series.coverTone}
@@ -1323,7 +1384,10 @@ export default function SearchPage() {
                       />
                     </div>
                     <div className="min-w-0 space-y-3">
-                      <h3 className="font-display text-lg font-semibold tracking-tight text-slate-950">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                        Result
+                      </p>
+                      <h3 className="font-display text-[1.2rem] font-semibold leading-tight tracking-tight text-slate-950">
                         {highlight(series.title, query)}
                       </h3>
                       <p className="text-sm text-slate-500">

@@ -60,7 +60,10 @@ export default function NotificationList({
           isLight ? "border-black/8 bg-white text-slate-600" : "border-white/10 bg-black/10"
         }`}
       >
-        <p className={`text-sm ${isLight ? "text-slate-500" : "text-neutral-400"}`}>Your inbox is getting ready.</p>
+        <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
+          Inbox
+        </p>
+        <p className={`mt-2 text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}>Loading your inbox.</p>
       </section>
     );
   }
@@ -72,9 +75,12 @@ export default function NotificationList({
           isLight ? "border-black/8 bg-white" : "border-white/10 bg-black/10"
         }`}
       >
-        <p className={`text-sm ${isLight ? "text-slate-600" : "text-neutral-400"}`}>Your inbox is clear.</p>
-        <p className={`mt-2 text-xs ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
-          Follow a series or keep alerts on, and new chapters or offers will show up here.
+        <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
+          Inbox
+        </p>
+        <p className={`mt-2 text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}>You're caught up.</p>
+        <p className={`mt-2 text-xs leading-5 ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
+          New chapters, offers, and free unlocks land here.
         </p>
       </section>
     );

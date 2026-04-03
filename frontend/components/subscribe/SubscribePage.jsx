@@ -295,55 +295,77 @@ export default function SubscribePage({
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
   return (
-    <div className="gush-page-shell">
+    <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
       <main className="gush-page-main gush-section-stack">
-        <EditorialHero
-          appearance="light"
-          accent="blue"
-          eyebrow="Membership"
-          title={subscriptionActionsEnabled ? "Membership plans." : "Membership opens soon."}
-          description={
-            subscriptionActionsEnabled
-              ? "Monthly plans for regular reading."
-              : "Plans are visible. Billing is not live yet."
-          }
-          secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
-          stats={subscriptionHeroStats}
-          actions={
-            <>
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EditorialHero
+            accent="blue"
+            eyebrow="Membership"
+            title={subscriptionActionsEnabled ? "Membership plans." : "Membership opens soon."}
+            description={
+              subscriptionActionsEnabled
+                ? "Monthly plans for regular reading."
+                : "Plans are visible. Billing is not live yet."
+            }
+            secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
+            stats={subscriptionHeroStats}
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Membership
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  {subscriptionActionsEnabled ? "Pick the pace that fits." : "Compare the lineup first."}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  {subscriptionActionsEnabled
+                    ? "Compare perks, choose a tier, and keep monthly reading predictable."
+                    : "Plans and perks are visible before recurring billing opens."}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
               <button
                 type="button"
                 onClick={subscriptionActionsEnabled ? () => scrollToSection("membership-plans") : handleLaunchAccess}
-                className={primaryButtonClass}
+                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
               >
                 {subscriptionActionsEnabled ? "View Plans" : launchAccessLabel}
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/store")}
-                className={secondaryButtonClass}
+                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
               >
                 {STOREFRONT_TERMS.viewPointPacks}
               </button>
               {!isSignedIn && !isActive && subscriptionActionsEnabled ? (
-                <button type="button" onClick={openAuthPrompt} className={secondaryButtonClass}>
-                  {subscriptionActionsEnabled ? "Sign in" : "Sign in"}
+                <button
+                  type="button"
+                  onClick={openAuthPrompt}
+                  className="rounded-full border border-white/12 bg-transparent px-4 py-2.5 text-sm font-semibold text-white/72 transition hover:border-white/16 hover:bg-white/[0.05] hover:text-white"
+                >
+                  Sign in
                 </button>
               ) : null}
-            </>
-          }
-        />
+            </div>
+          </SurfacePanel>
+        </section>
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="max-w-3xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  What to know
+                  Before billing
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  What to know.
+                  What to expect.
                 </h2>
             </div>
           </div>
@@ -407,7 +429,7 @@ export default function SubscribePage({
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {subscriptionActionsEnabled
-                    ? "Membership belongs to your account, not just this browser."
+                    ? "Membership stays on one account."
                     : "Use one account."}
                 </h2>
               </div>
@@ -462,7 +484,7 @@ export default function SubscribePage({
               const planNote = isCurrent
                 ? "This plan is already active on your account."
                 : subscriptionActionsEnabled
-                  ? "Recurring monthly billing while active."
+                  ? "Monthly while active."
                   : "";
 
               return (

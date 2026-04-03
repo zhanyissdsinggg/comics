@@ -29,22 +29,22 @@ const VIEWS = [
   {
     id: "start-here",
     label: "Start Here",
-    description: "Reader-friendly stories with a strong first step.",
+    description: "Strong first reads.",
   },
   {
     id: "completed",
     label: "Completed",
-    description: "Finished stories ready to read through.",
+    description: "Finished stories ready to finish.",
   },
   {
     id: "comics",
     label: "Comics",
-    description: "Editorial picks in comics.",
+    description: "Editorial comic picks.",
   },
   {
     id: "novels",
     label: "Novels",
-    description: "Editorial picks in novels.",
+    description: "Editorial novel picks.",
   },
 ];
 
@@ -257,6 +257,18 @@ export default function RankingsPage({
   const leadEntry = curatedSeries[0] || null;
   const supportingEntries = curatedSeries.slice(1, 3);
   const boardEntries = curatedSeries.slice(3, 12);
+  const heroStats = [
+    {
+      label: "Shelf",
+      value: activeView.label,
+      hint: activeView.description,
+    },
+    {
+      label: "Titles",
+      value: loading ? "..." : curatedSeries.length.toLocaleString(),
+      hint: loading ? "Refreshing this edit." : "Curated stories in this view.",
+    },
+  ];
 
   const handleSeriesClick = useCallback(
     (seriesId, entryPoint = "FEATURED_SERIES") => {
@@ -291,30 +303,64 @@ export default function RankingsPage({
     [handleSeriesClick],
   );
 
-  const filterButtonClass = (isActive) =>
-    [
-      "rounded-full border px-4 py-2 text-xs font-semibold transition",
-      isActive
-        ? "border-black/10 bg-slate-950 text-white"
-        : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950",
-    ].join(" ");
-
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
 
   return (
-    <main className="gush-page-shell overflow-hidden">
+    <main className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
-        <EditorialHero
-          eyebrow="Featured Series"
-          title="Featured stories."
-          description={activeView.description}
-          appearance="light"
-        />
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EditorialHero
+            eyebrow="Editor's shelf"
+            title={`${activeView.label} picks.`}
+            description={activeView.description}
+            secondary="Browse one strong shelf at a time."
+            stats={heroStats}
+            className="min-h-full"
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                This view
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  {activeView.label}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  {activeView.description}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/38">
+                Keep browsing
+              </p>
+              <div className="flex flex-col gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => router.push("/comics")}
+                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                >
+                  Browse Comics
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/creators")}
+                  className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                >
+                  Meet the Creators
+                </button>
+              </div>
+            </div>
+          </SurfacePanel>
+        </section>
 
         {commerceNotice ? (
           <CommerceSuccessBanner
@@ -323,20 +369,38 @@ export default function RankingsPage({
           />
         ) : null}
 
-        <div className="rounded-[24px] border border-black/6 bg-white/82 p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
-          <div className="flex flex-wrap gap-2">
+        <SurfacePanel tone="muted" accent="blue" className="space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/38">
+                View switcher
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+                Switch shelves.
+              </h2>
+            </div>
+            <p className="max-w-md text-sm leading-7 text-neutral-300">
+              Each tab narrows the edit.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
             {VIEWS.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => router.replace(`/rankings?view=${item.id}`)}
-                className={filterButtonClass(activeView.id === item.id)}
+                className={[
+                  "rounded-full border px-4 py-2.5 text-sm font-semibold transition",
+                  activeView.id === item.id
+                    ? "border-white/14 bg-white text-slate-950"
+                    : "border-white/10 bg-white/[0.04] text-white/78 hover:border-white/16 hover:bg-white/[0.08] hover:text-white",
+                ].join(" ")}
               >
                 {item.label}
               </button>
             ))}
           </div>
-        </div>
+        </SurfacePanel>
 
         {loading ? (
           <RankingsLoadingState />
@@ -381,7 +445,7 @@ export default function RankingsPage({
                   Meet the Creators
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Browse the people and teams behind the stories.
+                  Browse the people and teams behind these stories.
                 </p>
               </div>
               <button
@@ -400,10 +464,10 @@ export default function RankingsPage({
                 <Link
                   href={`/series/${encodeURIComponent(leadEntry.id)}`}
                   onClick={(event) => handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")}
-                  className="w-full rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-5 text-left shadow-[0_22px_52px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-black/10"
+                  className="group w-full rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-5 text-left shadow-[0_22px_52px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-black/10"
                   aria-label={`Open ${leadEntry.title}`}
                 >
-                  <div className="grid gap-5 lg:grid-cols-[200px_minmax(0,1fr)]">
+                  <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
                     <Cover
                       tone={leadEntry.coverTone}
                       coverUrl={leadEntry.coverUrl}
@@ -412,7 +476,7 @@ export default function RankingsPage({
                       badge={getSeriesBadge(leadEntry)}
                       genres={leadEntry.genres}
                       seriesType={leadEntry.type}
-                      className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] lg:mx-0"
+                      className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] transition-transform duration-500 group-hover:scale-[1.02] lg:mx-0"
                     />
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -421,7 +485,7 @@ export default function RankingsPage({
                       <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                         {leadEntry.title}
                       </h2>
-                      <p className="mt-4 text-sm leading-7 text-slate-600">
+                      <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
                         {leadEntry.description || "A strong place to begin."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
@@ -434,6 +498,9 @@ export default function RankingsPage({
                           </span>
                         ))}
                       </div>
+                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--gush-accent,#3157d6)]">
+                        Open story page
+                      </p>
                     </div>
                   </div>
                 </Link>
@@ -446,7 +513,7 @@ export default function RankingsPage({
                       key={series.id}
                       href={`/series/${encodeURIComponent(series.id)}`}
                       onClick={(event) => handleSeriesLinkClick(event, series.id, "FEATURED_SUPPORTING")}
-                      className="rounded-[26px] border border-black/6 bg-white/88 p-4 text-left shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-black/10"
+                      className="group rounded-[26px] border border-black/6 bg-white/88 p-4 text-left shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-black/10"
                       aria-label={`Open ${series.title}`}
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -463,7 +530,7 @@ export default function RankingsPage({
                         badge={getSeriesBadge(series)}
                         genres={series.genres}
                         seriesType={series.type}
-                        className="mt-4 aspect-[3/4] w-full rounded-[20px]"
+                        className="mt-4 aspect-[3/4] w-full rounded-[20px] transition-transform duration-500 group-hover:scale-[1.015]"
                       />
                       <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
                         {getSeriesMeta(series).map((item) => (
@@ -475,6 +542,9 @@ export default function RankingsPage({
                           </span>
                         ))}
                       </div>
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#3157d6)]">
+                        Open story
+                      </p>
                     </Link>
                   ))}
                 </div>
@@ -517,7 +587,7 @@ export default function RankingsPage({
                           ) : null}
                         </div>
                         <span className="hidden rounded-full border border-black/8 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-500 sm:inline-flex">
-                          View Series
+                          Open
                         </span>
                       </Link>
                     ))}

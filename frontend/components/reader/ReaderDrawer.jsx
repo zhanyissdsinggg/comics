@@ -123,8 +123,11 @@ export default function ReaderDrawer({
           ) : (
             <div className="space-y-2 pb-6">
             {bookmarks.length === 0 ? (
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4 text-sm text-neutral-400">
-                No bookmarks yet.
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4">
+                <div className="text-sm font-semibold text-neutral-100">No bookmarks yet.</div>
+                <div className="mt-1 text-xs leading-5 text-neutral-400">
+                  Save a spot and it will show up here.
+                </div>
               </div>
             ) : (
               bookmarks.map((bookmark) => (

@@ -18,7 +18,7 @@ function HomeSectionHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 border-b border-black/6 pb-5 sm:flex-row sm:items-end sm:justify-between",
+        "flex flex-col gap-4 border-b border-[rgba(36,30,20,0.08)] pb-5 sm:flex-row sm:items-end sm:justify-between",
         className,
       )}
     >
@@ -54,7 +54,7 @@ function HomeSectionHeader({
 
 function FallbackDiscoveryCard({ eyebrow, title, description, label, onClick }) {
   return (
-    <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,243,236,0.95))] py-0 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
+    <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,244,238,0.95))] py-0 shadow-[0_18px_36px_rgba(15,23,42,0.04)]">
       <CardContent className="p-6 sm:p-7">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
           {eyebrow}
@@ -110,6 +110,8 @@ function HomeShelfSection({
               item={item}
               tone={item.coverTone}
               appearance="light"
+              density="compact"
+              showActionLabel={false}
               actionLabel={actionLabel}
               onClick={() => onItemClick?.(item)}
             />
@@ -122,7 +124,7 @@ function HomeShelfSection({
 
 function HomeGuideCard({ icon: Icon, eyebrow, title, description, ctaLabel, onClick }) {
   return (
-    <Card className="h-full overflow-hidden rounded-[28px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,244,238,0.94))] py-0 shadow-[0_14px_30px_rgba(15,23,42,0.045)]">
+    <Card className="h-full overflow-hidden rounded-[28px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,244,238,0.95))] py-0 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
       <CardContent className="flex h-full flex-col p-5 sm:p-6">
         <div className="flex size-11 items-center justify-center rounded-[18px] border border-black/6 bg-white/90 text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
           <Icon className="size-5" />
@@ -154,7 +156,7 @@ const GUIDE_CARDS = [
     icon: BookOpenText,
     eyebrow: "Format",
     title: "Comics",
-    description: "Panel-led stories with a crisp reading rhythm and strong visual pacing.",
+    description: "Visual stories built for quicker reading sessions.",
     ctaLabel: "Browse Comics",
     href: "/comics",
   },
@@ -163,7 +165,7 @@ const GUIDE_CARDS = [
     icon: BookOpen,
     eyebrow: "Format",
     title: "Novels",
-    description: "Serialized prose built for quieter sessions and chapter-by-chapter momentum.",
+    description: "Serialized prose for slower, chapter-by-chapter reading.",
     ctaLabel: "Browse Novels",
     href: "/novels",
   },
@@ -172,17 +174,17 @@ const GUIDE_CARDS = [
     icon: Users,
     eyebrow: "Creators",
     title: "Meet the Creators",
-    description: "Explore the writers, artists, teams, and studios shaping each story world.",
+    description: "See who makes each series.",
     ctaLabel: "View Creators",
     href: "/creators",
   },
   {
     id: "guide-help",
     icon: CircleHelp,
-    eyebrow: "Help",
-    title: "Need Help?",
-    description: "Find support for reading, accounts, and content settings without digging around.",
-    ctaLabel: "Get Help",
+    eyebrow: "Support",
+    title: "Support",
+    description: "Reading, access, and account support.",
+    ctaLabel: "Open Support",
     href: "/support",
   },
 ];
@@ -199,7 +201,7 @@ export default function HomeContentSections({
   onGuideClick,
 }) {
   return (
-    <div className="space-y-12 md:space-y-16">
+    <div className="space-y-14 md:space-y-[4.75rem]">
       {showCatalogFallback ? (
         <section className="grid gap-5 md:grid-cols-2">
           {homepageFallbackCards.map((card) => (
@@ -216,21 +218,21 @@ export default function HomeContentSections({
       ) : (
         <>
           <HomeShelfSection
-            eyebrow="Editorial picks for right now"
+            eyebrow="Featured"
             title="Featured Series"
-            description="Hand-picked stories to start with."
-            ctaLabel="Browse all series"
+            description="Stories worth opening first."
+            ctaLabel="Browse Series"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}
-            actionLabel="View Series"
+            actionLabel="Open Series"
             onItemClick={onFeaturedItemClick}
           />
 
           <HomeShelfSection
             icon={BookOpenText}
-            eyebrow="A quieter first step"
-            title="Start here"
-            description="Reader-friendly picks when you want a confident entry point instead of a crowded catalog."
+            eyebrow="Start Here"
+            title="Start Here"
+            description="First picks for a cleaner start."
             items={startHereItems}
             actionLabel="Read Chapter 1"
             onItemClick={onStartHereItemClick}
@@ -240,9 +242,9 @@ export default function HomeContentSections({
 
       <section className="space-y-6 md:space-y-7">
         <HomeSectionHeader
-          eyebrow="Choose your reading pace"
-          title="Browse by Format"
-          description="Move from formats to creators and support without breaking the calm of the page."
+          eyebrow="Browse"
+          title="Browse by format"
+          description="Comics, novels, creators, and support."
         />
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

@@ -28,7 +28,7 @@ const iconMap = {
 
 export const EmptyState = memo(function EmptyState({
   icon = "inbox",
-  title = "Nothing is here yet",
+  title = "Nothing here yet",
   description,
   action,
   actionText,
@@ -59,9 +59,9 @@ export const EmptyState = memo(function EmptyState({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[28px] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-12 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
+        "relative overflow-hidden rounded-[28px] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-10 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
         isLight &&
-          "border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] shadow-[0_18px_42px_rgba(15,23,42,0.06)]",
+          "border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] shadow-[0_18px_42px_rgba(15,23,42,0.06)]",
         className,
       )}
     >
@@ -75,11 +75,11 @@ export const EmptyState = memo(function EmptyState({
       <div className="relative mx-auto flex max-w-xl flex-col items-center">
         <div
           className={cn(
-            "mb-5 flex h-20 w-20 items-center justify-center rounded-[24px] border shadow-[0_18px_50px_rgba(0,0,0,0.16)]",
+            "mb-5 flex h-16 w-16 items-center justify-center rounded-[20px] border shadow-[0_16px_32px_rgba(0,0,0,0.12)]",
             accentClass,
           )}
         >
-          <Icon size={36} strokeWidth={1.6} />
+          <Icon size={28} strokeWidth={1.7} />
         </div>
 
         <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
@@ -91,7 +91,7 @@ export const EmptyState = memo(function EmptyState({
         </h3>
 
         {description ? (
-          <p className={`mt-3 max-w-md text-sm leading-7 ${isLight ? "text-slate-600" : "text-neutral-400"}`}>{description}</p>
+          <p className={`mt-3 max-w-md text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-400"}`}>{description}</p>
         ) : null}
 
         {resolvedAction?.onClick && resolvedAction?.label ? (
@@ -120,7 +120,7 @@ export const EmptyLibrary = memo(function EmptyLibrary({ onBrowse }) {
     <EmptyState
       icon="book"
       title="Your library is empty"
-      description="Start adding series to your library to keep track of your reading progress."
+      description="Save series here to keep your place."
       action={onBrowse}
       actionText="Browse Series"
       eyebrow="Library"
@@ -132,11 +132,11 @@ export const EmptySearch = memo(function EmptySearch({ query }) {
   return (
     <EmptyState
       icon="search"
-      title="No results found"
+      title="No results"
       description={
         query
-          ? `We couldn't find anything matching "${query}". Try different keywords.`
-          : "Try searching for something else."
+          ? `No match for "${query}". Try another keyword.`
+          : "Try another keyword."
       }
       eyebrow="Search"
     />
@@ -148,7 +148,7 @@ export const EmptyFavorites = memo(function EmptyFavorites({ onBrowse }) {
     <EmptyState
       icon="heart"
       title="No favorites yet"
-      description="Mark series as favorites to easily find them later."
+      description="Save favorites here for quick returns."
       action={onBrowse}
       actionText="Discover Series"
       eyebrow="Favorites"
@@ -161,7 +161,7 @@ export const EmptyOrders = memo(function EmptyOrders({ onShop }) {
     <EmptyState
       icon="cart"
       title="No orders yet"
-      description="You haven't made any purchases yet. Start shopping to unlock episodes!"
+      description="Store purchases will appear here."
       action={onShop}
       actionText="Browse Store"
       eyebrow="Orders"
@@ -174,7 +174,7 @@ export const EmptyNotifications = memo(function EmptyNotifications() {
     <EmptyState
       icon="bell"
       title="No notifications"
-      description="You're all caught up! We'll notify you when there's something new."
+      description="You're caught up."
       eyebrow="Notifications"
     />
   );
@@ -185,7 +185,7 @@ export const EmptyHistory = memo(function EmptyHistory({ onBrowse }) {
     <EmptyState
       icon="file"
       title="No reading history"
-      description="Start reading to build your history and pick up where you left off."
+      description="Open a series and your recent reading will appear here."
       action={onBrowse}
       actionText="Start Reading"
       eyebrow="History"
@@ -195,8 +195,8 @@ export const EmptyHistory = memo(function EmptyHistory({ onBrowse }) {
 
 export const ErrorState = memo(function ErrorState({
   onRetry,
-  title = "Oops! We're having trouble loading this.",
-  description = "We're having trouble connecting. Your data is safe, let's try that again.",
+  title = "We couldn't load this yet.",
+  description = "Connection looks shaky. Your data is safe. Try again.",
   retryLabel = "Retry",
   className = "",
 }) {

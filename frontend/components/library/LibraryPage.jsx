@@ -786,10 +786,22 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const signedInHeroDescription = viewerSignedIn
     ? hasLibrarySignals
       ? resumeSpotlightReadHref
-        ? "Continue where you left off and keep recent reads close."
-        : "Recent reads and saved series stay together here."
-      : "Your next read and saved series stay here."
-    : "Sign in to keep your shelf and progress in one place.";
+        ? "Pick up where you left off. Recent opens and saves stay close."
+        : "Recent opens and saves stay together here."
+      : "Your next read and saves land here."
+    : "Sign in to keep your shelf and progress together.";
+  const libraryDeskTitle = viewerSignedIn
+    ? resumeSpotlightReadHref
+      ? "Your next chapter is ready."
+      : hasLibrarySignals
+        ? "Shelf, saves, and recent reads stay together."
+        : "Start your shelf."
+    : "Start a shelf worth keeping.";
+  const libraryDeskCopy = viewerSignedIn
+    ? visibleLibraryItems.length > 0
+      ? "Resume fast, open saved series, or browse something new."
+      : "Start free, save a few titles, and this becomes your shelf."
+    : "Read here first, then sign in when you want your shelf to follow you.";
   const readingSnapshotCardsPanel =
     viewerSignedIn && readingSnapshotCards.length > 0 ? (
       <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -820,50 +832,122 @@ export default function LibraryPage({ initialSignedIn = false }) {
     ) : null;
 
   return (
-    <div className="gush-page-shell">
+    <div className="gush-page-shell gush-home-shell overflow-hidden">
       <div className="gush-page-ambient h-[clamp(20rem,40vw,30rem)]" />
-      <SiteHeader variant="light" />
+      <SiteHeader variant="home" />
       <main className="gush-page-main gush-section-stack">
-        <EditorialHero
-          eyebrow="Library"
-          title={
-            viewerSignedIn || hasCuratedLibraryEntry
-              ? "Your next read."
-              : "Your reading shelf."
-          }
-          description={
-            signedInHeroDescription
-          }
-          secondary=""
-          stats={libraryStats}
-          appearance="light"
-          actions={
-            <>
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EditorialHero
+            eyebrow="Library"
+            title={
+              viewerSignedIn || hasCuratedLibraryEntry
+                ? "Your next read."
+                : "Your reading shelf."
+            }
+            description={
+              signedInHeroDescription
+            }
+            secondary=""
+            stats={libraryStats}
+            appearance="light"
+            actions={
+              <>
+                {resumeSpotlightReadHref ? (
+                  <button
+                    type="button"
+                    onClick={() => router.push(resumeSpotlightReadHref)}
+                    className={primaryButtonClass}
+                  >
+                    Continue Reading
+                  </button>
+                ) : viewerSignedIn && visibleLibraryItems.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection("saved-series")}
+                    className={primaryButtonClass}
+                  >
+                    Saved Series
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => router.push("/rankings?type=ttf&window=all")}
+                    className={primaryButtonClass}
+                  >
+                    Read Free
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!viewerSignedIn) {
+                      openAuthPrompt();
+                      return;
+                    }
+                    if (visibleLibraryItems.length > 0) {
+                      scrollToSection("saved-series");
+                      return;
+                    }
+                    setShowCollectionManager((value) => !value);
+                  }}
+                  className={secondaryButtonClass}
+                >
+                  {viewerSignedIn
+                    ? visibleLibraryItems.length > 0
+                      ? "Saved Series"
+                      : showCollectionManager
+                        ? "Hide Collections"
+                        : "Collections"
+                    : "Sign In"}
+                </button>
+              </>
+            }
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Reading desk
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  {libraryDeskTitle}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  {libraryDeskCopy}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
               {resumeSpotlightReadHref ? (
                 <button
                   type="button"
                   onClick={() => router.push(resumeSpotlightReadHref)}
-                  className={primaryButtonClass}
+                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
                 >
-                  Continue Reading
+                  Resume now
                 </button>
               ) : viewerSignedIn && visibleLibraryItems.length > 0 ? (
                 <button
                   type="button"
                   onClick={() => scrollToSection("saved-series")}
-                  className={primaryButtonClass}
+                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
                 >
-                  Saved Series
+                  Open saved series
                 </button>
               ) : (
                 <button
                   type="button"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className={primaryButtonClass}
+                  onClick={() =>
+                    viewerSignedIn ? router.push("/search") : router.push("/rankings?type=ttf&window=all")
+                  }
+                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
                 >
-                  Read Free
+                  {viewerSignedIn ? "Browse titles" : "Read free"}
                 </button>
               )}
+
               <button
                 type="button"
                 onClick={() => {
@@ -871,25 +955,25 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     openAuthPrompt();
                     return;
                   }
-                  if (visibleLibraryItems.length > 0) {
-                    scrollToSection("saved-series");
+                  if (showCollectionManager || !visibleLibraryItems.length) {
+                    setShowCollectionManager((value) => !value);
                     return;
                   }
-                  setShowCollectionManager((value) => !value);
+                  router.push("/search");
                 }}
-                className={secondaryButtonClass}
+                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
               >
                 {viewerSignedIn
-                  ? visibleLibraryItems.length > 0
-                    ? "Saved Series"
-                    : showCollectionManager
-                      ? "Hide Collections"
+                  ? showCollectionManager || !visibleLibraryItems.length
+                    ? showCollectionManager
+                      ? "Hide collections"
                       : "Collections"
-                  : "Sign In"}
+                    : "Browse more"
+                  : "Sign in"}
               </button>
-            </>
-          }
-        />
+            </div>
+          </SurfacePanel>
+        </section>
 
         {commerceNotice ? (
           <CommerceSuccessBanner
@@ -924,7 +1008,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         {resumeSpotlight?.title || "Your shelf is ready."}
                       </h2>
                       <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
-                        {resumeSpotlightMeta || "Recent reads, saves, and bookmarks stay close."}
+                        {resumeSpotlightMeta || "Recent reads and saves stay close."}
                       </p>
 
                       {resumeSpotlightProgressWidth > 0 ? (
@@ -1003,7 +1087,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         Your shelf is ready.
                       </h2>
                       <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
-                        The next read and saved series will stay here.
+                        Your next read and saves land here.
                       </p>
                       <div className="mt-6 flex flex-wrap gap-2">
                         <button

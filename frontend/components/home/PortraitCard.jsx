@@ -23,6 +23,7 @@ function PortraitCard({
   tone,
   onClick,
   appearance = "default",
+  density = "default",
   href = "",
   showActionLabel = true,
   actionLabel = "View Series",
@@ -33,6 +34,7 @@ function PortraitCard({
   const progressPercent = Number(item.progressPercent || 0);
   const progressWidth = Math.max(0, Math.min(progressPercent <= 1 ? progressPercent * 100 : progressPercent, 100));
   const isLight = appearance === "light";
+  const isCompact = density === "compact";
   const resolvedHref = href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
   const coverMeta = getCoverCardMeta(item);
   const hasItemGenres = Array.isArray(item?.genres)
@@ -75,7 +77,8 @@ function PortraitCard({
   const cardContent = (
     <div
       className={cn(
-        "overflow-hidden rounded-[26px] transition-all duration-300 group-hover:-translate-y-0.5",
+        "overflow-hidden transition-all duration-300 group-hover:-translate-y-0.5",
+        isCompact ? "rounded-[22px]" : "rounded-[26px]",
         isLight
           ? "border border-black/8 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.05)] group-hover:border-black/10 group-hover:shadow-[0_16px_34px_rgba(15,23,42,0.07)]"
           : "border border-white/10 bg-[linear-gradient(180deg,rgba(16,21,31,0.88),rgba(8,11,18,0.98))] shadow-[0_20px_70px_rgba(0,0,0,0.2)] group-hover:border-white/20 group-hover:shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
@@ -106,25 +109,28 @@ function PortraitCard({
         ) : null}
       </div>
 
-      <div className="space-y-2.5 px-4 py-4">
-        <div className="space-y-1.5">
+      <div className={cn(isCompact ? "space-y-2 px-3.5 py-3.5" : "space-y-2.5 px-4 py-4")}>
+        <div className={cn(isCompact ? "space-y-1.5" : "space-y-1.5")}>
           {showGenrePills ? (
             <div className="flex flex-wrap gap-2">
               {genrePills.map((genre) => (
                 <span
                   key={`${item?.id || item?.title || "series"}-${genre}`}
-                  className="inline-flex items-center whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
+                  className={cn(
+                    "inline-flex items-center whitespace-nowrap rounded-full bg-slate-100 font-medium text-slate-600",
+                    isCompact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1 text-xs",
+                  )}
                 >
                   {genre}
                 </span>
               ))}
             </div>
           ) : metaLine ? (
-            <p className={cn("line-clamp-1 text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors", isLight ? "text-slate-400 group-hover:text-slate-500" : "text-neutral-500 group-hover:text-neutral-400")}>
+            <p className={cn("line-clamp-1 font-semibold uppercase tracking-[0.2em] transition-colors", isCompact ? "text-[10px]" : "text-[11px]", isLight ? "text-slate-400 group-hover:text-slate-500" : "text-neutral-500 group-hover:text-neutral-400")}>
               {metaLine}
             </p>
           ) : null}
-          <p className={cn("line-clamp-2 text-[1rem] font-semibold leading-6 tracking-tight transition-colors", isLight ? "text-slate-900 group-hover:text-slate-950" : "text-neutral-100 group-hover:text-white")}>
+          <p className={cn("line-clamp-2 font-semibold tracking-tight transition-colors", isCompact ? "text-[0.98rem] leading-5" : "text-[1rem] leading-6", isLight ? "text-slate-900 group-hover:text-slate-950" : "text-neutral-100 group-hover:text-white")}>
             {item.title}
           </p>
         </div>
@@ -132,7 +138,8 @@ function PortraitCard({
         {detailText ? (
           <p
             className={cn(
-              "line-clamp-1 text-sm leading-6 transition-colors",
+              "line-clamp-1 transition-colors",
+              isCompact ? "text-[0.82rem] leading-5" : "text-sm leading-6",
               isLight ? "text-slate-600 group-hover:text-slate-700" : "text-neutral-400 group-hover:text-neutral-300",
             )}
           >
@@ -155,7 +162,7 @@ function PortraitCard({
               {Math.round(progressWidth)}% read
             </p>
           ) : showActionLabel ? (
-            <span className={cn("text-[11px] font-medium", isLight ? "text-slate-400" : "text-neutral-500")}>
+            <span className={cn(isCompact ? "text-[10px]" : "text-[11px]", "font-medium", isLight ? "text-slate-400" : "text-neutral-500")}>
               {actionLabel}
             </span>
           ) : null}

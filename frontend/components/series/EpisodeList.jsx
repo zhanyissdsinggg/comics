@@ -71,6 +71,10 @@ export default function EpisodeList({
     [episodeStateMap, episodes],
   );
   const availabilityCounts = availabilitySummary.counts;
+  const availabilityChips = useMemo(
+    () => availabilitySummary.summaryItems.slice(0, 4),
+    [availabilitySummary.summaryItems],
+  );
 
   const needsCountdown = useMemo(
     () => availabilitySummary.hasCountdown,
@@ -137,94 +141,121 @@ export default function EpisodeList({
 
   return (
     <section
-      className="mt-6 rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.92))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-md sm:mt-8 sm:p-6"
+      className="mt-6 overflow-hidden rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,240,232,0.94))] shadow-[0_22px_52px_rgba(15,23,42,0.06)] backdrop-blur-md sm:mt-8"
       data-wallet-total={walletTotal}
     >
-      <div className="mb-5 border-b border-black/8 pb-5">
+      <div className="border-b border-black/8 px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-2">
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">Episodes</h2>
-              <span className="text-sm text-slate-500">{totalEpisodes}</span>
+          <div className="max-w-3xl space-y-3">
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <span>Episodes</span>
+              <span className="rounded-full border border-black/8 bg-white/82 px-2.5 py-1 text-[10px] tracking-[0.2em] text-slate-600">
+                {totalEpisodes.toLocaleString()}
+              </span>
             </div>
-          </div>
-        </div>
+            <div className="space-y-2">
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                {availabilitySummary.entryLabel || "Read the story in order."}
+              </h2>
+              {availabilitySummary.entryHint ? (
+                <p className="max-w-2xl text-sm leading-7 text-slate-600">
+                  {availabilitySummary.entryHint}
+                </p>
+              ) : null}
+            </div>
 
-        {showFilterControl || showSortControl ? (
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-            <div className={`grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3 ${showFilterControl && showSortControl ? "grid-cols-2" : "grid-cols-1"}`}>
-              {showFilterControl ? (
-                <select
-                  value={filter}
-                  onChange={(event) => setFilter(event.target.value)}
-                  className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
-                >
-                  {filterOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              ) : null}
-              {showSortControl ? (
-                <select
-                  value={sortOrder}
-                  onChange={(event) => setSortOrder(event.target.value)}
-                  className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
-                >
-                  <option value="oldest">Oldest first</option>
-                  <option value="newest">Newest first</option>
-                </select>
-              ) : null}
-            </div>
+            {availabilityChips.length > 0 ? (
+              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                {availabilityChips.map((item) => (
+                  <span
+                    key={`episode-summary-${item}`}
+                    className="rounded-full border border-black/8 bg-white/86 px-3 py-1.5"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
-        ) : null}
+
+          {showFilterControl || showSortControl ? (
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
+              <div className={`grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3 ${showFilterControl && showSortControl ? "grid-cols-2" : "grid-cols-1"}`}>
+                {showFilterControl ? (
+                  <select
+                    value={filter}
+                    onChange={(event) => setFilter(event.target.value)}
+                    className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
+                  >
+                    {filterOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : null}
+                {showSortControl ? (
+                  <select
+                    value={sortOrder}
+                    onChange={(event) => setSortOrder(event.target.value)}
+                    className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#3157d6)]"
+                  >
+                    <option value="oldest">Oldest first</option>
+                    <option value="newest">Newest first</option>
+                  </select>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
 
-      {sortedEpisodes.length === 0 ? (
-        <div className="rounded-[24px] border border-black/6 bg-white/84 p-6 text-sm text-slate-600">
-          <p className="text-base font-semibold text-slate-950">No episodes found</p>
-          <p className="mt-2 text-sm text-slate-500">
-            {filter === "all"
-              ? "Episodes will appear here once available."
-              : "Try a different filter to see more episodes."}
-          </p>
-        </div>
-      ) : (
-        <ul className="space-y-2.5">
-          {sortedEpisodes.map((episode, index) => {
-            const key = episode?.id || `${series.id || "series"}-${index}`;
-            const unlocked = unlockedEpisodeIds.includes(episode?.id);
-            const progress = series?.id ? getProgress(series.id) : null;
-            const episodeAccess = getEpisodeCommerceAccess(episode);
-            const ttfEligible = Boolean(episodeAccess?.ttfEligible);
-            const ttfStatus = {
-              eligible: ttfEligible,
-              readyAt: episodeAccess?.ttfReadyAt || null,
-            };
-            const pricePts = episodeAccess?.pricePts ?? 0;
-            const nowMsForRow = !unlocked && ttfEligible ? nowMs : null;
+      <div className="px-5 py-5 sm:px-6 sm:py-6">
+        {sortedEpisodes.length === 0 ? (
+          <div className="rounded-[24px] border border-black/6 bg-white/84 p-6 text-sm text-slate-600">
+            <p className="text-base font-semibold text-slate-950">No episodes yet.</p>
+            <p className="mt-2 text-sm text-slate-500">
+              {filter === "all"
+                ? "Episodes will appear here once available."
+                : "Try another filter."}
+            </p>
+          </div>
+        ) : (
+          <ul className="space-y-2.5">
+            {sortedEpisodes.map((episode, index) => {
+              const key = episode?.id || `${series.id || "series"}-${index}`;
+              const unlocked = unlockedEpisodeIds.includes(episode?.id);
+              const progress = series?.id ? getProgress(series.id) : null;
+              const episodeAccess = getEpisodeCommerceAccess(episode);
+              const ttfEligible = Boolean(episodeAccess?.ttfEligible);
+              const ttfStatus = {
+                eligible: ttfEligible,
+                readyAt: episodeAccess?.ttfReadyAt || null,
+              };
+              const pricePts = episodeAccess?.pricePts ?? 0;
+              const nowMsForRow = !unlocked && ttfEligible ? nowMs : null;
 
-            return (
-              <EpisodeRow
-                key={key}
-                episode={episode}
-                seriesId={series?.id}
-                unlocked={unlocked}
-                ttfStatus={ttfStatus}
-                pricePts={pricePts}
-                coupons={coupons}
-                progress={progress}
-                nowMs={nowMsForRow}
-                onRead={onRead}
-                onUnlock={onUnlock}
-                onClaim={onClaim}
-                onSubscribe={onSubscribe}
-              />
-            );
-          })}
-        </ul>
-      )}
+              return (
+                <EpisodeRow
+                  key={key}
+                  episode={episode}
+                  seriesId={series?.id}
+                  unlocked={unlocked}
+                  ttfStatus={ttfStatus}
+                  pricePts={pricePts}
+                  coupons={coupons}
+                  progress={progress}
+                  nowMs={nowMsForRow}
+                  onRead={onRead}
+                  onUnlock={onUnlock}
+                  onClaim={onClaim}
+                  onSubscribe={onSubscribe}
+                />
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }

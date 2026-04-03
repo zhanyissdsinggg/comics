@@ -160,53 +160,53 @@ function getCreatorHeroCopy(creatorName, creditType, topGenres) {
 
   if (creditType === "studio") {
     return {
-      title: "More from this studio.",
+      title: "From this studio.",
       description: genreLabel
-        ? `${genreLabel} stories from the same credited studio.`
-        : "Stories from the same credited studio.",
+        ? `${genreLabel} stories from the same studio.`
+        : "Stories from the same studio.",
     };
   }
 
   if (creditType === "team") {
     return {
-      title: "More from this team.",
+      title: "From this team.",
       description: genreLabel
-        ? `${genreLabel} stories from the same credited team.`
-        : "Stories from the same credited team.",
+        ? `${genreLabel} stories from the same team.`
+        : "Stories from the same team.",
     };
   }
 
   return {
-    title: `More from ${creatorName}.`,
+    title: `From ${creatorName}.`,
     description: genreLabel
       ? `${creatorName}'s ${genreLabel} work in one place.`
-      : `${creatorName}'s published stories in one place.`,
+      : `${creatorName}'s stories in one place.`,
   };
 }
 
 function CreatorPageSkeleton() {
   return (
-    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-      <SiteHeader variant="light" />
-      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-        <SurfacePanel appearance="light" accent="blue" className="space-y-6">
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-center">
+    <main className="gush-home-shell overflow-hidden">
+      <div className="gush-page-ambient" />
+      <SiteHeader variant="home" />
+      <div className="gush-page-main gush-section-stack">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <SurfacePanel accent="blue" className="space-y-6">
             <div className="space-y-3">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
-              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-slate-200" />
-              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-200" />
+              <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
+              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-white/10" />
+              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/8" />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={`creator-hero-skeleton-${index}`}
-                  className="h-28 animate-pulse rounded-[24px] border border-black/6 bg-white/80"
-                />
-              ))}
-            </div>
-          </div>
-        </SurfacePanel>
+          </SurfacePanel>
+          <SurfacePanel tone="muted" accent="blue" className="space-y-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={`creator-hero-skeleton-${index}`}
+                className="h-24 animate-pulse rounded-[24px] border border-white/10 bg-white/[0.05]"
+              />
+            ))}
+          </SurfacePanel>
+        </div>
 
         <SurfacePanel appearance="light" accent="blue">
           <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
@@ -435,7 +435,7 @@ export default function CreatorPage({
       isCompleted ? "Completed" : `Updated ${formatDateLabel(spotlightSeries?.updatedAt)}`,
       Array.isArray(spotlightSeries?.genres) && spotlightSeries.genres.length > 0
         ? spotlightSeries.genres.slice(0, 2).join(" / ")
-        : "Best entry point on this shelf",
+        : "Lead title on this page",
     ].filter(Boolean);
   }, [spotlightSeries]);
 
@@ -507,7 +507,7 @@ export default function CreatorPage({
             id: "lead-title",
             eyebrow: "Spotlight",
             title: `View ${spotlightSeries.title}.`,
-            description: "The lead title on this shelf.",
+            description: "The lead title on this page.",
             cta: "View Series",
             onClick: () => handleOpenTitle(spotlightSeries),
             accentClass:
@@ -518,7 +518,7 @@ export default function CreatorPage({
         id: "genre",
         eyebrow: "Genres",
         title: topGenres[0] ? `Explore ${topGenres[0]}.` : "Explore similar reads.",
-        description: "Browse more stories with a similar tone.",
+        description: "Browse more stories nearby.",
         cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
         onClick: handleBrowseGenre,
         accentClass:
@@ -545,7 +545,7 @@ export default function CreatorPage({
         id: "search-series",
         eyebrow: "Search",
         title: `Search ${creatorName}.`,
-        description: "Open the wider catalog around this name.",
+        description: "Search this name across the catalog.",
         cta: "Search",
         onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=latest`),
         accentClass:
@@ -591,14 +591,14 @@ export default function CreatorPage({
 
   if (error) {
     return (
-      <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-        <SiteHeader variant="light" />
-        <div className="relative mx-auto max-w-[960px] px-4 py-12 sm:px-6">
+      <main className="gush-home-shell overflow-hidden">
+        <div className="gush-page-ambient" />
+        <SiteHeader variant="home" />
+        <div className="gush-page-main">
           <NetworkFallback
             compact
-            title="Oops! This creator page is taking a quick breather."
-            description="We're having trouble connecting. Your data is safe, and you can try again or head back to search while this recovers."
+            title="This creator page is unavailable right now."
+            description="Try again or head back to Search."
             onRetry={retryCreatorPage}
           >
             <button
@@ -616,62 +616,70 @@ export default function CreatorPage({
 
   if (!creatorItems.length) {
     return (
-      <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-        <SiteHeader variant="light" />
-        <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
-          <EditorialHero
-            appearance="light"
-            accent="blue"
-            eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
-            title={`${creatorName} is not in the public catalog yet.`}
-            description="Search the catalog or browse featured series for related titles."
-            secondary=""
-            stats={[
-              {
-                label: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
-                value: creatorName,
-                hint: "Use the name to search the wider catalog.",
-              },
-              {
-                label: "Catalog",
-                value: isAdultMode ? "18+" : "Standard",
-                hint: isAdultMode ? "18+ titles may appear in search." : "Adult-only titles stay hidden on this pass.",
-              },
-            ]}
-            actions={
-              <>
+      <main className="gush-home-shell overflow-hidden">
+        <div className="gush-page-ambient" />
+        <SiteHeader variant="home" />
+        <div className="gush-page-main gush-section-stack">
+          <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <EditorialHero
+              accent="blue"
+              eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
+              title={`${creatorName} is not live here yet.`}
+              description="Search the catalog or browse a wider shelf for now."
+              stats={[
+                {
+                  label: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
+                  value: creatorName,
+                  hint: "Search this name across the catalog.",
+                },
+                {
+                  label: "Catalog",
+                  value: isAdultMode ? "18+" : "Standard",
+                  hint: isAdultMode ? "18+ titles may appear in search." : "Adult-only titles stay hidden on this pass.",
+                },
+              ]}
+            />
+
+            <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+              <div className="space-y-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                  Next step
+                </p>
+                <div>
+                  <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                    Keep browsing.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-neutral-300">
+                    Search the name, browse featured series, or go back.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2.5">
                 <button
                   type="button"
                   onClick={() => router.push("/search")}
-                  className={primaryButtonClass}
+                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
                 >
                   Search
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push("/rankings?view=featured")}
-                  className={secondaryButtonClass}
-                >
-                  Browse Series
-                </button>
-                <button
-                  type="button"
                   onClick={handleReturn}
-                  className={secondaryButtonClass}
+                  className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
                 >
                   Go back
                 </button>
-              </>
-            }
-          />
+              </div>
+            </SurfacePanel>
+          </section>
 
           <SurfacePanel appearance="light" accent="blue">
             <EmptyState
               appearance="light"
               icon="book"
-              eyebrow="Keep reading"
-              title="Try another shelf."
+              eyebrow="Next"
+              title="Try another route."
               description="Search or browse featured series."
               action={{
                 label: "Search",
@@ -683,13 +691,13 @@ export default function CreatorPage({
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
-                  More to explore
+                  Next
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   Keep browsing.
                 </h2>
                 <p className="text-sm leading-7 text-slate-600">
-                  Search, browse featured series, or head back to the catalog.
+                  Search, browse featured series, or go back.
                 </p>
             </div>
             <StorefrontPathwaysGrid
@@ -704,52 +712,71 @@ export default function CreatorPage({
   }
 
   return (
-    <main className="relative min-h-screen bg-[#f4f6fb] text-slate-900">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_24%),linear-gradient(180deg,#eef2f9_0%,#f4f6fb_72%)]" />
-      <SiteHeader variant="light" />
+    <main className="gush-home-shell overflow-hidden">
+      <div className="gush-page-ambient" />
+      <SiteHeader variant="home" />
 
-      <div className="relative mx-auto max-w-[1280px] space-y-6 px-4 pb-14 pt-8 sm:px-6 lg:px-8">
+      <div className="gush-page-main gush-section-stack">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            appearance="light"
             accent="blue"
             eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
             title={heroCopy.title}
-          description={heroCopy.description}
-          secondary={
-            originSeries
-              ? `From ${originSeries.title}.`
-              : ""
-          }
-          stats={creatorStats}
-            actions={
-              <>
-                {spotlightSeries ? (
-                  <button
-                    type="button"
-                    onClick={() => handleOpenTitle(spotlightSeries)}
-                    className={primaryButtonClass}
-                  >
-                    View Series
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => router.push("/rankings?view=featured")}
-                    className={primaryButtonClass}
-                  >
-                    Browse Series
-                  </button>
-                )}
+            description={heroCopy.description}
+            secondary={originSeries ? `From ${originSeries.title}.` : ""}
+            stats={creatorStats}
+          />
+
+          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                Overview
+              </p>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  {creatorName}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                  Open the lead title, browse the strongest genre, or go back.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {spotlightSeries ? (
                 <button
                   type="button"
-                  onClick={handleReturn}
-                  className={secondaryButtonClass}
+                  onClick={() => handleOpenTitle(spotlightSeries)}
+                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                >
+                  Open {spotlightSeries.title}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => router.push("/rankings?view=featured")}
+                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                >
+                  Browse Series
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleBrowseGenre}
+                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+              >
+                {topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads"}
+              </button>
+              <button
+                type="button"
+                onClick={handleReturn}
+                className="rounded-full border border-white/12 bg-transparent px-4 py-2.5 text-sm font-semibold text-white/72 transition hover:border-white/16 hover:bg-white/[0.05] hover:text-white"
               >
                 {originSeries ? `Back to ${originSeries.title}` : "Go back"}
               </button>
-            </>
-          }
-        />
+            </div>
+          </SurfacePanel>
+        </section>
 
         {commerceNotice ? (
           <CommerceSuccessBanner
@@ -783,7 +810,7 @@ export default function CreatorPage({
                 </h2>
                 <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
                   {spotlightSeries.description ||
-                    `${spotlightSeries.title} is a strong place to start on this shelf.`}
+                    `${spotlightSeries.title} is a good place to start.`}
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -841,7 +868,7 @@ export default function CreatorPage({
                 More from {creatorName}
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Stories by {creatorName}.
+                Stories by {creatorName}
               </h2>
             </div>
             <p className="text-sm text-slate-500">

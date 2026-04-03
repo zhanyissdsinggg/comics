@@ -223,7 +223,7 @@ function VerifyPageContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f4f6fb]" />}>
+    <Suspense fallback={<div className="gush-home-shell min-h-screen overflow-hidden"><div className="gush-page-ambient" /></div>}>
       <VerifyPageContent />
     </Suspense>
   );

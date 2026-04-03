@@ -162,7 +162,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
       {trendingKeywords.length > 0 ? (
         <div className="space-y-2.5">
           <h3 className="text-sm font-medium text-slate-700">
-            {normalizedHotKeywords.length > 0 ? "Trending" : "Browse"}
+            {normalizedHotKeywords.length > 0 ? "Popular now" : "Browse"}
           </h3>
           <div className="flex flex-wrap gap-2">
             {trendingKeywords.map((keyword, index) => (
