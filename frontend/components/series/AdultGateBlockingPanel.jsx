@@ -33,10 +33,10 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           </div>
           <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-white/[0.05]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-neutral-400">
-              What to expect
+              Access
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-neutral-300">
-              Sign in, confirm age if needed, then keep browsing without extra prompts.
+              Sign in and confirm age if needed.
             </p>
           </div>
         </div>

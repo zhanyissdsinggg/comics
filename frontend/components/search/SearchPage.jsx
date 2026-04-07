@@ -854,7 +854,7 @@ export default function SearchPage() {
             id: "lead-trend",
             eyebrow: "Popular search",
             title: `${leadHotLabel} is trending right now.`,
-            description: "A live search term can open into something popular fast.",
+            description: "A live search term.",
             signalLabel: "Hot keyword",
             signalValue: leadHotLabel,
             signalHint:
@@ -880,8 +880,8 @@ export default function SearchPage() {
             title: `Start with ${freeStartPick.title}.`,
             description:
               startHereEpisodeCount > 0
-                ? `${freeStartPick.title} already has ${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} listed, so it is easy to judge from the first click.`
-                : `${freeStartPick.title} is a good place to start.`,
+                ? `${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} listed.`
+                : "A lighter place to start.",
             signalLabel: "Episodes",
             signalValue: startHereEpisodeCount > 0 ? String(startHereEpisodeCount) : "Live",
             signalHint: "A lighter commitment than restarting your search from scratch",
@@ -893,7 +893,7 @@ export default function SearchPage() {
             id: "free-start-desk",
             eyebrow: "Start here",
             title: "Try an editorial first pick.",
-            description: "A shorter, cleaner place to begin can be more useful than another empty result list.",
+            description: "A lighter place to start.",
             signalLabel: "Shelf",
             signalValue: "Start Here",
             signalHint: "Editorial picks with a cleaner first step",
@@ -919,11 +919,11 @@ export default function SearchPage() {
             id: isAdultMode ? "protected-desk" : "binge-desk",
             eyebrow: isAdultMode ? "18+ read" : "Completed pick",
             title: isAdultMode
-              ? "The 18+ catalog should be clear and easy to browse."
-              : "Completed series are the easiest backup when search is too narrow.",
+              ? "Open the 18+ shelf."
+              : "Browse completed.",
             description: isAdultMode
-              ? "If a mature search misses, go to the 18+ page and browse from there."
-              : "Finished stories give you payoff right away without waiting for another update.",
+              ? "Browse from the protected shelf."
+              : "Finished stories.",
             signalLabel: isAdultMode ? "Mode" : "Finished",
             signalValue: isAdultMode ? "18+" : "Runs",
             signalHint: isAdultMode ? "18+ titles are available" : "Ready for a longer read",
@@ -1018,14 +1018,14 @@ export default function SearchPage() {
                 Overview
               </p>
               <h2 className="mt-3 font-display text-[1.5rem] font-semibold tracking-tight text-white">
-                {query ? "Start with the closest result." : "Start with a clear route in."}
+                {query ? "Closest result." : "Start here."}
               </h2>
               <p className="mt-3 text-sm leading-7 text-white/62">
                 {query
-                  ? "Use filters if you want to narrow the list."
+                  ? "Use filters to narrow."
                   : mastheadLeadKeyword
                     ? `"${mastheadLeadKeyword.label}" is active right now.`
-                    : "Browse titles, creators, and genres from one place."}
+                    : "Browse titles and creators."}
               </p>
 
               <div className="mt-5 grid grid-cols-3 gap-2.5">
@@ -1084,13 +1084,13 @@ export default function SearchPage() {
             eyebrow={query ? "Search picks" : "Featured"}
             title={
               query
-                ? "Open the closest match first."
-                : "A few strong places to begin."
+                ? "Open the lead match."
+                : "Start here."
             }
             description={
               query
-                ? "If the list feels thin, these picks widen the shelf."
-                : "A few strong picks from across the catalog."
+                ? "A few nearby picks."
+                : "A few strong picks."
             }
             events={searchEventCards}
             appearance="light"
@@ -1109,9 +1109,7 @@ export default function SearchPage() {
           <SurfacePanel className="space-y-8" appearance="light" accent="blue">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  More to read
-                </p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Next</p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   {recoPanelTitle}
                 </h2>

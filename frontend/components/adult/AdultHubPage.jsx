@@ -229,27 +229,23 @@ export default function AdultHubPage() {
       {
         label: "Titles",
         value: loading ? "--" : seriesList.length.toLocaleString(),
-        hint: "Adult series available in the protected catalog.",
       },
       {
         label: "Completed",
         value: loading ? "--" : completedItems.length.toLocaleString(),
-        hint: "Finished 18+ series ready for binge reading.",
       },
       {
         label: "Free unlocks",
         value: loading ? "--" : freeUnlockItems.length.toLocaleString(),
-        hint: "Titles with active free-unlock value.",
       },
       {
         label: "Mode",
         value: isAdultMode ? "18+ enabled" : "Gate locked",
-        hint: isAdultMode ? "18+ browsing is currently active." : "Sign in and confirm age to unlock 18+ access.",
       },
     ],
     [completedItems.length, freeUnlockItems.length, isAdultMode, loading, seriesList.length],
   );
-  const adultModeActionLabel = isAdultMode ? "18+ mode is active." : "18+ mode stays off by default.";
+  const adultModeActionLabel = isAdultMode ? "18+ mode is on." : "18+ stays off by default.";
 
   return (
     <main className="gush-home-shell overflow-hidden">
@@ -260,10 +256,10 @@ export default function AdultHubPage() {
           <EditorialHero
             eyebrow="18+ catalog"
             title="The protected 18+ shelf."
-            description="Private by default. Turn on 18+ browsing only when you want it, then move through mature titles with the same calm discovery flow as the main catalog."
+            description="Private by default. Turn on 18+ only when you want it."
             secondary={
               isAdultMode
-                ? "Access is on. Start with the most-read titles, finished series, or the strongest free-unlock picks."
+                ? "Access is on."
                 : "Nothing 18+ appears until you sign in and confirm access."
             }
             stats={adultStats}
@@ -279,11 +275,6 @@ export default function AdultHubPage() {
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
                   {adultModeActionLabel}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  {isAdultMode
-                    ? "Open the main shelf, finished stories, or free-unlock picks from here without changing the rest of the storefront."
-                    : "The gate is explicit on purpose. Nothing mature leaks into browsing until you choose it."}
-                </p>
               </div>
             </div>
 
@@ -340,7 +331,7 @@ export default function AdultHubPage() {
             <EmptyState
               icon="search"
               title="No adult titles are currently available"
-              description="Open 18+ Top Series or switch back to the standard catalog until more mature titles are available."
+              description="Check back later or browse the standard catalog."
               action={{
                 label: "Open Top Series",
                 onClick: () => router.push("/rankings?type=popular&window=week"),
@@ -354,7 +345,7 @@ export default function AdultHubPage() {
               <Rail
                 title="18+ Spotlight"
                 items={spotlightItems}
-                reason="Popular 18+ titles worth opening first."
+                reason="Start here."
                 href="/rankings?type=popular&window=week"
                 ctaLabel="Open Top Series"
                 appearance="light"
@@ -367,7 +358,7 @@ export default function AdultHubPage() {
                 <Rail
                   title="Completed 18+ Series"
                   items={completedItems}
-                  reason="Finished 18+ series for readers who want a full binge."
+                  reason="Finished stories."
                   href="/rankings?type=completed&window=all"
                   ctaLabel="Browse completed"
                   appearance="light"
@@ -381,7 +372,7 @@ export default function AdultHubPage() {
                 <Rail
                   title="Free Unlock 18+ Picks"
                   items={freeUnlockItems}
-                  reason="18+ titles with free unlock value before you spend points."
+                  reason="Free unlocks."
                   href="/rankings?type=ttf&window=all"
                   ctaLabel="See free unlocks"
                   appearance="light"

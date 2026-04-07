@@ -315,12 +315,10 @@ export default function SupportPage() {
     {
       label: "Topics",
       value: SUPPORT_TOPICS.length.toLocaleString(),
-      hint: "Start in the right queue.",
     },
     {
       label: "Reply window",
       value: "1-2 days",
-      hint: "Typical reply time.",
     },
   ];
 
@@ -343,7 +341,7 @@ export default function SupportPage() {
                 Quick topics
               </p>
               <h2 className="mt-2 font-display text-[1.6rem] font-semibold tracking-tight text-white">
-                Pick an issue.
+                Pick one.
               </h2>
             </div>
 
@@ -433,7 +431,7 @@ export default function SupportPage() {
               <form className="space-y-5" onSubmit={handleSubmit}>
                 <div>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Tell us what happened.
+                    Send your request.
                   </h2>
                 </div>
 
@@ -591,7 +589,7 @@ export default function SupportPage() {
 
             <div className="rounded-[24px] border border-black/6 bg-[#f8f9fc] px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                Support desk
+                Contact
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Reply email: <span className="font-semibold text-slate-900">{siteConfig.supportEmail}</span>

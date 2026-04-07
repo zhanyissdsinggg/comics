@@ -133,27 +133,22 @@ export default function PrivacyPolicyPage() {
             eyebrow="Privacy"
             title="Privacy."
             description={`What data ${siteConfig.companyName} collects, why we need it, and how to contact us about it.`}
-            secondary="Current policy and privacy contact."
             stats={[
               {
                 label: "Effective",
                 value: effectiveDate,
-                hint: "This is the current version of the policy.",
               },
               {
                 label: "Covers",
                 value: "Account + reading",
-                hint: "Includes purchases, usage, and support messages.",
               },
               {
                 label: "Your options",
                 value: "Access / delete",
-                hint: "Available rights depend on the laws that apply where you live.",
               },
               {
                 label: "Contact",
                 value: siteConfig.privacyEmail,
-                hint: "Privacy questions and data requests should go here.",
               },
             ]}
           />
@@ -165,11 +160,8 @@ export default function PrivacyPolicyPage() {
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  Privacy requests stay easy to find.
+                  Privacy contact.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  Use the privacy contact for data requests and support for account issues.
-                </p>
               </div>
             </div>
 
@@ -198,9 +190,6 @@ export default function PrivacyPolicyPage() {
           <LegalSection
             title="Privacy requests"
             className="xl:col-span-2"
-            paragraphs={[
-              "Use the contact details below for privacy questions and data requests.",
-            ]}
           >
             <ContactCard />
           </LegalSection>

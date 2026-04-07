@@ -397,29 +397,22 @@ export default function CreatorPage({
       {
         label: "Stories",
         value: formatTitleCountLabel(creatorItems.length),
-        hint: "Published titles on this page.",
       },
       {
         label: "Format",
         value: formatLabel,
-        hint: "Available on Gush.",
       },
       {
         label: "Status",
         value: completedCount > 0 ? `${completedCount} complete` : "Mostly ongoing",
-        hint: completedCount > 0 ? "Finished stories are included here too." : "Most titles on this page are still ongoing.",
       },
       {
         label: "Latest",
         value: latestUpdatedAt ? formatDateLabel(latestUpdatedAt) : "Catalog",
-        hint: latestUpdatedAt ? "Most recent update on this page." : "Updates will appear here once available.",
       },
       {
         label: "Genre",
         value: strongestGenre,
-        hint: topGenres.length > 1
-          ? `${topGenres.slice(0, 2).join(" / ")} show up most often here.`
-          : "A notable genre on this page.",
       },
     ];
   }, [creatorItems, topGenres]);
@@ -507,7 +500,6 @@ export default function CreatorPage({
             id: "lead-title",
             eyebrow: "Spotlight",
             title: `View ${spotlightSeries.title}.`,
-            description: "The lead title on this page.",
             cta: "View Series",
             onClick: () => handleOpenTitle(spotlightSeries),
             accentClass:
@@ -518,7 +510,6 @@ export default function CreatorPage({
         id: "genre",
         eyebrow: "Genres",
         title: topGenres[0] ? `Explore ${topGenres[0]}.` : "Explore similar reads.",
-        description: "Browse more stories nearby.",
         cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
         onClick: handleBrowseGenre,
         accentClass:
@@ -528,9 +519,6 @@ export default function CreatorPage({
         id: "return",
         eyebrow: "Back",
         title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
-        description: originSeries
-          ? "Return to the title that led you here."
-          : "Return to your last page.",
         cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
         onClick: handleReturn,
         accentClass:
@@ -545,7 +533,6 @@ export default function CreatorPage({
         id: "search-series",
         eyebrow: "Search",
         title: `Search ${creatorName}.`,
-        description: "Search this name across the catalog.",
         cta: "Search",
         onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=latest`),
         accentClass:
@@ -555,7 +542,6 @@ export default function CreatorPage({
         id: "featured-series",
         eyebrow: "Featured Series",
         title: "Featured Series",
-        description: "A broader editorial mix across the catalog.",
         cta: "Browse Series",
         onClick: () => router.push("/rankings?view=featured"),
         accentClass:
@@ -565,7 +551,6 @@ export default function CreatorPage({
         id: "catalog",
         eyebrow: "Browse",
         title: "Explore the catalog.",
-        description: "Open comics or novels next.",
         cta: "Explore Comics",
         onClick: () => router.push("/comics"),
         accentClass:
@@ -575,7 +560,6 @@ export default function CreatorPage({
         id: "return",
         eyebrow: "Back",
         title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
-        description: originSeries ? "Return to the title that led you here." : "Return to your last page.",
         cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
         onClick: handleReturn,
         accentClass:
@@ -625,17 +609,15 @@ export default function CreatorPage({
               accent="blue"
               eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
               title={`${creatorName} is not live here yet.`}
-              description="Search the catalog or browse a wider shelf for now."
+              description="Search or browse for now."
               stats={[
                 {
                   label: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
                   value: creatorName,
-                  hint: "Search this name across the catalog.",
                 },
                 {
                   label: "Catalog",
                   value: isAdultMode ? "18+" : "Standard",
-                  hint: isAdultMode ? "18+ titles may appear in search." : "Adult-only titles stay hidden on this pass.",
                 },
               ]}
             />
@@ -649,9 +631,6 @@ export default function CreatorPage({
                   <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
                     Keep browsing.
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-neutral-300">
-                    Search the name, browse featured series, or go back.
-                  </p>
                 </div>
               </div>
 
@@ -680,7 +659,6 @@ export default function CreatorPage({
               icon="book"
               eyebrow="Next"
               title="Try another route."
-              description="Search or browse featured series."
               action={{
                 label: "Search",
                 onClick: () => router.push("/search"),
@@ -696,9 +674,6 @@ export default function CreatorPage({
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   Keep browsing.
                 </h2>
-                <p className="text-sm leading-7 text-slate-600">
-                  Search, browse featured series, or go back.
-                </p>
             </div>
             <StorefrontPathwaysGrid
               cards={emptyCreatorPathways}
@@ -736,9 +711,6 @@ export default function CreatorPage({
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
                   {creatorName}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  Open the lead title, browse the strongest genre, or go back.
-                </p>
               </div>
             </div>
 

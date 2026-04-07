@@ -26,32 +26,18 @@ export default function SeriesFAQPanel({ series, episodes = [], creatorHref = ""
             Reader FAQ
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-            Quick answers before you start.
+            Quick answers.
           </h2>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
-            The best pre-read questions are simple: Is it finished, can I try it, how much is there, and where do I go if something breaks?
-          </p>
-        </div>
-        <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-4 text-left">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Why it helps
-          </p>
-          <p className="mt-3 text-sm leading-6 text-slate-700">
-            Clear answers keep small questions from turning into a bounce.
-          </p>
         </div>
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        {faqItems.map((item, index) => (
+        {faqItems.map((item) => (
           <article
-            key={item.id || `${item.question}-${index}`}
+            key={item.id || item.question}
             className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-5 py-4"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Question {index + 1}
-            </p>
-            <h3 className="mt-2 text-base font-semibold text-slate-950 sm:text-lg">{item.question}</h3>
+            <h3 className="text-base font-semibold text-slate-950 sm:text-lg">{item.question}</h3>
             <p className="mt-3 text-sm leading-7 text-slate-600">{item.answer}</p>
           </article>
         ))}

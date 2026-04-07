@@ -134,34 +134,29 @@ export default function TermsOfServicePage() {
             title="Terms of service."
             description={
               <>
-                These terms cover using {siteConfig.siteName}, buying content, and keeping your account in good standing. By using the site, you agree to these Terms and our{" "}
+                Rules for using {siteConfig.siteName} and buying content. By using the site, you agree to these Terms and our{" "}
                 <Link href="/privacy-policy" className="text-[var(--gush-accent,#2f6bff)] transition hover:text-[rgba(47,107,255,0.8)]">
                   Privacy Policy
                 </Link>
                 .
               </>
             }
-            secondary="Current terms and legal contact."
             stats={[
               {
                 label: "Effective",
                 value: effectiveDate,
-                hint: "This is the current version of the Terms.",
               },
               {
                 label: "Covers",
                 value: "Browsing + purchases",
-                hint: "Applies to browsing, accounts, memberships, payments, and use of the site.",
               },
               {
                 label: "Purchases",
                 value: "Personal access",
-                hint: `What you buy unlocks personal access on ${siteConfig.siteName}. It does not transfer ownership.`,
               },
               {
                 label: "Contact",
                 value: siteConfig.legalEmail,
-                hint: "Formal notices and legal questions should go to this address.",
               },
             ]}
           />
@@ -173,11 +168,8 @@ export default function TermsOfServicePage() {
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  Use, purchases, and formal notices.
+                  Legal contact.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  Use this page for the rules that govern browsing, accounts, and purchases.
-                </p>
               </div>
             </div>
 
@@ -206,9 +198,6 @@ export default function TermsOfServicePage() {
           <LegalSection
             title="Legal contact"
             className="xl:col-span-2"
-            paragraphs={[
-              "If you have a legal question or need to send formal notice, use the contact details below.",
-            ]}
           >
             <ContactCard />
           </LegalSection>

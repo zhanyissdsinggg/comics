@@ -48,23 +48,19 @@ const FAQ_ITEMS = [
 const CONTROL_CARDS = [
   {
     title: "Turn mature content on or off",
-    body:
-      "Use the 18+ toggle in the site header when you want access, then turn it off again when you do not.",
+    body: "Use the 18+ toggle in the site header when you want access.",
   },
   {
     title: "Confirm age for your region",
-    body:
-      "The site can ask for a one-time age confirmation based on your current region settings.",
+    body: "The site may ask for a one-time age check for your region.",
   },
   {
     title: "Hide 18+ history",
-    body:
-      "Use the account setting if you do not want mature history visible in the normal account view on that device.",
+    body: "Use the account setting to hide mature history on that device.",
   },
   {
     title: "Get help when access looks wrong",
-    body:
-      "If the mature catalog stays hidden after sign-in and age confirmation, Support can help.",
+    body: "Support can help if access still looks wrong.",
   },
 ];
 
@@ -96,27 +92,22 @@ export default function MatureContentPage() {
             eyebrow="Mature content"
             title="18+ access."
             description="Mature titles stay hidden until you turn them on and complete the age check."
-            secondary="Region rules and visibility controls."
             stats={[
               {
                 label: "Default",
                 value: "Hidden",
-                hint: "Mature titles stay off until you turn them on.",
               },
               {
                 label: "Age check",
                 value: "One-time",
-                hint: "Age checks can depend on the current region.",
               },
               {
                 label: "Privacy",
                 value: "18+ history",
-                hint: "Hide mature history in account settings.",
               },
               {
                 label: "Help",
                 value: "Support",
-                hint: `Need help? Use ${siteConfig.supportEmail}.`,
               },
             ]}
             actions={
@@ -144,11 +135,8 @@ export default function MatureContentPage() {
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  Age gate, region, and history controls.
+                  Age gate and visibility.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  Use these controls when mature titles should be visible.
-                </p>
               </div>
             </div>
 
@@ -205,7 +193,7 @@ export default function MatureContentPage() {
                 Related pages
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                More places to check.
+                Next steps.
               </h2>
             </div>
             <div className="space-y-3">
@@ -245,7 +233,7 @@ export default function MatureContentPage() {
               FAQ
             </p>
             <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Common questions.
+              Quick answers.
             </h2>
           </div>
           <div className="grid gap-3 lg:grid-cols-2">

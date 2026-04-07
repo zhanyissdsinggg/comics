@@ -15,7 +15,6 @@ import { BrandingProvider, useBrandingStore } from "../../store/useBrandingStore
 import { RegionProvider } from "../../store/useRegionStore";
 import { HistoryProvider } from "../../store/useHistoryStore";
 import { ToastProvider } from "../common/ToastContext";
-import { ApiBootGuard } from "../common/ApiBootGuard";
 import { useAuthOpenListener } from "../../hooks/useAuthOpenListener";
 
 const GlobalErrorToast = dynamic(() => import("../common/GlobalErrorToast"), {
@@ -120,21 +119,19 @@ export default function AppProviders({ children }) {
                   <BrandingHeadSync />
                   <ToastContainer />
                   {!isAdminRoute ? <AuthRequiredModal /> : null}
-                  <ApiBootGuard>
-                    <ProgressProvider>
-                      <FollowProvider>
-                        <NotificationsProvider>
-                          <BehaviorProvider>
-                            <HistoryProvider>
-                              {children}
-                              {shouldShowFooter ? <SiteFooter tone={footerTone} variant={footerVariant} pathname={pathname || ""} /> : null}
-                              <PWAInstallPrompt />
-                            </HistoryProvider>
-                          </BehaviorProvider>
-                        </NotificationsProvider>
-                      </FollowProvider>
-                    </ProgressProvider>
-                  </ApiBootGuard>
+                  <ProgressProvider>
+                    <FollowProvider>
+                      <NotificationsProvider>
+                        <BehaviorProvider>
+                          <HistoryProvider>
+                            {children}
+                            {shouldShowFooter ? <SiteFooter tone={footerTone} variant={footerVariant} pathname={pathname || ""} /> : null}
+                            <PWAInstallPrompt />
+                          </HistoryProvider>
+                        </BehaviorProvider>
+                      </NotificationsProvider>
+                    </FollowProvider>
+                  </ProgressProvider>
                 </RegionProvider>
               </BrandingProvider>
             </AdultGateProvider>

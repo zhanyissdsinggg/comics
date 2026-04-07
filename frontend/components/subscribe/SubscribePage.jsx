@@ -264,28 +264,20 @@ export default function SubscribePage({
         ? {
             label: "Availability",
             value: subscriptionAvailabilityLabel,
-            hint: isActive
-              ? `${subscription?.planId || "Membership"} is active.`
-              : "Monthly billing is open.",
           }
         : null,
       {
         label: "Model",
         value: "Monthly plan",
-        hint: "Recurring while active.",
       },
       {
         label: "Best savings",
         value: maxDiscount > 0 ? `${maxDiscount}% off` : "Plan perks",
-        hint: maxDiscount > 0
-          ? "Highest unlock discount in the current lineup."
-          : "Perks appear in the current plan lineup.",
       },
     ].filter(Boolean);
   }, [
     isActive,
     planCatalog,
-    subscription?.planId,
     subscriptionAvailabilityLabel,
     subscriptionActionsEnabled,
   ]);
@@ -306,10 +298,9 @@ export default function SubscribePage({
             title={subscriptionActionsEnabled ? "Membership plans." : "Membership opens soon."}
             description={
               subscriptionActionsEnabled
-                ? "Monthly plans for regular reading."
-                : "Plans are visible. Billing is not live yet."
+                ? "Monthly plans."
+                : "Plans are visible."
             }
-            secondary={subscriptionActionsEnabled ? "Cancel before renewal." : ""}
             stats={subscriptionHeroStats}
           />
 
@@ -320,13 +311,8 @@ export default function SubscribePage({
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  {subscriptionActionsEnabled ? "Pick the pace that fits." : "Compare the lineup first."}
+                  {subscriptionActionsEnabled ? "Choose your plan." : "See the lineup."}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  {subscriptionActionsEnabled
-                    ? "Compare perks, choose a tier, and keep monthly reading predictable."
-                    : "Plans and perks are visible before recurring billing opens."}
-                </p>
               </div>
             </div>
 
@@ -362,10 +348,10 @@ export default function SubscribePage({
           <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="max-w-3xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Before billing
+                  {subscriptionActionsEnabled ? "Plan details" : "Before billing"}
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  What to expect.
+                  {subscriptionActionsEnabled ? "What happens next." : "Before you join."}
                 </h2>
             </div>
           </div>
@@ -374,15 +360,15 @@ export default function SubscribePage({
             {[
               {
                 title: "Today",
-                body: "No monthly charge yet.",
+                body: subscriptionActionsEnabled ? "Billing starts at checkout." : "No monthly charge yet.",
               },
               {
                 title: "Billing",
-                body: "Billing starts when membership goes live.",
+                body: subscriptionActionsEnabled ? "Renews monthly while active." : "Billing starts when membership goes live.",
               },
               {
                 title: "Receipts",
-                body: "Receipts and renewals show up in Purchases.",
+                body: "Receipts show in Purchases.",
               },
               {
                 title: "Help",
@@ -415,7 +401,7 @@ export default function SubscribePage({
               onClick={() => router.push("/orders")}
               className={secondaryButtonClass}
             >
-              Receipt location
+              View purchases
             </button>
           </div>
         </SurfacePanel>
@@ -429,7 +415,7 @@ export default function SubscribePage({
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {subscriptionActionsEnabled
-                    ? "Membership stays on one account."
+                    ? "Use one account."
                     : "Use one account."}
                 </h2>
               </div>
