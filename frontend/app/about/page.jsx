@@ -31,8 +31,7 @@ export default function AboutPage() {
             accent="blue"
             eyebrow="About Gush"
             title="Stories first. Everything else stays quiet."
-            description="Original comics and serialized fiction, arranged for calmer reading."
-            secondary="Browse and read without clutter."
+            description="Original comics and serialized fiction for calmer reading."
             actions={
               <>
                 <Link
@@ -58,11 +57,8 @@ export default function AboutPage() {
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  Support and legal stay easy to find.
+                  Support and legal.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  Support, privacy, and legal links stay right here.
-                </p>
               </div>
             </div>
 
@@ -93,14 +89,10 @@ export default function AboutPage() {
                 Built for readers first.
               </h2>
             </div>
-            <div className="space-y-4 text-sm leading-7 text-slate-600">
-              <p>
-                {siteConfig.companyName} is for readers who want to open a chapter and stay in the story.
-              </p>
-              <p>
-                Discovery, purchases, and account flows stay simple.
-              </p>
-            </div>
+            <p className="text-sm leading-7 text-slate-600">
+              {siteConfig.companyName} is for readers who want to open a chapter and stay in the story.
+              Discovery, purchases, and account flows stay simple.
+            </p>
           </SurfacePanel>
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
@@ -157,9 +149,6 @@ export default function AboutPage() {
             Need help?
           </p>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <p className="max-w-3xl text-sm leading-7 text-slate-600">
-              If a charge looks wrong, a page breaks, or you need an answer, start with Support.
-            </p>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/support"

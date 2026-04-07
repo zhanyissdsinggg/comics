@@ -98,28 +98,23 @@ export default function HowItWorksPage() {
             accent="blue"
             eyebrow="How it works"
             title="How it works."
-            description="Start free where available, unlock more with points, or choose a plan."
-            secondary="Free reads, point packs, and plans."
+            description="Start free where available. Use points or choose a plan."
             stats={[
               {
                 label: "Free access",
                 value: "Title-based",
-                hint: "Free access depends on the title.",
               },
               {
                 label: "Unlocks",
                 value: "Points",
-                hint: "Locked episodes use points.",
               },
               {
                 label: "Membership",
                 value: "Monthly",
-                hint: "Plans renew monthly when active.",
               },
               {
                 label: "Billing help",
                 value: "Support",
-                hint: `Need help? Contact ${siteConfig.supportEmail}.`,
               },
             ]}
             actions={
@@ -147,11 +142,8 @@ export default function HowItWorksPage() {
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  Free reads first, then points or plans.
+                  Free reads, then points or plans.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  This page covers access, points, plans, and where to check billing.
-                </p>
               </div>
             </div>
 
@@ -190,10 +182,10 @@ export default function HowItWorksPage() {
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Pricing basics
+                Access
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Access basics.
+                What opens reading.
               </h2>
             </div>
             <div className="space-y-4 text-sm leading-7 text-slate-600">
@@ -212,10 +204,10 @@ export default function HowItWorksPage() {
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Billing and receipts
+                Billing
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Where to check charges.
+                Check charges.
               </h2>
             </div>
             <ul className="space-y-3 text-sm leading-7 text-slate-600">
@@ -243,13 +235,13 @@ export default function HowItWorksPage() {
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Quick answers
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Quick answers.
-              </h2>
-            </div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              FAQ
+            </p>
+            <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              Quick answers.
+            </h2>
+          </div>
           <div className="grid gap-3 lg:grid-cols-2">
             {FAQ_ITEMS.map((item) => (
               <div

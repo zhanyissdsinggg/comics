@@ -9,8 +9,6 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  BookOpen,
-  Gift,
   Sparkles,
 } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
@@ -24,7 +22,6 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
-import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import {
   buildHomeHeroItems,
   getHomeEditorialSnapshot,
@@ -494,17 +491,13 @@ function HomeContent({ initialSearchParams = {} }) {
     () => [
       {
         id: "featured-series",
-        eyebrow: "Featured Series",
-        title: "Open featured stories",
-        description: "Editorial picks to open first.",
+        title: "Featured Series",
         label: "Browse Series",
         href: "/search",
       },
       {
         id: "browse-comics",
-        eyebrow: "Browse by Format",
-        title: "Pick a format",
-        description: "Comics or prose, depending on your mood.",
+        title: "Comics and Novels",
         label: "Browse Comics",
         href: "/comics",
       },
@@ -576,8 +569,7 @@ function HomeContent({ initialSearchParams = {} }) {
   const heroEyebrow = resumeSeries ? "Continue Reading" : "Featured";
   const heroSummary = resumeSeries
     ? "Pick up where you left off."
-    : clampText(heroSeries?.description, 170) ||
-      "Original comics and serialized novels, arranged for calmer reading.";
+    : clampText(heroSeries?.description, 170);
 
   return (
     <div className="gush-page-shell gush-home-shell overflow-hidden">
@@ -615,9 +607,11 @@ function HomeContent({ initialSearchParams = {} }) {
                       </p>
                     ) : null}
 
-                    <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-[0.98rem]">
-                      {heroSummary}
-                    </p>
+                    {heroSummary ? (
+                      <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-[0.98rem]">
+                        {heroSummary}
+                      </p>
+                    ) : null}
 
                     <div className="mt-5 flex flex-wrap gap-2.5">
                       {heroGenrePills.map((genre) => (
@@ -673,16 +667,11 @@ function HomeContent({ initialSearchParams = {} }) {
                         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
                           Overview
                         </p>
-                        <h2 className="mt-3 font-display text-[1.55rem] font-semibold tracking-tight text-white">
-                          A calmer place to read.
-                        </h2>
                       </div>
                       <span className="inline-flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-[var(--gush-home-accent)]">
                         <Sparkles className="size-4" />
                       </span>
                     </div>
-
-                    <p className="mt-3 text-sm leading-7 text-white/62">Featured stories first. Cleaner shelves after that.</p>
 
                     <div className="mt-5 grid grid-cols-3 gap-2.5">
                       {heroMetrics.map((metric) => (
@@ -733,21 +722,16 @@ function HomeContent({ initialSearchParams = {} }) {
                   <Card className="overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,26,0.95),rgba(12,17,26,0.9))] py-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.22)] ring-0">
                     <CardContent className="p-5 sm:p-6">
                       <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
-                            More to read
-                          </p>
-                          <h2 className="mt-2 font-display text-[1.35rem] font-semibold tracking-tight text-white">
-                            Open one next.
-                          </h2>
-                        </div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
+                          Next Up
+                        </p>
                         <Button
                           type="button"
                           variant="ghost"
                           onClick={() => router.push("/search")}
                           className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-white/56 hover:bg-transparent hover:text-white"
                         >
-                          Browse all
+                          Browse
                           <ArrowRight className="size-4" />
                         </Button>
                       </div>
@@ -800,23 +784,13 @@ function HomeContent({ initialSearchParams = {} }) {
         <LoginPrompt
           isOpen={showLoginPrompt}
           onClose={() => setShowLoginPrompt(false)}
-          eyebrow={STOREFRONT_TERMS.readerBenefits}
-          title="Save your library and pick up where you left off"
-          message="Sign in to sync your library, keep your progress, claim rewards, and make every return visit faster."
+          eyebrow=""
+          title="Save your library"
+          message="Sign in to sync your library and reading progress."
           returnTo="/"
           primaryLabel="Sign in and sync"
           secondaryLabel="Create free account"
-          features={[
-            {
-              icon: BookOpen,
-              text: "Resume chapters and keep your library synced across devices",
-            },
-            { icon: Gift, text: "Claim daily rewards, mission payouts, and bonus points" },
-            {
-              icon: Sparkles,
-              text: "Get better picks based on what you actually read",
-            },
-          ]}
+          showFeatures={false}
         />
       </main>
 
@@ -824,7 +798,7 @@ function HomeContent({ initialSearchParams = {} }) {
         tone="light"
         variant="compact"
         pathname="/"
-        taglineOverride="Original comics and serialized fiction, arranged for calmer reading."
+        showTagline={false}
       />
     </div>
   );

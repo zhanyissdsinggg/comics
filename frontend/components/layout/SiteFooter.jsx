@@ -170,7 +170,13 @@ function filterSections(sections, pathname) {
     .filter((section) => section.links.length > 0);
 }
 
-export default function SiteFooter({ tone = "default", variant = "full", pathname = "", taglineOverride = "" }) {
+export default function SiteFooter({
+  tone = "default",
+  variant = "full",
+  pathname = "",
+  taglineOverride,
+  showTagline = true,
+}) {
   const currentYear = new Date().getFullYear();
   const isHome = tone === "home" || tone === "light";
   const isCompact = variant === "compact";
@@ -183,7 +189,7 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
     pathname,
   );
   const footerSections = filterSections(fullFooterSections, pathname);
-  const footerTagline = taglineOverride || siteConfig.tagline;
+  const footerTagline = taglineOverride ?? siteConfig.tagline;
 
   if (isCompact) {
     return (
@@ -203,9 +209,11 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
               >
                 {siteConfig.siteName}
               </Link>
-              <p className={`text-sm leading-6 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
-                {footerTagline}
-              </p>
+              {showTagline && footerTagline ? (
+                <p className={`text-sm leading-6 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
+                  {footerTagline}
+                </p>
+              ) : null}
             </div>
 
             <nav className="flex max-w-3xl flex-wrap gap-x-4 gap-y-2 text-sm">
@@ -279,9 +287,11 @@ export default function SiteFooter({ tone = "default", variant = "full", pathnam
               >
                 {siteConfig.siteName}
               </Link>
-              <p className={`text-sm leading-6 ${isHome ? "text-slate-600 dark:text-neutral-300" : "text-neutral-300"}`}>
-                {footerTagline}
-              </p>
+              {showTagline && footerTagline ? (
+                <p className={`text-sm leading-6 ${isHome ? "text-slate-600 dark:text-neutral-300" : "text-neutral-300"}`}>
+                  {footerTagline}
+                </p>
+              ) : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">

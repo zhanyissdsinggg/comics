@@ -480,17 +480,17 @@ export default function CreatorsHubPage({
       {
         label: "Profiles",
         value: creators.length.toLocaleString(),
-        hint: "Public creator, team, and studio pages on this screen.",
+        hint: "Live public creator pages.",
       },
       {
         label: "Teams",
         value: collectiveCreatorCount.toLocaleString(),
-        hint: "Studios and team-style credits available on live titles.",
+        hint: "Studios and team credits.",
       },
       {
         label: "Credited titles",
         value: creditedSeriesCount.toLocaleString(),
-        hint: "Stories already carrying live public-facing credits.",
+        hint: "Titles with public credits.",
       },
     ],
     [collectiveCreatorCount, creators.length, creditedSeriesCount],
@@ -720,35 +720,26 @@ export default function CreatorsHubPage({
               accent="blue"
               eyebrow="Creator credits"
               title="Browse stories for now."
-              description="Current live titles do not yet expose enough public credits for a full creator directory."
-              secondary="So this page stays focused on titles, formats, and genres."
+              description="Live titles do not yet expose a full public creator directory."
               stats={[
                 {
                   label: "Story picks",
                   value: fallbackEntryTitles.length.toLocaleString(),
-                  hint: "Editorial entry points pulled from the live catalog.",
+                  hint: "Live catalog picks.",
                 },
                 {
                   label: "Genre lanes",
                   value: fallbackGenrePicks.length.toLocaleString(),
-                  hint: "Browse by the genres already attached to live titles.",
+                  hint: "Live genre lanes.",
                 },
               ]}
             />
 
             <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
-              <div className="space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
-                  For now
-                </p>
-                <div>
-                  <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                    No live creator directory yet.
-                  </h2>
-                  <p className="mt-3 text-sm leading-7 text-neutral-300">
-                    Browse by title and genre until public credits arrive.
-                  </p>
-                </div>
+              <div>
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  No live creator directory yet.
+                </h2>
               </div>
 
               <div className="flex flex-col gap-2.5">
@@ -782,9 +773,6 @@ export default function CreatorsHubPage({
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Start with These Stories
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                A few strong starts from the live catalog.
-              </p>
             </div>
 
             {fallbackEntryTitles.length > 0 ? (
@@ -830,9 +818,6 @@ export default function CreatorsHubPage({
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   Browse by Genre
                 </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Browse by genres already attached to live titles.
-              </p>
               </div>
 
               {fallbackGenrePicks.length > 0 ? (
@@ -843,51 +828,16 @@ export default function CreatorsHubPage({
                       type="button"
                       onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=latest`)}
                       className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
-                    >
+                  >
                       {item.genre}
                     </button>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">Use the catalog pages above to keep browsing by story and format.</p>
+                <p className="text-sm text-slate-500">Use comics, novels, or search.</p>
               )}
             </SurfacePanel>
           </section>
-
-          <SurfacePanel appearance="light" accent="blue" className="space-y-4">
-            <div>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                How creator credits appear
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Public creator names appear on title pages first. This directory stays quiet until live titles carry those credits.
-              </p>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-[22px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  Current state
-                </p>
-                <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-950">
-                  No live public creator names are attached to the current catalog yet.
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  Until then, the cleanest way to browse is by story, format, and genre.
-                </p>
-              </div>
-              <div className="rounded-[22px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  How creator credit works
-                </p>
-                <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-950">
-                  Series pages use one consistent creator fallback when no public credit is available.
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  When a title gains a public creator or team credit upstream, it can move into this directory cleanly.
-                </p>
-              </div>
-            </div>
-          </SurfacePanel>
         </div>
       </main>
     );
@@ -904,24 +854,15 @@ export default function CreatorsHubPage({
             accent="blue"
             eyebrow="Creators"
             title="Meet the credited creators."
-            description="Writers, artists, studios, and teams already attached to live titles."
-            secondary="Start with a strong title, then move deeper into the people and teams behind it."
+            description="Writers, artists, studios, and teams on live titles."
             stats={creatorHeroStats}
           />
 
           <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
-            <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
-                Browse next
-              </p>
-              <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  Move between people, teams, and titles.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  Start with a creator card, open a credited title, or narrow by genre below.
-                </p>
-              </div>
+            <div>
+              <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                Move between creators and titles.
+              </h2>
             </div>
 
             <div className="flex flex-col gap-2.5">
@@ -953,15 +894,9 @@ export default function CreatorsHubPage({
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Search
-              </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Search creators and teams.
+                Search creators
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                Search names, titles, and genres.
-              </p>
             </div>
             {query || activeGenre !== "All" || creditFilter !== "all" ? (
               <button
@@ -1026,14 +961,11 @@ export default function CreatorsHubPage({
         </SurfacePanel>
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-            <div>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Featured Creators
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Public creator pages from live titles.
-              </p>
-            </div>
+          <div>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+              Featured Creators
+            </h2>
+          </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
             {featuredCreatorCards.map((creator) => {
@@ -1111,9 +1043,6 @@ export default function CreatorsHubPage({
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Start with These Stories
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                A few strong starting points.
-              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -1229,9 +1158,6 @@ export default function CreatorsHubPage({
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
               Browse by Genre
             </h2>
-            <p className="mt-3 text-sm leading-7 text-slate-600">
-              Jump by genre.
-            </p>
           </div>
 
           {genreOptions.length > 0 ? (
@@ -1248,7 +1174,7 @@ export default function CreatorsHubPage({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500">Browse the catalog pages to keep moving between genres and formats.</p>
+            <p className="text-sm text-slate-500">Use comics, novels, or search.</p>
           )}
         </SurfacePanel>
 
@@ -1258,9 +1184,6 @@ export default function CreatorsHubPage({
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 All Creators
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Public credits on live titles.
-              </p>
             </div>
             <p className="text-sm text-slate-500">
               {filteredCreators.length.toLocaleString()} match{filteredCreators.length === 1 ? "" : "es"}
@@ -1274,8 +1197,8 @@ export default function CreatorsHubPage({
               appearance="light"
               icon="search"
               eyebrow="No match"
-              title="Try a broader search."
-              description="Clear a filter or search a broader term."
+              title="Try a broader search"
+              description="Clear a filter or broaden the term."
               action={{
                 label: "Show all",
                 onClick: () => {

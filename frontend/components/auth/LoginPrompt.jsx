@@ -104,11 +104,13 @@ const LoginPrompt = memo(function LoginPrompt({
           </div>
 
           <div className="mb-6 text-center">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
-              {eyebrow}
-            </p>
+            {eyebrow ? (
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/80">
+                {eyebrow}
+              </p>
+            ) : null}
             <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
-            <p className="text-sm text-neutral-400">{message}</p>
+            {message ? <p className="text-sm text-neutral-400">{message}</p> : null}
           </div>
 
           {showFeatures && features.length > 0 && (

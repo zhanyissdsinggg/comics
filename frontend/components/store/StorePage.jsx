@@ -423,13 +423,13 @@ export default function StorePage({
           ? {
               label: "Availability",
               value: purchaseAvailabilityLabel,
-              hint: "Checkout is open.",
+              hint: "Checkout open.",
             }
           : null,
         {
           label: "Model",
           value: "One-time packs",
-          hint: isSubscriber ? "Separate from membership." : "One-time only.",
+          hint: isSubscriber ? "Separate from membership." : "One-time.",
         },
         {
           label: "Membership",
@@ -464,11 +464,11 @@ export default function StorePage({
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="Point packs"
-            title={purchaseActionsEnabled ? "Point packs." : "Point packs open soon."}
+            title={purchaseActionsEnabled ? "Point packs" : "Point packs soon"}
             description={
               purchaseActionsEnabled
-                ? "Buy once, unlock what you want."
-                : "Prices are visible. Checkout is not live yet."
+                ? "Buy once. Unlock as you go."
+                : "Prices are visible. Checkout opens later."
             }
             secondary={purchaseActionsEnabled ? regionConfig.label : ""}
             stats={storeHeroStats}
@@ -482,13 +482,8 @@ export default function StorePage({
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  {purchaseActionsEnabled ? "Buy only what fits." : "See the packs first."}
+                  {purchaseActionsEnabled ? "Pick a pack." : "See the packs."}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  {purchaseActionsEnabled
-                    ? "One purchase. Clear pricing. No monthly commitment."
-                    : "Compare packs now before checkout opens."}
-                </p>
               </div>
             </div>
 
@@ -539,7 +534,7 @@ export default function StorePage({
               className="px-0 py-0"
               cardClassName="max-w-none rounded-[28px] px-5 py-5 sm:px-6 sm:py-6"
               title="Point-pack checkout hit a snag."
-              description={`${errorMessage} Try the same pack again or ask billing for help.`}
+              description={`${errorMessage} Try again or contact billing.`}
               onRetry={retryFailedPurchase}
             >
               <button
@@ -567,11 +562,8 @@ export default function StorePage({
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Before checkout
-              </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                What to expect.
+                Before checkout
               </h2>
             </div>
           </div>
@@ -636,15 +628,10 @@ export default function StorePage({
             {!isSignedIn ? (
               <SurfacePanel className="space-y-4" appearance="light" accent="blue">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    {purchaseActionsEnabled ? "Sign in" : "Account"}
-                  </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {purchaseActionsEnabled
-                    ? "Sign in before checkout."
-                    : "Use one account."}
-                </h2>
-              </div>
+                  <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Sign in
+                  </h2>
+                </div>
                 <button
                   type="button"
                   onClick={openAuthPrompt}
@@ -672,30 +659,24 @@ export default function StorePage({
             ) : null}
 
             <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-              <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Compare options
-                </p>
+              <div>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                   Pick the model that fits.
                 </h2>
-                <p className="text-sm leading-6 text-slate-600">
-                  Buy once or go monthly.
-                </p>
               </div>
               <div className="grid gap-3">
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
                   <p className="text-sm font-semibold text-slate-950">Point packs</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Buy once and unlock as you go.
+                    Buy once.
                   </p>
                 </div>
                 <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
                   <p className="text-sm font-semibold text-slate-950">Membership</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {subscriptionStats
-                      ? `Starts around ${membershipStartingPrice || "the current plan price"} a month and can save up to ${subscriptionStats.maxDiscount}%.`
-                      : "Worth a look if you top up often."}
+                      ? `From ${membershipStartingPrice || "the current plan price"} a month. Up to ${subscriptionStats.maxDiscount}% off.`
+                      : "Monthly option."}
                   </p>
                 </div>
               </div>
@@ -773,11 +754,8 @@ export default function StorePage({
             ) : (
               <SurfacePanel id="wallet-codes" className="space-y-4" appearance="light" accent="blue">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Promo codes
-                  </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Promo codes.
+                    Promo codes
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -805,13 +783,10 @@ export default function StorePage({
           <SurfacePanel id="point-packs" className="space-y-5" appearance="light" accent="blue">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Point packs
-                </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {purchaseActionsEnabled
-                    ? "Choose a pack."
-                    : "Browse the packs."}
+                    ? "Choose a pack"
+                    : "Browse the packs"}
                 </h2>
               </div>
               <p className="text-xs text-slate-500">
@@ -823,7 +798,7 @@ export default function StorePage({
               <>
                 <details className="overflow-hidden rounded-[26px] border border-black/8 bg-[#f8f9fc] md:hidden">
                   <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-slate-950">
-                    Compare pack details
+                    Compare packs
                   </summary>
                   <div className="space-y-3 border-t border-black/8 px-4 py-4">
                     {packageComparisonRows.map((pkg) => (

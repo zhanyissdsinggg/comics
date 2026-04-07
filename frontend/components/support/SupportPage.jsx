@@ -76,35 +76,35 @@ export default function SupportPage() {
       label: "Billing",
       topic: "billing",
       subject: "Billing issue",
-      context: "A charge, receipt, refund, or point pack does not look right.",
+      context: "Charge, refund, receipt, or point-pack issue.",
     },
     {
       id: "login",
       label: "Login",
       topic: "login",
       subject: "Login help",
-      context: "I cannot sign in, verify my email, or access the right account.",
+      context: "Sign-in, verification, or account access.",
     },
     {
       id: "subscription",
       label: "Subscription",
       topic: "subscription",
       subject: "Membership help",
-      context: "A membership charge, renewal, or included access looks wrong.",
+      context: "Membership charge, renewal, or access.",
     },
     {
       id: "content",
       label: "Content issue",
       topic: "content",
       subject: "Content report",
-      context: "A title page, chapter, cover, or metadata entry needs review.",
+      context: "Title, chapter, cover, or metadata issue.",
     },
     {
       id: "technical",
       label: "Technical issue",
       topic: "technical",
       subject: "Technical issue",
-      context: "A page, reader, or purchase screen is broken or not loading.",
+      context: "Broken page, reader, or purchase screen.",
     },
   ];
 
@@ -315,12 +315,12 @@ export default function SupportPage() {
     {
       label: "Topics",
       value: SUPPORT_TOPICS.length.toLocaleString(),
-      hint: "Route your request to the right queue from the start.",
+      hint: "Start in the right queue.",
     },
     {
       label: "Reply window",
       value: "1-2 days",
-      hint: "Typical response time for standard support requests.",
+      hint: "Typical reply time.",
     },
   ];
 
@@ -332,9 +332,8 @@ export default function SupportPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
           <EditorialHero
             eyebrow="Support"
-            title="Get help without the runaround."
-            description="Choose the issue, add the details, and send one clean request to the right queue."
-            secondary="Pick the issue first. Then tell us what happened."
+            title="Get help."
+            description="Choose an issue and send one request."
             stats={supportHeroStats}
           />
 
@@ -344,11 +343,8 @@ export default function SupportPage() {
                 Quick topics
               </p>
               <h2 className="mt-2 font-display text-[1.6rem] font-semibold tracking-tight text-white">
-                Pick the closest issue.
+                Pick an issue.
               </h2>
-              <p className="mt-3 text-sm leading-7 text-neutral-300">
-                Choose the closest topic so billing, login, content, and technical issues land in the right queue.
-              </p>
             </div>
 
             <div className="grid gap-2.5 sm:grid-cols-2">
@@ -405,7 +401,7 @@ export default function SupportPage() {
                     Request sent.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span> within 1 to 2 business days.
+                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span>.
                   </p>
                 </div>
 
@@ -435,16 +431,10 @@ export default function SupportPage() {
               </div>
             ) : (
               <form className="space-y-5" onSubmit={handleSubmit}>
-                <div className="space-y-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    Request
-                  </p>
+                <div>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                     Tell us what happened.
                   </h2>
-                  <p className="text-sm leading-6 text-slate-500">
-                    Most replies land within 1 to 2 business days.
-                  </p>
                 </div>
 
                 {feedback.text ? (
@@ -455,7 +445,7 @@ export default function SupportPage() {
                       className="px-0 py-0"
                       cardClassName="max-w-none rounded-[24px] px-4 py-4 sm:px-5 sm:py-5"
                       title="Support hit a network snag."
-                      description={`${feedback.text} Your message is still here, so you can try again.`}
+                      description={`${feedback.text} Try again.`}
                       onRetry={retrySupportRequest}
                     />
                   ) : (
@@ -551,7 +541,7 @@ export default function SupportPage() {
                     rows={7}
                     value={message}
                     onChange={(event) => setMessage(event.target.value)}
-                    placeholder="Tell us what happened, what you expected, and any page URL, title, or episode number that helps us find it faster."
+                    placeholder="Tell us what happened and include any page, title, episode, or order ID."
                     className={fieldClass}
                   />
                 </div>
@@ -574,27 +564,21 @@ export default function SupportPage() {
                     </button>
                   ) : null}
                 </div>
-
-                <p className="text-xs text-slate-500">Reply desk: {siteConfig.supportEmail}</p>
               </form>
             )}
           </SurfacePanel>
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Helpful details
-              </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Add what matters.
+                Before you send
               </h2>
             </div>
 
             <div className="space-y-3">
               {[
-                "Pick the closest issue before you start typing.",
-                "Add the page, title, episode number, or order ID when you have it.",
-                "Use the best reply email for follow-up.",
+                "Pick the closest issue.",
+                "Add any page, title, episode, or order ID.",
               ].map((item) => (
                 <div
                   key={item}
@@ -611,11 +595,6 @@ export default function SupportPage() {
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Reply email: <span className="font-semibold text-slate-900">{siteConfig.supportEmail}</span>
-              </p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                {signedInReader
-                  ? "You are signed in, so we can match this request to your account faster."
-                  : "Sign in first if you want us to match this request to your account faster."}
               </p>
             </div>
 

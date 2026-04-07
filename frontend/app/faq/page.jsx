@@ -22,19 +22,19 @@ const FAQ = getSiteFaqItems().map((item) => ({
 const QUICK_LINKS = [
   {
     title: "Support",
-    description: "Billing, access, or a broken page.",
+    description: "Billing or access help.",
     href: "/support",
     label: "Open Support",
   },
   {
     title: "How it works",
-    description: "Free reads, points, and plans.",
+    description: "Points and plans.",
     href: "/how-it-works",
     label: "Open Guide",
   },
   {
     title: "Mature content",
-    description: "Age checks, region settings, and 18+ history.",
+    description: "18+ access settings.",
     href: "/mature-content",
     label: "View 18+ Access",
   },
@@ -67,7 +67,6 @@ export default function FAQPage() {
             eyebrow="Help"
             title="Quick answers first."
             description="Billing, account access, membership, and 18+ settings."
-            secondary="Still stuck? Open support."
             actions={
               <>
                 <Link
@@ -88,22 +87,18 @@ export default function FAQPage() {
               {
                 label: "Answers",
                 value: String(FAQ.length),
-                hint: "Common reader questions.",
               },
               {
                 label: "Contact",
                 value: "Email + form",
-                hint: "Support is one click away.",
               },
               {
                 label: "How it works",
                 value: "Points + plans",
-                hint: "Free reads, points, and plans.",
               },
               {
                 label: "18+ access",
                 value: "Age + region",
-                hint: "Access depends on age and region.",
               },
             ]}
           />
@@ -115,11 +110,8 @@ export default function FAQPage() {
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  Start here, then open support.
+                  Start here.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  Start with the common questions, then move straight into support or account help.
-                </p>
               </div>
             </div>
 

@@ -56,13 +56,17 @@ function FallbackDiscoveryCard({ eyebrow, title, description, label, onClick }) 
   return (
     <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,244,238,0.95))] py-0 shadow-[0_18px_36px_rgba(15,23,42,0.04)]">
       <CardContent className="p-6 sm:p-7">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-          {eyebrow}
-        </p>
+        {eyebrow ? (
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+            {eyebrow}
+          </p>
+        ) : null}
         <h2 className="mt-3 font-display text-[1.75rem] font-semibold tracking-tight text-slate-950">
           {title}
         </h2>
-        <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600">{description}</p>
+        {description ? (
+          <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600">{description}</p>
+        ) : null}
         <Button
           type="button"
           variant="ghost"
@@ -135,7 +139,9 @@ function HomeGuideCard({ icon: Icon, eyebrow, title, description, ctaLabel, onCl
         <h3 className="mt-2 font-display text-[1.3rem] font-semibold tracking-tight text-slate-950">
           {title}
         </h3>
-        <p className="mt-3 flex-1 text-sm leading-7 text-slate-600">{description}</p>
+        <div className="mt-3 flex-1">
+          {description ? <p className="text-sm leading-7 text-slate-600">{description}</p> : null}
+        </div>
         <Button
           type="button"
           variant="ghost"
@@ -156,7 +162,6 @@ const GUIDE_CARDS = [
     icon: BookOpenText,
     eyebrow: "Format",
     title: "Comics",
-    description: "Visual stories built for quicker reading sessions.",
     ctaLabel: "Browse Comics",
     href: "/comics",
   },
@@ -165,7 +170,6 @@ const GUIDE_CARDS = [
     icon: BookOpen,
     eyebrow: "Format",
     title: "Novels",
-    description: "Serialized prose for slower, chapter-by-chapter reading.",
     ctaLabel: "Browse Novels",
     href: "/novels",
   },
@@ -174,7 +178,6 @@ const GUIDE_CARDS = [
     icon: Users,
     eyebrow: "Creators",
     title: "Meet the Creators",
-    description: "See who makes each series.",
     ctaLabel: "View Creators",
     href: "/creators",
   },
@@ -183,7 +186,6 @@ const GUIDE_CARDS = [
     icon: CircleHelp,
     eyebrow: "Support",
     title: "Support",
-    description: "Reading, access, and account support.",
     ctaLabel: "Open Support",
     href: "/support",
   },
@@ -218,9 +220,7 @@ export default function HomeContentSections({
       ) : (
         <>
           <HomeShelfSection
-            eyebrow="Featured"
             title="Featured Series"
-            description="Stories worth opening first."
             ctaLabel="Browse Series"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}
@@ -230,9 +230,7 @@ export default function HomeContentSections({
 
           <HomeShelfSection
             icon={BookOpenText}
-            eyebrow="Start Here"
             title="Start Here"
-            description="First picks for a cleaner start."
             items={startHereItems}
             actionLabel="Read Chapter 1"
             onItemClick={onStartHereItemClick}
@@ -242,9 +240,7 @@ export default function HomeContentSections({
 
       <section className="space-y-6 md:space-y-7">
         <HomeSectionHeader
-          eyebrow="Browse"
           title="Browse by format"
-          description="Comics, novels, creators, and support."
         />
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

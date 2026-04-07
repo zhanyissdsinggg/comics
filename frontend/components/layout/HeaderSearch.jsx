@@ -11,7 +11,7 @@ const SearchBar = dynamic(() => import("../common/SearchBar"), {
 export default function HeaderSearch({ onSearch, variant = "default" }) {
   const isHome = variant === "home";
   const isLight = variant === "light";
-  const placeholder = "Search series, creators...";
+  const placeholder = "Search titles";
 
   return (
     <>
